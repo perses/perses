@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   go: circleci/go@1.5.0
 jobs:
-  build:
+  test:
     executor:
       name: go/default
       tag: '1.15'
@@ -25,5 +25,5 @@ jobs:
 workflows:
   main:
     jobs:
-      - build
+      - test
       - check_format
