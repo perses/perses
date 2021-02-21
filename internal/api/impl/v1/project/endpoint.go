@@ -9,7 +9,6 @@ import (
 
 type Endpoint struct {
 	toolbox shared.Toolbox
-	service project.Service
 }
 
 func NewEndpoint(service project.Service) *Endpoint {
