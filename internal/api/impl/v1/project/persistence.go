@@ -23,5 +23,5 @@ func NewDAO(etcdClient *clientv3.Client, timeout time.Duration) project.DAO {
 
 func (d *dao) Create(entity *v1.Project) error {
 	key := entity.GenerateID()
-	return d.client.Create(key, entity )
+	return d.client.Create(key, entity)
 }
