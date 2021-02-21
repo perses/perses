@@ -2,10 +2,20 @@ version: 2.1
 orbs:
   go: circleci/go@1.5.0
 jobs:
+  build:
+    executor:
+      name: go/default
+      tag: '1.16'
+    steps:
+      - checkout
+      - go/load-cache
+      - go/mod-download
+      - go/save-cache
+      - run: make build
   test:
     executor:
       name: go/default
-      tag: '1.15'
+      tag: '1.16'
     steps:
       - checkout
       - go/load-cache
@@ -15,7 +25,7 @@ jobs:
   check_format:
     executor:
       name: go/default
-      tag: '1.15'
+      tag: '1.16'
     steps:
       - checkout
       - go/load-cache
@@ -25,5 +35,6 @@ jobs:
 workflows:
   main:
     jobs:
+      - build
       - test
       - check_format
