@@ -35,5 +35,6 @@ jobs:
 workflows:
   main:
     jobs:
+      - build
       - test
       - check_format
