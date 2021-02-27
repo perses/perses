@@ -21,6 +21,10 @@ test:
 	$(GO) test -count=1 -v $(pkgs)
 
 .PHONY: build
-build:
+build: generate
 	@echo ">> build the perses api"
 	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build  -a -installsuffix cgo ${LDFLAGS} -o ./bin/perses ./cmd/perses
+
+.PHONY: generate
+generate:
+	$(GO) generate ./internal/api
