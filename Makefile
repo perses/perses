@@ -16,7 +16,7 @@ fmt:
 	@echo ">> format code"
 	$(GO) fmt $(pkgs)
 
-test:
+test: generate
 	@echo ">> running all tests"
 	$(GO) test -count=1 -v $(pkgs)
 
