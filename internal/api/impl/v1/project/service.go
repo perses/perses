@@ -69,21 +69,30 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
 	}
 	// find the previous version of the project
-	oldEntity, err := s.dao.Get(entity.Metadata.Name)
+	oldEntity, err := s.Get(parameters)
 	if err != nil {
-		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the project '%s'", entity.Metadata.Name)
-			return nil, shared.NotFoundError
-		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the project '%s', something wrong with etcd", entity.Metadata.Name)
-		return nil, shared.InternalError
+		return nil, err
 	}
+	oldObject := oldEntity.(*v1.Project)
 	// update the immutable field of the newEntity with the old one
-	entity.Metadata.CreatedAt = oldEntity.Metadata.CreatedAt
+	entity.Metadata.CreatedAt = oldObject.Metadata.CreatedAt
 	// update the field UpdatedAt with the new time
 	entity.Metadata.UpdatedAt = time.Now().UTC()
 	if err := s.dao.Update(entity); err != nil {
 		logrus.WithError(err).Errorf("unable to perform the update of the project '%s', something wrong with etcd", entity.Metadata.Name)
+		return nil, shared.InternalError
+	}
+	return entity, nil
+}
+
+func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+	entity, err := s.dao.Get(parameters.Name)
+	if err != nil {
+		if etcd.IsKeyNotFound(err) {
+			logrus.Debugf("unable to find the project '%s'", parameters.Name)
+			return nil, shared.NotFoundError
+		}
+		logrus.WithError(err).Errorf("unable to find the previous version of the project '%s', something wrong with etcd", parameters.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil

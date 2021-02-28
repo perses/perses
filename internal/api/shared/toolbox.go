@@ -32,6 +32,7 @@ func extractParameters(ctx echo.Context) Parameters {
 type ToolboxService interface {
 	Create(entity interface{}) (interface{}, error)
 	Update(entity interface{}, parameters Parameters) (interface{}, error)
+	Get(parameters Parameters) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -39,6 +40,7 @@ type ToolboxService interface {
 type Toolbox interface {
 	Create(ctx echo.Context, entity interface{}) error
 	Update(ctx echo.Context, entity interface{}) error
+	Get(ctx echo.Context) error
 }
 
 func NewToolBox(service ToolboxService) Toolbox {
@@ -73,4 +75,13 @@ func (t *toolboxImpl) Update(ctx echo.Context, entity interface{}) error {
 		return handleError(err)
 	}
 	return ctx.JSON(http.StatusOK, newEntity)
+}
+
+func (t *toolboxImpl) Get(ctx echo.Context) error {
+	parameters := extractParameters(ctx)
+	entity, err := t.service.Get(parameters)
+	if err != nil {
+		return handleError(err)
+	}
+	return ctx.JSON(http.StatusOK, entity)
 }

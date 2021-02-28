@@ -172,3 +172,40 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 
 	clearAllKeys(t, persistenceManager.GetETCDClient())
 }
+
+func TestGetProject(t *testing.T) {
+	project := &v1.Project{Metadata: v1.Metadata{
+		Kind: v1.KindProject,
+		Name: "perses",
+	}}
+	server, persistenceManager := createServer(t)
+	defer server.Close()
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  server.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
+		WithJSON(project).
+		Expect().
+		Status(http.StatusOK)
+
+	e.GET(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathProject)).
+		Expect().
+		Status(http.StatusOK)
+
+	clearAllKeys(t, persistenceManager.GetETCDClient())
+}
+
+func TestGetProjectNotFound(t *testing.T) {
+	server, _ := createServer(t)
+	defer server.Close()
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  server.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	e.GET(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathProject)).
+		Expect().
+		Status(http.StatusNotFound)
+}
