@@ -2,3 +2,4 @@
 bin/
 
 internal/api/impl/v1/project/endpoint.go
+coverage.txt
