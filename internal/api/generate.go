@@ -65,13 +65,19 @@ func NewEndpoint(service {{ $package }}.Service) *Endpoint {
 }
 
 func (e *Endpoint) RegisterRoutes(g *echo.Group) {
-	projectGroup := g.Group(fmt.Sprintf("/%s", shared.Path{{ $kind }}))
-	projectGroup.POST("", e.Create)
+	group := g.Group(fmt.Sprintf("/%s", shared.Path{{ $kind }}))
+	group.POST("", e.Create)
+	group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
 }
 
 func (e *Endpoint) Create(ctx echo.Context) error {
 	entity := &v1.{{ $kind }}{}
 	return e.toolbox.Create(ctx, entity)
+}
+
+func (e *Endpoint) Update(ctx echo.Context) error {
+	entity := &v1.{{ $kind }}{}
+	return e.toolbox.Update(ctx, entity)
 }
 `
 

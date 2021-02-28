@@ -20,6 +20,7 @@ import (
 
 type DAO interface {
 	Create(entity *v1.Project) error
+	Update(entity *v1.Project) error
 	Get(name string) (*v1.Project, error)
 }
 

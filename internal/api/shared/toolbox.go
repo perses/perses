@@ -19,14 +19,26 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type Parameters struct {
+	Name string
+}
+
+func extractParameters(ctx echo.Context) Parameters {
+	return Parameters{
+		Name: getNameParameter(ctx),
+	}
+}
+
 type ToolboxService interface {
 	Create(entity interface{}) (interface{}, error)
+	Update(entity interface{}, parameters Parameters) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
 // This is a way to align the code of the different endpoint.
 type Toolbox interface {
 	Create(ctx echo.Context, entity interface{}) error
+	Update(ctx echo.Context, entity interface{}) error
 }
 
 func NewToolBox(service ToolboxService) Toolbox {
@@ -45,6 +57,18 @@ func (t *toolboxImpl) Create(ctx echo.Context, entity interface{}) error {
 		return err
 	}
 	newEntity, err := t.service.Create(entity)
+	if err != nil {
+		return handleError(err)
+	}
+	return ctx.JSON(http.StatusOK, newEntity)
+}
+
+func (t *toolboxImpl) Update(ctx echo.Context, entity interface{}) error {
+	if err := ctx.Bind(entity); err != nil {
+		return err
+	}
+	parameters := extractParameters(ctx)
+	newEntity, err := t.service.Update(entity, parameters)
 	if err != nil {
 		return handleError(err)
 	}
