@@ -16,6 +16,7 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 type Kind string
@@ -50,8 +51,15 @@ func (k *Kind) validate() error {
 }
 
 type Metadata struct {
-	Kind Kind   `json:"kind"`
-	Name string `json:"name"`
+	Kind      Kind      `json:"kind"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (m *Metadata) CreateNow() {
+	m.CreatedAt = time.Now().UTC()
+	m.UpdatedAt = m.CreatedAt
 }
 
 func (m *Metadata) UnmarshalJSON(data []byte) error {

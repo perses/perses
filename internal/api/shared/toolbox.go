@@ -14,6 +14,8 @@
 package shared
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -42,5 +44,9 @@ func (t *toolboxImpl) Create(ctx echo.Context, entity interface{}) error {
 	if err := ctx.Bind(entity); err != nil {
 		return err
 	}
-	return nil
+	newEntity, err := t.service.Create(entity)
+	if err != nil {
+		return handleError(err)
+	}
+	return ctx.JSON(http.StatusOK, newEntity)
 }

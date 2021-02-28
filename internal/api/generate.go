@@ -28,7 +28,6 @@ import (
 
 const tpl = `{{- $endpoint := . -}}
 {{- $package := $endpoint.PackageName -}}
-{{- $plural := $endpoint.Plural -}}
 {{- $kind := $endpoint.Kind -}}
 // Copyright 2021 Amadeus s.a.s
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +46,8 @@ const tpl = `{{- $endpoint := . -}}
 package {{ $package }}
 
 import (
+    "fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
 	"github.com/perses/perses/internal/api/shared"
@@ -64,7 +65,7 @@ func NewEndpoint(service {{ $package }}.Service) *Endpoint {
 }
 
 func (e *Endpoint) RegisterRoutes(g *echo.Group) {
-	projectGroup := g.Group("/{{ $plural }}")
+	projectGroup := g.Group(fmt.Sprintf("/%s", shared.Path{{ $kind }}))
 	projectGroup.POST("", e.Create)
 }
 
@@ -80,17 +81,15 @@ var endpointTemplate = template.Must(
 // endpoint is the struct that will be used to generate the template
 type endpoint struct {
 	PackageName string
-	Plural      string
 	Kind        string
 }
 
 func main() {
 	pkg := flag.String("package", "", "the name of the package that needs to be generated. It should match the name of the resource you would like to expose through http")
-	plural := flag.String("plural", "", "the plural of the resource name")
 	kind := flag.String("kind", "", "the name of the resource with the appropriate cases")
 	flag.Parse()
 
-	if len(*pkg) == 0 || len(*plural) == 0 || len(*kind) == 0 {
+	if len(*pkg) == 0 || len(*kind) == 0 {
 		log.Fatal("unable to generate endpoint, missing parameter")
 	}
 
@@ -101,7 +100,6 @@ func main() {
 	endpointFile := fmt.Sprintf("%s/endpoint.go", folder)
 	ept := endpoint{
 		PackageName: *pkg,
-		Plural:      *plural,
 		Kind:        *kind,
 	}
 	builder := &bytes.Buffer{}

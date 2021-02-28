@@ -42,7 +42,8 @@ func NewPersistenceManager(conf config.EtcdConfig) (PersistenceManager, error) {
 	}
 	projectDAO := projectImpl.NewDAO(etcdClient, timeout)
 	return &persistence{
-		project: projectDAO,
+		project:    projectDAO,
+		etcdClient: etcdClient,
 	}, nil
 }
 

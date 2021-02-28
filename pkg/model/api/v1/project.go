@@ -18,12 +18,16 @@ import (
 	"fmt"
 )
 
+func GenerateProjectID(name string) string {
+	return fmt.Sprintf("/projects/%s", name)
+}
+
 type Project struct {
 	Metadata Metadata `json:"metadata"`
 }
 
 func (p *Project) GenerateID() string {
-	return fmt.Sprintf("/projects/%s", p.Metadata.Name)
+	return GenerateProjectID(p.Metadata.Name)
 }
 
 func (p *Project) UnmarshalJSON(data []byte) error {
