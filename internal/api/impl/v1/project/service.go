@@ -85,6 +85,18 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 	return entity, nil
 }
 
+func (s *service) Delete(parameters shared.Parameters) error {
+	if err := s.dao.Delete(parameters.Name); err != nil {
+		if etcd.IsKeyNotFound(err) {
+			logrus.Debugf("unable to find the project '%s'", parameters.Name)
+			return shared.NotFoundError
+		}
+		logrus.WithError(err).Errorf("unable to delete the project '%s', something wrong with etcd", parameters.Name)
+		return shared.InternalError
+	}
+	return nil
+}
+
 func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	entity, err := s.dao.Get(parameters.Name)
 	if err != nil {

@@ -32,6 +32,7 @@ func extractParameters(ctx echo.Context) Parameters {
 type ToolboxService interface {
 	Create(entity interface{}) (interface{}, error)
 	Update(entity interface{}, parameters Parameters) (interface{}, error)
+	Delete(parameters Parameters) error
 	Get(parameters Parameters) (interface{}, error)
 }
 
@@ -40,6 +41,7 @@ type ToolboxService interface {
 type Toolbox interface {
 	Create(ctx echo.Context, entity interface{}) error
 	Update(ctx echo.Context, entity interface{}) error
+	Delete(ctx echo.Context) error
 	Get(ctx echo.Context) error
 }
 
@@ -75,6 +77,14 @@ func (t *toolboxImpl) Update(ctx echo.Context, entity interface{}) error {
 		return handleError(err)
 	}
 	return ctx.JSON(http.StatusOK, newEntity)
+}
+
+func (t *toolboxImpl) Delete(ctx echo.Context) error {
+	parameters := extractParameters(ctx)
+	if err := t.service.Delete(parameters); err != nil {
+		return handleError(err)
+	}
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 func (t *toolboxImpl) Get(ctx echo.Context) error {

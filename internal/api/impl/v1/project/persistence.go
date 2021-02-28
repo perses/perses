@@ -49,3 +49,8 @@ func (d *dao) Get(name string) (*v1.Project, error) {
 	entity := &v1.Project{}
 	return entity, d.client.Get(key, entity)
 }
+
+func (d *dao) Delete(name string) error {
+	key := v1.GenerateProjectID(name)
+	return d.client.Delete(key)
+}

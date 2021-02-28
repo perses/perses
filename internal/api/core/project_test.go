@@ -209,3 +209,38 @@ func TestGetProjectNotFound(t *testing.T) {
 		Expect().
 		Status(http.StatusNotFound)
 }
+
+func TestDeleteProject(t *testing.T) {
+	project := &v1.Project{Metadata: v1.Metadata{
+		Kind: v1.KindProject,
+		Name: "perses",
+	}}
+	server, _ := createServer(t)
+	defer server.Close()
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  server.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
+		WithJSON(project).
+		Expect().
+		Status(http.StatusOK)
+
+	e.DELETE(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathProject)).
+		Expect().
+		Status(http.StatusNoContent)
+}
+
+func TestDeleteProjectNotFound(t *testing.T) {
+	server, _ := createServer(t)
+	defer server.Close()
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  server.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	e.DELETE(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathProject)).
+		Expect().
+		Status(http.StatusNotFound)
+}
