@@ -32,6 +32,7 @@ jobs:
           paths:
             - "/home/circleci/go/pkg/mod"
       - run: make integration-test
+      - run: bash <(curl -s https://codecov.io/bash)
   check_format:
     executor:
       name: go/default
