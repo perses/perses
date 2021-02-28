@@ -38,3 +38,9 @@ func (d *dao) Create(entity *v1.Project) error {
 	key := entity.GenerateID()
 	return d.client.Create(key, entity)
 }
+
+func (d *dao) Get(name string) (*v1.Project, error) {
+	key := v1.GenerateProjectID(name)
+	entity := &v1.Project{}
+	return entity, d.client.Get(key, entity)
+}

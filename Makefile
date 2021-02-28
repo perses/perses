@@ -20,6 +20,10 @@ test: generate
 	@echo ">> running all tests"
 	$(GO) test -count=1 -v $(pkgs)
 
+.PHONY: integration-test
+integration-test: generate
+	$(GO) test -tags=integration -v -count=1 $(pkgs)
+
 .PHONY: build
 build: generate
 	@echo ">> build the perses api"

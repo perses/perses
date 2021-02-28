@@ -3,6 +3,7 @@ module github.com/perses/perses
 go 1.15
 
 require (
+	github.com/gavv/httpexpect/v2 v2.2.0
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/perses/common v0.2.1
 	github.com/sirupsen/logrus v1.7.0
