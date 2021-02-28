@@ -13,15 +13,25 @@ jobs:
       - go/save-cache
       - run: make build
   test:
-    executor:
-      name: go/default
-      tag: '1.16'
+
+    docker:
+    - image: circleci/golang:1.16
+    - image: 'quay.io/coreos/etcd:v3.4.7'
+      command:
+      - /usr/local/bin/etcd
+      - --advertise-client-urls=http://0.0.0.0:2379
+      - --listen-client-urls=http://0.0.0.0:2379
     steps:
       - checkout
-      - go/load-cache
-      - go/mod-download
-      - go/save-cache
-      - run: make test
+      - restore_cache: # restores saved cache if no changes are detected since last run
+          keys:
+          - go-mod-v1-{{ checksum "go.sum" }}
+      - run: go mod download
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/home/circleci/go/pkg/mod"
+      - run: make integration-test
   check_format:
     executor:
       name: go/default
