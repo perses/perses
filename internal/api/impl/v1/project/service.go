@@ -16,8 +16,11 @@ package project
 import (
 	"fmt"
 
+	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/shared"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/sirupsen/logrus"
 )
 
 type service struct {
@@ -39,5 +42,15 @@ func (s *service) Create(entity interface{}) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.Project) (*v1.Project, error) {
-	return nil, nil
+	// Update the time contains in the entity
+	entity.Metadata.CreateNow()
+	if err := s.dao.Create(entity); err != nil {
+		if etcd.IsKeyConflict(err) {
+			logrus.Debugf("unable to create the project '%s'. It already exits", entity.Metadata.Name)
+			return nil, shared.ConflictError
+		}
+		logrus.WithError(err).Errorf("unable to perform the creation of the project '%s', something wrong with etcd", entity.Metadata.Name)
+		return nil, shared.InternalError
+	}
+	return entity, nil
 }
