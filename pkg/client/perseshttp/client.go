@@ -71,10 +71,11 @@ func NewFromConfig(config *RestConfigClient) (*RESTClient, error) {
 	}
 
 	return &RESTClient{
-		token:   config.Token,
-		BaseURL: u,
-		Client:  httpClient,
-		headers: config.Headers,
+		token:     config.Token,
+		BaseURL:   u,
+		Client:    httpClient,
+		headers:   config.Headers,
+		basicAuth: config.BasicAuth,
 	}, nil
 
 }
