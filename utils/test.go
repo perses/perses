@@ -1,6 +1,6 @@
 // +build integration
 
-package core
+package utils
 
 import (
 	"context"
@@ -10,11 +10,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/config"
+	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"go.etcd.io/etcd/clientv3"
 )
 
-func clearAllKeys(t *testing.T, client *clientv3.Client) {
+func ClearAllKeys(t *testing.T, client *clientv3.Client) {
 	kv := clientv3.NewKV(client)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -24,7 +25,7 @@ func clearAllKeys(t *testing.T, client *clientv3.Client) {
 	}
 }
 
-func defaultETCDConfig() config.EtcdConfig {
+func DefaultETCDConfig() config.EtcdConfig {
 	return config.EtcdConfig{
 		Connections: []config.Connection{
 			{
@@ -37,14 +38,14 @@ func defaultETCDConfig() config.EtcdConfig {
 	}
 }
 
-func createServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
+func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
 	handler := echo.New()
-	persistenceManager, err := dependency.NewPersistenceManager(defaultETCDConfig())
+	persistenceManager, err := dependency.NewPersistenceManager(DefaultETCDConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager)
-	persesAPI := NewPersesAPI(serviceManager)
+	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
 	return httptest.NewServer(handler), persistenceManager
 }

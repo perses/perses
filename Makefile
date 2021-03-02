@@ -14,7 +14,7 @@ checkformat:
 
 fmt:
 	@echo ">> format code"
-	$(GO) fmt $(pkgs)
+	$(GO) fmt ./...
 
 test: generate
 	@echo ">> running all tests"
