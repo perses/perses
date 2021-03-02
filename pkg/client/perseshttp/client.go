@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -15,12 +16,22 @@ const connectionTimeout = 30 * time.Second
 
 type BasicAuth struct {
 	User     string `yaml:"user"`
-	Password string `yaml:"password"`
+	Password string `yaml:"password,omitempty"`
+	// PasswordFile is a path to a file that contains a password
+	PasswordFile string `yaml:"password_file,omitempty"`
 }
 
 func (b *BasicAuth) Verify() error {
-	if len(b.User) == 0 || len(b.Password) == 0 {
+	if len(b.User) == 0 || (len(b.Password) == 0 && len(b.PasswordFile) == 0) {
 		return fmt.Errorf("when using basic_auth, user or password cannot be empty")
+	}
+	if len(b.PasswordFile) > 0 {
+		// Read the file and load the password contained
+		data, err := ioutil.ReadFile(b.PasswordFile)
+		if err != nil {
+			return err
+		}
+		b.Password = string(data)
 	}
 	return nil
 }
