@@ -1,6 +1,6 @@
 // +build integration
 
-package core
+package e2e
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/shared"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +21,7 @@ func TestCreateProject(t *testing.T) {
 		Name: "perses",
 	}}
 
-	server, persistenceManager := createServer(t)
+	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -35,7 +36,7 @@ func TestCreateProject(t *testing.T) {
 	// check the document exists in the db
 	_, err := persistenceManager.GetProject().Get(project.Metadata.Name)
 	assert.NoError(t, err)
-	clearAllKeys(t, persistenceManager.GetETCDClient())
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
 }
 
 func TestCreateProjectWithConflict(t *testing.T) {
@@ -44,7 +45,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 		Name: "perses",
 	}}
 
-	server, persistenceManager := createServer(t)
+	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -63,7 +64,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 		Expect().
 		Status(http.StatusConflict)
 
-	clearAllKeys(t, persistenceManager.GetETCDClient())
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
 }
 
 func TestCreateProjectBadRequest(t *testing.T) {
@@ -71,7 +72,7 @@ func TestCreateProjectBadRequest(t *testing.T) {
 		Kind: v1.KindProject,
 	}}
 
-	server, _ := createServer(t)
+	server, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -91,7 +92,7 @@ func TestUpdateProject(t *testing.T) {
 		Name: "perses",
 	}}
 
-	server, persistenceManager := createServer(t)
+	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -129,7 +130,7 @@ func TestUpdateProject(t *testing.T) {
 	_, err = persistenceManager.GetProject().Get(project.Metadata.Name)
 	assert.NoError(t, err)
 
-	clearAllKeys(t, persistenceManager.GetETCDClient())
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
 }
 
 func TestUpdateProjectNotFound(t *testing.T) {
@@ -137,7 +138,7 @@ func TestUpdateProjectNotFound(t *testing.T) {
 		Kind: v1.KindProject,
 		Name: "perses",
 	}}
-	server, persistenceManager := createServer(t)
+	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -149,7 +150,7 @@ func TestUpdateProjectNotFound(t *testing.T) {
 		Expect().
 		Status(http.StatusNotFound)
 
-	clearAllKeys(t, persistenceManager.GetETCDClient())
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
 }
 
 func TestUpdateProjectBadRequest(t *testing.T) {
@@ -157,7 +158,7 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 		Kind: v1.KindProject,
 		Name: "perses",
 	}}
-	server, persistenceManager := createServer(t)
+	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -170,7 +171,7 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 		Expect().
 		Status(http.StatusBadRequest)
 
-	clearAllKeys(t, persistenceManager.GetETCDClient())
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
 }
 
 func TestGetProject(t *testing.T) {
@@ -178,7 +179,7 @@ func TestGetProject(t *testing.T) {
 		Kind: v1.KindProject,
 		Name: "perses",
 	}}
-	server, persistenceManager := createServer(t)
+	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -194,11 +195,11 @@ func TestGetProject(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	clearAllKeys(t, persistenceManager.GetETCDClient())
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
 }
 
 func TestGetProjectNotFound(t *testing.T) {
-	server, _ := createServer(t)
+	server, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -215,7 +216,7 @@ func TestDeleteProject(t *testing.T) {
 		Kind: v1.KindProject,
 		Name: "perses",
 	}}
-	server, _ := createServer(t)
+	server, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -233,7 +234,7 @@ func TestDeleteProject(t *testing.T) {
 }
 
 func TestDeleteProjectNotFound(t *testing.T) {
-	server, _ := createServer(t)
+	server, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,

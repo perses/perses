@@ -46,6 +46,7 @@ func (c *project) Update(entity *v1.Project) (*v1.Project, error) {
 }
 func (c *project) Delete(name string) error {
 	return c.client.Delete().
+		Resource(projectResource).
 		Name(name).
 		Do().
 		Error()
