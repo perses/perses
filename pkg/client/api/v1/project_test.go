@@ -38,6 +38,26 @@ func TestCreateProject(t *testing.T) {
 	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
 }
 
+func TestCreateProjectConflict(t *testing.T) {
+	project := &v1.Project{Metadata: v1.Metadata{
+		Kind: v1.KindProject,
+		Name: "perses",
+	}}
+
+	server, persistenceManager := utils.CreateServer(t)
+	defer server.Close()
+	client := createClient(t, server)
+
+	object, err := client.Project().Create(project)
+	assert.NoError(t, err)
+	assert.Equal(t, object.Metadata.Name, project.Metadata.Name)
+
+	_, err = client.Project().Create(project)
+	assert.Error(t, err)
+
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
+}
+
 func TestUpdateProject(t *testing.T) {
 	project := &v1.Project{Metadata: v1.Metadata{
 		Kind: v1.KindProject,

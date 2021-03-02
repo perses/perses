@@ -288,11 +288,19 @@ func (re *RequestError) Error() string {
 	return err
 }
 
+func (re *RequestError) Unwrap() error {
+	return re.Err
+}
+
 // Response contains the result of calling #Request.Do()
 type Response struct {
 	body       []byte
 	err        error
 	statusCode int
+}
+
+type errorResponse struct {
+	Message string `json:"message"`
 }
 
 // Error returns the error executing the request, nil if no error occurred.
@@ -302,22 +310,13 @@ func (r *Response) Error() error {
 	if r.statusCode < http.StatusOK || r.statusCode > http.StatusPartialContent {
 		// check error message contains in the body
 		if r.body != nil {
-			var genericMessage map[string]interface{}
-			err := json.Unmarshal(r.body, &genericMessage)
+			response := &errorResponse{}
+			err := json.Unmarshal(r.body, &response)
 			if err != nil {
 				// in this case something horrible append on client side
-				e.Err = fmt.Errorf("something horrible occured when the client tried to decode the error message: %s", err)
+				e.Err = fmt.Errorf("something horrible occured when the client tried to decode the error message: %w", err)
 			} else {
-				for k, v := range genericMessage {
-					if k == "message" {
-						e.Message = v.(string)
-						break
-					}
-
-					if len(e.Message) > 0 {
-						break
-					}
-				}
+				e.Message = response.Message
 			}
 		}
 		e.StatusCode = r.statusCode
@@ -340,7 +339,7 @@ func (r *Response) Object(respObj interface{}) error {
 	if r.body != nil {
 		err = json.Unmarshal(r.body, respObj)
 		if err != nil {
-			return fmt.Errorf("unable to decode the response body. Error %s", err)
+			return fmt.Errorf("unable to decode the response body. Error %w", err)
 		}
 	}
 	return nil
