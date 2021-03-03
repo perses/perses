@@ -109,3 +109,7 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	}
 	return entity, nil
 }
+
+func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
+	return s.dao.List(q)
+}

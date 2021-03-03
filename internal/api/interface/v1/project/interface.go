@@ -14,15 +14,28 @@
 package project
 
 import (
+	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/shared"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
+
+type Query struct {
+	etcd.Query
+	// Name is a prefix of the project.metadata.name that is used to filter the list of the project.
+	// Name can be empty in case you want to return the full list of project available.
+	Name string `query:"name"`
+}
+
+func (q *Query) Build() (string, error) {
+	return v1.GenerateProjectID(q.Name), nil
+}
 
 type DAO interface {
 	Create(entity *v1.Project) error
 	Update(entity *v1.Project) error
 	Delete(name string) error
 	Get(name string) (*v1.Project, error)
+	List(q etcd.Query) ([]*v1.Project, error)
 }
 
 type Service interface {

@@ -126,3 +126,21 @@ func TestDeleteProject(t *testing.T) {
 	err = client.Project().Delete(project.Metadata.Name)
 	assert.NoError(t, err)
 }
+
+func TestListProject(t *testing.T) {
+	project := &v1.Project{Metadata: v1.Metadata{
+		Kind: v1.KindProject,
+		Name: "perses",
+	}}
+	server, persistenceManager := utils.CreateServer(t)
+	defer server.Close()
+	client := createClient(t, server)
+
+	_, err := client.Project().Create(project)
+	assert.NoError(t, err)
+
+	result, err := client.Project().List("")
+	assert.NoError(t, err)
+	assert.True(t, len(result) == 1)
+	utils.ClearAllKeys(t, persistenceManager.GetETCDClient())
+}

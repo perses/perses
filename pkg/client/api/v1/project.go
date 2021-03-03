@@ -14,6 +14,8 @@
 package v1
 
 import (
+	"net/url"
+
 	"github.com/perses/perses/pkg/client/perseshttp"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -24,7 +26,13 @@ type ProjectInterface interface {
 	Create(entity *v1.Project) (*v1.Project, error)
 	Update(entity *v1.Project) (*v1.Project, error)
 	Delete(name string) error
+	// Get is returning an unique project.
+	// As such name is the exact value of project.metadata.name. It cannot be empty.
+	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Project, error)
+	// prefix is a prefix of the project.metadata.name to search for.
+	// It can be empty in case you want to get the full list of project available
+	List(prefix string) ([]*v1.Project, error)
 }
 
 type project struct {
@@ -47,6 +55,7 @@ func (c *project) Create(entity *v1.Project) (*v1.Project, error) {
 		Object(result)
 	return result, err
 }
+
 func (c *project) Update(entity *v1.Project) (*v1.Project, error) {
 	result := &v1.Project{}
 	err := c.client.Put().
@@ -57,6 +66,7 @@ func (c *project) Update(entity *v1.Project) (*v1.Project, error) {
 		Object(result)
 	return result, err
 }
+
 func (c *project) Delete(name string) error {
 	return c.client.Delete().
 		Resource(projectResource).
@@ -64,6 +74,7 @@ func (c *project) Delete(name string) error {
 		Do().
 		Error()
 }
+
 func (c *project) Get(name string) (*v1.Project, error) {
 	result := &v1.Project{}
 	err := c.client.Get().
@@ -71,5 +82,29 @@ func (c *project) Get(name string) (*v1.Project, error) {
 		Name(name).
 		Do().
 		Object(result)
+	return result, err
+}
+
+type projectQuery struct {
+	name string
+}
+
+func (q *projectQuery) GetValues() url.Values {
+	values := make(url.Values)
+	if len(q.name) > 0 {
+		values["name"] = []string{q.name}
+	}
+	return values
+}
+
+func (c *project) List(prefix string) ([]*v1.Project, error) {
+	var result []*v1.Project
+	err := c.client.Get().
+		Resource(projectResource).
+		Query(&projectQuery{
+			name: prefix,
+		}).
+		Do().
+		Object(&result)
 	return result, err
 }

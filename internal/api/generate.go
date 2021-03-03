@@ -67,6 +67,7 @@ func NewEndpoint(service {{ $package }}.Service) *Endpoint {
 func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 	group := g.Group(fmt.Sprintf("/%s", shared.Path{{ $kind }}))
 	group.POST("", e.Create)
+	group.GET("", e.List)
 	group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
 	group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete)
 	group.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get)
@@ -88,6 +89,11 @@ func (e *Endpoint) Delete(ctx echo.Context) error {
 
 func (e *Endpoint) Get(ctx echo.Context) error {
 	return e.toolbox.Get(ctx)
+}
+
+func (e *Endpoint) List(ctx echo.Context) error {
+	q := &{{ $package }}.Query{}
+	return e.toolbox.List(ctx, q)
 }
 `
 
