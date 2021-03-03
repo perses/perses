@@ -17,6 +17,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/common/etcd"
 )
 
 type Parameters struct {
@@ -34,6 +35,7 @@ type ToolboxService interface {
 	Update(entity interface{}, parameters Parameters) (interface{}, error)
 	Delete(parameters Parameters) error
 	Get(parameters Parameters) (interface{}, error)
+	List(q etcd.Query, parameters Parameters) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -43,20 +45,21 @@ type Toolbox interface {
 	Update(ctx echo.Context, entity interface{}) error
 	Delete(ctx echo.Context) error
 	Get(ctx echo.Context) error
+	List(ctx echo.Context, q etcd.Query) error
 }
 
 func NewToolBox(service ToolboxService) Toolbox {
-	return &toolboxImpl{
+	return &toolbox{
 		service: service,
 	}
 }
 
-type toolboxImpl struct {
+type toolbox struct {
 	Toolbox
 	service ToolboxService
 }
 
-func (t *toolboxImpl) Create(ctx echo.Context, entity interface{}) error {
+func (t *toolbox) Create(ctx echo.Context, entity interface{}) error {
 	if err := ctx.Bind(entity); err != nil {
 		return err
 	}
@@ -67,7 +70,7 @@ func (t *toolboxImpl) Create(ctx echo.Context, entity interface{}) error {
 	return ctx.JSON(http.StatusOK, newEntity)
 }
 
-func (t *toolboxImpl) Update(ctx echo.Context, entity interface{}) error {
+func (t *toolbox) Update(ctx echo.Context, entity interface{}) error {
 	if err := ctx.Bind(entity); err != nil {
 		return err
 	}
@@ -79,7 +82,7 @@ func (t *toolboxImpl) Update(ctx echo.Context, entity interface{}) error {
 	return ctx.JSON(http.StatusOK, newEntity)
 }
 
-func (t *toolboxImpl) Delete(ctx echo.Context) error {
+func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
 	if err := t.service.Delete(parameters); err != nil {
 		return handleError(err)
@@ -87,11 +90,23 @@ func (t *toolboxImpl) Delete(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (t *toolboxImpl) Get(ctx echo.Context) error {
+func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
 	entity, err := t.service.Get(parameters)
 	if err != nil {
 		return handleError(err)
 	}
 	return ctx.JSON(http.StatusOK, entity)
+}
+
+func (t *toolbox) List(ctx echo.Context, q etcd.Query) error {
+	if err := ctx.Bind(q); err != nil {
+		return err
+	}
+	parameters := extractParameters(ctx)
+	result, err := t.service.List(q, parameters)
+	if err != nil {
+		return handleError(err)
+	}
+	return ctx.JSON(http.StatusOK, result)
 }

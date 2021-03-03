@@ -54,3 +54,9 @@ func (d *dao) Delete(name string) error {
 	key := v1.GenerateProjectID(name)
 	return d.client.Delete(key)
 }
+
+func (d *dao) List(q etcd.Query) ([]*v1.Project, error) {
+	var result []*v1.Project
+	err := d.client.Query(q, &result)
+	return result, err
+}
