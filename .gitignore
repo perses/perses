@@ -1,5 +1,5 @@
 .idea/
 bin/
 
-internal/api/impl/v1/project/endpoint.go
+internal/api/impl/v1/**/*/endpoint.go
 coverage.txt
