@@ -19,35 +19,8 @@ import (
 	"time"
 )
 
-type Kind string
-
-const KindProject Kind = "project"
-
-var KindMap = map[Kind]bool{
-	KindProject: true,
-}
-
-func (k *Kind) UnmarshalJSON(data []byte) error {
-	var tmp Kind
-	type plain Kind
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*k = tmp
-	return nil
-}
-
-func (k *Kind) validate() error {
-	if len(*k) == 0 {
-		return fmt.Errorf("kind cannot be empty")
-	}
-	if _, ok := KindMap[*k]; !ok {
-		return fmt.Errorf("unknown kind '%s' used", *k)
-	}
-	return nil
+func generateProjectResourceID(pluralKind string, project string, name string) string {
+	return fmt.Sprintf("/%s/%s/%s", pluralKind, project, name)
 }
 
 type Metadata struct {
@@ -78,6 +51,32 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 func (m *Metadata) validate() error {
 	if len(m.Name) == 0 {
 		return fmt.Errorf("metadata.name cannot be empty")
+	}
+	return nil
+}
+
+// ProjectMetadata is the metadata struct for resources that belongs to a project.
+type ProjectMetadata struct {
+	Metadata `json:",inline"`
+	Project  string `json:"project"`
+}
+
+func (m *ProjectMetadata) UnmarshalJSON(data []byte) error {
+	var tmp ProjectMetadata
+	type plain ProjectMetadata
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*m = tmp
+	return nil
+}
+
+func (m *ProjectMetadata) validate() error {
+	if len(m.Project) == 0 {
+		return fmt.Errorf("metadata.project cannot be empty")
 	}
 	return nil
 }
