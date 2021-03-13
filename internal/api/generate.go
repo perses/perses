@@ -261,8 +261,6 @@ func (d *dao) List(q etcd.Query) ([]*v1.{{ $kind }}, error) {
 package v1
 
 import (
-	"net/url"
-
 	"github.com/perses/perses/pkg/client/perseshttp"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -273,7 +271,13 @@ type {{ $kind }}Interface interface {
 	Create(entity *v1.{{ $kind }}) (*v1.{{ $kind }}, error)
 	Update(entity *v1.{{ $kind }}) (*v1.{{ $kind }}, error)
 	Delete(name string) error
+	// Get is returning an unique {{ $kind }}.
+	// As such name is the exact value of {{ $kind }}.metadata.name. It cannot be empty.
+	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.{{ $kind }}, error)
+	// prefix is a prefix of the {{ $kind }}.metadata.name to search for.
+	// It can be empty in case you want to get the full list of {{ $kind }} available
+	List(prefix string) ([]*v1.{{ $kind }}, error)
 }
 
 type {{ unTitle $kind }} struct {
@@ -343,6 +347,22 @@ func (c *{{ unTitle $kind }}) Get(name string) (*v1.{{ $kind }}, error) {
 		Object(result)
 	return result, err
 }
+
+func (c *{{ unTitle $kind }}) List(prefix string) ([]*v1.{{ $kind }}, error) {
+	var result []*v1.{{ $kind }}
+	err := c.client.Get().
+		Resource({{ unTitle $kind }}Resource).
+		Query(&query{
+			name: prefix,
+		}).
+{{ if $endpoint.IsProjectResource -}}
+		Project(c.project).
+{{- end }}
+		Do().
+		Object(&result)
+	return result, err
+}
+
 `))
 )
 
@@ -385,7 +405,9 @@ func generatePersistence(ept endpoint) {
 func generateClient(ept endpoint) {
 	folder := "../../pkg/client/api/v1/"
 	fileName := fmt.Sprintf("%s.go", ept.PackageName)
-	generateFile(folder, fileName, clientTemplate, ept, false)
+	// as the endpoint are generated and not add in git, the client that reflects exactly what is exposed by the endpoint,
+	// then should be also ignored by git and so we can override it.
+	generateFile(folder, fileName, clientTemplate, ept, true)
 }
 
 func generateFile(folder string, fileName string, tpl *template.Template, ept endpoint, shouldOverride bool) {

@@ -13,11 +13,16 @@
 
 package v1
 
-import "github.com/perses/perses/pkg/client/perseshttp"
+import (
+	"net/url"
+
+	"github.com/perses/perses/pkg/client/perseshttp"
+)
 
 type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	Project() ProjectInterface
+	PrometheusRule(project string) PrometheusRuleInterface
 }
 
 type client struct {
@@ -37,4 +42,20 @@ func (c *client) RESTClient() *perseshttp.RESTClient {
 
 func (c *client) Project() ProjectInterface {
 	return newProject(c.restClient)
+}
+
+func (c *client) PrometheusRule(project string) PrometheusRuleInterface {
+	return newPrometheusRule(c.restClient, project)
+}
+
+type query struct {
+	name string
+}
+
+func (q *query) GetValues() url.Values {
+	values := make(url.Values)
+	if len(q.name) > 0 {
+		values["name"] = []string{q.name}
+	}
+	return values
 }
