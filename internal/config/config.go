@@ -16,7 +16,7 @@ package config
 import "github.com/perses/common/config"
 
 type Config struct {
-	Etcd config.EtcdConfig `yaml:"etcd"`
+	Etcd *config.EtcdConfig `yaml:"etcd"`
 }
 
 func Resolve(configFile string) (Config, error) {
