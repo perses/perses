@@ -21,12 +21,14 @@ import (
 )
 
 type Parameters struct {
-	Name string
+	Project string
+	Name    string
 }
 
 func extractParameters(ctx echo.Context) Parameters {
 	return Parameters{
-		Name: getNameParameter(ctx),
+		Project: getProjectParameter(ctx),
+		Name:    getNameParameter(ctx),
 	}
 }
 

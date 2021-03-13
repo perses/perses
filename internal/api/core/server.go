@@ -17,6 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
 	"github.com/perses/perses/internal/api/impl/v1/project"
+	"github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/shared/dependency"
 )
 
@@ -30,9 +31,9 @@ type api struct {
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
-	projectEndpoint := project.NewEndpoint(serviceManager.GetProject())
 	endpoints := []endpoint{
-		projectEndpoint,
+		project.NewEndpoint(serviceManager.GetProject()),
+		prometheusrule.NewEndpoint(serviceManager.GetPrometheusRule()),
 	}
 	return &api{
 		endpoints: endpoints,

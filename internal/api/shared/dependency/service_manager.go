@@ -17,25 +17,35 @@ package dependency
 
 import (
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
+	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 )
 
 type ServiceManager interface {
 	GetProject() project.Service
+	GetPrometheusRule() prometheusrule.Service
 }
 
 type service struct {
 	ServiceManager
-	project project.Service
+	project        project.Service
+	prometheusRule prometheusrule.Service
 }
 
 func NewServiceManager(dao PersistenceManager) ServiceManager {
 	projectService := projectImpl.NewService(dao.GetProject())
+	prometheusRuleService := prometheusruleImpl.NewService(dao.GetPrometheusRule())
 	return &service{
-		project: projectService,
+		project:        projectService,
+		prometheusRule: prometheusRuleService,
 	}
 }
 
 func (s *service) GetProject() project.Service {
 	return s.project
+}
+
+func (s *service) GetPrometheusRule() prometheusrule.Service {
+	return s.prometheusRule
 }
