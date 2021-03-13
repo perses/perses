@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatalf("error when reading configuration or from file '%s' or from environment", *configFile)
 	}
-	persistenceManager, err := dependency.NewPersistenceManager(conf.Etcd)
+	persistenceManager, err := dependency.NewPersistenceManager(*conf.Etcd)
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistent manager")
 	}

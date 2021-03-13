@@ -19,19 +19,23 @@ import (
 	"github.com/perses/common/config"
 	"github.com/perses/common/etcd"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
+	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"go.etcd.io/etcd/clientv3"
 )
 
 type PersistenceManager interface {
 	GetProject() project.DAO
+	GetPrometheusRule() prometheusrule.DAO
 	GetETCDClient() *clientv3.Client
 }
 
 type persistence struct {
 	PersistenceManager
-	project    project.DAO
-	etcdClient *clientv3.Client
+	project        project.DAO
+	prometheusRule prometheusrule.DAO
+	etcdClient     *clientv3.Client
 }
 
 func NewPersistenceManager(conf config.EtcdConfig) (PersistenceManager, error) {
@@ -41,14 +45,20 @@ func NewPersistenceManager(conf config.EtcdConfig) (PersistenceManager, error) {
 		return nil, err
 	}
 	projectDAO := projectImpl.NewDAO(etcdClient, timeout)
+	prometheusRuleDAO := prometheusruleImpl.NewDAO(etcdClient, timeout)
 	return &persistence{
-		project:    projectDAO,
-		etcdClient: etcdClient,
+		project:        projectDAO,
+		prometheusRule: prometheusRuleDAO,
+		etcdClient:     etcdClient,
 	}, nil
 }
 
 func (p *persistence) GetProject() project.DAO {
 	return p.project
+}
+
+func (p *persistence) GetPrometheusRule() prometheusrule.DAO {
+	return p.prometheusRule
 }
 
 func (p *persistence) GetETCDClient() *clientv3.Client {

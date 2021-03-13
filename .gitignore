@@ -1,5 +1,8 @@
 .idea/
 bin/
 
-internal/api/impl/v1/project/endpoint.go
+# ignore generated file
+internal/api/impl/v1/**/*/endpoint.go
+pkg/client/api/v1/prometheusrule.go
+pkg/client/api/v1/project.go
 coverage.txt

@@ -14,4 +14,5 @@
 package api
 
 // this file is just there to run the command generate
-//go:generate go run generate.go -package=project -kind=Project
+//go:generate go run generate.go -package=project -plural=projects -kind=Project
+//go:generate go run generate.go -package=prometheusrule -plural=prometheusrules -kind=PrometheusRule -isProjectResource=true

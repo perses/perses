@@ -16,11 +16,17 @@ package shared
 import "github.com/labstack/echo/v4"
 
 const (
-	ParamName   = "name"
-	APIV1Prefix = "/api/v1"
-	PathProject = "projects"
+	ParamName          = "name"
+	ParamProject       = "project"
+	APIV1Prefix        = "/api/v1"
+	PathProject        = "projects"
+	PathPrometheusRule = "prometheusrules"
 )
 
 func getNameParameter(ctx echo.Context) string {
 	return ctx.Param(ParamName)
+}
+
+func getProjectParameter(ctx echo.Context) string {
+	return ctx.Param(ParamProject)
 }
