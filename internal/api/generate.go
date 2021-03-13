@@ -151,7 +151,7 @@ type Query struct {
 }
 
 func (q *Query) Build() (string, error) {
-	return v1.Generate{{ $kind }}ID(q.Name), nil
+	return v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}q.Project,{{- end -}}q.Name), nil
 }
 
 type DAO interface {
@@ -170,6 +170,75 @@ type DAO interface {
 type Service interface {
 	shared.ToolboxService
 }
+`))
+	persistenceTemplate = template.Must(
+		template.New("persistence").Funcs(tplFunc).Parse(`{{- $endpoint := . -}}
+{{- $package := $endpoint.PackageName -}}
+{{- $kind := $endpoint.Kind -}}
+{{- $plural := $endpoint.Plural -}}
+// Copyright 2021 Amadeus s.a.s
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {{ $package }}
+
+import (
+	"time"
+
+	"github.com/perses/common/etcd"
+	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"go.etcd.io/etcd/clientv3"
+)
+
+type dao struct {
+	{{ $package }}.DAO
+	client etcd.DAO
+}
+
+func NewDAO(etcdClient *clientv3.Client, timeout time.Duration) {{ $package }}.DAO {
+	client := etcd.NewDAO(etcdClient, timeout)
+	return &dao{
+		client: client,
+	}
+}
+
+func (d *dao) Create(entity *v1.{{ $kind }}) error {
+	key := entity.GenerateID()
+	return d.client.Create(key, entity)
+}
+
+func (d *dao) Update(entity *v1.{{ $kind }}) error {
+	key := entity.GenerateID()
+	return d.client.Upsert(key, entity)
+}
+
+func (d *dao) Delete({{- if $endpoint.IsProjectResource -}}project string,{{- end -}} name string) error {
+	key := v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}project,{{- end -}} name)
+	return d.client.Delete(key)
+}
+
+func (d *dao) Get({{- if $endpoint.IsProjectResource -}}project string,{{- end -}} name string) (*v1.{{ $kind }}, error) {
+	key := v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}project,{{- end -}} name)
+	entity := &v1.{{ $kind }}{}
+	return entity, d.client.Get(key, entity)
+}
+
+func (d *dao) List(q etcd.Query) ([]*v1.{{ $kind }}, error) {
+	var result []*v1.{{ $kind }}
+	err := d.client.Query(q, &result)
+	return result, err
+}
+
 `))
 	clientTemplate = template.Must(
 		template.New("interface").Funcs(tplFunc).Parse(`{{- $endpoint := . -}}
@@ -307,6 +376,12 @@ func generateInterface(ept endpoint) {
 	generateFile(folder, fileName, interfaceTemplate, ept, false)
 }
 
+func generatePersistence(ept endpoint) {
+	folder := fmt.Sprintf("./impl/v1/%s", ept.PackageName)
+	fileName := "persistence.go"
+	generateFile(folder, fileName, persistenceTemplate, ept, false)
+}
+
 func generateClient(ept endpoint) {
 	folder := "../../pkg/client/api/v1/"
 	fileName := fmt.Sprintf("%s.go", ept.PackageName)
@@ -357,5 +432,6 @@ func main() {
 	}
 	generateEndpoint(ept)
 	generateInterface(ept)
+	generatePersistence(ept)
 	generateClient(ept)
 }
