@@ -3,7 +3,6 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 func GeneratePrometheusRuleID(project string, name string) string {
@@ -14,15 +13,15 @@ type Rule struct {
 	Record      string            `json:"record"`
 	Alert       string            `json:"alert"`
 	Expr        string            `json:"expr"`
-	For         time.Duration     `json:"for,omitempty"`
+	For         string            `json:"for,omitempty"`
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 type RuleGroup struct {
-	Name     string        `json:"name"`
-	Internal time.Duration `json:"internal"`
-	Rules    []Rule        `json:"rules"`
+	Name     string `json:"name"`
+	Internal string `json:"internal"`
+	Rules    []Rule `json:"rules"`
 }
 
 type PrometheusRuleSpec struct {
@@ -37,6 +36,10 @@ type PrometheusRule struct {
 
 func (p *PrometheusRule) GenerateID() string {
 	return GeneratePrometheusRuleID(p.Metadata.Project, p.Metadata.Name)
+}
+
+func (p *PrometheusRule) GetMetadata() interface{} {
+	return &p.Metadata
 }
 
 func (p *PrometheusRule) UnmarshalJSON(data []byte) error {

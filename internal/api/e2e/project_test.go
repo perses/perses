@@ -29,10 +29,12 @@ import (
 )
 
 func TestCreateProject(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 
 	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
@@ -53,10 +55,12 @@ func TestCreateProject(t *testing.T) {
 }
 
 func TestCreateProjectWithConflict(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 
 	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
@@ -81,9 +85,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 }
 
 func TestCreateProjectBadRequest(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
-		Kind: v1.KindProject,
-	}}
+	project := &v1.Project{Kind: v1.KindProject}
 
 	server, _ := utils.CreateServer(t)
 	defer server.Close()
@@ -100,10 +102,12 @@ func TestCreateProjectBadRequest(t *testing.T) {
 }
 
 func TestUpdateProject(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 
 	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
@@ -147,10 +151,12 @@ func TestUpdateProject(t *testing.T) {
 }
 
 func TestUpdateProjectNotFound(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -167,10 +173,12 @@ func TestUpdateProjectNotFound(t *testing.T) {
 }
 
 func TestUpdateProjectBadRequest(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -188,10 +196,12 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 }
 
 func TestGetProject(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 	server, persistenceManager := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -225,10 +235,12 @@ func TestGetProjectNotFound(t *testing.T) {
 }
 
 func TestDeleteProject(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 	server, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -260,10 +272,12 @@ func TestDeleteProjectNotFound(t *testing.T) {
 }
 
 func TestListProject(t *testing.T) {
-	project := &v1.Project{Metadata: v1.Metadata{
+	project := &v1.Project{
 		Kind: v1.KindProject,
-		Name: "perses",
-	}}
+		Metadata: v1.Metadata{
+			Name: "perses",
+		},
+	}
 	server, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{

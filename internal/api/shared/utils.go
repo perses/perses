@@ -13,7 +13,12 @@
 
 package shared
 
-import "github.com/labstack/echo/v4"
+import (
+	"fmt"
+
+	"github.com/labstack/echo/v4"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+)
 
 const (
 	ParamName          = "name"
@@ -29,4 +34,21 @@ func getNameParameter(ctx echo.Context) string {
 
 func getProjectParameter(ctx echo.Context) string {
 	return ctx.Param(ParamProject)
+}
+
+func validateMetadata(metadata interface{}) error {
+	switch met := metadata.(type) {
+	case *v1.ProjectMetadata:
+		if len(met.Project) == 0 {
+			return fmt.Errorf("metadata.project cannot be empty")
+		}
+		if len(met.Name) == 0 {
+			return fmt.Errorf("metadata.name cannot be empty")
+		}
+	case *v1.Metadata:
+		if len(met.Name) == 0 {
+			return fmt.Errorf("metadata.name cannot be empty")
+		}
+	}
+	return nil
 }

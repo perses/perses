@@ -31,6 +31,10 @@ func (p *Project) GenerateID() string {
 	return GenerateProjectID(p.Metadata.Name)
 }
 
+func (p *Project) GetMetadata() interface{} {
+	return &p.Metadata
+}
+
 func (p *Project) UnmarshalJSON(data []byte) error {
 	var tmp Project
 	type plain Project
