@@ -68,11 +68,28 @@ func TestMetadata_validateError(t *testing.T) {
 		resultError error
 	}{
 		{
-			title: "empty name",
-			metadata: Metadata{
-				Kind: KindProject,
-			},
+			title:       "empty name",
+			metadata:    Metadata{},
 			resultError: fmt.Errorf("metadata.name cannot be empty"),
+		},
+	}
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			assert.Equal(t, test.resultError, (&test.metadata).validate())
+		})
+	}
+}
+
+func TestProjectMetadata_validateError(t *testing.T) {
+	testSuites := []struct {
+		title       string
+		metadata    ProjectMetadata
+		resultError error
+	}{
+		{
+			title:       "empty name",
+			metadata:    ProjectMetadata{},
+			resultError: fmt.Errorf("metadata.project cannot be empty"),
 		},
 	}
 	for _, test := range testSuites {

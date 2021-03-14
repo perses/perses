@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {PrometheusRuleService} from "../prometheusrule.service";
 
 @Component({
   selector: 'app-prometheusrule-list',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PrometheusRuleListComponent implements OnInit {
 
-  constructor() { }
+  constructor(private service: PrometheusRuleService) { }
 
   ngOnInit(): void {
   }

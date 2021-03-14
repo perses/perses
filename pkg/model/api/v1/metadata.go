@@ -24,7 +24,6 @@ func generateProjectResourceID(pluralKind string, project string, name string) s
 }
 
 type Metadata struct {
-	Kind      Kind      `json:"kind"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

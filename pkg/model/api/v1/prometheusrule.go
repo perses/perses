@@ -14,9 +14,9 @@ type Rule struct {
 	Record      string            `json:"record"`
 	Alert       string            `json:"alert"`
 	Expr        string            `json:"expr"`
-	For         time.Duration     `json:"for"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	For         time.Duration     `json:"for,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 type RuleGroup struct {
@@ -30,6 +30,7 @@ type PrometheusRuleSpec struct {
 }
 
 type PrometheusRule struct {
+	Kind     Kind               `json:"kind"`
 	Metadata ProjectMetadata    `json:"metadata"`
 	Spec     PrometheusRuleSpec `json:"spec"`
 }
@@ -52,8 +53,8 @@ func (p *PrometheusRule) UnmarshalJSON(data []byte) error {
 }
 
 func (p *PrometheusRule) validate() error {
-	if p.Metadata.Kind != KindPrometheusRule {
-		return fmt.Errorf("invalid kind: '%s' for a PrometheusRule type", p.Metadata.Kind)
+	if p.Kind != KindPrometheusRule {
+		return fmt.Errorf("invalid kind: '%s' for a PrometheusRule type", p.Kind)
 	}
 	return nil
 }
