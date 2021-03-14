@@ -49,3 +49,4 @@ build: generate
 .PHONY: generate
 generate:
 	$(GO) generate ./internal/api
+	$(GO) generate ./internal/api/front
