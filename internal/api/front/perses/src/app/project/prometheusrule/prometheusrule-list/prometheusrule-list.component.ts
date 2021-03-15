@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {PrometheusRuleService} from "../prometheusrule.service";
+import { PrometheusRuleService } from '../prometheusrule.service';
+import { PrometheusRuleModel, RuleGroup } from '../prometheusrule.model';
 
 @Component({
   selector: 'app-prometheusrule-list',
@@ -8,9 +9,31 @@ import {PrometheusRuleService} from "../prometheusrule.service";
 })
 export class PrometheusRuleListComponent implements OnInit {
 
-  constructor(private service: PrometheusRuleService) { }
+  isLoading = false;
+  rules: PrometheusRuleModel[] = [];
 
-  ngOnInit(): void {
+  constructor(private service: PrometheusRuleService) {
   }
 
+  ngOnInit(): void {
+    this.getRules();
+  }
+
+  public countRules(groups: RuleGroup[]): number {
+    let result = 0;
+    for (const group of groups) {
+      result = result + group.rules.length;
+    }
+    return result;
+  }
+
+  private getRules(): void {
+    this.isLoading = true;
+    this.service.list('perses').subscribe(
+      responses => {
+        this.rules = responses;
+        this.isLoading = false;
+      }
+    );
+  }
 }

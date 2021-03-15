@@ -1,17 +1,17 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ProjectTemplateComponent } from './project-template/project-template.component';
-import {ProjectRoutingModule} from "./project-routing.module";
-import {MatSidenavModule} from "@angular/material/sidenav";
-
+import { ProjectRoutingModule } from './project-routing.module';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
   declarations: [ProjectTemplateComponent],
   imports: [
-    CommonModule,
+    SharedModule,
     ProjectRoutingModule,
-    MatSidenavModule,
+    MatSidenavModule
   ]
 })
-export class ProjectModule { }
+export class ProjectModule {
+}
