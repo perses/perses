@@ -1,19 +1,47 @@
 version: 2.1
 orbs:
   go: circleci/go@1.5.0
+  node: circleci/node@4.2.0
 jobs:
-  build:
+  build-front:
+    executor:
+      name: node/default
+      tag: '14.16'
+    steps:
+      - checkout
+      - node/install-packages:
+          cache-path: ~/project/internal/api/front/perses/node_modules
+          app-dir: '~/project/internal/api/front/perses'
+      - run: cd ~/project/internal/api/front/perses && npm run build
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - internal/api/front/perses/dist
+
+  lint-front:
+    executor:
+      name: node/default
+      tag: '14.16'
+    steps:
+      - checkout
+      - node/install-packages:
+          cache-path: ~/project/internal/api/front/perses/node_modules
+          app-dir: '~/project/internal/api/front/perses'
+      - run: cd ~/project/internal/api/front/perses && npm run lint
+
+  build-back:
     executor:
       name: go/default
       tag: '1.16'
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/project
       - go/load-cache
       - go/mod-download
       - go/save-cache
       - run: make build
   test:
-
     docker:
     - image: circleci/golang:1.16
     - image: 'quay.io/coreos/etcd:v3.4.7'
@@ -33,6 +61,7 @@ jobs:
             - "/home/circleci/go/pkg/mod"
       - run: make integration-test
       - run: bash <(curl -s https://codecov.io/bash)
+
   check_format:
     executor:
       name: go/default
@@ -43,9 +72,16 @@ jobs:
       - go/mod-download
       - go/save-cache
       - run: "make checkformat"
+
 workflows:
   main:
     jobs:
-      - build
-      - test
+      - build-front
+      - lint-front
+      - build-back:
+          requires:
+            - build-front
+      - test:
+          requires:
+            - build-front
       - check_format
