@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeDetectionStrategy, Component, Directive, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, HostBinding, ViewEncapsulation } from '@angular/core';
+
+@Directive({
+  selector: 'app-page-header, [app-page-header], [appPageHeader]'
+})
+// tslint:disable-next-line:directive-class-suffix
+export class PageHeader {
+  @HostBinding('class.app-page-header') appPageHeader = true;
+}
 
 @Directive({
   selector: 'app-page-sub-content, [app-page-sub-content], [appPageSubContent]'

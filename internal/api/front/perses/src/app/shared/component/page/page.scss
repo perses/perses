@@ -11,6 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+.app-page-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .app-page-content {
   display: flex;
   justify-content: center;
