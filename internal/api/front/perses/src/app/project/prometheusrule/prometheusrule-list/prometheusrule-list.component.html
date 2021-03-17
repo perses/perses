@@ -3,7 +3,8 @@
   <app-page-content>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <app-page-sub-content *ngIf="!isLoading">
-      <mat-expansion-panel class="mat-elevation-z0" *ngFor="let promRule of rules; let isFirst= first" [expanded]="isFirst">
+      <mat-expansion-panel class="mat-elevation-z0" *ngFor="let promRule of rules; let isFirst= first"
+                           [expanded]="isFirst">
         <mat-expansion-panel-header>
           <div class="expansion-panel-header-container">
             <div class="line">
@@ -17,12 +18,15 @@
         </mat-expansion-panel-header>
         <ng-container *ngFor="let gr of promRule.spec.groups">
           <h2>{{gr.name}}</h2>
-          <mat-card class="mat-elevation-z0" *ngFor="let rule of gr.rules; let isLast = last">
+          <mat-card class="mat-elevation-z0" *ngFor="let rule of gr.rules; let index = index; let isLast = last">
             <mat-card-content>
               <table>
                 <tr>
                   <th>Expr</th>
-                  <td>{{rule.expr}}</td>
+                  <td>
+                    <app-promql-editor [id]="promRule.metadata.name + '-'+gr.name +'-'+index"
+                                       [expr]="rule.expr"></app-promql-editor>
+                  </td>
                 </tr>
                 <tr>
                   <th>For</th>
