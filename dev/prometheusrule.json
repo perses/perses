@@ -1,64 +1,106 @@
-{
-  "kind": "PrometheusRule",
-  "metadata": {
-    "name": "PrometheusListOfRule",
-    "project": "perses"
+[
+  {
+    "kind": "PrometheusRule",
+    "metadata": {
+      "name": "PrometheusListOfRule",
+      "project": "perses"
+    },
+    "spec": {
+      "groups": [
+        {
+          "name": "prometheusListOfRule",
+          "rules": [
+            {
+              "alert": "PrometheusJobMissing",
+              "expr": "absent(up{job='prometheus'})",
+              "for": "0m",
+              "labels": {
+                "severity": "warning"
+              },
+              "annotations": {
+                "summary": "Prometheus job missing (instance {{ $labels.instance }})",
+                "description": "A Prometheus job has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            },
+            {
+              "alert": "PrometheusTargetMissing",
+              "expr": "up == 0",
+              "for": "0m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Prometheus target missing (instance {{ $labels.instance }})",
+                "description": "A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            },
+            {
+              "alert": "PrometheusAllTargetsMissing",
+              "expr": "count by (job) (up) == 0",
+              "for": "0m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Prometheus all targets missing (instance {{ $labels.instance }})",
+                "description": "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            },
+            {
+              "alert": "PrometheusTooManyRestarts",
+              "expr": "changes(process_start_time_seconds{job=~\"prometheus|pushgateway|alertmanager\"}[15m]) > 2",
+              "for": "0m",
+              "labels": {
+                "severity": "warning"
+              },
+              "annotations": {
+                "summary": "Prometheus too many restarts (instance {{ $labels.instance }})",
+                "description": "Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            }
+          ]
+        }
+      ]
+    }
   },
-  "spec": {
-    "groups": [
-      {
-        "name": "prometheusListOfRule",
-        "rules": [
-          {
-            "alert": "PrometheusJobMissing",
-            "expr": "absent(up{job='prometheus'})",
-            "for": "0m",
-            "labels": {
-              "severity": "warning"
+  {
+    "kind": "PrometheusRule",
+    "metadata": {
+      "project": "perses",
+      "name": "K8s"
+    },
+    "spec": {
+      "groups": [
+        {
+          "name": "k8s monitoring",
+          "rules": [
+            {
+              "alert": "KubernetesNodeReady",
+              "expr": "kube_node_status_condition{condition='Ready',status='true'} == 0",
+              "for": "10m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Kubernetes Node ready (instance {{ $labels.instance }})",
+                "description": "Node {{ $labels.node }} has been unready for a long time\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
             },
-            "annotations": {
-              "summary": "Prometheus job missing (instance {{ $labels.instance }})",
-              "description": "A Prometheus job has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+            {
+              "alert": "KubernetesMemoryPressure",
+              "expr": "kube_node_status_condition{condition='MemoryPressure',status='true'} == 1",
+              "for": "2m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Kubernetes memory pressure (instance {{ $labels.instance }})",
+                "description": "{{ $labels.node }} has MemoryPressure condition\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
             }
-          },
-          {
-            "alert": "PrometheusTargetMissing",
-            "expr": "up == 0",
-            "for": "0m",
-            "labels": {
-              "severity": "critical"
-            },
-            "annotations": {
-              "summary": "Prometheus target missing (instance {{ $labels.instance }})",
-              "description": "A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-            }
-          },
-          {
-            "alert": "PrometheusAllTargetsMissing",
-            "expr": "count by (job) (up) == 0",
-            "for": "0m",
-            "labels": {
-              "severity": "critical"
-            },
-            "annotations": {
-              "summary": "Prometheus all targets missing (instance {{ $labels.instance }})",
-              "description": "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-            }
-          },
-          {
-            "alert": "PrometheusTooManyRestarts",
-            "expr": "changes(process_start_time_seconds{job=~\"prometheus|pushgateway|alertmanager\"}[15m]) > 2",
-            "for": "0m",
-            "labels": {
-              "severity": "warning"
-            },
-            "annotations": {
-              "summary": "Prometheus too many restarts (instance {{ $labels.instance }})",
-              "description": "Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-            }
-          }
-        ]
-      }
-    ]
+          ]
+        }
+      ]
+    }
   }
-}
+]

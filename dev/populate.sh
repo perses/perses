@@ -13,7 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+function getKindID() {
+  kind=$1
+  if [ "${kind}" = "PrometheusRule" ]; then
+    echo "prometheusrules"
+  fi
+}
 
-content=$(cat ./prometheusrule.json)
 
-docker exec dev_etcd_1 etcdctl put /prometheusrules/perses/PrometheusListOfRule "${content}"
+function insertProjectResourceData() {
+  file=$1
+  jq -c '.[]' ${file} | while read -r entity; do
+      _jq() {
+        echo ${entity} | jq -r ${1}
+      }
+      id="/"$(getKindID $(_jq '.kind'))"/"$(_jq '.metadata.project')"/"$(_jq '.metadata.name')
+      echo "injected document at with the key $id"
+      docker exec dev_etcd_1 etcdctl put "${id}" "${entity}"
+  done
+}
+
+
+insertProjectResourceData ./prometheusrule.json
