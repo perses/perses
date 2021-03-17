@@ -3,7 +3,7 @@
   <app-page-content>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <app-page-sub-content *ngIf="!isLoading">
-      <mat-expansion-panel class="mat-elevation-z0" *ngFor="let promRule of rules">
+      <mat-expansion-panel class="mat-elevation-z0" *ngFor="let promRule of rules; let isFirst= first" [expanded]="isFirst">
         <mat-expansion-panel-header>
           <div class="expansion-panel-header-container">
             <div class="line">
