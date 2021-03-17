@@ -1,0 +1,23 @@
+.app-page-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.app-page-sub-content {
+  flex-grow: 1;
+  width: 100%;
+}
+
+@media only screen and (min-width: 1200px) {
+  .app-page-sub-content{
+    max-width: 75%;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .app-page-sub-content{
+    max-width: 100%;
+  }
+}
