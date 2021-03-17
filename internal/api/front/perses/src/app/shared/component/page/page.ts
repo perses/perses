@@ -26,6 +26,7 @@ export class PageHeader {
 })
 // tslint:disable-next-line:directive-class-suffix
 export class PageSubContent {
+  @HostBinding('class.app-page-sub-content') appPageSubContent = true;
 }
 
 @Component({
@@ -47,4 +48,5 @@ export class PageComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageContentComponent {
+  @HostBinding('class.app-page-content') appPageContent = true;
 }
