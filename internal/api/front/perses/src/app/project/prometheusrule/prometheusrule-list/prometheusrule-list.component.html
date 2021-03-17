@@ -1,22 +1,25 @@
 <h1>Prometheus Rule</h1>
 
-<div *ngIf="isLoading" class="loader">
-  <mat-spinner></mat-spinner>
+
+<div class="super-container">
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+
+  <div *ngIf="!isLoading" class="page-content-container">
+    <mat-expansion-panel class="mat-elevation-z0" *ngFor="let rule of rules">
+      <mat-expansion-panel-header>
+        <div class="expansion-panel-header-container">
+          <div class="line">
+            <mat-divider></mat-divider>
+          </div>
+          {{rule.metadata.name}}
+          <div class="line">
+            <mat-divider></mat-divider>
+          </div>
+        </div>
+      </mat-expansion-panel-header>
+      <p>This is the primary content of the panel.</p>
+    </mat-expansion-panel>
+  </div>
 </div>
 
-<mat-accordion>
-  <mat-expansion-panel class="mat-elevation-z0" *ngFor="let rule of rules">
-    <mat-expansion-panel-header>
-      <div class="header-container">
-        <div class="line">
-          <mat-divider></mat-divider>
-        </div>
-        {{rule.metadata.name}}
-        <div class="line">
-          <mat-divider></mat-divider>
-        </div>
-      </div>
-    </mat-expansion-panel-header>
-    <p>This is the primary content of the panel.</p>
-  </mat-expansion-panel>
-</mat-accordion>
+

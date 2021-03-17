@@ -1,13 +1,32 @@
-.loader {
+.super-container {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.page-content-container {
+  flex-grow: 1;
+  width: 100%;
+}
+
+@media only screen and (min-width: 1200px) {
+  .page-content-container{
+    max-width: 75%;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .page-content-container{
+    max-width: 100%;
+  }
 }
 
 .mat-expansion-panel {
   background-color: inherit;
 }
 
-.header-container {
+.expansion-panel-header-container {
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -19,10 +38,4 @@
   flex: 1;
   padding-left: 10px;
   padding-right: 10px;
-}
-
-.content-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
 }
