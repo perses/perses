@@ -1,25 +1,59 @@
-<h1>Prometheus Rule</h1>
-
-
-<div class="super-container">
-  <mat-spinner *ngIf="isLoading"></mat-spinner>
-
-  <div *ngIf="!isLoading" class="page-content-container">
-    <mat-expansion-panel class="mat-elevation-z0" *ngFor="let rule of rules">
-      <mat-expansion-panel-header>
-        <div class="expansion-panel-header-container">
-          <div class="line">
-            <mat-divider></mat-divider>
+<app-page>
+  <h1>Prometheus Rule</h1>
+  <app-page-content>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <app-page-sub-content *ngIf="!isLoading">
+      <mat-expansion-panel class="mat-elevation-z0" *ngFor="let promRule of rules">
+        <mat-expansion-panel-header>
+          <div class="expansion-panel-header-container">
+            <div class="line">
+              <mat-divider></mat-divider>
+            </div>
+            {{promRule.metadata.name}}
+            <div class="line">
+              <mat-divider></mat-divider>
+            </div>
           </div>
-          {{rule.metadata.name}}
-          <div class="line">
-            <mat-divider></mat-divider>
-          </div>
-        </div>
-      </mat-expansion-panel-header>
-      <p>This is the primary content of the panel.</p>
-    </mat-expansion-panel>
-  </div>
-</div>
-
-
+        </mat-expansion-panel-header>
+        <ng-container *ngFor="let gr of promRule.spec.groups">
+          <h2>{{gr.name}}</h2>
+          <mat-card class="mat-elevation-z0" *ngFor="let rule of gr.rules; let isLast = last">
+            <mat-card-content>
+              <table>
+                <tr>
+                  <th>Expr</th>
+                  <td>{{rule.expr}}</td>
+                </tr>
+                <tr>
+                  <th>For</th>
+                  <td>{{rule.for}}</td>
+                </tr>
+              </table>
+              <div class="map-container">
+                <div class="map">
+                  <h3>Labels</h3>
+                  <table>
+                    <tr *ngFor="let label of rule.labels| keyvalue">
+                      <th>{{label.key}}</th>
+                      <td>{{label.value}}</td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="map">
+                  <h3>Annotations</h3>
+                  <table>
+                    <tr *ngFor="let annotation of rule.annotations| keyvalue">
+                      <th>{{annotation.key}}</th>
+                      <td>{{annotation.value}}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <mat-divider *ngIf="!isLast"></mat-divider>
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+      </mat-expansion-panel>
+    </app-page-sub-content>
+  </app-page-content>
+</app-page>

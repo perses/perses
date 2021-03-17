@@ -1,28 +1,8 @@
-.super-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.page-content-container {
-  flex-grow: 1;
-  width: 100%;
-}
-
-@media only screen and (min-width: 1200px) {
-  .page-content-container{
-    max-width: 75%;
-  }
-}
-
-@media only screen and (max-width: 1200px) {
-  .page-content-container{
-    max-width: 100%;
-  }
-}
-
 .mat-expansion-panel {
+  background-color: inherit;
+}
+
+.mat-card {
   background-color: inherit;
 }
 
@@ -38,4 +18,43 @@
   flex: 1;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.map-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.map {
+  flex-grow: 1;
+}
+
+@media only screen and (min-width: 1200px) {
+  .map-container {
+    flex-direction: row;
+  }
+  .map {
+    width: 50%;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .map-container {
+    flex-direction: column;
+  }
+  .map {
+    width: 100%;
+  }
+}
+
+th {
+  text-align: left;
+  font-weight: normal;
+  color: #7986cb
+}
+
+h3 {
+  font-weight: bold;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
