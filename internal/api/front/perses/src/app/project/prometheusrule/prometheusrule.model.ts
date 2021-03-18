@@ -15,8 +15,8 @@ import { Metadata } from '../../shared/model/metadata.model';
 import { HeaderModel } from '../../shared/model/kind.model';
 
 export interface Rule {
-  record: string;
-  alert: string;
+  record?: string;
+  alert?: string;
   expr: string;
   for?: string;
   labels?: Record<string, string>;

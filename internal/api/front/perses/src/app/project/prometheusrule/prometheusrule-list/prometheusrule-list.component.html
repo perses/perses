@@ -17,7 +17,7 @@
             <div class="line">
               <mat-divider></mat-divider>
             </div>
-            {{promRule.metadata.name}}
+            <h1>{{promRule.metadata.name}}</h1>
             <div class="line">
               <mat-divider></mat-divider>
             </div>
@@ -28,6 +28,16 @@
           <mat-card class="mat-elevation-z0" *ngFor="let rule of gr.rules; let index = index; let isLastRule = last">
             <mat-card-content>
               <table>
+                <tr>
+                  <th>
+                    <ng-container *ngIf="rule.record;else thAlert">Record</ng-container>
+                    <ng-template #thAlert>Alert</ng-template>
+                  </th>
+                  <td>
+                    <ng-container *ngIf="rule.record;else tdAlert">{{rule.record}}</ng-container>
+                    <ng-template #tdAlert>{{rule.alert}}</ng-template>
+                  </td>
+                </tr>
                 <tr>
                   <th>Expr</th>
                   <td>
