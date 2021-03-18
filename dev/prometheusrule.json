@@ -59,6 +59,32 @@
               }
             }
           ]
+        },
+        {
+          "name": "A bunch of dummy test",
+          "interval": "30s",
+          "rules": [
+            {
+              "alert": "Dummy Test",
+              "expr": "vector(1)"
+            },
+            {
+              "record": "awesome_record_rule",
+              "expr": ""
+            },
+            {
+              "alert": "long promql expr",
+              "expr": "(\n\navg by(pod,container,namespace) (label_replace(label_replace(container_memory_rss{federation='k8s',namespace='perses',image!=''},'pod','$01','pod_name','(.*)'),'container','$1','container_name','(.*)'))\n\n/\n\navg by(pod,container,namespace) (kube_pod_container_resource_limits_memory_bytes{federation='k8s',namespace=~'perses'})\n\n) > 0.8",
+              "labels": {
+                "severity": "warning"
+              },
+              "annotations": {
+                "description": "Memory consumption of {{ $labels.container }} in pod {{ $labels.pod }} on namespace {{ $labels.namespace }} is high.",
+                "grafana_dashboard_link": "https://grafana.com/d/pods-monitoring/pods-monitoring?var-Stack={{$externalLabels.stack}}&var-namespace={{$labels.namespace}}&var-pod={{$labels.pod}}&var-container={{$labels.container}}",
+                "title": "Container memory consumption high"
+              }
+            }
+          ]
         }
       ]
     }
