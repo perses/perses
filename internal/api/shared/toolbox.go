@@ -14,10 +14,12 @@
 package shared
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/etcd"
+	"github.com/perses/perses/pkg/model/api"
 )
 
 type Parameters struct {
@@ -33,8 +35,8 @@ func extractParameters(ctx echo.Context) Parameters {
 }
 
 type ToolboxService interface {
-	Create(entity interface{}) (interface{}, error)
-	Update(entity interface{}, parameters Parameters) (interface{}, error)
+	Create(entity api.Entity) (interface{}, error)
+	Update(entity api.Entity, parameters Parameters) (interface{}, error)
 	Delete(parameters Parameters) error
 	Get(parameters Parameters) (interface{}, error)
 	List(q etcd.Query, parameters Parameters) (interface{}, error)
@@ -43,8 +45,8 @@ type ToolboxService interface {
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
 // This is a way to align the code of the different endpoint.
 type Toolbox interface {
-	Create(ctx echo.Context, entity interface{}) error
-	Update(ctx echo.Context, entity interface{}) error
+	Create(ctx echo.Context, entity api.Entity) error
+	Update(ctx echo.Context, entity api.Entity) error
 	Delete(ctx echo.Context) error
 	Get(ctx echo.Context) error
 	List(ctx echo.Context, q etcd.Query) error
@@ -61,8 +63,8 @@ type toolbox struct {
 	service ToolboxService
 }
 
-func (t *toolbox) Create(ctx echo.Context, entity interface{}) error {
-	if err := ctx.Bind(entity); err != nil {
+func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
+	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
 	newEntity, err := t.service.Create(entity)
@@ -72,8 +74,8 @@ func (t *toolbox) Create(ctx echo.Context, entity interface{}) error {
 	return ctx.JSON(http.StatusOK, newEntity)
 }
 
-func (t *toolbox) Update(ctx echo.Context, entity interface{}) error {
-	if err := ctx.Bind(entity); err != nil {
+func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
+	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
 	parameters := extractParameters(ctx)
@@ -103,7 +105,7 @@ func (t *toolbox) Get(ctx echo.Context) error {
 
 func (t *toolbox) List(ctx echo.Context, q etcd.Query) error {
 	if err := ctx.Bind(q); err != nil {
-		return err
+		return handleError(fmt.Errorf("%w: %s", BadRequestError, err))
 	}
 	parameters := extractParameters(ctx)
 	result, err := t.service.List(q, parameters)
@@ -111,4 +113,14 @@ func (t *toolbox) List(ctx echo.Context, q etcd.Query) error {
 		return handleError(err)
 	}
 	return ctx.JSON(http.StatusOK, result)
+}
+
+func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
+	if err := ctx.Bind(entity); err != nil {
+		return handleError(fmt.Errorf("%w: %s", BadRequestError, err))
+	}
+	if err := validateMetadata(entity.GetMetadata()); err != nil {
+		return handleError(fmt.Errorf("%w: %s", BadRequestError, err))
+	}
+	return nil
 }

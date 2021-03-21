@@ -23,11 +23,16 @@ func GenerateProjectID(name string) string {
 }
 
 type Project struct {
+	Kind     Kind     `json:"kind"`
 	Metadata Metadata `json:"metadata"`
 }
 
 func (p *Project) GenerateID() string {
 	return GenerateProjectID(p.Metadata.Name)
+}
+
+func (p *Project) GetMetadata() interface{} {
+	return &p.Metadata
 }
 
 func (p *Project) UnmarshalJSON(data []byte) error {
@@ -44,8 +49,8 @@ func (p *Project) UnmarshalJSON(data []byte) error {
 }
 
 func (p *Project) validate() error {
-	if p.Metadata.Kind != KindProject {
-		return fmt.Errorf("invalid kind: '%s' for a Project type", p.Metadata.Kind)
+	if p.Kind != KindProject {
+		return fmt.Errorf("invalid kind: '%s' for a Project type", p.Kind)
 	}
 	return nil
 }

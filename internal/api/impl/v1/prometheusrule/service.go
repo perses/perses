@@ -20,6 +20,7 @@ import (
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -35,7 +36,7 @@ func NewService(dao prometheusrule.DAO) prometheusrule.Service {
 	}
 }
 
-func (s *service) Create(entity interface{}) (interface{}, error) {
+func (s *service) Create(entity api.Entity) (interface{}, error) {
 	if ruleObject, ok := entity.(*v1.PrometheusRule); ok {
 		return s.create(ruleObject)
 	}
@@ -58,7 +59,7 @@ func (s *service) create(entity *v1.PrometheusRule) (*v1.PrometheusRule, error) 
 	return entity, nil
 }
 
-func (s *service) Update(entity interface{}, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
 	if ruleObject, ok := entity.(*v1.PrometheusRule); ok {
 		return s.update(ruleObject, parameters)
 	}

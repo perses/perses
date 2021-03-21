@@ -1,8 +1,27 @@
-.idea/
-bin/
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+.history/*
+
+# System Files
+.DS_Store
+Thumbs.db
+
+
+/bin
 
 # ignore generated file
 internal/api/impl/v1/**/*/endpoint.go
+internal/api/front/endpoint.go
 pkg/client/api/v1/prometheusrule.go
 pkg/client/api/v1/project.go
 coverage.txt
+

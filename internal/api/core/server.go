@@ -16,6 +16,7 @@ package core
 import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
+	"github.com/perses/perses/internal/api/front"
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/shared/dependency"
@@ -27,7 +28,8 @@ type endpoint interface {
 
 type api struct {
 	echoUtils.Register
-	endpoints []endpoint
+	endpoints     []endpoint
+	frontEndpoint endpoint
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
@@ -36,11 +38,13 @@ func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
 		prometheusrule.NewEndpoint(serviceManager.GetPrometheusRule()),
 	}
 	return &api{
-		endpoints: endpoints,
+		endpoints:     endpoints,
+		frontEndpoint: &front.Endpoint{},
 	}
 }
 
 func (a *api) RegisterRoute(e *echo.Echo) {
+	a.frontEndpoint.RegisterRoutes(e.Group(""))
 	a.registerAPIV1Route(e)
 }
 

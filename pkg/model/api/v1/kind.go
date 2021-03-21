@@ -13,7 +13,8 @@ const (
 )
 
 var KindMap = map[Kind]bool{
-	KindProject: true,
+	KindProject:        true,
+	KindPrometheusRule: true,
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {

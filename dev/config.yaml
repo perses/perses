@@ -1,0 +1,6 @@
+etcd:
+  protocol: "http"
+  request_timeout: 10
+  connections:
+    - host: 0.0.0.0
+      port: 2379

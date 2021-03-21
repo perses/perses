@@ -1,0 +1,139 @@
+[
+  {
+    "kind": "PrometheusRule",
+    "metadata": {
+      "name": "PrometheusListOfRule",
+      "project": "perses"
+    },
+    "spec": {
+      "groups": [
+        {
+          "name": "prometheusListOfRule",
+          "rules": [
+            {
+              "alert": "PrometheusJobMissing",
+              "expr": "absent(up{job='prometheus'})",
+              "for": "0m",
+              "labels": {
+                "severity": "warning"
+              },
+              "annotations": {
+                "summary": "Prometheus job missing (instance {{ $labels.instance }})",
+                "description": "A Prometheus job has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            },
+            {
+              "alert": "PrometheusTargetMissing",
+              "expr": "up == 0",
+              "for": "0m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Prometheus target missing (instance {{ $labels.instance }})",
+                "description": "A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            },
+            {
+              "alert": "PrometheusAllTargetsMissing",
+              "expr": "count by (job) (up) == 0",
+              "for": "0m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Prometheus all targets missing (instance {{ $labels.instance }})",
+                "description": "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            },
+            {
+              "alert": "PrometheusTooManyRestarts",
+              "expr": "changes(process_start_time_seconds{job=~\"prometheus|pushgateway|alertmanager\"}[15m]) > 2",
+              "for": "0m",
+              "labels": {
+                "severity": "warning"
+              },
+              "annotations": {
+                "summary": "Prometheus too many restarts (instance {{ $labels.instance }})",
+                "description": "Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "A bunch of dummy test",
+          "interval": "30s",
+          "rules": [
+            {
+              "alert": "Dummy Test",
+              "expr": "vector(1)"
+            },
+            {
+              "record": "awesome_record_rule",
+              "expr": ""
+            },
+            {
+              "alert": "long promql expr",
+              "expr": "(\n\navg by(pod,container,namespace) (label_replace(label_replace(container_memory_rss{federation='k8s',namespace='perses',image!=''},'pod','$01','pod_name','(.*)'),'container','$1','container_name','(.*)'))\n\n/\n\navg by(pod,container,namespace) (kube_pod_container_resource_limits_memory_bytes{federation='k8s',namespace=~'perses'})\n\n) > 0.8",
+              "labels": {
+                "severity": "warning"
+              },
+              "annotations": {
+                "description": "Memory consumption of {{ $labels.container }} in pod {{ $labels.pod }} on namespace {{ $labels.namespace }} is high.",
+                "grafana_dashboard_link": "https://grafana.com/d/pods-monitoring/pods-monitoring?var-Stack={{$externalLabels.stack}}&var-namespace={{$labels.namespace}}&var-pod={{$labels.pod}}&var-container={{$labels.container}}",
+                "title": "Container memory consumption high"
+              }
+            },
+            {
+              "alert": "no labels",
+              "expr": "2",
+              "annotations": {
+                "description": "this a dummy test; please don't use it"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "kind": "PrometheusRule",
+    "metadata": {
+      "project": "perses",
+      "name": "K8s"
+    },
+    "spec": {
+      "groups": [
+        {
+          "name": "k8s monitoring",
+          "rules": [
+            {
+              "alert": "KubernetesNodeReady",
+              "expr": "kube_node_status_condition{condition='Ready',status='true'} == 0",
+              "for": "10m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Kubernetes Node ready (instance {{ $labels.instance }})",
+                "description": "Node {{ $labels.node }} has been unready for a long time\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            },
+            {
+              "alert": "KubernetesMemoryPressure",
+              "expr": "kube_node_status_condition{condition='MemoryPressure',status='true'} == 1",
+              "for": "2m",
+              "labels": {
+                "severity": "critical"
+              },
+              "annotations": {
+                "summary": "Kubernetes memory pressure (instance {{ $labels.instance }})",
+                "description": "{{ $labels.node }} has MemoryPressure condition\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
