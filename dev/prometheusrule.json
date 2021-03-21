@@ -83,6 +83,13 @@
                 "grafana_dashboard_link": "https://grafana.com/d/pods-monitoring/pods-monitoring?var-Stack={{$externalLabels.stack}}&var-namespace={{$labels.namespace}}&var-pod={{$labels.pod}}&var-container={{$labels.container}}",
                 "title": "Container memory consumption high"
               }
+            },
+            {
+              "alert": "no labels",
+              "expr": "2",
+              "annotations": {
+                "description": "this a dummy test; please don't use it"
+              }
             }
           ]
         }
