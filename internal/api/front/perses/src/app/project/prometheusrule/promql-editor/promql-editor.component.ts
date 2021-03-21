@@ -136,7 +136,8 @@ export class PromqlEditorComponent implements OnInit, AfterViewInit {
             basicSetup,
             promQLExtension.asExtension(),
             this.promQLHighlightMaterialTheme,
-            this.customTheme, EditorView.editable.of(false)
+            this.customTheme, EditorView.editable.of(false),
+            EditorView.lineWrapping
           ],
           doc: this.expr,
         }),
