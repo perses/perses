@@ -51,7 +51,7 @@
                 </tr>
               </table>
               <div class="map-container">
-                <div class="map">
+                <div class="map" *ngIf="rule.labels">
                   <h3>Labels</h3>
                   <table>
                     <tr *ngFor="let label of rule.labels| keyvalue">
@@ -60,7 +60,7 @@
                     </tr>
                   </table>
                 </div>
-                <div class="map">
+                <div class="map" *ngIf="rule.annotations">
                   <h3>Annotations</h3>
                   <table>
                     <tr *ngFor="let annotation of rule.annotations| keyvalue">
