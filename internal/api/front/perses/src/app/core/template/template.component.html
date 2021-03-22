@@ -1,2 +1,8 @@
-<mat-toolbar color="primary"></mat-toolbar>
-<router-outlet></router-outlet>
+<div [ngClass]="{'perses-dark-theme': isDarkTheme | async}">
+  <mat-toolbar color="primary">
+    <mat-slide-toggle [checked]="isDarkTheme| async"
+                      (change)="toggleDarkTheme($event.checked)"
+                      [matTooltip]="'Theme'"></mat-slide-toggle>
+  </mat-toolbar>
+  <router-outlet></router-outlet>
+</div>

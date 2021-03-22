@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@import "src/assets/styles/variables";
+
 .mat-expansion-panel {
   background-color: inherit;
 }
@@ -42,7 +44,7 @@
   flex-grow: 1;
 }
 
-@media only screen and (min-width: 1200px) {
+@media only screen and (min-width: $large-screen) {
   .map-container {
     flex-direction: row;
   }
@@ -51,7 +53,7 @@
   }
 }
 
-@media only screen and (max-width: 1200px) {
+@media only screen and (max-width: $large-screen) {
   .map-container {
     flex-direction: column;
   }

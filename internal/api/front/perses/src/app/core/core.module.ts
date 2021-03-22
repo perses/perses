@@ -16,13 +16,14 @@ import { CommonModule } from '@angular/common';
 import { TemplateComponent } from './template/template.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
+import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
   declarations: [TemplateComponent],
   exports: [TemplateComponent],
   imports: [
-    CommonModule,
+    SharedModule,
     MatToolbarModule,
     RouterModule
   ]

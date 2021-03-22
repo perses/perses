@@ -19,6 +19,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastrModule } from 'ngx-toastr';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [],
@@ -29,6 +31,8 @@ import { ToastrModule } from 'ngx-toastr';
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSlideToggleModule,
+    MatTooltipModule,
   ],
   imports: [
     CommonModule,
