@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { Component, OnInit } from '@angular/core';
+import { ThemeService } from '../../shared/service/theme.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-template',
@@ -20,9 +22,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class TemplateComponent implements OnInit {
 
-  constructor() { }
+  isDarkTheme: Observable<boolean> = new Observable<boolean>();
+
+  constructor(private themeService: ThemeService) {
+  }
 
   ngOnInit(): void {
+    this.isDarkTheme = this.themeService.darkThemeEnable;
+  }
+
+  toggleDarkTheme(checked: boolean): void {
+    this.themeService.enableDarkTheme(checked);
   }
 
 }

@@ -14,9 +14,10 @@
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
 import { PromQLExtension } from 'codemirror-promql';
 import { EditorView } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState, Extension } from '@codemirror/state';
 import { basicSetup } from '@codemirror/basic-setup';
 import { HighlightStyle, tags } from '@codemirror/highlight';
+import { ThemeService } from '../../../shared/service/theme.service';
 
 @Component({
   selector: 'app-promql-editor',
@@ -24,125 +25,149 @@ import { HighlightStyle, tags } from '@codemirror/highlight';
   styleUrls: ['./promql-editor.component.scss']
 })
 export class PromqlEditorComponent implements OnInit, AfterViewInit {
+  // promQLHighlightMaterialTheme is based on the material theme defined here:
+  // https://codemirror.net/theme/material.css
+  private static promQLHighlightMaterialTheme = HighlightStyle.define(
+    [
+      {
+        tag: tags.deleted,
+        textDecoration: 'line-through',
+      },
+      {
+        tag: tags.inserted,
+        textDecoration: 'underline',
+      },
+      {
+        tag: tags.link,
+        textDecoration: 'underline',
+      },
+      {
+        tag: tags.strong,
+        fontWeight: 'bold',
+      },
+      {
+        tag: tags.emphasis,
+        fontStyle: 'italic',
+      },
+      {
+        tag: tags.invalid,
+        color: '#f00',
+      },
+      {
+        tag: tags.keyword,
+        color: '#C792EA',
+      },
+      {
+        tag: tags.operator,
+        color: '#89DDFF',
+      },
+      {
+        tag: tags.atom,
+        color: '#F78C6C',
+      },
+      {
+        tag: tags.number,
+        color: '#FF5370',
+      },
+      {
+        tag: tags.string,
+        color: '#99b867',
+      },
+      {
+        tag: [tags.escape, tags.regexp],
+        color: '#e40',
+      },
+      {
+        tag: tags.definition(tags.variableName),
+        color: '#f07178',
+      },
+      {
+        tag: tags.labelName,
+        color: '#f07178',
+      },
+      {
+        tag: tags.typeName,
+        color: '#085',
+      },
+      {
+        tag: tags.function(tags.variableName),
+        color: '#C792EA',
+      },
+      {
+        tag: tags.definition(tags.propertyName),
+        color: '#00c',
+      },
+      {
+        tag: tags.comment,
+        color: '#546e7a',
+      }
+    ]
+  );
+
   @Input()
   expr = '';
   @Input()
   id = '';
 
-  // promQLHighlightMaterialTheme is based on the material theme defined here:
-  // https://codemirror.net/theme/material.css
-  private promQLHighlightMaterialTheme = HighlightStyle.define(
-    {
-      tag: tags.deleted,
-      textDecoration: 'line-through',
-    },
-    {
-      tag: tags.inserted,
-      textDecoration: 'underline',
-    },
-    {
-      tag: tags.link,
-      textDecoration: 'underline',
-    },
-    {
-      tag: tags.strong,
-      fontWeight: 'bold',
-    },
-    {
-      tag: tags.emphasis,
-      fontStyle: 'italic',
-    },
-    {
-      tag: tags.invalid,
-      color: '#f00',
-    },
-    {
-      tag: tags.keyword,
-      color: '#C792EA',
-    },
-    {
-      tag: tags.operator,
-      color: '#89DDFF',
-    },
-    {
-      tag: tags.atom,
-      color: '#F78C6C',
-    },
-    {
-      tag: tags.number,
-      color: '#FF5370',
-    },
-    {
-      tag: tags.string,
-      color: '#99b867',
-    },
-    {
-      tag: [tags.escape, tags.regexp],
-      color: '#e40',
-    },
-    {
-      tag: tags.definition(tags.variableName),
-      color: '#f07178',
-    },
-    {
-      tag: tags.labelName,
-      color: '#f07178',
-    },
-    {
-      tag: tags.typeName,
-      color: '#085',
-    },
-    {
-      tag: tags.function(tags.variableName),
-      color: '#C792EA',
-    },
-    {
-      tag: tags.definition(tags.propertyName),
-      color: '#00c',
-    },
-    {
-      tag: tags.comment,
-      color: '#546e7a',
-    }
-  );
+  private dynamicConfig = new Compartment();
+  private codemirrorView: EditorView | null = null;
+  private isDarkTheme = false;
 
-  private customTheme = EditorView.theme({
-    $completionDetail: {
-      marginLeft: '0.5em',
-      float: 'right',
-      color: '#9d4040',
-    },
-    $completionMatchedText: {
-      color: '#83080a',
-      textDecoration: 'none',
-      fontWeight: 'bold',
-    },
-  });
+  constructor(private themeService: ThemeService) {
+  }
 
-  constructor() {
+  private static customizeCodemirrorTheme(isDarkTheme: boolean): Extension {
+    return EditorView.theme({
+      $completionDetail: {
+        marginLeft: '0.5em',
+        float: 'right',
+        color: '#9d4040',
+      },
+      $completionMatchedText: {
+        color: '#83080a',
+        textDecoration: 'none',
+        fontWeight: 'bold',
+      },
+    }, {dark: isDarkTheme});
   }
 
   ngOnInit(): void {
-
+    this.themeService.darkThemeEnable.subscribe(
+      res => {
+        this.isDarkTheme = res;
+        if (this.codemirrorView !== null) {
+          this.codemirrorView.dispatch(
+            this.codemirrorView.state.update({
+              effects: this.dynamicConfig.reconfigure(PromqlEditorComponent.customizeCodemirrorTheme(res))
+            })
+          );
+        }
+      }
+    );
   }
 
   ngAfterViewInit(): void {
+    this.initializeCodemirror();
+  }
+
+  private initializeCodemirror(): void {
     const doc = document.getElementById(`${this.id}`);
-    if (doc !== null) {
-      const promQLExtension = new PromQLExtension();
-      const view = new EditorView({
-        state: EditorState.create({
-          extensions: [
-            basicSetup,
-            promQLExtension.asExtension(),
-            this.promQLHighlightMaterialTheme,
-            this.customTheme, EditorView.editable.of(false),
-            EditorView.lineWrapping
-          ],
-          doc: this.expr,
-        }),
-        parent: doc
-      });
+    if (doc === null) {
+      return;
     }
+    const promQLExtension = new PromQLExtension();
+    this.codemirrorView = new EditorView({
+      state: EditorState.create({
+        extensions: [
+          basicSetup,
+          promQLExtension.asExtension(),
+          PromqlEditorComponent.promQLHighlightMaterialTheme,
+          this.dynamicConfig.of(PromqlEditorComponent.customizeCodemirrorTheme(this.isDarkTheme)), EditorView.editable.of(false),
+          EditorView.lineWrapping
+        ],
+        doc: this.expr,
+      }),
+      parent: doc
+    });
   }
 }
