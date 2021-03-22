@@ -16,6 +16,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PrometheusRuleModel } from './prometheusrule.model';
 import { UrlBuilderUtil } from '../../shared/utils/url-builder.util';
+import { ErrorHandlingService } from '../../shared/service/error-handling.service';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,7 @@ import { UrlBuilderUtil } from '../../shared/utils/url-builder.util';
 export class PrometheusRuleService {
   private prometheusRuleResource = 'prometheusrules';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private errorHandler: ErrorHandlingService) {
   }
 
   list(project: string): Observable<PrometheusRuleModel[]> {
@@ -31,6 +33,6 @@ export class PrometheusRuleService {
       .setResource(this.prometheusRuleResource)
       .setProject(project);
 
-    return this.http.get<PrometheusRuleModel[]>(url.build());
+    return this.http.get<PrometheusRuleModel[]>(url.build()).pipe(catchError(this.errorHandler.handleHTTPError));
   }
 }

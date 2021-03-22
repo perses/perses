@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* You can add global styles to this file, and also import other style files */
-
-@import "~ngx-toastr/toastr";
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+export interface CustomError {
+  status: number;
+  statusText: string;
+  message: string;
+}
