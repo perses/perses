@@ -11,29 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata } from '../../shared/model/api/v1/metadata.model';
-import { HeaderModel } from '../../shared/model/api/v1/kind.model';
-
-export interface Rule {
-  record?: string;
-  alert?: string;
-  expr: string;
-  for?: string;
-  labels?: Record<string, string>;
-  annotations?: Record<string, string>;
-}
-
-export interface RuleGroup {
-  name: string;
-  internal: string;
-  rules: Rule[];
-}
-
-export interface PrometheusRuleSpec {
-  groups: RuleGroup[];
-}
-
-export interface PrometheusRuleModel extends HeaderModel {
-  metadata: Metadata;
-  spec: PrometheusRuleSpec;
+export interface CustomError {
+  status: number;
+  statusText: string;
+  message: string;
 }
