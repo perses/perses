@@ -11,34 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@import "src/assets/styles/variables";
-
-.app-page-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.app-page-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.app-page-sub-content {
-  flex-grow: 1;
-  width: 100%;
-}
-
-@media only screen and (min-width: $large-screen) {
-  .app-page-sub-content{
-    max-width: 75%;
-  }
-}
-
-@media only screen and (max-width: $large-screen) {
-  .app-page-sub-content{
-    max-width: 100%;
-  }
-}
+$large-screen: 1200px;
