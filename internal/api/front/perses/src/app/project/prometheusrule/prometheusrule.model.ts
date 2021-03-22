@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata } from '../../shared/model/metadata.model';
-import { HeaderModel } from '../../shared/model/kind.model';
+import { Metadata } from '../../shared/model/api/v1/metadata.model';
+import { HeaderModel } from '../../shared/model/api/v1/kind.model';
 
 export interface Rule {
   record?: string;
