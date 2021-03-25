@@ -11,6 +11,26 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body class="mat-typography">
-  <app-root></app-root>
+<app-root>
+  <div id="loader-theme">
+    <div class="app-loading">
+      <div class="wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="shadow"></div>
+        <div class="shadow"></div>
+        <div class="shadow"></div>
+        <span>Loading</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    const isDarkTheme = localStorage.getItem('perses-dark-theme-enabled') === 'true'
+    if (isDarkTheme) {
+      document.getElementById('loader-theme').classList.add('app-loading-dark-theme')
+    }
+  </script>
+</app-root>
 </body>
 </html>
