@@ -15,6 +15,15 @@
 
 .app-loading-dark-theme {
   background-color: rgb(66, 66, 66);
+  .circle {
+    background-color: #ffffff;
+  }
+  .shadow {
+    background-color: #ffffff;
+  }
+  .wrapper span {
+    color: #ffffff;
+  }
 }
 
 .app-loading {
@@ -31,10 +40,6 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-}
-
-.app-loading-dark-theme .circle {
-  background-color: #fff;
 }
 
 .circle {
@@ -76,10 +81,6 @@
   animation-delay: .3s;
 }
 
-.app-loading-dark-theme .shadow {
-  background-color: rgba(255, 255, 255);
-}
-
 .shadow {
   width: 20px;
   height: 4px;
@@ -117,10 +118,6 @@
   left: auto;
   right: 15%;
   animation-delay: .3s;
-}
-
-.app-loading-dark-theme .wrapper span {
-  color: #fff;
 }
 
 .wrapper span {
