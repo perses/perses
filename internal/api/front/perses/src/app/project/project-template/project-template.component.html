@@ -1,5 +1,5 @@
 <mat-sidenav-container autosize class="project-container">
-  <mat-sidenav mode="side" opened>
+  <mat-sidenav [mode]="screenSize.mobileQuery.matches ? 'over' : 'side'" [opened]="sidenavToggleService.toggle | async">
     Drawer content
   </mat-sidenav>
   <mat-sidenav-content>

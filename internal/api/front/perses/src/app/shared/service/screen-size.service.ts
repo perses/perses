@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, OnInit } from '@angular/core';
-import { ScreenSizeService } from '../../shared/service/screen-size.service';
-import { SidenavToggleService } from '../../shared/service/sidenav-toggle.service';
+import { Injectable } from '@angular/core';
+import { BreakpointObserver, BreakpointState, MediaMatcher } from '@angular/cdk/layout';
+import { Observable } from 'rxjs';
 
-@Component({
-  selector: 'app-project-template',
-  templateUrl: './project-template.component.html',
-  styleUrls: ['./project-template.component.scss']
+@Injectable({
+  providedIn: 'root'
 })
-export class ProjectTemplateComponent implements OnInit {
-  constructor(public screenSize: ScreenSizeService, public sidenavToggleService: SidenavToggleService) {
-  }
+export class ScreenSizeService {
+  readonly mobileQuery: MediaQueryList;
+  readonly mobileQueryObserver: Observable<BreakpointState>;
 
-  ngOnInit(): void {
+  constructor(private media: MediaMatcher, private breakpoint: BreakpointObserver) {
+    const mobileMaxWidth = '(max-width: 600px)';
+    this.mobileQuery = media.matchMedia(mobileMaxWidth);
+    this.mobileQueryObserver = breakpoint.observe(mobileMaxWidth);
   }
-
 }
