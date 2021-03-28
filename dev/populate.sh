@@ -17,21 +17,30 @@ function getKindID() {
   kind=$1
   if [ "${kind}" = "PrometheusRule" ]; then
     echo "prometheusrules"
+  elif [ "${kind}" = "Project" ]; then
+    echo "projects"
   fi
 }
 
 
-function insertProjectResourceData() {
+function insertResourceData() {
   file=$1
+  isProjectResource=$2
+
   jq -c '.[]' ${file} | while read -r entity; do
       _jq() {
-        echo ${entity} | jq -r ${1}
+        echo ${entity} | jq -r "${1}"
       }
-      id="/"$(getKindID $(_jq '.kind'))"/"$(_jq '.metadata.project')"/"$(_jq '.metadata.name')
+      id="/"$(getKindID $(_jq '.kind'))"/"
+      if [ "${isProjectResource}" ]; then
+        id=${id}$(_jq '.metadata.project')"/"
+      fi
+      id=${id}$(_jq '.metadata.name')
       echo "injected document at with the key $id"
       docker exec dev_etcd_1 etcdctl put "${id}" "${entity}"
   done
 }
 
 
-insertProjectResourceData ./prometheusrule.json
+insertResourceData ./data/prometheusrule.json true
+insertResourceData ./data/project.json
