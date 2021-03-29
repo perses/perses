@@ -11,5 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-$large-screen: 1200px;
-$xsmall-screen: 600px;
+import { HeaderModel } from '../shared/model/api/v1/kind.model';
+import { Metadata } from '../shared/model/api/v1/metadata.model';
+
+export interface ProjectModel extends HeaderModel {
+  metadata: Metadata;
+}

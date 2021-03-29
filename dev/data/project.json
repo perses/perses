@@ -1,0 +1,14 @@
+[
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "perses"
+    }
+  },
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "IncredibleProject"
+    }
+  }
+]

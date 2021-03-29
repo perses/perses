@@ -12,24 +12,19 @@
 // limitations under the License.
 
 import { Injectable } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { CustomError } from '../model/error.model';
+import { BreakpointObserver, BreakpointState, MediaMatcher } from '@angular/cdk/layout';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ErrorHandlingService {
+export class ScreenSizeService {
+  readonly mobileQuery: MediaQueryList;
+  readonly mobileQueryObserver: Observable<BreakpointState>;
 
-  private static defaultStatusText = 'Something horrible occurred';
-
-  handleHTTPError(res: HttpErrorResponse): Observable<never> {
-    const error = {
-      status: res.status
-    } as CustomError;
-
-    error.message = res.error.message || '';
-    error.statusText = res.statusText || ErrorHandlingService.defaultStatusText;
-    return throwError(error);
+  constructor(private media: MediaMatcher, private breakpoint: BreakpointObserver) {
+    const mobileMaxWidth = '(max-width: 600px)';
+    this.mobileQuery = media.matchMedia(mobileMaxWidth);
+    this.mobileQueryObserver = breakpoint.observe(mobileMaxWidth);
   }
 }

@@ -14,6 +14,7 @@
 import { RouterModule, Routes } from '@angular/router';
 import { ProjectTemplateComponent } from './project-template/project-template.component';
 import { NgModule } from '@angular/core';
+import { ProjectGuard } from './project.guard';
 
 const PROJECT_ROUTES: Routes = [
   {
@@ -22,6 +23,7 @@ const PROJECT_ROUTES: Routes = [
     children: [
       {
         path: 'prometheusrules',
+        canActivate: [ProjectGuard],
         loadChildren: () => import('./prometheusrule/prometheusrule.module').then(m => m.PrometheusRuleModule)
       }
     ]

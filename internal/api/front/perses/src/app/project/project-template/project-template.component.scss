@@ -11,12 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@import "src/assets/styles/variables";
+
 .project-container {
   position: absolute;
-  top: 64px; // the size of the toolbar
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+// size of the toolbar depending of the size of the screen.
+// Spec coming from https://github.com/angular/components/blob/master/src/material/toolbar/_toolbar-variables.scss
+@media only screen and (max-width: $xsmall-screen) {
+  .project-container{
+    top: 56px;
+  }
+}
+
+@media only screen and (min-width: $xsmall-screen) {
+  .project-container{
+    top: 64px;
+  }
 }
 
 .project-sidenav-content {

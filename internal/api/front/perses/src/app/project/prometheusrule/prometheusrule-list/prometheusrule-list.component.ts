@@ -15,6 +15,7 @@ import { Component, OnInit } from '@angular/core';
 import { PrometheusRuleService } from '../prometheusrule.service';
 import { PrometheusRuleModel, RuleGroup } from '../prometheusrule.model';
 import { ToastService } from '../../../shared/service/toast.service';
+import { ProjectService } from '../../project.service';
 
 @Component({
   selector: 'app-prometheusrule-list',
@@ -25,11 +26,20 @@ export class PrometheusRuleListComponent implements OnInit {
 
   isLoading = false;
   rules: PrometheusRuleModel[] = [];
+  currentProject = '';
 
-  constructor(private service: PrometheusRuleService, private toastService: ToastService) {
+  constructor(private service: PrometheusRuleService,
+              private toastService: ToastService,
+              private projectService: ProjectService) {
   }
 
   ngOnInit(): void {
+    this.projectService.currentProject.subscribe(
+      res => {
+        this.currentProject = res;
+        this.getRules();
+      }
+    );
     this.getRules();
   }
 
@@ -43,7 +53,7 @@ export class PrometheusRuleListComponent implements OnInit {
 
   private getRules(): void {
     this.isLoading = true;
-    this.service.list('perses').subscribe(
+    this.service.list(this.currentProject).subscribe(
       responses => {
         this.rules = responses;
         this.isLoading = false;
