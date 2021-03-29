@@ -26,6 +26,7 @@ export class SidenavToggleService {
   constructor(private screenSize: ScreenSizeService) {
     this.screenSize.mobileQueryObserver.subscribe(
       result => {
+        // the idea here is to close the menu by default when we are on a mobile device. And to open it otherwise.
         this.toggleSubject.next(!result.matches);
       }
     );
