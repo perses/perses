@@ -16,6 +16,8 @@ import { ProjectTemplateComponent } from './project-template/project-template.co
 import { ProjectRoutingModule } from './project-routing.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { SharedModule } from '../shared/shared.module';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 @NgModule({
@@ -23,6 +25,8 @@ import { SharedModule } from '../shared/shared.module';
   imports: [
     SharedModule,
     ProjectRoutingModule,
+    MatListModule,
+    MatMenuModule,
     MatSidenavModule
   ]
 })

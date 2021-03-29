@@ -1,6 +1,23 @@
 <mat-sidenav-container autosize class="project-container">
   <mat-sidenav [mode]="screenSize.mobileQuery.matches ? 'over' : 'side'" [opened]="sidenavToggleService.toggle | async">
-    Drawer content
+    <button mat-button [matMenuTriggerFor]="menu">
+      {{projectService.currentProject | async}}
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <a mat-menu-item *ngFor="let project of projectList"
+         [routerLink]="['/projects/', project.metadata.name, 'prometheusrules']">
+        {{project.metadata.name}}
+      </a>
+    </mat-menu>
+    <mat-nav-list>
+      <mat-list-item *ngFor="let link of sidebarLinks">
+        <a matLine href [routerLink]="['/projects/perses/',link.url]">
+          <mat-icon [matTooltip]="link.label" matTooltipPosition="right">{{link.icon}}</mat-icon>
+          <span>{{link.label}}</span>
+        </a>
+      </mat-list-item>
+    </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
     <div class="project-sidenav-content">

@@ -14,6 +14,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ScreenSizeService } from '../../shared/service/screen-size.service';
 import { SidenavToggleService } from '../../shared/service/sidenav-toggle.service';
+import { ProjectService } from '../project.service';
+import { ProjectModel } from '../project.model';
+import { ToastService } from '../../shared/service/toast.service';
 
 @Component({
   selector: 'app-project-template',
@@ -21,10 +24,30 @@ import { SidenavToggleService } from '../../shared/service/sidenav-toggle.servic
   styleUrls: ['./project-template.component.scss']
 })
 export class ProjectTemplateComponent implements OnInit {
-  constructor(public screenSize: ScreenSizeService, public sidenavToggleService: SidenavToggleService) {
+  sidebarLinks = [
+    {url: 'prometheusrules', icon: 'add_alert', label: 'Prometheus Rules'}
+  ];
+
+  projectList: ProjectModel[] = [];
+
+  constructor(public screenSize: ScreenSizeService,
+              public sidenavToggleService: SidenavToggleService,
+              public projectService: ProjectService,
+              private toastService: ToastService) {
   }
 
   ngOnInit(): void {
+    this.getProjectList();
   }
 
+  private getProjectList(): void {
+    this.projectService.list().subscribe(
+      result => {
+        this.projectList = result;
+      },
+      error => {
+        this.toastService.error(error);
+      }
+    );
+  }
 }
