@@ -27,7 +27,7 @@ import { MatMenuModule } from '@angular/material/menu';
     ProjectRoutingModule,
     MatListModule,
     MatMenuModule,
-    MatSidenavModule
+    MatSidenavModule,
   ]
 })
 export class ProjectModule {

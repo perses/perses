@@ -1,6 +1,5 @@
 <div [ngClass]="{'perses-dark-theme': isDarkTheme | async}">
   <mat-toolbar color="primary">
-    <button mat-icon-button *ngIf="screenSize.mobileQuery.matches" (click)="sidenavToggleService.nextToggle()"><mat-icon>menu</mat-icon></button>
     <mat-slide-toggle [checked]="isDarkTheme| async"
                       (change)="toggleDarkTheme($event.checked)"
                       [matTooltip]="'Theme'"></mat-slide-toggle>

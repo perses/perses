@@ -13,7 +13,6 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ScreenSizeService } from '../../shared/service/screen-size.service';
-import { SidenavToggleService } from '../../shared/service/sidenav-toggle.service';
 import { ProjectService } from '../project.service';
 import { ProjectModel } from '../project.model';
 import { ToastService } from '../../shared/service/toast.service';
@@ -31,7 +30,6 @@ export class ProjectTemplateComponent implements OnInit {
   projectList: ProjectModel[] = [];
 
   constructor(public screenSize: ScreenSizeService,
-              public sidenavToggleService: SidenavToggleService,
               public projectService: ProjectService,
               private toastService: ToastService) {
   }

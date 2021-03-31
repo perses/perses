@@ -1,5 +1,9 @@
+<mat-toolbar class="phone-project-toolbar" *ngIf="screenSize.mobileQuery.matches">
+  <button mat-icon-button (click)="snav.toggle()"><mat-icon>menu</mat-icon></button>
+  <span> > {{projectService.currentProject | async}}</span>
+</mat-toolbar>
 <mat-sidenav-container autosize class="project-container">
-  <mat-sidenav [mode]="screenSize.mobileQuery.matches ? 'over' : 'side'" [opened]="sidenavToggleService.toggle | async">
+  <mat-sidenav #snav [mode]="screenSize.mobileQuery.matches ? 'over' : 'side'" [opened]="!screenSize.mobileQuery.matches">
     <button mat-button [matMenuTriggerFor]="menu">
       {{projectService.currentProject | async}}
       <mat-icon>arrow_drop_down</mat-icon>

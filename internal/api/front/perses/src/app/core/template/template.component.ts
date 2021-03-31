@@ -14,8 +14,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ThemeService } from '../../shared/service/theme.service';
 import { Observable } from 'rxjs';
-import { ScreenSizeService } from '../../shared/service/screen-size.service';
-import { SidenavToggleService } from '../../shared/service/sidenav-toggle.service';
 
 @Component({
   selector: 'app-template',
@@ -25,9 +23,7 @@ import { SidenavToggleService } from '../../shared/service/sidenav-toggle.servic
 export class TemplateComponent implements OnInit {
   isDarkTheme: Observable<boolean> = new Observable<boolean>();
 
-  constructor(private themeService: ThemeService,
-              public screenSize: ScreenSizeService,
-              public sidenavToggleService: SidenavToggleService) {
+  constructor(private themeService: ThemeService) {
   }
 
   ngOnInit(): void {

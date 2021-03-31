@@ -13,6 +13,8 @@
 
 @import "src/assets/styles/variables";
 
+$phone-project-toolbar-height: 40px;
+
 .project-container {
   position: absolute;
   bottom: 0;
@@ -24,7 +26,7 @@
 // Spec coming from https://github.com/angular/components/blob/master/src/material/toolbar/_toolbar-variables.scss
 @media only screen and (max-width: $xsmall-screen) {
   .project-container{
-    top: 56px;
+    top: calc(56px + #{$phone-project-toolbar-height});
   }
 }
 
@@ -38,4 +40,8 @@
   margin-left: 2rem;
   margin-right: 1rem;
   margin-top: 2rem;
+}
+
+.phone-project-toolbar {
+  height: 40px;
 }
