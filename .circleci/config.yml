@@ -29,12 +29,13 @@ jobs:
           app-dir: '~/project/internal/api/front/perses'
       - run: cd ~/project/internal/api/front/perses && npm run lint
 
-  build-back:
+  build:
     executor:
       name: go/default
       tag: '1.16'
     steps:
       - checkout
+      - setup_remote_docker
       - attach_workspace:
           at: ~/project
       - go/load-cache
@@ -90,7 +91,7 @@ workflows:
           filters:
             tags:
               ignore: /.*/
-      - build-back:
+      - build:
           requires:
             - build-front
           filters:

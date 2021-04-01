@@ -12,3 +12,12 @@ builds:
       - PKG_LDFLAGS=github.com/perses/common/app
     ldflags:
       - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Commit={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildTime={{.Date}}"
+dockers:
+  - goos: linux
+    goarch: amd64
+    ids:
+      - "perses"
+    image_templates:
+      - "docker.io/perses/perses:latest"
+      - "docker.io/perses/perses:{{ .Tag }}"
+      - "docker.io/perses/perses:v{{ .Major }}.{{ .Minor }}"
