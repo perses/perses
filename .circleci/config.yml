@@ -40,7 +40,13 @@ jobs:
       - go/load-cache
       - go/mod-download
       - go/save-cache
-      - run: make build
+      - run:
+          name: "install goreleaser"
+          command: |
+            curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh
+            mkdir -p ~/bin
+            $SUDO cp ./bin/goreleaser ~/bin/goreleaser
+      - run: make crossbuild
   test:
     docker:
     - image: circleci/golang:1.16

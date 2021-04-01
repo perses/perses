@@ -17,6 +17,7 @@ Thumbs.db
 
 
 /bin
+/dist
 
 # ignore generated file
 internal/api/impl/v1/**/*/endpoint.go

@@ -1,0 +1,14 @@
+builds:
+  - id: "perses"
+    main: ./cmd/perses/main.go
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+      - PKG_LDFLAGS=github.com/perses/common/app
+    ldflags:
+      - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Commit={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildTime={{.Date}}"

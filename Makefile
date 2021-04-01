@@ -44,7 +44,11 @@ coverage-html: integration-test
 .PHONY: build
 build: generate
 	@echo ">> build the perses api"
-	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build  -a -installsuffix cgo ${LDFLAGS} -o ./bin/perses ./cmd/perses
+	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/perses ./cmd/perses
+
+.PHONY: crossbuild
+crossbuild: generate
+	goreleaser --snapshot --skip-publish --rm-dist
 
 .PHONY: generate
 generate:
