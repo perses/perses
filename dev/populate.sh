@@ -37,7 +37,7 @@ function insertResourceData() {
       fi
       id=${id}$(_jq '.metadata.name')
       echo "injected document at with the key $id"
-      docker exec dev_etcd_1 etcdctl put "${id}" "${entity}"
+      MSYS_NO_PATHCONV=1 docker exec dev_etcd_1 etcdctl put "${id}" "${entity}"
   done
 }
 
