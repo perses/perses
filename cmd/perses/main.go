@@ -23,6 +23,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const banner = `
+______                       
+| ___ \                      
+| |_/ /__ _ __ ___  ___  ___ 
+|  __/ _ \ '__/ __|/ _ \/ __|
+| | |  __/ |  \__ \  __/\__ \
+\_|  \___|_|  |___/\___||___/  %s 
+
+The secure way to configure your monitoring.               <\
+                                                            \\
+--------------==========================================>|||<*>//////]
+                                                            //
+                                                           </
+`
+
 func main() {
 	configFile := flag.String("config", "", "Path to the yaml configuration file for the api. Configuration can be overridden when using the environment variable")
 	flag.Parse()
@@ -37,7 +52,7 @@ func main() {
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager)
 	persesAPI := core.NewPersesAPI(serviceManager)
-	runner := app.NewRunner().WithDefaultHTTPServer("perses")
+	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 	// register the API
 	runner.HTTPServerBuilder().APIRegistration(persesAPI)
 	// start the application
