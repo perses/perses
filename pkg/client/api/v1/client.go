@@ -23,6 +23,7 @@ type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	Project() ProjectInterface
 	PrometheusRule(project string) PrometheusRuleInterface
+	User() UserInterface
 }
 
 type client struct {
@@ -46,6 +47,10 @@ func (c *client) Project() ProjectInterface {
 
 func (c *client) PrometheusRule(project string) PrometheusRuleInterface {
 	return newPrometheusRule(c.restClient, project)
+}
+
+func (c *client) User() UserInterface {
+	return newUser(c.restClient)
 }
 
 type query struct {

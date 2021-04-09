@@ -195,7 +195,7 @@ import (
 	"time"
 
 	"github.com/perses/common/etcd"
-	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
+	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"go.etcd.io/etcd/clientv3"
 )

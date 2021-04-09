@@ -22,7 +22,9 @@ Thumbs.db
 # ignore generated file
 internal/api/impl/v1/**/*/endpoint.go
 internal/api/front/endpoint.go
-pkg/client/api/v1/prometheusrule.go
-pkg/client/api/v1/project.go
+
+!pkg/client/api/v1/client.go
+pkg/client/api/v1/
+
 coverage.txt
 

@@ -10,11 +10,13 @@ type Kind string
 const (
 	KindProject        Kind = "Project"
 	KindPrometheusRule Kind = "PrometheusRule"
+	KindUser           Kind = "User"
 )
 
 var KindMap = map[Kind]bool{
 	KindProject:        true,
 	KindPrometheusRule: true,
+	KindUser:           true,
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {

@@ -19,6 +19,7 @@ import (
 	"github.com/perses/perses/internal/api/front"
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/prometheusrule"
+	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/shared/dependency"
 )
 
@@ -36,6 +37,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
 	endpoints := []endpoint{
 		project.NewEndpoint(serviceManager.GetProject()),
 		prometheusrule.NewEndpoint(serviceManager.GetPrometheusRule()),
+		user.NewEndpoint(serviceManager.GetUser()),
 	}
 	return &api{
 		endpoints:     endpoints,
