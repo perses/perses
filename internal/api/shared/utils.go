@@ -26,6 +26,7 @@ const (
 	APIV1Prefix        = "/api/v1"
 	PathProject        = "projects"
 	PathPrometheusRule = "prometheusrules"
+	PathUser           = "users"
 )
 
 func getNameParameter(ctx echo.Context) string {

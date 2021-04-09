@@ -9,4 +9,5 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd v0.5.0-alpha.5.0.20201125193152-8a03d2e9614b
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 )
