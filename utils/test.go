@@ -25,7 +25,7 @@ import (
 	"github.com/perses/common/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	"go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 func ClearAllKeys(t *testing.T, client *clientv3.Client) {

@@ -24,7 +24,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type PersistenceManager interface {

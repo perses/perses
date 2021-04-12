@@ -19,7 +19,7 @@ import (
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type dao struct {
