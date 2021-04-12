@@ -73,6 +73,19 @@ func (p *User) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (p *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp User
+	type plain User
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
 func (p *User) validate() error {
 	if p.Kind != KindUser {
 		return fmt.Errorf("invalid kind: '%s' for a User type", p.Kind)

@@ -23,8 +23,8 @@ func GenerateProjectID(name string) string {
 }
 
 type Project struct {
-	Kind     Kind     `json:"kind"`
-	Metadata Metadata `json:"metadata"`
+	Kind     Kind     `json:"kind" yaml:"kind"`
+	Metadata Metadata `json:"metadata" yaml:"metadata"`
 }
 
 func (p *Project) GenerateID() string {
@@ -39,6 +39,19 @@ func (p *Project) UnmarshalJSON(data []byte) error {
 	var tmp Project
 	type plain Project
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *Project) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Project
+	type plain Project
+	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {
