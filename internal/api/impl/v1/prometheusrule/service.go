@@ -22,8 +22,23 @@ import (
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/prometheus/prometheus/pkg/rulefmt"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
+
+func checkRule(ruleSpec v1.PrometheusRuleSpec) error {
+	data, err := yaml.Marshal(ruleSpec)
+	if err != nil {
+		logrus.WithError(err).Error("unable to marshal the ruleSpec")
+		return shared.InternalError
+	}
+	_, errs := rulefmt.Parse(data)
+	if len(errs) > 0 {
+		return fmt.Errorf("%w: %s", shared.BadRequestError, errs[0])
+	}
+	return nil
+}
 
 type service struct {
 	prometheusrule.Service
@@ -44,8 +59,13 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.PrometheusRule) (*v1.PrometheusRule, error) {
-	// you don't need to check that the project exists since once the permission middleware will be in place,
+	// Note: you don't need to check that the project exists since once the permission middleware will be in place,
 	// it won't be possible to create a resources into a not known project
+
+	// check that the rules are correct
+	if err := checkRule(entity.Spec); err != nil {
+		return nil, err
+	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -77,7 +97,11 @@ func (s *service) update(entity *v1.PrometheusRule, parameters shared.Parameters
 		logrus.Debugf("project in prometheusRule '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Project, parameters.Project)
 		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request doesn't match", shared.BadRequestError)
 	}
-	// find the previous version of the project
+	// check that the rules are correct
+	if err := checkRule(entity.Spec); err != nil {
+		return nil, err
+	}
+	// find the previous version of the prometheusRule
 	oldEntity, err := s.Get(parameters)
 	if err != nil {
 		return nil, err

@@ -32,6 +32,19 @@ func (k *Kind) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (k *Kind) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Kind
+	type plain Kind
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*k = tmp
+	return nil
+}
+
 func (k *Kind) validate() error {
 	if len(*k) == 0 {
 		return fmt.Errorf("kind cannot be empty")

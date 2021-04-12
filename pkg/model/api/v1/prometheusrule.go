@@ -10,18 +10,31 @@ func GeneratePrometheusRuleID(project string, name string) string {
 }
 
 type Rule struct {
-	Record      string            `json:"record,omitempty"`
-	Alert       string            `json:"alert,omitempty"`
-	Expr        string            `json:"expr"`
-	For         string            `json:"for,omitempty"`
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Record      string            `json:"record,omitempty" yaml:"record,omitempty"`
+	Alert       string            `json:"alert,omitempty" yaml:"alert,omitempty"`
+	Expr        string            `json:"expr" yaml:"expr"`
+	For         string            `json:"for,omitempty" yaml:"for,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty" yaml:"labels;,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty" yaml:"annotations,omitempty"`
 }
 
 func (r *Rule) UnmarshallJSON(data []byte) error {
 	var tmp Rule
 	type plain Rule
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*r = tmp
+	return nil
+}
+
+func (r *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Rule
+	type plain Rule
+	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {
@@ -53,19 +66,85 @@ func (r *Rule) validate() error {
 }
 
 type RuleGroup struct {
-	Name     string `json:"name"`
-	Interval string `json:"interval,omitempty"`
-	Rules    []Rule `json:"rules"`
+	Name     string `json:"name" yaml:"name"`
+	Interval string `json:"interval,omitempty" yaml:"interval,omitempty"`
+	Rules    []Rule `json:"rules" yaml:"rules"`
+}
+
+func (p *RuleGroup) UnmarshalJSON(data []byte) error {
+	var tmp RuleGroup
+	type plain RuleGroup
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *RuleGroup) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp RuleGroup
+	type plain RuleGroup
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *RuleGroup) validate() error {
+	if len(p.Rules) == 0 {
+		return fmt.Errorf("at least one rule should be defined")
+	}
+	return nil
 }
 
 type PrometheusRuleSpec struct {
-	Groups []RuleGroup `json:"groups"`
+	Groups []RuleGroup `json:"groups" yaml:"groups"`
+}
+
+func (p *PrometheusRuleSpec) UnmarshalJSON(data []byte) error {
+	var tmp PrometheusRuleSpec
+	type plain PrometheusRuleSpec
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *PrometheusRuleSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp PrometheusRuleSpec
+	type plain PrometheusRuleSpec
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *PrometheusRuleSpec) validate() error {
+	if len(p.Groups) == 0 {
+		return fmt.Errorf("at least one group should be defined")
+	}
+	return nil
 }
 
 type PrometheusRule struct {
-	Kind     Kind               `json:"kind"`
-	Metadata ProjectMetadata    `json:"metadata"`
-	Spec     PrometheusRuleSpec `json:"spec"`
+	Kind     Kind               `json:"kind" yaml:"kind"`
+	Metadata ProjectMetadata    `json:"metadata" yaml:"metadata"`
+	Spec     PrometheusRuleSpec `json:"spec" yaml:"spec"`
 }
 
 func (p *PrometheusRule) GenerateID() string {
@@ -80,6 +159,19 @@ func (p *PrometheusRule) UnmarshalJSON(data []byte) error {
 	var tmp PrometheusRule
 	type plain PrometheusRule
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *PrometheusRule) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp PrometheusRule
+	type plain PrometheusRule
+	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {

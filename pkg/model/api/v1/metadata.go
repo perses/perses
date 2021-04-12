@@ -23,9 +23,9 @@ func generateProjectResourceID(pluralKind string, project string, name string) s
 }
 
 type Metadata struct {
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name" yaml:"name"`
+	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
 }
 
 func (m *Metadata) CreateNow() {
@@ -35,6 +35,6 @@ func (m *Metadata) CreateNow() {
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
 type ProjectMetadata struct {
-	Metadata `json:",inline"`
-	Project  string `json:"project"`
+	Metadata `json:",inline" yaml:";,inline"`
+	Project  string `json:"project" yaml:"project"`
 }
