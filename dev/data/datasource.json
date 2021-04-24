@@ -1,0 +1,11 @@
+[
+  {
+    "kind": "Datasource",
+    "metadata": {
+      "name": "PrometheusDemo"
+    },
+    "spec": {
+      "url": "https://prometheus.demo.do.prometheus.io"
+    }
+  }
+]

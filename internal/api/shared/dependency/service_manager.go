@@ -16,15 +16,18 @@
 package dependency
 
 import (
+	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
+	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 )
 
 type ServiceManager interface {
+	GetDatasource() datasource.Service
 	GetProject() project.Service
 	GetPrometheusRule() prometheusrule.Service
 	GetUser() user.Service
@@ -32,20 +35,27 @@ type ServiceManager interface {
 
 type service struct {
 	ServiceManager
+	datasource     datasource.Service
 	project        project.Service
 	prometheusRule prometheusrule.Service
 	user           user.Service
 }
 
 func NewServiceManager(dao PersistenceManager) ServiceManager {
+	datasourceService := datasourceImpl.NewService(dao.GetDatasource())
 	projectService := projectImpl.NewService(dao.GetProject())
 	prometheusRuleService := prometheusruleImpl.NewService(dao.GetPrometheusRule())
 	userService := userImpl.NewService(dao.GetUser())
 	return &service{
+		datasource:     datasourceService,
 		project:        projectService,
 		prometheusRule: prometheusRuleService,
 		user:           userService,
 	}
+}
+
+func (s *service) GetDatasource() datasource.Service {
+	return s.datasource
 }
 
 func (s *service) GetProject() project.Service {

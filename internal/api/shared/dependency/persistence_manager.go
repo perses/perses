@@ -18,9 +18,11 @@ import (
 
 	"github.com/perses/common/config"
 	"github.com/perses/common/etcd"
+	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
+	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -28,6 +30,7 @@ import (
 )
 
 type PersistenceManager interface {
+	GetDatasource() datasource.DAO
 	GetProject() project.DAO
 	GetPrometheusRule() prometheusrule.DAO
 	GetUser() user.DAO
@@ -36,6 +39,7 @@ type PersistenceManager interface {
 
 type persistence struct {
 	PersistenceManager
+	datasource     datasource.DAO
 	project        project.DAO
 	prometheusRule prometheusrule.DAO
 	user           user.DAO
@@ -48,15 +52,21 @@ func NewPersistenceManager(conf config.EtcdConfig) (PersistenceManager, error) {
 	if err != nil {
 		return nil, err
 	}
+	datasourceDAO := datasourceImpl.NewDAO(etcdClient, timeout)
 	projectDAO := projectImpl.NewDAO(etcdClient, timeout)
 	prometheusRuleDAO := prometheusruleImpl.NewDAO(etcdClient, timeout)
 	userDAO := userImpl.NewDAO(etcdClient, timeout)
 	return &persistence{
+		datasource:     datasourceDAO,
 		project:        projectDAO,
 		prometheusRule: prometheusRuleDAO,
 		user:           userDAO,
 		etcdClient:     etcdClient,
 	}, nil
+}
+
+func (p *persistence) GetDatasource() datasource.DAO {
+	return p.datasource
 }
 
 func (p *persistence) GetProject() project.DAO {
