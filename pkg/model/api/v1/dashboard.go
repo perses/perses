@@ -144,6 +144,9 @@ func (d *DashboardSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (d *DashboardSpec) validate() error {
+	if len(d.Datasource) == 0 {
+		return fmt.Errorf("dashboard.spec.datasource cannot be empty")
+	}
 	if len(d.Sections) == 0 {
 		return fmt.Errorf("dashboard.spec.sections cannot be empty")
 	}

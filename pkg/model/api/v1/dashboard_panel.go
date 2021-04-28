@@ -115,14 +115,14 @@ func (l *LineChart) validate() error {
 type tmpPanel struct {
 	Name string `json:"name" yaml:"name"`
 	// Order is used to know the display order
-	Order string                 `json:"order" yaml:"order"`
+	Order uint64                 `json:"order" yaml:"order"`
 	Chart map[string]interface{} `json:"chart" yaml:"chart"`
 }
 
 type Panel struct {
 	Name string `json:"name" yaml:"name"`
 	// Order is used to know the display order
-	Order string `json:"order" yaml:"order"`
+	Order uint64 `json:"order" yaml:"order"`
 	Chart Chart  `json:"chart" yaml:"chart"`
 }
 
@@ -157,7 +157,7 @@ func (p *Panel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(
 	}
 	p.Name = tmpPanel.Name
 	p.Order = tmpPanel.Order
-	chartKind := tmpPanel.Chart["kind"].(KindChart)
+	chartKind := tmpPanel.Chart["kind"].(string)
 	if len(chartKind) == 0 {
 		return fmt.Errorf("chart.kind cannot be empty")
 	}
@@ -168,7 +168,7 @@ func (p *Panel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(
 	}
 
 	switch chartKind {
-	case KindLineChart:
+	case string(KindLineChart):
 		chart := &LineChart{}
 		if err := staticUnmarshal(rawChart, chart); err != nil {
 			return err
