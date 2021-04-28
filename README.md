@@ -51,20 +51,19 @@ You should see something like that displayed in your terminal:
 
 ```log
 $> ./bin/perses -config ./bin/config.yaml
-INFO[0000] Program started at 2021-03-21 22:04:36.689526206 +0000 UTC 
-INFO[0000] Build time: 2021-03-18                       
-INFO[0000] Version:                                     
-INFO[0000] Commit: 2507f05f80372e67331ac9a1698fed409b716197 
-INFO[0000] ------------                                 
+______                       
+| ___ \                      
+| |_/ /__ _ __ ___  ___  ___ 
+|  __/ _ \ '__/ __|/ _ \/ __|
+| | |  __/ |  \__ \  __/\__ \
+\_|  \___|_|  |___/\___||___/  [] 
 
-   ____    __
-  / __/___/ /  ___
- / _// __/ _ \/ _ \
-/___/\__/_//_/\___/ v4.1.17
-High performance, minimalist Go web framework
-https://echo.labstack.com
-____________________________________O/_______
-                                    O\
+The secure way to configure your monitoring.               <\
+                                                            \\
+--------------==========================================>|||<*>//////]
+                                                            //
+                                                           </
+
 ⇨ http server started on [::]:8080
 
 ```
