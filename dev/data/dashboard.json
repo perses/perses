@@ -1,0 +1,32 @@
+[
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "SimpleLineChart",
+      "project": "perses"
+    },
+    "spec": {
+      "datasource": "PrometheusDemo",
+      "duration": "6h",
+      "sections": [
+        {
+          "name": "mySection",
+          "open": true,
+          "panels": [
+            {
+              "name": "myGraphPanel",
+              "chart": {
+                "kind": "LineChart",
+                "lines": [
+                  {
+                    "expr": "up"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

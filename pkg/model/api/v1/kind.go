@@ -21,12 +21,16 @@ import (
 type Kind string
 
 const (
+	KindDashboard      Kind = "Dashboard"
+	KindDatasource     Kind = "Datasource"
 	KindProject        Kind = "Project"
 	KindPrometheusRule Kind = "PrometheusRule"
 	KindUser           Kind = "User"
 )
 
 var KindMap = map[Kind]bool{
+	KindDashboard:      true,
+	KindDatasource:     true,
 	KindProject:        true,
 	KindPrometheusRule: true,
 	KindUser:           true,

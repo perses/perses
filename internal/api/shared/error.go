@@ -36,8 +36,8 @@ var (
 	BadRequestError = &PersesError{message: "bad request"}
 )
 
-// handleError is translating the given error to the echoHTTPError
-func handleError(err error) error {
+// HandleError is translating the given error to the echoHTTPError
+func HandleError(err error) error {
 	if err == nil {
 		return nil
 	}

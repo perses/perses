@@ -21,6 +21,8 @@ import (
 
 type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
+	Dashboard(project string) DashboardInterface
+	Datasource() DatasourceInterface
 	Project() ProjectInterface
 	PrometheusRule(project string) PrometheusRuleInterface
 	User() UserInterface
@@ -39,6 +41,14 @@ func NewWithClient(restClient *perseshttp.RESTClient) ClientInterface {
 
 func (c *client) RESTClient() *perseshttp.RESTClient {
 	return c.restClient
+}
+
+func (c *client) Dashboard(project string) DashboardInterface {
+	return newDashboard(c.restClient, project)
+}
+
+func (c *client) Datasource() DatasourceInterface {
+	return newDatasource(c.restClient)
 }
 
 func (c *client) Project() ProjectInterface {

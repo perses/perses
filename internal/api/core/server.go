@@ -17,6 +17,9 @@ import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
 	"github.com/perses/perses/internal/api/front"
+	"github.com/perses/perses/internal/api/impl/v1/dashboard"
+	"github.com/perses/perses/internal/api/impl/v1/dashboard_feed"
+	"github.com/perses/perses/internal/api/impl/v1/datasource"
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/impl/v1/user"
@@ -35,6 +38,9 @@ type api struct {
 
 func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
 	endpoints := []endpoint{
+		dashboard.NewEndpoint(serviceManager.GetDashboard()),
+		dashboard_feed.NewEndpoint(serviceManager.GetDashboardFeed()),
+		datasource.NewEndpoint(serviceManager.GetDatasource()),
 		project.NewEndpoint(serviceManager.GetProject()),
 		prometheusrule.NewEndpoint(serviceManager.GetPrometheusRule()),
 		user.NewEndpoint(serviceManager.GetUser()),
