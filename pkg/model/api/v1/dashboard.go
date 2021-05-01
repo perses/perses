@@ -24,49 +24,6 @@ func GenerateDashboardID(project string, name string) string {
 	return generateProjectResourceID("dashboards", project, name)
 }
 
-type DashboardVariable struct {
-	Name string `json:"name" yaml:"name"`
-	Expr string `json:"expr" yaml:"expr"`
-	// Selected is the variable selected by default if it exists
-	Selected string `json:"selected,omitempty" yaml:"selected,omitempty"`
-}
-
-func (d *DashboardVariable) UnmarshalJSON(data []byte) error {
-	var tmp DashboardVariable
-	type plain DashboardVariable
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *DashboardVariable) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp DashboardVariable
-	type plain DashboardVariable
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *DashboardVariable) validate() error {
-	if len(d.Name) == 0 {
-		return fmt.Errorf("variable.name cannot be empty")
-	}
-	if len(d.Expr) == 0 {
-		return fmt.Errorf("variable.expr cannot be empty")
-	}
-	return nil
-}
-
 type DashboardSection struct {
 	// Name is the name of the section. It is optional
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
@@ -111,10 +68,10 @@ func (d *DashboardSection) validate() error {
 }
 
 type DashboardSpec struct {
-	Datasource string              `json:"datasource" yaml:"datasource"`
-	Duration   model.Duration      `json:"duration" yaml:"duration"`
-	Variables  []DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Sections   []DashboardSection  `json:"sections" yaml:"sections"`
+	Datasource string                       `json:"datasource" yaml:"datasource"`
+	Duration   model.Duration               `json:"duration" yaml:"duration"`
+	Variables  map[string]DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Sections   []DashboardSection           `json:"sections" yaml:"sections"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
