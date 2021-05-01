@@ -21,13 +21,13 @@ import (
 )
 
 type Chart interface {
-	GetKind() KindChart
+	GetKind() ChartKind
 }
 
-type KindChart string
+type ChartKind string
 
 const (
-	KindLineChart KindChart = "LineChart"
+	KindLineChart ChartKind = "LineChart"
 )
 
 type Line struct {
@@ -70,12 +70,12 @@ func (l *Line) validate() error {
 
 type LineChart struct {
 	Chart      `json:"-" yaml:"-"`
-	Kind       KindChart `json:"kind" yaml:"kind"`
+	Kind       ChartKind `json:"kind" yaml:"kind"`
 	ShowLegend bool      `json:"show_legend" yaml:"show_legend"`
 	Lines      []Line    `json:"lines" yaml:"lines"`
 }
 
-func (l *LineChart) GetKind() KindChart {
+func (l *LineChart) GetKind() ChartKind {
 	return l.Kind
 }
 
