@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/perses/common/etcd"
+	"github.com/perses/perses/internal/api/impl/v1/dashboard/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/pkg/model/api"
@@ -47,6 +48,10 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// Note: you don't need to check that the project exists since once the permission middleware will be in place,
 	// it won't be possible to create a resources into a not known project
 
+	// verify it's possible to calculate the build order for the variable.
+	if err := variable.Check(entity.Spec.Variables); err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -77,6 +82,10 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 	} else if entity.Metadata.Project != parameters.Project {
 		logrus.Debugf("project in dashboard '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Project, parameters.Project)
 		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request doesn't match", shared.BadRequestError)
+	}
+	// verify it's possible to calculate the build order for the variable.
+	if err := variable.Check(entity.Spec.Variables); err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// find the previous version of the dashboard
 	oldEntity, err := s.Get(parameters)
