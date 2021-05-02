@@ -26,6 +26,9 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
+            "allowedCommonJsDependencies": [
+              "lru-cache"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets"

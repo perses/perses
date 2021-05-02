@@ -41,8 +41,7 @@
                 <tr>
                   <th>Expr</th>
                   <td>
-                    <app-promql-editor [id]="promRule.metadata.name + '-'+gr.name +'-'+index"
-                                       [expr]="rule.expr"></app-promql-editor>
+                    <app-promql-editor [ngModel]="rule.expr"></app-promql-editor>
                   </td>
                 </tr>
                 <tr>

@@ -22,12 +22,17 @@ import { ToastrModule } from 'ngx-toastr';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { PromqlEditorComponent } from './component/promql-editor/promql-editor.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [],
+  declarations: [
+    PromqlEditorComponent
+  ],
   exports: [
     CommonModule,
     HttpClientModule,
+    FormsModule,
     MatButtonModule,
     MatCardModule,
     MatIconModule,
@@ -35,6 +40,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatSlideToggleModule,
     MatTooltipModule,
     MatToolbarModule,
+    PromqlEditorComponent
   ],
   imports: [
     CommonModule,
