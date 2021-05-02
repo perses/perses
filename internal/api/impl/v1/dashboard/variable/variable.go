@@ -112,13 +112,17 @@ func buildVariableDependencies(variables map[string]v1.DashboardVariable) (map[s
 			// for the moment that's the only type of variable where you can use another variable defined
 			parameter := variable.Parameter.(*v1.QueryVariableParameter)
 			matches := variableRegexp2.FindAllStringSubmatch(parameter.Expr, -1)
+			deps := make(map[string]bool)
 			for _, match := range matches {
 				// match[0] is the string that is matching the regexp (including the $)
 				// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
 				if _, ok := variables[match[1]]; !ok {
 					return nil, fmt.Errorf("variable '%s' is used in the variable '%s' but not defined", match[1], name)
 				}
-				result[name] = append(result[name], match[1])
+				deps[match[1]] = true
+			}
+			for dep := range deps {
+				result[name] = append(result[name], dep)
 			}
 		}
 	}
