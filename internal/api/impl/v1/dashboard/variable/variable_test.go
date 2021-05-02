@@ -93,12 +93,52 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 			},
 		},
+		{
+			title: "multiple usage of the same variable",
+			variables: map[string]v1.DashboardVariable{
+				"myVariable": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						Expr: "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+					},
+				},
+				"foo": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						Expr: "test",
+					},
+				},
+				"bar": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						Expr: "vector($foo)",
+					},
+				},
+				"doe": {
+					Kind: v1.KindConstantVariable,
+					Parameter: &v1.ConstantVariableParameter{
+						Values: []string{"myConstant"},
+					},
+				},
+			},
+			result: map[string][]string{
+				"myVariable": {
+					"doe", "bar", "foo",
+				},
+				"bar": {
+					"foo",
+				},
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			result, err := buildVariableDependencies(test.variables)
 			assert.NoError(t, err)
-			assert.Equal(t, test.result, result)
+			assert.Equal(t, len(test.result), len(result))
+			for k, v := range test.result {
+				assert.ElementsMatch(t, v, result[k])
+			}
 		})
 	}
 }
@@ -192,7 +232,7 @@ func TestGraph_BuildOrder(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			g := newGraph(test.variables, test.dependencies)
-			result, err := g.BuildOrder()
+			result, err := g.buildOrder()
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(result))
 			for i := 0; i < len(result); i++ {
@@ -240,7 +280,7 @@ func TestGraph_BuildOrderError(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			g := newGraph(test.variables, test.dependencies)
-			_, err := g.BuildOrder()
+			_, err := g.buildOrder()
 			assert.Equal(t, fmt.Errorf("circular dependency detected"), err)
 		})
 	}
