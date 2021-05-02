@@ -96,11 +96,9 @@ func buildGraph(variables map[string]v1.DashboardVariable) (*graph, error) {
 	if err != nil {
 		return nil, err
 	}
-	vars := make([]string, len(variables))
-	i := 0
+	vars := make([]string, 0, len(variables))
 	for v := range variables {
-		vars[i] = v
-		i++
+		vars = append(vars, v)
 	}
 	return newGraph(vars, deps), nil
 }
@@ -191,11 +189,9 @@ func (g *graph) addEdge(startName string, endName string) {
 }
 
 func (g *graph) buildInitialRemainingNodes() []*node {
-	remainingNodes := make([]*node, len(g.nodes))
-	i := 0
+	remainingNodes := make([]*node, 0, len(g.nodes))
 	for _, n := range g.nodes {
-		remainingNodes[i] = n
-		i++
+		remainingNodes = append(remainingNodes, n)
 	}
 	return remainingNodes
 }
