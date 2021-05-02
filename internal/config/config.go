@@ -13,7 +13,9 @@
 
 package config
 
-import "github.com/perses/common/config"
+import (
+	"github.com/perses/common/config"
+)
 
 type Config struct {
 	Etcd *config.EtcdConfig `yaml:"etcd"`

@@ -18,6 +18,7 @@ import (
 
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core"
+	"github.com/perses/perses/internal/api/front"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/config"
 	"github.com/sirupsen/logrus"
@@ -52,9 +53,10 @@ func main() {
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager)
 	persesAPI := core.NewPersesAPI(serviceManager)
+	persesFrontend := front.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 	// register the API
-	runner.HTTPServerBuilder().APIRegistration(persesAPI)
+	runner.HTTPServerBuilder().APIRegistration(persesAPI).APIRegistration(persesFrontend)
 	// start the application
 	runner.Start()
 }

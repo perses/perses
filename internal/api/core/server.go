@@ -16,7 +16,6 @@ package core
 import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
-	"github.com/perses/perses/internal/api/front"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard_feed"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
@@ -32,8 +31,7 @@ type endpoint interface {
 
 type api struct {
 	echoUtils.Register
-	endpoints     []endpoint
-	frontEndpoint endpoint
+	endpoints []endpoint
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
@@ -46,13 +44,11 @@ func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
 		user.NewEndpoint(serviceManager.GetUser()),
 	}
 	return &api{
-		endpoints:     endpoints,
-		frontEndpoint: &front.Endpoint{},
+		endpoints: endpoints,
 	}
 }
 
 func (a *api) RegisterRoute(e *echo.Echo) {
-	a.frontEndpoint.RegisterRoutes(e.Group(""))
 	a.registerAPIV1Route(e)
 }
 

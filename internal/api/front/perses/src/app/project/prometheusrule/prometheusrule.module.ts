@@ -18,17 +18,16 @@ import { SharedModule } from '../../shared/shared.module';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { PageModule } from '../../shared/component/page/page.module';
-import { PromqlEditorComponent } from './promql-editor/promql-editor.component';
 
 @NgModule({
-  declarations: [PrometheusRuleListComponent, PromqlEditorComponent],
-    imports: [
-        MatDividerModule,
-        MatExpansionModule,
-        PrometheusRuleRoutingModule,
-        SharedModule,
-        PageModule,
-    ]
+  declarations: [PrometheusRuleListComponent],
+  imports: [
+    MatDividerModule,
+    MatExpansionModule,
+    PrometheusRuleRoutingModule,
+    SharedModule,
+    PageModule,
+  ]
 })
 export class PrometheusRuleModule {
 }
