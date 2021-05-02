@@ -78,17 +78,20 @@ var (
 	variableRegexp2 = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
 )
 
-func Check(variables map[string]v1.DashboardVariable) error {
-	// calculate the build order of the variable just to verify there is no error
-	g, err := New(variables)
-	if err != nil {
-		return err
-	}
-	_, err = g.BuildOrder()
-	return err
+type Group struct {
+	variables []string
 }
 
-func New(variables map[string]v1.DashboardVariable) (*Graph, error) {
+func BuildOrder(variables map[string]v1.DashboardVariable) ([]Group, error) {
+	// calculate the build order of the variable just to verify there is no error
+	g, err := buildGraph(variables)
+	if err != nil {
+		return nil, err
+	}
+	return g.buildOrder()
+}
+
+func buildGraph(variables map[string]v1.DashboardVariable) (*graph, error) {
 	deps, err := buildVariableDependencies(variables)
 	if err != nil {
 		return nil, err
@@ -129,8 +132,8 @@ func buildVariableDependencies(variables map[string]v1.DashboardVariable) (map[s
 	return result, nil
 }
 
-func newGraph(variables []string, dependencies map[string][]string) *Graph {
-	g := &Graph{
+func newGraph(variables []string, dependencies map[string][]string) *graph {
+	g := &graph{
 		nodes: make(map[string]*node),
 	}
 	for _, variable := range variables {
@@ -147,11 +150,11 @@ func newGraph(variables []string, dependencies map[string][]string) *Graph {
 	return g
 }
 
-type Graph struct {
+type graph struct {
 	nodes map[string]*node
 }
 
-func (g *Graph) BuildOrder() ([]Group, error) {
+func (g *graph) buildOrder() ([]Group, error) {
 	remainingNodes := g.buildInitialRemainingNodes()
 	var groups []Group
 	for len(remainingNodes) > 0 {
@@ -183,11 +186,11 @@ func (g *Graph) BuildOrder() ([]Group, error) {
 	return groups, nil
 }
 
-func (g *Graph) addEdge(startName string, endName string) {
+func (g *graph) addEdge(startName string, endName string) {
 	g.nodes[startName].addChild(g.nodes[endName])
 }
 
-func (g *Graph) buildInitialRemainingNodes() []*node {
+func (g *graph) buildInitialRemainingNodes() []*node {
 	remainingNodes := make([]*node, len(g.nodes))
 	i := 0
 	for _, n := range g.nodes {
@@ -208,8 +211,4 @@ type node struct {
 func (n *node) addChild(node *node) {
 	n.children[node.name] = node
 	node.dependencies++
-}
-
-type Group struct {
-	variables []string
 }

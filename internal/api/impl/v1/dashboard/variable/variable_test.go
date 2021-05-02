@@ -232,7 +232,7 @@ func TestGraph_BuildOrder(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			g := newGraph(test.variables, test.dependencies)
-			result, err := g.BuildOrder()
+			result, err := g.buildOrder()
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(result))
 			for i := 0; i < len(result); i++ {
@@ -280,7 +280,7 @@ func TestGraph_BuildOrderError(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			g := newGraph(test.variables, test.dependencies)
-			_, err := g.BuildOrder()
+			_, err := g.buildOrder()
 			assert.Equal(t, fmt.Errorf("circular dependency detected"), err)
 		})
 	}
