@@ -639,8 +639,8 @@ github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtP
 github.com/pelletier/go-toml v1.4.0/go.mod h1:PN7xzY2wHTK0K9p34ErDQMlFxa51Fk0OUruD3k1mMwo=
 github.com/pelletier/go-toml v1.7.0/go.mod h1:vwGMzjaWMwyfHwgIBhI2YUM4fB6nL6lVAvS1LBMMhTE=
 github.com/performancecopilot/speed v3.0.0+incompatible/go.mod h1:/CLtqpZ5gBg1M9iaPbIdPPGyKcA8hKdoy6hAWba7Yac=
-github.com/perses/common v0.5.1 h1:mN+Qbq9ghGLsUBmUBVeIokvtQejzPG0+MStJ+1TPC1Y=
-github.com/perses/common v0.5.1/go.mod h1:GAtVrF8+usGRa8j+fAAQxjZTDjJfVlZ3ngXk6z5T2x4=
+github.com/perses/common v0.5.2 h1:lP5ZYMngNuS+AYvXwd2P/FxNQVJnyqWogVqm2BhdeUc=
+github.com/perses/common v0.5.2/go.mod h1:GAtVrF8+usGRa8j+fAAQxjZTDjJfVlZ3ngXk6z5T2x4=
 github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
 github.com/peterh/liner v1.0.1-0.20180619022028-8c1271fcf47f/go.mod h1:xIteQHvHuaLYG9IFj6mSxM0fCKrs34IrEQUhOYuGPHc=
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
