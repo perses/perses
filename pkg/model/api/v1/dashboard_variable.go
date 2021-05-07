@@ -72,16 +72,87 @@ func (k *VariableKind) validate() error {
 type VariableParameter interface {
 }
 
+// QueryVariableLabelNames is representing the parameter to be used when filling the variable by using the HTTP endpoint
+// `GET /api/v1/labels`
+// More information here: https://prometheus.io/docs/prometheus/latest/querying/api/#getting-label-names
+type QueryVariableLabelNames struct {
+	// Matchers is the repeated series selector argument that selects the series from which to read the label names
+	Matchers []string `json:"matchers,omitempty" yaml:"matchers,omitempty"`
+}
+
+// QueryVariableLabelValues is representing the parameter to be used when filling the variable by using the HTTP endpoint
+// `GET /api/v1/label/<label_name>/values`
+// More information here: https://prometheus.io/docs/prometheus/latest/querying/api/#querying-label-values
+type QueryVariableLabelValues struct {
+	LabelName string `json:"label_name" yaml:"label_name"`
+	// Matchers is the repeated series selector argument that selects the series from which to read the label values
+	Matchers []string `json:"matchers,omitempty" yaml:"matchers,omitempty"`
+}
+
+func (v *QueryVariableLabelValues) UnmarshalJSON(data []byte) error {
+	var tmp QueryVariableLabelValues
+	type plain QueryVariableLabelValues
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*v = tmp
+	return nil
+}
+
+func (v *QueryVariableLabelValues) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp QueryVariableLabelValues
+	type plain QueryVariableLabelValues
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*v = tmp
+	return nil
+}
+
+func (v *QueryVariableLabelValues) validate() error {
+	if len(v.LabelName) == 0 {
+		return fmt.Errorf("'label_name' cannot be empty when using 'label_values' query parameter")
+	}
+	return nil
+}
+
 type tmpQueryVariable struct {
-	Expr   string `json:"expr" yaml:"expr"`
-	Regexp string `json:"regexp" yaml:"regexp"`
+	Expr            string                    `json:"expr,omitempty" yaml:"expr,omitempty"`
+	LabelNames      *QueryVariableLabelNames  `json:"label_names,omitempty" yaml:"label_names,omitempty"`
+	LabelValues     *QueryVariableLabelValues `json:"label_values,omitempty" yaml:"label_values,omitempty"`
+	CapturingRegexp string                    `json:"capturing_regexp" yaml:"capturing_regexp"`
 }
 
 type QueryVariableParameter struct {
 	VariableParameter `json:"-" yaml:"-"`
-	Expr              string `json:"expr" yaml:"expr"`
-	// Regexp is the regexp used to filter the result returned by Expr once the query is performed.
-	Regexp *regexp.Regexp `json:"regexp" yaml:"regexp"`
+	// Expr is the PromQL expression to be used when variable should be filled by using the HTTP endpoint
+	// `GET /api/v1/query_range`
+	// More information available here: https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
+	Expr        string                    `json:"expr,omitempty" yaml:"expr,omitempty"`
+	LabelNames  *QueryVariableLabelNames  `json:"label_names,omitempty" yaml:"label_names,omitempty"`
+	LabelValues *QueryVariableLabelValues `json:"label_values,omitempty" yaml:"label_values,omitempty"`
+	// CapturingRegexp is the regexp used to filter the result returned by Expr or by Lab once the query is performed.
+	CapturingRegexp *regexp.Regexp `json:"capturing_regexp" yaml:"capturing_regexp"`
+}
+
+func (v *QueryVariableParameter) MarshalJSON() ([]byte, error) {
+	tmp := &tmpQueryVariable{
+		CapturingRegexp: v.CapturingRegexp.String(),
+	}
+	return json.Marshal(tmp)
+}
+
+func (v *QueryVariableParameter) MarshalYAML() (interface{}, error) {
+	tmp := &tmpQueryVariable{
+		CapturingRegexp: v.CapturingRegexp.String(),
+	}
+	return tmp, nil
 }
 
 func (v *QueryVariableParameter) UnmarshalJSON(data []byte) error {
@@ -107,18 +178,29 @@ func (v *QueryVariableParameter) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 func (v *QueryVariableParameter) validate(tmp tmpQueryVariable) error {
-	if len(tmp.Regexp) == 0 {
-		return fmt.Errorf("regexp cannot be empty for a query variable")
+	if len(tmp.CapturingRegexp) == 0 {
+		return fmt.Errorf("'capturing_regexp' cannot be empty for a query variable")
 	}
-	if len(tmp.Expr) == 0 {
-		return fmt.Errorf("expr cannot be empty for a query variable")
+	if len(tmp.Expr) == 0 && tmp.LabelValues == nil && tmp.LabelNames == nil {
+		return fmt.Errorf("'expr' or 'label_values' or 'label_names' should be used for a query variable")
 	}
-	if re, err := regexp.Compile(tmp.Regexp); err != nil {
+	if len(tmp.Expr) > 0 && (tmp.LabelValues != nil || tmp.LabelNames != nil) {
+		return fmt.Errorf("when expr is used, you should not use 'label_values' or 'label_names'")
+	}
+	if tmp.LabelValues != nil && (len(tmp.Expr) > 0 || tmp.LabelNames != nil) {
+		return fmt.Errorf("when label_values is used, you should not use 'expr' or 'label_names'")
+	}
+	if tmp.LabelNames != nil && (len(tmp.Expr) > 0 || tmp.LabelValues != nil) {
+		return fmt.Errorf("when label_names is used, you should not use 'expr' or 'label_values'")
+	}
+	if re, err := regexp.Compile(tmp.CapturingRegexp); err != nil {
 		return err
 	} else {
-		v.Regexp = re
+		v.CapturingRegexp = re
 	}
 	v.Expr = tmp.Expr
+	v.LabelValues = tmp.LabelValues
+	v.LabelNames = tmp.LabelNames
 	return nil
 }
 
@@ -163,8 +245,8 @@ func (v *ConstantVariableParameter) validate() error {
 type tmpDashboardVariable struct {
 	Kind VariableKind `json:"kind" yaml:"kind"`
 	// Selected is the variable selected by default if it exists
-	Selected  string          `json:"selected,omitempty" yaml:"selected,omitempty"`
-	Parameter json.RawMessage `json:"parameter" yaml:"parameter"`
+	Selected  string                 `json:"selected,omitempty" yaml:"selected,omitempty"`
+	Parameter map[string]interface{} `json:"parameter" yaml:"parameter"`
 }
 
 type DashboardVariable struct {
@@ -178,14 +260,14 @@ func (d *DashboardVariable) UnmarshalJSON(data []byte) error {
 	jsonUnmarshalFunc := func(panel interface{}) error {
 		return json.Unmarshal(data, panel)
 	}
-	return d.unmarshal(jsonUnmarshalFunc, json.Unmarshal)
+	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
 func (d *DashboardVariable) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return d.unmarshal(unmarshal, yaml.Unmarshal)
+	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (d *DashboardVariable) unmarshal(unmarshal func(interface{}) error, staticUnmarshal func([]byte, interface{}) error) error {
+func (d *DashboardVariable) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
 	var tmpVariable tmpDashboardVariable
 	if err := unmarshal(&tmpVariable); err != nil {
 		return err
@@ -195,17 +277,20 @@ func (d *DashboardVariable) unmarshal(unmarshal func(interface{}) error, staticU
 	if len(tmpVariable.Kind) == 0 {
 		return fmt.Errorf("variable.kind cannot be empty")
 	}
-
+	rawParameter, err := staticMarshal(tmpVariable.Parameter)
+	if err != nil {
+		return err
+	}
 	switch tmpVariable.Kind {
 	case KindQueryVariable:
 		parameter := &QueryVariableParameter{}
-		if err := staticUnmarshal(tmpVariable.Parameter, parameter); err != nil {
+		if err := staticUnmarshal(rawParameter, parameter); err != nil {
 			return err
 		}
 		d.Parameter = parameter
 	case KindConstantVariable:
 		parameter := &ConstantVariableParameter{}
-		if err := staticUnmarshal(tmpVariable.Parameter, parameter); err != nil {
+		if err := staticUnmarshal(rawParameter, parameter); err != nil {
 			return err
 		}
 		d.Parameter = parameter

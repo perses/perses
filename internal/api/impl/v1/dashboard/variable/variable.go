@@ -82,7 +82,7 @@ type Group struct {
 	variables []string
 }
 
-func BuildOrder(variables map[string]v1.DashboardVariable) ([]Group, error) {
+func BuildOrder(variables map[string]*v1.DashboardVariable) ([]Group, error) {
 	// calculate the build order of the variable just to verify there is no error
 	g, err := buildGraph(variables)
 	if err != nil {
@@ -91,7 +91,7 @@ func BuildOrder(variables map[string]v1.DashboardVariable) ([]Group, error) {
 	return g.buildOrder()
 }
 
-func buildGraph(variables map[string]v1.DashboardVariable) (*graph, error) {
+func buildGraph(variables map[string]*v1.DashboardVariable) (*graph, error) {
 	deps, err := buildVariableDependencies(variables)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ func buildGraph(variables map[string]v1.DashboardVariable) (*graph, error) {
 	return newGraph(vars, deps), nil
 }
 
-func buildVariableDependencies(variables map[string]v1.DashboardVariable) (map[string][]string, error) {
+func buildVariableDependencies(variables map[string]*v1.DashboardVariable) (map[string][]string, error) {
 	result := make(map[string][]string)
 	for name, variable := range variables {
 		if !variableRegexp.MatchString(name) {
@@ -112,7 +112,20 @@ func buildVariableDependencies(variables map[string]v1.DashboardVariable) (map[s
 		if variable.Kind == v1.KindQueryVariable {
 			// for the moment that's the only type of variable where you can use another variable defined
 			parameter := variable.Parameter.(*v1.QueryVariableParameter)
-			matches := variableRegexp2.FindAllStringSubmatch(parameter.Expr, -1)
+			var matches [][]string
+			if parameter.LabelValues != nil {
+				matches = findAllVariableUsed(parameter.LabelValues.LabelName)
+				for _, matcher := range parameter.LabelValues.Matchers {
+					matches = append(matches, findAllVariableUsed(matcher)...)
+				}
+			} else if parameter.LabelNames != nil {
+				for _, matcher := range parameter.LabelNames.Matchers {
+					matches = append(matches, findAllVariableUsed(matcher)...)
+				}
+			} else {
+				matches = findAllVariableUsed(parameter.Expr)
+			}
+
 			deps := make(map[string]bool)
 			for _, match := range matches {
 				// match[0] is the string that is matching the regexp (including the $)
@@ -128,6 +141,10 @@ func buildVariableDependencies(variables map[string]v1.DashboardVariable) (map[s
 		}
 	}
 	return result, nil
+}
+
+func findAllVariableUsed(str string) [][]string {
+	return variableRegexp2.FindAllStringSubmatch(str, -1)
 }
 
 func newGraph(variables []string, dependencies map[string][]string) *graph {

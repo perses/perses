@@ -68,10 +68,10 @@ func (d *DashboardSection) validate() error {
 }
 
 type DashboardSpec struct {
-	Datasource string                       `json:"datasource" yaml:"datasource"`
-	Duration   model.Duration               `json:"duration" yaml:"duration"`
-	Variables  map[string]DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Sections   []DashboardSection           `json:"sections" yaml:"sections"`
+	Datasource string                        `json:"datasource" yaml:"datasource"`
+	Duration   model.Duration                `json:"duration" yaml:"duration"`
+	Variables  map[string]*DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Sections   []DashboardSection            `json:"sections" yaml:"sections"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
