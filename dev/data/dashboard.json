@@ -15,8 +15,8 @@
           "panels": [
             {
               "name": "myGraphPanel",
+              "kind": "LineChart",
               "chart": {
-                "kind": "LineChart",
                 "lines": [
                   {
                     "expr": "up"
