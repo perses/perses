@@ -61,7 +61,7 @@ func (k *VariableKind) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (k *VariableKind) validate() error {
 	if len(*k) == 0 {
-		return fmt.Errorf("kind cannot be empty")
+		return fmt.Errorf("variable.kind cannot be empty")
 	}
 	if _, ok := variableKindMap[*k]; !ok {
 		return fmt.Errorf("unknown variable.kind '%s' used", *k)
@@ -117,7 +117,7 @@ func (v *QueryVariableLabelValues) UnmarshalYAML(unmarshal func(interface{}) err
 
 func (v *QueryVariableLabelValues) validate() error {
 	if len(v.LabelName) == 0 {
-		return fmt.Errorf("'label_name' cannot be empty when using 'label_values' query parameter")
+		return fmt.Errorf("'label_values.label_name' cannot be empty")
 	}
 	return nil
 }
@@ -179,19 +179,16 @@ func (v *QueryVariableParameter) UnmarshalYAML(unmarshal func(interface{}) error
 
 func (v *QueryVariableParameter) validate(tmp tmpQueryVariable) error {
 	if len(tmp.CapturingRegexp) == 0 {
-		return fmt.Errorf("'capturing_regexp' cannot be empty for a query variable")
+		return fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a query variable")
 	}
 	if len(tmp.Expr) == 0 && tmp.LabelValues == nil && tmp.LabelNames == nil {
-		return fmt.Errorf("'expr' or 'label_values' or 'label_names' should be used for a query variable")
+		return fmt.Errorf("'parameter.expr' or 'parameter.label_values' or 'parameter.label_names' should be used for a query variable")
 	}
 	if len(tmp.Expr) > 0 && (tmp.LabelValues != nil || tmp.LabelNames != nil) {
-		return fmt.Errorf("when expr is used, you should not use 'label_values' or 'label_names'")
+		return fmt.Errorf("when parameter.expr is used, you should not use 'parameter.label_values' or 'parameter.label_names'")
 	}
 	if tmp.LabelValues != nil && (len(tmp.Expr) > 0 || tmp.LabelNames != nil) {
-		return fmt.Errorf("when label_values is used, you should not use 'expr' or 'label_names'")
-	}
-	if tmp.LabelNames != nil && (len(tmp.Expr) > 0 || tmp.LabelValues != nil) {
-		return fmt.Errorf("when label_names is used, you should not use 'expr' or 'label_values'")
+		return fmt.Errorf("when parameter.label_values is used, you should not use 'parameter.expr' or 'parameter.label_names'")
 	}
 	if re, err := regexp.Compile(tmp.CapturingRegexp); err != nil {
 		return err
@@ -237,7 +234,7 @@ func (v *ConstantVariableParameter) UnmarshalYAML(unmarshal func(interface{}) er
 
 func (v *ConstantVariableParameter) validate() error {
 	if len(v.Values) == 0 {
-		return fmt.Errorf("values cannot be empty for a constant variable")
+		return fmt.Errorf("parameter.values cannot be empty for a constant variable")
 	}
 	return nil
 }
@@ -274,13 +271,16 @@ func (d *DashboardVariable) unmarshal(unmarshal func(interface{}) error, staticM
 	}
 	d.Kind = tmpVariable.Kind
 	d.Selected = tmpVariable.Selected
+
 	if len(tmpVariable.Kind) == 0 {
 		return fmt.Errorf("variable.kind cannot be empty")
 	}
+
 	rawParameter, err := staticMarshal(tmpVariable.Parameter)
 	if err != nil {
 		return err
 	}
+
 	switch tmpVariable.Kind {
 	case KindQueryVariable:
 		parameter := &QueryVariableParameter{}
@@ -294,8 +294,6 @@ func (d *DashboardVariable) unmarshal(unmarshal func(interface{}) error, staticM
 			return err
 		}
 		d.Parameter = parameter
-	default:
-		return fmt.Errorf("variable kind not supported: '%s'", tmpVariable.Kind)
 	}
 	return nil
 }
