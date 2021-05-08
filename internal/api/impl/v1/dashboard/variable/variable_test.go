@@ -24,7 +24,7 @@ import (
 func TestBuildVariableDependencies(t *testing.T) {
 	testSuite := []struct {
 		title     string
-		variables map[string]v1.DashboardVariable
+		variables map[string]*v1.DashboardVariable
 		result    map[string][]string
 	}{
 		{
@@ -34,7 +34,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "constant variable, no dep",
-			variables: map[string]v1.DashboardVariable{
+			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
 					Kind: v1.KindConstantVariable,
 					Parameter: &v1.ConstantVariableParameter{
@@ -46,7 +46,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "query variable with no variable used",
-			variables: map[string]v1.DashboardVariable{
+			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
 					Kind: v1.KindQueryVariable,
 					Parameter: &v1.QueryVariableParameter{
@@ -58,7 +58,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "query variable with variable used",
-			variables: map[string]v1.DashboardVariable{
+			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
 					Kind: v1.KindQueryVariable,
 					Parameter: &v1.QueryVariableParameter{
@@ -94,8 +94,87 @@ func TestBuildVariableDependencies(t *testing.T) {
 			},
 		},
 		{
+			title: "query variable label_values with variable used",
+			variables: map[string]*v1.DashboardVariable{
+				"myVariable": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						LabelValues: &v1.QueryVariableLabelValues{
+							LabelName: "$foo",
+							Matchers:  []string{"$foo{$bar='test'}"},
+						},
+					},
+				},
+				"foo": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						Expr: "test",
+					},
+				},
+				"bar": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						Expr: "vector($foo)",
+					},
+				},
+				"doe": {
+					Kind: v1.KindConstantVariable,
+					Parameter: &v1.ConstantVariableParameter{
+						Values: []string{"myConstant"},
+					},
+				},
+			},
+			result: map[string][]string{
+				"myVariable": {
+					"foo", "bar",
+				},
+				"bar": {
+					"foo",
+				},
+			},
+		},
+		{
+			title: "query variable label_names with variable used",
+			variables: map[string]*v1.DashboardVariable{
+				"myVariable": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						LabelNames: &v1.QueryVariableLabelNames{
+							Matchers: []string{"$foo{$bar='test'}"},
+						},
+					},
+				},
+				"foo": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						Expr: "test",
+					},
+				},
+				"bar": {
+					Kind: v1.KindQueryVariable,
+					Parameter: &v1.QueryVariableParameter{
+						Expr: "vector($foo)",
+					},
+				},
+				"doe": {
+					Kind: v1.KindConstantVariable,
+					Parameter: &v1.ConstantVariableParameter{
+						Values: []string{"myConstant"},
+					},
+				},
+			},
+			result: map[string][]string{
+				"myVariable": {
+					"foo", "bar",
+				},
+				"bar": {
+					"foo",
+				},
+			},
+		},
+		{
 			title: "multiple usage of the same variable",
-			variables: map[string]v1.DashboardVariable{
+			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
 					Kind: v1.KindQueryVariable,
 					Parameter: &v1.QueryVariableParameter{
@@ -146,12 +225,12 @@ func TestBuildVariableDependencies(t *testing.T) {
 func TestBuildVariableDependenciesError(t *testing.T) {
 	testSuite := []struct {
 		title     string
-		variables map[string]v1.DashboardVariable
+		variables map[string]*v1.DashboardVariable
 		err       error
 	}{
 		{
 			title: "wrong variable name",
-			variables: map[string]v1.DashboardVariable{
+			variables: map[string]*v1.DashboardVariable{
 				"VariableW$thI%ValidChar": {
 					Kind:      v1.KindQueryVariable,
 					Parameter: &v1.QueryVariableParameter{},
@@ -161,7 +240,7 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 		},
 		{
 			title: "variable used but not defined",
-			variables: map[string]v1.DashboardVariable{
+			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
 					Kind: v1.KindQueryVariable,
 					Parameter: &v1.QueryVariableParameter{
