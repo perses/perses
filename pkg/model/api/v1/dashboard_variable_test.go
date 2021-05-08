@@ -15,6 +15,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -248,6 +249,107 @@ parameter:
 			result := &DashboardVariable{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), result))
 			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestUnmarshallVariableError(t *testing.T) {
+	testSuite := []struct {
+		title string
+		jsone string
+		err   error
+	}{
+		{
+			title: "unsupported variable kind",
+			jsone: `
+{
+  "kind": "Awkward",
+  "parameter": "insane"
+}
+`,
+			err: fmt.Errorf("unknown variable.kind 'Awkward' used"),
+		},
+		{
+			title: "constant variable with no values",
+			jsone: `
+{
+  "kind": "Constant",
+  "parameter": {}
+}
+`,
+			err: fmt.Errorf("parameter.values cannot be empty for a constant variable"),
+		},
+		{
+			title: "query variable with no regexp",
+			jsone: `
+{
+  "kind": "Query",
+  "parameter": {}
+}
+`,
+			err: fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a query variable"),
+		},
+		{
+			title: "query variable with no query parameter",
+			jsone: `
+{
+  "kind": "Query",
+  "parameter": {
+    "capturing_regexp": ".*"
+  }
+}
+`,
+			err: fmt.Errorf("'parameter.expr' or 'parameter.label_values' or 'parameter.label_names' should be used for a query variable"),
+		},
+		{
+			title: "query variable with expr and label_names defined",
+			jsone: `
+{
+  "kind": "Query",
+  "parameter": {
+    "capturing_regexp": ".*",
+    "expr": "up{instance='localhost:8080'}",
+    "label_names": {}
+  }
+}
+`,
+			err: fmt.Errorf("when parameter.expr is used, you should not use 'parameter.label_values' or 'parameter.label_names'"),
+		},
+		{
+			title: "query variable with label_values and label_names defined",
+			jsone: `
+{
+  "kind": "Query",
+  "parameter": {
+    "capturing_regexp": ".*",
+    "label_names": {},
+    "label_values": {
+      "label_name": "test"
+    }
+  }
+}
+`,
+			err: fmt.Errorf("when parameter.label_values is used, you should not use 'parameter.expr' or 'parameter.label_names'"),
+		},
+		{
+			title: "query variable with label_values wrongly defined",
+			jsone: `
+{
+  "kind": "Query",
+  "parameter": {
+    "capturing_regexp": ".*",
+    "label_values": {
+    }
+  }
+}
+`,
+			err: fmt.Errorf("'label_values.label_name' cannot be empty"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := &DashboardVariable{}
+			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jsone), result))
 		})
 	}
 }

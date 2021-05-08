@@ -20,15 +20,54 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Chart interface {
-	GetKind() ChartKind
-}
-
 type ChartKind string
 
 const (
 	KindLineChart ChartKind = "LineChart"
 )
+
+var chartKindMap = map[ChartKind]bool{
+	KindLineChart: true,
+}
+
+func (k *ChartKind) UnmarshalJSON(data []byte) error {
+	var tmp ChartKind
+	type plain ChartKind
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*k = tmp
+	return nil
+}
+
+func (k *ChartKind) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp ChartKind
+	type plain ChartKind
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*k = tmp
+	return nil
+}
+
+func (k *ChartKind) validate() error {
+	if len(*k) == 0 {
+		return fmt.Errorf("panel.kind cannot be empty")
+	}
+	if _, ok := chartKindMap[*k]; !ok {
+		return fmt.Errorf("unknown panel.kind '%s' used", *k)
+	}
+	return nil
+}
+
+type Chart interface {
+}
 
 type Line struct {
 	Expr   string `json:"expr" yaml:"expr"`
@@ -70,13 +109,8 @@ func (l *Line) validate() error {
 
 type LineChart struct {
 	Chart      `json:"-" yaml:"-"`
-	Kind       ChartKind `json:"kind" yaml:"kind"`
-	ShowLegend bool      `json:"show_legend" yaml:"show_legend"`
-	Lines      []Line    `json:"lines" yaml:"lines"`
-}
-
-func (l *LineChart) GetKind() ChartKind {
-	return l.Kind
+	ShowLegend bool   `json:"show_legend" yaml:"show_legend"`
+	Lines      []Line `json:"lines" yaml:"lines"`
 }
 
 func (l *LineChart) UnmarshalJSON(data []byte) error {
@@ -116,14 +150,16 @@ type tmpPanel struct {
 	Name string `json:"name" yaml:"name"`
 	// Order is used to know the display order
 	Order uint64                 `json:"order" yaml:"order"`
+	Kind  ChartKind              `json:"kind" yaml:"kind"`
 	Chart map[string]interface{} `json:"chart" yaml:"chart"`
 }
 
 type Panel struct {
 	Name string `json:"name" yaml:"name"`
 	// Order is used to know the display order
-	Order uint64 `json:"order" yaml:"order"`
-	Chart Chart  `json:"chart" yaml:"chart"`
+	Order uint64    `json:"order" yaml:"order"`
+	Kind  ChartKind `json:"kind" yaml:"kind"`
+	Chart Chart     `json:"chart" yaml:"chart"`
 }
 
 func (p *Panel) UnmarshalJSON(data []byte) error {
@@ -151,31 +187,30 @@ func (p *Panel) validate() error {
 }
 
 func (p *Panel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
-	var tmpPanel tmpPanel
-	if err := unmarshal(&tmpPanel); err != nil {
+	var tmp tmpPanel
+	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
-	p.Name = tmpPanel.Name
-	p.Order = tmpPanel.Order
-	chartKind := tmpPanel.Chart["kind"].(string)
-	if len(chartKind) == 0 {
-		return fmt.Errorf("chart.kind cannot be empty")
+	p.Name = tmp.Name
+	p.Order = tmp.Order
+	p.Kind = tmp.Kind
+
+	if len(p.Kind) == 0 {
+		return fmt.Errorf("panel.kind cannot be empty")
 	}
 
-	rawChart, err := staticMarshal(tmpPanel.Chart)
+	rawChart, err := staticMarshal(tmp.Chart)
 	if err != nil {
 		return err
 	}
 
-	switch chartKind {
-	case string(KindLineChart):
+	switch p.Kind {
+	case KindLineChart:
 		chart := &LineChart{}
 		if err := staticUnmarshal(rawChart, chart); err != nil {
 			return err
 		}
 		p.Chart = chart
-	default:
-		return fmt.Errorf("chart kind not supported: '%s'", chartKind)
 	}
 	return nil
 }
