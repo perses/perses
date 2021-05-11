@@ -22,9 +22,11 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/common/config"
+	configUtils "github.com/perses/common/config"
+	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/config"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -38,27 +40,33 @@ func ClearAllKeys(t *testing.T, client *clientv3.Client) {
 	}
 }
 
-func DefaultETCDConfig() config.EtcdConfig {
-	return config.EtcdConfig{
-		Connections: []config.Connection{
+func DefaultETCDConfig() *configUtils.EtcdConfig {
+	return &configUtils.EtcdConfig{
+		Connections: []configUtils.Connection{
 			{
 				Host: "localhost",
 				Port: 2379,
 			},
 		},
-		Protocol:              config.EtcdAsHTTPProtocol,
+		Protocol:              configUtils.EtcdAsHTTPProtocol,
 		RequestTimeoutSeconds: 10,
 	}
 }
 
-func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
+func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager, *clientv3.Client) {
 	handler := echo.New()
-	persistenceManager, err := dependency.NewPersistenceManager(DefaultETCDConfig())
+	etcdClient, err := etcd.NewETCDClient(*DefaultETCDConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	persistenceManager, err := dependency.NewPersistenceManager(config.Database{
+		Etcd: DefaultETCDConfig(),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager)
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
-	return httptest.NewServer(handler), persistenceManager
+	return httptest.NewServer(handler), persistenceManager, etcdClient
 }

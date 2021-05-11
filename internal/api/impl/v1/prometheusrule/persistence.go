@@ -14,23 +14,20 @@
 package prometheusrule
 
 import (
-	"time"
-
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
+	"github.com/perses/perses/internal/api/shared/database"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type dao struct {
 	prometheusrule.DAO
-	client etcd.DAO
+	client database.DAO
 }
 
-func NewDAO(etcdClient *clientv3.Client, timeout time.Duration) prometheusrule.DAO {
-	client := etcd.NewDAO(etcdClient, timeout)
+func NewDAO(persesDAO database.DAO) prometheusrule.DAO {
 	return &dao{
-		client: client,
+		client: persesDAO,
 	}
 }
 

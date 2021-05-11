@@ -14,23 +14,20 @@
 package user
 
 import (
-	"time"
-
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/shared/database"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type dao struct {
 	user.DAO
-	client etcd.DAO
+	client database.DAO
 }
 
-func NewDAO(etcdClient *clientv3.Client, timeout time.Duration) user.DAO {
-	client := etcd.NewDAO(etcdClient, timeout)
+func NewDAO(persesDAO database.DAO) user.DAO {
 	return &dao{
-		client: client,
+		client: persesDAO,
 	}
 }
 
