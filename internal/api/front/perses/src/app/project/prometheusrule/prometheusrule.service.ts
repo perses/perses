@@ -13,7 +13,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { PrometheusRuleModel } from './prometheusrule.model';
 import { UrlBuilderUtil } from '../../shared/utils/url-builder.util';
 import { ErrorHandlingService } from '../../shared/service/error-handling.service';
@@ -23,16 +23,33 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class PrometheusRuleService {
-  private prometheusRuleResource = 'prometheusrules';
+  private readonly resource = 'prometheusrules';
+  private readonly currentSubject = new BehaviorSubject<string | undefined>(undefined);
 
-  constructor(private http: HttpClient, private errorHandler: ErrorHandlingService) {
+  constructor(private readonly http: HttpClient, private readonly errorHandler: ErrorHandlingService) {
+  }
+
+  getCurrent(): Observable<string | undefined> {
+    return this.currentSubject.asObservable();
+  }
+
+  setCurrent(name: string | undefined): void {
+    this.currentSubject.next(name);
   }
 
   list(project: string): Observable<PrometheusRuleModel[]> {
     const url = new UrlBuilderUtil()
-      .setResource(this.prometheusRuleResource)
+      .setResource(this.resource)
       .setProject(project);
 
     return this.http.get<PrometheusRuleModel[]>(url.build()).pipe(catchError(this.errorHandler.handleHTTPError));
+  }
+
+  get(name: string, project: string): Observable<PrometheusRuleModel> {
+    const url = new UrlBuilderUtil()
+      .setResource(this.resource)
+      .setProject(project)
+      .setName(name);
+    return this.http.get<PrometheusRuleModel>(url.build()).pipe(catchError(this.errorHandler.handleHTTPError));
   }
 }

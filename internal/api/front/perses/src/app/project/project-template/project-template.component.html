@@ -1,11 +1,14 @@
 <mat-toolbar class="phone-project-toolbar" *ngIf="screenSize.mobileQuery.matches">
-  <button mat-icon-button (click)="snav.toggle()"><mat-icon>menu</mat-icon></button>
-  <span> > {{projectService.currentProject | async}}</span>
+  <button mat-icon-button (click)="snav.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span> > {{projectService.getCurrent() | async}}</span>
 </mat-toolbar>
 <mat-sidenav-container autosize class="project-container">
-  <mat-sidenav #snav [mode]="screenSize.mobileQuery.matches ? 'over' : 'side'" [opened]="!screenSize.mobileQuery.matches">
+  <mat-sidenav #snav [mode]="screenSize.mobileQuery.matches ? 'over' : 'side'"
+               [opened]="!screenSize.mobileQuery.matches">
     <button mat-button [matMenuTriggerFor]="menu">
-      {{projectService.currentProject | async}}
+      {{projectService.getCurrent() | async}}
       <mat-icon>arrow_drop_down</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
@@ -16,6 +19,7 @@
     </mat-menu>
     <mat-nav-list>
       <mat-list-item *ngFor="let link of sidebarLinks">
+<!--        TODO(Célian): Take the current project name instead of 'perses' hardcoded-->
         <a matLine href [routerLink]="['/projects/perses/',link.url]">
           <mat-icon [matTooltip]="link.label" matTooltipPosition="right">{{link.icon}}</mat-icon>
           <span>{{link.label}}</span>

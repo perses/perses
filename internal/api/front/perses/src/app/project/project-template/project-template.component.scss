@@ -15,31 +15,32 @@
 
 $phone-project-toolbar-height: 40px;
 
+// size of the toolbar depending of the size of the screen.
+// Spec coming from https://github.com/angular/components/blob/master/src/material/toolbar/_toolbar-variables.scss
+$project-container-top-small: calc(56px + #{$phone-project-toolbar-height});
+$project-container-top-big: calc(64px);
+@media only screen and (max-width: $xsmall-screen) {
+  .project-container{
+    top: #{$project-container-top-small};
+  }
+  .project-sidenav-content {
+    height: calc(100vh - #{$project-container-top-small});
+  }
+}
+@media only screen and (min-width: $xsmall-screen) {
+  .project-container{
+    top: #{$project-container-top-big};
+  }
+  .project-sidenav-content {
+    height: calc(100vh - #{$project-container-top-big});
+  }
+}
+
 .project-container {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-}
-
-// size of the toolbar depending of the size of the screen.
-// Spec coming from https://github.com/angular/components/blob/master/src/material/toolbar/_toolbar-variables.scss
-@media only screen and (max-width: $xsmall-screen) {
-  .project-container{
-    top: calc(56px + #{$phone-project-toolbar-height});
-  }
-}
-
-@media only screen and (min-width: $xsmall-screen) {
-  .project-container{
-    top: 64px;
-  }
-}
-
-.project-sidenav-content {
-  margin-left: 2rem;
-  margin-right: 1rem;
-  margin-top: 2rem;
 }
 
 .phone-project-toolbar {

@@ -10,9 +10,9 @@ import { CustomError } from '../shared/model/error.model';
   providedIn: 'root'
 })
 export class ProjectGuard implements CanActivate {
-  constructor(private projectService: ProjectService,
-              private toastService: ToastService,
-              private router: Router) {
+  constructor(private readonly projectService: ProjectService,
+              private readonly toastService: ToastService,
+              private readonly router: Router) {
   }
 
   // canActivate will give the right to navigate to the sub module of the project module only if:
@@ -21,8 +21,8 @@ export class ProjectGuard implements CanActivate {
   // Note that permission access will certainly be checked by another guard once the permission layer is available in the backend.
   canActivate(
     route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | boolean {
-    // this assume that the guard is activated only for child Module of the project module.
-    const currentProject = route.parent?.paramMap.get('project');
+    // this assume that the guard is activated on the project module
+    const currentProject = route.paramMap.get('project');
     if (!currentProject) {
       return false;
     }
@@ -35,7 +35,7 @@ export class ProjectGuard implements CanActivate {
         return of(false);
       }),
       map(() => {
-        this.projectService.setCurrentProject(currentProject);
+        this.projectService.setCurrent(currentProject);
         return true;
       }),
     );

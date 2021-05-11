@@ -1,6 +1,6 @@
-<app-page>
+<app-page [noMargin]="isDisplayingDetails">
   <app-page-header>
-    <h1>Prometheus Rule</h1>
+    <h1>Prometheus Rules</h1>
     <button mat-raised-button color="primary">
       <mat-icon inline>add</mat-icon>
       New
@@ -14,19 +14,38 @@
                            [expanded]="isPromRuleFirst">
         <mat-expansion-panel-header>
           <div class="expansion-panel-header-container">
+            <h4>
+              <mat-icon>description</mat-icon>
+            </h4>
+            <div class="little-line">
+              <mat-divider></mat-divider>
+            </div>
+            <h2>
+              {{promRule.metadata.name}}
+            </h2>
             <div class="line">
               <mat-divider></mat-divider>
             </div>
-            <h1>{{promRule.metadata.name}}</h1>
-            <div class="line">
+            <h4 class="remove-if-small-screen">
+              <button mat-icon-button
+                      color="primary"
+                      routerLink="." [queryParams]="{ name: promRule.metadata.name }"
+                      (click)="cancelEvent($event)">
+                <mat-icon>launch</mat-icon>
+              </button>
+            </h4>
+            <div class="little-line remove-if-small-screen">
               <mat-divider></mat-divider>
             </div>
           </div>
         </mat-expansion-panel-header>
-        <ng-container *ngFor="let gr of promRule.spec.groups; let isLastGroup = last">
-          <h2>{{gr.name}}</h2>
-          <mat-card class="mat-elevation-z0" *ngFor="let rule of gr.rules; let index = index; let isLastRule = last">
-            <mat-card-content>
+        <ng-container *ngFor="let gr of promRule.spec.groups">
+          <h2>
+            <mat-icon inline>subdirectory_arrow_right</mat-icon>
+            Group : {{gr.name}}
+          </h2>
+          <mat-card>
+            <ng-container *ngFor="let rule of gr.rules; let ruleIndex = index; let isLastRule = last">
               <table>
                 <tr>
                   <th>
@@ -50,27 +69,29 @@
                 </tr>
               </table>
               <div class="map-container">
-                <div class="map" *ngIf="rule.labels">
+                <div class="map labels-map" *ngIf="rule.labels">
                   <h3>Labels</h3>
                   <table>
-                    <tr *ngFor="let label of rule.labels| keyvalue">
+                    <tr *ngFor="let label of rule.labels | keyvalue">
                       <th>{{label.key}}</th>
                       <td>{{label.value}}</td>
                     </tr>
                   </table>
                 </div>
-                <div class="map" *ngIf="rule.annotations">
+                <div class="map annotations-map" *ngIf="rule.annotations">
                   <h3>Annotations</h3>
                   <table>
-                    <tr *ngFor="let annotation of rule.annotations| keyvalue">
+                    <tr *ngFor="let annotation of rule.annotations | keyvalue">
                       <th>{{annotation.key}}</th>
                       <td>{{annotation.value}}</td>
                     </tr>
                   </table>
                 </div>
               </div>
-              <mat-divider *ngIf="!isLastGroup || !isLastRule"></mat-divider>
-            </mat-card-content>
+              <div class="divider">
+                <mat-divider *ngIf="!isLastRule"></mat-divider>
+              </div>
+            </ng-container>
           </mat-card>
         </ng-container>
       </mat-expansion-panel>
