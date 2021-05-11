@@ -18,11 +18,17 @@ import (
 )
 
 type Config struct {
-	Etcd *config.EtcdConfig `yaml:"etcd"`
+	Database Database `yaml:"database"`
 }
 
-func Resolve(configFile string) (Config, error) {
+func Resolve(configFile string, dbFolder string, dbExtension string) (Config, error) {
 	c := Config{}
+	if len(dbFolder) > 0 {
+		c.Database.File = &File{
+			Folder:        dbFolder,
+			FileExtension: FileExtension(dbExtension),
+		}
+	}
 	return c, config.NewResolver().
 		SetConfigFile(configFile).
 		SetEnvPrefix("PERSES").

@@ -59,7 +59,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 			logrus.Debugf("unable to create the dashboard '%s'. It already exits", entity.Metadata.Name)
 			return nil, shared.ConflictError
 		}
-		logrus.WithError(err).Errorf("unable to perform the creation of the prometheuRule '%s', something wrong with etcd", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the creation of the prometheuRule '%s', something wrong with the database", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil
@@ -98,7 +98,7 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 	// update the field UpdatedAt with the new time
 	entity.Metadata.UpdatedAt = time.Now().UTC()
 	if err := s.dao.Update(entity); err != nil {
-		logrus.WithError(err).Errorf("unable to perform the update of the dashboard '%s', something wrong with etcd", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the update of the dashboard '%s', something wrong with the database", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil
@@ -110,7 +110,7 @@ func (s *service) Delete(parameters shared.Parameters) error {
 			logrus.Debugf("unable to find the project '%s'", parameters.Name)
 			return shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to delete the project '%s', something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to delete the project '%s', something wrong with the database", parameters.Name)
 		return shared.InternalError
 	}
 	return nil
@@ -123,7 +123,7 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 			logrus.Debugf("unable to find the project '%s'", parameters.Name)
 			return nil, shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the project '%s', something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to find the previous version of the project '%s', something wrong with the database", parameters.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil

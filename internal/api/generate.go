@@ -192,23 +192,21 @@ type Service interface {
 package {{ $package }}
 
 import (
-	"time"
-
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
+	"github.com/perses/perses/internal/api/shared/database"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type dao struct {
 	{{ $package }}.DAO
-	client etcd.DAO
+	client database.DAO
 }
 
-func NewDAO(etcdClient *clientv3.Client, timeout time.Duration) {{ $package }}.DAO {
+func NewDAO(persesDAO database.DAO) {{ $package }}.DAO {
 	client := etcd.NewDAO(etcdClient, timeout)
 	return &dao{
-		client: client,
+		client: persesDAO,
 	}
 }
 
@@ -418,7 +416,6 @@ func generateFile(folder string, fileName string, tpl *template.Template, ept en
 	if !shouldOverride {
 		// only generate the file if it doesn't exist
 		if _, err := os.Stat(file); err == nil {
-			log.Printf("%s already exists, it won't override it\n", file)
 			return
 		}
 	}

@@ -41,13 +41,15 @@ The secure way to configure your monitoring.               <\
 
 func main() {
 	configFile := flag.String("config", "", "Path to the yaml configuration file for the api. Configuration can be overridden when using the environment variable")
+	dbFolder := flag.String("db.folder", "", "Path to the folder that would be used as a database. In case the flag is not used, Perses required to have a connection to ETCD")
+	dbExtension := flag.String("db.extension", "yaml", "The extension of the file to read and use when creating a file. yaml or json are the only value accepted")
 	flag.Parse()
 	// load the config from file or/and from environment
-	conf, err := config.Resolve(*configFile)
+	conf, err := config.Resolve(*configFile, *dbFolder, *dbExtension)
 	if err != nil {
 		logrus.WithError(err).Fatalf("error when reading configuration or from file '%s' or from environment", *configFile)
 	}
-	persistenceManager, err := dependency.NewPersistenceManager(*conf.Etcd)
+	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistent manager")
 	}

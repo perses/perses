@@ -14,10 +14,6 @@
 package dependency
 
 import (
-	"time"
-
-	"github.com/perses/common/config"
-	"github.com/perses/common/etcd"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
@@ -28,7 +24,8 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	clientv3 "go.etcd.io/etcd/client/v3"
+	"github.com/perses/perses/internal/api/shared/database"
+	"github.com/perses/perses/internal/config"
 )
 
 type PersistenceManager interface {
@@ -37,7 +34,6 @@ type PersistenceManager interface {
 	GetProject() project.DAO
 	GetPrometheusRule() prometheusrule.DAO
 	GetUser() user.DAO
-	GetETCDClient() *clientv3.Client
 }
 
 type persistence struct {
@@ -47,27 +43,24 @@ type persistence struct {
 	project        project.DAO
 	prometheusRule prometheusrule.DAO
 	user           user.DAO
-	etcdClient     *clientv3.Client
 }
 
-func NewPersistenceManager(conf config.EtcdConfig) (PersistenceManager, error) {
-	timeout := time.Duration(conf.RequestTimeoutSeconds) * time.Second
-	etcdClient, err := etcd.NewETCDClient(conf)
+func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
+	persesDAO, err := database.New(conf)
 	if err != nil {
 		return nil, err
 	}
-	dashboardDAO := dashboardImpl.NewDAO(etcdClient, timeout)
-	datasourceDAO := datasourceImpl.NewDAO(etcdClient, timeout)
-	projectDAO := projectImpl.NewDAO(etcdClient, timeout)
-	prometheusRuleDAO := prometheusruleImpl.NewDAO(etcdClient, timeout)
-	userDAO := userImpl.NewDAO(etcdClient, timeout)
+	dashboardDAO := dashboardImpl.NewDAO(persesDAO)
+	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
+	projectDAO := projectImpl.NewDAO(persesDAO)
+	prometheusRuleDAO := prometheusruleImpl.NewDAO(persesDAO)
+	userDAO := userImpl.NewDAO(persesDAO)
 	return &persistence{
 		dashboard:      dashboardDAO,
 		datasource:     datasourceDAO,
 		project:        projectDAO,
 		prometheusRule: prometheusRuleDAO,
 		user:           userDAO,
-		etcdClient:     etcdClient,
 	}, nil
 }
 
@@ -89,8 +82,4 @@ func (p *persistence) GetPrometheusRule() prometheusrule.DAO {
 
 func (p *persistence) GetUser() user.DAO {
 	return p.user
-}
-
-func (p *persistence) GetETCDClient() *clientv3.Client {
-	return p.etcdClient
 }
