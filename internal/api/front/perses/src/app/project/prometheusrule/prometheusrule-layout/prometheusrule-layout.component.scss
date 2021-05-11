@@ -11,23 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RouterModule, Routes } from '@angular/router';
-import { NgModule } from '@angular/core';
-import { PrometheusruleLayoutComponent } from './prometheusrule-layout/prometheusrule-layout.component';
-import { PrometheusRuleGuard } from './prometheusrule.guard';
+@import "src/assets/styles/variables";
 
-const ROUTES: Routes = [
-  {
-    path: '',
-    component: PrometheusruleLayoutComponent,
-    canActivate: [PrometheusRuleGuard],
-    runGuardsAndResolvers: 'paramsOrQueryParamsChange'
+.split-container-with-details {
+  height: 100%;
+}
+
+.split-container-without-details {
+  as-split-area {
+    overflow-x:hidden;
+    overflow-y:hidden;
   }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(ROUTES)],
-  exports: [RouterModule]
-})
-export class PrometheusRuleRoutingModule {
 }

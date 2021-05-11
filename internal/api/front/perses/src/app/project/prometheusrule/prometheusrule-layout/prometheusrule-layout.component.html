@@ -1,0 +1,16 @@
+<div [ngClass]="viewDetails ? 'split-container-with-details': 'split-container-without-details'">
+  <as-split direction="horizontal">
+    <as-split-area [size]="gutterStartLocation"
+                   [minSize]="gutterMinLocation"
+                   [maxSize]="gutterMaxLocation">
+      <app-prometheusrule-list></app-prometheusrule-list>
+    </as-split-area>
+    <as-split-area *ngIf="viewDetails"
+                   [size]="100 - gutterStartLocation"
+                   [minSize]="100 - gutterMaxLocation"
+                   [maxSize]="100 - gutterMinLocation">
+      <app-prometheusrule-details></app-prometheusrule-details>
+    </as-split-area>
+  </as-split>
+</div>
+

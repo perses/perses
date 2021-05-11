@@ -20,10 +20,10 @@ const PROJECT_ROUTES: Routes = [
   {
     path: 'projects/:project',
     component: ProjectTemplateComponent,
+    canActivate: [ProjectGuard],
     children: [
       {
         path: 'prometheusrules',
-        canActivate: [ProjectGuard],
         loadChildren: () => import('./prometheusrule/prometheusrule.module').then(m => m.PrometheusRuleModule)
       }
     ]

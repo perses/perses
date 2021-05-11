@@ -13,10 +13,51 @@
 
 @import "src/assets/styles/variables";
 
+.app-page,.app-page-no-margin {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin: auto;
+  padding-top: 20px;
+  .app-page-header,.app-page-content {
+    flex-grow: 1;
+    margin: auto;
+  }
+}
+
+.app-page-no-margin {
+  .app-page-header,.app-page-content {
+    max-width: 100%;
+    width: -webkit-fill-available;
+    padding-left: 2rem;
+    padding-right: 1rem;
+  }
+}
+
+@media only screen and (min-width: $large-screen) {
+  .app-page {
+    .app-page-header,.app-page-content {
+      width: 75%;
+    }
+  }
+}
+
+@media only screen and (max-width: $large-screen) {
+  .app-page {
+    .app-page-header,.app-page-content {
+      max-width: 100%;
+      width: -webkit-fill-available;
+      padding-left: 2rem;
+      padding-right: 1rem;
+    }
+  }
+}
+
 .app-page-header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  padding: 4px 0;
 }
 
 .app-page-content {
@@ -29,16 +70,4 @@
 .app-page-sub-content {
   flex-grow: 1;
   width: 100%;
-}
-
-@media only screen and (min-width: $large-screen) {
-  .app-page-sub-content{
-    max-width: 75%;
-  }
-}
-
-@media only screen and (max-width: $large-screen) {
-  .app-page-sub-content{
-    max-width: 100%;
-  }
 }

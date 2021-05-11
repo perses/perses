@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeDetectionStrategy, Component, Directive, HostBinding, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, HostBinding, Input, ViewEncapsulation } from '@angular/core';
+import { booleanInput } from '../../utils/angular-input.util';
 
 @Directive({
   selector: 'app-page-header, [app-page-header], [appPageHeader]'
@@ -38,6 +39,19 @@ export class PageSubContent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageComponent {
+  private useMargin = true;
+
+  @Input() set noMargin(value: string | boolean) {
+    this.useMargin = !booleanInput(value);
+  }
+
+  @HostBinding('class.app-page') get appPage(): boolean {
+    return this.useMargin;
+  }
+
+  @HostBinding('class.app-page-no-margin') get appPageNoMargin(): boolean {
+    return !this.useMargin;
+  }
 }
 
 @Component({

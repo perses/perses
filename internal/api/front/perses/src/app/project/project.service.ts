@@ -49,18 +49,18 @@ class Cache {
   providedIn: 'root'
 })
 export class ProjectService {
-  private projectResource = 'projects';
-  private currentProjectSubject = new BehaviorSubject<string>('');
-  private cache = new Cache();
+  private readonly projectResource = 'projects';
+  private readonly currentProjectSubject = new BehaviorSubject<string>('');
+  private readonly cache = new Cache();
 
-  constructor(private http: HttpClient, private errorHandler: ErrorHandlingService) {
+  constructor(private readonly http: HttpClient, private readonly errorHandler: ErrorHandlingService) {
   }
 
-  public get currentProject(): Observable<string> {
+  public getCurrent(): Observable<string> {
     return this.currentProjectSubject.asObservable();
   }
 
-  setCurrentProject(project: string): void {
+  setCurrent(project: string): void {
     this.currentProjectSubject.next(project);
   }
 

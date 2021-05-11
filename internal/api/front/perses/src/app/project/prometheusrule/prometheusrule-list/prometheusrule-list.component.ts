@@ -16,7 +16,9 @@ import { PrometheusRuleService } from '../prometheusrule.service';
 import { PrometheusRuleModel, RuleGroup } from '../prometheusrule.model';
 import { ToastService } from '../../../shared/service/toast.service';
 import { ProjectService } from '../../project.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-prometheusrule-list',
   templateUrl: './prometheusrule-list.component.html',
@@ -25,22 +27,32 @@ import { ProjectService } from '../../project.service';
 export class PrometheusRuleListComponent implements OnInit {
 
   isLoading = false;
+  isDisplayingDetails = false;
   rules: PrometheusRuleModel[] = [];
   currentProject = '';
 
-  constructor(private service: PrometheusRuleService,
-              private toastService: ToastService,
-              private projectService: ProjectService) {
+  constructor(private readonly resourceService: PrometheusRuleService,
+              private readonly toastService: ToastService,
+              private readonly projectService: ProjectService) {
   }
 
   ngOnInit(): void {
-    this.projectService.currentProject.subscribe(
-      res => {
-        this.currentProject = res;
+    this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
+      current => {
+        this.currentProject = current;
         this.getRules();
       }
     );
+    this.resourceService.getCurrent().pipe(untilDestroyed(this)).subscribe(
+      current => {
+        this.isDisplayingDetails = current !== undefined;
+      }
+    );
     this.getRules();
+  }
+
+  cancelEvent($event: MouseEvent): void {
+    $event.stopPropagation();
   }
 
   public countRules(groups: RuleGroup[]): number {
@@ -53,7 +65,7 @@ export class PrometheusRuleListComponent implements OnInit {
 
   private getRules(): void {
     this.isLoading = true;
-    this.service.list(this.currentProject).subscribe(
+    this.resourceService.list(this.currentProject).pipe(untilDestroyed(this)).subscribe(
       responses => {
         this.rules = responses;
         this.isLoading = false;
