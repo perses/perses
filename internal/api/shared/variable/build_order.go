@@ -11,9 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package variable is providing the necessary function to calculate the build order of the variables.
-//
-// To determinate which variable we have to build first (aka to perform the query), we have to:
+// Package variable is providing the necessary functions:
+// * to calculate the build order of the variables
+// * and to calculate the list of value for a given variable.
+package variable
+
+import (
+	"fmt"
+	"regexp"
+
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+)
+
+var (
+	variableRegexp  = regexp.MustCompile("^[a-zA-Z0-9_-]+$")
+	variableRegexp2 = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
+)
+
+type Group struct {
+	variables []string
+}
+
+// BuildOrder determinate which variable we have to build first (aka to perform the query).
+// Here is the description of the algorithm followed:
 //
 // 1. First calculate which variable depend of which other variable
 // 2. Then, thanks to the dependencies, we can create a dependency graph.
@@ -64,24 +84,6 @@
 //      group1: (c), (b), (g)
 //      group2: (a)
 //      group3: (e)
-package variable
-
-import (
-	"fmt"
-	"regexp"
-
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-)
-
-var (
-	variableRegexp  = regexp.MustCompile("^[a-zA-Z0-9_-]+$")
-	variableRegexp2 = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
-)
-
-type Group struct {
-	variables []string
-}
-
 func BuildOrder(variables map[string]*v1.DashboardVariable) ([]Group, error) {
 	// calculate the build order of the variable just to verify there is no error
 	g, err := buildGraph(variables)
