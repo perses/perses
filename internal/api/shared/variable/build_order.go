@@ -29,7 +29,7 @@ var (
 )
 
 type Group struct {
-	variables []string
+	Variables []string
 }
 
 // BuildOrder determinate which variable we have to build first (aka to perform the query).
@@ -177,18 +177,18 @@ func (g *graph) buildOrder() ([]Group, error) {
 		var newRemainingNode []*node
 		for _, n := range remainingNodes {
 			if n.dependencies == 0 {
-				group.variables = append(group.variables, n.name)
+				group.Variables = append(group.Variables, n.name)
 			} else {
 				newRemainingNode = append(newRemainingNode, n)
 			}
 		}
 		// if no variable has been added to the current node, then it means there are no nodes with no deps which means there is a circular dependency
-		if len(group.variables) == 0 {
+		if len(group.Variables) == 0 {
 			return nil, fmt.Errorf("circular dependency detected")
 		}
 		remainingNodes = newRemainingNode
 		// Then we loop other the available node in the current group to decrease for each children the number of dependencies
-		for _, v := range group.variables {
+		for _, v := range group.Variables {
 			for _, child := range g.nodes[v].children {
 				child.dependencies--
 			}

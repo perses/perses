@@ -71,3 +71,40 @@ func (d *SectionFeedRequest) validate() error {
 	}
 	return nil
 }
+
+// VariableFeedResponse represents the calculated value for the corresponding variable
+type VariableFeedResponse struct {
+	Name   string   `json:"name"`
+	Values []string `json:"values"`
+	Err    error    `json:"err,omitempty"`
+}
+
+type VariableFeedRequest struct {
+	Datasource        string                        `json:"datasource"`
+	Duration          model.Duration                `json:"duration"`
+	Variables         map[string]*DashboardVariable `json:"variables"`
+	SelectedVariables map[string]string             `json:"selected_variables,omitempty"`
+}
+
+func (d *VariableFeedRequest) UnmarshalJSON(data []byte) error {
+	var tmp VariableFeedRequest
+	type plain VariableFeedRequest
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *VariableFeedRequest) validate() error {
+	if len(d.Datasource) == 0 {
+		return fmt.Errorf("datasource cannot be empty")
+	}
+	if len(d.Variables) == 0 {
+		return fmt.Errorf("variables cannot be empty")
+	}
+	return nil
+}

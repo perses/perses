@@ -265,12 +265,12 @@ func TestGraph_BuildOrder(t *testing.T) {
 		{
 			title:     "single variable",
 			variables: []string{"myVariable"},
-			result:    []Group{{variables: []string{"myVariable"}}},
+			result:    []Group{{Variables: []string{"myVariable"}}},
 		},
 		{
 			title:     "independent variable",
 			variables: []string{"a", "d", "e"},
-			result:    []Group{{variables: []string{"a", "d", "e"}}},
+			result:    []Group{{Variables: []string{"a", "d", "e"}}},
 		},
 		{
 			title:     "a depend on d depend on e",
@@ -280,9 +280,9 @@ func TestGraph_BuildOrder(t *testing.T) {
 				"d": {"e"},
 			},
 			result: []Group{
-				{variables: []string{"e"}},
-				{variables: []string{"d"}},
-				{variables: []string{"a"}},
+				{Variables: []string{"e"}},
+				{Variables: []string{"d"}},
+				{Variables: []string{"a"}},
 			},
 		},
 		{
@@ -297,10 +297,10 @@ func TestGraph_BuildOrder(t *testing.T) {
 				"b": {"f"},
 			},
 			result: []Group{
-				{variables: []string{"f", "d"}},
-				{variables: []string{"c", "b", "g"}},
-				{variables: []string{"a", "h"}},
-				{variables: []string{"e"}},
+				{Variables: []string{"f", "d"}},
+				{Variables: []string{"c", "b", "g"}},
+				{Variables: []string{"a", "h"}},
+				{Variables: []string{"e"}},
 			},
 		},
 	}
@@ -311,7 +311,7 @@ func TestGraph_BuildOrder(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(result))
 			for i := 0; i < len(result); i++ {
-				assert.ElementsMatch(t, test.result[i].variables, result[i].variables)
+				assert.ElementsMatch(t, test.result[i].Variables, result[i].Variables)
 			}
 		})
 	}
