@@ -48,8 +48,8 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "query variable with no variable used",
 			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "vector(1)",
 					},
 				},
@@ -60,20 +60,20 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "query variable with variable used",
 			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "sum by($doe) (rate($foo{label='$bar'}))",
 					},
 				},
 				"foo": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "test",
 					},
 				},
 				"bar": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "vector($foo)",
 					},
 				},
@@ -97,23 +97,21 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "query variable label_values with variable used",
 			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
-						LabelValues: &v1.QueryVariableLabelValues{
-							LabelName: "$foo",
-							Matchers:  []string{"$foo{$bar='test'}"},
-						},
+					Kind: v1.KindLabelValuesQueryVariable,
+					Parameter: &v1.LabelValuesQueryVariableParameter{
+						LabelName: "$foo",
+						Matchers:  []string{"$foo{$bar='test'}"},
 					},
 				},
 				"foo": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "test",
 					},
 				},
 				"bar": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "vector($foo)",
 					},
 				},
@@ -137,22 +135,20 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "query variable label_names with variable used",
 			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
-						LabelNames: &v1.QueryVariableLabelNames{
-							Matchers: []string{"$foo{$bar='test'}"},
-						},
+					Kind: v1.KindLabelNamesQueryVariable,
+					Parameter: &v1.LabelNamesQueryVariableParameter{
+						Matchers: []string{"$foo{$bar='test'}"},
 					},
 				},
 				"foo": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "test",
 					},
 				},
 				"bar": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "vector($foo)",
 					},
 				},
@@ -176,20 +172,20 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "multiple usage of the same variable",
 			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "sum by($doe, $bar) (rate($foo{label='$bar'}))",
 					},
 				},
 				"foo": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "test",
 					},
 				},
 				"bar": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "vector($foo)",
 					},
 				},
@@ -232,8 +228,8 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 			title: "wrong variable name",
 			variables: map[string]*v1.DashboardVariable{
 				"VariableW$thI%ValidChar": {
-					Kind:      v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{},
+					Kind:      v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{},
 				},
 			},
 			err: fmt.Errorf("'%s' is not a correct variable name. It should match the regexp: %s", "VariableW$thI%ValidChar", variableRegexp.String()),
@@ -242,8 +238,8 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 			title: "variable used but not defined",
 			variables: map[string]*v1.DashboardVariable{
 				"myVariable": {
-					Kind: v1.KindQueryVariable,
-					Parameter: &v1.QueryVariableParameter{
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
 						Expr: "$foo",
 					},
 				},

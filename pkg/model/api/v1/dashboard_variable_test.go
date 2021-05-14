@@ -52,18 +52,16 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			title: "query variable by label_names",
 			jason: `
 {
-  "kind": "Query",
+  "kind": "LabelNamesQuery",
   "parameter": {
-    "label_names": {},
     "capturing_regexp": ".*"
   }
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					LabelNames:      &QueryVariableLabelNames{},
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindLabelNamesQueryVariable,
+				Parameter: &LabelNamesQueryVariableParameter{
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},
@@ -71,24 +69,20 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			title: "query variable by label_names with matcher",
 			jason: `
 {
-  "kind": "Query",
-  "parameter": {
-    "label_names": {
-      "matchers": [
-        "up"
-      ]
-    },
+  "kind": "LabelNamesQuery",
+  "parameter": { 
+    "matchers": [
+      "up"
+    ],
     "capturing_regexp": ".*"
   }
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					LabelNames: &QueryVariableLabelNames{
-						Matchers: []string{"up"},
-					},
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindLabelNamesQueryVariable,
+				Parameter: &LabelNamesQueryVariableParameter{
+					Matchers:        []string{"up"},
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},
@@ -96,26 +90,22 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			title: "query variable with label_values and matcher",
 			jason: `
 {
-  "kind": "Query",
+  "kind": "LabelValuesQuery",
   "parameter": {
-    "label_values": {
-      "label_name": "instance",
-      "matchers": [
-        "up"
-      ]
-    },
+    "label_name": "instance",
+    "matchers": [
+    "up"
+    ],
     "capturing_regexp": ".*"
   }
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					LabelValues: &QueryVariableLabelValues{
-						LabelName: "instance",
-						Matchers:  []string{"up"},
-					},
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindLabelValuesQueryVariable,
+				Parameter: &LabelValuesQueryVariableParameter{
+					LabelName:       "instance",
+					Matchers:        []string{"up"},
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},
@@ -123,18 +113,24 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			title: "query variable with expr",
 			jason: `
 {
-  "kind": "Query",
+  "kind": "PromQLQuery",
   "parameter": {
     "expr": "up{instance='localhost:8080'}",
-    "capturing_regexp": ".*"
+    "filter": {
+      "label_name": "instance",
+      "label_value": ".*"
+    }
   }
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					Expr:            "up{instance='localhost:8080'}",
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindPromQLQueryVariable,
+				Parameter: &PromQLQueryVariableParameter{
+					Expr: "up{instance='localhost:8080'}",
+					Filter: PromQLQueryFilter{
+						LabelName:  "instance",
+						LabelValue: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+					},
 				},
 			},
 		},
@@ -172,74 +168,71 @@ parameter:
 		{
 			title: "query variable by label_names",
 			yamele: `
-kind: "Query"
+kind: "LabelNamesQuery"
 parameter:
   capturing_regexp: ".*"
-  label_names: {}
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					LabelNames:      &QueryVariableLabelNames{},
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindLabelNamesQueryVariable,
+				Parameter: &LabelNamesQueryVariableParameter{
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},
 		{
 			title: "query variable by label_names with matcher",
 			yamele: `
-kind: "Query"
+kind: "LabelNamesQuery"
 parameter:
-  label_names:
-    matchers:
-    - "up"
+  matchers:
+  - "up"
   capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					LabelNames: &QueryVariableLabelNames{
-						Matchers: []string{"up"},
-					},
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindLabelNamesQueryVariable,
+				Parameter: &LabelNamesQueryVariableParameter{
+					Matchers:        []string{"up"},
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},
 		{
 			title: "query variable with label_values and matcher",
 			yamele: `
-kind: "Query"
+kind: "LabelValuesQuery"
 parameter:
- label_values:
-   label_name: "instance"
-   matchers:
-   - "up"
- capturing_regexp: ".*"
+  label_name: "instance"
+  matchers:
+  - "up"
+  capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					LabelValues: &QueryVariableLabelValues{
-						LabelName: "instance",
-						Matchers:  []string{"up"},
-					},
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindLabelValuesQueryVariable,
+				Parameter: &LabelValuesQueryVariableParameter{
+					LabelName:       "instance",
+					Matchers:        []string{"up"},
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},
 		{
 			title: "query variable with expr",
 			yamele: `
-kind: "Query"
+kind: "PromQLQuery"
 parameter:
   expr: "up{instance='localhost:8080'}"
-  capturing_regexp: ".*"
+  filter:
+    label_name: "instance"
+    label_value: ".*"
 `,
 			result: &DashboardVariable{
-				Kind: KindQueryVariable,
-				Parameter: &QueryVariableParameter{
-					Expr:            "up{instance='localhost:8080'}",
-					CapturingRegexp: regexp.MustCompile(`.*`),
+				Kind: KindPromQLQueryVariable,
+				Parameter: &PromQLQueryVariableParameter{
+					Expr: "up{instance='localhost:8080'}",
+					Filter: PromQLQueryFilter{
+						LabelName:  "instance",
+						LabelValue: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+					},
 				},
 			},
 		},
@@ -280,70 +273,76 @@ func TestUnmarshallVariableError(t *testing.T) {
 			err: fmt.Errorf("parameter.values cannot be empty for a constant variable"),
 		},
 		{
-			title: "query variable with no regexp",
+			title: "label names query variable with no regexp",
 			jsone: `
 {
-  "kind": "Query",
+  "kind": "LabelNamesQuery",
   "parameter": {}
 }
 `,
-			err: fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a query variable"),
+			err: fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a LabelNamesQuery"),
 		},
 		{
-			title: "query variable with no query parameter",
+			title: "LabelValuesQuery variable with empty label_name",
 			jsone: `
 {
-  "kind": "Query",
+  "kind": "LabelValuesQuery",
   "parameter": {
     "capturing_regexp": ".*"
   }
 }
 `,
-			err: fmt.Errorf("'parameter.expr' or 'parameter.label_values' or 'parameter.label_names' should be used for a query variable"),
+			err: fmt.Errorf("'parameter.label_name' cannot be empty for a LabelValuesQuery"),
 		},
 		{
-			title: "query variable with expr and label_names defined",
+			title: "LabelValuesQuery variable with empty regexp",
 			jsone: `
 {
-  "kind": "Query",
+  "kind": "LabelValuesQuery",
   "parameter": {
-    "capturing_regexp": ".*",
-    "expr": "up{instance='localhost:8080'}",
-    "label_names": {}
+    "label_name": "test"
   }
 }
 `,
-			err: fmt.Errorf("when parameter.expr is used, you should not use 'parameter.label_values' or 'parameter.label_names'"),
+			err: fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a LabelValuesQuery"),
 		},
 		{
-			title: "query variable with label_values and label_names defined",
+			title: "PromQLQuery variable with empty expr",
 			jsone: `
 {
-  "kind": "Query",
+  "kind": "PromQLQuery",
   "parameter": {
-    "capturing_regexp": ".*",
-    "label_names": {},
-    "label_values": {
-      "label_name": "test"
+  }
+}
+`,
+			err: fmt.Errorf("parameter.expr cannot be empty for a PromQLQuery"),
+		},
+		{
+			title: "PromQLQuery variable with empty label_name filter",
+			jsone: `
+{
+  "kind": "PromQLQuery",
+  "parameter": {
+    "expr": "1"
+  }
+}
+`,
+			err: fmt.Errorf("parameter.filter.label_name cannot be empty for a PromQLQuery"),
+		},
+		{
+			title: "PromQLQuery variable with empty label_value regexp",
+			jsone: `
+{
+  "kind": "PromQLQuery",
+  "parameter": {
+    "expr": "1",
+    "filter": {
+      "label_name" :"test"
     }
   }
 }
 `,
-			err: fmt.Errorf("when parameter.label_values is used, you should not use 'parameter.expr' or 'parameter.label_names'"),
-		},
-		{
-			title: "query variable with label_values wrongly defined",
-			jsone: `
-{
-  "kind": "Query",
-  "parameter": {
-    "capturing_regexp": ".*",
-    "label_values": {
-    }
-  }
-}
-`,
-			err: fmt.Errorf("'label_values.label_name' cannot be empty"),
+			err: fmt.Errorf("parameter.filter.label_value cannot be empty for a PromQLQuery"),
 		},
 	}
 	for _, test := range testSuite {

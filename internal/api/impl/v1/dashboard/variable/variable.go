@@ -109,35 +109,31 @@ func buildVariableDependencies(variables map[string]*v1.DashboardVariable) (map[
 		if !variableRegexp.MatchString(name) {
 			return nil, fmt.Errorf("'%s' is not a correct variable name. It should match the regexp: %s", name, variableRegexp.String())
 		}
-		if variable.Kind == v1.KindQueryVariable {
-			// for the moment that's the only type of variable where you can use another variable defined
-			parameter := variable.Parameter.(*v1.QueryVariableParameter)
-			var matches [][]string
-			if parameter.LabelValues != nil {
-				matches = findAllVariableUsed(parameter.LabelValues.LabelName)
-				for _, matcher := range parameter.LabelValues.Matchers {
-					matches = append(matches, findAllVariableUsed(matcher)...)
-				}
-			} else if parameter.LabelNames != nil {
-				for _, matcher := range parameter.LabelNames.Matchers {
-					matches = append(matches, findAllVariableUsed(matcher)...)
-				}
-			} else {
-				matches = findAllVariableUsed(parameter.Expr)
+		var matches [][]string
+		switch param := variable.Parameter.(type) {
+		case *v1.PromQLQueryVariableParameter:
+			matches = findAllVariableUsed(param.Expr)
+		case *v1.LabelNamesQueryVariableParameter:
+			for _, matcher := range param.Matchers {
+				matches = append(matches, findAllVariableUsed(matcher)...)
 			}
-
-			deps := make(map[string]bool)
-			for _, match := range matches {
-				// match[0] is the string that is matching the regexp (including the $)
-				// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
-				if _, ok := variables[match[1]]; !ok {
-					return nil, fmt.Errorf("variable '%s' is used in the variable '%s' but not defined", match[1], name)
-				}
-				deps[match[1]] = true
+		case *v1.LabelValuesQueryVariableParameter:
+			matches = findAllVariableUsed(param.LabelName)
+			for _, matcher := range param.Matchers {
+				matches = append(matches, findAllVariableUsed(matcher)...)
 			}
-			for dep := range deps {
-				result[name] = append(result[name], dep)
+		}
+		deps := make(map[string]bool)
+		for _, match := range matches {
+			// match[0] is the string that is matching the regexp (including the $)
+			// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
+			if _, ok := variables[match[1]]; !ok {
+				return nil, fmt.Errorf("variable '%s' is used in the variable '%s' but not defined", match[1], name)
 			}
+			deps[match[1]] = true
+		}
+		for dep := range deps {
+			result[name] = append(result[name], dep)
 		}
 	}
 	return result, nil
