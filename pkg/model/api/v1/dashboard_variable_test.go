@@ -118,7 +118,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
     "expr": "up{instance='localhost:8080'}",
     "filter": {
       "label_name": "instance",
-      "label_value": ".*"
+      "capturing_regexp": ".*"
     }
   }
 }
@@ -128,8 +128,8 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 				Parameter: &PromQLQueryVariableParameter{
 					Expr: "up{instance='localhost:8080'}",
 					Filter: PromQLQueryFilter{
-						LabelName:  "instance",
-						LabelValue: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+						LabelName:       "instance",
+						CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 					},
 				},
 			},
@@ -223,15 +223,15 @@ parameter:
   expr: "up{instance='localhost:8080'}"
   filter:
     label_name: "instance"
-    label_value: ".*"
+    capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
 				Kind: KindPromQLQueryVariable,
 				Parameter: &PromQLQueryVariableParameter{
 					Expr: "up{instance='localhost:8080'}",
 					Filter: PromQLQueryFilter{
-						LabelName:  "instance",
-						LabelValue: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+						LabelName:       "instance",
+						CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 					},
 				},
 			},
@@ -342,7 +342,7 @@ func TestUnmarshallVariableError(t *testing.T) {
   }
 }
 `,
-			err: fmt.Errorf("parameter.filter.label_value cannot be empty for a PromQLQuery"),
+			err: fmt.Errorf("parameter.filter.capturing_regexp cannot be empty for a PromQLQuery"),
 		},
 	}
 	for _, test := range testSuite {

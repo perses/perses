@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/perses/common/async"
@@ -22,10 +21,7 @@ import (
 
 func prometheusQuery(variables map[string]string, query string, duration model.Duration, promClient prometheusAPIV1.API) func() interface{} {
 	return func() interface{} {
-		q := query
-		for k, v := range variables {
-			q = strings.Replace(q, fmt.Sprintf("$%s", k), v, -1)
-		}
+		q := variable.ReplaceVariableByValue(variables, query)
 		end := time.Now()
 		start := end.Add(-time.Duration(duration))
 		logrus.Debugf("performing the http request with the query '%s'", q)
@@ -111,19 +107,26 @@ func (s *service) FeedVariable(request *v1.VariableFeedRequest) ([]v1.VariableFe
 					}
 				}(name)),
 			)
+			errorOccurred := false
 			for _, asyncRequest := range groupAsynchronousRequests {
 				// wait every asynchronous execution and then set a value into the map
 				response := asyncRequest.Await().(*v1.VariableFeedResponse)
 				if response.Err != nil {
+					// if an error occurred when calculating the variable, we should stop to calculate them.
+					// Likely we won't be able to calculate the next group since it depends of the current one.
 					logrus.WithError(err).Debugf("an error occurred when executing the query for the variable '%s'", response.Name)
-				} else {
-					value := currentVariable.Selected
-					if len(currentVariable.Selected) == 0 {
-						value = response.Values[0]
-					}
+					errorOccurred = true
+				} else if len(response.Values) > 0 {
+					// if there is no value, then there is no reason to take the value from the one selected by default.
+					value := response.Values[0]
 					request.SelectedVariables[name] = value
+					response.Selected = value
 				}
 				result = append(result, *response)
+			}
+			if errorOccurred {
+				logrus.Debug("aborting calculation of the variable since an error occurred")
+				return result, nil
 			}
 		}
 	}

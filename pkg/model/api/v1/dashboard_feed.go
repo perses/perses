@@ -74,9 +74,10 @@ func (d *SectionFeedRequest) validate() error {
 
 // VariableFeedResponse represents the calculated value for the corresponding variable
 type VariableFeedResponse struct {
-	Name   string   `json:"name"`
-	Values []string `json:"values"`
-	Err    error    `json:"err,omitempty"`
+	Name     string   `json:"name"`
+	Selected string   `json:"selected"`
+	Values   []string `json:"values"`
+	Err      error    `json:"err,omitempty"`
 }
 
 type VariableFeedRequest struct {

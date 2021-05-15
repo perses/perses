@@ -25,16 +25,16 @@ import (
 // It used mainly to be able to override the way to unmarshall and marshall a regexp
 type CapturingRegexp regexp.Regexp
 
-func (c *CapturingRegexp) getRegexp() *regexp.Regexp {
+func (c *CapturingRegexp) GetRegexp() *regexp.Regexp {
 	return (*regexp.Regexp)(c)
 }
 
 func (c *CapturingRegexp) MarshalJSON() ([]byte, error) {
-	return []byte(c.getRegexp().String()), nil
+	return []byte(c.GetRegexp().String()), nil
 }
 
 func (c *CapturingRegexp) MarshalYAML() (interface{}, error) {
-	return c.getRegexp().String(), nil
+	return c.GetRegexp().String(), nil
 }
 
 func (c *CapturingRegexp) UnmarshalJSON(data []byte) error {
@@ -219,8 +219,8 @@ func (v *LabelValuesQueryVariableParameter) validate() error {
 }
 
 type PromQLQueryFilter struct {
-	LabelName  string           `json:"label_name" yaml:"label_name"`
-	LabelValue *CapturingRegexp `json:"label_value" yaml:"label_value"`
+	LabelName       string           `json:"label_name" yaml:"label_name"`
+	CapturingRegexp *CapturingRegexp `json:"capturing_regexp" yaml:"capturing_regexp"`
 }
 
 type PromQLQueryVariableParameter struct {
@@ -265,8 +265,8 @@ func (v *PromQLQueryVariableParameter) validate() error {
 	if len(v.Filter.LabelName) == 0 {
 		return fmt.Errorf("parameter.filter.label_name cannot be empty for a PromQLQuery")
 	}
-	if v.Filter.LabelValue == nil {
-		return fmt.Errorf("parameter.filter.label_value cannot be empty for a PromQLQuery")
+	if v.Filter.CapturingRegexp == nil {
+		return fmt.Errorf("parameter.filter.capturing_regexp cannot be empty for a PromQLQuery")
 	}
 	return nil
 }
