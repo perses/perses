@@ -68,10 +68,15 @@ func (d *DashboardSection) validate() error {
 }
 
 type DashboardSpec struct {
-	Datasource string                        `json:"datasource" yaml:"datasource"`
-	Duration   model.Duration                `json:"duration" yaml:"duration"`
-	Variables  map[string]*DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Sections   []DashboardSection            `json:"sections" yaml:"sections"`
+	// Datasource is the name of the datasource.
+	// It's the direct reference of the document of type `Datasource`.
+	// The datasource linked must exist in the database.
+	Datasource string `json:"datasource" yaml:"datasource"`
+	// Duration is the default time you would like to use to looking in the past when getting data to fill the
+	// dashboard
+	Duration  model.Duration                `json:"duration" yaml:"duration"`
+	Variables map[string]*DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Sections  []DashboardSection            `json:"sections" yaml:"sections"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {

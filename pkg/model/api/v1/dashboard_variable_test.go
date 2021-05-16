@@ -126,11 +126,9 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			result: &DashboardVariable{
 				Kind: KindPromQLQueryVariable,
 				Parameter: &PromQLQueryVariableParameter{
-					Expr: "up{instance='localhost:8080'}",
-					Filter: PromQLQueryFilter{
-						LabelName:       "instance",
-						CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
-					},
+					Expr:            "up{instance='localhost:8080'}",
+					LabelName:       "instance",
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},
@@ -228,11 +226,9 @@ parameter:
 			result: &DashboardVariable{
 				Kind: KindPromQLQueryVariable,
 				Parameter: &PromQLQueryVariableParameter{
-					Expr: "up{instance='localhost:8080'}",
-					Filter: PromQLQueryFilter{
-						LabelName:       "instance",
-						CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
-					},
+					Expr:            "up{instance='localhost:8080'}",
+					LabelName:       "instance",
+					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
 			},
 		},

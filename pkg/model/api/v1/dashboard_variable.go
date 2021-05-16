@@ -218,18 +218,15 @@ func (v *LabelValuesQueryVariableParameter) validate() error {
 	return nil
 }
 
-type PromQLQueryFilter struct {
-	LabelName       string           `json:"label_name" yaml:"label_name"`
-	CapturingRegexp *CapturingRegexp `json:"capturing_regexp" yaml:"capturing_regexp"`
-}
-
 type PromQLQueryVariableParameter struct {
 	VariableParameter `json:"-" yaml:"-"`
 	// Expr is the PromQL expression to be used when variable should be filled by using the HTTP endpoint
 	// `GET /api/v1/query_range`
 	// More information available here: https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
-	Expr   string            `json:"expr,omitempty" yaml:"expr,omitempty"`
-	Filter PromQLQueryFilter `json:"filter" yaml:"filter"`
+	Expr string `json:"expr,omitempty" yaml:"expr,omitempty"`
+	// LabelName is the name of the label which is used once the PromQL query is performed to select the labelValue in the metric
+	LabelName       string           `json:"label_name" yaml:"label_name"`
+	CapturingRegexp *CapturingRegexp `json:"capturing_regexp" yaml:"capturing_regexp"`
 }
 
 func (v *PromQLQueryVariableParameter) UnmarshalJSON(data []byte) error {
@@ -262,11 +259,11 @@ func (v *PromQLQueryVariableParameter) validate() error {
 	if len(v.Expr) == 0 {
 		return fmt.Errorf("parameter.expr cannot be empty for a PromQLQuery")
 	}
-	if len(v.Filter.LabelName) == 0 {
-		return fmt.Errorf("parameter.filter.label_name cannot be empty for a PromQLQuery")
+	if len(v.LabelName) == 0 {
+		return fmt.Errorf("parameter.label_name cannot be empty for a PromQLQuery")
 	}
-	if v.Filter.CapturingRegexp == nil {
-		return fmt.Errorf("parameter.filter.capturing_regexp cannot be empty for a PromQLQuery")
+	if v.CapturingRegexp == nil {
+		return fmt.Errorf("parameter.capturing_regexp cannot be empty for a PromQLQuery")
 	}
 	return nil
 }
