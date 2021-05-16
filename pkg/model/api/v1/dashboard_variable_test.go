@@ -94,7 +94,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   "parameter": {
     "label_name": "instance",
     "matchers": [
-    "up"
+      "up"
     ],
     "capturing_regexp": ".*"
   }
@@ -116,10 +116,8 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   "kind": "PromQLQuery",
   "parameter": {
     "expr": "up{instance='localhost:8080'}",
-    "filter": {
-      "label_name": "instance",
-      "capturing_regexp": ".*"
-    }
+    "label_name": "instance",
+    "capturing_regexp": ".*"
   }
 }
 `,
@@ -219,9 +217,8 @@ parameter:
 kind: "PromQLQuery"
 parameter:
   expr: "up{instance='localhost:8080'}"
-  filter:
-    label_name: "instance"
-    capturing_regexp: ".*"
+  label_name: "instance"
+  capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
 				Kind: KindPromQLQueryVariable,
@@ -323,7 +320,7 @@ func TestUnmarshallVariableError(t *testing.T) {
   }
 }
 `,
-			err: fmt.Errorf("parameter.filter.label_name cannot be empty for a PromQLQuery"),
+			err: fmt.Errorf("parameter.label_name cannot be empty for a PromQLQuery"),
 		},
 		{
 			title: "PromQLQuery variable with empty label_value regexp",
@@ -332,13 +329,11 @@ func TestUnmarshallVariableError(t *testing.T) {
   "kind": "PromQLQuery",
   "parameter": {
     "expr": "1",
-    "filter": {
-      "label_name" :"test"
-    }
+    "label_name" :"test"
   }
 }
 `,
-			err: fmt.Errorf("parameter.filter.capturing_regexp cannot be empty for a PromQLQuery"),
+			err: fmt.Errorf("parameter.capturing_regexp cannot be empty for a PromQLQuery"),
 		},
 	}
 	for _, test := range testSuite {

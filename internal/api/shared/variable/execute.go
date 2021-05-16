@@ -100,7 +100,7 @@ func Execute(request *v1.VariableFeedRequest, variableName string, promClient pr
 	default:
 		return &v1.VariableFeedResponse{
 			Name:   variableName,
-			Values: make([]string, 0, 0),
+			Values: make([]string, 0),
 			Err:    fmt.Errorf("parameter of type %T is not managed", parameter),
 		}
 	}
@@ -125,7 +125,7 @@ func (q *query) PromQLQuery(parameter *v1.PromQLQueryVariableParameter) *v1.Vari
 		logrus.WithError(err).Error("unable to get the list of the label values")
 		return &v1.VariableFeedResponse{
 			Name:   q.name,
-			Values: make([]string, 0, 0),
+			Values: make([]string, 0),
 			Err:    err,
 		}
 	}
@@ -137,7 +137,7 @@ func (q *query) PromQLQuery(parameter *v1.PromQLQueryVariableParameter) *v1.Vari
 	}
 	return &v1.VariableFeedResponse{
 		Name:   q.name,
-		Values: make([]string, 0, 0),
+		Values: make([]string, 0),
 		Err:    fmt.Errorf("'%T' is not managed", result),
 	}
 }
@@ -152,7 +152,7 @@ func (q *query) LabelValues(parameter *v1.LabelValuesQueryVariableParameter) *v1
 		logrus.WithError(err).Error("unable to get the list of the label values")
 		return &v1.VariableFeedResponse{
 			Name:   q.name,
-			Values: make([]string, 0, 0),
+			Values: make([]string, 0),
 			Err:    err,
 		}
 	}
@@ -172,7 +172,7 @@ func (q *query) LabelNames(parameter *v1.LabelNamesQueryVariableParameter) *v1.V
 		logrus.WithError(err).Error("unable to get the list of the label name")
 		return &v1.VariableFeedResponse{
 			Name:   q.name,
-			Values: make([]string, 0, 0),
+			Values: make([]string, 0),
 			Err:    err,
 		}
 	}
