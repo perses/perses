@@ -30,6 +30,11 @@ func diff(current map[string]string, previous map[string]string) map[string]bool
 // the group number the calculation of the variable need to start.
 // It will also returned a boolean that will say if every variable in the group represented by the number returned
 // need to be re-calculated.
+// TODO (@nexucis) Actually the fact that a variable in the group 0 required to be recalculated doesn't necessary imply
+//      that all next group should be recalculated.
+//      For example in group 0 you can have a constant variable that user changed the selected value and none of the next group depends on it.
+//      To solve this issue we need to have the dependency graph that contained the variable that changed.
+//      Thanks to that, we will know exactly which variable must be recalculated
 func CalculationStartAt(current map[string]string, previous map[string]string, groups []Group) (int, bool) {
 	// Here we simply have to determinate which variables doesn't have the same value in 'current' comparing to 'previous'.
 	// It's because the change of a value should trigger the calculation of every variable that depends of it.

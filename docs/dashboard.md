@@ -3,6 +3,9 @@ Dashboard
 
 ## Data model
 
+This part is describing the data model that represents a dashboard. It would help for user/developer that want to put in
+a place the dashboard as code
+
 Note: In this documentation, the examples will be in **json**, but you can translate it into **yaml**, it is the same
 syntax. A dashboard like others documents is composed by three different sections:
 
@@ -285,3 +288,163 @@ Example:
   }
 ]
 ```
+
+## How to feed a dashboard
+
+This part is more dedicated to developer that would like to consume the API in order to feed a dashboard.
+
+The API is providing two different endpoint for that:
+
+* `POST /api/v1/feed/variables` that should be used to get the value of the different variable defined
+* `POST /api/v1/feed/sections` that should be used to get the value for a set of sections
+
+### How to get the value of the variables.
+
+#### Dashboard initialization
+
+During the initialization of the dashboard (in GUI side), the frontend should simply send the full definition of the
+variables to the backend. It will find the build order, and then calculate the values for each of them.
+
+Example:
+
+```bash
+curl -XPOST http://localhost:8080/api/v1/feed/variables -d '
+{
+    "datasource":"PrometheusDemo",
+    "duration": "6h",
+    "variables": {
+        "do": {
+            "kind": "PromQLQuery",
+            "parameter": {
+                "expr": "prometheus_build_info",
+                "label_name": "branch",
+                "capturing_regexp": "(.*)"
+            }
+        },
+        "bar": {
+            "kind" :"LabelValuesQuery",
+            "parameter":{
+                "label_name": "$foo",
+                "capturing_regexp" : "(.*)"
+            }
+        },
+        "foo": {
+            "kind" : "LabelNamesQuery",
+            "parameter":{
+                "capturing_regexp" : "(alert.*)"
+            }
+        }
+    }
+}
+'
+```
+
+Result:
+
+```json
+[
+  {
+    "name": "foo",
+    "selected": "alertmanager",
+    "values": [
+      "alertmanager",
+      "alertname",
+      "alertstate"
+    ]
+  },
+  {
+    "name": "do",
+    "selected": "HEAD",
+    "values": [
+      "HEAD"
+    ]
+  },
+  {
+    "name": "bar",
+    "selected": "http://demo.do.prometheus.io:9093/api/v2/alerts",
+    "values": [
+      "http://demo.do.prometheus.io:9093/api/v2/alerts"
+    ]
+  }
+]
+```
+
+#### Changing the value of the variable
+
+Once the dashboard is properly initialized, the user will likely change the value selected for some variable.
+
+As the backend need to know which variable should be recalculated (following the changes of the selected value), the
+front-end should:
+
+* re-send all variables definitions to the backend.
+* Send the previous selected value for each variable
+* Send the current selected value for each variable. Thanks to the previous and the current selected value, the backend
+  is able to calculate which variable value changed. Then it compares to the build order to know exactly which variable
+  should be recalculated and which one should not.
+
+Example:
+
+```bash
+curl -XPOST http://localhost:8080/api/v1/feed/variables -d '
+{
+    "datasource":"PrometheusDemo",
+    "duration": "6h",
+    "selected_variables": {
+        "foo" :"alertname"
+    },
+    "previous_selected_variables": {
+        "foo" :"alertmanager"
+    },
+    "variables": {
+        "do": {
+            "kind": "PromQLQuery",
+            "parameter": {
+                "expr": "prometheus_build_info",
+                "label_name": "branch",
+                "capturing_regexp": "(.*)"
+            }
+        },
+        "bar": {
+            "kind" :"LabelValuesQuery",
+            "parameter":{
+                "label_name": "$foo",
+                "capturing_regexp" : "(.*)"
+            }
+        },
+        "foo": {
+            "kind" : "LabelNamesQuery",
+            "parameter":{
+                "capturing_regexp" : "(alert.*)"
+            }
+        }
+    }
+}
+'
+```
+
+Result:
+
+```json
+[
+  {
+    "name": "do",
+    "selected": "HEAD",
+    "values": [
+      "HEAD"
+    ]
+  },
+  {
+    "name": "bar",
+    "selected": "Watchdog",
+    "values": [
+      "Watchdog"
+    ]
+  }
+]
+```
+
+Here the backend detects that it doesn't need to calculate the value of the variable `foo`. But, the value for the
+variable `do` wasn't provided, so it had to determinate it.
+
+Also since the value of the variable `foo` changed and the variable `bar` depends on it, the backend needed to
+recalculate it.
