@@ -310,14 +310,16 @@ func (v *ConstantVariableParameter) validate() error {
 }
 
 type tmpDashboardVariable struct {
-	Kind VariableKind `json:"kind" yaml:"kind"`
-	// Selected is the variable selected by default if it exists
+	Kind      VariableKind           `json:"kind" yaml:"kind"`
+	Hide      bool                   `json:"hide" yaml:"hide"`
 	Selected  string                 `json:"selected,omitempty" yaml:"selected,omitempty"`
 	Parameter map[string]interface{} `json:"parameter" yaml:"parameter"`
 }
 
 type DashboardVariable struct {
 	Kind VariableKind `json:"kind" yaml:"kind"`
+	// Hide will be used by the UI to decide if the variable has to be displayed
+	Hide bool `json:"hide" yaml:"hide"`
 	// Selected is the variable selected by default if it exists
 	Selected  string            `json:"selected,omitempty" yaml:"selected,omitempty"`
 	Parameter VariableParameter `json:"parameter" yaml:"parameter"`

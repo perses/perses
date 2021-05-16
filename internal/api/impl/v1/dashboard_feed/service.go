@@ -74,10 +74,16 @@ func (s *service) FeedVariable(request *v1.VariableFeedRequest) ([]v1.VariableFe
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
-	for _, group := range groups {
+	// determinate where to start the build
+	groupNumber, needToRecalculateAllVariableInGroupNumber := variable.CalculationStartAt(request.SelectedVariables, request.PreviousSelectedVariables, groups)
+	for i := groupNumber; i < len(groups); i++ {
 		// Each variable contains in a single group can be built in parallel.
-		groupAsynchronousRequests := make([]async.Future, 0, len(group.Variables))
-		for _, name := range group.Variables {
+		groupAsynchronousRequests := make([]async.Future, 0, len(groups[i].Variables))
+		for _, name := range groups[i].Variables {
+			if i > groupNumber || needToRecalculateAllVariableInGroupNumber {
+				// here we delete the value set to be sure we will recalculate it.
+				delete(request.SelectedVariables, name)
+			}
 			// In case the variable has a value in the map request.SelectedVariables,
 			// then we don't need to calculate it.
 			if _, ok := request.SelectedVariables[name]; ok {

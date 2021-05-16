@@ -1,0 +1,49 @@
+package variable
+
+// diff returns a new map that contains only the variable that the value changed between 'previous' and 'current'
+func diff(current map[string]string, previous map[string]string) map[string]bool {
+	result := make(map[string]bool)
+	for currentName, currentValue := range current {
+		if previousValue, ok := previous[currentName]; ok {
+			if previousValue != currentValue {
+				result[currentName] = true
+			}
+		}
+	}
+	return result
+}
+
+// CalculationStartAt will determinate by comparing the two maps 'current' and 'previous'
+// the group number the calculation of the variable need to start.
+// It will also returned a boolean that will say if every variable in the group represented by the number returned
+// need to be re-calculated.
+func CalculationStartAt(current map[string]string, previous map[string]string, groups []Group) (int, bool) {
+	// Here we simply have to determinate which variables doesn't have the same value in 'current' comparing to 'previous'.
+	// It's because the change of a value should trigger the calculation of every variable that depends of it.
+	// It doesn't really matter if one variable is not set anymore in 'current'.
+	diffMap := diff(current, previous)
+	// now we just have to loop other the groups and find the first one
+	// that is contained in diff or the first one that is not contained in 'current'.
+	// If one variable is not contained in 'current' then it needs to be calculated.
+	for i := 0; i < len(groups); i++ {
+		diffDetected := false
+		for _, name := range groups[i].Variables {
+			// to avoid to hide a missing value in the current map
+			// the fact that a diff has been detected in the current group would be used when leaving the loop.
+			diffDetected = diffMap[name] || diffDetected
+			if _, ok := current[name]; !ok {
+				// current doesn't contain the value of the current variable.
+				// So we have to calculate the variable contained in the current group
+				return i, false
+			}
+		}
+		if diffDetected {
+			// calculation need to start for the next group and not the current one
+			// because the next group would depend on the value of this one
+			return i + 1, true
+		}
+	}
+	// in case there is no diff and all variable are already set in 'current', then there is no variable to calculate.
+	// So we can just returned the length of the groups.
+	return len(groups), false
+}

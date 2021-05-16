@@ -81,10 +81,17 @@ type VariableFeedResponse struct {
 }
 
 type VariableFeedRequest struct {
-	Datasource        string                        `json:"datasource"`
-	Duration          model.Duration                `json:"duration"`
-	Variables         map[string]*DashboardVariable `json:"variables"`
-	SelectedVariables map[string]string             `json:"selected_variables,omitempty"`
+	Datasource string                        `json:"datasource"`
+	Duration   model.Duration                `json:"duration"`
+	Variables  map[string]*DashboardVariable `json:"variables"`
+	// SelectedVariables is the current variable values selected by the user.
+	// With the SelectedVariables and the PreviousSelectedVariables, the server will determinate which variable value has been changed.
+	// Then based on this difference and based on the build order, the server will determinate which variable should be re-calculated
+	// and which one can be skipped.
+	SelectedVariables map[string]string `json:"selected_variables,omitempty"`
+	// PreviousSelectedVariables is the previous variable values selected by the user before he changed one of the value.
+	// It is used as the previous state for the different variable set.
+	PreviousSelectedVariables map[string]string `json:"previous_selected_variables,omitempty"`
 }
 
 func (d *VariableFeedRequest) UnmarshalJSON(data []byte) error {
@@ -106,6 +113,9 @@ func (d *VariableFeedRequest) validate() error {
 	}
 	if len(d.Variables) == 0 {
 		return fmt.Errorf("variables cannot be empty")
+	}
+	if len(d.SelectedVariables) > 0 && len(d.PreviousSelectedVariables) == 0 {
+		return fmt.Errorf("selected_variables cannot be used without setting the previous_selected_variables")
 	}
 	return nil
 }
