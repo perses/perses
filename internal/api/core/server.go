@@ -19,6 +19,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard_feed"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
+	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/impl/v1/user"
@@ -39,6 +40,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
 		dashboard.NewEndpoint(serviceManager.GetDashboard()),
 		dashboard_feed.NewEndpoint(serviceManager.GetDashboardFeed()),
 		datasource.NewEndpoint(serviceManager.GetDatasource()),
+		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject()),
 		prometheusrule.NewEndpoint(serviceManager.GetPrometheusRule()),
 		user.NewEndpoint(serviceManager.GetUser()),

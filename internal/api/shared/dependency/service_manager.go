@@ -19,12 +19,14 @@ import (
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	dashboardFeedimpl "github.com/perses/perses/internal/api/impl/v1/dashboard_feed"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
+	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard_feed"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -34,6 +36,7 @@ type ServiceManager interface {
 	GetDashboard() dashboard.Service
 	GetDashboardFeed() dashboard_feed.Service
 	GetDatasource() datasource.Service
+	GetHealth() health.Service
 	GetProject() project.Service
 	GetPrometheusRule() prometheusrule.Service
 	GetUser() user.Service
@@ -44,6 +47,7 @@ type service struct {
 	dashboard      dashboard.Service
 	dashboardFeed  dashboard_feed.Service
 	datasource     datasource.Service
+	health         health.Service
 	project        project.Service
 	prometheusRule prometheusrule.Service
 	user           user.Service
@@ -53,6 +57,7 @@ func NewServiceManager(dao PersistenceManager) ServiceManager {
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard())
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource())
 	dashboardFeedService := dashboardFeedimpl.NewService(datasourceService)
+	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject())
 	prometheusRuleService := prometheusruleImpl.NewService(dao.GetPrometheusRule())
 	userService := userImpl.NewService(dao.GetUser())
@@ -60,6 +65,7 @@ func NewServiceManager(dao PersistenceManager) ServiceManager {
 		dashboard:      dashboardService,
 		dashboardFeed:  dashboardFeedService,
 		datasource:     datasourceService,
+		health:         healthService,
 		project:        projectService,
 		prometheusRule: prometheusRuleService,
 		user:           userService,
@@ -76,6 +82,10 @@ func (s *service) GetDashboardFeed() dashboard_feed.Service {
 
 func (s *service) GetDatasource() datasource.Service {
 	return s.datasource
+}
+
+func (s *service) GetHealth() health.Service {
+	return s.health
 }
 
 func (s *service) GetProject() project.Service {

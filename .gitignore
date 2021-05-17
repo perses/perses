@@ -23,8 +23,5 @@ Thumbs.db
 internal/api/impl/v1/**/*/endpoint.go
 internal/api/front/endpoint.go
 
-!pkg/client/api/v1/client.go
-pkg/client/api/v1/
-
 coverage.txt
 
