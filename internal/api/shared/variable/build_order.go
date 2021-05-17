@@ -11,9 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package variable is providing the necessary function to calculate the build order of the variables.
-//
-// To determinate which variable we have to build first (aka to perform the query), we have to:
+// Package variable is providing the necessary functions:
+// * to calculate the build order of the variables
+// * and to calculate the list of value for a given variable.
+package variable
+
+import (
+	"fmt"
+	"regexp"
+
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+)
+
+var (
+	variableRegexp  = regexp.MustCompile("^[a-zA-Z0-9_-]+$")
+	variableRegexp2 = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
+)
+
+type Group struct {
+	Variables []string
+}
+
+// BuildOrder determinate which variable we have to build first (aka to perform the query).
+// Here is the description of the algorithm followed:
 //
 // 1. First calculate which variable depend of which other variable
 // 2. Then, thanks to the dependencies, we can create a dependency graph.
@@ -64,24 +84,6 @@
 //      group1: (c), (b), (g)
 //      group2: (a)
 //      group3: (e)
-package variable
-
-import (
-	"fmt"
-	"regexp"
-
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-)
-
-var (
-	variableRegexp  = regexp.MustCompile("^[a-zA-Z0-9_-]+$")
-	variableRegexp2 = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
-)
-
-type Group struct {
-	variables []string
-}
-
 func BuildOrder(variables map[string]*v1.DashboardVariable) ([]Group, error) {
 	// calculate the build order of the variable just to verify there is no error
 	g, err := buildGraph(variables)
@@ -109,35 +111,31 @@ func buildVariableDependencies(variables map[string]*v1.DashboardVariable) (map[
 		if !variableRegexp.MatchString(name) {
 			return nil, fmt.Errorf("'%s' is not a correct variable name. It should match the regexp: %s", name, variableRegexp.String())
 		}
-		if variable.Kind == v1.KindQueryVariable {
-			// for the moment that's the only type of variable where you can use another variable defined
-			parameter := variable.Parameter.(*v1.QueryVariableParameter)
-			var matches [][]string
-			if parameter.LabelValues != nil {
-				matches = findAllVariableUsed(parameter.LabelValues.LabelName)
-				for _, matcher := range parameter.LabelValues.Matchers {
-					matches = append(matches, findAllVariableUsed(matcher)...)
-				}
-			} else if parameter.LabelNames != nil {
-				for _, matcher := range parameter.LabelNames.Matchers {
-					matches = append(matches, findAllVariableUsed(matcher)...)
-				}
-			} else {
-				matches = findAllVariableUsed(parameter.Expr)
+		var matches [][]string
+		switch param := variable.Parameter.(type) {
+		case *v1.PromQLQueryVariableParameter:
+			matches = findAllVariableUsed(param.Expr)
+		case *v1.LabelNamesQueryVariableParameter:
+			for _, matcher := range param.Matchers {
+				matches = append(matches, findAllVariableUsed(matcher)...)
 			}
-
-			deps := make(map[string]bool)
-			for _, match := range matches {
-				// match[0] is the string that is matching the regexp (including the $)
-				// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
-				if _, ok := variables[match[1]]; !ok {
-					return nil, fmt.Errorf("variable '%s' is used in the variable '%s' but not defined", match[1], name)
-				}
-				deps[match[1]] = true
+		case *v1.LabelValuesQueryVariableParameter:
+			matches = findAllVariableUsed(param.LabelName)
+			for _, matcher := range param.Matchers {
+				matches = append(matches, findAllVariableUsed(matcher)...)
 			}
-			for dep := range deps {
-				result[name] = append(result[name], dep)
+		}
+		deps := make(map[string]bool)
+		for _, match := range matches {
+			// match[0] is the string that is matching the regexp (including the $)
+			// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
+			if _, ok := variables[match[1]]; !ok {
+				return nil, fmt.Errorf("variable '%s' is used in the variable '%s' but not defined", match[1], name)
 			}
+			deps[match[1]] = true
+		}
+		for dep := range deps {
+			result[name] = append(result[name], dep)
 		}
 	}
 	return result, nil
@@ -179,18 +177,18 @@ func (g *graph) buildOrder() ([]Group, error) {
 		var newRemainingNode []*node
 		for _, n := range remainingNodes {
 			if n.dependencies == 0 {
-				group.variables = append(group.variables, n.name)
+				group.Variables = append(group.Variables, n.name)
 			} else {
 				newRemainingNode = append(newRemainingNode, n)
 			}
 		}
 		// if no variable has been added to the current node, then it means there are no nodes with no deps which means there is a circular dependency
-		if len(group.variables) == 0 {
+		if len(group.Variables) == 0 {
 			return nil, fmt.Errorf("circular dependency detected")
 		}
 		remainingNodes = newRemainingNode
 		// Then we loop other the available node in the current group to decrease for each children the number of dependencies
-		for _, v := range group.variables {
+		for _, v := range group.Variables {
 			for _, child := range g.nodes[v].children {
 				child.dependencies--
 			}

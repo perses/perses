@@ -18,9 +18,9 @@ import (
 	"time"
 
 	"github.com/perses/common/etcd"
-	"github.com/perses/perses/internal/api/impl/v1/dashboard/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/variable"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"

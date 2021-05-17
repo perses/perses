@@ -11,7 +11,7 @@ services:
       - 2379:2379
       - 2380:2380
 
-  prometheus:
-    image: 'prom/prometheus'
-    ports:
-    - 9090:9090
+  #prometheus:
+  #  image: 'prom/prometheus'
+  #  ports:
+  #  - 9090:9090
