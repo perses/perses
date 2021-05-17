@@ -16,11 +16,13 @@ package dependency
 import (
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
+	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -31,6 +33,7 @@ import (
 type PersistenceManager interface {
 	GetDashboard() dashboard.DAO
 	GetDatasource() datasource.DAO
+	GetHealth() health.DAO
 	GetProject() project.DAO
 	GetPrometheusRule() prometheusrule.DAO
 	GetUser() user.DAO
@@ -40,6 +43,7 @@ type persistence struct {
 	PersistenceManager
 	dashboard      dashboard.DAO
 	datasource     datasource.DAO
+	health         health.DAO
 	project        project.DAO
 	prometheusRule prometheusrule.DAO
 	user           user.DAO
@@ -52,12 +56,14 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	}
 	dashboardDAO := dashboardImpl.NewDAO(persesDAO)
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
+	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
 	prometheusRuleDAO := prometheusruleImpl.NewDAO(persesDAO)
 	userDAO := userImpl.NewDAO(persesDAO)
 	return &persistence{
 		dashboard:      dashboardDAO,
 		datasource:     datasourceDAO,
+		health:         healthDAO,
 		project:        projectDAO,
 		prometheusRule: prometheusRuleDAO,
 		user:           userDAO,
@@ -70,6 +76,10 @@ func (p *persistence) GetDashboard() dashboard.DAO {
 
 func (p *persistence) GetDatasource() datasource.DAO {
 	return p.datasource
+}
+
+func (p *persistence) GetHealth() health.DAO {
+	return p.health
 }
 
 func (p *persistence) GetProject() project.DAO {

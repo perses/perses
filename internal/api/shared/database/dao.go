@@ -35,6 +35,7 @@ type DAO interface {
 	Get(key string, entity interface{}) error
 	Query(query etcd.Query, slice interface{}) error
 	Delete(key string) error
+	HealthCheck() bool
 }
 
 func New(conf config.Database) (DAO, error) {
@@ -192,6 +193,10 @@ func (d *fileDAO) Delete(key string) error {
 		return err
 	}
 	return nil
+}
+
+func (d *fileDAO) HealthCheck() bool {
+	return true
 }
 
 func (d *fileDAO) buildPath(key string) string {
