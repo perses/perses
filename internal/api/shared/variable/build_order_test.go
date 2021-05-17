@@ -306,7 +306,7 @@ func TestGraph_BuildOrder(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			g := newGraph(test.variables, test.dependencies)
+			g := newGraph(test.variables, test.dependencies, nil, nil)
 			result, err := g.buildOrder()
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(result))
@@ -354,9 +354,115 @@ func TestGraph_BuildOrderError(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			g := newGraph(test.variables, test.dependencies)
+			g := newGraph(test.variables, test.dependencies, nil, nil)
 			_, err := g.buildOrder()
 			assert.Equal(t, fmt.Errorf("circular dependency detected"), err)
+		})
+	}
+}
+
+func TestBuildOrder(t *testing.T) {
+	testSuite := []struct {
+		title     string
+		variables map[string]*v1.DashboardVariable
+		current   map[string]string
+		previous  map[string]string
+		result    []Group
+	}{
+		{
+			title: "no variable",
+		},
+		{
+			title: "constant variable, no dep",
+			variables: map[string]*v1.DashboardVariable{
+				"myVariable": {
+					Kind: v1.KindConstantVariable,
+					Parameter: &v1.ConstantVariableParameter{
+						Values: []string{"myConstant"},
+					},
+				},
+			},
+			result: []Group{{Variables: []string{"myVariable"}}},
+		},
+		{
+			title: "multiple usage of same variable",
+			variables: map[string]*v1.DashboardVariable{
+				"myVariable": {
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
+						Expr: "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+					},
+				},
+				"foo": {
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
+						Expr: "test",
+					},
+				},
+				"bar": {
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
+						Expr: "vector($foo)",
+					},
+				},
+				"doe": {
+					Kind: v1.KindConstantVariable,
+					Parameter: &v1.ConstantVariableParameter{
+						Values: []string{"myConstant"},
+					},
+				},
+			},
+			result: []Group{
+				{Variables: []string{"doe", "foo"}},
+				{Variables: []string{"bar"}},
+				{Variables: []string{"myVariable"}},
+			},
+		},
+		{
+			title: "multiple usage of same variable with foo variable known",
+			variables: map[string]*v1.DashboardVariable{
+				"myVariable": {
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
+						Expr: "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+					},
+				},
+				"foo": {
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
+						Expr: "test",
+					},
+				},
+				"bar": {
+					Kind: v1.KindPromQLQueryVariable,
+					Parameter: &v1.PromQLQueryVariableParameter{
+						Expr: "vector($foo)",
+					},
+				},
+				"doe": {
+					Kind: v1.KindConstantVariable,
+					Parameter: &v1.ConstantVariableParameter{
+						Values: []string{"myConstant"},
+					},
+				},
+			},
+			current: map[string]string{
+				"foo": "value",
+			},
+			result: []Group{
+				{Variables: []string{"bar", "doe"}},
+				{Variables: []string{"myVariable"}},
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			groups, err := BuildOrder(test.variables, test.current, test.previous)
+			assert.NoError(t, err)
+			assert.Equal(t, len(test.result), len(groups))
+			for i := 0; i < len(groups); i++ {
+				assert.ElementsMatch(t, test.result[i].Variables, groups[i].Variables)
+			}
 		})
 	}
 }
