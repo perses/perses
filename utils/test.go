@@ -18,6 +18,7 @@ package utils
 import (
 	"context"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -29,6 +30,10 @@ import (
 	"github.com/perses/perses/internal/config"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
+
+// DatabaseLocker should be used to be sure that only one test is modifying or accessing the database
+// It should avoid concurrent delete of object in the database
+var DatabaseLocker = &sync.Mutex{}
 
 func ClearAllKeys(t *testing.T, client *clientv3.Client) {
 	kv := clientv3.NewKV(client)
