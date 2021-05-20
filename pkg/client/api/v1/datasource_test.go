@@ -16,112 +16,111 @@
 package v1
 
 import (
-	"net/http/httptest"
+	"net/url"
 	"testing"
 
-	"github.com/perses/perses/pkg/client/perseshttp"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/utils"
 	"github.com/stretchr/testify/assert"
 )
 
-func createProject() *v1.Project {
-	return &v1.Project{
-		Kind: v1.KindProject,
-		Metadata: v1.Metadata{
-			Name: "perses",
-		}}
-}
-
-func createClient(t *testing.T, server *httptest.Server) ClientInterface {
-	restClient, err := perseshttp.NewFromConfig(&perseshttp.RestConfigClient{
-		URL: server.URL,
-	})
+func createDatasource(t *testing.T) *v1.Datasource {
+	promURL, err := url.Parse("https://prometheus.demo.do.prometheus.io")
 	if err != nil {
+
 		t.Fatal(err)
 	}
-	return NewWithClient(restClient)
+	return &v1.Datasource{
+		Kind: v1.KindDatasource,
+		Metadata: v1.Metadata{
+			Name: "PrometheusDemo",
+		},
+		Spec: v1.DatasourceSpec{URL: promURL},
+	}
 }
 
-func TestCreateProject(t *testing.T) {
+func TestCreateDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
+	entity := createDatasource(t)
 
 	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	object, err := persesClient.Project().Create(entity)
+	object, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
+	assert.Equal(t, entity.Spec, object.Spec)
 	utils.ClearAllKeys(t, etcdClient)
 }
 
-func TestUpdateProject(t *testing.T) {
+func TestUpdateDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
+	entity := createDatasource(t)
 
 	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
+	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
 
-	object, err := persesClient.Project().Update(entity)
+	object, err := persesClient.Datasource().Update(entity)
 	assert.NoError(t, err)
 
 	// for the moment the only thing to test is that the dates are correctly updated
 	assert.True(t, object.Metadata.CreatedAt.UnixNano() < object.Metadata.UpdatedAt.UnixNano())
+	assert.Equal(t, entity.Spec, object.Spec)
 
 	utils.ClearAllKeys(t, etcdClient)
 }
 
-func TestGetProject(t *testing.T) {
+func TestGetDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
+	entity := createDatasource(t)
 	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
+	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
-	object, err := persesClient.Project().Get(entity.Metadata.Name)
+	object, err := persesClient.Datasource().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
-	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
+	assert.Equal(t, entity.Metadata.Name, object.Metadata.Name)
+	assert.Equal(t, entity.Spec, object.Spec)
 
 	utils.ClearAllKeys(t, etcdClient)
 }
 
-func TestDeleteProject(t *testing.T) {
+func TestDeleteDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
+	entity := createDatasource(t)
 	server, _, _ := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
+	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
 
-	err = persesClient.Project().Delete(entity.Metadata.Name)
+	err = persesClient.Datasource().Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
 }
 
-func TestListProject(t *testing.T) {
+func TestListDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
+	entity := createDatasource(t)
 	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
+	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
-	objects, err := persesClient.Project().List("")
+	objects, err := persesClient.Datasource().List("")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(objects))
 	assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
