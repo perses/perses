@@ -35,13 +35,31 @@ import (
 // It should avoid concurrent delete of object in the database
 var DatabaseLocker = &sync.Mutex{}
 
-func ClearAllKeys(t *testing.T, client *clientv3.Client) {
+func ClearAllKeys(t *testing.T, client *clientv3.Client, keys ...string) {
 	kv := clientv3.NewKV(client)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	_, err := kv.Delete(ctx, "", clientv3.WithPrefix())
 	if err != nil {
 		t.Fatal(err)
+	}
+	for _, key := range keys {
+		var count int64 = 1
+		i := 0
+		for count > 0 && i < 30 {
+			gr, err := kv.Get(context.Background(), key)
+			if err != nil {
+				t.Fatal(err)
+			}
+			count = gr.Count
+			if count > 0 {
+				time.Sleep(2 * time.Second)
+			}
+			i++
+		}
+		if i >= 30 && count > 0 {
+			t.Fatal("database is not correctly cleanup to be able to move to the next test")
+		}
 	}
 }
 

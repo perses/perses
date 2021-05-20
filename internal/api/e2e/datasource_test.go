@@ -63,7 +63,7 @@ func TestCreateDatasource(t *testing.T) {
 	// check the document exists in the db
 	_, err := persistenceManager.GetDatasource().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestCreateDatasourceWithConflict(t *testing.T) {
@@ -90,7 +90,7 @@ func TestCreateDatasourceWithConflict(t *testing.T) {
 		Expect().
 		Status(http.StatusConflict)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestCreateDatasourceBadRequest(t *testing.T) {
@@ -155,14 +155,14 @@ func TestUpdateDatasource(t *testing.T) {
 	_, err = persistenceManager.GetDatasource().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestUpdateDatasourceNotFound(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newDatasource(t)
-	server, _, etcdClient := utils.CreateServer(t)
+	server, _, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -173,15 +173,13 @@ func TestUpdateDatasourceNotFound(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusNotFound)
-
-	utils.ClearAllKeys(t, etcdClient)
 }
 
 func TestUpdateDatasourceBadRequest(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newDatasource(t)
-	server, _, etcdClient := utils.CreateServer(t)
+	server, _, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -193,8 +191,6 @@ func TestUpdateDatasourceBadRequest(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusBadRequest)
-
-	utils.ClearAllKeys(t, etcdClient)
 }
 
 func TestGetDatasource(t *testing.T) {
@@ -217,7 +213,7 @@ func TestGetDatasource(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestGetDatasourceNotFound(t *testing.T) {
@@ -254,6 +250,10 @@ func TestDeleteDatasource(t *testing.T) {
 	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusNoContent)
+
+	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
+		Expect().
+		Status(http.StatusNotFound)
 }
 
 func TestDeleteDatasourceNotFound(t *testing.T) {
@@ -290,5 +290,5 @@ func TestListDatasource(t *testing.T) {
 	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
 		Expect().
 		Status(http.StatusOK)
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }

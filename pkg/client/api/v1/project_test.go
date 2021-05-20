@@ -55,7 +55,7 @@ func TestCreateProject(t *testing.T) {
 	object, err := persesClient.Project().Create(entity)
 	assert.NoError(t, err)
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestUpdateProject(t *testing.T) {
@@ -76,7 +76,7 @@ func TestUpdateProject(t *testing.T) {
 	// for the moment the only thing to test is that the dates are correctly updated
 	assert.True(t, object.Metadata.CreatedAt.UnixNano() < object.Metadata.UpdatedAt.UnixNano())
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestGetProject(t *testing.T) {
@@ -93,7 +93,7 @@ func TestGetProject(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestDeleteProject(t *testing.T) {
@@ -126,5 +126,5 @@ func TestListProject(t *testing.T) {
 	assert.Equal(t, 1, len(objects))
 	assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }

@@ -56,7 +56,7 @@ func TestCreateProject(t *testing.T) {
 	// check the document exists in the db
 	_, err := persistenceManager.GetProject().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestCreateProjectWithConflict(t *testing.T) {
@@ -83,7 +83,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 		Expect().
 		Status(http.StatusConflict)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestCreateProjectBadRequest(t *testing.T) {
@@ -148,7 +148,7 @@ func TestUpdateProject(t *testing.T) {
 	_, err = persistenceManager.GetProject().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestUpdateProjectNotFound(t *testing.T) {
@@ -174,7 +174,7 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newProject()
-	server, _, etcdClient := utils.CreateServer(t)
+	server, _, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -186,8 +186,6 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusBadRequest)
-
-	utils.ClearAllKeys(t, etcdClient)
 }
 
 func TestGetProject(t *testing.T) {
@@ -210,7 +208,7 @@ func TestGetProject(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestGetProjectNotFound(t *testing.T) {
@@ -247,6 +245,10 @@ func TestDeleteProject(t *testing.T) {
 	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusNoContent)
+
+	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
+		Expect().
+		Status(http.StatusNotFound)
 }
 
 func TestDeleteProjectNotFound(t *testing.T) {
@@ -267,7 +269,7 @@ func TestDeleteProjectNotFound(t *testing.T) {
 func TestListProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	project := newProject()
+	entity := newProject()
 	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -276,12 +278,12 @@ func TestListProject(t *testing.T) {
 	})
 
 	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
-		WithJSON(project).
+		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
 
 	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
 		Expect().
 		Status(http.StatusOK)
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }

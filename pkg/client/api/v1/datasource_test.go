@@ -52,7 +52,7 @@ func TestCreateDatasource(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
 	assert.Equal(t, entity.Spec, object.Spec)
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestUpdateDatasource(t *testing.T) {
@@ -74,7 +74,7 @@ func TestUpdateDatasource(t *testing.T) {
 	assert.True(t, object.Metadata.CreatedAt.UnixNano() < object.Metadata.UpdatedAt.UnixNano())
 	assert.Equal(t, entity.Spec, object.Spec)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestGetDatasource(t *testing.T) {
@@ -92,7 +92,7 @@ func TestGetDatasource(t *testing.T) {
 	assert.Equal(t, entity.Metadata.Name, object.Metadata.Name)
 	assert.Equal(t, entity.Spec, object.Spec)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
 func TestDeleteDatasource(t *testing.T) {
@@ -125,5 +125,5 @@ func TestListDatasource(t *testing.T) {
 	assert.Equal(t, 1, len(objects))
 	assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
 
-	utils.ClearAllKeys(t, etcdClient)
+	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
