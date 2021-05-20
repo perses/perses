@@ -21,9 +21,11 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/dependency"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/utils"
 	"github.com/stretchr/testify/assert"
@@ -44,6 +46,15 @@ func newDatasource(t *testing.T) *v1.Datasource {
 	}
 }
 
+func waitUntilDatasourceIsCreate(persistenceManager dependency.PersistenceManager, entity *v1.Datasource) {
+	// we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
+	i := 0
+	for _, err := persistenceManager.GetDatasource().Get(entity.Metadata.Name); err != nil && i < 30; _, err = persistenceManager.GetDatasource().Get(entity.Metadata.Name) {
+		i++
+		time.Sleep(2 * time.Second)
+	}
+}
+
 func TestCreateDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
@@ -60,6 +71,8 @@ func TestCreateDatasource(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
+	waitUntilDatasourceIsCreate(persistenceManager, entity)
+
 	// check the document exists in the db
 	_, err := persistenceManager.GetDatasource().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -71,7 +84,7 @@ func TestCreateDatasourceWithConflict(t *testing.T) {
 	utils.DatabaseLocker.Unlock()
 	entity := newDatasource(t)
 
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -83,6 +96,8 @@ func TestCreateDatasourceWithConflict(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
+
+	waitUntilDatasourceIsCreate(persistenceManager, entity)
 
 	// recall the same endpoint, it should now return a conflict error
 	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
@@ -129,6 +144,8 @@ func TestUpdateDatasource(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
+
+	waitUntilDatasourceIsCreate(persistenceManager, entity)
 
 	// call now the update endpoint, shouldn't return an error
 	o := e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
@@ -197,7 +214,7 @@ func TestGetDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newDatasource(t)
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -208,6 +225,8 @@ func TestGetDatasource(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
+
+	waitUntilDatasourceIsCreate(persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().
@@ -235,7 +254,7 @@ func TestDeleteDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newDatasource(t)
-	server, _, _ := utils.CreateServer(t)
+	server, persistenceManager, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -246,6 +265,8 @@ func TestDeleteDatasource(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
+
+	waitUntilDatasourceIsCreate(persistenceManager, entity)
 
 	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().

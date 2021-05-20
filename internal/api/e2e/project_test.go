@@ -20,9 +20,11 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/dependency"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/utils"
 	"github.com/stretchr/testify/assert"
@@ -34,6 +36,15 @@ func newProject() *v1.Project {
 		Metadata: v1.Metadata{
 			Name: "perses",
 		}}
+}
+
+func waitUntilProjectIsCreate(persistenceManager dependency.PersistenceManager, entity *v1.Project) {
+	// we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
+	i := 0
+	for _, err := persistenceManager.GetProject().Get(entity.Metadata.Name); err != nil && i < 30; _, err = persistenceManager.GetProject().Get(entity.Metadata.Name) {
+		i++
+		time.Sleep(2 * time.Second)
+	}
 }
 
 func TestCreateProject(t *testing.T) {
@@ -53,6 +64,7 @@ func TestCreateProject(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
+	waitUntilProjectIsCreate(persistenceManager, entity)
 	// check the document exists in the db
 	_, err := persistenceManager.GetProject().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -64,7 +76,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 	utils.DatabaseLocker.Unlock()
 	entity := newProject()
 
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -76,6 +88,8 @@ func TestCreateProjectWithConflict(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
+
+	waitUntilProjectIsCreate(persistenceManager, entity)
 
 	// recall the same endpoint, it should now return a conflict error
 	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
@@ -122,6 +136,8 @@ func TestUpdateProject(t *testing.T) {
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
+
+	waitUntilProjectIsCreate(persistenceManager, entity)
 
 	// call now the update endpoint, shouldn't return an error
 	o := e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
@@ -192,17 +208,18 @@ func TestGetProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newProject()
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetProject().Create(entity); err != nil {
+		t.Fatal(err)
+	}
+
+	waitUntilProjectIsCreate(persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
 		Expect().
@@ -230,17 +247,18 @@ func TestDeleteProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newProject()
-	server, _, _ := utils.CreateServer(t)
+	server, persistenceManager, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetProject().Create(entity); err != nil {
+		t.Fatal(err)
+	}
+
+	waitUntilProjectIsCreate(persistenceManager, entity)
 
 	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
 		Expect().
@@ -270,17 +288,18 @@ func TestListProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := newProject()
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetProject().Create(entity); err != nil {
+		t.Fatal(err)
+	}
+
+	waitUntilProjectIsCreate(persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
 		Expect().
