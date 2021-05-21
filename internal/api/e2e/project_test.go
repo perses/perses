@@ -20,37 +20,18 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/dependency"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/utils"
 	"github.com/stretchr/testify/assert"
 )
 
-func newProject() *v1.Project {
-	return &v1.Project{
-		Kind: v1.KindProject,
-		Metadata: v1.Metadata{
-			Name: "perses",
-		}}
-}
-
-func waitUntilProjectIsCreate(persistenceManager dependency.PersistenceManager, entity *v1.Project) {
-	// we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
-	i := 0
-	for _, err := persistenceManager.GetProject().Get(entity.Metadata.Name); err != nil && i < 30; _, err = persistenceManager.GetProject().Get(entity.Metadata.Name) {
-		i++
-		time.Sleep(2 * time.Second)
-	}
-}
-
 func TestCreateProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
@@ -64,7 +45,7 @@ func TestCreateProject(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	waitUntilProjectIsCreate(persistenceManager, entity)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 	// check the document exists in the db
 	_, err := persistenceManager.GetProject().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -74,7 +55,7 @@ func TestCreateProject(t *testing.T) {
 func TestCreateProjectWithConflict(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
@@ -89,7 +70,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	waitUntilProjectIsCreate(persistenceManager, entity)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	// recall the same endpoint, it should now return a conflict error
 	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
@@ -122,7 +103,7 @@ func TestCreateProjectBadRequest(t *testing.T) {
 func TestUpdateProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
@@ -137,7 +118,7 @@ func TestUpdateProject(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	waitUntilProjectIsCreate(persistenceManager, entity)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	// call now the update endpoint, shouldn't return an error
 	o := e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
@@ -170,7 +151,7 @@ func TestUpdateProject(t *testing.T) {
 func TestUpdateProjectNotFound(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -189,7 +170,7 @@ func TestUpdateProjectNotFound(t *testing.T) {
 func TestUpdateProjectBadRequest(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 	server, _, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -207,7 +188,7 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 func TestGetProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -219,7 +200,7 @@ func TestGetProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	waitUntilProjectIsCreate(persistenceManager, entity)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
 		Expect().
@@ -246,7 +227,7 @@ func TestGetProjectNotFound(t *testing.T) {
 func TestDeleteProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 	server, persistenceManager, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -258,7 +239,7 @@ func TestDeleteProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	waitUntilProjectIsCreate(persistenceManager, entity)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
 		Expect().
@@ -287,7 +268,7 @@ func TestDeleteProjectNotFound(t *testing.T) {
 func TestListProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := newProject()
+	entity := utils.NewProject()
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -299,7 +280,7 @@ func TestListProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	waitUntilProjectIsCreate(persistenceManager, entity)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
 		Expect().

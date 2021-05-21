@@ -18,6 +18,7 @@ package utils
 import (
 	"context"
 	"net/http/httptest"
+	"net/url"
 	"sync"
 	"testing"
 	"time"
@@ -28,6 +29,7 @@ import (
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -60,6 +62,54 @@ func ClearAllKeys(t *testing.T, client *clientv3.Client, keys ...string) {
 		if i >= 30 && count > 0 {
 			t.Fatal("database is not correctly cleanup to be able to move to the next test")
 		}
+	}
+}
+
+func WaitUntilEntityIsCreate(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
+	var getFunc func(name string) (interface{}, error)
+	var entityName string
+	switch entity := object.(type) {
+	case *v1.Project:
+		entityName = entity.Metadata.Name
+		getFunc = func(name string) (interface{}, error) {
+			return persistenceManager.GetProject().Get(name)
+		}
+	case *v1.Datasource:
+		entityName = entity.Metadata.Name
+		getFunc = func(name string) (interface{}, error) {
+			return persistenceManager.GetDatasource().Get(name)
+		}
+	default:
+		t.Fatalf("%T is not managed", object)
+	}
+	// we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
+	i := 0
+	for _, err := getFunc(entityName); err != nil && i < 30; _, err = getFunc(entityName) {
+		i++
+		time.Sleep(2 * time.Second)
+	}
+}
+
+func NewProject() *v1.Project {
+	return &v1.Project{
+		Kind: v1.KindProject,
+		Metadata: v1.Metadata{
+			Name: "perses",
+		}}
+}
+
+func NewDatasource(t *testing.T) *v1.Datasource {
+	promURL, err := url.Parse("https://prometheus.demo.do.prometheus.io")
+	if err != nil {
+
+		t.Fatal(err)
+	}
+	return &v1.Datasource{
+		Kind: v1.KindDatasource,
+		Metadata: v1.Metadata{
+			Name: "PrometheusDemo",
+		},
+		Spec: v1.DatasourceSpec{URL: promURL},
 	}
 }
 

@@ -20,18 +20,9 @@ import (
 	"testing"
 
 	"github.com/perses/perses/pkg/client/perseshttp"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/utils"
 	"github.com/stretchr/testify/assert"
 )
-
-func createProject() *v1.Project {
-	return &v1.Project{
-		Kind: v1.KindProject,
-		Metadata: v1.Metadata{
-			Name: "perses",
-		}}
-}
 
 func createClient(t *testing.T, server *httptest.Server) ClientInterface {
 	restClient, err := perseshttp.NewFromConfig(&perseshttp.RestConfigClient{
@@ -46,14 +37,16 @@ func createClient(t *testing.T, server *httptest.Server) ClientInterface {
 func TestCreateProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
+	entity := utils.NewProject()
 
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	object, err := persesClient.Project().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
@@ -61,14 +54,15 @@ func TestCreateProject(t *testing.T) {
 func TestUpdateProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
+	entity := utils.NewProject()
 
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Project().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	object, err := persesClient.Project().Update(entity)
 	assert.NoError(t, err)
@@ -82,13 +76,15 @@ func TestUpdateProject(t *testing.T) {
 func TestGetProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
-	server, _, etcdClient := utils.CreateServer(t)
+	entity := utils.NewProject()
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Project().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+
 	object, err := persesClient.Project().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
@@ -99,13 +95,14 @@ func TestGetProject(t *testing.T) {
 func TestDeleteProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
-	server, _, _ := utils.CreateServer(t)
+	entity := utils.NewProject()
+	server, persistenceManager, _ := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Project().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	err = persesClient.Project().Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -114,13 +111,15 @@ func TestDeleteProject(t *testing.T) {
 func TestListProject(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createProject()
-	server, _, etcdClient := utils.CreateServer(t)
+	entity := utils.NewProject()
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Project().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+
 	objects, err := persesClient.Project().List("")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(objects))

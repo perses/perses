@@ -16,40 +16,25 @@
 package v1
 
 import (
-	"net/url"
 	"testing"
 
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/utils"
 	"github.com/stretchr/testify/assert"
 )
 
-func createDatasource(t *testing.T) *v1.Datasource {
-	promURL, err := url.Parse("https://prometheus.demo.do.prometheus.io")
-	if err != nil {
-
-		t.Fatal(err)
-	}
-	return &v1.Datasource{
-		Kind: v1.KindDatasource,
-		Metadata: v1.Metadata{
-			Name: "PrometheusDemo",
-		},
-		Spec: v1.DatasourceSpec{URL: promURL},
-	}
-}
-
 func TestCreateDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createDatasource(t)
+	entity := utils.NewDatasource(t)
 
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	object, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
 	assert.Equal(t, entity.Spec, object.Spec)
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
@@ -58,14 +43,16 @@ func TestCreateDatasource(t *testing.T) {
 func TestUpdateDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createDatasource(t)
+	entity := utils.NewDatasource(t)
 
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
+
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	object, err := persesClient.Datasource().Update(entity)
 	assert.NoError(t, err)
@@ -80,13 +67,15 @@ func TestUpdateDatasource(t *testing.T) {
 func TestGetDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createDatasource(t)
-	server, _, etcdClient := utils.CreateServer(t)
+	entity := utils.NewDatasource(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+
 	object, err := persesClient.Datasource().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, entity.Metadata.Name, object.Metadata.Name)
@@ -98,13 +87,14 @@ func TestGetDatasource(t *testing.T) {
 func TestDeleteDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createDatasource(t)
-	server, _, _ := utils.CreateServer(t)
+	entity := utils.NewDatasource(t)
+	server, persistenceManager, _ := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	err = persesClient.Datasource().Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -113,13 +103,15 @@ func TestDeleteDatasource(t *testing.T) {
 func TestListDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := createDatasource(t)
-	server, _, etcdClient := utils.CreateServer(t)
+	entity := utils.NewDatasource(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	_, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
+	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+
 	objects, err := persesClient.Datasource().List("")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(objects))
