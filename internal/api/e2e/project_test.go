@@ -64,11 +64,9 @@ func TestCreateProjectWithConflict(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	// perform the POST request, no error should occur at this point
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -113,10 +111,9 @@ func TestUpdateProject(t *testing.T) {
 	})
 
 	// perform the POST request, no error should occur at this point
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -196,7 +193,7 @@ func TestGetProject(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	if err := persistenceManager.GetProject().Create(entity); err != nil {
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
 		t.Fatal(err)
 	}
 
@@ -235,7 +232,7 @@ func TestDeleteProject(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	if err := persistenceManager.GetProject().Create(entity); err != nil {
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
 		t.Fatal(err)
 	}
 
@@ -276,7 +273,7 @@ func TestListProject(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	if err := persistenceManager.GetProject().Create(entity); err != nil {
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
 		t.Fatal(err)
 	}
 

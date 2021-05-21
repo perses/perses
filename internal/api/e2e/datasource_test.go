@@ -64,11 +64,9 @@ func TestCreateDatasourceWithConflict(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	// perform the POST request, no error should occur at this point
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -112,11 +110,9 @@ func TestUpdateDatasource(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	// perform the POST request, no error should occur at this point
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -194,10 +190,9 @@ func TestGetDatasource(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -234,10 +229,9 @@ func TestDeleteDatasource(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -269,17 +263,16 @@ func TestListDatasource(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	entity := utils.NewDatasource(t)
-	server, _, etcdClient := utils.CreateServer(t)
+	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
 		Expect().

@@ -64,11 +64,9 @@ func TestCreateUserWithConflict(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	// perform the POST request, no error should occur at this point
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathUser)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetUser().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -112,11 +110,9 @@ func TestUpdateUser(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	// perform the POST request, no error should occur at this point
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathUser)).
-		WithJSON(entity).
-		Expect().
-		Status(http.StatusOK)
+	if err := persistenceManager.GetUser().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -196,7 +192,7 @@ func TestGetUser(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	if err := persistenceManager.GetUser().Create(entity); err != nil {
+	if err := persistenceManager.GetUser().Update(entity); err != nil {
 		t.Fatal(err)
 	}
 
@@ -235,7 +231,7 @@ func TestDeleteUser(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	if err := persistenceManager.GetUser().Create(entity); err != nil {
+	if err := persistenceManager.GetUser().Update(entity); err != nil {
 		t.Fatal(err)
 	}
 

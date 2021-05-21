@@ -60,8 +60,9 @@ func TestUpdateProject(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	object, err := persesClient.Project().Update(entity)
@@ -81,8 +82,9 @@ func TestGetProject(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	object, err := persesClient.Project().Get(entity.Metadata.Name)
@@ -100,11 +102,12 @@ func TestDeleteProject(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
-	err = persesClient.Project().Delete(entity.Metadata.Name)
+	err := persesClient.Project().Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
 }
 
@@ -116,8 +119,9 @@ func TestListProject(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Project().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetProject().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	objects, err := persesClient.Project().List("")

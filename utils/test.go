@@ -96,11 +96,13 @@ func WaitUntilEntityIsCreate(t *testing.T, persistenceManager dependency.Persist
 }
 
 func NewProject() *v1.Project {
-	return &v1.Project{
+	entity := &v1.Project{
 		Kind: v1.KindProject,
 		Metadata: v1.Metadata{
 			Name: "perses",
 		}}
+	entity.Metadata.CreateNow()
+	return entity
 }
 
 func NewDatasource(t *testing.T) *v1.Datasource {
@@ -109,17 +111,19 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 
 		t.Fatal(err)
 	}
-	return &v1.Datasource{
+	entity := &v1.Datasource{
 		Kind: v1.KindDatasource,
 		Metadata: v1.Metadata{
 			Name: "PrometheusDemo",
 		},
 		Spec: v1.DatasourceSpec{URL: promURL},
 	}
+	entity.Metadata.CreateNow()
+	return entity
 }
 
 func NewUser() *v1.User {
-	return &v1.User{
+	entity := &v1.User{
 		Kind: v1.KindUser,
 		Metadata: v1.Metadata{
 			Name: "jdoe",
@@ -130,6 +134,8 @@ func NewUser() *v1.User {
 			Password:  []byte("password"),
 		},
 	}
+	entity.Metadata.CreateNow()
+	return entity
 }
 
 func DefaultETCDConfig() *configUtils.EtcdConfig {

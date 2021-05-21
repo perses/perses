@@ -49,8 +49,9 @@ func TestUpdateDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Datasource().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
@@ -72,8 +73,9 @@ func TestGetDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Datasource().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	object, err := persesClient.Datasource().Get(entity.Metadata.Name)
@@ -92,11 +94,12 @@ func TestDeleteDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Datasource().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
-	err = persesClient.Datasource().Delete(entity.Metadata.Name)
+	err := persesClient.Datasource().Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
 }
 
@@ -108,8 +111,9 @@ func TestListDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	_, err := persesClient.Datasource().Create(entity)
-	assert.NoError(t, err)
+	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
+		t.Fatal(err)
+	}
 	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	objects, err := persesClient.Datasource().List("")
