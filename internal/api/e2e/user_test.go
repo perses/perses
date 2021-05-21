@@ -28,10 +28,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateProject(t *testing.T) {
+func TestCreateUser(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
@@ -40,21 +40,21 @@ func TestCreateProject(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 	// perform the POST request, no error should occur at this point
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
+	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathUser)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK)
 
 	// check the document exists in the db
-	_, err := persistenceManager.GetProject().Get(entity.Metadata.Name)
+	_, err := persistenceManager.GetUser().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
-func TestCreateProjectWithConflict(t *testing.T) {
+func TestCreateUserWithConflict(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
@@ -65,7 +65,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	// recall the same endpoint, it should now return a conflict error
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
+	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathUser)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusConflict)
@@ -73,10 +73,10 @@ func TestCreateProjectWithConflict(t *testing.T) {
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
-func TestCreateProjectBadRequest(t *testing.T) {
+func TestCreateUserBadRequest(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	project := &v1.Project{Kind: v1.KindProject}
+	user := &v1.User{Kind: v1.KindUser}
 
 	server, _, _ := utils.CreateServer(t)
 	defer server.Close()
@@ -86,16 +86,16 @@ func TestCreateProjectBadRequest(t *testing.T) {
 	})
 
 	// metadata.name is not provided, it should return a bad request
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
-		WithJSON(project).
+	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathUser)).
+		WithJSON(user).
 		Expect().
 		Status(http.StatusBadRequest)
 }
 
-func TestUpdateProject(t *testing.T) {
+func TestUpdateUser(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
@@ -106,7 +106,7 @@ func TestUpdateProject(t *testing.T) {
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	// call now the update endpoint, shouldn't return an error
-	o := e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
+	o := e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathUser, entity.Metadata.Name)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK).
@@ -118,7 +118,7 @@ func TestUpdateProject(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result := &v1.Project{}
+	result := &v1.User{}
 	if err := json.Unmarshal(raw, result); err != nil {
 		t.Fatal(err)
 	}
@@ -127,16 +127,16 @@ func TestUpdateProject(t *testing.T) {
 	assert.True(t, result.Metadata.CreatedAt.UnixNano() < result.Metadata.UpdatedAt.UnixNano())
 
 	// check the document exists in the db
-	_, err = persistenceManager.GetProject().Get(entity.Metadata.Name)
+	_, err = persistenceManager.GetUser().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
 
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
-func TestUpdateProjectNotFound(t *testing.T) {
+func TestUpdateUserNotFound(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -144,7 +144,7 @@ func TestUpdateProjectNotFound(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
+	e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathUser, entity.Metadata.Name)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusNotFound)
@@ -152,10 +152,10 @@ func TestUpdateProjectNotFound(t *testing.T) {
 	utils.ClearAllKeys(t, etcdClient)
 }
 
-func TestUpdateProjectBadRequest(t *testing.T) {
+func TestUpdateUserBadRequest(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 	server, _, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -164,16 +164,16 @@ func TestUpdateProjectBadRequest(t *testing.T) {
 	})
 
 	// the name in the metadata and the name in the path doesn't match, it should return a bad request
-	e.PUT(fmt.Sprintf("%s/%s/otherProject", shared.APIV1Prefix, shared.PathProject)).
+	e.PUT(fmt.Sprintf("%s/%s/otherUser", shared.APIV1Prefix, shared.PathUser)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusBadRequest)
 }
 
-func TestGetProject(t *testing.T) {
+func TestGetUser(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -182,14 +182,14 @@ func TestGetProject(t *testing.T) {
 	})
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
+	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathUser, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusOK)
 
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
 }
 
-func TestGetProjectNotFound(t *testing.T) {
+func TestGetUserNotFound(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	server, _, _ := utils.CreateServer(t)
@@ -199,15 +199,15 @@ func TestGetProjectNotFound(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.GET(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathProject)).
+	e.GET(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathUser)).
 		Expect().
 		Status(http.StatusNotFound)
 }
 
-func TestDeleteProject(t *testing.T) {
+func TestDeleteUser(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 	server, persistenceManager, _ := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -216,16 +216,16 @@ func TestDeleteProject(t *testing.T) {
 	})
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
+	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathUser, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusNoContent)
 
-	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
+	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathUser, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusNotFound)
 }
 
-func TestDeleteProjectNotFound(t *testing.T) {
+func TestDeleteUserNotFound(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
 	server, _, _ := utils.CreateServer(t)
@@ -235,15 +235,15 @@ func TestDeleteProjectNotFound(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.DELETE(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathProject)).
+	e.DELETE(fmt.Sprintf("%s/%s/perses", shared.APIV1Prefix, shared.PathUser)).
 		Expect().
 		Status(http.StatusNotFound)
 }
 
-func TestListProject(t *testing.T) {
+func TestListUser(t *testing.T) {
 	utils.DatabaseLocker.Lock()
 	utils.DatabaseLocker.Unlock()
-	entity := utils.NewProject()
+	entity := utils.NewUser()
 	server, persistenceManager, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	e := httpexpect.WithConfig(httpexpect.Config{
@@ -252,7 +252,7 @@ func TestListProject(t *testing.T) {
 	})
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
+	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathUser)).
 		Expect().
 		Status(http.StatusOK)
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())

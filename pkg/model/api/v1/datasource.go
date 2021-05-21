@@ -32,15 +32,23 @@ type tmpDatasourceSpec struct {
 }
 
 func (d *DatasourceSpec) MarshalJSON() ([]byte, error) {
+	urlAsString := ""
+	if d.URL != nil {
+		urlAsString = d.URL.String()
+	}
 	tmp := &tmpDatasourceSpec{
-		URL: d.URL.String(),
+		URL: urlAsString,
 	}
 	return json.Marshal(tmp)
 }
 
 func (d *DatasourceSpec) MarshalYAML() (interface{}, error) {
+	urlAsString := ""
+	if d.URL != nil {
+		urlAsString = d.URL.String()
+	}
 	tmp := &tmpDatasourceSpec{
-		URL: d.URL.String(),
+		URL: urlAsString,
 	}
 	return tmp, nil
 }

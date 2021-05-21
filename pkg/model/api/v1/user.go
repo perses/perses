@@ -30,9 +30,9 @@ type UserSpec struct {
 
 func (p *UserSpec) UnmarshalJSON(data []byte) error {
 	type plain = struct {
-		FirstName string `json:"first_name,omitempty"`
-		LastName  string `json:"last_name,omitempty"`
-		Password  string `json:"password,omitempty"`
+		FirstName string `json:"first_name,omitempty" yaml:"first_name,omitempty"`
+		LastName  string `json:"last_name,omitempty" yaml:"last_name,omitempty"`
+		Password  string `json:"password,omitempty" yaml:"password,omitempty"`
 	}
 	var tmp plain
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -46,10 +46,28 @@ func (p *UserSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (p *UserSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type plain = struct {
+		FirstName string `json:"first_name,omitempty" yaml:"first_name,omitempty"`
+		LastName  string `json:"last_name,omitempty" yaml:"last_name,omitempty"`
+		Password  string `json:"password,omitempty" yaml:"password,omitempty"`
+	}
+	var tmp plain
+	if err := unmarshal(&tmp); err != nil {
+		return err
+	}
+	if len(tmp.Password) > 0 {
+		p.Password = []byte(tmp.Password)
+	}
+	p.LastName = tmp.LastName
+	p.FirstName = tmp.FirstName
+	return nil
+}
+
 type User struct {
-	Kind     Kind     `json:"kind"`
-	Metadata Metadata `json:"metadata"`
-	Spec     UserSpec `json:"spec"`
+	Kind     Kind     `json:"kind" yaml:"kind"`
+	Metadata Metadata `json:"metadata" yaml:"metadata"`
+	Spec     UserSpec `json:"spec" yaml:"spec"`
 }
 
 func (p *User) GenerateID() string {
