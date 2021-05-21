@@ -1,0 +1,58 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  build-front:
+    name: "build frontend"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install nodejs
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: install deps
+        run: cd ./internal/api/front/perses && npm ci
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: cd ./internal/api/front/perses && npm run build
+      - name: store angular production build
+        uses: actions/upload-artifact@v2
+        with:
+          name: angular-build
+          path: internal/api/front/perses/dist
+  build-back:
+    name: "build backend"
+    needs: build-front
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.x
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Download angular build
+        uses: actions/download-artifact@v2
+        with:
+          name: angular-build
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          install-only: true
+      - name: cross-build
+        run: make crossbuild
