@@ -79,6 +79,11 @@ func WaitUntilEntityIsCreate(t *testing.T, persistenceManager dependency.Persist
 		getFunc = func(name string) (interface{}, error) {
 			return persistenceManager.GetDatasource().Get(name)
 		}
+	case *v1.User:
+		entityName = entity.Metadata.Name
+		getFunc = func(name string) (interface{}, error) {
+			return persistenceManager.GetUser().Get(name)
+		}
 	default:
 		t.Fatalf("%T is not managed", object)
 	}
@@ -110,6 +115,20 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 			Name: "PrometheusDemo",
 		},
 		Spec: v1.DatasourceSpec{URL: promURL},
+	}
+}
+
+func NewUser() *v1.User {
+	return &v1.User{
+		Kind: v1.KindUser,
+		Metadata: v1.Metadata{
+			Name: "jdoe",
+		},
+		Spec: v1.UserSpec{
+			FirstName: "John",
+			LastName:  "Doe",
+			Password:  []byte("password"),
+		},
 	}
 }
 
