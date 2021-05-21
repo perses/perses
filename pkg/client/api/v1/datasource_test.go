@@ -27,13 +27,12 @@ func TestCreateDatasource(t *testing.T) {
 	utils.DatabaseLocker.Unlock()
 	entity := utils.NewDatasource(t)
 
-	server, persistenceManager, etcdClient := utils.CreateServer(t)
+	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	object, err := persesClient.Datasource().Create(entity)
 	assert.NoError(t, err)
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
 	assert.Equal(t, entity.Spec, object.Spec)
@@ -49,11 +48,7 @@ func TestUpdateDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	object, err := persesClient.Datasource().Update(entity)
 	assert.NoError(t, err)
@@ -73,10 +68,7 @@ func TestGetDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	object, err := persesClient.Datasource().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -94,10 +86,7 @@ func TestDeleteDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	err := persesClient.Datasource().Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -111,10 +100,7 @@ func TestListDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	objects, err := persesClient.Datasource().List("")
 	assert.NoError(t, err)

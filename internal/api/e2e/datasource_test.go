@@ -44,8 +44,6 @@ func TestCreateDatasource(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
-
 	// check the document exists in the db
 	_, err := persistenceManager.GetDatasource().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -63,12 +61,7 @@ func TestCreateDatasourceWithConflict(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	// recall the same endpoint, it should now return a conflict error
 	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
@@ -109,12 +102,7 @@ func TestUpdateDatasource(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	// call now the update endpoint, shouldn't return an error
 	o := e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
@@ -189,12 +177,7 @@ func TestGetDatasource(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().
@@ -228,12 +211,7 @@ func TestDeleteDatasource(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetDatasource().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().

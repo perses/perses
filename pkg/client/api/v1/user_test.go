@@ -27,13 +27,12 @@ func TestCreateUser(t *testing.T) {
 	utils.DatabaseLocker.Unlock()
 	entity := utils.NewUser()
 
-	server, persistenceManager, etcdClient := utils.CreateServer(t)
+	server, _, etcdClient := utils.CreateServer(t)
 	defer server.Close()
 	persesClient := createClient(t, server)
 
 	object, err := persesClient.User().Create(entity)
 	assert.NoError(t, err)
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
 	utils.ClearAllKeys(t, etcdClient, entity.GenerateID())
@@ -48,10 +47,7 @@ func TestUpdateUser(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetUser().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	object, err := persesClient.User().Update(entity)
 	assert.NoError(t, err)
@@ -70,10 +66,7 @@ func TestGetUser(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetUser().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	object, err := persesClient.User().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -90,10 +83,7 @@ func TestDeleteUser(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetUser().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	err := persesClient.User().Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -107,10 +97,7 @@ func TestListUser(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	if err := persistenceManager.GetUser().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	objects, err := persesClient.User().List("")
 	assert.NoError(t, err)

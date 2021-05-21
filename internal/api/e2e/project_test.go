@@ -45,7 +45,6 @@ func TestCreateProject(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
 	// check the document exists in the db
 	_, err := persistenceManager.GetProject().Get(entity.Metadata.Name)
 	assert.NoError(t, err)
@@ -63,12 +62,7 @@ func TestCreateProjectWithConflict(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetProject().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	// recall the same endpoint, it should now return a conflict error
 	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
@@ -109,13 +103,7 @@ func TestUpdateProject(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	// perform the POST request, no error should occur at this point
-	if err := persistenceManager.GetProject().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	// call now the update endpoint, shouldn't return an error
 	o := e.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
@@ -192,12 +180,7 @@ func TestGetProject(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetProject().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
 		Expect().
@@ -231,12 +214,7 @@ func TestDeleteProject(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetProject().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	e.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Name)).
 		Expect().
@@ -272,12 +250,7 @@ func TestListProject(t *testing.T) {
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-
-	if err := persistenceManager.GetProject().Update(entity); err != nil {
-		t.Fatal(err)
-	}
-
-	utils.WaitUntilEntityIsCreate(t, persistenceManager, entity)
+	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
 	e.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathProject)).
 		Expect().

@@ -39,15 +39,13 @@ var DatabaseLocker = &sync.Mutex{}
 
 func ClearAllKeys(t *testing.T, client *clientv3.Client, keys ...string) {
 	kv := clientv3.NewKV(client)
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	_, err := kv.Delete(ctx, "", clientv3.WithPrefix())
-	if err != nil {
-		t.Fatal(err)
-	}
 	for _, key := range keys {
 		var count int64 = 1
 		i := 0
+		_, err := kv.Delete(context.Background(), key)
+		if err != nil {
+			t.Fatal(err)
+		}
 		for count > 0 && i < 30 {
 			gr, err := kv.Get(context.Background(), key)
 			if err != nil {
@@ -65,38 +63,55 @@ func ClearAllKeys(t *testing.T, client *clientv3.Client, keys ...string) {
 	}
 }
 
-func WaitUntilEntityIsCreate(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
-	var getFunc func(name string) (interface{}, error)
-	var entityName string
+func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
+	var getFunc func() (interface{}, error)
+	var upsertFunc func() error
 	switch entity := object.(type) {
 	case *v1.Project:
-		entityName = entity.Metadata.Name
-		getFunc = func(name string) (interface{}, error) {
-			return persistenceManager.GetProject().Get(name)
+		getFunc = func() (interface{}, error) {
+			return persistenceManager.GetProject().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetProject().Update(entity)
 		}
 	case *v1.Datasource:
-		entityName = entity.Metadata.Name
-		getFunc = func(name string) (interface{}, error) {
-			return persistenceManager.GetDatasource().Get(name)
+		getFunc = func() (interface{}, error) {
+			return persistenceManager.GetDatasource().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetDatasource().Update(entity)
 		}
 	case *v1.User:
-		entityName = entity.Metadata.Name
-		getFunc = func(name string) (interface{}, error) {
-			return persistenceManager.GetUser().Get(name)
+		getFunc = func() (interface{}, error) {
+			return persistenceManager.GetUser().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetUser().Update(entity)
 		}
 	default:
 		t.Fatalf("%T is not managed", object)
 	}
-	// we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
-	i := 0
-	var err error
-	for _, err = getFunc(entityName); err != nil && i < 30; _, err = getFunc(entityName) {
-		i++
-		time.Sleep(2 * time.Second)
+
+	// it appears that (maybe because of the tiny short between a delete order and a create order),
+	// an entity actually created in database could be removed by a previous delete order.
+	// In order to avoid that we will upsert the entity multiple times.
+	// Also we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
+	nbTimeToCreate := 3
+	for i := 0; i < nbTimeToCreate; i++ {
+		if err := upsertFunc(); err != nil {
+			t.Fatal(err)
+		}
+		j := 0
+		var err error
+		for _, err = getFunc(); err != nil && j < 30; _, err = getFunc() {
+			j++
+			time.Sleep(2 * time.Second)
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 func NewProject() *v1.Project {
