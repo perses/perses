@@ -97,21 +97,20 @@ func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.
 	// In order to avoid that we will upsert the entity multiple times.
 	// Also we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
 	nbTimeToCreate := 3
+	var err error
 	for i := 0; i < nbTimeToCreate; i++ {
 		if err := upsertFunc(); err != nil {
 			t.Fatal(err)
 		}
 		j := 0
-		var err error
 		for _, err = getFunc(); err != nil && j < 30; _, err = getFunc() {
 			j++
 			time.Sleep(2 * time.Second)
 		}
-		if err != nil {
-			t.Fatal(err)
-		}
 	}
-
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func NewProject() *v1.Project {
