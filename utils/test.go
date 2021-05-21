@@ -89,9 +89,13 @@ func WaitUntilEntityIsCreate(t *testing.T, persistenceManager dependency.Persist
 	}
 	// we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
 	i := 0
-	for _, err := getFunc(entityName); err != nil && i < 30; _, err = getFunc(entityName) {
+	var err error
+	for _, err = getFunc(entityName); err != nil && i < 30; _, err = getFunc(entityName) {
 		i++
 		time.Sleep(2 * time.Second)
+	}
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
