@@ -3,51 +3,6 @@ orbs:
   go: circleci/go@1.5.0
   node: circleci/node@4.2.0
 jobs:
-  build-front:
-    executor:
-      name: node/default
-      tag: '14.16'
-    steps:
-      - checkout
-      - node/install-packages:
-          cache-path: ~/project/internal/api/front/perses/node_modules
-          app-dir: '~/project/internal/api/front/perses'
-      - run: cd ~/project/internal/api/front/perses && npm run build
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - internal/api/front/perses/dist
-
-  lint-front:
-    executor:
-      name: node/default
-      tag: '14.16'
-    steps:
-      - checkout
-      - node/install-packages:
-          cache-path: ~/project/internal/api/front/perses/node_modules
-          app-dir: '~/project/internal/api/front/perses'
-      - run: cd ~/project/internal/api/front/perses && npm run lint
-
-  build:
-    executor:
-      name: go/default
-      tag: '1.16'
-    steps:
-      - checkout
-      - setup_remote_docker
-      - attach_workspace:
-          at: ~/project
-      - go/load-cache
-      - go/mod-download
-      - go/save-cache
-      - run:
-          name: "install goreleaser"
-          command: |
-            curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh
-            mkdir -p ~/bin
-            $SUDO cp ./bin/goreleaser ~/bin/goreleaser
-      - run: make crossbuild
   test:
     docker:
     - image: circleci/golang:1.16
@@ -69,41 +24,10 @@ jobs:
       - run: make integration-test
       - run: bash <(curl -s https://codecov.io/bash)
 
-  check_format:
-    executor:
-      name: go/default
-      tag: '1.16'
-    steps:
-      - checkout
-      - go/load-cache
-      - go/mod-download
-      - go/save-cache
-      - run: "make checkformat"
-
 workflows:
   main:
     jobs:
-      - build-front:
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+){2}(-.+)*/
-      - lint-front:
-          filters:
-            tags:
-              ignore: /.*/
-      - build:
-          requires:
-            - build-front
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+){2}(-.+)*/
       - test:
-          requires:
-            - build-front
-          filters:
-            tags:
-              ignore: /.*/
-      - check_format:
           filters:
             tags:
               ignore: /.*/

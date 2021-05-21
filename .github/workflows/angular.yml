@@ -1,0 +1,26 @@
+name: angular
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: install nodejs
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: install deps
+      run: cd ./internal/api/front/perses && npm ci
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: cd ./internal/api/front/perses && npm run lint
