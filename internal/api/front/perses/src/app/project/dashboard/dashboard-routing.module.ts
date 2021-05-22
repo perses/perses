@@ -11,12 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export enum Kind {
-  project = 'Project',
-  prometheusRule = 'PrometheusRule',
-  dashboard = 'Dashboard'
-}
+import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
 
-export interface HeaderModel {
-  kind: Kind;
+const ROUTES: Routes = [
+  {
+    path: '',
+    component: DashboardDetailsComponent,
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(ROUTES)],
+  exports: [RouterModule]
+})
+export class DashboardRoutingModule {
 }
