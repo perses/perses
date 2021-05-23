@@ -47,3 +47,7 @@ $perses-dark-theme:   mat-dark-theme((
 .perses-dark-theme {
   @include angular-material-color($perses-dark-theme);
 }
+
+.mat-expansion-panel {
+  background-color: inherit;
+}
