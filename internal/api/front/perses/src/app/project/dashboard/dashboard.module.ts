@@ -15,13 +15,22 @@ import { NgModule } from '@angular/core';
 import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
 import { SharedModule } from '../../shared/shared.module';
 import { DashboardRoutingModule } from './dashboard-routing.module';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { DashboardVariablesComponent } from './dashboard-variables/dashboard-variables.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 
 @NgModule({
-  declarations: [DashboardDetailsComponent],
+  declarations: [DashboardDetailsComponent, DashboardVariablesComponent],
   imports: [
     SharedModule,
     DashboardRoutingModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
   ]
 })
 export class DashboardModule {

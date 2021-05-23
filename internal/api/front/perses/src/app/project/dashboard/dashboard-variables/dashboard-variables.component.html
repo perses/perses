@@ -1,0 +1,12 @@
+<div class="container">
+  <div class="variable-item" *ngFor="let variable of dashboard.spec.variables | keyvalue">
+    <mat-form-field appearance="fill">
+      <mat-label>{{variable.key}}</mat-label>
+      <mat-select [value]="selectedValue[variable.key]">
+         <mat-option *ngFor="let value of variableValues[variable.key]" [value]="value">
+           {{value}}
+         </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>

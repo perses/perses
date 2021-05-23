@@ -10,3 +10,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+import { DashboardVariable } from './dashboard.model';
+
+export interface VariableFeedRequest {
+  datasource: string;
+  duration: string;
+  variables: Record<string, DashboardVariable>;
+  selected_variables?: Record<string, string>;
+  previous_selected_variables?: Record<string, string>;
+}
+
+export interface VariableFeedResponse {
+  name: string;
+  selected: string;
+  values: string [];
+  err?: string;
+}
