@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Component, Input, OnInit } from '@angular/core';
-import { DashboardModel } from '../dashboard.model';
+import { DashboardModel, VariableKind } from '../dashboard.model';
 import { DashboardFeedService } from '../dashboard-feed.service';
 import { VariableFeedRequest } from '../dashboard-feed.model';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -29,6 +29,7 @@ export class DashboardVariablesComponent implements OnInit {
   dashboard: DashboardModel = {} as DashboardModel;
   variableValues: Record<string, string[]> = {};
   selectedValue: Record<string, string> = {};
+  isVariableDetailsExpended = false;
 
   constructor(private dashboardFeed: DashboardFeedService,
               private toastService: ToastService) {

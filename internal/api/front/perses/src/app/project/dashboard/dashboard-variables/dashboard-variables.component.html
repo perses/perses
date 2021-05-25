@@ -1,12 +1,71 @@
-<div class="container">
-  <div class="variable-item" *ngFor="let variable of dashboard.spec.variables | keyvalue">
-    <mat-form-field appearance="fill">
-      <mat-label>{{variable.key}}</mat-label>
-      <mat-select [value]="selectedValue[variable.key]">
-         <mat-option *ngFor="let value of variableValues[variable.key]" [value]="value">
-           {{value}}
-         </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
+<div class="select-variable-container">
+  <ng-container *ngFor="let variable of dashboard.spec.variables | keyvalue; let isLast = last">
+    <div class="select-variable-item" *ngIf="!variable.value.hide">
+      <mat-form-field appearance="fill">
+        <mat-label>{{variable.key}}</mat-label>
+        <mat-select [value]="selectedValue[variable.key]">
+          <mat-option *ngFor="let value of variableValues[variable.key]" [value]="value">
+            {{value}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-icon-button *ngIf="isLast" (click)="isVariableDetailsExpended= !isVariableDetailsExpended">
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
+  </ng-container>
 </div>
+<mat-expansion-panel [expanded]="isVariableDetailsExpended" class="mat-elevation-z0">
+  <div class="variable-details-container">
+    <mat-card class="variable-details-item" *ngFor="let variable of dashboard.spec.variables | keyvalue">
+      <h3>General</h3>
+      <div class="box-container">
+        <div class="key-boxed">
+          name
+        </div>
+        <div class="value-boxed">
+          {{variable.key}}
+        </div>
+      </div>
+      <div class="box-container">
+        <div class="key-boxed">
+          kind
+        </div>
+        <div class="value-boxed">
+          {{dashboard.spec.variables[variable.key].kind}}
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <h3>Parameter</h3>
+      <ng-container [ngSwitch]="dashboard.spec.variables[variable.key].kind">
+        <ng-container *ngSwitchCase="'LabelValuesQuery'" >
+          <div class="box-container">
+            <div class="key-boxed">
+              label_name
+            </div>
+            <div class="value-boxed">
+              {{dashboard.spec.variables[variable.key].parameter.label_name}}
+            </div>
+          </div>
+          <div class="box-container">
+            <div class="key-boxed">
+              capturing_regexp
+            </div>
+            <div class="value-boxed">
+              {{dashboard.spec.variables[variable.key].parameter.capturing_regexp}}
+            </div>
+          </div>
+          <div class="box-container" *ngIf="dashboard.spec.variables[variable.key].parameter.matchers">
+            <div class="key-boxed">
+              matchers
+            </div>
+            <div class="value-boxed">
+              {{dashboard.spec.variables[variable.key].parameter.matchers}}
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </mat-card>
+  </div>
+
+</mat-expansion-panel>

@@ -11,12 +11,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-.container {
+@import "src/assets/styles/variables";
+
+.select-variable-container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }
 
-.variable-item {
+.select-variable-item {
   flex-grow: 1;
+}
+
+.variable-details-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: space-between;
+}
+
+.mat-card {
+  margin-bottom: 1rem;
+}
+
+.variable-details-item {
+  // flex-grow: 1;
+}
+
+::ng-deep .mat-expansion-panel-body {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.boxed {
+  border-radius: 4px;
+  outline: none;
+  padding: 8px;
+  flex-grow: 0;
+}
+
+.box-container {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.key-boxed {
+  @extend .boxed;
+  border: 1px;
+  background-color: rgba(0, 0, 0, 0.04);
+  min-width: 3rem;
+}
+
+.value-boxed {
+  @extend .boxed;
+  border: 1px solid #aaa;
+  text-wrap: normal;
+  box-sizing: border-box;
+  transition: .3s;
 }

@@ -14,12 +14,7 @@
 import { HeaderModel } from '../../shared/model/api/v1/kind.model';
 import { ProjectMetadata } from '../../shared/model/api/v1/metadata.model';
 
-export enum VariableKind {
-  promqlQuery = 'PromQLQuery',
-  labelNamesQuery = 'LabelNamesQuery',
-  labelValuesQuery = 'LabelValuesQuery',
-  constant = 'Constant'
-}
+export type VariableKind = 'PromQLQuery' | 'LabelNamesQuery' | 'LabelValuesQuery' | 'Constant';
 
 export interface PromQLQueryVariableParameter {
   expr: string;
@@ -42,13 +37,33 @@ export interface ConstantVariableParameter {
   values: string[];
 }
 
-export interface DashboardVariable {
+interface DashboardVariableInterface {
   kind: VariableKind;
   hide: boolean;
   selected: string;
-  parameter: PromQLQueryVariableParameter | LabelNamesQueryVariableParameter |
-    LabelValuesQueryVariableParameter | ConstantVariableParameter;
 }
+
+export interface PromQLVariable extends DashboardVariableInterface {
+  kind: 'PromQLQuery';
+  parameter: PromQLQueryVariableParameter;
+}
+
+export interface LabelValuesVariable extends DashboardVariableInterface {
+  kind: 'LabelValuesQuery';
+  parameter: LabelValuesQueryVariableParameter;
+}
+
+export interface LabelNamesVariable extends DashboardVariableInterface {
+  kind: 'LabelNamesQuery';
+  parameter: LabelNamesQueryVariableParameter;
+}
+
+export interface ConstantVariable extends DashboardVariableInterface {
+  kind: 'Constant';
+  parameter: ConstantVariableParameter;
+}
+
+export type DashboardVariable = PromQLVariable | LabelValuesVariable | LabelNamesVariable | ConstantVariable;
 
 export enum ChartKind {
   lineChart = 'LineChart'
