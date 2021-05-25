@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, Input, OnInit } from '@angular/core';
-import { DashboardModel, VariableKind } from '../dashboard.model';
-import { DashboardFeedService } from '../dashboard-feed.service';
-import { VariableFeedRequest } from '../dashboard-feed.model';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { ToastService } from '../../../shared/service/toast.service';
+import {Component, Input, OnInit} from '@angular/core';
+import {DashboardModel} from '../dashboard.model';
+import {DashboardFeedService} from '../dashboard-feed.service';
+import {VariableFeedRequest} from '../dashboard-feed.model';
+import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
+import {ToastService} from '../../../shared/service/toast.service';
 
 @UntilDestroy()
 @Component({

@@ -11,10 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HeaderModel } from '../../shared/model/api/v1/kind.model';
-import { ProjectMetadata } from '../../shared/model/api/v1/metadata.model';
+import {HeaderModel} from '../../shared/model/api/v1/kind.model';
+import {ProjectMetadata} from '../../shared/model/api/v1/metadata.model';
 
-export type VariableKind = 'PromQLQuery' | 'LabelNamesQuery' | 'LabelValuesQuery' | 'Constant';
+type ParametersType = {
+  PromqlQuery: PromQLQueryVariableParameter
+  Constant: ConstantVariableParameter
+  LabelValuesQuery: LabelValuesQueryVariableParameter
+  LabelNamesQuery: LabelNamesQueryVariableParameter
+};
 
 export interface PromQLQueryVariableParameter {
   expr: string;
@@ -37,33 +42,19 @@ export interface ConstantVariableParameter {
   values: string[];
 }
 
-interface DashboardVariableInterface {
-  kind: VariableKind;
+type PermutationParameter<T> = {
+  [K in keyof T]: {
+    kind: K;
+    parameter: T[K]
+  }
+}[keyof T];
+
+interface CommonDashboardVariable {
   hide: boolean;
   selected: string;
 }
 
-export interface PromQLVariable extends DashboardVariableInterface {
-  kind: 'PromQLQuery';
-  parameter: PromQLQueryVariableParameter;
-}
-
-export interface LabelValuesVariable extends DashboardVariableInterface {
-  kind: 'LabelValuesQuery';
-  parameter: LabelValuesQueryVariableParameter;
-}
-
-export interface LabelNamesVariable extends DashboardVariableInterface {
-  kind: 'LabelNamesQuery';
-  parameter: LabelNamesQueryVariableParameter;
-}
-
-export interface ConstantVariable extends DashboardVariableInterface {
-  kind: 'Constant';
-  parameter: ConstantVariableParameter;
-}
-
-export type DashboardVariable = PromQLVariable | LabelValuesVariable | LabelNamesVariable | ConstantVariable;
+export type DashboardVariable = CommonDashboardVariable & PermutationParameter<ParametersType>;
 
 export enum ChartKind {
   lineChart = 'LineChart'

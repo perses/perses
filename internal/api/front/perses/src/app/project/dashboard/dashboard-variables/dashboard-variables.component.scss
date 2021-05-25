@@ -13,30 +13,26 @@
 
 @import "src/assets/styles/variables";
 
+.variable-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
 .select-variable-container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }
 
-.select-variable-item {
-  flex-grow: 1;
+.select-variable-container .mat-card {
+  width: 450px;
+  margin-right: 1rem;
 }
 
-.variable-details-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-content: space-between;
-}
-
-.mat-card {
-  margin-bottom: 1rem;
-}
-
-.variable-details-item {
-  // flex-grow: 1;
+.select-variable-container .mat-form-field {
+  margin-right: 1rem;
 }
 
 ::ng-deep .mat-expansion-panel-body {
@@ -44,30 +40,20 @@
   padding-right: 0 !important;
 }
 
-.boxed {
+.variable-details-box {
   border-radius: 4px;
   outline: none;
   padding: 8px;
-  flex-grow: 0;
-}
-
-.box-container {
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-}
-
-.key-boxed {
-  @extend .boxed;
-  border: 1px;
-  background-color: rgba(0, 0, 0, 0.04);
-  min-width: 3rem;
-}
-
-.value-boxed {
-  @extend .boxed;
   border: 1px solid #aaa;
   text-wrap: normal;
   box-sizing: border-box;
   transition: .3s;
+  width: 450px;
+  margin-right: 1rem;
+}
+
+@media only screen and (max-width: $medium-screen) {
+  .variable-details-box{
+    width: 100%;
+  }
 }

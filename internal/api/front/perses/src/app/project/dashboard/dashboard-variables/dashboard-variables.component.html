@@ -1,71 +1,44 @@
-<div class="select-variable-container">
-  <ng-container *ngFor="let variable of dashboard.spec.variables | keyvalue; let isLast = last">
-    <div class="select-variable-item" *ngIf="!variable.value.hide">
-      <mat-form-field appearance="fill">
-        <mat-label>{{variable.key}}</mat-label>
-        <mat-select [value]="selectedValue[variable.key]">
-          <mat-option *ngFor="let value of variableValues[variable.key]" [value]="value">
-            {{value}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button mat-icon-button *ngIf="isLast" (click)="isVariableDetailsExpended= !isVariableDetailsExpended">
-        <mat-icon>settings</mat-icon>
-      </button>
-    </div>
-  </ng-container>
-</div>
-<mat-expansion-panel [expanded]="isVariableDetailsExpended" class="mat-elevation-z0">
-  <div class="variable-details-container">
-    <mat-card class="variable-details-item" *ngFor="let variable of dashboard.spec.variables | keyvalue">
-      <h3>General</h3>
-      <div class="box-container">
-        <div class="key-boxed">
-          name
-        </div>
-        <div class="value-boxed">
-          {{variable.key}}
-        </div>
-      </div>
-      <div class="box-container">
-        <div class="key-boxed">
-          kind
-        </div>
-        <div class="value-boxed">
-          {{dashboard.spec.variables[variable.key].kind}}
-        </div>
-      </div>
-      <mat-divider></mat-divider>
-      <h3>Parameter</h3>
-      <ng-container [ngSwitch]="dashboard.spec.variables[variable.key].kind">
-        <ng-container *ngSwitchCase="'LabelValuesQuery'" >
-          <div class="box-container">
-            <div class="key-boxed">
-              label_name
-            </div>
-            <div class="value-boxed">
-              {{dashboard.spec.variables[variable.key].parameter.label_name}}
-            </div>
-          </div>
-          <div class="box-container">
-            <div class="key-boxed">
-              capturing_regexp
-            </div>
-            <div class="value-boxed">
-              {{dashboard.spec.variables[variable.key].parameter.capturing_regexp}}
-            </div>
-          </div>
-          <div class="box-container" *ngIf="dashboard.spec.variables[variable.key].parameter.matchers">
-            <div class="key-boxed">
-              matchers
-            </div>
-            <div class="value-boxed">
-              {{dashboard.spec.variables[variable.key].parameter.matchers}}
-            </div>
-          </div>
-        </ng-container>
-      </ng-container>
-    </mat-card>
+<mat-card *ngIf="dashboard.spec.variables">
+  <div class="variable-header">
+    <h2>Variables</h2>
+    <button mat-icon-button (click)="isVariableDetailsExpended= !isVariableDetailsExpended"
+            matTooltip="Show configuration">
+      <mat-icon>settings</mat-icon>
+    </button>
   </div>
+  <div class="select-variable-container">
+    <ng-container *ngFor="let variable of dashboard.spec.variables | keyvalue">
+      <div *ngIf="!variable.value.hide">
+        <mat-form-field appearance="fill">
+          <mat-label>{{variable.key}}</mat-label>
+          <mat-select [value]="selectedValue[variable.key]">
+            <mat-option *ngFor="let value of variableValues[variable.key]" [value]="value">
+              {{value}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-expansion-panel [expanded]="isVariableDetailsExpended" class="mat-elevation-z0">
+          <div class="variable-details-box" *ngIf="isVariableDetailsExpended">
+            <h2>General</h2>
+            <app-input-box label="name" value="{{variable.key}}" [readonly]="true"></app-input-box>
+            <app-input-box label="kind" value="{{variable.value.kind}}" [readonly]="true"></app-input-box>
+            <app-input-box label="hide" value="{{variable.value.hide}}" [readonly]="true"></app-input-box>
+            <h2>Parameter</h2>
+            <ng-container *ngIf="variable.value.kind === 'LabelValuesQuery'">
+              <app-input-box label="label_name" value="{{variable.value.parameter.label_name}}" [readonly]="true"></app-input-box>
+              <app-input-box label="capturing_regexp" value="{{variable.value.parameter.capturing_regexp}}"
+                       [readonly]="true"></app-input-box>
+              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}" [readonly]="true"></app-input-box>
+            </ng-container>
+            <ng-container *ngIf="variable.value.kind === 'LabelNamesQuery'">
+              <app-input-box label="capturing_regexp" value="{{variable.value.parameter.capturing_regexp}}"
+                       [readonly]="true"></app-input-box>
+              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}" [readonly]="true"></app-input-box>
+            </ng-container>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </ng-container>
+  </div>
+</mat-card>
 
-</mat-expansion-panel>

@@ -20,20 +20,18 @@ import { DashboardVariablesComponent } from './dashboard-variables/dashboard-var
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatDividerModule } from '@angular/material/divider';
 
 
 @NgModule({
   declarations: [DashboardDetailsComponent, DashboardVariablesComponent],
-    imports: [
-        SharedModule,
-        DashboardRoutingModule,
-        MatExpansionModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatOptionModule,
-        MatDividerModule,
-    ]
+  imports: [
+    SharedModule,
+    DashboardRoutingModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+  ]
 })
 export class DashboardModule {
 }

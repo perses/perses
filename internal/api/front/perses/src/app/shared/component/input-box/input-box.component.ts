@@ -11,6 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-$large-screen: 1200px;
-$medium-screen: 800px;
-$xsmall-screen: 600px;
+import {Component, Input, OnInit} from '@angular/core';
+
+@Component({
+  selector: 'app-input-box',
+  templateUrl: './input-box.component.html',
+  styleUrls: ['./input-box.component.scss']
+})
+export class InputBoxComponent implements OnInit {
+
+  @Input()
+  label = '';
+  @Input()
+  value = '';
+  @Input()
+  readonly = false;
+
+  constructor() {
+  }
+
+  ngOnInit(): void {
+  }
+
+}
