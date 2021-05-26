@@ -24,7 +24,7 @@ import { catchError } from 'rxjs/operators';
 })
 export class DashboardService {
   private readonly resource = 'dashboards';
-  currentDashboard = <DashboardModel>{};
+  currentDashboard: DashboardModel = {} as DashboardModel;
 
   constructor(private readonly http: HttpClient, private readonly errorHandler: ErrorHandlingService) {
   }

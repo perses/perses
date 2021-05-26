@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DashboardService } from '../dashboard.service';
 import { DashboardFeedService } from '../dashboardfeed.service';
 import { DashboardFeedModel } from '../dashboardfeed.model';
@@ -29,9 +29,9 @@ import { DashboardModel } from '../dashboard.model';
   templateUrl: './dashboard-details.component.html',
   styleUrls: ['./dashboard-details.component.scss']
 })
-export class DashboardDetailsComponent {
-
-  name: string = "";
+export class DashboardDetailsComponent implements OnInit {
+  private readonly paramName = 'dashboard';
+  name = '';
   isLoading = false;
   dashboard: DashboardModel = {} as DashboardModel;
   ngxData = new Map<string, NgxLineChartModel[]>();
@@ -63,15 +63,15 @@ export class DashboardDetailsComponent {
     this.isLoading = true;
 
     this.route.params.subscribe(params => {
-       this.name = params['dashboard'];
+       this.name = params[this.paramName];
     });
 
     this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
       res => {
         this.currentProject = res;
 
-        if (Object.keys(this.service.currentDashboard).length != 0
-        && this.service.currentDashboard.metadata.name == this.name) {
+        if (Object.keys(this.service.currentDashboard).length !== 0
+        && this.service.currentDashboard.metadata.name === this.name) {
           this.dashboard = this.service.currentDashboard;
           this.feedDashboard();
         } else {
@@ -110,21 +110,21 @@ export class DashboardDetailsComponent {
   private convertDashboardFeeds(dashboardFeeds: DashboardFeedModel[]): void {
     for (const section of dashboardFeeds) {
       for (const panel of section.panels) {
-        const ngxPanelData: NgxLineChartModel[] = []
+        const ngxPanelData: NgxLineChartModel[] = [];
         for (const query of panel.results) {
           let i = 0;
           for (const serie of query.result) {
             const ngxSerieData: NgxLineChartModel = {
-              name: serie.metric.__name__ + " - " + i,
+              name: serie.metric.__name__ + ' - ' + i,
               series: []
             };
             for (const [timestamp, value] of serie.values) {
               const datapoint: NgxPoint = {name: String(timestamp), value: Number(value)};
-              ngxSerieData.series.push(datapoint)
+              ngxSerieData.series.push(datapoint);
             }
-            ngxPanelData[i] = ngxSerieData
-            i++
-            this.ngxData.set(section.name + "_" +  panel.name, ngxPanelData);
+            ngxPanelData[i] = ngxSerieData;
+            i++;
+            this.ngxData.set(section.name + '_' +  panel.name, ngxPanelData);
           }
         }
       }

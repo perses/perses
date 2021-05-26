@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DashboardService } from '../dashboard.service';
 import { DashboardModel } from '../dashboard.model';
 import { ToastService } from '../../../shared/service/toast.service';
@@ -22,7 +22,7 @@ import { ProjectService } from '../../project.service';
   templateUrl: './dashboard-list.component.html',
   styleUrls: ['./dashboard-list.component.scss']
 })
-export class DashboardListComponent {
+export class DashboardListComponent implements OnInit {
 
   isLoading = false;
   dashboards: DashboardModel[] = [];
