@@ -5,7 +5,8 @@
   <app-page-content>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <app-page-sub-content *ngIf="!isLoading">
-      <app-dashboard-variables [dashboard]="dashboard"></app-dashboard-variables>
+      <app-dashboard-variables [datasource]="dashboard.spec.datasource" [duration]="dashboard.spec.duration"
+                               [variables]="dashboard.spec.variables"></app-dashboard-variables>
     </app-page-sub-content>
   </app-page-content>
 </app-page>

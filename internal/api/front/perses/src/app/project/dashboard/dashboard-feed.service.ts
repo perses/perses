@@ -30,7 +30,7 @@ export class DashboardFeedService {
   }
 
   feedVariables(request: VariableFeedRequest): Observable<VariableFeedResponse[]> {
-    const url = new UrlBuilderUtil().setResource('feed' + '/variables');
+    const url = new UrlBuilderUtil().setResource(`${this.resource}/variables`);
     return this.http.post<VariableFeedResponse[]>(url.build(), request).pipe(catchError(this.errorHandler.handleHTTPError));
   }
 }

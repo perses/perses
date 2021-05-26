@@ -1,4 +1,4 @@
-<mat-card *ngIf="dashboard.spec.variables">
+<mat-card *ngIf="variables">
   <div class="variable-header">
     <h2>Variables</h2>
     <button mat-icon-button (click)="isVariableDetailsExpended= !isVariableDetailsExpended"
@@ -7,11 +7,11 @@
     </button>
   </div>
   <div class="select-variable-container">
-    <ng-container *ngFor="let variable of dashboard.spec.variables | keyvalue">
+    <ng-container *ngFor="let variable of variables | keyvalue">
       <div *ngIf="!variable.value.hide">
         <mat-form-field appearance="fill">
           <mat-label>{{variable.key}}</mat-label>
-          <mat-select [value]="selectedValue[variable.key]">
+          <mat-select [value]="selectedValue[variable.key]" (selectionChange)="selectValueChange(variable.key, $event)">
             <mat-option *ngFor="let value of variableValues[variable.key]" [value]="value">
               {{value}}
             </mat-option>
