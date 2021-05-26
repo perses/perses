@@ -18,6 +18,6 @@ dockers:
     ids:
       - "perses"
     image_templates:
-      - "docker.io/perses/perses:latest"
-      - "docker.io/perses/perses:{{ .Tag }}"
-      - "docker.io/perses/perses:v{{ .Major }}.{{ .Minor }}"
+      - "docker.io/persesdev/perses:latest"
+      - "docker.io/persesdev/perses:{{ .Tag }}"
+      - "docker.io/persesdev/perses:v{{ .Major }}.{{ .Minor }}"
