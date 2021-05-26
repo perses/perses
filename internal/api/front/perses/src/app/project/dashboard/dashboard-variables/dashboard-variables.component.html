@@ -1,10 +1,13 @@
 <mat-card *ngIf="variables">
   <div class="variable-header">
     <h2>Variables</h2>
-    <button mat-icon-button (click)="isVariableDetailsExpended= !isVariableDetailsExpended"
-            matTooltip="Show configuration">
-      <mat-icon>settings</mat-icon>
-    </button>
+    <div class="variable-action-header">
+      <mat-spinner *ngIf="isLoading" diameter="25"></mat-spinner>
+      <button mat-icon-button (click)="isVariableDetailsExpended= !isVariableDetailsExpended"
+              matTooltip="Show configuration">
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
   </div>
   <div class="select-variable-container">
     <ng-container *ngFor="let variable of variables | keyvalue">
@@ -25,15 +28,18 @@
             <app-input-box label="hide" value="{{variable.value.hide}}" [readonly]="true"></app-input-box>
             <h2>Parameter</h2>
             <ng-container *ngIf="variable.value.kind === 'LabelValuesQuery'">
-              <app-input-box label="label_name" value="{{variable.value.parameter.label_name}}" [readonly]="true"></app-input-box>
+              <app-input-box label="label_name" value="{{variable.value.parameter.label_name}}"
+                             [readonly]="true"></app-input-box>
               <app-input-box label="capturing_regexp" value="{{variable.value.parameter.capturing_regexp}}"
-                       [readonly]="true"></app-input-box>
-              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}" [readonly]="true"></app-input-box>
+                             [readonly]="true"></app-input-box>
+              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}"
+                             [readonly]="true"></app-input-box>
             </ng-container>
             <ng-container *ngIf="variable.value.kind === 'LabelNamesQuery'">
               <app-input-box label="capturing_regexp" value="{{variable.value.parameter.capturing_regexp}}"
-                       [readonly]="true"></app-input-box>
-              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}" [readonly]="true"></app-input-box>
+                             [readonly]="true"></app-input-box>
+              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}"
+                             [readonly]="true"></app-input-box>
             </ng-container>
           </div>
         </mat-expansion-panel>

@@ -37,6 +37,7 @@ export class DashboardVariablesComponent implements OnInit {
   selectedValue: Record<string, string> = {};
   previousSelectedValue: Record<string, string> = {};
   isVariableDetailsExpended = false;
+  isLoading = false;
 
   constructor(private dashboardFeed: DashboardFeedService,
               private eventFeed: EventFeedService,
@@ -54,6 +55,7 @@ export class DashboardVariablesComponent implements OnInit {
   }
 
   private feedVariable(): void {
+    this.isLoading = true;
     const feedRequest: VariableFeedRequest = {
       datasource: this.datasource,
       duration: this.duration,
@@ -76,9 +78,11 @@ export class DashboardVariablesComponent implements OnInit {
         if (!isError) {
           this.eventFeed.variableHasBeenChanged();
         }
+        this.isLoading = false;
       },
       error => {
         this.toastService.error(error);
+        this.isLoading = false;
       },
     );
   }

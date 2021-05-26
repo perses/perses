@@ -20,6 +20,12 @@
   padding: 4px 0;
 }
 
+.variable-action-header{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .select-variable-container {
   display: flex;
   flex-direction: row;
