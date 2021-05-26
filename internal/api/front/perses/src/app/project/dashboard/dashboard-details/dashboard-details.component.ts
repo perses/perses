@@ -11,10 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { DashboardService } from '../dashboard.service';
+import { DashboardFeedService } from '../dashboardfeed.service';
+import { DashboardFeedModel } from '../dashboardfeed.model';
+import { NgxLineChartModel } from '../ngxcharts.model';
+import { NgxPoint } from '../ngxcharts.model';
 import { ToastService } from '../../../shared/service/toast.service';
 import { ProjectService } from '../../project.service';
+import { ActivatedRoute } from '@angular/router';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { DashboardModel } from '../dashboard.model';
 
@@ -24,30 +29,75 @@ import { DashboardModel } from '../dashboard.model';
   templateUrl: './dashboard-details.component.html',
   styleUrls: ['./dashboard-details.component.scss']
 })
-export class DashboardDetailsComponent implements OnInit {
-  isLoading = false;
-  currentProject = '';
-  dashboard: DashboardModel = {} as DashboardModel;
+export class DashboardDetailsComponent {
 
-  constructor(private dashboardService: DashboardService,
+  name: string = "";
+  isLoading = false;
+  dashboard: DashboardModel = {} as DashboardModel;
+  ngxData = new Map<string, NgxLineChartModel[]>();
+  currentProject = '';
+
+  // TEMP static options data for graph display
+  view: [number, number] = [600, 400];
+  showXAxis = true;
+  showYAxis = true;
+  gradient = false;
+  showLegend = true;
+  showXAxisLabel = true;
+  xAxisLabel = 'Time';
+  showYAxisLabel = true;
+  yAxisLabel = 'Value';
+  timeline = true;
+  colorScheme = {
+    domain: ['#9370DB', '#87CEFA', '#FA8072', '#FF7F50', '#90EE90', '#9370DB']
+  };
+
+  constructor(private service: DashboardService,
+              private feedService: DashboardFeedService,
               private readonly toastService: ToastService,
-              private readonly projectService: ProjectService) {
+              private readonly projectService: ProjectService,
+              private route: ActivatedRoute) {
+  }
+
+  ngOnInit(): void {
+    this.isLoading = true;
+
+    this.route.params.subscribe(params => {
+       this.name = params['dashboard'];
+    });
+
     this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
-      current => {
-        this.currentProject = current;
-        this.getDashboard();
+      res => {
+        this.currentProject = res;
+
+        if (Object.keys(this.service.currentDashboard).length != 0
+        && this.service.currentDashboard.metadata.name == this.name) {
+          this.dashboard = this.service.currentDashboard;
+          this.feedDashboard();
+        } else {
+          this.getDashboard();
+        }
       }
     );
   }
 
-  ngOnInit(): void {
+  private getDashboard(): void {
+    this.service.get(this.name, this.currentProject).pipe(untilDestroyed(this)).subscribe(
+      res => {
+        this.dashboard = res;
+        this.feedDashboard();
+      },
+      error => {
+        this.toastService.error(error);
+        this.isLoading = false;
+      },
+    );
   }
 
-  private getDashboard(): void {
-    this.isLoading = true;
-    this.dashboardService.get('SimpleLineChart', this.currentProject).pipe(untilDestroyed(this)).subscribe(
-      response => {
-        this.dashboard = response;
+  private feedDashboard(): void {
+    this.feedService.get(this.dashboard.spec).subscribe(
+      responses => {
+        this.convertDashboardFeeds(responses);
         this.isLoading = false;
       },
       error => {
@@ -55,5 +105,29 @@ export class DashboardDetailsComponent implements OnInit {
         this.isLoading = false;
       },
     );
+  }
+
+  private convertDashboardFeeds(dashboardFeeds: DashboardFeedModel[]): void {
+    for (const section of dashboardFeeds) {
+      for (const panel of section.panels) {
+        const ngxPanelData: NgxLineChartModel[] = []
+        for (const query of panel.results) {
+          let i = 0;
+          for (const serie of query.result) {
+            const ngxSerieData: NgxLineChartModel = {
+              name: serie.metric.__name__ + " - " + i,
+              series: []
+            };
+            for (const [timestamp, value] of serie.values) {
+              const datapoint: NgxPoint = {name: String(timestamp), value: Number(value)};
+              ngxSerieData.series.push(datapoint)
+            }
+            ngxPanelData[i] = ngxSerieData
+            i++
+            this.ngxData.set(section.name + "_" +  panel.name, ngxPanelData);
+          }
+        }
+      }
+    }
   }
 }

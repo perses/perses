@@ -12,16 +12,20 @@
 // limitations under the License.
 
 import { NgModule } from '@angular/core';
-import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
-import { SharedModule } from '../../shared/shared.module';
 import { DashboardRoutingModule } from './dashboard-routing.module';
-
+import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
+import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
+import { SharedModule } from '../../shared/shared.module';
+import { PageModule } from '../../shared/component/page/page.module';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
-  declarations: [DashboardDetailsComponent],
+  declarations: [DashboardListComponent, DashboardDetailsComponent],
   imports: [
-    SharedModule,
+    NgxChartsModule,
     DashboardRoutingModule,
+    PageModule,
+    SharedModule
   ]
 })
 export class DashboardModule {

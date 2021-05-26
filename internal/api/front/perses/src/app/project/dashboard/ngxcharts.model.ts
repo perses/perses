@@ -11,25 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RouterModule, Routes } from '@angular/router';
-import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
-import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
-import { NgModule } from '@angular/core';
+export interface NgxPoint {
+  name: string;
+  value: number;
+}
 
-const ROUTES: Routes = [
-  {
-    path: '',
-    component: DashboardListComponent
-  },
-  {
-    path: ':dashboard',
-    component: DashboardDetailsComponent
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(ROUTES)],
-  exports: [RouterModule]
-})
-export class DashboardRoutingModule {
+export interface NgxLineChartModel {
+  name: string;
+  series: NgxPoint[];
 }

@@ -1,1 +1,33 @@
-<p>dashboard-details works!</p>
+<app-page>
+  <app-page-header>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <h1 *ngIf="!isLoading">{{dashboard.metadata.name}}</h1>
+  </app-page-header>
+
+  <app-page-content>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <app-page-sub-content *ngIf="!isLoading">
+      <ng-container *ngFor="let section of dashboard.spec.sections">
+        <h2>{{section.name}}</h2>
+        <div *ngFor="let panel of section.panels">
+          <h3>{{panel.name}}</h3>
+          <div>
+            <ngx-charts-line-chart
+            [view]="view"
+            [scheme]="colorScheme"
+            [results]="ngxData.get(section.name+'_'+panel.name)"
+            [gradient]="gradient"
+            [xAxis]="showXAxis"
+            [yAxis]="showYAxis"
+            [legend]="showLegend"
+            [showXAxisLabel]="showXAxisLabel"
+            [showYAxisLabel]="showYAxisLabel"
+            [xAxisLabel]="xAxisLabel"
+            [yAxisLabel]="yAxisLabel">
+            </ngx-charts-line-chart>
+          </div>
+        </div>
+      </ng-container>
+    </app-page-sub-content>
+  </app-page-content>
+</app-page>

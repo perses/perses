@@ -11,25 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RouterModule, Routes } from '@angular/router';
-import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
-import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
-import { NgModule } from '@angular/core';
+export interface Serie {
+  metric: Record<string, string>;
+  values: [number, string][];
+}
 
-const ROUTES: Routes = [
-  {
-    path: '',
-    component: DashboardListComponent
-  },
-  {
-    path: ':dashboard',
-    component: DashboardDetailsComponent
-  }
-];
+export interface Result {
+  result: Serie[];
+}
 
-@NgModule({
-  imports: [RouterModule.forChild(ROUTES)],
-  exports: [RouterModule]
-})
-export class DashboardRoutingModule {
+export interface Panel {
+  name: string;
+  order: number;
+  results: Result[];
+}
+
+export interface DashboardFeedModel {
+  name: string;
+  order: number;
+  panels: Panel[];
 }
