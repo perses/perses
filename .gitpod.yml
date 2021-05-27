@@ -1,0 +1,25 @@
+tasks:
+  - init: make build # runs during prebuild
+    command: |
+      cd ./dev
+      docker-compose up -d
+      bash ./populate.sh
+      cd ../
+      ./bin/perses -config ./dev/config.yaml
+  - init: |
+      cd ./internal/api/front/perses
+      npm ci
+    command: |
+      cd ./internal/api/front/perses
+      npm start
+    openMode: split-right
+  
+ports:
+  - port: 4200
+    onOpen: open-preview
+  - port: 8080
+    onOpen: ignore
+  - port: 2379
+    onOpen: ignore
+  - port: 2380
+    onOpen: ignore
