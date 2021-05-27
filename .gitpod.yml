@@ -7,6 +7,7 @@ tasks:
       cd ../
       ./bin/perses -config ./dev/config.yaml
   - init: |
+      export NG_CLI_ANALYTICS=ci
       cd ./internal/api/front/perses
       npm ci
     command: |
