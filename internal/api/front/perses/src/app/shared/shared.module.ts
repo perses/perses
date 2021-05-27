@@ -28,7 +28,8 @@ import { AngularSplitModule } from 'angular-split';
 import { PageModule } from './component/page/page.module';
 import { InputBoxComponent } from './component/input-box/input-box.component';
 import { MatInputModule } from '@angular/material/input';
-import { MatDividerModule } from "@angular/material/divider";
+import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { LineComponent } from './component/line/line.component';
 
 @NgModule({
@@ -46,6 +47,7 @@ import { LineComponent } from './component/line/line.component';
     LineComponent,
     MatButtonModule,
     MatCardModule,
+    MatExpansionModule,
     MatDividerModule,
     MatIconModule,
     MatInputModule,
