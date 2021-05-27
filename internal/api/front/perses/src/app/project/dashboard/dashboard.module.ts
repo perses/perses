@@ -14,19 +14,19 @@
 import { NgModule } from '@angular/core';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
+import { DashboardSectionsComponent } from './dashboard-details/dashboard-sections/dashboard-sections.component';
 import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
 import { SharedModule } from '../../shared/shared.module';
 import { PageModule } from '../../shared/component/page/page.module';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-// TODO @Nexucis : to be removed once variable is integrated
 
 @NgModule({
-  declarations: [DashboardListComponent, DashboardDetailsComponent],
+  declarations: [DashboardListComponent, DashboardDetailsComponent, DashboardSectionsComponent],
   imports: [
     NgxChartsModule,
     DashboardRoutingModule,
-    PageModule,
+    PageModule, // TODO @Nexucis : to be removed once variable is integrated
     SharedModule
   ]
 })

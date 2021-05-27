@@ -7,27 +7,7 @@
   <app-page-content>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <app-page-sub-content *ngIf="!isLoading">
-      <ng-container *ngFor="let section of dashboard.spec.sections">
-        <h2>{{section.name}}</h2>
-        <div *ngFor="let panel of section.panels">
-          <h3>{{panel.name}}</h3>
-          <div>
-            <ngx-charts-line-chart
-            [view]="view"
-            [scheme]="colorScheme"
-            [results]="getChartData(section.name, panel.name)"
-            [gradient]="gradient"
-            [xAxis]="showXAxis"
-            [yAxis]="showYAxis"
-            [legend]="showLegend"
-            [showXAxisLabel]="showXAxisLabel"
-            [showYAxisLabel]="showYAxisLabel"
-            [xAxisLabel]="xAxisLabel"
-            [yAxisLabel]="yAxisLabel">
-            </ngx-charts-line-chart>
-          </div>
-        </div>
-      </ng-container>
+      <app-dashboard-sections [spec]="dashboard.spec"></app-dashboard-sections>
     </app-page-sub-content>
   </app-page-content>
 </app-page>
