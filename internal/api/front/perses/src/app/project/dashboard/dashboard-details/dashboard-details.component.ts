@@ -12,16 +12,16 @@
 // limitations under the License.
 
 import { Component, OnInit } from '@angular/core';
-import { DashboardService } from '../dashboard.service';
-import { DashboardFeedService } from '../dashboardfeed.service';
-import { DashboardFeedModel } from '../dashboardfeed.model';
-import { NgxLineChartModel } from '../ngxcharts.model';
-import { NgxPoint } from '../ngxcharts.model';
+import { DashboardService } from '../service/dashboard.service';
+import { DashboardFeedService } from '../service/dashboardfeed.service';
+import { DashboardFeedModel } from '../model/dashboardfeed.model';
+import { NgxLineChartModel } from '../model/ngxcharts.model';
+import { NgxPoint } from '../model/ngxcharts.model';
 import { ToastService } from '../../../shared/service/toast.service';
 import { ProjectService } from '../../project.service';
 import { ActivatedRoute } from '@angular/router';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { DashboardModel } from '../dashboard.model';
+import { DashboardModel } from '../model/dashboard.model';
 
 @UntilDestroy()
 @Component({

@@ -14,9 +14,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DashboardModel } from './dashboard.model';
-import { UrlBuilderUtil } from '../../shared/utils/url-builder.util';
-import { ErrorHandlingService } from '../../shared/service/error-handling.service';
+import { DashboardModel } from '../model/dashboard.model';
+import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
+import { ErrorHandlingService } from '../../../shared/service/error-handling.service';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({

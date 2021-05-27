@@ -14,10 +14,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DashboardSpec } from './dashboard.model';
-import { DashboardFeedModel } from './dashboardfeed.model';
-import { UrlBuilderUtil } from '../../shared/utils/url-builder.util';
-import { ErrorHandlingService } from '../../shared/service/error-handling.service';
+import { DashboardSpec } from '../model/dashboard.model';
+import { DashboardFeedModel } from '../model/dashboardfeed.model';
+import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
+import { ErrorHandlingService } from '../../../shared/service/error-handling.service';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({

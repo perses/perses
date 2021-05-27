@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Component, OnInit } from '@angular/core';
-import { DashboardService } from '../dashboard.service';
-import { DashboardModel } from '../dashboard.model';
+import { DashboardService } from '../service/dashboard.service';
+import { DashboardModel } from '../model/dashboard.model';
 import { ToastService } from '../../../shared/service/toast.service';
 import { ProjectService } from '../../project.service';
 
