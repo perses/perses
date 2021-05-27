@@ -30,11 +30,11 @@ import { DashboardModel } from '../model/dashboard.model';
   styleUrls: ['./dashboard-details.component.scss']
 })
 export class DashboardDetailsComponent implements OnInit {
-  private readonly paramName = 'dashboard';
-  name = '';
+  private readonly dashboardNameParam = 'dashboard';
   isLoading = false;
+  dashboardName = '';
   dashboard: DashboardModel = {} as DashboardModel;
-  ngxData = new Map<string, NgxChartLineChartModel[]>();
+  chartDataMap = new Map<string, NgxChartLineChartModel[]>();
   currentProject = '';
 
   // TEMP static options data for graph display
@@ -63,7 +63,7 @@ export class DashboardDetailsComponent implements OnInit {
     this.isLoading = true;
 
     this.route.params.subscribe(params => {
-       this.name = params[this.paramName];
+       this.dashboardName = params[this.dashboardNameParam];
     });
 
     this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
@@ -71,7 +71,7 @@ export class DashboardDetailsComponent implements OnInit {
         this.currentProject = res;
 
         if (Object.keys(this.service.currentDashboard).length !== 0
-        && this.service.currentDashboard.metadata.name === this.name) {
+        && this.service.currentDashboard.metadata.name === this.dashboardName) {
           this.dashboard = this.service.currentDashboard;
           this.feedDashboard();
         } else {
@@ -82,7 +82,7 @@ export class DashboardDetailsComponent implements OnInit {
   }
 
   private getDashboard(): void {
-    this.service.get(this.name, this.currentProject).pipe(untilDestroyed(this)).subscribe(
+    this.service.get(this.dashboardName, this.currentProject).pipe(untilDestroyed(this)).subscribe(
       res => {
         this.dashboard = res;
         this.feedDashboard();
@@ -124,7 +124,7 @@ export class DashboardDetailsComponent implements OnInit {
             }
             ngxPanelData[i] = ngxSerieData;
             i++;
-            this.ngxData.set(section.name + '_' +  panel.name, ngxPanelData);
+            this.chartDataMap.set(section.name + '_' +  panel.name, ngxPanelData);
           }
         }
       }
@@ -132,6 +132,6 @@ export class DashboardDetailsComponent implements OnInit {
   }
 
   public getChartData(sectionName: string, panelName: string) {
-    return this.ngxData.get(`${sectionName}_${panelName}`)
+    return this.chartDataMap.get(`${sectionName}_${panelName}`)
   }
 }
