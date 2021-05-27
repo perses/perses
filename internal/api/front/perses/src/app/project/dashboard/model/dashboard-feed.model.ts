@@ -11,6 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+ * These interfaces are used to map the dashboard feeds information received
+ * from the backend.
+ */
+
 export interface Serie {
   metric: Record<string, string>;
   values: [number, string][];

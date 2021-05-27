@@ -11,6 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+ * These interfaces are used to translate the dashboard feeds information
+ * received from the backend into the format expected by ngx-charts for the
+ * rendering.
+ */
+
 export interface NgxChartPoint {
   name: string;
   value: number;
