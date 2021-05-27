@@ -69,7 +69,7 @@ export interface Panel {
 }
 
 export interface DashboardSection {
-  name?: string;
+  name: string;
   order: number;
   open: boolean;
   panels: Panel[];

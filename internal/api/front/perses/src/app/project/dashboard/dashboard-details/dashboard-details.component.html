@@ -15,7 +15,7 @@
             <ngx-charts-line-chart
             [view]="view"
             [scheme]="colorScheme"
-            [results]="ngxData.get(section.name+'_'+panel.name)"
+            [results]="getChartData(section.name, panel.name)"
             [gradient]="gradient"
             [xAxis]="showXAxis"
             [yAxis]="showYAxis"

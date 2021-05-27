@@ -130,4 +130,8 @@ export class DashboardDetailsComponent implements OnInit {
       }
     }
   }
+
+  public getChartData(sectionName: string, panelName: string) {
+    return this.ngxData.get(`${sectionName}_${panelName}`)
+  }
 }
