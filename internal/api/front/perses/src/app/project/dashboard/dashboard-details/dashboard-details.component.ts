@@ -52,11 +52,11 @@ export class DashboardDetailsComponent implements OnInit {
     domain: ['#9370DB', '#87CEFA', '#FA8072', '#FF7F50', '#90EE90', '#9370DB']
   };
 
-  constructor(private service: DashboardService,
-              private feedService: DashboardFeedService,
+  constructor(private readonly service: DashboardService,
+              private readonly feedService: DashboardFeedService,
               private readonly toastService: ToastService,
               private readonly projectService: ProjectService,
-              private route: ActivatedRoute) {
+              private readonly route: ActivatedRoute) {
   }
 
   ngOnInit(): void {

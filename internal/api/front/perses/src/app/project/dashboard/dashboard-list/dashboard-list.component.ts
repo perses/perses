@@ -28,9 +28,9 @@ export class DashboardListComponent implements OnInit {
   dashboards: DashboardModel[] = [];
   currentProject = '';
 
-  constructor(private service: DashboardService,
-              private toastService: ToastService,
-              private projectService: ProjectService) {
+  constructor(private readonly service: DashboardService,
+              private readonly toastService: ToastService,
+              private readonly projectService: ProjectService) {
   }
 
   ngOnInit(): void {
