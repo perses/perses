@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Component, OnInit } from '@angular/core';
-import { DashboardService } from '../dashboard.service';
+import { DashboardService } from '../service/dashboard.service';
 import { ToastService } from '../../../shared/service/toast.service';
 import { ProjectService } from '../../project.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';

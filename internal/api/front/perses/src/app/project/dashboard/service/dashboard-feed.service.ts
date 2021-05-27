@@ -13,10 +13,10 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ErrorHandlingService } from '../../shared/service/error-handling.service';
-import { VariableFeedRequest, VariableFeedResponse } from './dashboard-feed.model';
+import { ErrorHandlingService } from '../../../shared/service/error-handling.service';
+import { VariableFeedRequest, VariableFeedResponse } from '../dashboard-feed.model';
 import { Observable } from 'rxjs';
-import { UrlBuilderUtil } from '../../shared/utils/url-builder.util';
+import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({

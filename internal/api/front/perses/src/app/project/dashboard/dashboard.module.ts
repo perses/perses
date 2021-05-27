@@ -16,7 +16,7 @@ import { DashboardDetailsComponent } from './dashboard-details/dashboard-details
 import { SharedModule } from '../../shared/shared.module';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { DashboardVariablesComponent } from './dashboard-variables/dashboard-variables.component';
+import { DashboardVariablesComponent } from './dashboard-details/dashboard-variables/dashboard-variables.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
