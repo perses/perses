@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HeaderModel} from '../../shared/model/api/v1/kind.model';
-import {ProjectMetadata} from '../../shared/model/api/v1/metadata.model';
+import {HeaderModel} from '../../../shared/model/api/v1/kind.model';
+import {ProjectMetadata} from '../../../shared/model/api/v1/metadata.model';
 
 type ParametersType = {
   PromqlQuery: PromQLQueryVariableParameter

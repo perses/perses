@@ -17,7 +17,7 @@ import { ErrorHandlingService } from '../../../shared/service/error-handling.ser
 import { Observable } from 'rxjs';
 import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
 import { catchError } from 'rxjs/operators';
-import { DashboardModel } from '../dashboard.model';
+import { DashboardModel } from '../model/dashboard.model';
 
 @Injectable({
   providedIn: 'root'
