@@ -13,10 +13,10 @@
 
 import { Component, OnInit } from '@angular/core';
 import { DashboardService } from '../service/dashboard.service';
-import { DashboardFeedService } from '../service/dashboardfeed.service';
-import { DashboardFeedModel } from '../model/dashboardfeed.model';
-import { NgxLineChartModel } from '../model/ngxcharts.model';
-import { NgxPoint } from '../model/ngxcharts.model';
+import { DashboardFeedService } from '../service/dashboard-feed.service';
+import { DashboardFeedModel } from '../model/dashboard-feed.model';
+import { NgxChartLineChartModel } from '../model/ngxcharts.model';
+import { NgxChartPoint } from '../model/ngxcharts.model';
 import { ToastService } from '../../../shared/service/toast.service';
 import { ProjectService } from '../../project.service';
 import { ActivatedRoute } from '@angular/router';
@@ -34,7 +34,7 @@ export class DashboardDetailsComponent implements OnInit {
   name = '';
   isLoading = false;
   dashboard: DashboardModel = {} as DashboardModel;
-  ngxData = new Map<string, NgxLineChartModel[]>();
+  ngxData = new Map<string, NgxChartLineChartModel[]>();
   currentProject = '';
 
   // TEMP static options data for graph display
@@ -95,7 +95,7 @@ export class DashboardDetailsComponent implements OnInit {
   }
 
   private feedDashboard(): void {
-    this.feedService.get(this.dashboard.spec).subscribe(
+    this.feedService.feedSections(this.dashboard.spec).subscribe(
       responses => {
         this.convertDashboardFeeds(responses);
         this.isLoading = false;
@@ -110,16 +110,16 @@ export class DashboardDetailsComponent implements OnInit {
   private convertDashboardFeeds(dashboardFeeds: DashboardFeedModel[]): void {
     for (const section of dashboardFeeds) {
       for (const panel of section.panels) {
-        const ngxPanelData: NgxLineChartModel[] = [];
+        const ngxPanelData: NgxChartLineChartModel[] = [];
         for (const query of panel.results) {
           let i = 0;
           for (const serie of query.result) {
-            const ngxSerieData: NgxLineChartModel = {
+            const ngxSerieData: NgxChartLineChartModel = {
               name: serie.metric.__name__ + ' - ' + i,
               series: []
             };
             for (const [timestamp, value] of serie.values) {
-              const datapoint: NgxPoint = {name: String(timestamp), value: Number(value)};
+              const datapoint: NgxChartPoint = {name: String(timestamp), value: Number(value)};
               ngxSerieData.series.push(datapoint);
             }
             ngxPanelData[i] = ngxSerieData;

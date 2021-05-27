@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NgxPoint {
+export interface NgxChartPoint {
   name: string;
   value: number;
 }
 
-export interface NgxLineChartModel {
+export interface NgxChartLineChartModel {
   name: string;
-  series: NgxPoint[];
+  series: NgxChartPoint[];
 }
