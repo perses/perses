@@ -19,6 +19,8 @@ import { SharedModule } from '../../shared/shared.module';
 import { PageModule } from '../../shared/component/page/page.module';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
+// TODO @Nexucis : to be removed once variable is integrated
+
 @NgModule({
   declarations: [DashboardListComponent, DashboardDetailsComponent],
   imports: [
