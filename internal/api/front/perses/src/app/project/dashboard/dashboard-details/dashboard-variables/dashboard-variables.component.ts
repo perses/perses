@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { Component, Input, OnInit } from '@angular/core';
-import { DashboardVariable } from '../dashboard.model';
-import { DashboardFeedService } from '../dashboard-feed.service';
-import { VariableFeedRequest } from '../dashboard-feed.model';
+import { DashboardVariable } from '../../dashboard.model';
+import { DashboardFeedService } from '../../service/dashboard-feed.service';
+import { VariableFeedRequest } from '../../dashboard-feed.model';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { ToastService } from '../../../shared/service/toast.service';
-import { EventFeedService } from '../event-feed.service';
+import { ToastService } from '../../../../shared/service/toast.service';
+import { EventFeedService } from '../../service/event-feed.service';
 import { MatSelectChange } from '@angular/material/select';
 
 @UntilDestroy()
