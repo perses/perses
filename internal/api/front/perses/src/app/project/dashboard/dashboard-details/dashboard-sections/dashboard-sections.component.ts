@@ -14,7 +14,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DashboardService } from '../../service/dashboard.service';
 import { DashboardFeedService } from '../../service/dashboard-feed.service';
-import { DashboardFeedModel } from '../../model/dashboard-feed.model';
+import { SectionFeedModel } from '../../model/section-feed.model';
 import { DashboardSpec } from '../../model/dashboard.model';
 import { NgxChartLineChartModel } from '../../model/ngxcharts.model';
 import { NgxChartPoint } from '../../model/ngxcharts.model';
@@ -76,7 +76,7 @@ export class DashboardSectionsComponent implements OnInit {
     );
   }
 
-  private convertDashboardFeeds(dashboardFeeds: DashboardFeedModel[]): void {
+  private convertDashboardFeeds(dashboardFeeds: SectionFeedModel[]): void {
     for (const section of dashboardFeeds) {
       for (const panel of section.panels) {
         const ngxPanelData: NgxChartLineChartModel[] = [];

@@ -15,7 +15,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DashboardSpec } from '../model/dashboard.model';
-import { DashboardFeedModel } from '../model/dashboard-feed.model';
+import { SectionFeedModel } from '../model/section-feed.model';
 import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
 import { ErrorHandlingService } from '../../../shared/service/error-handling.service';
 import { catchError } from 'rxjs/operators';
@@ -29,10 +29,10 @@ export class DashboardFeedService {
   constructor(private readonly http: HttpClient, private readonly errorHandler: ErrorHandlingService) {
   }
 
-  feedSections(spec: DashboardSpec): Observable<DashboardFeedModel[]> {
+  feedSections(spec: DashboardSpec): Observable<SectionFeedModel[]> {
     const url = new UrlBuilderUtil()
       .setResource(this.resource);
 
-    return this.http.post<DashboardFeedModel[]>(url.build(), spec).pipe(catchError(this.errorHandler.handleHTTPError));
+    return this.http.post<SectionFeedModel[]>(url.build(), spec).pipe(catchError(this.errorHandler.handleHTTPError));
   }
 }

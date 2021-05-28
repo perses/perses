@@ -12,8 +12,8 @@
 // limitations under the License.
 
 /*
- * These interfaces are used to map the dashboard feeds information received
- * from the backend.
+ * These interfaces are used to map the section feeds information received from
+ * the backend.
  */
 
 export interface Serie {
@@ -31,7 +31,7 @@ export interface Panel {
   results: Result[];
 }
 
-export interface DashboardFeedModel {
+export interface SectionFeedModel {
   name: string;
   order: number;
   panels: Panel[];
