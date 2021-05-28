@@ -1,8 +1,14 @@
-<ng-container *ngFor="let section of spec.sections">
-  <h2>{{section.name}}</h2>
-  <div *ngFor="let panel of section.panels">
+<mat-expansion-panel class="mat-elevation-z0" *ngFor="let section of spec.sections; let isPromRuleFirst= first;"
+                     [expanded]="isPromRuleFirst">
+  <mat-expansion-panel-header>
+    <div class="expansion-panel-header-container">
+      <h2>{{section.name}}</h2>
+      <mat-divider></mat-divider>
+    </div>
+  </mat-expansion-panel-header>
+  <ng-container *ngFor="let panel of section.panels">
     <h3>{{panel.name}}</h3>
-    <div>
+    <mat-card>
       <ngx-charts-line-chart
       [view]="view"
       [scheme]="colorScheme"
@@ -16,6 +22,6 @@
       [xAxisLabel]="xAxisLabel"
       [yAxisLabel]="yAxisLabel">
       </ngx-charts-line-chart>
-    </div>
-  </div>
-</ng-container>
+    </mat-card>
+  </ng-container>
+</mat-expansion-panel>

@@ -19,6 +19,8 @@ import { DashboardListComponent } from './dashboard-list/dashboard-list.componen
 import { SharedModule } from '../../shared/shared.module';
 import { PageModule } from '../../shared/component/page/page.module';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 
 @NgModule({
@@ -27,7 +29,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     NgxChartsModule,
     DashboardRoutingModule,
     PageModule, // TODO @Nexucis : to be removed once variable is integrated
-    SharedModule
+    SharedModule,
+    MatDividerModule,
+    MatExpansionModule
   ]
 })
 export class DashboardModule {
