@@ -21,8 +21,11 @@
       <mat-list-item *ngFor="let link of sidebarLinks">
 <!--        TODO(Célian): Take the current project name instead of 'perses' hardcoded-->
         <a matLine href [routerLink]="['/projects/perses/',link.url]">
-          <mat-icon [matTooltip]="link.label" matTooltipPosition="right">{{link.icon}}</mat-icon>
-          <span>{{link.label}}</span>
+          <app-line justifyContent="flex-start">
+            <mat-icon [matTooltip]="link.label" matTooltipPosition="right">{{link.icon}}</mat-icon>
+            <span>{{link.label}}</span>
+          </app-line>
+
         </a>
       </mat-list-item>
     </mat-nav-list>
