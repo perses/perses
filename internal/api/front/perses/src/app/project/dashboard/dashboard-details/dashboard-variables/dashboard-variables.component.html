@@ -1,5 +1,5 @@
 <mat-card *ngIf="variables">
-  <div class="variable-header">
+  <app-line>
     <h2>Variables</h2>
     <div class="variable-action-header">
       <mat-spinner *ngIf="isLoading" diameter="25"></mat-spinner>
@@ -8,7 +8,7 @@
         <mat-icon>settings</mat-icon>
       </button>
     </div>
-  </div>
+  </app-line>
   <div class="select-variable-container">
     <ng-container *ngFor="let variable of variables | keyvalue">
       <div *ngIf="!variable.value.hide">

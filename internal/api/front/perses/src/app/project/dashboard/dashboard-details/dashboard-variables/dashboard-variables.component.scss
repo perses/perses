@@ -13,11 +13,8 @@
 
 @import "src/assets/styles/variables";
 
-.variable-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 4px 0;
+.app-line h2 {
+  margin: 0;
 }
 
 .variable-action-header{
