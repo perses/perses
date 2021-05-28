@@ -12,7 +12,7 @@
     <app-page-sub-content *ngIf="!isLoading">
       <ul>
         <li *ngFor="let dashboard of dashboards">
-          <a routerLink="{{dashboard.metadata.name}}" (click)="onGoToDashboard(dashboard)">{{dashboard.metadata.name}}</a>
+          <a routerLink="{{dashboard.metadata.name}}">{{dashboard.metadata.name}}</a>
         </li>
       </ul>
     </app-page-sub-content>

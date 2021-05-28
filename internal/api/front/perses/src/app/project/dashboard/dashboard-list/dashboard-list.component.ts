@@ -55,8 +55,4 @@ export class DashboardListComponent implements OnInit {
       },
     );
   }
-
-  onGoToDashboard(dashboard: DashboardModel): void {
-    this.service.currentDashboard = dashboard;
-  }
 }

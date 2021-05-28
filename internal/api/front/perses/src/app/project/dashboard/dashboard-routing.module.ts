@@ -15,14 +15,17 @@ import { RouterModule, Routes } from '@angular/router';
 import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
 import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
 import { NgModule } from '@angular/core';
+import { DashboardGuard } from './dashboard.guard';
 
 const ROUTES: Routes = [
   {
     path: '',
+    canActivate: [DashboardGuard],
     component: DashboardListComponent
   },
   {
     path: ':dashboard',
+    canActivate: [DashboardGuard],
     component: DashboardDetailsComponent
   }
 ];

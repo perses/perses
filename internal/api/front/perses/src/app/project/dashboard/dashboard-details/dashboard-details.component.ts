@@ -48,15 +48,7 @@ export class DashboardDetailsComponent implements OnInit {
     this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
       res => {
         this.currentProject = res;
-
-        if (Object.keys(this.service.currentDashboard).length === 0
-        || this.service.currentDashboard.metadata.name !== this.dashboardName) {
-          this.dashboard = this.service.currentDashboard;
-          this.getDashboard();
-        } else {
-          this.dashboard = this.service.currentDashboard;
-          this.isLoading = false;
-        }
+        this.getDashboard();
       }
     );
   }
