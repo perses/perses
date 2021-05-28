@@ -23,6 +23,7 @@ export interface Serie {
 
 export interface Result {
   result: Serie[];
+  err?: string;
 }
 
 export interface Panel {
