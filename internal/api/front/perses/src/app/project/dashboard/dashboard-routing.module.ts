@@ -16,6 +16,7 @@ import { DashboardDetailsComponent } from './dashboard-details/dashboard-details
 import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
 import { NgModule } from '@angular/core';
 import { DashboardGuard } from './dashboard.guard';
+import { DashboardDetailsGuard } from './dashboard-details/dashboard-details.guard';
 
 const ROUTES: Routes = [
   {
@@ -25,7 +26,7 @@ const ROUTES: Routes = [
   },
   {
     path: ':dashboard',
-    canActivate: [DashboardGuard],
+    canActivate: [DashboardGuard, DashboardDetailsGuard],
     component: DashboardDetailsComponent
   }
 ];
