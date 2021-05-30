@@ -23,6 +23,7 @@ import { ToastService } from '../../../../shared/service/toast.service';
 import { ProjectService } from '../../../project.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { DashboardModel } from '../../model/dashboard.model';
+import { ThemeService } from '../../../../shared/service/theme.service';
 
 @UntilDestroy()
 @Component({
@@ -55,7 +56,8 @@ export class DashboardSectionsComponent implements OnInit {
   constructor(private readonly service: DashboardService,
               private readonly feedService: DashboardFeedService,
               private readonly toastService: ToastService,
-              private readonly projectService: ProjectService) {
+              private readonly projectService: ProjectService,
+              private readonly themeService: ThemeService) {
   }
 
   ngOnInit(): void {
