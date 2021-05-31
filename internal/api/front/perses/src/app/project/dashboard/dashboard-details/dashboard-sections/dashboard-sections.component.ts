@@ -19,6 +19,7 @@ import { DashboardSection } from '../../model/dashboard.model';
 import { NgxChartLineChartModel, NgxChartPoint } from '../../model/ngxcharts.model';
 import { ToastService } from '../../../../shared/service/toast.service';
 import { UntilDestroy } from '@ngneat/until-destroy';
+import { EventFeedService } from '../../service/event-feed.service';
 
 @UntilDestroy()
 @Component({
@@ -33,6 +34,8 @@ export class DashboardSectionsComponent implements OnInit {
     duration = '';
     @Input()
     sections: DashboardSection[] = [];
+    @Input()
+    selectedVariable: Record<string, string> = {};
 
     isLoading = false;
     chartDataMap = new Map<string, NgxChartLineChartModel[]>();
@@ -54,11 +57,18 @@ export class DashboardSectionsComponent implements OnInit {
 
     constructor(private readonly service: DashboardService,
                 private readonly feedService: DashboardFeedService,
+                private readonly eventFeedService: EventFeedService,
                 private readonly toastService: ToastService) {
     }
 
     ngOnInit(): void {
-        this.feedDashboard();
+        this.eventFeedService.variableChange.subscribe(
+            shouldLoad => {
+                if (shouldLoad) {
+                    this.feedDashboard();
+                }
+            },
+        );
     }
 
     feedSection(section: DashboardSection): void {
@@ -75,6 +85,7 @@ export class DashboardSectionsComponent implements OnInit {
         const feedRequest: SectionFeedRequest = {
             datasource: this.datasource,
             duration: this.duration,
+            variables: this.selectedVariable,
             sections: sections.filter((section => section.open)),
         };
         this.feedService.feedSections(feedRequest).subscribe(

@@ -8,9 +8,11 @@
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <app-page-sub-content *ngIf="!isLoading">
       <app-dashboard-variables [datasource]="dashboard.spec.datasource" [duration]="dashboard.spec.duration"
-                               [variables]="dashboard.spec.variables"></app-dashboard-variables>
+                               [variables]="dashboard.spec.variables"
+                               [(selectedValue)]="selectedVariable"></app-dashboard-variables>
       <app-dashboard-sections [datasource]="dashboard.spec.datasource" [duration]="dashboard.spec.duration"
-                              [sections]="dashboard.spec.sections"></app-dashboard-sections>
+                              [sections]="dashboard.spec.sections"
+                              [selectedVariable]="selectedVariable"></app-dashboard-sections>
     </app-page-sub-content>
   </app-page-content>
 </app-page>

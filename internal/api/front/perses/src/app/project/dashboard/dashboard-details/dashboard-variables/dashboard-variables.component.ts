@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DashboardVariable } from '../../model/dashboard.model';
 import { DashboardFeedService } from '../../service/dashboard-feed.service';
 import { VariableFeedRequest } from '../../model/dashboard-feed.model';
@@ -33,9 +33,12 @@ export class DashboardVariablesComponent implements OnInit {
   duration = '';
   @Input()
   variables: Record<string, DashboardVariable> = {};
-  variableValues: Record<string, string[]> = {};
+  @Input()
   selectedValue: Record<string, string> = {};
+  @Output()
+  selectedValueChange = new EventEmitter<Record<string, string>>();
   previousSelectedValue: Record<string, string> = {};
+  variableValues: Record<string, string[]> = {};
   isVariableDetailsExpended = false;
   isLoading = false;
 
@@ -51,6 +54,7 @@ export class DashboardVariablesComponent implements OnInit {
   selectValueChange(key: string, event: MatSelectChange): void {
     this.copySelectedValue();
     this.selectedValue[key] = event.value;
+    this.selectedValueChange.emit(this.selectedValue);
     this.feedVariable();
   }
 
