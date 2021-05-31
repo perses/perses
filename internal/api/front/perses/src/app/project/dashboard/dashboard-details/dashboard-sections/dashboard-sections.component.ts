@@ -40,8 +40,6 @@ export class DashboardSectionsComponent implements OnInit {
     isLoading = false;
     chartDataMap = new Map<string, NgxChartLineChartModel[]>();
 
-    // TEMP static options data for graph display
-    view: [number, number] = [600, 400];
     showXAxis = true;
     showYAxis = true;
     gradient = false;

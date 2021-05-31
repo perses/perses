@@ -11,6 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mat-card {
-  height: 400px;
+@import "src/assets/styles/variables";
+
+.chart {
+  // TODO (@Nexucis) it should change according to the scale attribute coming from the dashboard spec
+  width: 450px;
+  min-height: 200px;
+  max-height: 450px;
+}
+
+@media only screen and (max-width: $medium-screen) {
+  .chart{
+    width: 100%;
+  }
 }
