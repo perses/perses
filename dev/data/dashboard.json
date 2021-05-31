@@ -51,7 +51,7 @@
         },
         {
           "name": "mySection2",
-          "open": true,
+          "open": false,
           "panels": [
             {
               "name": "myGraphPanel",

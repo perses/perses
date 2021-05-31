@@ -61,12 +61,21 @@ export class DashboardSectionsComponent implements OnInit {
         this.feedDashboard();
     }
 
-    private feedDashboard(): void {
+    feedSection(section: DashboardSection): void {
+        this.feedDashboard([section]);
+    }
+
+    private feedDashboard(sections = this.sections): void {
+        const filteredSections = sections.filter((section => section.open));
+        if (filteredSections.length === 0) {
+            // that would mean that all sections are closed, so no need to call the backend.
+            return;
+        }
         this.isLoading = true;
         const feedRequest: SectionFeedRequest = {
             datasource: this.datasource,
             duration: this.duration,
-            sections: this.sections,
+            sections: sections.filter((section => section.open)),
         };
         this.feedService.feedSections(feedRequest).subscribe(
             responses => {
