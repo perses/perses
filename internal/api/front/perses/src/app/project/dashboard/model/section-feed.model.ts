@@ -11,29 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProjectMetadata } from '../../shared/model/api/v1/metadata.model';
-import { HeaderModel } from '../../shared/model/api/v1/kind.model';
+/*
+ * These interfaces are used to map the section feeds information received from
+ * the backend.
+ */
 
-export interface Rule {
-  record?: string;
-  alert?: string;
-  expr: string;
-  for?: string;
-  labels?: Record<string, string>;
-  annotations?: Record<string, string>;
+export interface Serie {
+  metric: Record<string, string>;
+  values: [number, string][];
 }
 
-export interface RuleGroup {
+export interface Result {
+  result: Serie[];
+  err?: string;
+}
+
+export interface Panel {
   name: string;
-  internal: string;
-  rules: Rule[];
+  order: number;
+  results: Result[];
 }
 
-export interface PrometheusRuleSpec {
-  groups: RuleGroup[];
-}
-
-export interface PrometheusRuleModel extends HeaderModel {
-  metadata: ProjectMetadata;
-  spec: PrometheusRuleSpec;
+export interface SectionFeedModel {
+  name: string;
+  order: number;
+  panels: Panel[];
 }

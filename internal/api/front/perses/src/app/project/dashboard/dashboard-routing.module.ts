@@ -12,13 +12,22 @@
 // limitations under the License.
 
 import { RouterModule, Routes } from '@angular/router';
-import { NgModule } from '@angular/core';
 import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
+import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
+import { NgModule } from '@angular/core';
+import { DashboardGuard } from './dashboard.guard';
+import { DashboardDetailsGuard } from './dashboard-details/dashboard-details.guard';
 
 const ROUTES: Routes = [
   {
     path: '',
-    component: DashboardDetailsComponent,
+    canActivate: [DashboardGuard],
+    component: DashboardListComponent
+  },
+  {
+    path: ':dashboard',
+    canActivate: [DashboardGuard, DashboardDetailsGuard],
+    component: DashboardDetailsComponent
   }
 ];
 

@@ -13,26 +13,26 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ErrorHandlingService } from '../../shared/service/error-handling.service';
 import { Observable } from 'rxjs';
-import { UrlBuilderUtil } from '../../shared/utils/url-builder.util';
+import { DashboardSpec } from '../model/dashboard.model';
+import { SectionFeedModel } from '../model/section-feed.model';
+import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
+import { ErrorHandlingService } from '../../../shared/service/error-handling.service';
 import { catchError } from 'rxjs/operators';
-import { DashboardModel } from './dashboard.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class DashboardService {
-  private readonly resource = 'dashboards';
+export class DashboardFeedService {
+  private readonly resource = 'feed/sections';
 
   constructor(private readonly http: HttpClient, private readonly errorHandler: ErrorHandlingService) {
   }
 
-  get(name: string, project: string): Observable<DashboardModel> {
+  feedSections(spec: DashboardSpec): Observable<SectionFeedModel[]> {
     const url = new UrlBuilderUtil()
-      .setResource(this.resource)
-      .setProject(project)
-      .setName(name);
-    return this.http.get<DashboardModel>(url.build()).pipe(catchError(this.errorHandler.handleHTTPError));
+      .setResource(this.resource);
+
+    return this.http.post<SectionFeedModel[]>(url.build(), spec).pipe(catchError(this.errorHandler.handleHTTPError));
   }
 }
