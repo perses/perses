@@ -1,0 +1,20 @@
+<app-page>
+  <app-page-header>
+    <h1>Dashboards</h1>
+    <button mat-raised-button color="primary">
+      <mat-icon inline>add</mat-icon>
+      New
+    </button>
+  </app-page-header>
+
+  <app-page-content>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <app-page-sub-content *ngIf="!isLoading">
+      <ul>
+        <li *ngFor="let dashboard of dashboards">
+          <a routerLink="{{dashboard.metadata.name}}">{{dashboard.metadata.name}}</a>
+        </li>
+      </ul>
+    </app-page-sub-content>
+  </app-page-content>
+</app-page>

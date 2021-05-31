@@ -13,50 +13,40 @@
 
 import { Component, OnInit } from '@angular/core';
 import { DashboardService } from '../service/dashboard.service';
+import { DashboardModel } from '../model/dashboard.model';
 import { ToastService } from '../../../shared/service/toast.service';
 import { ProjectService } from '../../project.service';
-import { ActivatedRoute } from '@angular/router';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { DashboardModel } from '../model/dashboard.model';
 
-@UntilDestroy()
 @Component({
-  selector: 'app-dashboard-details',
-  templateUrl: './dashboard-details.component.html',
-  styleUrls: ['./dashboard-details.component.scss']
+  selector: 'app-dashboard',
+  templateUrl: './dashboard-list.component.html',
+  styleUrls: ['./dashboard-list.component.scss']
 })
-export class DashboardDetailsComponent implements OnInit {
-  private readonly dashboardNameParam = 'dashboard';
+export class DashboardListComponent implements OnInit {
+
   isLoading = false;
-  dashboardName = '';
-  dashboard: DashboardModel = {} as DashboardModel;
+  dashboards: DashboardModel[] = [];
   currentProject = '';
 
   constructor(private readonly service: DashboardService,
               private readonly toastService: ToastService,
-              private readonly projectService: ProjectService,
-              private readonly route: ActivatedRoute) {
+              private readonly projectService: ProjectService) {
   }
 
   ngOnInit(): void {
-    this.isLoading = true;
-
-    this.route.params.subscribe(params => {
-       this.dashboardName = params[this.dashboardNameParam];
-    });
-
-    this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
+    this.projectService.getCurrent().subscribe(
       res => {
         this.currentProject = res;
-        this.getDashboard();
+        this.getDashboards();
       }
     );
   }
 
-  private getDashboard(): void {
-    this.service.get(this.dashboardName, this.currentProject).pipe(untilDestroyed(this)).subscribe(
-      res => {
-        this.dashboard = res;
+  private getDashboards(): void {
+    this.isLoading = true;
+    this.service.list(this.currentProject).subscribe(
+      responses => {
+        this.dashboards = responses;
         this.isLoading = false;
       },
       error => {

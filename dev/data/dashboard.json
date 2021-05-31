@@ -48,6 +48,37 @@
               }
             }
           ]
+        },
+        {
+          "name": "mySection2",
+          "open": true,
+          "panels": [
+            {
+              "name": "myGraphPanel",
+              "kind": "LineChart",
+              "chart": {
+                "lines": [
+                  {
+                    "expr": "up"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "myGraphPanel",
+              "kind": "LineChart",
+              "chart": {
+                "lines": [
+                  {
+                    "expr": "up"
+                  },
+                  {
+                    "expr": "up"
+                  }
+                ]
+              }
+            }
+          ]
         }
       ]
     }

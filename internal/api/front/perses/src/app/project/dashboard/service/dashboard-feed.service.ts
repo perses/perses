@@ -14,7 +14,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlingService } from '../../../shared/service/error-handling.service';
-import { VariableFeedRequest, VariableFeedResponse } from '../model/dashboard-feed.model';
+import { SectionFeedResponse, VariableFeedRequest, VariableFeedResponse } from '../model/dashboard-feed.model';
+import { DashboardSpec } from '../model/dashboard.model';
 import { Observable } from 'rxjs';
 import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
 import { catchError } from 'rxjs/operators';
@@ -23,10 +24,16 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class DashboardFeedService {
-
   private readonly resource = 'feed';
 
   constructor(private readonly http: HttpClient, private readonly errorHandler: ErrorHandlingService) {
+  }
+
+  feedSections(spec: DashboardSpec): Observable<SectionFeedResponse[]> {
+    const url = new UrlBuilderUtil()
+      .setResource(`${this.resource}/sections`);
+
+    return this.http.post<SectionFeedResponse[]>(url.build(), spec).pipe(catchError(this.errorHandler.handleHTTPError));
   }
 
   feedVariables(request: VariableFeedRequest): Observable<VariableFeedResponse[]> {

@@ -25,7 +25,7 @@ import { ToastService } from '../../shared/service/toast.service';
 export class ProjectTemplateComponent implements OnInit {
   sidebarLinks = [
     {url: 'prometheusrules', icon: 'add_alert', label: 'Prometheus Rules'},
-    {url: 'dashboards', icon: 'dashboard', label: 'Dashboard'}
+    {url: 'dashboards', icon: 'insert_chart', label: 'Dashboards'}
   ];
 
   projectList: ProjectModel[] = [];

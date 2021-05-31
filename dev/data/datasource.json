@@ -7,5 +7,14 @@
     "spec": {
       "url": "https://prometheus.demo.do.prometheus.io"
     }
+  },
+  {
+    "kind": "Datasource",
+    "metadata": {
+      "name": "PrometheusLocal"
+    },
+    "spec": {
+      "url": "http://localhost:9090"
+    }
   }
 ]

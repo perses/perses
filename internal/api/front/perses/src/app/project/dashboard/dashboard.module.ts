@@ -13,8 +13,11 @@
 
 import { NgModule } from '@angular/core';
 import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
+import { DashboardSectionsComponent } from './dashboard-details/dashboard-sections/dashboard-sections.component';
+import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
 import { SharedModule } from '../../shared/shared.module';
 import { DashboardRoutingModule } from './dashboard-routing.module';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { DashboardVariablesComponent } from './dashboard-details/dashboard-variables/dashboard-variables.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
@@ -22,9 +25,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 
 @NgModule({
-  declarations: [DashboardDetailsComponent, DashboardVariablesComponent],
+  declarations: [DashboardListComponent, DashboardDetailsComponent, DashboardSectionsComponent, DashboardVariablesComponent],
   imports: [
     SharedModule,
+    NgxChartsModule,
     DashboardRoutingModule,
     MatFormFieldModule,
     MatSelectModule,

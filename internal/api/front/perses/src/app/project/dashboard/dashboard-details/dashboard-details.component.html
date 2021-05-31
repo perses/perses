@@ -1,12 +1,15 @@
 <app-page>
   <app-page-header>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
     <h1 *ngIf="!isLoading">{{dashboard.metadata.name}}</h1>
   </app-page-header>
+
   <app-page-content>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <app-page-sub-content *ngIf="!isLoading">
       <app-dashboard-variables [datasource]="dashboard.spec.datasource" [duration]="dashboard.spec.duration"
                                [variables]="dashboard.spec.variables"></app-dashboard-variables>
+      <app-dashboard-sections [spec]="dashboard.spec"></app-dashboard-sections>
     </app-page-sub-content>
   </app-page-content>
 </app-page>

@@ -27,3 +27,30 @@ export interface VariableFeedResponse {
   values: string [];
   err?: string;
 }
+
+/*
+ * These interfaces are used to map the section feeds information received from
+ * the backend.
+ */
+
+export interface Serie {
+  metric: Record<string, string>;
+  values: [number, string][];
+}
+
+export interface Result {
+  result: Serie[];
+  err?: string;
+}
+
+export interface Panel {
+  name: string;
+  order: number;
+  results: Result[];
+}
+
+export interface SectionFeedResponse {
+  name: string;
+  order: number;
+  panels: Panel[];
+}
