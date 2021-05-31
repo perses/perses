@@ -114,7 +114,9 @@ export class DashboardSectionsComponent implements OnInit {
                             series: []
                         };
                         for (const [timestamp, value] of serie.values) {
-                            const datapoint: NgxChartPoint = {name: String(timestamp), value: Number(value)};
+                            // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+                            const date = new Date(timestamp * 1000);
+                            const datapoint: NgxChartPoint = {name: date, value: Number(value)};
                             ngxSerieData.series.push(datapoint);
                         }
                         ngxPanelData[i] = ngxSerieData;
