@@ -18,6 +18,7 @@
   width: 450px;
   min-height: 200px;
   max-height: 450px;
+  flex-grow: 1;
 }
 
 @media only screen and (max-width: $medium-screen) {
