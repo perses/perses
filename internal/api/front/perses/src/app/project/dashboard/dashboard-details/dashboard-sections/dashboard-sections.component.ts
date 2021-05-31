@@ -14,13 +14,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DashboardService } from '../../service/dashboard.service';
 import { DashboardFeedService } from '../../service/dashboard-feed.service';
-import { SectionFeedResponse } from '../../model/dashboard-feed.model';
-import { DashboardSpec } from '../../model/dashboard.model';
+import { SectionFeedRequest, SectionFeedResponse } from '../../model/dashboard-feed.model';
+import { DashboardSection } from '../../model/dashboard.model';
 import { NgxChartLineChartModel, NgxChartPoint } from '../../model/ngxcharts.model';
 import { ToastService } from '../../../../shared/service/toast.service';
-import { ProjectService } from '../../../project.service';
 import { UntilDestroy } from '@ngneat/until-destroy';
-import { ThemeService } from '../../../../shared/service/theme.service';
 
 @UntilDestroy()
 @Component({
@@ -30,7 +28,11 @@ import { ThemeService } from '../../../../shared/service/theme.service';
 })
 export class DashboardSectionsComponent implements OnInit {
     @Input()
-    spec: DashboardSpec = {} as DashboardSpec;
+    datasource = '';
+    @Input()
+    duration = '';
+    @Input()
+    sections: DashboardSection[] = [];
 
     isLoading = false;
     chartDataMap = new Map<string, NgxChartLineChartModel[]>();
@@ -52,9 +54,7 @@ export class DashboardSectionsComponent implements OnInit {
 
     constructor(private readonly service: DashboardService,
                 private readonly feedService: DashboardFeedService,
-                private readonly toastService: ToastService,
-                private readonly projectService: ProjectService,
-                private readonly themeService: ThemeService) {
+                private readonly toastService: ToastService) {
     }
 
     ngOnInit(): void {
@@ -63,7 +63,12 @@ export class DashboardSectionsComponent implements OnInit {
 
     private feedDashboard(): void {
         this.isLoading = true;
-        this.feedService.feedSections(this.spec).subscribe(
+        const feedRequest: SectionFeedRequest = {
+            datasource: this.datasource,
+            duration: this.duration,
+            sections: this.sections,
+        };
+        this.feedService.feedSections(feedRequest).subscribe(
             responses => {
                 this.convertDashboardFeeds(responses);
                 this.isLoading = false;
@@ -81,6 +86,10 @@ export class DashboardSectionsComponent implements OnInit {
                 const ngxPanelData: NgxChartLineChartModel[] = [];
                 for (const query of panel.results) {
                     let i = 0;
+                    if (query.err) {
+                        this.toastService.errorMessage(query.err);
+                        continue;
+                    }
                     for (const serie of query.result) {
                         const ngxSerieData: NgxChartLineChartModel = {
                             name: serie.metric.__name__ + ' - ' + i,

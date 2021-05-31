@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardVariable } from './dashboard.model';
+import { DashboardSection, DashboardVariable } from './dashboard.model';
 
 export interface VariableFeedRequest {
   datasource: string;
@@ -53,4 +53,11 @@ export interface SectionFeedResponse {
   name: string;
   order: number;
   panels: Panel[];
+}
+
+export interface SectionFeedRequest {
+  datasource: string;
+  duration: string;
+  variables?: Record<string, string>;
+  sections: DashboardSection[];
 }
