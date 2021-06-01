@@ -8,6 +8,29 @@
     "spec": {
       "datasource": "PrometheusDemo",
       "duration": "6h",
+      "variables": {
+        "labelName": {
+          "kind": "LabelNamesQuery",
+          "hide": false,
+          "parameter": {
+            "matchers": [
+              "up"
+            ],
+            "capturing_regexp": "(.*)"
+          }
+        },
+        "labelValue": {
+          "kind": "LabelValuesQuery",
+          "hide": false,
+          "parameter": {
+            "label_name": "$labelName",
+            "matchers": [
+              "up"
+            ],
+            "capturing_regexp": "(.*)"
+          }
+        }
+      },
       "sections": [
         {
           "name": "mySection",
@@ -19,7 +42,7 @@
               "chart": {
                 "lines": [
                   {
-                    "expr": "up"
+                    "expr": "up{$labelName='$labelValue'}"
                   }
                 ]
               }
@@ -28,7 +51,7 @@
         },
         {
           "name": "mySection2",
-          "open": true,
+          "open": false,
           "panels": [
             {
               "name": "myGraphPanel",

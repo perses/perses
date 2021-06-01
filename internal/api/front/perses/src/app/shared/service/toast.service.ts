@@ -33,6 +33,10 @@ export class ToastService {
     this.toasterService.error(error.message, error.statusText, this.defaultConfig);
   }
 
+  errorMessage(message: string): void {
+    this.toasterService.error(message, '', this.defaultConfig);
+  }
+
   success(message: string): void {
     this.toasterService.success(message, '', this.defaultConfig);
   }

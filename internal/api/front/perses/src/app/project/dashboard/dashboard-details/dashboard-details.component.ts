@@ -21,48 +21,51 @@ import { DashboardModel } from '../model/dashboard.model';
 
 @UntilDestroy()
 @Component({
-  selector: 'app-dashboard-details',
-  templateUrl: './dashboard-details.component.html',
-  styleUrls: ['./dashboard-details.component.scss']
+    selector: 'app-dashboard-details',
+    templateUrl: './dashboard-details.component.html',
+    styleUrls: ['./dashboard-details.component.scss']
 })
 export class DashboardDetailsComponent implements OnInit {
-  private readonly dashboardNameParam = 'dashboard';
-  isLoading = false;
-  dashboardName = '';
-  dashboard: DashboardModel = {} as DashboardModel;
-  currentProject = '';
+    private readonly dashboardNameParam = 'dashboard';
+    isLoading = false;
+    dashboardName = '';
+    dashboard: DashboardModel = {} as DashboardModel;
+    currentProject = '';
+    // selectedVariable is the map of the current value of each variable.
+    // This map is shared between the dashboard-variable and the dashboard-section.
+    selectedVariable: Record<string, string> = {};
 
-  constructor(private readonly service: DashboardService,
-              private readonly toastService: ToastService,
-              private readonly projectService: ProjectService,
-              private readonly route: ActivatedRoute) {
-  }
+    constructor(private readonly service: DashboardService,
+                private readonly toastService: ToastService,
+                private readonly projectService: ProjectService,
+                private readonly route: ActivatedRoute) {
+    }
 
-  ngOnInit(): void {
-    this.isLoading = true;
+    ngOnInit(): void {
+        this.isLoading = true;
 
-    this.route.params.subscribe(params => {
-       this.dashboardName = params[this.dashboardNameParam];
-    });
+        this.route.params.subscribe(params => {
+            this.dashboardName = params[this.dashboardNameParam];
+        });
 
-    this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
-      res => {
-        this.currentProject = res;
-        this.getDashboard();
-      }
-    );
-  }
+        this.projectService.getCurrent().pipe(untilDestroyed(this)).subscribe(
+            res => {
+                this.currentProject = res;
+                this.getDashboard();
+            }
+        );
+    }
 
-  private getDashboard(): void {
-    this.service.get(this.dashboardName, this.currentProject).pipe(untilDestroyed(this)).subscribe(
-      res => {
-        this.dashboard = res;
-        this.isLoading = false;
-      },
-      error => {
-        this.toastService.error(error);
-        this.isLoading = false;
-      },
-    );
-  }
+    private getDashboard(): void {
+        this.service.get(this.dashboardName, this.currentProject).pipe(untilDestroyed(this)).subscribe(
+            res => {
+                this.dashboard = res;
+                this.isLoading = false;
+            },
+            error => {
+                this.toastService.error(error);
+                this.isLoading = false;
+            },
+        );
+    }
 }

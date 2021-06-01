@@ -15,20 +15,14 @@ import { NgModule } from '@angular/core';
 import { PrometheusRuleListComponent } from './prometheusrule-list/prometheusrule-list.component';
 import { PrometheusRuleRoutingModule } from './prometheusrule-routing.module';
 import { SharedModule } from '../../shared/shared.module';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { PageModule } from '../../shared/component/page/page.module';
 import { PrometheusruleLayoutComponent } from './prometheusrule-layout/prometheusrule-layout.component';
 import { PrometheusruleDetailsComponent } from './prometheusrule-details/prometheusrule-details.component';
 
 @NgModule({
   declarations: [PrometheusRuleListComponent, PrometheusruleLayoutComponent, PrometheusruleDetailsComponent],
   imports: [
-    MatDividerModule,
-    MatExpansionModule,
     PrometheusRuleRoutingModule,
     SharedModule,
-    PageModule,
   ]
 })
 export class PrometheusRuleModule {

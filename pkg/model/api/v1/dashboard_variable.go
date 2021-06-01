@@ -29,7 +29,8 @@ func (c *CapturingRegexp) GetRegexp() *regexp.Regexp {
 	return (*regexp.Regexp)(c)
 }
 
-func (c *CapturingRegexp) MarshalJSON() ([]byte, error) {
+// MarshalText is used during the marshal of a json. It will be considered as a text and not as a json struct.
+func (c *CapturingRegexp) MarshalText() ([]byte, error) {
 	return []byte(c.GetRegexp().String()), nil
 }
 

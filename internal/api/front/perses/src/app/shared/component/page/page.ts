@@ -36,7 +36,6 @@ export class PageSubContent {
   templateUrl: 'page.html',
   styleUrls: ['page.scss'],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageComponent {
   private useMargin = true;

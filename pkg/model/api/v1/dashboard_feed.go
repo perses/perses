@@ -25,6 +25,20 @@ type PromQueryResult struct {
 	Result model.Value `json:"result"`
 }
 
+func (p *PromQueryResult) MarshalJSON() ([]byte, error) {
+	type tmpQuery = struct {
+		Err    string      `json:"err,omitempty"`
+		Result model.Value `json:"result"`
+	}
+	result := &tmpQuery{
+		Result: p.Result,
+	}
+	if p.Err != nil {
+		result.Err = p.Err.Error()
+	}
+	return json.Marshal(result)
+}
+
 type PanelFeedResponse struct {
 	Name    string            `json:"name"`
 	Order   uint64            `json:"order"`

@@ -11,29 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
- * These interfaces are used to map the section feeds information received from
- * the backend.
- */
-
-export interface Serie {
-  metric: Record<string, string>;
-  values: [number, string][];
-}
-
-export interface Result {
-  result: Serie[];
-  err?: string;
-}
-
-export interface Panel {
-  name: string;
-  order: number;
-  results: Result[];
-}
-
-export interface SectionFeedModel {
-  name: string;
-  order: number;
-  panels: Panel[];
+.mat-form-field {
+  margin-right: 1rem;
 }

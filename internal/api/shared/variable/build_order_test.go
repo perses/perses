@@ -15,6 +15,7 @@ package variable
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -453,6 +454,41 @@ func TestBuildOrder(t *testing.T) {
 				{Variables: []string{"bar", "doe"}},
 				{Variables: []string{"myVariable"}},
 			},
+		},
+		{
+			title: "all variable with an already known value",
+			variables: map[string]*v1.DashboardVariable{
+				"labelName": {
+					Kind: v1.KindLabelNamesQueryVariable,
+					Hide: false,
+					Parameter: &v1.LabelNamesQueryVariableParameter{
+						Matchers: []string{
+							"up",
+						},
+						CapturingRegexp: (*v1.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
+					},
+				},
+				"labelValue": {
+					Kind: v1.KindLabelValuesQueryVariable,
+					Hide: false,
+					Parameter: &v1.LabelValuesQueryVariableParameter{
+						LabelName: "$labelName",
+						Matchers: []string{
+							"up",
+						},
+						CapturingRegexp: (*v1.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
+					},
+				},
+			},
+			current: map[string]string{
+				"labelName":  "job",
+				"labelValue": "value1",
+			},
+			previous: map[string]string{
+				"labelName":  "job",
+				"labelValue": "value2",
+			},
+			result: []Group{},
 		},
 	}
 	for _, test := range testSuite {

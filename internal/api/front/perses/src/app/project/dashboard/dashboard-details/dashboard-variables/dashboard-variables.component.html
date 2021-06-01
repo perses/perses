@@ -1,0 +1,50 @@
+<mat-card *ngIf="variables">
+  <app-line>
+    <h2>Variables</h2>
+    <div class="variable-action-header">
+      <mat-spinner *ngIf="isLoading" diameter="25"></mat-spinner>
+      <button mat-icon-button (click)="isVariableDetailsExpended= !isVariableDetailsExpended"
+              matTooltip="Show configuration">
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
+  </app-line>
+  <div class="select-variable-container">
+    <ng-container *ngFor="let variable of variables | keyvalue">
+      <div *ngIf="!variable.value.hide">
+        <mat-form-field appearance="fill">
+          <mat-label>{{variable.key}}</mat-label>
+          <mat-select [value]="selectedValue[variable.key]" (selectionChange)="selectValueChange(variable.key, $event)">
+            <mat-option *ngFor="let value of variableValues[variable.key]" [value]="value">
+              {{value}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-expansion-panel [expanded]="isVariableDetailsExpended" class="mat-elevation-z0">
+          <div class="variable-details-box" *ngIf="isVariableDetailsExpended">
+            <h2>General</h2>
+            <app-input-box label="name" value="{{variable.key}}" [readonly]="true"></app-input-box>
+            <app-input-box label="kind" value="{{variable.value.kind}}" [readonly]="true"></app-input-box>
+            <app-input-box label="hide" value="{{variable.value.hide}}" [readonly]="true"></app-input-box>
+            <h2>Parameter</h2>
+            <ng-container *ngIf="variable.value.kind === 'LabelValuesQuery'">
+              <app-input-box label="label_name" value="{{variable.value.parameter.label_name}}"
+                             [readonly]="true"></app-input-box>
+              <app-input-box label="capturing_regexp" value="{{variable.value.parameter.capturing_regexp}}"
+                             [readonly]="true"></app-input-box>
+              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}"
+                             [readonly]="true"></app-input-box>
+            </ng-container>
+            <ng-container *ngIf="variable.value.kind === 'LabelNamesQuery'">
+              <app-input-box label="capturing_regexp" value="{{variable.value.parameter.capturing_regexp}}"
+                             [readonly]="true"></app-input-box>
+              <app-input-box label="matchers" value="{{variable.value.parameter.matchers}}"
+                             [readonly]="true"></app-input-box>
+            </ng-container>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </ng-container>
+  </div>
+</mat-card>
+

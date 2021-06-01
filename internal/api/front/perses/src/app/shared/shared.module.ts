@@ -25,32 +25,44 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { PromqlEditorComponent } from './component/promql-editor/promql-editor.component';
 import { FormsModule } from '@angular/forms';
 import { AngularSplitModule } from 'angular-split';
+import { PageModule } from './component/page/page.module';
+import { InputBoxComponent } from './component/input-box/input-box.component';
+import { MatInputModule } from '@angular/material/input';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { LineComponent } from './component/line/line.component';
 
 @NgModule({
   declarations: [
+    InputBoxComponent,
     LineComponent,
     PromqlEditorComponent,
   ],
   exports: [
+    AngularSplitModule,
+    InputBoxComponent,
     CommonModule,
     HttpClientModule,
     FormsModule,
     LineComponent,
     MatButtonModule,
     MatCardModule,
+    MatExpansionModule,
+    MatDividerModule,
     MatIconModule,
+    MatInputModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     MatTooltipModule,
     MatToolbarModule,
     PromqlEditorComponent,
-    AngularSplitModule
+    PageModule
   ],
   imports: [
     CommonModule,
     HttpClientModule,
     ToastrModule.forRoot(),
+    MatInputModule,
   ]
 })
 export class SharedModule {

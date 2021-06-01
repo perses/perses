@@ -12,26 +12,27 @@
 // limitations under the License.
 
 import { NgModule } from '@angular/core';
-import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardDetailsComponent } from './dashboard-details/dashboard-details.component';
 import { DashboardSectionsComponent } from './dashboard-details/dashboard-sections/dashboard-sections.component';
 import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
 import { SharedModule } from '../../shared/shared.module';
-import { PageModule } from '../../shared/component/page/page.module';
+import { DashboardRoutingModule } from './dashboard-routing.module';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { DashboardVariablesComponent } from './dashboard-details/dashboard-variables/dashboard-variables.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 
 @NgModule({
-  declarations: [DashboardListComponent, DashboardDetailsComponent, DashboardSectionsComponent],
+  declarations: [DashboardListComponent, DashboardDetailsComponent, DashboardSectionsComponent, DashboardVariablesComponent],
   imports: [
+    SharedModule,
     NgxChartsModule,
     DashboardRoutingModule,
-    PageModule, // TODO @Nexucis : to be removed once variable is integrated
-    SharedModule,
-    MatDividerModule,
-    MatExpansionModule
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
   ]
 })
 export class DashboardModule {

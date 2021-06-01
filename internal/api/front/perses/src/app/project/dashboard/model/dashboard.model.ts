@@ -14,12 +14,12 @@
 import { ProjectMetadata } from '../../../shared/model/api/v1/metadata.model';
 import { HeaderModel } from '../../../shared/model/api/v1/kind.model';
 
-export enum VariableKind {
-  promqlQuery = 'PromQLQuery',
-  labelNamesQuery = 'LabelNamesQuery',
-  labelValuesQuery = 'LabelValuesQuery',
-  constant = 'Constant'
-}
+type ParametersType = {
+  PromqlQuery: PromQLQueryVariableParameter
+  Constant: ConstantVariableParameter
+  LabelValuesQuery: LabelValuesQueryVariableParameter
+  LabelNamesQuery: LabelNamesQueryVariableParameter
+};
 
 export interface PromQLQueryVariableParameter {
   expr: string;
@@ -42,13 +42,19 @@ export interface ConstantVariableParameter {
   values: string[];
 }
 
-export interface DashboardVariable {
-  kind: VariableKind;
+type PermutationParameter<T> = {
+  [K in keyof T]: {
+    kind: K;
+    parameter: T[K]
+  }
+}[keyof T];
+
+interface CommonDashboardVariable {
   hide: boolean;
   selected: string;
-  parameter: PromQLQueryVariableParameter | LabelNamesQueryVariableParameter |
-    LabelValuesQueryVariableParameter | ConstantVariableParameter;
 }
+
+export type DashboardVariable = CommonDashboardVariable & PermutationParameter<ParametersType>;
 
 export enum ChartKind {
   lineChart = 'LineChart'

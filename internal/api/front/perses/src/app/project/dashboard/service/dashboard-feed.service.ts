@@ -13,26 +13,35 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { DashboardSpec } from '../model/dashboard.model';
-import { SectionFeedModel } from '../model/section-feed.model';
-import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
 import { ErrorHandlingService } from '../../../shared/service/error-handling.service';
+import {
+  SectionFeedRequest,
+  SectionFeedResponse,
+  VariableFeedRequest,
+  VariableFeedResponse
+} from '../model/dashboard-feed.model';
+import { Observable } from 'rxjs';
+import { UrlBuilderUtil } from '../../../shared/utils/url-builder.util';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardFeedService {
-  private readonly resource = 'feed/sections';
+  private readonly resource = 'feed';
 
   constructor(private readonly http: HttpClient, private readonly errorHandler: ErrorHandlingService) {
   }
 
-  feedSections(spec: DashboardSpec): Observable<SectionFeedModel[]> {
+  feedSections(request: SectionFeedRequest): Observable<SectionFeedResponse[]> {
     const url = new UrlBuilderUtil()
-      .setResource(this.resource);
+      .setResource(`${this.resource}/sections`);
 
-    return this.http.post<SectionFeedModel[]>(url.build(), spec).pipe(catchError(this.errorHandler.handleHTTPError));
+    return this.http.post<SectionFeedResponse[]>(url.build(), request).pipe(catchError(this.errorHandler.handleHTTPError));
+  }
+
+  feedVariables(request: VariableFeedRequest): Observable<VariableFeedResponse[]> {
+    const url = new UrlBuilderUtil().setResource(`${this.resource}/variables`);
+    return this.http.post<VariableFeedResponse[]>(url.build(), request).pipe(catchError(this.errorHandler.handleHTTPError));
   }
 }

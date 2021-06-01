@@ -11,6 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-$large-screen: 1200px;
-$medium-screen: 800px;
-$xsmall-screen: 600px;
+import { EventEmitter, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class EventFeedService {
+  private variableChangeEmitter = new EventEmitter<boolean>();
+
+  constructor() {
+  }
+
+  public getVariableChange(): Observable<boolean> {
+    return this.variableChangeEmitter.asObservable();
+  }
+
+  public variableHasBeenChanged(): void {
+    this.variableChangeEmitter.emit(true);
+  }
+
+}

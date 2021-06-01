@@ -19,8 +19,8 @@
 
 // Define the default theme (same as the example above).
 $perses-light-primary: mat-palette($mat-indigo);
-$perses-light-accent:  mat-palette($mat-pink, A200, A100, A400);
-$perses-light-theme:   mat-light-theme((
+$perses-light-accent: mat-palette($mat-pink, A200, A100, A400);
+$perses-light-theme: mat-light-theme((
   color: (
     primary: $perses-light-primary,
     accent: $perses-light-accent,
@@ -33,9 +33,9 @@ $perses-light-theme:   mat-light-theme((
 
 // Define an alternate dark theme.
 $perses-dark-primary: mat-palette($mat-blue-gray);
-$perses-dark-accent:  mat-palette($mat-amber, A200, A100, A400);
-$perses-dark-warn:    mat-palette($mat-deep-orange);
-$perses-dark-theme:   mat-dark-theme((
+$perses-dark-accent: mat-palette($mat-amber, A200, A100, A400);
+$perses-dark-warn: mat-palette($mat-deep-orange);
+$perses-dark-theme: mat-dark-theme((
   color: (
     primary: $perses-dark-primary,
     accent: $perses-dark-accent,
@@ -46,4 +46,8 @@ $perses-dark-theme:   mat-dark-theme((
 // Include the dark color styles inside of a block with a CSS class.
 .perses-dark-theme {
   @include angular-material-color($perses-dark-theme);
+}
+
+.mat-expansion-panel {
+  background-color: transparent !important;
 }
