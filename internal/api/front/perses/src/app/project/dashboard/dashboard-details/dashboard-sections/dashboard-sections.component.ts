@@ -48,10 +48,6 @@ export class DashboardSectionsComponent implements OnInit {
   xAxisLabel = 'Time';
   showYAxisLabel = true;
   yAxisLabel = 'Value';
-  timeline = true;
-  colorScheme = {
-    domain: ['#9370DB', '#87CEFA', '#FA8072', '#FF7F50', '#90EE90', '#9370DB']
-  };
 
   constructor(private readonly service: DashboardService,
               private readonly feedService: DashboardFeedService,
