@@ -11,24 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { EventEmitter, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventFeedService {
-  private variableChangeSubject = new BehaviorSubject<boolean>(false);
+  private variableChangeEmitter = new EventEmitter<boolean>();
 
   constructor() {
   }
 
-  public get variableChange(): Observable<boolean> {
-    return this.variableChangeSubject.asObservable();
+  public getVariableChange(): Observable<boolean> {
+    return this.variableChangeEmitter.asObservable();
   }
 
   public variableHasBeenChanged(): void {
-    this.variableChangeSubject.next(true);
+    this.variableChangeEmitter.emit(true);
   }
 
 }
