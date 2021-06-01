@@ -7,4 +7,23 @@
       fill: mat-color($foreground, text);
     }
   }
+  .chart-legend {
+    .legend-item {
+      &:hover {
+        color: mat-color($foreground, text);
+      }
+    }
+
+    .legend-label {
+      &:hover {
+        color: mat-color($foreground, text);
+      }
+
+      .active {
+        .legend-label-text {
+          color: mat-color($foreground, text);
+        }
+      }
+    }
+  }
 }
