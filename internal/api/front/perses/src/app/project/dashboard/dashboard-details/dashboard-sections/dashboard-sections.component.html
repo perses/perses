@@ -1,10 +1,10 @@
 <mat-expansion-panel class="mat-elevation-z0" *ngFor="let section of sections"
                      [(expanded)]="section.open" (afterExpand)="feedSection(section)">
   <mat-expansion-panel-header>
-    <div class="expansion-panel-header-container">
+    <app-line>
       <h2>{{section.name}}</h2>
-      <mat-divider></mat-divider>
-    </div>
+      <mat-spinner *ngIf="isSectionLoading[section.name]" diameter="25"></mat-spinner>
+    </app-line>
   </mat-expansion-panel-header>
   <mat-card>
     <app-line justifyContent="flex-start">

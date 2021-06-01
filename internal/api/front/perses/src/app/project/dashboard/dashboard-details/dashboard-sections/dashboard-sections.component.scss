@@ -26,3 +26,11 @@
     width: 100%;
   }
 }
+
+mat-expansion-panel-header {
+  padding: 0;
+}
+
+mat-expansion-panel {
+  overflow: visible;
+}
