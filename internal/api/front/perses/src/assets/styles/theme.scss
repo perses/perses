@@ -12,6 +12,7 @@
 // limitations under the License.
 
 @import "~@angular/material/theming";
+@import "../../app/project/dashboard/dashboard-details/dashboard-sections/dashboard-sections-theme.component";
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
 // **Be sure that you only ever include this mixin once!**
@@ -29,7 +30,7 @@ $perses-light-theme: mat-light-theme((
 
 // Include the default theme styles (color and default density)
 @include angular-material-theme($perses-light-theme);
-
+@include dashboardSection($perses-light-theme);
 
 // Define an alternate dark theme.
 $perses-dark-primary: mat-palette($mat-blue-gray);
@@ -46,6 +47,11 @@ $perses-dark-theme: mat-dark-theme((
 // Include the dark color styles inside of a block with a CSS class.
 .perses-dark-theme {
   @include angular-material-color($perses-dark-theme);
+  @include dashboardSection($perses-dark-theme);
+}
+
+.mat-expansion-panel {
+  background-color: transparent !important;
 }
 
 .mat-expansion-panel {

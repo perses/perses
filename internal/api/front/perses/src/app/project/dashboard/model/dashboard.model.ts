@@ -56,9 +56,9 @@ interface CommonDashboardVariable {
 
 export type DashboardVariable = CommonDashboardVariable & PermutationParameter<ParametersType>;
 
-export enum ChartKind {
-  lineChart = 'LineChart'
-}
+type ChartType = {
+  LineChart: LineChart,
+};
 
 export interface LineChart {
   lines: {
@@ -67,12 +67,19 @@ export interface LineChart {
   show_legend: boolean;
 }
 
-export interface Panel {
+type PermutationChart<T> = {
+  [K in keyof T]: {
+    kind: K;
+    chart: T[K]
+  }
+}[keyof T];
+
+export interface CommonPanel {
   name: string;
   order: number;
-  kind: ChartKind;
-  chart: LineChart;
 }
+
+export type Panel = CommonPanel & PermutationChart<ChartType>;
 
 export interface DashboardSection {
   name: string;

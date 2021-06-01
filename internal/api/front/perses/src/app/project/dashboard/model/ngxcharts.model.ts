@@ -18,7 +18,7 @@
  */
 
 export interface NgxChartPoint {
-  name: string;
+  name: string | Date;
   value: number;
 }
 

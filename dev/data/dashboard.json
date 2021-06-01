@@ -57,6 +57,7 @@
               "name": "myGraphPanel",
               "kind": "LineChart",
               "chart": {
+                "show_legend": true,
                 "lines": [
                   {
                     "expr": "up"

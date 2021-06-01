@@ -1,0 +1,29 @@
+@import "~@angular/material/theming";
+
+@mixin dashboardSection($theme) {
+  $foreground: map-get($theme, foreground);
+  .ngx-charts {
+    text {
+      fill: mat-color($foreground, text);
+    }
+  }
+  .chart-legend {
+    .legend-item {
+      &:hover {
+        color: mat-color($foreground, text);
+      }
+    }
+
+    .legend-label {
+      &:hover {
+        color: mat-color($foreground, text);
+      }
+
+      .active {
+        .legend-label-text {
+          color: mat-color($foreground, text);
+        }
+      }
+    }
+  }
+}

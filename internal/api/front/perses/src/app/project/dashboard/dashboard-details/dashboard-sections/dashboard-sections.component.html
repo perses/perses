@@ -1,27 +1,29 @@
 <mat-expansion-panel class="mat-elevation-z0" *ngFor="let section of sections"
                      [(expanded)]="section.open" (afterExpand)="feedSection(section)">
   <mat-expansion-panel-header>
-    <div class="expansion-panel-header-container">
+    <app-line>
       <h2>{{section.name}}</h2>
-      <mat-divider></mat-divider>
-    </div>
+      <mat-spinner *ngIf="isSectionLoading[section.name]" diameter="25"></mat-spinner>
+    </app-line>
   </mat-expansion-panel-header>
-  <ng-container *ngFor="let panel of section.panels">
-    <h3>{{panel.name}}</h3>
-    <mat-card>
-      <ngx-charts-line-chart
-        [view]="view"
-        [scheme]="colorScheme"
-        [results]="getChartData(section.name, panel.name)"
-        [gradient]="gradient"
-        [xAxis]="showXAxis"
-        [yAxis]="showYAxis"
-        [legend]="showLegend"
-        [showXAxisLabel]="showXAxisLabel"
-        [showYAxisLabel]="showYAxisLabel"
-        [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel">
-      </ngx-charts-line-chart>
-    </mat-card>
-  </ng-container>
+  <mat-card>
+    <app-line justifyContent="flex-start">
+      <ng-container *ngFor="let panel of section.panels">
+        <div class="chart">
+          <h3>{{panel.name}}</h3>
+          <ngx-charts-line-chart *ngIf="panel.kind == 'LineChart'"
+                                 [results]="getChartData(section.name, panel.name)"
+                                 [gradient]="gradient"
+                                 [xAxis]="showXAxis"
+                                 [yAxis]="showYAxis"
+                                 [legend]="panel.chart.show_legend"
+                                 [showXAxisLabel]="showXAxisLabel"
+                                 [showYAxisLabel]="showYAxisLabel"
+                                 [xAxisLabel]="xAxisLabel"
+                                 [yAxisLabel]="yAxisLabel">
+          </ngx-charts-line-chart>
+        </div>
+      </ng-container>
+    </app-line>
+  </mat-card>
 </mat-expansion-panel>

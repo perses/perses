@@ -13,7 +13,7 @@
       <mat-expansion-panel class="mat-elevation-z0" *ngFor="let promRule of rules; let isPromRuleFirst= first;"
                            [expanded]="isPromRuleFirst">
         <mat-expansion-panel-header>
-          <div class="expansion-panel-header-container">
+          <app-line>
             <h4>
               <mat-icon>description</mat-icon>
             </h4>
@@ -37,7 +37,7 @@
             <div class="little-line remove-if-small-screen">
               <mat-divider></mat-divider>
             </div>
-          </div>
+          </app-line>
         </mat-expansion-panel-header>
         <ng-container *ngFor="let gr of promRule.spec.groups">
           <h2>
