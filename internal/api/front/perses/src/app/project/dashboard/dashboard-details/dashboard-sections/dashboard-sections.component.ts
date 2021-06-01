@@ -18,7 +18,7 @@ import { SectionFeedRequest, SectionFeedResponse } from '../../model/dashboard-f
 import { DashboardSection } from '../../model/dashboard.model';
 import { NgxChartLineChartModel, NgxChartPoint } from '../../model/ngxcharts.model';
 import { ToastService } from '../../../../shared/service/toast.service';
-import { UntilDestroy } from '@ngneat/until-destroy';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { EventFeedService } from '../../service/event-feed.service';
 
 @UntilDestroy()
@@ -60,7 +60,7 @@ export class DashboardSectionsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.eventFeedService.variableChange.subscribe(
+    this.eventFeedService.getVariableChange().pipe(untilDestroyed(this)).subscribe(
       shouldLoad => {
         if (shouldLoad) {
           this.feedDashboard();
