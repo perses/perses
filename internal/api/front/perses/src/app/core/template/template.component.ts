@@ -14,7 +14,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ThemeService } from '../../shared/service/theme.service';
 import { Observable } from 'rxjs';
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+const darkThemeClass = 'perses-dark-theme';
+
+@UntilDestroy()
 @Component({
   selector: 'app-template',
   templateUrl: './template.component.html',
@@ -23,11 +28,20 @@ import { Observable } from 'rxjs';
 export class TemplateComponent implements OnInit {
   isDarkTheme: Observable<boolean> = new Observable<boolean>();
 
-  constructor(private themeService: ThemeService) {
+  constructor(private readonly themeService: ThemeService,
+              private readonly overlayContainer: OverlayContainer) {
   }
 
   ngOnInit(): void {
     this.isDarkTheme = this.themeService.darkThemeEnable;
+    this.isDarkTheme.pipe(untilDestroyed(this)).subscribe(
+      res => {
+        if (res) {
+          this.overlayContainer.getContainerElement().classList.add(darkThemeClass);
+        } else {
+          this.overlayContainer.getContainerElement().classList.remove(darkThemeClass);
+        }
+      });
   }
 
   toggleDarkTheme(checked: boolean): void {
