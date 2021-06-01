@@ -1,0 +1,10 @@
+@import "~@angular/material/theming";
+
+@mixin dashboardSection($theme) {
+  $foreground: map-get($theme, foreground);
+  .ngx-charts {
+    text {
+      fill: mat-color($foreground, text);
+    }
+  }
+}
