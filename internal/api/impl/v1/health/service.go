@@ -1,9 +1,9 @@
 package health
 
 import (
-	utilsApp "github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/prometheus/common/version"
 )
 
 type serviceImpl struct {
@@ -20,9 +20,9 @@ func NewService(dao health.DAO) health.Service {
 
 func (s *serviceImpl) HealthCheck() *v1.Health {
 	return &v1.Health{
-		BuildTime: utilsApp.BuildTime,
-		Version:   utilsApp.Version,
-		Commit:    utilsApp.Commit,
+		BuildTime: version.BuildDate,
+		Version:   version.Version,
+		Commit:    version.Revision,
 		Database:  s.dao.HealthCheck(),
 	}
 }

@@ -16,9 +16,10 @@ GOFMT         ?= $(GO)fmt
 GOARCH        ?= amd64
 COMMIT        := $(shell git rev-parse HEAD)
 DATE          := $(shell date +%Y-%m-%d)
+BRANCH        := $(shell git rev-parse --abbrev-ref HEAD)
 COVER_PROFILE := coverage.txt
-PKG_LDFLAGS   := github.com/perses/common/app
-LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Commit=${COMMIT} -X ${PKG_LDFLAGS}.BuildTime=${DATE}"
+PKG_LDFLAGS   := github.com/prometheus/common/version
+LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}"
 
 .PHONY: checkformat
 checkformat:
