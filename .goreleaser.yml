@@ -9,9 +9,9 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
-      - PKG_LDFLAGS=github.com/perses/common/app
+      - PKG_LDFLAGS=github.com/prometheus/common/version
     ldflags:
-      - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Commit={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildTime={{.Date}}"
+      - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Revision={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildDate={{.Date}} -X {{.Env.PKG_LDFLAGS}}.Branch={{.Branch}}"
 dockers:
   - goos: linux
     goarch: amd64

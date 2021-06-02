@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/gavv/httpexpect/v2 v2.2.0
 	github.com/labstack/echo/v4 v4.1.17
-	github.com/perses/common v0.5.2
+	github.com/perses/common v0.6.0
 	github.com/prometheus/client_golang v1.10.0
 	github.com/prometheus/common v0.20.0
 	github.com/prometheus/prometheus v1.8.2-0.20210331101223-3cafc58827d1
