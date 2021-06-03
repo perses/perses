@@ -57,6 +57,27 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 				},
 			},
 		},
+		{
+			title: "gauge chart",
+			jason: `
+{
+  "name": "myPanel",
+  "order": 0,
+  "kind": "GaugeChart",
+  "chart": {
+    "expr": "up"
+  }
+}
+`,
+			result: Panel{
+				Name:  "myPanel",
+				Order: 0,
+				Kind:  KindGaugeChart,
+				Chart: &GaugeChart{
+					Expr: "up",
+				},
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -93,6 +114,24 @@ chart:
 							Expr: "up{instance='localhost:8080'}",
 						},
 					},
+				},
+			},
+		},
+		{
+			title: "gauge chart",
+			yamele: `
+name: "myPanel"
+order: 0
+kind: "GaugeChart"
+chart:
+  expr: "up"
+`,
+			result: Panel{
+				Name:  "myPanel",
+				Order: 0,
+				Kind:  KindGaugeChart,
+				Chart: &GaugeChart{
+					Expr: "up",
 				},
 			},
 		},

@@ -21,17 +21,20 @@ import (
 )
 
 type PromQueryResult struct {
-	Err    error       `json:"err,omitempty"`
-	Result model.Value `json:"result"`
+	Err    error           `json:"err,omitempty"`
+	Type   model.ValueType `json:"type"`
+	Result model.Value     `json:"result"`
 }
 
 func (p *PromQueryResult) MarshalJSON() ([]byte, error) {
 	type tmpQuery = struct {
-		Err    string      `json:"err,omitempty"`
-		Result model.Value `json:"result"`
+		Err    string          `json:"err,omitempty"`
+		Type   model.ValueType `json:"type"`
+		Result model.Value     `json:"result"`
 	}
 	result := &tmpQuery{
 		Result: p.Result,
+		Type:   p.Type,
 	}
 	if p.Err != nil {
 		result.Err = p.Err.Error()

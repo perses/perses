@@ -83,5 +83,55 @@
         }
       ]
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "NodeExporter",
+      "project": "perses"
+    },
+    "spec": {
+      "datasource": "PrometheusDemo",
+      "duration": "6h",
+      "variables": {
+        "job": {
+          "kind": "LabelValuesQuery",
+          "hide": false,
+          "parameter": {
+            "label_name": "job",
+            "matchers": [
+              "node_uname_info"
+            ],
+            "capturing_regexp": "(.*)"
+          }
+        },
+        "node": {
+          "kind": "LabelValuesQuery",
+          "hide": false,
+          "parameter": {
+            "label_name": "instance",
+            "matchers": [
+              "node_uname_info{job=\"$job\"}"
+            ],
+            "capturing_regexp": "(.*)"
+          }
+        }
+      },
+      "sections": [
+        {
+          "name": "Basic CPU / Mem / Disk Gauge",
+          "open": true,
+          "panels": [
+            {
+              "name": "CPU Busy",
+              "kind": "GaugeChart",
+              "chart": {
+                "expr": "(((count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',instance=\"$node\",job=\"$job\"}[5m])))) * 100) / count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))"
+              }
+            }
+          ]
+        }
+      ]
+    }
   }
 ]

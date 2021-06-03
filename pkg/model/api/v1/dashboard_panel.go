@@ -23,11 +23,13 @@ import (
 type ChartKind string
 
 const (
-	KindLineChart ChartKind = "LineChart"
+	KindLineChart  ChartKind = "LineChart"
+	KindGaugeChart ChartKind = "GaugeChart"
 )
 
 var chartKindMap = map[ChartKind]bool{
-	KindLineChart: true,
+	KindLineChart:  true,
+	KindGaugeChart: true,
 }
 
 func (k *ChartKind) UnmarshalJSON(data []byte) error {
@@ -146,6 +148,44 @@ func (l *LineChart) validate() error {
 	return nil
 }
 
+type GaugeChart struct {
+	Chart `json:"-" yaml:"-"`
+	Expr  string `json:"expr" yaml:"expr"`
+}
+
+func (l *GaugeChart) UnmarshalJSON(data []byte) error {
+	var tmp GaugeChart
+	type plain GaugeChart
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*l = tmp
+	return nil
+}
+
+func (l *GaugeChart) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp GaugeChart
+	type plain GaugeChart
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*l = tmp
+	return nil
+}
+
+func (l *GaugeChart) validate() error {
+	if len(l.Expr) == 0 {
+		return fmt.Errorf("expr cannot be empty for a GaugeChart")
+	}
+	return nil
+}
+
 type tmpPanel struct {
 	Name string `json:"name" yaml:"name"`
 	// Order is used to know the display order
@@ -203,14 +243,16 @@ func (p *Panel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(
 	if err != nil {
 		return err
 	}
-
+	var chart Chart
 	switch p.Kind {
 	case KindLineChart:
-		chart := &LineChart{}
-		if err := staticUnmarshal(rawChart, chart); err != nil {
-			return err
-		}
-		p.Chart = chart
+		chart = &LineChart{}
+	case KindGaugeChart:
+		chart = &GaugeChart{}
 	}
+	if err := staticUnmarshal(rawChart, chart); err != nil {
+		return err
+	}
+	p.Chart = chart
 	return nil
 }
