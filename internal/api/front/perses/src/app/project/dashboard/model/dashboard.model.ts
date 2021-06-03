@@ -58,6 +58,7 @@ export type DashboardVariable = CommonDashboardVariable & PermutationParameter<P
 
 type ChartType = {
   LineChart: LineChart,
+  GaugeChart: GaugeChart,
 };
 
 export interface LineChart {
@@ -65,6 +66,10 @@ export interface LineChart {
     expr: string
   };
   show_legend: boolean;
+}
+
+export interface GaugeChart {
+  expr: string;
 }
 
 type PermutationChart<T> = {
