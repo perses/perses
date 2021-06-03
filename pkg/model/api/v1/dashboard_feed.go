@@ -60,10 +60,10 @@ type SectionFeedResponse struct {
 
 // SectionFeedRequest is the struct that represents the request performed by a client in order to get a set of data to feed a Dashboard.
 type SectionFeedRequest struct {
-	Datasource string             `json:"datasource"`
-	Duration   model.Duration     `json:"duration"`
-	Variables  map[string]string  `json:"variables"`
-	Sections   []DashboardSection `json:"sections"`
+	Datasource string                       `json:"datasource"`
+	Duration   model.Duration               `json:"duration"`
+	Variables  map[string]string            `json:"variables"`
+	Sections   map[string]*DashboardSection `json:"sections"`
 }
 
 func (d *SectionFeedRequest) UnmarshalJSON(data []byte) error {

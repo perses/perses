@@ -32,7 +32,6 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 			title: "line chart",
 			jason: `
 {
-  "name": "myPanel",
   "order": 0,
   "kind": "LineChart",
   "chart": {
@@ -45,7 +44,6 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 }
 `,
 			result: Panel{
-				Name:  "myPanel",
 				Order: 0,
 				Kind:  KindLineChart,
 				Chart: &LineChart{
@@ -61,7 +59,6 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 			title: "gauge chart",
 			jason: `
 {
-  "name": "myPanel",
   "order": 0,
   "kind": "GaugeChart",
   "chart": {
@@ -70,7 +67,6 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 }
 `,
 			result: Panel{
-				Name:  "myPanel",
 				Order: 0,
 				Kind:  KindGaugeChart,
 				Chart: &GaugeChart{
@@ -97,7 +93,6 @@ func TestUnmarshallYAMLPanel(t *testing.T) {
 		{
 			title: "line chart",
 			yamele: `
-name: "myPanel"
 order: 0
 kind: "LineChart"
 chart:
@@ -105,7 +100,6 @@ chart:
   - expr: "up{instance='localhost:8080'}"
 `,
 			result: Panel{
-				Name:  "myPanel",
 				Order: 0,
 				Kind:  KindLineChart,
 				Chart: &LineChart{
@@ -120,14 +114,12 @@ chart:
 		{
 			title: "gauge chart",
 			yamele: `
-name: "myPanel"
 order: 0
 kind: "GaugeChart"
 chart:
   expr: "up"
 `,
 			result: Panel{
-				Name:  "myPanel",
 				Order: 0,
 				Kind:  KindGaugeChart,
 				Chart: &GaugeChart{
@@ -151,22 +143,6 @@ func TestUnmarshallPanelError(t *testing.T) {
 		jason string
 		err   error
 	}{
-		{
-			title: "panel with no name",
-			jason: `
-{
-  "kind": "LineChart",
-  "chart": {
-    "lines": [
-      {
-        "expr": "up{instance='localhost:8080'}"
-      }
-    ]
-  }
-}
-`,
-			err: fmt.Errorf("panel.name cannot be empty"),
-		},
 		{
 			title: "panel.kind is empty",
 			jason: `

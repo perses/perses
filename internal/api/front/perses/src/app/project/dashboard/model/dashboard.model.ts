@@ -90,14 +90,14 @@ export interface DashboardSection {
   name: string;
   order: number;
   open: boolean;
-  panels: Panel[];
+  panels: Record<string, Panel>;
 }
 
 export interface DashboardSpec {
   datasource: string;
   duration: string;
   variables: Record<string, DashboardVariable>;
-  sections: DashboardSection[];
+  sections: Record<string, DashboardSection>;
 }
 
 export interface DashboardModel extends HeaderModel {

@@ -43,14 +43,12 @@ func TestMarshalDashboard(t *testing.T) {
 					Datasource: "PrometheusDemo",
 					Duration:   model.Duration(6 * time.Hour),
 					Variables:  nil,
-					Sections: []DashboardSection{
-						{
-							Name:  "MySection",
+					Sections: map[string]*DashboardSection{
+						"MySection": {
 							Order: 0,
 							Open:  false,
-							Panels: []Panel{
-								{
-									Name:  "MyPanel",
+							Panels: map[string]*Panel{
+								"MyPanel": {
 									Order: 0,
 									Kind:  KindLineChart,
 									Chart: &LineChart{
@@ -78,14 +76,12 @@ func TestMarshalDashboard(t *testing.T) {
   "spec": {
     "datasource": "PrometheusDemo",
     "duration": "6h",
-    "sections": [
-      {
-        "name": "MySection",
+    "sections": {
+      "MySection": {
         "order": 0,
         "open": false,
-        "panels": [
-          {
-            "name": "MyPanel",
+        "panels": {
+          "MyPanel": {
             "order": 0,
             "kind": "LineChart",
             "chart": {
@@ -97,9 +93,9 @@ func TestMarshalDashboard(t *testing.T) {
               ]
             }
           }
-        ]
+        }
       }
-    ]
+    }
   }
 }`,
 		},
@@ -139,14 +135,12 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Sections: []DashboardSection{
-						{
-							Name:  "MySection",
+					Sections: map[string]*DashboardSection{
+						"MySection": {
 							Order: 0,
 							Open:  false,
-							Panels: []Panel{
-								{
-									Name:  "MyPanel",
+							Panels: map[string]*Panel{
+								"MyPanel": {
 									Order: 0,
 									Kind:  KindLineChart,
 									Chart: &LineChart{
@@ -197,14 +191,12 @@ func TestMarshalDashboard(t *testing.T) {
         }
       }
     },
-    "sections": [
-      {
-        "name": "MySection",
+    "sections": {
+      "MySection": {
         "order": 0,
         "open": false,
-        "panels": [
-          {
-            "name": "MyPanel",
+        "panels": {
+          "MyPanel": {
             "order": 0,
             "kind": "LineChart",
             "chart": {
@@ -216,9 +208,9 @@ func TestMarshalDashboard(t *testing.T) {
               ]
             }
           }
-        ]
+        }
       }
-    ]
+    }
   }
 }`,
 		},

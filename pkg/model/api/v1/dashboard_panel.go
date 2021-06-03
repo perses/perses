@@ -187,15 +187,12 @@ func (l *GaugeChart) validate() error {
 }
 
 type tmpPanel struct {
-	Name string `json:"name" yaml:"name"`
-	// Order is used to know the display order
 	Order uint64                 `json:"order" yaml:"order"`
 	Kind  ChartKind              `json:"kind" yaml:"kind"`
 	Chart map[string]interface{} `json:"chart" yaml:"chart"`
 }
 
 type Panel struct {
-	Name string `json:"name" yaml:"name"`
 	// Order is used to know the display order
 	Order uint64    `json:"order" yaml:"order"`
 	Kind  ChartKind `json:"kind" yaml:"kind"`
@@ -220,8 +217,8 @@ func (p *Panel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (p *Panel) validate() error {
-	if len(p.Name) == 0 {
-		return fmt.Errorf("panel.name cannot be empty")
+	if p.Chart == nil {
+		return fmt.Errorf("panel.chart cannot be empty")
 	}
 	return nil
 }
@@ -231,7 +228,6 @@ func (p *Panel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(
 	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
-	p.Name = tmp.Name
 	p.Order = tmp.Order
 	p.Kind = tmp.Kind
 

@@ -153,21 +153,21 @@ func (s *service) FeedSection(sectionRequest *v1.SectionFeedRequest) ([]v1.Secti
 	}
 
 	var sectionResponses = make([]v1.SectionFeedResponse, 0, len(sectionRequest.Sections))
-	for _, section := range sectionRequest.Sections {
+	for sectionName, section := range sectionRequest.Sections {
 		currentSectionResponse := v1.SectionFeedResponse{
-			Name:  section.Name,
+			Name:  sectionName,
 			Order: section.Order,
 		}
 		panelAsynchronousRequests := make([]async.Future, 0, len(section.Panels))
-		for _, panel := range section.Panels {
+		for panelName, panel := range section.Panels {
 			panelAsynchronousRequests = append(panelAsynchronousRequests,
-				async.Async(func(currentPanel v1.Panel) func() interface{} {
+				async.Async(func(currentPanel *v1.Panel) func() interface{} {
 					return func() interface{} {
 						switch chart := panel.Chart.(type) {
 						case *v1.LineChart:
-							return s.feedLineChart(sectionRequest, panel, chart, promClient)
+							return s.feedLineChart(sectionRequest, panelName, panel, chart, promClient)
 						case *v1.GaugeChart:
-							return s.feedGaugeChart(sectionRequest, currentPanel, chart, promClient)
+							return s.feedGaugeChart(sectionRequest, panelName, currentPanel, chart, promClient)
 						default:
 							return fmt.Errorf("this chart '%T' is not supported", chart)
 						}
@@ -187,9 +187,9 @@ func (s *service) FeedSection(sectionRequest *v1.SectionFeedRequest) ([]v1.Secti
 	return sectionResponses, nil
 }
 
-func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, currentPanel v1.Panel, chart *v1.LineChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
+func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, panelName string, currentPanel *v1.Panel, chart *v1.LineChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
 	panelAnswer := &v1.PanelFeedResponse{
-		Name:  currentPanel.Name,
+		Name:  panelName,
 		Order: currentPanel.Order,
 	}
 	asynchronousRequests := make([]async.Future, 0, len(chart.Lines))
@@ -210,9 +210,9 @@ func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, currentPa
 	return panelAnswer
 }
 
-func (s *service) feedGaugeChart(sectionRequest *v1.SectionFeedRequest, currentPanel v1.Panel, chart *v1.GaugeChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
+func (s *service) feedGaugeChart(sectionRequest *v1.SectionFeedRequest, panelName string, currentPanel *v1.Panel, chart *v1.GaugeChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
 	return &v1.PanelFeedResponse{
-		Name:    currentPanel.Name,
+		Name:    panelName,
 		Order:   currentPanel.Order,
 		Results: []v1.PromQueryResult{*prometheusInstantQuery(sectionRequest.Variables, chart.Expr, promClient)},
 	}

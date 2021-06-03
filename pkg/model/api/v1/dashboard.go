@@ -25,13 +25,11 @@ func GenerateDashboardID(project string, name string) string {
 }
 
 type DashboardSection struct {
-	// Name is the name of the section. It is optional
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 	// Order is used to know the display order
 	Order uint64 `json:"order" yaml:"order"`
 	// Open is used to know if the section is opened by default when the dashboard is loaded for the first time
-	Open   bool    `json:"open" yaml:"open"`
-	Panels []Panel `json:"panels" yaml:"panels"`
+	Open   bool              `json:"open" yaml:"open"`
+	Panels map[string]*Panel `json:"panels" yaml:"panels"`
 }
 
 func (d *DashboardSection) UnmarshalJSON(data []byte) error {
@@ -76,7 +74,7 @@ type DashboardSpec struct {
 	// dashboard
 	Duration  model.Duration                `json:"duration" yaml:"duration"`
 	Variables map[string]*DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Sections  []DashboardSection            `json:"sections" yaml:"sections"`
+	Sections  map[string]*DashboardSection  `json:"sections" yaml:"sections"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
