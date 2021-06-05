@@ -9,28 +9,11 @@
   <mat-card>
     <app-line justifyContent="flex-start">
       <ng-container *ngFor="let panel of section.value.panels | keyvalue">
-        <div class="chart">
+        <div>
           <h3>{{panel.key}}</h3>
-          <ngx-charts-line-chart *ngIf="panel.value.kind == 'LineChart'"
-                                 [results]="getChartData(section.key, panel.key)"
-                                 [gradient]="gradient"
-                                 [xAxis]="showXAxis"
-                                 [yAxis]="showYAxis"
-                                 [legend]="panel.value.chart.show_legend"
-                                 [showXAxisLabel]="showXAxisLabel"
-                                 [showYAxisLabel]="showYAxisLabel"
-                                 [xAxisLabel]="xAxisLabel"
-                                 [yAxisLabel]="yAxisLabel">
-          </ngx-charts-line-chart>
-          <ngx-charts-gauge *ngIf="panel.value.kind == 'GaugeChart'"
-                            [results]="getChartData(section.key, panel.key)"
-                            [legend]="false"
-                            [angleSpan]="240"
-                            [startAngle]="-120"
-                            [max]="100"
-                            [bigSegments]="1"
-                            [smallSegments]="5">
-          </ngx-charts-gauge>
+          <app-gauge-chart *ngIf="panel.value.kind == 'GaugeChart'"
+                           [data]="getChartData(section.key, panel.key)">
+          </app-gauge-chart>
         </div>
       </ng-container>
     </app-line>

@@ -13,7 +13,6 @@
 
 import { PanelFeedResponse } from '../../model/dashboard-feed.model';
 import { DashboardSection } from '../../model/dashboard.model';
-import { NgxChartPoint } from '../../model/ngxcharts.model';
 
 
 export interface FeedBuilder {
@@ -40,30 +39,27 @@ class GaugeChartFeedBuilder {
     this.feedPanel = feedPanel;
   }
 
-  build(): NgxChartPoint[] {
-    const result: NgxChartPoint[] = [];
+  build(): number {
     // In this case we are feeding a gaugeChart, then we are only interesting by the first result if there is one.
     // It's because there is only one expression in the GaugeChart data model,
     // so feedPanel.feeds should be an array with at most one element.
     if (this.feedPanel.feeds.length !== 1) {
-      return result;
+      return 0;
     }
     const feedResult = this.feedPanel.feeds[0];
     if (feedResult.err) {
       // at some point, we should find a nice way to handle this error. If possible with the ToastService
-      return result;
+      return 0;
     }
     if (feedResult.type !== 'vector') {
       // For a GaugeChart, we are expecting a vector, since it's an instant query that is performed on the backend side.
       // In case it's something different, we should stop the execution. It's the safer for the moment.
-      return result;
+      return 0;
     }
-    let i = 0;
-    for (const vector of feedResult.result) {
-      const point: NgxChartPoint = {name: String(i), value: Number(vector.value[1])};
-      result.push(point);
-      i++;
+    if (feedResult.result.length !== 1) {
+      return 0;
     }
-    return result;
+    // let's truncate the number so it can be easily displayed.
+    return Number(feedResult.result[0].value[1].split('.')[0]);
   }
 }

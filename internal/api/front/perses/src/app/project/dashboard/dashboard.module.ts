@@ -17,18 +17,22 @@ import { DashboardSectionsComponent } from './dashboard-details/dashboard-sectio
 import { DashboardListComponent } from './dashboard-list/dashboard-list.component';
 import { SharedModule } from '../../shared/shared.module';
 import { DashboardRoutingModule } from './dashboard-routing.module';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { DashboardVariablesComponent } from './dashboard-details/dashboard-variables/dashboard-variables.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { GaugeChartComponent } from './dashboard-details/gauge-chart/gauge-chart.component';
 
 
 @NgModule({
-  declarations: [DashboardListComponent, DashboardDetailsComponent, DashboardSectionsComponent, DashboardVariablesComponent],
+  declarations: [
+    DashboardListComponent,
+    DashboardDetailsComponent,
+    DashboardSectionsComponent,
+    DashboardVariablesComponent,
+    GaugeChartComponent],
   imports: [
     SharedModule,
-    NgxChartsModule,
     DashboardRoutingModule,
     MatFormFieldModule,
     MatSelectModule,
