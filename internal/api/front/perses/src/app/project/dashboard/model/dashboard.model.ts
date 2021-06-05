@@ -80,7 +80,6 @@ type PermutationChart<T> = {
 }[keyof T];
 
 export interface CommonPanel {
-  name: string;
   order: number;
 }
 
@@ -103,4 +102,15 @@ export interface DashboardSpec {
 export interface DashboardModel extends HeaderModel {
   metadata: ProjectMetadata;
   spec: DashboardSpec;
+}
+
+export function filterSections(sections: Record<string, DashboardSection>,
+                               filter: (key: string, value: DashboardSection) => boolean): Record<string, DashboardSection> {
+  const result: Record<string, DashboardSection> = {};
+  for (const [k, v] of Object.entries(sections)) {
+    if (filter(k, v)) {
+      result[k] = v;
+    }
+  }
+  return result;
 }

@@ -56,21 +56,21 @@ export interface PromVector {
   value: [number, string];
 }
 
-export interface Panel {
+export interface PanelFeedResponse {
   name: string;
   order: number;
-  results: PermutationPrometheusResult<PrometheusResultType>[];
+  feeds: PermutationPrometheusResult<PrometheusResultType>[];
 }
 
 export interface SectionFeedResponse {
   name: string;
   order: number;
-  panels: Panel[];
+  panels: PanelFeedResponse[];
 }
 
 export interface SectionFeedRequest {
   datasource: string;
   duration: string;
   variables?: Record<string, string>;
-  sections: DashboardSection[];
+  sections: Record<string, DashboardSection>;
 }

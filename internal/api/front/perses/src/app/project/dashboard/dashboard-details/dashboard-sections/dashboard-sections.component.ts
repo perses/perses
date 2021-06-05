@@ -15,11 +15,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { DashboardService } from '../../service/dashboard.service';
 import { DashboardFeedService } from '../../service/dashboard-feed.service';
 import { SectionFeedRequest, SectionFeedResponse } from '../../model/dashboard-feed.model';
-import { DashboardSection } from '../../model/dashboard.model';
-import { NgxChartLineChartModel, NgxChartPoint } from '../../model/ngxcharts.model';
+import { DashboardSection, filterSections } from '../../model/dashboard.model';
 import { ToastService } from '../../../../shared/service/toast.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { EventFeedService } from '../../service/event-feed.service';
+import { newFeedBuilder } from './feed-builder';
 
 @UntilDestroy()
 @Component({
@@ -33,12 +33,12 @@ export class DashboardSectionsComponent implements OnInit {
   @Input()
   duration = '';
   @Input()
-  sections: DashboardSection[] = [];
+  sections: Record<string, DashboardSection> = {};
   @Input()
   selectedVariable: Record<string, string> = {};
 
   isSectionLoading: Record<string, boolean> = {};
-  chartDataMap = new Map<string, NgxChartLineChartModel[]>();
+  chartDataMap = new Map<string, any>();
 
   showXAxis = true;
   showYAxis = true;
@@ -65,17 +65,17 @@ export class DashboardSectionsComponent implements OnInit {
     );
   }
 
-  feedSection(section: DashboardSection): void {
-    this.feedDashboard([section]);
+  feedSection(sectionName: string, section: DashboardSection): void {
+    this.feedDashboard({[sectionName]: section});
   }
 
-  getChartData(sectionName: string, panelName: string): NgxChartLineChartModel[] | undefined {
+  getChartData(sectionName: string, panelName: string): any {
     return this.chartDataMap.get(`${sectionName}_${panelName}`);
   }
 
   private feedDashboard(sections = this.sections): void {
-    const filteredSections = sections.filter((section => section.open));
-    if (filteredSections.length === 0) {
+    const filteredSections = filterSections(sections, (k, v) => v.open);
+    if (Object.keys(filteredSections).length === 0) {
       // that would mean that all sections are closed, so no need to call the backend.
       return;
     }
@@ -84,7 +84,7 @@ export class DashboardSectionsComponent implements OnInit {
       datasource: this.datasource,
       duration: this.duration,
       variables: this.selectedVariable,
-      sections: sections.filter((section => section.open)),
+      sections: filteredSections,
     };
     this.feedService.feedSections(feedRequest).subscribe(
       responses => {
@@ -98,39 +98,20 @@ export class DashboardSectionsComponent implements OnInit {
     );
   }
 
-  private convertDashboardFeeds(dashboardFeeds: SectionFeedResponse[]): void {
-    for (const section of dashboardFeeds) {
+  private convertDashboardFeeds(sectionFeedResponses: SectionFeedResponse[]): void {
+    for (const section of sectionFeedResponses) {
       for (const panel of section.panels) {
-        const ngxPanelData: NgxChartLineChartModel[] = [];
-        for (const query of panel.results) {
-          let i = 0;
-          if (query.err) {
-            this.toastService.errorMessage(query.err);
-            continue;
-          }
-          for (const serie of query.result) {
-            const ngxSerieData: NgxChartLineChartModel = {
-              name: serie.metric.__name__ + ' - ' + i,
-              series: []
-            };
-            for (const [timestamp, value] of serie.values) {
-              // multiplied by 1000 so that the argument is in milliseconds, not seconds.
-              const date = new Date(timestamp * 1000);
-              const datapoint: NgxChartPoint = {name: date, value: Number(value)};
-              ngxSerieData.series.push(datapoint);
-            }
-            ngxPanelData[i] = ngxSerieData;
-            i++;
-            this.chartDataMap.set(section.name + '_' + panel.name, ngxPanelData);
-          }
+        const feedBuilder = newFeedBuilder(section.name, panel, this.sections);
+        if (feedBuilder) {
+          this.chartDataMap.set(`${section.name}_${panel.name}`, feedBuilder.build());
         }
       }
     }
   }
 
-  private setIsSectionLoading(sections: DashboardSection[], value: boolean): void {
-    for (const section of sections) {
-      this.isSectionLoading[section.name] = value;
+  private setIsSectionLoading(sections: Record<string, DashboardSection>, value: boolean): void {
+    for (const k of Object.keys(sections)) {
+      this.isSectionLoading[k] = value;
     }
   }
 }
