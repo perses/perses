@@ -43,9 +43,9 @@ func (p *PromQueryResult) MarshalJSON() ([]byte, error) {
 }
 
 type PanelFeedResponse struct {
-	Name    string            `json:"name"`
-	Order   uint64            `json:"order"`
-	Results []PromQueryResult `json:"results"`
+	Name  string            `json:"name"`
+	Order uint64            `json:"order"`
+	Feeds []PromQueryResult `json:"feeds"`
 }
 
 type SectionFeedResponse struct {

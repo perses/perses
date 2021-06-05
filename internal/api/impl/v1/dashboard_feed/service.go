@@ -43,6 +43,7 @@ func prometheusQuery(variables map[string]string, query string, duration model.D
 
 func prometheusInstantQuery(variables map[string]string, query string, promClient prometheusAPIV1.API) *v1.PromQueryResult {
 	q := variable.ReplaceVariableByValue(variables, query)
+	logrus.Debugf("performing an instant query with the expression: '%s'", q)
 	result, _, err := promClient.Query(context.Background(), q, time.Now())
 
 	pr := &v1.PromQueryResult{
@@ -161,18 +162,7 @@ func (s *service) FeedSection(sectionRequest *v1.SectionFeedRequest) ([]v1.Secti
 		panelAsynchronousRequests := make([]async.Future, 0, len(section.Panels))
 		for panelName, panel := range section.Panels {
 			panelAsynchronousRequests = append(panelAsynchronousRequests,
-				async.Async(func(currentPanel *v1.Panel) func() interface{} {
-					return func() interface{} {
-						switch chart := panel.Chart.(type) {
-						case *v1.LineChart:
-							return s.feedLineChart(sectionRequest, panelName, panel, chart, promClient)
-						case *v1.GaugeChart:
-							return s.feedGaugeChart(sectionRequest, panelName, currentPanel, chart, promClient)
-						default:
-							return fmt.Errorf("this chart '%T' is not supported", chart)
-						}
-					}
-				}(panel)))
+				async.Async(s.feedPanelFunc(sectionRequest, panelName, panel, promClient)))
 		}
 		for _, request := range panelAsynchronousRequests {
 			object := request.Await()
@@ -185,6 +175,19 @@ func (s *service) FeedSection(sectionRequest *v1.SectionFeedRequest) ([]v1.Secti
 		sectionResponses = append(sectionResponses, currentSectionResponse)
 	}
 	return sectionResponses, nil
+}
+
+func (s *service) feedPanelFunc(sectionRequest *v1.SectionFeedRequest, currentPanelName string, currentPanel *v1.Panel, promClient prometheusAPIV1.API) func() interface{} {
+	return func() interface{} {
+		switch chart := currentPanel.Chart.(type) {
+		case *v1.LineChart:
+			return s.feedLineChart(sectionRequest, currentPanelName, currentPanel, chart, promClient)
+		case *v1.GaugeChart:
+			return s.feedGaugeChart(sectionRequest, currentPanelName, currentPanel, chart, promClient)
+		default:
+			return fmt.Errorf("this chart '%T' is not supported", chart)
+		}
+	}
 }
 
 func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, panelName string, currentPanel *v1.Panel, chart *v1.LineChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
@@ -205,16 +208,16 @@ func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, panelName
 		if queryResult.Err != nil {
 			logrus.WithError(queryResult.Err).Error("Error occurred when contacting the prometheus server")
 		}
-		panelAnswer.Results = append(panelAnswer.Results, *queryResult)
+		panelAnswer.Feeds = append(panelAnswer.Feeds, *queryResult)
 	}
 	return panelAnswer
 }
 
 func (s *service) feedGaugeChart(sectionRequest *v1.SectionFeedRequest, panelName string, currentPanel *v1.Panel, chart *v1.GaugeChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
 	return &v1.PanelFeedResponse{
-		Name:    panelName,
-		Order:   currentPanel.Order,
-		Results: []v1.PromQueryResult{*prometheusInstantQuery(sectionRequest.Variables, chart.Expr, promClient)},
+		Name:  panelName,
+		Order: currentPanel.Order,
+		Feeds: []v1.PromQueryResult{*prometheusInstantQuery(sectionRequest.Variables, chart.Expr, promClient)},
 	}
 }
 
