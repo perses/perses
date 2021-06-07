@@ -94,7 +94,7 @@ export class GaugeChartComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     if (!this.containerRef) {
-      throw new Error('expected CodeMirror container element to exist');
+      throw new Error('expected echart container element to exist');
     }
     this.localChart = echarts.init(this.containerRef.nativeElement);
     this.localChart.setOption(this.option);

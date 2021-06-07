@@ -11,6 +11,10 @@
       <ng-container *ngFor="let panel of section.value.panels | keyvalue">
         <div>
           <h3>{{panel.key}}</h3>
+          <app-line-chart *ngIf="panel.value.kind === 'LineChart'"
+                          [data]="getChartData(section.key, panel.key)"
+                          [showLegend]="panel.value.chart.show_legend">
+          </app-line-chart>
           <app-gauge-chart *ngIf="panel.value.kind === 'GaugeChart'"
                            [data]="getChartData(section.key, panel.key)">
           </app-gauge-chart>

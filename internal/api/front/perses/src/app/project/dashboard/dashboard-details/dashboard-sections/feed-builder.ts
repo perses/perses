@@ -23,19 +23,51 @@ export function newFeedBuilder(sectionName: string, feedPanel: PanelFeedResponse
                                sections: Record<string, DashboardSection>): FeedBuilder | undefined {
   switch (sections[sectionName].panels[feedPanel.name].kind) {
     case 'GaugeChart':
-      return new GaugeChartFeedBuilder(sectionName, feedPanel);
+      return new GaugeChartFeedBuilder(feedPanel);
+    case 'LineChart':
+      return new LineChartFeedBuilder(feedPanel);
     default:
       return undefined;
   }
 }
 
-
-class GaugeChartFeedBuilder {
-  private readonly sectionName: string;
+class LineChartFeedBuilder {
   private readonly feedPanel: PanelFeedResponse;
 
-  constructor(sectionName: string, feedPanel: PanelFeedResponse) {
-    this.sectionName = sectionName;
+  constructor(feedPanel: PanelFeedResponse) {
+    this.feedPanel = feedPanel;
+  }
+
+  build(): any {
+    const result: [Date, number][][] = []
+    for (const feed of this.feedPanel.feeds) {
+      if (feed.err) {
+        // at some point, we should find a nice way to handle this error. If possible with the ToastService
+        continue;
+      }
+      if (feed.type === 'vector') {
+        // As we are in a line chart, vector is not an accepted type.
+        // Since it's the backend that is in charge to take care of that, it would be weird to have it anyway.
+        continue;
+      }
+      for (const matrix of feed.result) {
+        const matrixResult: [Date, number][] = []
+        for (const [timestamp, value] of matrix.values) {
+          const date = new Date(timestamp * 1000);
+          matrixResult.push([date, Number(value)])
+        }
+        result.push(matrixResult)
+      }
+    }
+    return result;
+  }
+}
+
+
+class GaugeChartFeedBuilder {
+  private readonly feedPanel: PanelFeedResponse;
+
+  constructor(feedPanel: PanelFeedResponse) {
     this.feedPanel = feedPanel;
   }
 
