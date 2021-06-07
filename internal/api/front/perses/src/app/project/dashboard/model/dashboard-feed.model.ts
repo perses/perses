@@ -43,6 +43,7 @@ type PermutationPrometheusResult<T> = {
     type: K;
     result: T[K][];
     err?: string;
+    legend?: string;
   }
 }[keyof T];
 

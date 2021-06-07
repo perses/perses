@@ -14,6 +14,14 @@
 import { PanelFeedResponse } from '../../model/dashboard-feed.model';
 import { DashboardSection } from '../../model/dashboard.model';
 
+function replaceTemplateValue(tplLegend: string, labelSet: Record<string, string>): string {
+  let str = tplLegend
+  for (const [labelName, labelValue] of Object.entries(labelSet)) {
+    str = str.replace(new RegExp(`{{\s*${labelName}\s*}}`), labelValue)
+  }
+  return str
+}
+
 
 export interface FeedBuilder {
   build(): any;
@@ -38,8 +46,9 @@ class LineChartFeedBuilder {
     this.feedPanel = feedPanel;
   }
 
-  build(): any {
-    const result: [Date, number][][] = []
+  build(): Record<string, [Date, number][]> {
+    const result: Record<string, [Date, number][]> = {}
+    let i = 0;
     for (const feed of this.feedPanel.feeds) {
       if (feed.err) {
         // at some point, we should find a nice way to handle this error. If possible with the ToastService
@@ -50,14 +59,28 @@ class LineChartFeedBuilder {
         // Since it's the backend that is in charge to take care of that, it would be weird to have it anyway.
         continue;
       }
+      let j = 0;
       for (const matrix of feed.result) {
         const matrixResult: [Date, number][] = []
         for (const [timestamp, value] of matrix.values) {
           const date = new Date(timestamp * 1000);
           matrixResult.push([date, Number(value)])
         }
-        result.push(matrixResult)
+        let legend = ''
+        if (feed.legend) {
+          legend = replaceTemplateValue(feed.legend, matrix.metric)
+        }
+        if (legend.length == 0) {
+          legend = `${i}_${j}`
+        }
+        if (!result[legend]) {
+          result[legend] = matrixResult;
+        } else {
+          result[`${legend}_${i}_${j}`] = matrixResult
+        }
+        j++;
       }
+      i++
     }
     return result;
   }

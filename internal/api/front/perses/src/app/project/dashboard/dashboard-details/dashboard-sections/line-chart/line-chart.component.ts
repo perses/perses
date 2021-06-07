@@ -26,20 +26,19 @@ export class LineChartComponent implements OnInit, AfterViewInit {
   showLegend = false;
 
   @Input()
-  public set data(data: [Date, number][][] | undefined) {
+  public set data(data: Record<string, [Date, number][]> | undefined) {
     if (!data) {
       return
     }
     const lines: LineSeriesOption[] = []
-    let i = 0;
-    for (const series of data) {
+
+    for (const [name, series] of Object.entries(data)) {
       const echartSeries: LineSeriesOption = {
-        name: String(i),
+        name: name,
         type: 'line',
         symbol: 'none',
         data: series
       }
-      i++
       lines.push(echartSeries)
     }
     this.option.series = lines

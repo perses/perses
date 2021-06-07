@@ -21,20 +21,24 @@ import (
 )
 
 type PromQueryResult struct {
-	Err    error           `json:"err,omitempty"`
-	Type   model.ValueType `json:"type"`
-	Result model.Value     `json:"result"`
+	Err  error           `json:"err,omitempty"`
+	Type model.ValueType `json:"type"`
+	// Legend is a template that would be used by the GUI to generate the final legend displayed
+	Legend string      `json:"legend,omitempty"`
+	Result model.Value `json:"result"`
 }
 
 func (p *PromQueryResult) MarshalJSON() ([]byte, error) {
 	type tmpQuery = struct {
 		Err    string          `json:"err,omitempty"`
 		Type   model.ValueType `json:"type"`
+		Legend string          `json:"legend,omitempty"`
 		Result model.Value     `json:"result"`
 	}
 	result := &tmpQuery{
 		Result: p.Result,
 		Type:   p.Type,
+		Legend: p.Legend,
 	}
 	if p.Err != nil {
 		result.Err = p.Err.Error()

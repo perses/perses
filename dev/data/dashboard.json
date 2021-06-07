@@ -56,7 +56,8 @@
                 "show_legend": true,
                 "lines": [
                   {
-                    "expr": "up"
+                    "expr": "up",
+                    "legend": "{{job}}[{{instance}}]"
                   }
                 ]
               }
