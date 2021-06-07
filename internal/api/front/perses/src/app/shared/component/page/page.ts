@@ -17,7 +17,7 @@ import { booleanInput } from '../../utils/angular-input.util';
 @Directive({
   selector: 'app-page-header, [app-page-header], [appPageHeader]'
 })
-// tslint:disable-next-line:directive-class-suffix
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class PageHeader {
   @HostBinding('class.app-page-header') appPageHeader = true;
 }
@@ -25,7 +25,7 @@ export class PageHeader {
 @Directive({
   selector: 'app-page-sub-content, [app-page-sub-content], [appPageSubContent]'
 })
-// tslint:disable-next-line:directive-class-suffix
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class PageSubContent {
   @HostBinding('class.app-page-sub-content') appPageSubContent = true;
 }

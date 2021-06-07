@@ -21,15 +21,15 @@ import { Component, ElementRef, HostBinding, Input, OnInit, ViewEncapsulation } 
   encapsulation: ViewEncapsulation.None,
 })
 export class LineComponent implements OnInit {
-  // tslint:disable-next-line:variable-name
-  private _justifyContent: 'space-between' | 'flex-start' | 'flex-end' = 'space-between';
+  private $justifyContent: 'space-between' | 'flex-start' | 'flex-end' = 'space-between';
+
   @Input()
   set justifyContent(content: 'space-between' | 'flex-start' | 'flex-end') {
-    this._justifyContent = content;
+    this.$justifyContent = content;
   }
 
   get justifyContent(): 'space-between' | 'flex-start' | 'flex-end' {
-    return this._justifyContent;
+    return this.$justifyContent;
   }
 
   @HostBinding('class.app-line') appLine = true;
@@ -38,7 +38,7 @@ export class LineComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.elementRef.nativeElement.style.justifyContent = this._justifyContent;
+    this.elementRef.nativeElement.style.justifyContent = this.$justifyContent;
   }
 
 }

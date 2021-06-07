@@ -11,7 +11,7 @@
       <ng-container *ngFor="let panel of section.value.panels | keyvalue">
         <div>
           <h3>{{panel.key}}</h3>
-          <app-gauge-chart *ngIf="panel.value.kind == 'GaugeChart'"
+          <app-gauge-chart *ngIf="panel.value.kind === 'GaugeChart'"
                            [data]="getChartData(section.key, panel.key)">
           </app-gauge-chart>
         </div>
