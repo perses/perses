@@ -58,6 +58,7 @@ export type DashboardVariable = CommonDashboardVariable & PermutationParameter<P
 
 type ChartType = {
   LineChart: LineChart,
+  GaugeChart: GaugeChart,
 };
 
 export interface LineChart {
@@ -65,6 +66,10 @@ export interface LineChart {
     expr: string
   };
   show_legend: boolean;
+}
+
+export interface GaugeChart {
+  expr: string;
 }
 
 type PermutationChart<T> = {
@@ -75,7 +80,6 @@ type PermutationChart<T> = {
 }[keyof T];
 
 export interface CommonPanel {
-  name: string;
   order: number;
 }
 
@@ -85,17 +89,28 @@ export interface DashboardSection {
   name: string;
   order: number;
   open: boolean;
-  panels: Panel[];
+  panels: Record<string, Panel>;
 }
 
 export interface DashboardSpec {
   datasource: string;
   duration: string;
   variables: Record<string, DashboardVariable>;
-  sections: DashboardSection[];
+  sections: Record<string, DashboardSection>;
 }
 
 export interface DashboardModel extends HeaderModel {
   metadata: ProjectMetadata;
   spec: DashboardSpec;
+}
+
+export function filterSections(sections: Record<string, DashboardSection>,
+                               filter: (key: string, value: DashboardSection) => boolean): Record<string, DashboardSection> {
+  const result: Record<string, DashboardSection> = {};
+  for (const [k, v] of Object.entries(sections)) {
+    if (filter(k, v)) {
+      result[k] = v;
+    }
+  }
+  return result;
 }

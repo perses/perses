@@ -21,17 +21,20 @@ import (
 )
 
 type PromQueryResult struct {
-	Err    error       `json:"err,omitempty"`
-	Result model.Value `json:"result"`
+	Err    error           `json:"err,omitempty"`
+	Type   model.ValueType `json:"type"`
+	Result model.Value     `json:"result"`
 }
 
 func (p *PromQueryResult) MarshalJSON() ([]byte, error) {
 	type tmpQuery = struct {
-		Err    string      `json:"err,omitempty"`
-		Result model.Value `json:"result"`
+		Err    string          `json:"err,omitempty"`
+		Type   model.ValueType `json:"type"`
+		Result model.Value     `json:"result"`
 	}
 	result := &tmpQuery{
 		Result: p.Result,
+		Type:   p.Type,
 	}
 	if p.Err != nil {
 		result.Err = p.Err.Error()
@@ -40,9 +43,9 @@ func (p *PromQueryResult) MarshalJSON() ([]byte, error) {
 }
 
 type PanelFeedResponse struct {
-	Name    string            `json:"name"`
-	Order   uint64            `json:"order"`
-	Results []PromQueryResult `json:"results"`
+	Name  string            `json:"name"`
+	Order uint64            `json:"order"`
+	Feeds []PromQueryResult `json:"feeds"`
 }
 
 type SectionFeedResponse struct {
@@ -57,10 +60,10 @@ type SectionFeedResponse struct {
 
 // SectionFeedRequest is the struct that represents the request performed by a client in order to get a set of data to feed a Dashboard.
 type SectionFeedRequest struct {
-	Datasource string             `json:"datasource"`
-	Duration   model.Duration     `json:"duration"`
-	Variables  map[string]string  `json:"variables"`
-	Sections   []DashboardSection `json:"sections"`
+	Datasource string                       `json:"datasource"`
+	Duration   model.Duration               `json:"duration"`
+	Variables  map[string]string            `json:"variables"`
+	Sections   map[string]*DashboardSection `json:"sections"`
 }
 
 func (d *SectionFeedRequest) UnmarshalJSON(data []byte) error {

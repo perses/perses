@@ -13,14 +13,6 @@
 
 @import "src/assets/styles/variables";
 
-.chart {
-  // TODO (@Nexucis) it should change according to the scale attribute coming from the dashboard spec
-  width: 450px;
-  min-height: 200px;
-  max-height: 450px;
-  flex-grow: 1;
-}
-
 @media only screen and (max-width: $medium-screen) {
   .chart{
     width: 100%;

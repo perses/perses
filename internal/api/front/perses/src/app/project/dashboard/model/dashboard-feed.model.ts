@@ -33,31 +33,44 @@ export interface VariableFeedResponse {
  * the backend.
  */
 
-export interface Serie {
+type PrometheusResultType = {
+  matrix: PromMatrix,
+  vector: PromVector,
+};
+
+type PermutationPrometheusResult<T> = {
+  [K in keyof T]: {
+    type: K;
+    result: T[K][];
+    err?: string;
+  }
+}[keyof T];
+
+export interface PromMatrix {
   metric: Record<string, string>;
   values: [number, string][];
 }
 
-export interface Result {
-  result: Serie[];
-  err?: string;
+export interface PromVector {
+  metric: Record<string, string>;
+  value: [number, string];
 }
 
-export interface Panel {
+export interface PanelFeedResponse {
   name: string;
   order: number;
-  results: Result[];
+  feeds: PermutationPrometheusResult<PrometheusResultType>[];
 }
 
 export interface SectionFeedResponse {
   name: string;
   order: number;
-  panels: Panel[];
+  panels: PanelFeedResponse[];
 }
 
 export interface SectionFeedRequest {
   datasource: string;
   duration: string;
   variables?: Record<string, string>;
-  sections: DashboardSection[];
+  sections: Record<string, DashboardSection>;
 }
