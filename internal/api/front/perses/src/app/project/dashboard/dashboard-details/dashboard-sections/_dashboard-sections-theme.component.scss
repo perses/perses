@@ -1,27 +1,27 @@
-@import "~@angular/material/theming";
+@use '~@angular/material' as mat;
 
 @mixin dashboardSection($theme) {
   $foreground: map-get($theme, foreground);
   .ngx-charts {
     text {
-      fill: mat-color($foreground, text);
+      fill: mat.get-color-from-palette($foreground, text);
     }
   }
   .chart-legend {
     .legend-item {
       &:hover {
-        color: mat-color($foreground, text);
+        color: mat.get-color-from-palette($foreground, text);
       }
     }
 
     .legend-label {
       &:hover {
-        color: mat-color($foreground, text);
+        color: mat.get-color-from-palette($foreground, text);
       }
 
       .active {
         .legend-label-text {
-          color: mat-color($foreground, text);
+          color: mat.get-color-from-palette($foreground, text);
         }
       }
     }
