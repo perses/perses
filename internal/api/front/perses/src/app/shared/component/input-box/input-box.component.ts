@@ -18,7 +18,7 @@ import {Component, Input, OnInit} from '@angular/core';
   templateUrl: './input-box.component.html',
   styleUrls: ['./input-box.component.scss']
 })
-export class InputBoxComponent implements OnInit {
+export class InputBoxComponent {
 
   @Input()
   label = '';
@@ -28,9 +28,6 @@ export class InputBoxComponent implements OnInit {
   readonly = false;
 
   constructor() {
-  }
-
-  ngOnInit(): void {
   }
 
 }
