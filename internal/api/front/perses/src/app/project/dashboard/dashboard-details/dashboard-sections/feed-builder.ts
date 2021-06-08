@@ -14,6 +14,14 @@
 import { PanelFeedResponse } from '../../model/dashboard-feed.model';
 import { DashboardSection } from '../../model/dashboard.model';
 
+function replaceTemplateValue(tplLegend: string, labelSet: Record<string, string>): string {
+  let str = tplLegend
+  for (const [labelName, labelValue] of Object.entries(labelSet)) {
+    str = str.replace(new RegExp(`{{\s*${labelName}\s*}}`), labelValue)
+  }
+  return str
+}
+
 
 export interface FeedBuilder {
   build(): any;
@@ -23,19 +31,66 @@ export function newFeedBuilder(sectionName: string, feedPanel: PanelFeedResponse
                                sections: Record<string, DashboardSection>): FeedBuilder | undefined {
   switch (sections[sectionName].panels[feedPanel.name].kind) {
     case 'GaugeChart':
-      return new GaugeChartFeedBuilder(sectionName, feedPanel);
+      return new GaugeChartFeedBuilder(feedPanel);
+    case 'LineChart':
+      return new LineChartFeedBuilder(feedPanel);
     default:
       return undefined;
   }
 }
 
-
-class GaugeChartFeedBuilder {
-  private readonly sectionName: string;
+class LineChartFeedBuilder {
   private readonly feedPanel: PanelFeedResponse;
 
-  constructor(sectionName: string, feedPanel: PanelFeedResponse) {
-    this.sectionName = sectionName;
+  constructor(feedPanel: PanelFeedResponse) {
+    this.feedPanel = feedPanel;
+  }
+
+  build(): Record<string, [Date, number][]> {
+    const result: Record<string, [Date, number][]> = {}
+    let i = 0;
+    for (const feed of this.feedPanel.feeds) {
+      if (feed.err) {
+        // at some point, we should find a nice way to handle this error. If possible with the ToastService
+        continue;
+      }
+      if (feed.type === 'vector') {
+        // As we are in a line chart, vector is not an accepted type.
+        // Since it's the backend that is in charge to take care of that, it would be weird to have it anyway.
+        continue;
+      }
+      let j = 0;
+      for (const matrix of feed.result) {
+        const matrixResult: [Date, number][] = []
+        for (const [timestamp, value] of matrix.values) {
+          const date = new Date(timestamp * 1000);
+          matrixResult.push([date, Number(value)])
+        }
+        let legend = ''
+        if (feed.legend) {
+          legend = replaceTemplateValue(feed.legend, matrix.metric)
+        }
+        if (legend.length == 0) {
+          legend = `${i}_${j}`
+        }
+        if (!result[legend]) {
+          result[legend] = matrixResult;
+        } else {
+          result[`${legend}_${i}_${j}`] = matrixResult
+        }
+        j++;
+      }
+      i++
+    }
+    return result;
+  }
+}
+
+
+class GaugeChartFeedBuilder {
+  private readonly feedPanel: PanelFeedResponse;
+
+  constructor(feedPanel: PanelFeedResponse) {
     this.feedPanel = feedPanel;
   }
 

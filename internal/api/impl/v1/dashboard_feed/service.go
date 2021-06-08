@@ -19,9 +19,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func prometheusQuery(variables map[string]string, query string, duration model.Duration, promClient prometheusAPIV1.API) func() interface{} {
+func prometheusQuery(variables map[string]string, line v1.Line, duration model.Duration, promClient prometheusAPIV1.API) func() interface{} {
 	return func() interface{} {
-		q := variable.ReplaceVariableByValue(variables, query)
+		q := variable.ReplaceVariableByValue(variables, line.Expr)
 		end := time.Now()
 		start := end.Add(-time.Duration(duration))
 		logrus.Debugf("performing the http request with the query '%s'", q)
@@ -32,6 +32,7 @@ func prometheusQuery(variables map[string]string, query string, duration model.D
 		})
 		pr := &v1.PromQueryResult{
 			Err:    err,
+			Legend: line.Legend,
 			Result: result,
 		}
 		if result != nil {
@@ -198,7 +199,7 @@ func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, panelName
 	asynchronousRequests := make([]async.Future, 0, len(chart.Lines))
 	for _, line := range chart.Lines {
 		asynchronousRequests = append(asynchronousRequests,
-			async.Async(prometheusQuery(sectionRequest.Variables, line.Expr, sectionRequest.Duration, promClient)),
+			async.Async(prometheusQuery(sectionRequest.Variables, line, sectionRequest.Duration, promClient)),
 		)
 	}
 

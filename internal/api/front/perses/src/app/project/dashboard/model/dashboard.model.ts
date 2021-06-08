@@ -57,18 +57,18 @@ interface CommonDashboardVariable {
 export type DashboardVariable = CommonDashboardVariable & PermutationParameter<ParametersType>;
 
 type ChartType = {
-  LineChart: LineChart,
-  GaugeChart: GaugeChart,
+  LineChart: LineChartModel,
+  GaugeChart: GaugeChartModel,
 };
 
-export interface LineChart {
+export interface LineChartModel {
   lines: {
     expr: string
   };
   show_legend: boolean;
 }
 
-export interface GaugeChart {
+export interface GaugeChartModel {
   expr: string;
 }
 

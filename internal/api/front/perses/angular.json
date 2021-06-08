@@ -66,6 +66,13 @@
                   "maximumError": "4kb"
                 }
               ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           }
         },
@@ -78,6 +85,9 @@
           "configurations": {
             "production": {
               "browserTarget": "perses:build:production"
+            },
+            "development": {
+              "browserTarget": "perses:build:development"
             }
           }
         },
