@@ -21,8 +21,8 @@ import { DashboardVariablesComponent } from './dashboard-details/dashboard-varia
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { GaugeChartComponent } from './dashboard-details/dashboard-sections/gauge-chart/gauge-chart.component';
-import { LineChartComponent } from './dashboard-details/dashboard-sections/line-chart/line-chart.component';
+import { GaugeChartComponent } from './dashboard-details/dashboard-sections/chart/gauge-chart.component';
+import { LineChartComponent } from './dashboard-details/dashboard-sections/chart/line-chart.component';
 
 
 @NgModule({

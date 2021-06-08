@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, NgZone } from '@angular/core';
 import * as echarts from 'echarts/core';
 import { LineChart, LineSeriesOption } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -11,17 +11,15 @@ import {
   TooltipComponent,
   TooltipComponentOption
 } from 'echarts/components';
+import { BaseChartComponent } from './base-chart.component';
 
 type LocalOption = echarts.ComposeOption<LineSeriesOption | TooltipComponentOption | GridComponentOption | LegendComponentOption>;
 
 @Component({
   selector: 'app-line-chart',
-  templateUrl: './line-chart.component.html',
-  styleUrls: ['./line-chart.component.scss']
+  template: '',
 })
-export class LineChartComponent implements OnInit, AfterViewInit {
-  @ViewChild('container') containerRef?: ElementRef<HTMLDivElement>;
-
+export class LineChartComponent extends BaseChartComponent<LocalOption> {
   @Input()
   showLegend = false;
 
@@ -42,10 +40,8 @@ export class LineChartComponent implements OnInit, AfterViewInit {
       lines.push(echartSeries)
     }
     this.option.series = lines
-    this.localChart?.setOption(this.option);
+    this.localChart?.setOption(this.option, true);
   }
-
-  private localChart?: echarts.ECharts;
 
   private option: LocalOption = {
     xAxis: {
@@ -63,7 +59,11 @@ export class LineChartComponent implements OnInit, AfterViewInit {
     legend: {
       type: 'scroll',
       orient: 'vertical',
+      height: '75%',
       right: 0,
+      textStyle: {
+        overflow: 'truncate'
+      }
     },
     tooltip: {
       trigger: 'axis',
@@ -76,22 +76,26 @@ export class LineChartComponent implements OnInit, AfterViewInit {
     },
   }
 
-  constructor() {
+  private echartsExtensions = [LineChart, LegendComponent, TooltipComponent, GridComponent, DataZoomInsideComponent, CanvasRenderer]
+
+  constructor(el: ElementRef,
+              ngZone: NgZone) {
+    super(el, ngZone)
   }
 
-  ngOnInit(): void {
-    echarts.use([LineChart, LegendComponent, TooltipComponent, GridComponent, DataZoomInsideComponent, CanvasRenderer]);
+  // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
+  ngOnInit() {
+    super.ngOnInit();
     if (!this.showLegend) {
       this.option.legend = undefined;
     }
   }
 
-  ngAfterViewInit(): void {
-    if (!this.containerRef) {
-      throw new Error('expected echart container element to exist');
-    }
-    this.localChart = echarts.init(this.containerRef.nativeElement);
-    this.localChart.setOption(this.option);
+  getOption(): LocalOption {
+    return this.option
   }
 
+  getEchartsExtensions(): any[] {
+    return this.echartsExtensions
+  }
 }

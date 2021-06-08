@@ -12,19 +12,18 @@
 // limitations under the License.
 
 import * as echarts from 'echarts/core';
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, NgZone } from '@angular/core';
 import { GaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
+import { BaseChartComponent } from './base-chart.component';
 
 type LocalOption = echarts.ComposeOption<GaugeSeriesOption>;
 
 @Component({
   selector: 'app-gauge-chart',
-  templateUrl: './gauge-chart.component.html',
-  styleUrls: ['./gauge-chart.component.scss']
+  template: '',
 })
-export class GaugeChartComponent implements OnInit, AfterViewInit {
-  @ViewChild('container') containerRef?: ElementRef<HTMLDivElement>;
+export class GaugeChartComponent extends BaseChartComponent<LocalOption> {
 
   @Input()
   public set data(data: number) {
@@ -34,8 +33,6 @@ export class GaugeChartComponent implements OnInit, AfterViewInit {
       this.localChart?.setOption(this.option);
     }
   }
-
-  private localChart?: echarts.ECharts;
 
   private option: LocalOption = {
     series: {
@@ -85,19 +82,20 @@ export class GaugeChartComponent implements OnInit, AfterViewInit {
     },
   };
 
-  constructor() {
+  private echartsExtensions = [GaugeChart, CanvasRenderer]
+
+
+  constructor(el: ElementRef,
+              ngZone: NgZone) {
+    super(el, ngZone)
   }
 
-  ngOnInit(): void {
-    echarts.use([GaugeChart, CanvasRenderer]);
+  getOption(): LocalOption {
+    return this.option
   }
 
-  ngAfterViewInit(): void {
-    if (!this.containerRef) {
-      throw new Error('expected echart container element to exist');
-    }
-    this.localChart = echarts.init(this.containerRef.nativeElement);
-    this.localChart.setOption(this.option);
+  getEchartsExtensions(): any[] {
+    return this.echartsExtensions
   }
 
 }

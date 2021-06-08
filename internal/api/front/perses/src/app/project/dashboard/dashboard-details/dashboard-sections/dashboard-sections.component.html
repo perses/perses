@@ -9,7 +9,7 @@
   <mat-card>
     <app-line justifyContent="flex-start">
       <ng-container *ngFor="let panel of section.value.panels | keyvalue">
-        <div>
+        <div class="chart-item">
           <h3>{{panel.key}}</h3>
           <app-line-chart *ngIf="panel.value.kind === 'LineChart'"
                           [data]="getChartData(section.key, panel.key)"
