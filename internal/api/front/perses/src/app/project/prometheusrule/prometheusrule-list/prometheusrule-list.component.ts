@@ -48,7 +48,6 @@ export class PrometheusRuleListComponent implements OnInit {
         this.isDisplayingDetails = current !== undefined;
       }
     );
-    this.getRules();
   }
 
   cancelEvent($event: MouseEvent): void {
