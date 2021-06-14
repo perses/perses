@@ -32,7 +32,7 @@ export abstract class BaseChartComponent<T extends ECBasicOption> implements OnI
   abstract getOption(): T
 
   ngOnInit(): void {
-    echarts.use(this.getEchartsExtensions)
+    echarts.use(this.getEchartsExtensions())
     this.resizeSub = new ResizeObserver(() => {
       this.animationFrameID = window.requestAnimationFrame(() => this.resize());
     });
