@@ -13,15 +13,12 @@
 
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { PrometheusruleLayoutComponent } from './prometheusrule-layout/prometheusrule-layout.component';
-import { PrometheusRuleGuard } from './prometheusrule.guard';
+import { PrometheusRuleListComponent } from './prometheusrule-list/prometheusrule-list.component';
 
 const ROUTES: Routes = [
   {
     path: '',
-    component: PrometheusruleLayoutComponent,
-    canActivate: [PrometheusRuleGuard],
-    runGuardsAndResolvers: 'paramsOrQueryParamsChange'
+    component: PrometheusRuleListComponent
   }
 ];
 

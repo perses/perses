@@ -24,7 +24,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { PromqlEditorComponent } from './component/promql-editor/promql-editor.component';
 import { FormsModule } from '@angular/forms';
-import { AngularSplitModule } from 'angular-split';
 import { PageModule } from './component/page/page.module';
 import { InputBoxComponent } from './component/input-box/input-box.component';
 import { MatInputModule } from '@angular/material/input';
@@ -39,7 +38,6 @@ import { LineComponent } from './component/line/line.component';
     PromqlEditorComponent,
   ],
   exports: [
-    AngularSplitModule,
     InputBoxComponent,
     CommonModule,
     HttpClientModule,

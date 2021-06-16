@@ -1,4 +1,4 @@
-<app-page [noMargin]="isDisplayingDetails">
+<app-page>
   <app-page-header>
     <h1>Prometheus Rules</h1>
     <button mat-raised-button color="primary">
@@ -24,17 +24,6 @@
               {{promRule.metadata.name}}
             </h2>
             <div class="line">
-              <mat-divider></mat-divider>
-            </div>
-            <h4 class="remove-if-small-screen">
-              <button mat-icon-button
-                      color="primary"
-                      routerLink="." [queryParams]="{ name: promRule.metadata.name }"
-                      (click)="cancelEvent($event)">
-                <mat-icon>launch</mat-icon>
-              </button>
-            </h4>
-            <div class="little-line remove-if-small-screen">
               <mat-divider></mat-divider>
             </div>
           </app-line>
