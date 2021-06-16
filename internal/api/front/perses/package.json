@@ -29,7 +29,6 @@
     "@codemirror/state": "^0.18.2",
     "@codemirror/view": "^0.18.3",
     "@ngneat/until-destroy": "^8.0.4",
-    "angular-split": "^5.0.0",
     "codemirror-promql": "^0.16.0",
     "echarts": "^5.1.1",
     "lru-cache": "^6.0.0",
