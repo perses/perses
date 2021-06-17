@@ -11,6 +11,7 @@ tasks:
       cd ./internal/api/front/perses
       npm ci
     command: |
+      export NG_CLI_ANALYTICS=ci
       cd ./internal/api/front/perses
       npm start
     openMode: split-right
