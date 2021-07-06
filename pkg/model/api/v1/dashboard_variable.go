@@ -308,14 +308,20 @@ func (v *ConstantVariableParameter) validate() error {
 }
 
 type tmpDashboardVariable struct {
-	Kind      VariableKind           `json:"kind" yaml:"kind"`
-	Hide      bool                   `json:"hide" yaml:"hide"`
-	Selected  string                 `json:"selected,omitempty" yaml:"selected,omitempty"`
-	Parameter map[string]interface{} `json:"parameter" yaml:"parameter"`
+	Kind          VariableKind           `json:"kind" yaml:"kind"`
+	DisplayedName string                 `json:"displayed_name,omitempty" yaml:"displayed_name,omitempty"`
+	Hide          bool                   `json:"hide" yaml:"hide"`
+	Selected      string                 `json:"selected,omitempty" yaml:"selected,omitempty"`
+	Parameter     map[string]interface{} `json:"parameter" yaml:"parameter"`
 }
 
 type DashboardVariable struct {
+	// Kind is the type of the variable. Depending of the value of Kind, it will change the content of Parameter.
 	Kind VariableKind `json:"kind" yaml:"kind"`
+	// DisplayedName is the name that would be displayed by the UI. It should be filled only if Hide is set to false.
+	// It is not the name used to reference the variable in others variables or in the different panels.
+	// The name used for the reference is the key of map of variables
+	DisplayedName string `json:"displayed_name,omitempty" yaml:"displayed_name,omitempty"`
 	// Hide will be used by the UI to decide if the variable has to be displayed
 	Hide bool `json:"hide" yaml:"hide"`
 	// Selected is the variable selected by default if it exists
@@ -341,7 +347,12 @@ func (d *DashboardVariable) unmarshal(unmarshal func(interface{}) error, staticM
 	}
 	d.Kind = tmpVariable.Kind
 	d.Selected = tmpVariable.Selected
+	d.Hide = tmpVariable.Hide
+	d.DisplayedName = tmpVariable.DisplayedName
 
+	if len(tmpVariable.DisplayedName) == 0 && !d.Hide {
+		return fmt.Errorf("variable.displayed_name cannot be empty if the variable is not hidden")
+	}
 	if len(tmpVariable.Kind) == 0 {
 		return fmt.Errorf("variable.kind cannot be empty")
 	}

@@ -34,6 +34,28 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			jason: `
 {
   "kind": "Constant",
+  "displayed_name": "my awesome variable",
+  "parameter": {
+    "values": [
+      "myVariable"
+    ]
+  }
+}
+`,
+			result: &DashboardVariable{
+				Kind:          KindConstantVariable,
+				DisplayedName: "my awesome variable",
+				Parameter: &ConstantVariableParameter{
+					Values: []string{"myVariable"},
+				},
+			},
+		},
+		{
+			title: "simple ConstantVariable hide",
+			jason: `
+{
+  "kind": "Constant",
+  "hide": true,
   "parameter": {
     "values": [
       "myVariable"
@@ -43,6 +65,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 `,
 			result: &DashboardVariable{
 				Kind: KindConstantVariable,
+				Hide: true,
 				Parameter: &ConstantVariableParameter{
 					Values: []string{"myVariable"},
 				},
@@ -53,13 +76,15 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			jason: `
 {
   "kind": "LabelNamesQuery",
+  "displayed_name": "my awesome variable",
   "parameter": {
     "capturing_regexp": ".*"
   }
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindLabelNamesQueryVariable,
+				Kind:          KindLabelNamesQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
 					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
@@ -70,6 +95,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			jason: `
 {
   "kind": "LabelNamesQuery",
+  "displayed_name": "my awesome variable",
   "parameter": { 
     "matchers": [
       "up"
@@ -79,7 +105,8 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindLabelNamesQueryVariable,
+				Kind:          KindLabelNamesQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
 					Matchers:        []string{"up"},
 					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
@@ -91,6 +118,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			jason: `
 {
   "kind": "LabelValuesQuery",
+  "displayed_name": "my awesome variable",
   "parameter": {
     "label_name": "instance",
     "matchers": [
@@ -101,7 +129,8 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindLabelValuesQueryVariable,
+				Kind:          KindLabelValuesQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &LabelValuesQueryVariableParameter{
 					LabelName:       "instance",
 					Matchers:        []string{"up"},
@@ -114,6 +143,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 			jason: `
 {
   "kind": "PromQLQuery",
+  "displayed_name": "my awesome variable",
   "parameter": {
     "expr": "up{instance='localhost:8080'}",
     "label_name": "instance",
@@ -122,7 +152,8 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 }
 `,
 			result: &DashboardVariable{
-				Kind: KindPromQLQueryVariable,
+				Kind:          KindPromQLQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &PromQLQueryVariableParameter{
 					Expr:            "up{instance='localhost:8080'}",
 					LabelName:       "instance",
@@ -150,12 +181,31 @@ func TestUnmarshallYAMLVariable(t *testing.T) {
 			title: "simple ConstantVariable",
 			yamele: `
 kind: "Constant"
+displayed_name: "my awesome variable"
+parameter:
+  values:
+  - "myVariable"
+`,
+			result: &DashboardVariable{
+				Kind:          KindConstantVariable,
+				DisplayedName: "my awesome variable",
+				Parameter: &ConstantVariableParameter{
+					Values: []string{"myVariable"},
+				},
+			},
+		},
+		{
+			title: "simple ConstantVariable hide",
+			yamele: `
+kind: "Constant"
+hide: true
 parameter:
   values:
   - "myVariable"
 `,
 			result: &DashboardVariable{
 				Kind: KindConstantVariable,
+				Hide: true,
 				Parameter: &ConstantVariableParameter{
 					Values: []string{"myVariable"},
 				},
@@ -165,11 +215,13 @@ parameter:
 			title: "query variable by label_names",
 			yamele: `
 kind: "LabelNamesQuery"
+displayed_name: "my awesome variable"
 parameter:
   capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
-				Kind: KindLabelNamesQueryVariable,
+				Kind:          KindLabelNamesQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
 					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
 				},
@@ -179,13 +231,15 @@ parameter:
 			title: "query variable by label_names with matcher",
 			yamele: `
 kind: "LabelNamesQuery"
+displayed_name: "my awesome variable"
 parameter:
   matchers:
   - "up"
   capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
-				Kind: KindLabelNamesQueryVariable,
+				Kind:          KindLabelNamesQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
 					Matchers:        []string{"up"},
 					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
@@ -196,6 +250,7 @@ parameter:
 			title: "query variable with label_values and matcher",
 			yamele: `
 kind: "LabelValuesQuery"
+displayed_name: "my awesome variable"
 parameter:
   label_name: "instance"
   matchers:
@@ -203,7 +258,8 @@ parameter:
   capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
-				Kind: KindLabelValuesQueryVariable,
+				Kind:          KindLabelValuesQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &LabelValuesQueryVariableParameter{
 					LabelName:       "instance",
 					Matchers:        []string{"up"},
@@ -215,13 +271,15 @@ parameter:
 			title: "query variable with expr",
 			yamele: `
 kind: "PromQLQuery"
+displayed_name: "my awesome variable"
 parameter:
   expr: "up{instance='localhost:8080'}"
   label_name: "instance"
   capturing_regexp: ".*"
 `,
 			result: &DashboardVariable{
-				Kind: KindPromQLQueryVariable,
+				Kind:          KindPromQLQueryVariable,
+				DisplayedName: "my awesome variable",
 				Parameter: &PromQLQueryVariableParameter{
 					Expr:            "up{instance='localhost:8080'}",
 					LabelName:       "instance",
@@ -256,10 +314,21 @@ func TestUnmarshallVariableError(t *testing.T) {
 			err: fmt.Errorf("unknown variable.kind 'Awkward' used"),
 		},
 		{
+			title: "no displayed name provided",
+			jsone: `
+{
+  "kind": "Constant",
+  "parameter": {}
+}
+`,
+			err: fmt.Errorf("variable.displayed_name cannot be empty if the variable is not hidden"),
+		},
+		{
 			title: "constant variable with no values",
 			jsone: `
 {
   "kind": "Constant",
+  "hide": true,
   "parameter": {}
 }
 `,
@@ -270,6 +339,7 @@ func TestUnmarshallVariableError(t *testing.T) {
 			jsone: `
 {
   "kind": "LabelNamesQuery",
+  "hide": true,
   "parameter": {}
 }
 `,
@@ -280,6 +350,7 @@ func TestUnmarshallVariableError(t *testing.T) {
 			jsone: `
 {
   "kind": "LabelValuesQuery",
+  "hide": true,
   "parameter": {
     "capturing_regexp": ".*"
   }
@@ -292,6 +363,7 @@ func TestUnmarshallVariableError(t *testing.T) {
 			jsone: `
 {
   "kind": "LabelValuesQuery",
+  "hide": true,
   "parameter": {
     "label_name": "test"
   }
@@ -304,6 +376,7 @@ func TestUnmarshallVariableError(t *testing.T) {
 			jsone: `
 {
   "kind": "PromQLQuery",
+  "hide": true,
   "parameter": {
   }
 }
@@ -315,6 +388,7 @@ func TestUnmarshallVariableError(t *testing.T) {
 			jsone: `
 {
   "kind": "PromQLQuery",
+  "hide": true,
   "parameter": {
     "expr": "1"
   }
@@ -327,6 +401,7 @@ func TestUnmarshallVariableError(t *testing.T) {
 			jsone: `
 {
   "kind": "PromQLQuery",
+  "hide": true,
   "parameter": {
     "expr": "1",
     "label_name" :"test"

@@ -16,9 +16,12 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"github.com/prometheus/common/model"
 )
+
+var keyRegexp = regexp.MustCompile("(?m)^[a-zA-Z0-9_-]")
 
 func GenerateDashboardID(project string, name string) string {
 	return generateProjectResourceID("dashboards", project, name)
@@ -109,6 +112,11 @@ func (d *DashboardSpec) validate() error {
 	}
 	if len(d.Sections) == 0 {
 		return fmt.Errorf("dashboard.spec.sections cannot be empty")
+	}
+	for variableName := range d.Variables {
+		if len(keyRegexp.FindAllString(variableName, -1)) <= 0 {
+			return fmt.Errorf("variable references '%s' is containing spaces or special characters", variableName)
+		}
 	}
 	return nil
 }
