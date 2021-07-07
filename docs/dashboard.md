@@ -41,7 +41,8 @@ There are three mandatory things to provide here:
   datasource linked must exist in the database. Otherwise, the API will reject the creation of the Dashboard
 * `duration` is the default time you would like to use to looking in the past when getting data to fill the dashboard
 * `sections` is the list of the section. Each section contained a list of panel. You must have at least one section.
-
+* `variables` is a map where the key is the reference of the variable defined as a value. The key cannot contain any special characters or spaces.
+The key is used in the different variables / panels when they need to use it.
 Finally, you can define some variables that would be used then in the different panel.
 
 Example:
@@ -57,7 +58,7 @@ Example:
 
 #### Variables
 
-Variables is a map where the key is the name of the variable. The value is a document that contains the following
+Variables is a map where the key is the reference of the variable. The value is the actual variable definition that contains the following
 attribute:
 
 * `kind` is the type of the variable. It's an enum and each value is conditioning what you can put in the
@@ -68,7 +69,8 @@ attribute:
     * `LabelValuesQuery`. The list of value for this variable will be calculated using the Prometheus
       endpoint `/api/v1/label/<label_name>/values`
     * `Constant`. The variable has a defined list of value.
-* `hide` is a boolean that will be used by the UI to decide if the variable has to be displayed. By default, it's false
+* `displayed_name` is the name that would be displayed by the UI. It should be filled only if `hide` is set to `false`.
+* `hide` is a boolean that will be used by the UI to decide if the variable has to be displayed. By default, it's `false`
 * `selected` is the variable selected by default if it exists. (Not mandatory)
 * `parameter` is a document, and the different attributes that defined it, are conditioned by the value of the
   attribute `kind` described above

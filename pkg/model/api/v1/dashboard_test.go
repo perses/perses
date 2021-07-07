@@ -115,7 +115,7 @@ func TestMarshalDashboard(t *testing.T) {
 					Variables: map[string]*DashboardVariable{
 						"labelName": {
 							Kind: KindLabelNamesQueryVariable,
-							Hide: false,
+							Hide: true,
 							Parameter: &LabelNamesQueryVariableParameter{
 								Matchers: []string{
 									"up",
@@ -125,7 +125,7 @@ func TestMarshalDashboard(t *testing.T) {
 						},
 						"labelValue": {
 							Kind: KindLabelValuesQueryVariable,
-							Hide: false,
+							Hide: true,
 							Parameter: &LabelValuesQueryVariableParameter{
 								LabelName: "$labelName",
 								Matchers: []string{
@@ -171,7 +171,7 @@ func TestMarshalDashboard(t *testing.T) {
     "variables": {
       "labelName": {
         "kind": "LabelNamesQuery",
-        "hide": false,
+        "hide": true,
         "parameter": {
           "matchers": [
             "up"
@@ -181,7 +181,7 @@ func TestMarshalDashboard(t *testing.T) {
       },
       "labelValue": {
         "kind": "LabelValuesQuery",
-        "hide": false,
+        "hide": true,
         "parameter": {
           "label_name": "$labelName",
           "matchers": [
