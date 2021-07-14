@@ -6,11 +6,6 @@ jobs:
   test:
     docker:
     - image: circleci/golang:1.16
-    - image: 'quay.io/coreos/etcd:v3.4.7'
-      command:
-      - /usr/local/bin/etcd
-      - --advertise-client-urls=http://0.0.0.0:2379
-      - --listen-client-urls=http://0.0.0.0:2379
     steps:
       - checkout
       - restore_cache: # restores saved cache if no changes are detected since last run
