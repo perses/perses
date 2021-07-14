@@ -34,6 +34,7 @@ type PersistenceManager interface {
 	GetDashboard() dashboard.DAO
 	GetDatasource() datasource.DAO
 	GetHealth() health.DAO
+	GetPersesDAO() database.DAO
 	GetProject() project.DAO
 	GetPrometheusRule() prometheusrule.DAO
 	GetUser() user.DAO
@@ -44,6 +45,7 @@ type persistence struct {
 	dashboard      dashboard.DAO
 	datasource     datasource.DAO
 	health         health.DAO
+	perses         database.DAO
 	project        project.DAO
 	prometheusRule prometheusrule.DAO
 	user           user.DAO
@@ -64,6 +66,7 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 		dashboard:      dashboardDAO,
 		datasource:     datasourceDAO,
 		health:         healthDAO,
+		perses:         persesDAO,
 		project:        projectDAO,
 		prometheusRule: prometheusRuleDAO,
 		user:           userDAO,
@@ -80,6 +83,10 @@ func (p *persistence) GetDatasource() datasource.DAO {
 
 func (p *persistence) GetHealth() health.DAO {
 	return p.health
+}
+
+func (p *persistence) GetPersesDAO() database.DAO {
+	return p.perses
 }
 
 func (p *persistence) GetProject() project.DAO {

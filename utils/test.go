@@ -16,49 +16,24 @@
 package utils
 
 import (
-	"context"
 	"net/http/httptest"
 	"net/url"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/labstack/echo/v4"
-	configUtils "github.com/perses/common/config"
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/core"
+	"github.com/perses/perses/internal/api/shared/database"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-// DatabaseLocker should be used to be sure that only one test is modifying or accessing the database
-// It should avoid concurrent delete of object in the database
-var DatabaseLocker = &sync.Mutex{}
-
-func ClearAllKeys(t *testing.T, client *clientv3.Client, keys ...string) {
-	kv := clientv3.NewKV(client)
+func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
 	for _, key := range keys {
-		var count int64 = 1
-		i := 0
-		_, err := kv.Delete(context.Background(), key)
+		err := dao.Delete(key)
 		if err != nil {
 			t.Fatal(err)
-		}
-		for count > 0 && i < 30 {
-			gr, err := kv.Get(context.Background(), key)
-			if err != nil {
-				t.Fatal(err)
-			}
-			count = gr.Count
-			if count > 0 {
-				time.Sleep(2 * time.Second)
-			}
-			i++
-		}
-		if i >= 30 && count > 0 {
-			t.Fatal("database is not correctly cleanup to be able to move to the next test")
 		}
 	}
 }
@@ -156,27 +131,17 @@ func NewUser() *v1.User {
 	return entity
 }
 
-func DefaultETCDConfig() *configUtils.EtcdConfig {
-	return &configUtils.EtcdConfig{
-		Connections: []configUtils.Connection{
-			{
-				Host: "localhost",
-				Port: 2379,
-			},
-		},
-		Protocol:              configUtils.EtcdAsHTTPProtocol,
-		RequestTimeoutSeconds: 10,
+func defaultFileConfig() *config.File {
+	return &config.File{
+		Folder:        "./test",
+		FileExtension: config.JSONExtension,
 	}
 }
 
-func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager, *clientv3.Client) {
+func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
 	handler := echo.New()
-	etcdClient, err := etcd.NewETCDClient(*DefaultETCDConfig())
-	if err != nil {
-		t.Fatal(err)
-	}
 	persistenceManager, err := dependency.NewPersistenceManager(config.Database{
-		Etcd: DefaultETCDConfig(),
+		File: defaultFileConfig(),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -184,5 +149,5 @@ func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager
 	serviceManager := dependency.NewServiceManager(persistenceManager)
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
-	return httptest.NewServer(handler), persistenceManager, etcdClient
+	return httptest.NewServer(handler), persistenceManager
 }

@@ -25,3 +25,5 @@ internal/api/front/endpoint.go
 
 coverage.txt
 
+/internal/api/e2e/test/
+/pkg/client/api/v1/test/
