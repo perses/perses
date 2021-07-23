@@ -9,7 +9,22 @@ Perses
 
 ## Overview
 
-Work in progress and far away to be prod ready 
+Perses is providing a secure way to configure your Prometheus (like AlertRules, Scrapping Rules). Configurations can
+then be deployed across different Prometheis.
+
+Perses is the solution if you want to give the hand to your users without being worried that they could change or impact
+others configuration. Users can create isolated workspace where they can define their configurations.
+
+A good example of how Perses is securing and isolated each workspace is when a user is going to silence something with
+AlertManager. With Perses, the silences are scoped to the alertRules the user defined in his workspace. Perses is
+assuring you won't be able to silence others alert
+
+Perses is also going to provide visualization for Prometheus through a new dashboard definition.
+
+## Status
+
+Work in progress and far away to be prod ready. We have for the moment the CRUD for the Prometheus AlertRule and a
+beginning of a dashboard.
 
 ## Development
 
@@ -37,6 +52,13 @@ Once it is done, you can proceed as followed:
 cd dev/
 docker-compose up -d
 ```  
+
+* You have a bash script that would populate the database with a default setup. It can help if you just want to run a
+  demo.
+
+```bash
+bash populate.sh
+```
 
 * come back to the root of the project and then build the api:
 
@@ -94,6 +116,9 @@ npm start
 ```
 
 The web-app is now available using the url http://localhost:4200.
+
+Note: if you populate the database with the bash script `./dev/populate.sh`, then you can go on the
+URL http://localhost:4200/projects/perses you will see a first visual of Prometheus AlertRule and Dashboard.
 
 ## License
 
