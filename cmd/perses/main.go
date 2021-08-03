@@ -32,7 +32,7 @@ ______
 | | |  __/ |  \__ \  __/\__ \
 \_|  \___|_|  |___/\___||___/  %s 
 
-The secure way to configure your monitoring.               <\
+All your monitoring dashboards in one place.               <\
                                                             \\
 --------------==========================================>|||<*>//////]
                                                             //
@@ -40,18 +40,18 @@ The secure way to configure your monitoring.               <\
 `
 
 func main() {
-	configFile := flag.String("config", "", "Path to the yaml configuration file for the api. Configuration can be overridden when using the environment variable")
-	dbFolder := flag.String("db.folder", "", "Path to the folder that would be used as a database. In case the flag is not used, Perses required to have a connection to ETCD")
-	dbExtension := flag.String("db.extension", "yaml", "The extension of the file to read and use when creating a file. yaml or json are the only value accepted")
+	configFile := flag.String("config", "", "Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.")
+	dbFolder := flag.String("db.folder", "", "Path to the folder to use as a database. In case the flag is not used, Perses requires a connection to etcd.")
+	dbExtension := flag.String("db.extension", "yaml", "The extension of the file to read and use when creating a file. Valid values: 'yaml' or 'json'.")
 	flag.Parse()
 	// load the config from file or/and from environment
 	conf, err := config.Resolve(*configFile, *dbFolder, *dbExtension)
 	if err != nil {
-		logrus.WithError(err).Fatalf("error when reading configuration or from file '%s' or from environment", *configFile)
+		logrus.WithError(err).Fatalf("error reading configuration from file %q or from environment", *configFile)
 	}
 	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
 	if err != nil {
-		logrus.WithError(err).Fatal("unable to instantiate the persistent manager")
+		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager)
 	persesAPI := core.NewPersesAPI(serviceManager)
