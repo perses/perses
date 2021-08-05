@@ -11,6 +11,7 @@
       "variables": {
         "labelName": {
           "kind": "LabelNamesQuery",
+          "displayed_name": "LabelName",
           "hide": false,
           "parameter": {
             "matchers": [
@@ -21,6 +22,7 @@
         },
         "labelValue": {
           "kind": "LabelValuesQuery",
+          "displayed_name": "LabelValue",
           "hide": false,
           "parameter": {
             "label_name": "$labelName",
@@ -79,6 +81,7 @@
       "variables": {
         "job": {
           "kind": "LabelValuesQuery",
+          "displayed_name": "job",
           "hide": false,
           "parameter": {
             "label_name": "job",
@@ -90,6 +93,7 @@
         },
         "node": {
           "kind": "LabelValuesQuery",
+          "displayed_name": "node",
           "hide": false,
           "parameter": {
             "label_name": "instance",
