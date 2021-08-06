@@ -18,13 +18,11 @@ import (
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
-	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
-	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared/database"
 	"github.com/perses/perses/internal/config"
@@ -36,19 +34,17 @@ type PersistenceManager interface {
 	GetHealth() health.DAO
 	GetPersesDAO() database.DAO
 	GetProject() project.DAO
-	GetPrometheusRule() prometheusrule.DAO
 	GetUser() user.DAO
 }
 
 type persistence struct {
 	PersistenceManager
-	dashboard      dashboard.DAO
-	datasource     datasource.DAO
-	health         health.DAO
-	perses         database.DAO
-	project        project.DAO
-	prometheusRule prometheusrule.DAO
-	user           user.DAO
+	dashboard  dashboard.DAO
+	datasource datasource.DAO
+	health     health.DAO
+	perses     database.DAO
+	project    project.DAO
+	user       user.DAO
 }
 
 func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
@@ -60,16 +56,14 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
 	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
-	prometheusRuleDAO := prometheusruleImpl.NewDAO(persesDAO)
 	userDAO := userImpl.NewDAO(persesDAO)
 	return &persistence{
-		dashboard:      dashboardDAO,
-		datasource:     datasourceDAO,
-		health:         healthDAO,
-		perses:         persesDAO,
-		project:        projectDAO,
-		prometheusRule: prometheusRuleDAO,
-		user:           userDAO,
+		dashboard:  dashboardDAO,
+		datasource: datasourceDAO,
+		health:     healthDAO,
+		perses:     persesDAO,
+		project:    projectDAO,
+		user:       userDAO,
 	}, nil
 }
 
@@ -91,10 +85,6 @@ func (p *persistence) GetPersesDAO() database.DAO {
 
 func (p *persistence) GetProject() project.DAO {
 	return p.project
-}
-
-func (p *persistence) GetPrometheusRule() prometheusrule.DAO {
-	return p.prometheusRule
 }
 
 func (p *persistence) GetUser() user.DAO {

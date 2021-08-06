@@ -15,9 +15,7 @@
 
 function getKindID() {
   kind=$1
-  if [ "${kind}" = "PrometheusRule" ]; then
-    echo "prometheusrules"
-  elif [ "${kind}" = "Project" ]; then
+  if [ "${kind}" = "Project" ]; then
     echo "projects"
   elif [ "${kind}" = "Datasource" ]; then
     echo "datasources"
@@ -46,7 +44,6 @@ function insertResourceData() {
 }
 
 
-insertResourceData ./data/prometheusrule.json true
 insertResourceData ./data/dashboard.json true
 insertResourceData ./data/project.json
 insertResourceData ./data/datasource.json

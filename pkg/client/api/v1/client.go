@@ -24,7 +24,6 @@ type ClientInterface interface {
 	Dashboard(project string) DashboardInterface
 	Datasource() DatasourceInterface
 	Project() ProjectInterface
-	PrometheusRule(project string) PrometheusRuleInterface
 	User() UserInterface
 }
 
@@ -53,10 +52,6 @@ func (c *client) Datasource() DatasourceInterface {
 
 func (c *client) Project() ProjectInterface {
 	return newProject(c.restClient)
-}
-
-func (c *client) PrometheusRule(project string) PrometheusRuleInterface {
-	return newPrometheusRule(c.restClient, project)
 }
 
 func (c *client) User() UserInterface {

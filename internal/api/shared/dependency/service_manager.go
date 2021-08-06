@@ -21,14 +21,12 @@ import (
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
-	prometheusruleImpl "github.com/perses/perses/internal/api/impl/v1/prometheusrule"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard_feed"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
-	"github.com/perses/perses/internal/api/interface/v1/prometheusrule"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 )
 
@@ -38,19 +36,17 @@ type ServiceManager interface {
 	GetDatasource() datasource.Service
 	GetHealth() health.Service
 	GetProject() project.Service
-	GetPrometheusRule() prometheusrule.Service
 	GetUser() user.Service
 }
 
 type service struct {
 	ServiceManager
-	dashboard      dashboard.Service
-	dashboardFeed  dashboard_feed.Service
-	datasource     datasource.Service
-	health         health.Service
-	project        project.Service
-	prometheusRule prometheusrule.Service
-	user           user.Service
+	dashboard     dashboard.Service
+	dashboardFeed dashboard_feed.Service
+	datasource    datasource.Service
+	health        health.Service
+	project       project.Service
+	user          user.Service
 }
 
 func NewServiceManager(dao PersistenceManager) ServiceManager {
@@ -59,16 +55,14 @@ func NewServiceManager(dao PersistenceManager) ServiceManager {
 	dashboardFeedService := dashboardFeedimpl.NewService(datasourceService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject())
-	prometheusRuleService := prometheusruleImpl.NewService(dao.GetPrometheusRule())
 	userService := userImpl.NewService(dao.GetUser())
 	return &service{
-		dashboard:      dashboardService,
-		dashboardFeed:  dashboardFeedService,
-		datasource:     datasourceService,
-		health:         healthService,
-		project:        projectService,
-		prometheusRule: prometheusRuleService,
-		user:           userService,
+		dashboard:     dashboardService,
+		dashboardFeed: dashboardFeedService,
+		datasource:    datasourceService,
+		health:        healthService,
+		project:       projectService,
+		user:          userService,
 	}
 }
 
@@ -90,10 +84,6 @@ func (s *service) GetHealth() health.Service {
 
 func (s *service) GetProject() project.Service {
 	return s.project
-}
-
-func (s *service) GetPrometheusRule() prometheusrule.Service {
-	return s.prometheusRule
 }
 
 func (s *service) GetUser() user.Service {
