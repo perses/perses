@@ -23,10 +23,6 @@ const PROJECT_ROUTES: Routes = [
     canActivate: [ProjectGuard],
     children: [
       {
-        path: 'prometheusrules',
-        loadChildren: () => import('./prometheusrule/prometheusrule.module').then(m => m.PrometheusRuleModule)
-      },
-      {
         path: 'dashboards',
         loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
       }
