@@ -1,4 +1,4 @@
-name: angular
+name: react
 on:
   push:
     branches:
@@ -16,11 +16,11 @@ jobs:
       with:
         node-version: '14'
     - name: install deps
-      run: cd ./internal/api/front/perses && npm ci
+      run: cd ./web && npm ci
     - uses: actions/cache@v2
       with:
         path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    - run: cd ./internal/api/front/perses && npm run lint
+    - run: cd ./web && npm run lint
