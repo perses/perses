@@ -17,6 +17,7 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.15",
     "@types/react-dom": "^17.0.0",
+    "chokidar": "^3.5.2",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-flowtype": "^5.9.0",
