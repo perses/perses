@@ -54,7 +54,7 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 
 const (
 	endpointFile     = "endpoint.go"
-	distFolder       = "perses/dist/perses"
+	distFolder       = "../../../web/build"
 	defaultIndexHTML = `<!doctype html>
 <html lang="en">
 <head>

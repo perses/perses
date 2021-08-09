@@ -16,19 +16,19 @@ jobs:
         with:
           node-version: '14'
       - name: install deps
-        run: cd ./internal/api/front/perses && npm ci
+        run: cd ./web && npm ci
       - uses: actions/cache@v2
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - run: cd ./internal/api/front/perses && npm run build
+      - run: cd ./web && npm run build
       - name: store angular production build
         uses: actions/upload-artifact@v2
         with:
-          name: angular-build
-          path: internal/api/front/perses/dist
+          name: react-build
+          path: web/build
   build-back:
     name: "build backend"
     needs: build-front
@@ -49,7 +49,7 @@ jobs:
       - name: Download angular build
         uses: actions/download-artifact@v2
         with:
-          name: angular-build
+          name: react-build
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
