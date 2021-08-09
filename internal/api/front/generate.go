@@ -67,7 +67,7 @@ const (
 </head>
 <body>
 <div>
-  <p> This is the default index, looks like you forget to generate the angular app before generating the golang endpoint.</p
+  <p> This is the default index, looks like you forget to generate the react app before generating the golang endpoint.</p
 </div>
 </body>
 </html>`

@@ -24,7 +24,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: cd ./web && npm run build
-      - name: store angular production build
+      - name: store react production build
         uses: actions/upload-artifact@v2
         with:
           name: react-build
@@ -46,7 +46,7 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Download angular build
+      - name: Download react build
         uses: actions/download-artifact@v2
         with:
           name: react-build
