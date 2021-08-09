@@ -187,19 +187,18 @@ func (l *GaugeChart) validate() error {
 }
 
 type tmpPanel struct {
-	Order uint64                 `json:"order" yaml:"order"`
-	Kind  ChartKind              `json:"kind" yaml:"kind"`
-	Chart map[string]interface{} `json:"chart" yaml:"chart"`
+	DisplayedName string                 `json:"displayed_name" yaml:"displayed_name"`
+	Kind          ChartKind              `json:"kind" yaml:"kind"`
+	Chart         map[string]interface{} `json:"chart" yaml:"chart"`
 }
 
-type Panel struct {
-	// Order is used to know the display order
-	Order uint64    `json:"order" yaml:"order"`
-	Kind  ChartKind `json:"kind" yaml:"kind"`
-	Chart Chart     `json:"chart" yaml:"chart"`
+type DashboardPanel struct {
+	DisplayedName string    `json:"displayed_name" yaml:"displayed_name"`
+	Kind          ChartKind `json:"kind" yaml:"kind"`
+	Chart         Chart     `json:"chart" yaml:"chart"`
 }
 
-func (p *Panel) UnmarshalJSON(data []byte) error {
+func (p *DashboardPanel) UnmarshalJSON(data []byte) error {
 	jsonUnmarshalFunc := func(panel interface{}) error {
 		return json.Unmarshal(data, panel)
 	}
@@ -209,27 +208,30 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 	return p.validate()
 }
 
-func (p *Panel) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *DashboardPanel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := p.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal); err != nil {
 		return err
 	}
 	return p.validate()
 }
 
-func (p *Panel) validate() error {
+func (p *DashboardPanel) validate() error {
+	if len(p.DisplayedName) == 0 {
+		return fmt.Errorf("panel.displayed_name cannot be empty")
+	}
 	if p.Chart == nil {
 		return fmt.Errorf("panel.chart cannot be empty")
 	}
 	return nil
 }
 
-func (p *Panel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (p *DashboardPanel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
 	var tmp tmpPanel
 	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
-	p.Order = tmp.Order
 	p.Kind = tmp.Kind
+	p.DisplayedName = tmp.DisplayedName
 
 	if len(p.Kind) == 0 {
 		return fmt.Errorf("panel.kind cannot be empty")

@@ -35,12 +35,12 @@ func NewEndpoint(service dashboard_feed.Service) *Endpoint {
 
 func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 	group := g.Group("/feed")
-	group.POST("/sections", e.FeedSection)
+	group.POST("/panels", e.FeedPanel)
 	group.POST("/variables", e.FeedVariable)
 }
 
-func (e *Endpoint) FeedSection(ctx echo.Context) error {
-	body := &v1.SectionFeedRequest{}
+func (e *Endpoint) FeedPanel(ctx echo.Context) error {
+	body := &v1.PanelFeedRequest{}
 	if err := ctx.Bind(body); err != nil {
 		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
 	}

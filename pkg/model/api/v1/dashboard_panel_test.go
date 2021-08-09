@@ -26,13 +26,13 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
-		result Panel
+		result DashboardPanel
 	}{
 		{
 			title: "line chart",
 			jason: `
 {
-  "order": 0,
+  "displayed_name": "simple line chart",
   "kind": "LineChart",
   "chart": {
     "lines": [
@@ -43,9 +43,9 @@ func TestUnmarshallJSONPanel(t *testing.T) {
   }
 }
 `,
-			result: Panel{
-				Order: 0,
-				Kind:  KindLineChart,
+			result: DashboardPanel{
+				DisplayedName: "simple line chart",
+				Kind:          KindLineChart,
 				Chart: &LineChart{
 					Lines: []Line{
 						{
@@ -59,16 +59,16 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 			title: "gauge chart",
 			jason: `
 {
-  "order": 0,
+  "displayed_name": "simple gauge chart",
   "kind": "GaugeChart",
   "chart": {
     "expr": "up"
   }
 }
 `,
-			result: Panel{
-				Order: 0,
-				Kind:  KindGaugeChart,
+			result: DashboardPanel{
+				DisplayedName: "simple gauge chart",
+				Kind:          KindGaugeChart,
 				Chart: &GaugeChart{
 					Expr: "up",
 				},
@@ -77,7 +77,7 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := Panel{}
+			result := DashboardPanel{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
 			assert.Equal(t, test.result, result)
 		})
@@ -88,20 +88,20 @@ func TestUnmarshallYAMLPanel(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
-		result Panel
+		result DashboardPanel
 	}{
 		{
 			title: "line chart",
 			yamele: `
-order: 0
+displayed_name: "simple line chart"
 kind: "LineChart"
 chart:
   lines:
   - expr: "up{instance='localhost:8080'}"
 `,
-			result: Panel{
-				Order: 0,
-				Kind:  KindLineChart,
+			result: DashboardPanel{
+				DisplayedName: "simple line chart",
+				Kind:          KindLineChart,
 				Chart: &LineChart{
 					Lines: []Line{
 						{
@@ -114,14 +114,14 @@ chart:
 		{
 			title: "gauge chart",
 			yamele: `
-order: 0
+displayed_name: "simple gauge chart"
 kind: "GaugeChart"
 chart:
   expr: "up"
 `,
-			result: Panel{
-				Order: 0,
-				Kind:  KindGaugeChart,
+			result: DashboardPanel{
+				DisplayedName: "simple gauge chart",
+				Kind:          KindGaugeChart,
 				Chart: &GaugeChart{
 					Expr: "up",
 				},
@@ -130,7 +130,7 @@ chart:
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := Panel{}
+			result := DashboardPanel{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
 		})
@@ -147,7 +147,6 @@ func TestUnmarshallPanelError(t *testing.T) {
 			title: "panel.kind is empty",
 			jason: `
 {
-  "name": "myPanel"
 }
 `,
 			err: fmt.Errorf("panel.kind cannot be empty"),
@@ -156,7 +155,6 @@ func TestUnmarshallPanelError(t *testing.T) {
 			title: "panel.kind is wrong",
 			jason: `
 {
-  "name": "myPanel",
   "kind": "UnknownChart"
 }
 `,
@@ -166,17 +164,28 @@ func TestUnmarshallPanelError(t *testing.T) {
 			title: "no lines defined for a lineChart",
 			jason: `
 {
-  "name": "myPanel",
   "kind": "LineChart",
   "chart": {}
 }
 `,
 			err: fmt.Errorf("you need to define at least one line for a LineChart"),
 		},
+		{
+			title: "displayed_name cannot be empty",
+			jason: `
+{
+  "kind": "GaugeChart",
+  "chart": {
+    "expr": "up"
+  }
+}
+`,
+			err: fmt.Errorf("panel.displayed_name cannot be empty"),
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := Panel{}
+			result := DashboardPanel{}
 			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
 		})
 	}

@@ -27,47 +27,6 @@ func GenerateDashboardID(project string, name string) string {
 	return generateProjectResourceID("dashboards", project, name)
 }
 
-type DashboardSection struct {
-	// Order is used to know the display order
-	Order uint64 `json:"order" yaml:"order"`
-	// Open is used to know if the section is opened by default when the dashboard is loaded for the first time
-	Open   bool              `json:"open" yaml:"open"`
-	Panels map[string]*Panel `json:"panels" yaml:"panels"`
-}
-
-func (d *DashboardSection) UnmarshalJSON(data []byte) error {
-	var tmp DashboardSection
-	type plain DashboardSection
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *DashboardSection) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp DashboardSection
-	type plain DashboardSection
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *DashboardSection) validate() error {
-	if len(d.Panels) == 0 {
-		return fmt.Errorf("sections[].panels cannot be empty")
-	}
-	return nil
-}
-
 type DashboardSpec struct {
 	// Datasource is the name of the datasource.
 	// It's the direct reference of the document of type `Datasource`.
@@ -77,7 +36,7 @@ type DashboardSpec struct {
 	// dashboard
 	Duration  model.Duration                `json:"duration" yaml:"duration"`
 	Variables map[string]*DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Sections  map[string]*DashboardSection  `json:"sections" yaml:"sections"`
+	Panels    map[string]*DashboardPanel    `json:"panels" yaml:"panels"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
@@ -110,12 +69,17 @@ func (d *DashboardSpec) validate() error {
 	if len(d.Datasource) == 0 {
 		return fmt.Errorf("dashboard.spec.datasource cannot be empty")
 	}
-	if len(d.Sections) == 0 {
-		return fmt.Errorf("dashboard.spec.sections cannot be empty")
+	if len(d.Panels) == 0 {
+		return fmt.Errorf("dashboard.spec.panels cannot be empty")
 	}
-	for variableName := range d.Variables {
-		if len(keyRegexp.FindAllString(variableName, -1)) <= 0 {
-			return fmt.Errorf("variable references '%s' is containing spaces or special characters", variableName)
+	for variableKey := range d.Variables {
+		if len(keyRegexp.FindAllString(variableKey, -1)) <= 0 {
+			return fmt.Errorf("variable reference '%s' is containing spaces or special characters", variableKey)
+		}
+	}
+	for panelKey := range d.Panels {
+		if len(keyRegexp.FindAllString(panelKey, -1)) <= 0 {
+			return fmt.Errorf("panel reference '%s' is containing spaces or special characters", panelKey)
 		}
 	}
 	return nil

@@ -43,21 +43,15 @@ func TestMarshalDashboard(t *testing.T) {
 					Datasource: "PrometheusDemo",
 					Duration:   model.Duration(6 * time.Hour),
 					Variables:  nil,
-					Sections: map[string]*DashboardSection{
-						"MySection": {
-							Order: 0,
-							Open:  false,
-							Panels: map[string]*Panel{
-								"MyPanel": {
-									Order: 0,
-									Kind:  KindLineChart,
-									Chart: &LineChart{
-										ShowLegend: false,
-										Lines: []Line{
-											{
-												Expr: "up",
-											},
-										},
+					Panels: map[string]*DashboardPanel{
+						"MyPanel": {
+							DisplayedName: "simple line chart",
+							Kind:          KindLineChart,
+							Chart: &LineChart{
+								ShowLegend: false,
+								Lines: []Line{
+									{
+										Expr: "up",
 									},
 								},
 							},
@@ -76,23 +70,17 @@ func TestMarshalDashboard(t *testing.T) {
   "spec": {
     "datasource": "PrometheusDemo",
     "duration": "6h",
-    "sections": {
-      "MySection": {
-        "order": 0,
-        "open": false,
-        "panels": {
-          "MyPanel": {
-            "order": 0,
-            "kind": "LineChart",
-            "chart": {
-              "show_legend": false,
-              "lines": [
-                {
-                  "expr": "up"
-                }
-              ]
+    "panels": {
+      "MyPanel": {
+        "displayed_name": "simple line chart",
+        "kind": "LineChart",
+        "chart": {
+          "show_legend": false,
+          "lines": [
+            {
+              "expr": "up"
             }
-          }
+          ]
         }
       }
     }
@@ -135,21 +123,15 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Sections: map[string]*DashboardSection{
-						"MySection": {
-							Order: 0,
-							Open:  false,
-							Panels: map[string]*Panel{
-								"MyPanel": {
-									Order: 0,
-									Kind:  KindLineChart,
-									Chart: &LineChart{
-										ShowLegend: false,
-										Lines: []Line{
-											{
-												Expr: "up",
-											},
-										},
+					Panels: map[string]*DashboardPanel{
+						"MyPanel": {
+							DisplayedName: "simple line chart",
+							Kind:          KindLineChart,
+							Chart: &LineChart{
+								ShowLegend: false,
+								Lines: []Line{
+									{
+										Expr: "up",
 									},
 								},
 							},
@@ -191,23 +173,17 @@ func TestMarshalDashboard(t *testing.T) {
         }
       }
     },
-    "sections": {
-      "MySection": {
-        "order": 0,
-        "open": false,
-        "panels": {
-          "MyPanel": {
-            "order": 0,
-            "kind": "LineChart",
-            "chart": {
-              "show_legend": false,
-              "lines": [
-                {
-                  "expr": "up"
-                }
-              ]
+    "panels": {
+      "MyPanel": {
+        "displayed_name": "simple line chart",
+        "kind": "LineChart",
+        "chart": {
+          "show_legend": false,
+          "lines": [
+            {
+              "expr": "up"
             }
-          }
+          ]
         }
       }
     }
