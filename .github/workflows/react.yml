@@ -24,3 +24,22 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     - run: cd ./web && npm run lint
+  test:
+    name: "unit test"
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: install nodejs
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: install deps
+      run: cd ./web && npm ci
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: cd ./web && npm run test
