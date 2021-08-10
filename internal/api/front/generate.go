@@ -54,7 +54,7 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 
 const (
 	endpointFile     = "endpoint.go"
-	distFolder       = "perses/dist/perses"
+	distFolder       = "../../../web/build"
 	defaultIndexHTML = `<!doctype html>
 <html lang="en">
 <head>
@@ -67,7 +67,7 @@ const (
 </head>
 <body>
 <div>
-  <p> This is the default index, looks like you forget to generate the angular app before generating the golang endpoint.</p
+  <p> This is the default index, looks like you forget to generate the react app before generating the golang endpoint.</p
 </div>
 </body>
 </html>`

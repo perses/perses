@@ -31,7 +31,7 @@ beginning of a dashboard.
 In this repository you have :
 
 * the API written in Golang
-* the web app written in Typescript (using Angular)
+* the web app written in Typescript (using React)
 
 Each side of this project can be easily started and tested, you just have to follow the steps described below.
 
@@ -102,10 +102,10 @@ To be able to use the Web app, you will have to follow the steps to run the API 
 particular desire to run the Web-app on the development environment without the API at the same time.
 
 * Once the API is running, you have to install nodeJS v14 minimum.
-* Then go to the folder `./internal/api/front/perses`, and install all necessary packages:
+* Then go to the folder `./web`, and install all necessary packages:
 
 ```bash
-cd ./internal/api/front/perses
+cd ./web
 npm install
 ```
 
@@ -115,10 +115,7 @@ npm install
 npm start
 ```
 
-The web-app is now available using the url http://localhost:4200.
-
-Note: if you populate the database with the bash script `./dev/populate.sh`, then you can go on the
-URL http://localhost:4200/projects/perses you will see a first visual of Prometheus AlertRule and Dashboard.
+The web-app is now available using the url http://localhost:3000.
 
 ## License
 
