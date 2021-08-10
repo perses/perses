@@ -47,32 +47,23 @@ func (p *PromQueryResult) MarshalJSON() ([]byte, error) {
 }
 
 type PanelFeedResponse struct {
-	Name  string            `json:"name"`
-	Order uint64            `json:"order"`
+	// Key is the key coming from the map PanelFeedRequest.Panels.
+	// It should be used by the user to associate the data to its panel.
+	Key   string            `json:"key"`
 	Feeds []PromQueryResult `json:"feeds"`
 }
 
-type SectionFeedResponse struct {
-	// Name is the original name of the section from the Dashboard model.
-	// It is used to associate the prometheus data to the section that initiate the request.
-	// It is of course optional. If the name is empty, then the order is used know which section to fill with the Prometheus response.
-	// It should be used as well by the UI to know which chart to fill with the response.
-	Name   string              `json:"name,omitempty"`
-	Order  uint64              `json:"order"`
-	Panels []PanelFeedResponse `json:"panels"`
+// PanelFeedRequest is the struct that represents the request performed by a client in order to get a set of data to feed a Dashboard.
+type PanelFeedRequest struct {
+	Datasource string                     `json:"datasource"`
+	Duration   model.Duration             `json:"duration"`
+	Variables  map[string]string          `json:"variables"`
+	Panels     map[string]*DashboardPanel `json:"panels"`
 }
 
-// SectionFeedRequest is the struct that represents the request performed by a client in order to get a set of data to feed a Dashboard.
-type SectionFeedRequest struct {
-	Datasource string                       `json:"datasource"`
-	Duration   model.Duration               `json:"duration"`
-	Variables  map[string]string            `json:"variables"`
-	Sections   map[string]*DashboardSection `json:"sections"`
-}
-
-func (d *SectionFeedRequest) UnmarshalJSON(data []byte) error {
-	var tmp SectionFeedRequest
-	type plain SectionFeedRequest
+func (d *PanelFeedRequest) UnmarshalJSON(data []byte) error {
+	var tmp PanelFeedRequest
+	type plain PanelFeedRequest
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -83,12 +74,12 @@ func (d *SectionFeedRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *SectionFeedRequest) validate() error {
+func (d *PanelFeedRequest) validate() error {
 	if len(d.Datasource) == 0 {
 		return fmt.Errorf("datasource cannot be empty")
 	}
-	if len(d.Sections) == 0 {
-		return fmt.Errorf("sections cannot be empty")
+	if len(d.Panels) == 0 {
+		return fmt.Errorf("panels cannot be empty")
 	}
 	return nil
 }

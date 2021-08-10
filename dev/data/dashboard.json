@@ -33,37 +33,29 @@
           }
         }
       },
-      "sections": {
-        "mySection": {
-          "open": true,
-          "panels": {
-            "myGraphPanel": {
-              "kind": "LineChart",
-              "chart": {
-                "lines": [
-                  {
-                    "expr": "up{$labelName='$labelValue'}"
-                  }
-                ]
+      "panels": {
+        "upByLabel": {
+          "kind": "LineChart",
+          "displayed_name": "Line Chart using variable",
+          "chart": {
+            "lines": [
+              {
+                "expr": "up{$labelName='$labelValue'}"
               }
-            }
+            ]
           }
         },
-        "mySection2": {
-          "open": false,
-          "panels": {
-            "myGraphPanel": {
-              "kind": "LineChart",
-              "chart": {
-                "show_legend": true,
-                "lines": [
-                  {
-                    "expr": "up",
-                    "legend": "{{job}}[{{instance}}]"
-                  }
-                ]
+        "allUP": {
+          "kind": "LineChart",
+          "displayed_name": "Line chart using legend template",
+          "chart": {
+            "show_legend": true,
+            "lines": [
+              {
+                "expr": "up",
+                "legend": "{{job}}[{{instance}}]"
               }
-            }
+            ]
           }
         }
       }
@@ -104,46 +96,47 @@
           }
         }
       },
-      "sections": {
-        "Basic CPU / Mem / Disk Gauge": {
-          "open": true,
-          "panels": {
-            "CPU Busy": {
-              "kind": "GaugeChart",
-              "chart": {
-                "expr": "(((count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',instance=\"$node\",job=\"$job\"}[5m])))) * 100) / count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))"
-              }
-            },
-            "Sys Load (5m avg)": {
-              "kind": "GaugeChart",
-              "chart": {
-                "expr": "avg(node_load5{instance=\"$node\",job=\"$job\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)) * 100"
-              }
-            },
-            "Sys Load (15m avg)": {
-              "kind": "GaugeChart",
-              "chart": {
-                "expr": "avg(node_load15{instance=\"$node\",job=\"$job\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)) * 100"
-              }
-            },
-            "Ram Used": {
-              "kind": "GaugeChart",
-              "chart": {
-                "expr": "100 - ((node_memory_MemAvailable_bytes{instance=\"$node\",job=\"$job\"} * 100) / node_memory_MemTotal_bytes{instance=\"$node\",job=\"$job\"})"
-              }
-            },
-            "Swap Used": {
-              "kind": "GaugeChart",
-              "chart": {
-                "expr": "((node_memory_SwapTotal_bytes{instance=\"$node\",job=\"$job\"} - node_memory_SwapFree_bytes{instance=\"$node\",job=\"$job\"}) / (node_memory_SwapTotal_bytes{instance=\"$node\",job=\"$job\"} )) * 100"
-              }
-            },
-            "Root FS Used": {
-              "kind": "GaugeChart",
-              "chart": {
-                "expr": "100 - ((node_filesystem_avail_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"})"
-              }
-            }
+      "panels": {
+        "CPUBusy": {
+          "kind": "GaugeChart",
+          "displayed_name": "CPU Busy",
+          "chart": {
+            "expr": "(((count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',instance=\"$node\",job=\"$job\"}[5m])))) * 100) / count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))"
+          }
+        },
+        "SysLoad5mAVG)": {
+          "kind": "GaugeChart",
+          "displayed_name": "Sys Load (5m avg)",
+          "chart": {
+            "expr": "avg(node_load5{instance=\"$node\",job=\"$job\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)) * 100"
+          }
+        },
+        "SysLoad15mAVG": {
+          "kind": "GaugeChart",
+          "displayed_name": "Sys Load (15m avg)",
+          "chart": {
+            "expr": "avg(node_load15{instance=\"$node\",job=\"$job\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)) * 100"
+          }
+        },
+        "RamUsed": {
+          "kind": "GaugeChart",
+          "displayed_name": "Ram Used",
+          "chart": {
+            "expr": "100 - ((node_memory_MemAvailable_bytes{instance=\"$node\",job=\"$job\"} * 100) / node_memory_MemTotal_bytes{instance=\"$node\",job=\"$job\"})"
+          }
+        },
+        "SwapUsed": {
+          "kind": "GaugeChart",
+          "displayed_name": "Swap Used",
+          "chart": {
+            "expr": "((node_memory_SwapTotal_bytes{instance=\"$node\",job=\"$job\"} - node_memory_SwapFree_bytes{instance=\"$node\",job=\"$job\"}) / (node_memory_SwapTotal_bytes{instance=\"$node\",job=\"$job\"} )) * 100"
+          }
+        },
+        "RootFSUsed": {
+          "kind": "GaugeChart",
+          "displayed_name": "Root FS Used",
+          "chart": {
+            "expr": "100 - ((node_filesystem_avail_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"})"
           }
         }
       }

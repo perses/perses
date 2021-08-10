@@ -148,63 +148,55 @@ func (s *service) FeedVariable(request *v1.VariableFeedRequest) ([]v1.VariableFe
 	return result, nil
 }
 
-func (s *service) FeedSection(sectionRequest *v1.SectionFeedRequest) ([]v1.SectionFeedResponse, error) {
-	promClient, err := s.buildPromClient(sectionRequest.Datasource)
+func (s *service) FeedSection(request *v1.PanelFeedRequest) ([]v1.PanelFeedResponse, error) {
+	promClient, err := s.buildPromClient(request.Datasource)
 	if err != nil {
 		return nil, err
 	}
 
-	var sectionResponses = make([]v1.SectionFeedResponse, 0, len(sectionRequest.Sections))
-	for sectionName, section := range sectionRequest.Sections {
-		currentSectionResponse := v1.SectionFeedResponse{
-			Name:  sectionName,
-			Order: section.Order,
-		}
-		panelAsynchronousRequests := make([]async.Future, 0, len(section.Panels))
-		for panelName, panel := range section.Panels {
-			panelAsynchronousRequests = append(panelAsynchronousRequests,
-				async.Async(s.feedPanelFunc(sectionRequest, panelName, panel, promClient)))
-		}
-		for _, request := range panelAsynchronousRequests {
-			object := request.Await()
-			if panelErr, ok := object.(error); ok {
-				logrus.WithError(panelErr)
-				continue
-			}
-			currentSectionResponse.Panels = append(currentSectionResponse.Panels, *object.(*v1.PanelFeedResponse))
-		}
-		sectionResponses = append(sectionResponses, currentSectionResponse)
+	panelResponses := make([]v1.PanelFeedResponse, 0, len(request.Panels))
+	asynchronousRequests := make([]async.Future, 0, len(request.Panels))
+	for panelKey, panel := range request.Panels {
+		asynchronousRequests = append(asynchronousRequests,
+			async.Async(s.feedPanelFunc(request, panelKey, panel, promClient)))
 	}
-	return sectionResponses, nil
+	for _, asyncReq := range asynchronousRequests {
+		object := asyncReq.Await()
+		if panelErr, ok := object.(error); ok {
+			logrus.WithError(panelErr)
+			continue
+		}
+		panelResponses = append(panelResponses, *object.(*v1.PanelFeedResponse))
+	}
+	return panelResponses, nil
 }
 
-func (s *service) feedPanelFunc(sectionRequest *v1.SectionFeedRequest, currentPanelName string, currentPanel *v1.Panel, promClient prometheusAPIV1.API) func() interface{} {
+func (s *service) feedPanelFunc(request *v1.PanelFeedRequest, panelKey string, currentPanel *v1.DashboardPanel, promClient prometheusAPIV1.API) func() interface{} {
 	return func() interface{} {
 		switch chart := currentPanel.Chart.(type) {
 		case *v1.LineChart:
-			return s.feedLineChart(sectionRequest, currentPanelName, currentPanel, chart, promClient)
+			return s.feedLineChart(request, panelKey, chart, promClient)
 		case *v1.GaugeChart:
-			return s.feedGaugeChart(sectionRequest, currentPanelName, currentPanel, chart, promClient)
+			return s.feedGaugeChart(request, panelKey, chart, promClient)
 		default:
 			return fmt.Errorf("this chart '%T' is not supported", chart)
 		}
 	}
 }
 
-func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, panelName string, currentPanel *v1.Panel, chart *v1.LineChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
+func (s *service) feedLineChart(request *v1.PanelFeedRequest, panelKey string, chart *v1.LineChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
 	panelAnswer := &v1.PanelFeedResponse{
-		Name:  panelName,
-		Order: currentPanel.Order,
+		Key: panelKey,
 	}
 	asynchronousRequests := make([]async.Future, 0, len(chart.Lines))
 	for _, line := range chart.Lines {
 		asynchronousRequests = append(asynchronousRequests,
-			async.Async(prometheusQuery(sectionRequest.Variables, line, sectionRequest.Duration, promClient)),
+			async.Async(prometheusQuery(request.Variables, line, request.Duration, promClient)),
 		)
 	}
 
-	for _, request := range asynchronousRequests {
-		object := request.Await()
+	for _, asyncReq := range asynchronousRequests {
+		object := asyncReq.Await()
 		queryResult := object.(*v1.PromQueryResult)
 		if queryResult.Err != nil {
 			logrus.WithError(queryResult.Err).Error("Error occurred when contacting the prometheus server")
@@ -214,11 +206,10 @@ func (s *service) feedLineChart(sectionRequest *v1.SectionFeedRequest, panelName
 	return panelAnswer
 }
 
-func (s *service) feedGaugeChart(sectionRequest *v1.SectionFeedRequest, panelName string, currentPanel *v1.Panel, chart *v1.GaugeChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
+func (s *service) feedGaugeChart(request *v1.PanelFeedRequest, panelKey string, chart *v1.GaugeChart, promClient prometheusAPIV1.API) *v1.PanelFeedResponse {
 	return &v1.PanelFeedResponse{
-		Name:  panelName,
-		Order: currentPanel.Order,
-		Feeds: []v1.PromQueryResult{*prometheusInstantQuery(sectionRequest.Variables, chart.Expr, promClient)},
+		Key:   panelKey,
+		Feeds: []v1.PromQueryResult{*prometheusInstantQuery(request.Variables, chart.Expr, promClient)},
 	}
 }
 
