@@ -57,6 +57,22 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
+					Entrypoint: &JSONRef{
+						Ref: "#/spec/layouts/main",
+					},
+					Layouts: map[string]*DashboardLayout{
+						"main": {
+							Kind: KindExpandLayout,
+							Parameter: ExpandLayoutParameter{
+								Open: false,
+								Children: []*JSONRef{
+									{
+										Ref: "#/spec/panels/MyPanel",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 			result: `{
@@ -83,6 +99,22 @@ func TestMarshalDashboard(t *testing.T) {
           ]
         }
       }
+    },
+    "layouts": {
+      "main": {
+        "kind": "Expand",
+        "parameter": {
+          "open": false,
+          "children": [
+            {
+              "$ref": "#/spec/panels/MyPanel"
+            }
+          ]
+        }
+      }
+    },
+    "entrypoint": {
+      "$ref": "#/spec/layouts/main"
     }
   }
 }`,
@@ -137,6 +169,22 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
+					Entrypoint: &JSONRef{
+						Ref: "#/spec/layouts/main",
+					},
+					Layouts: map[string]*DashboardLayout{
+						"main": {
+							Kind: KindExpandLayout,
+							Parameter: ExpandLayoutParameter{
+								Open: false,
+								Children: []*JSONRef{
+									{
+										Ref: "#/spec/panels/MyPanel",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 			result: `{
@@ -186,6 +234,22 @@ func TestMarshalDashboard(t *testing.T) {
           ]
         }
       }
+    },
+    "layouts": {
+      "main": {
+        "kind": "Expand",
+        "parameter": {
+          "open": false,
+          "children": [
+            {
+              "$ref": "#/spec/panels/MyPanel"
+            }
+          ]
+        }
+      }
+    },
+    "entrypoint": {
+      "$ref": "#/spec/layouts/main"
     }
   }
 }`,
