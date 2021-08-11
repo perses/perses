@@ -44,6 +44,25 @@ func TestUnmarshallJSONRef(t *testing.T) {
 				Object: nil,
 			},
 		},
+		{
+			title: "ref with big path",
+			jason: `
+{
+  "$ref": "#/my/incredible/super/long/path"
+}
+`,
+			result: &JSONRef{
+				Ref: "#/my/incredible/super/long/path",
+				Path: []string{
+					"my",
+					"incredible",
+					"super",
+					"long",
+					"path",
+				},
+				Object: nil,
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -70,6 +89,23 @@ $ref: "#/panels/load"
 				Path: []string{
 					"panels",
 					"load",
+				},
+				Object: nil,
+			},
+		},
+		{
+			title: "ref with big path",
+			yamele: `
+$ref: "#/my/incredible/super/long/path"
+`,
+			result: &JSONRef{
+				Ref: "#/my/incredible/super/long/path",
+				Path: []string{
+					"my",
+					"incredible",
+					"super",
+					"long",
+					"path",
 				},
 				Object: nil,
 			},
@@ -107,15 +143,6 @@ func TestUnmarshallJSONRefError(t *testing.T) {
 }
 `,
 			err: fmt.Errorf("ref '#/foo/ref with space' is not accepted"),
-		},
-		{
-			title: "reference not starting by #",
-			jsone: `
-{
-  "$ref": "/ref"
-}
-`,
-			err: fmt.Errorf("ref '/ref' is not accepted"),
 		},
 	}
 	for _, test := range testSuite {

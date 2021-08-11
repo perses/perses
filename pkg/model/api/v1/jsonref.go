@@ -19,7 +19,12 @@ import (
 	"regexp"
 )
 
-var jsonRefRegexp = regexp.MustCompile(`^#/([a-zA-Z0-9_-]+)(?:/([a-zA-Z0-9_-]+))*$`)
+var (
+	// jsonRefMatching is only used to validate the whole reference.
+	jsonRefMatching = regexp.MustCompile(`^#?/([a-zA-Z0-9_-]+)(?:/([a-zA-Z0-9_-]+))*$`)
+	// jsonRefCapturedGroup is used to captured every part of the reference
+	jsonRefCapturedGroup = regexp.MustCompile(`(?:/([a-zA-Z0-9_-]+))`)
+)
 
 type JSONRef struct {
 	// Ref is the JSON reference. That's the only thing that is used during the marshalling / unmarshalling process.
@@ -58,12 +63,13 @@ func (j *JSONRef) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (j *JSONRef) validate() error {
-	if !jsonRefRegexp.MatchString(j.Ref) {
+	if !jsonRefMatching.MatchString(j.Ref) {
 		return fmt.Errorf("ref '%s' is not accepted", j.Ref)
 	}
-	matches := jsonRefRegexp.FindAllStringSubmatch(j.Ref, -1)[0]
-	for i := 1; i < len(matches); i++ {
-		j.Path = append(j.Path, matches[i])
+	for _, matches := range jsonRefCapturedGroup.FindAllStringSubmatch(j.Ref, -1) {
+		for i := 1; i < len(matches); i++ {
+			j.Path = append(j.Path, matches[i])
+		}
 	}
 	return nil
 }
