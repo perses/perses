@@ -40,10 +40,12 @@ There are three mandatory things to provide here:
 * `datasource` is the name of the datasource. It's the direct reference of the document of type `Datasource`. The
   datasource linked must exist in the database. Otherwise, the API will reject the creation of the Dashboard
 * `duration` is the default time you would like to use to looking in the past when getting data to fill the dashboard
-* `sections` is the list of the section. Each section contained a list of panel. You must have at least one section.
-* `variables` is a map where the key is the reference of the variable defined as a value. The key cannot contain any special characters or spaces.
-The key is used in the different variables / panels when they need to use it.
-Finally, you can define some variables that would be used then in the different panel.
+* `panels` is the list of the panel.
+* `layouts` is the list of layout. A layout is the object you can use to describe how to display the list of the panel.
+* `entrypoint` is the json reference to one particular layout.
+* `variables` is a map where the key is the reference of the variable defined as a value. The key cannot contain any
+  special characters or spaces. The key is used in the different variables / panels when they need to use it. Finally,
+  you can define some variables that would be used then in the different panel.
 
 Example:
 
@@ -58,8 +60,8 @@ Example:
 
 #### Variables
 
-Variables is a map where the key is the reference of the variable. The value is the actual variable definition that contains the following
-attribute:
+Variables is a map where the key is the reference of the variable. The value is the actual variable definition that
+contains the following attribute:
 
 * `kind` is the type of the variable. It's an enum and each value is conditioning what you can put in the
   attribute `parameter`. Possible values are :
@@ -70,7 +72,8 @@ attribute:
       endpoint `/api/v1/label/<label_name>/values`
     * `Constant`. The variable has a defined list of value.
 * `displayed_name` is the name that would be displayed by the UI. It should be filled only if `hide` is set to `false`.
-* `hide` is a boolean that will be used by the UI to decide if the variable has to be displayed. By default, it's `false`
+* `hide` is a boolean that will be used by the UI to decide if the variable has to be displayed. By default,
+  it's `false`
 * `selected` is the variable selected by default if it exists. (Not mandatory)
 * `parameter` is a document, and the different attributes that defined it, are conditioned by the value of the
   attribute `kind` described above
@@ -179,62 +182,36 @@ Example:
 }
 ```
 
-#### Sections
+#### Panels
 
-Sections is an array of section. One section contains the following attribute:
-
-* `name` is the name of the section. It is optional.
-* `order` is a number, and it is used to know the display order.
-* `open` is a boolean used to know if the section is opened by default when the dashboard is loaded for the first time
-* `panels` is a list of panel. A section should at least contain one panel.
-
-Example:
-
-```json
-{
-  "sections": [
-    {
-      "name": "NameOfMyAweSomeSection",
-      "order": 0,
-      "open": true,
-      "panels": []
-    }
-  ]
-}
-```
-
-##### Panels
-
-A panel is the actual document that will describe what kind of chart you will display. One panel can only hold one
-chart.
+Panels is a map where the key is the reference of the panel. The value is the actual panel definition that will describe
+what kind of chart you will display. One panel can only hold one chart.
 
 Here is the different attribute available:
 
-* `name` is the name of the panel.
-* `order` is a number used to know the display order inside the section
+* `displayed_name` is the name of the panel that would be displayed by the UI.
 * `kind` is the type of chart displayed. It is an enum, and it conditions what contains the attribute `chart`. Possible
   values are :
     * `LineChart`. It is a simple graph
-* `chart` contains the different parameter that described a chart. It will depend on the `kind` value
+    * `GaugeChart`. It is the way to display a single number with different threshold. It can be used to show with
+      different color if it's ok or not to have the current value displayed
+* `chart` contains the different parameters that describe a chart. It will depend on the `kind` value
 
 Example:
 
 ```json
 {
-  "panels": [
-    {
+  "panels": {
+    "foo": {
       "name": "myPanel",
-      "order": 0,
       "kind": "LineChart",
       "chart": {}
     }
-  ]
+  }
 }
 ```
 
-###### Chart
-
-* kind = "LineChart"
+##### LineChart
 
 A `LineChart` is a simple graph composed by a list of line. Each line is described by a PromQL expression
 
@@ -252,43 +229,142 @@ Example:
 }
 ```
 
+#### Layouts
+
+Layouts is a map where the key is the reference of the layout. The value the actual layout definition that will describe
+how the different panels are positioned in the UI
+
+Here is the different attribute available:
+
+* `kind` is the type of layout. It is an enum, and it conditions what contains the attribute `parameter`. Possible value
+  are:
+    * `Expand`: It's a layout that can be expanded. It can be used for example if you want to hide panel by default.
+    * `Grid`: It's the layout tha defines a grid. Useful when you want to give different size for your different panels
+      and to position them precisely.
+
+*`parameter` contains the different parameters of the layout. It will depend on the `kind` value
+
+Example:
+
+```json
+{
+  "layouts": {
+    "foo": {
+      "kind": "Expand",
+      "parameter": {}
+    }
+  }
+}
+```
+
+##### Expand
+
+* `open` : a boolean used by the UI to decide if the children should be displayed or not
+* `children`: a list of json reference. Each element can be a reference to another layout or to a panel.
+
+Example:
+
+```json
+{
+  "parameter": {
+    "open": true,
+    "children": [
+      {
+        "$ref": "#/spec/layouts/foo"
+      },
+      {
+        "$ref": "#/spec/panels/bar"
+      }
+    ]
+  }
+}
+```
+
+##### Grid
+
+`children` is a matrix. First array define the different lines. Each line is taking another array that defines then the
+column for the current line. You can define the size of the column with the parameter `width`.
+
+To define the content of a cell, you can use `content` that is wrapping a json reference. It's optional, you could want
+to define empty cell just by defining the `width`. It can be useful if you would like to put a panel on the right for
+example.
+
+```json
+{
+  "parameter": {
+    "children": [
+      [
+        {
+          "width": 2,
+          "content": {
+            "$ref": "#/spec/panels/myAwesomePanel"
+          }
+        },
+        {
+          "width": 1
+        }
+      ],
+      [
+        {
+          "width": 1
+        },
+        {
+          "width": 1,
+          "content": {
+            "$ref": "#/spec/layouts/gaugeGrid"
+          }
+        }
+      ]
+    ]
+  }
+}
+```
+
 ### Example
 
 #### Simple dashboard
 
 ```json
-[
   {
-    "kind": "Dashboard",
-    "metadata": {
-      "name": "SimpleLineChart",
-      "project": "perses"
-    },
-    "spec": {
-      "datasource": "PrometheusDemo",
-      "duration": "6h",
-      "sections": [
-        {
-          "name": "mySection",
-          "open": true,
-          "panels": [
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "SimpleLineChart",
+    "project": "perses"
+  },
+  "spec": {
+    "datasource": "PrometheusDemo",
+    "duration": "6h",
+    "panels": {
+      "foo": {
+        "name": "myGraphPanel",
+        "kind": "LineChart",
+        "chart": {
+          "lines": [
             {
-              "name": "myGraphPanel",
-              "kind": "LineChart",
-              "chart": {
-                "lines": [
-                  {
-                    "expr": "up"
-                  }
-                ]
-              }
+              "expr": "up"
             }
           ]
         }
-      ]
+      }
+    },
+    "layout": {
+      "main": {
+        "kind": "Expand",
+        "parameter": {
+          "open": true,
+          "children": [
+            {
+              "$ref": "#/spec/panels/foo"
+            }
+          ]
+        }
+      }
+    },
+    "entrypoint": {
+      "$ref": "#/spec/layouts/main"
     }
   }
-]
+}
 ```
 
 ## How to feed a dashboard
@@ -298,7 +374,7 @@ This part is more dedicated to developer that would like to consume the API in o
 The API is providing two different endpoint for that:
 
 * `POST /api/v1/feed/variables` that should be used to get the value of the different variable defined
-* `POST /api/v1/feed/sections` that should be used to get the value for a set of sections
+* `POST /api/v1/feed/panels` that should be used to get the value for a set of panels
 
 ### How to get the value of the variables.
 
@@ -445,8 +521,47 @@ Result:
 ]
 ```
 
-Here the backend detects that it doesn't need to calculate the value of the variable `foo`. But, the value for the
-variable `do` wasn't provided, so it had to determinate it.
+Here the backend detects that it doesn't need to calculate the value of the variable `foo`, but the value for the
+variable `do` wasn't provided. So it had to determinate it.
 
 Also since the value of the variable `foo` changed and the variable `bar` depends on it, the backend needed to
 recalculate it.
+
+### How to get the values for the panels
+
+To get the data for the panels, the frontend just need to send the list of the panel definition, the duration, the
+variables values currently selected and the datasource:
+
+```bash
+curl -XPOST http://localhost:8080/api/v1/feed/panels -d '
+{
+    "datasource":"PrometheusDemo",
+    "duration": "6h",
+    "variables": {
+        "foo": "192.168.2.1"
+    },
+    "panels": {
+        "foo": {
+            "name": "myGraphPanel",
+            "kind": "LineChart",
+            "chart": {
+                "lines": [
+                {
+                    "expr": "up"
+                }
+                ]
+           }
+        }
+    }
+}
+'
+```
+
+Note:
+
+* Panels is a map (exactly like in the dashboard definition). Like that, the frontend won't have to transform the panel
+  definitions when requesting the backend to get the data.
+* After getting the values of the variables, the frontend need to get the data for the different panels displayed. For
+  optimization purpose, the frontend shouldn't ask the data for the panels not displayed.
+
+
