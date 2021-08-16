@@ -58,6 +58,25 @@
             ]
           }
         }
+      },
+      "layouts": {
+        "main": {
+          "kind": "Expand",
+          "parameter": {
+            "open": true,
+            "children": [
+              {
+                "$ref": "#/spec/panels/upByLabel"
+              },
+              {
+                "$ref": "#/spec/panels/allUP"
+              }
+            ]
+          }
+        }
+      },
+      "entrypoint": {
+        "$ref": "#/spec/layouts/main"
       }
     }
   },
@@ -104,7 +123,7 @@
             "expr": "(((count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',instance=\"$node\",job=\"$job\"}[5m])))) * 100) / count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))"
           }
         },
-        "SysLoad5mAVG)": {
+        "SysLoad5mAVG": {
           "kind": "GaugeChart",
           "displayed_name": "Sys Load (5m avg)",
           "chart": {
@@ -139,6 +158,37 @@
             "expr": "100 - ((node_filesystem_avail_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"})"
           }
         }
+      },
+      "layouts": {
+        "main": {
+          "kind": "Expand",
+          "parameter": {
+            "open": true,
+            "children": [
+              {
+                "$ref": "#/spec/panels/CPUBusy"
+              },
+              {
+                "$ref": "#/spec/panels/SysLoad5mAVG"
+              },
+              {
+                "$ref": "#/spec/panels/SysLoad15mAVG"
+              },
+              {
+                "$ref": "#/spec/panels/RamUsed"
+              },
+              {
+                "$ref": "#/spec/panels/SwapUsed"
+              },
+              {
+                "$ref": "#/spec/panels/RootFSUsed"
+              }
+            ]
+          }
+        }
+      },
+      "entrypoint": {
+        "$ref": "#/spec/layouts/main"
       }
     }
   }
