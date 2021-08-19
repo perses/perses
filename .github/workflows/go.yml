@@ -14,7 +14,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16.x
+        go-version: 1.17.x
     - uses: actions/cache@v2
       with:
         path: ~/go/pkg/mod
@@ -32,7 +32,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16.x
+        go-version: 1.17.x
     - uses: actions/cache@v2
       with:
         path: ~/go/pkg/mod
@@ -53,4 +53,4 @@ jobs:
       uses: golangci/golangci-lint-action@v2
       with:
         # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-        version: v1.37.1
+        version: v1.42.0
