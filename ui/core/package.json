@@ -1,0 +1,27 @@
+{
+  "name": "@perses-ui/core",
+  "version": "1.0.0",
+  "description": "Core functionality consumed by both the Perses UI and plugins",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts,.tsx",
+    "start": "npm run clean && npm run build -- --watch"
+  },
+  "dependencies": {
+    "date-fns": "^2.23.0",
+    "lodash-es": "^4.17.21"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.4"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ]
+}

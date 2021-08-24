@@ -1,0 +1,10 @@
+// Config for web projects that are going to run in a browser
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2018",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "jsx": "react-jsx"
+  }
+}

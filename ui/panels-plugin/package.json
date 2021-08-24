@@ -1,0 +1,38 @@
+{
+  "name": "@perses-ui/panels-plugin",
+  "version": "1.0.0",
+  "description": "Core panels plugin for Perses",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts,.tsx",
+    "start": "npm run clean && npm run build -- --watch"
+  },
+  "dependencies": {
+    "@perses-ui/core": "^1.0.0",
+    "date-fns": "^2.23.0",
+    "lodash-es": "^4.17.21",
+    "react": "^17.0.2"
+  },
+  "perses": {
+    "kind": "Plugin",
+    "metadata": {
+      "name": "Core Panels"
+    },
+    "spec": {
+      "supported_kinds": {
+        "LineChart": "Panel",
+        "GaugeChart": "Panel",
+        "StatChart": "Panel",
+        "EmptyChart": "Panel"
+      },
+      "plugin_module_path": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "Apache-2.0"
+}
