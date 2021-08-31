@@ -15,7 +15,7 @@ Currently, those packages consist of:
 The root `package.json` in this folder has
 [NPM workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces) enabled,
 so running `npm install` will install dependencies for all packages and add
-symlinks to the local versions for packages that depdend on other packages in
+symlinks to the local versions for packages that depend on other packages in
 the workspace. The root `package.json` also contains `devDependencies` that
 are commonly used across multiple packages in the workspace.
 
