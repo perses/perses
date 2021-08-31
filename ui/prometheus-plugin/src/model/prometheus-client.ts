@@ -24,7 +24,7 @@ export function useInstantQuery(
   params: InstantQueryRequestParameters,
   fetchOptions?: FetchOptions
 ) {
-  const { url, init } = usePost(dataSource, '/api/v1/query', params);
+  const { url, init } = usePostFetchArgs(dataSource, '/api/v1/query', params);
   return useFetch<InstantQueryResponse>(url, init, fetchOptions);
 }
 
@@ -53,7 +53,7 @@ export function useRangeQuery(
     };
   }, [params]);
 
-  const { url, init } = usePost(
+  const { url, init } = usePostFetchArgs(
     dataSource,
     '/api/v1/query_range',
     alignedParams
@@ -69,7 +69,7 @@ export function useLabelNames(
   params: LabelNamesRequestParameters,
   fetchOptions?: FetchOptions
 ) {
-  const { url, init } = usePost(dataSource, '/api/v1/labels', params, {
+  const { url, init } = usePostFetchArgs(dataSource, '/api/v1/labels', params, {
     match: 'match[]',
   });
   return useFetch<LabelNamesResponse>(url, init, fetchOptions);
@@ -86,13 +86,13 @@ export function useLabelValues(
 ) {
   const { labelName, ...searchParams } = params;
   const apiUrl = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
-  const { url, init } = useGet(dataSource, apiUrl, searchParams, {
+  const { url, init } = useGetFetchArgs(dataSource, apiUrl, searchParams, {
     match: 'match[]',
   });
   return useFetch<LabelValuesResponse>(url, init, fetchOptions);
 }
 
-function useGet<T extends RequestParams<T>>(
+function useGetFetchArgs<T extends RequestParams<T>>(
   dataSource: ResourceSelector,
   apiUrl: string,
   params: T,
@@ -111,7 +111,7 @@ function useGet<T extends RequestParams<T>>(
   }, [baseUrl, apiUrl, params, rename]);
 }
 
-function usePost<T extends RequestParams<T>>(
+function usePostFetchArgs<T extends RequestParams<T>>(
   dataSource: ResourceSelector,
   apiUrl: string,
   params: T,
