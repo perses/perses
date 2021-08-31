@@ -1,0 +1,40 @@
+{
+  "name": "@perses-ui/prometheus-plugin",
+  "version": "1.0.0",
+  "description": "Prometheus plugin for Perses",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts,.tsx",
+    "start": "npm run clean && npm run build -- --watch"
+  },
+  "dependencies": {
+    "@perses-ui/core": "^1.0.0",
+    "date-fns": "^2.23.0",
+    "lezer": "^0.13.5",
+    "lezer-promql": "^0.20.0",
+    "react": "^17.0.2"
+  },
+  "perses": {
+    "kind": "Plugin",
+    "metadata": {
+      "name": "Prometheus"
+    },
+    "spec": {
+      "supported_kinds": {
+        "PrometheusLabelNames": "Variable",
+        "PrometheusLabelValues": "Variable",
+        "Interval": "Variable",
+        "PrometheusInstantChartQuery": "ChartQuery",
+        "PrometheusRangeChartQuery": "ChartQuery"
+      },
+      "plugin_module_path": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "Apache-2.0"
+}
