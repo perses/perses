@@ -9,113 +9,24 @@ Perses
 
 ## Overview
 
-Perses is providing a secure way to configure your Prometheus (like AlertRules, Scrapping Rules). Configurations can
-then be deployed across different Prometheis.
+Perses is part of the [CoreDash community](https://github.com/coredashio/community)
 
-Perses is the solution if you want to give the hand to your users without being worried that they could change or impact
-others configuration. Users can create isolated workspace where they can define their configurations.
+Perses aims to become a dashboard visualization tool for Prometheus and other datasources. It will focus on being
+GitOps-compatible via a new and well-defined dashboard definition model. It should ease the adoption of the "Dashboard
+as Code"
 
-A good example of how Perses is securing and isolated each workspace is when a user is going to silence something with
-AlertManager. With Perses, the silences are scoped to the alertRules the user defined in his workspace. Perses is
-assuring you won't be able to silence others alert
-
-Perses is also going to provide visualization for Prometheus through a new dashboard definition.
+It aims also to be k8s native and to support the Dashboard As A Service.
 
 ## Status
 
-Work in progress and far away to be prod ready. We have for the moment the CRUD for the Prometheus AlertRule and a
-beginning of a dashboard.
+Work in progress and far away to be prod ready. We have the API in place, a beginning of the front-end with plugin
+oriented architecture.
 
-## Development
+Dashboard datamodel is still under review.
 
-In this repository you have :
+## Contributing and development
 
-* the API written in Golang
-* the web app written in Typescript (using React)
-
-Each side of this project can be easily started and tested, you just have to follow the steps described below.
-
-### API
-
-To be able to start the API, you need to install the following tool:
-
-* Golang (usually the last version as we are following closely the latest version of Golang)
-* Docker & docker-compose
-* Make
-
-Once it is done, you can proceed as followed:
-
-* go the `dev` folder, where you can find a `docker-compose.yaml` file.
-* start the different container described in the file:
-
-```bash
-cd dev/
-docker-compose up -d
-```  
-
-* You have a bash script that would populate the database with a default setup. It can help if you just want to run a
-  demo.
-
-```bash
-bash populate.sh
-```
-
-* come back to the root of the project and then build the api:
-
-```bash
-cd ../
-make build
-```
-
-* finally, run the binary built by using the simple configuration file from the `dev` folder:
-
-```bash
-./bin/perses -config ./dev/config.yaml
-```
-
-You should see something like that displayed in your terminal:
-
-```log
-$> ./bin/perses -config ./bin/config.yaml
-______                       
-| ___ \                      
-| |_/ /__ _ __ ___  ___  ___ 
-|  __/ _ \ '__/ __|/ _ \/ __|
-| | |  __/ |  \__ \  __/\__ \
-\_|  \___|_|  |___/\___||___/ 
-
-The secure way to configure your monitoring.               <\
-                                                            \\
---------------==========================================>|||<*>//////]
-                                                            //
-                                                           </
-
-⇨ http server started on [::]:8080
-
-```
-
-The API is now available :).
-
-### Web App
-
-To be able to use the Web app, you will have to follow the steps to run the API first. For the moment there is no
-particular desire to run the Web-app on the development environment without the API at the same time.
-
-* Once the API is running, you have to install nodeJS v14 minimum.
-* Then go to the folder `./web`, and install all necessary packages:
-
-```bash
-cd ./web
-npm install
-```
-
-* Finally, start the web-app:
-
-```bash
-npm start
-```
-
-The web-app is now available using the url http://localhost:3000.
+Refer to [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 
