@@ -64,13 +64,12 @@ export function parseDurationString(durationString: DurationString): Duration {
   }
 
   return {
-    years: parseFloat(matches[1] ?? '0'),
+    years: parseInt(matches[1] ?? '0'),
     months: 0,
-    weeks: parseFloat(matches[2] ?? '0'),
-    days: parseFloat(matches[3] ?? '0'),
-    hours: parseFloat(matches[4] ?? '0'),
-    minutes: parseFloat(matches[5] ?? '0'),
-    seconds:
-      parseFloat(matches[6] ?? '0') + parseFloat(matches[7] ?? '0') / 1000,
+    weeks: parseInt(matches[2] ?? '0'),
+    days: parseInt(matches[3] ?? '0'),
+    hours: parseInt(matches[4] ?? '0'),
+    minutes: parseInt(matches[5] ?? '0'),
+    seconds: parseInt(matches[6] ?? '0') + parseInt(matches[7] ?? '0') / 1000,
   };
 }
