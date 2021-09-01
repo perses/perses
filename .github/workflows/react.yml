@@ -14,7 +14,7 @@ jobs:
     - name: install nodejs
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '16'
     - uses: actions/cache@v2
       with:
         path: ~/.npm
@@ -22,24 +22,5 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     - name: install deps
-      run: cd ./web && npm ci
-    - run: cd ./web && npm run lint
-  test:
-    name: "unit test"
-    runs-on: ubuntu-latest
-    steps:
-    - name: checkout
-      uses: actions/checkout@v2
-    - name: install nodejs
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-    - uses: actions/cache@v2
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-    - name: install deps
-      run: cd ./web && npm ci
-    - run: cd ./web && npm run test
+      run: cd ./ui && npm ci
+    - run: cd ./ui && npm run lint
