@@ -1,3 +1,5 @@
+image:
+  file: .gitpod.Dockerfile
 tasks:
   - init: make build # runs during prebuild
     command: |
@@ -8,7 +10,6 @@ tasks:
       ./bin/perses -config ./dev/config.yaml
   - init: |
       export NG_CLI_ANALYTICS=ci
-      npm install -g npm@7
       cd ./ui
       npm ci
     command: |
