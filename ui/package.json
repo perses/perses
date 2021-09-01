@@ -2,6 +2,11 @@
   "name": "perses-ui",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "build": "bash ./build.sh",
+    "lint": "npm run lint --workspaces",
+    "start": "npm run start -w app"
+  },
   "workspaces": [
     "app",
     "core",
