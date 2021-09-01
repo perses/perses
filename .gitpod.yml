@@ -8,16 +8,18 @@ tasks:
       ./bin/perses -config ./dev/config.yaml
   - init: |
       export NG_CLI_ANALYTICS=ci
-      cd ./web
+      npm install -g npm@7
+      cd ./ui
       npm ci
     command: |
       export NG_CLI_ANALYTICS=ci
-      cd ./web
+      cd ./ui
+      npm run build
       npm start
     openMode: split-right
   
 ports:
-  - port: 3000
+  - port: 3001
     onOpen: open-preview
   - port: 8080
     onOpen: ignore
