@@ -24,6 +24,45 @@ oriented architecture.
 
 Dashboard datamodel is still under review.
 
+### Roadmap
+
+Here an overview of what we are going to implement / provide in a short term
+
+#### First Milestone - target Beginning of December - Dashboard management
+
+* Define a proper datamodel for the dashboard.
+  * The datamodel should be easy to use by SRE / developer (in a GitOps mode)
+  * The architecture should support plugins
+  * Focus is to support the Prometheus datasource
+* A REST API provides a CRUD to manage the dashboard
+* In terms of visualization we will support for the moment the following chart:
+  * Timeseries chart
+  * Gauge
+  * Stat
+  * Table ?
+* The UI will support natively a dark and a light theme.
+* If possible the UI will be immediately responsive.
+* We should be able to load big dashboard without freezing the UI / the browser
+* We will be able to load an equivalent of the Node-exporter Dashboard.
+* Perses will be available through a Docker image, or through a binary. (OS targeted: linux, windows, darwin in amd64)
+
+#### Second Milestone - K8s native
+
+The goal is to be able to deploy Perses on k8s and to support the dashboard a service
+
+* Define CRDs that would be read by Perses. The idea would be to define and deploy the dashboard in the namespace of the
+  application. Then Perses will read the dashboards across the different namespaces and display it.
+* Be able to define a service discovery configuration for the datasource. The idea is instead of hardcoding a URL in the
+  datasource configuration, we will define the configuration of a discovery that then will be used to find how to
+  contact the datasource.
+* Possibility to define a datasource per namespace. Like that the dashboard of the application could use also a local
+  and private Prometheus.
+
+#### Future Milestone - Access control, Support other Datasource
+
+* Define a way to secure the access to the different resource.
+* Start to support others interesting datasource.
+
 ## Contributing and development
 
 Refer to [CONTRIBUTING.md](CONTRIBUTING.md)
