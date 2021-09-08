@@ -18,6 +18,7 @@ import (
 
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core"
+	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/front"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/config"
@@ -58,7 +59,10 @@ func main() {
 	persesFrontend := front.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 	// register the API
-	runner.HTTPServerBuilder().APIRegistration(persesAPI).APIRegistration(persesFrontend)
+	runner.HTTPServerBuilder().
+		APIRegistration(persesAPI).
+		APIRegistration(persesFrontend).
+		Middleware(middleware.Proxy(persistenceManager.GetDatasource()))
 	// start the application
 	runner.Start()
 }
