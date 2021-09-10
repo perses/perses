@@ -70,6 +70,8 @@ func buildProxy(c echo.Context, dao datasource.DAO) (*url.URL, error) {
 		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
+	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
+	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
 	path := "/"
 	if len(matchingGroups[0]) > 1 {
 		path = matchingGroups[0][2]
