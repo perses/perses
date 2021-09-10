@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	proxyMatcher                       = regexp.MustCompile(`/proxy/datasources/([a-zA-Z-0-9_-]+)(/.*)`)
+	proxyMatcher                       = regexp.MustCompile(`/proxy/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
 	defaultTransport http.RoundTripper = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -70,7 +70,7 @@ func buildProxy(c echo.Context, dao datasource.DAO) (*url.URL, error) {
 		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
-	var path string
+	path := "/"
 	if len(matchingGroups[0]) > 1 {
 		path = matchingGroups[0][2]
 	}
@@ -87,7 +87,7 @@ func serveProxy(c echo.Context, targetURL *url.URL) error {
 	// We have to modify the HOST of the request in order to match the host of the targetURL
 	// So far I'm not sure to understand exactly why, but if you are going to remove it, be sure of what you are doing.
 	// It has been done to fix an error returned by Openshift itself saying the target doesn't exist.
-	// Since we are using HTTP/1, setting the HOST is setting also an header so if the host and the header is blocked
+	// Since we are using HTTP/1, setting the HOST is setting also an header so if the host and the header are different
 	// then maybe it is blocked by the Openshift router.
 	req.Host = targetURL.Host
 	// Fix header
@@ -97,22 +97,20 @@ func serveProxy(c echo.Context, targetURL *url.URL) error {
 	if len(req.Header.Get(echo.HeaderXForwardedProto)) == 0 {
 		req.Header.Set(echo.HeaderXForwardedProto, c.Scheme())
 	}
-	proxyHTTP(c, targetURL).ServeHTTP(res, req)
-	if e, ok := c.Get("_error").(error); ok {
-		return e
-	}
-	return nil
-}
 
-func proxyHTTP(c echo.Context, targetURL *url.URL) http.Handler {
+	// Set up the proxy
+	var proxyErr error
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 	proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
 		desc := targetURL.String()
-		msg := fmt.Sprintf("remote %s is unreachable, could not forward: %v", desc, err)
-		logrus.Errorf(msg)
-		c.Set("_error", echo.NewHTTPError(http.StatusBadGateway, msg))
+		proxyErr = fmt.Errorf("error proxying, remote unreachable: target=%s, err=%w", desc, err)
+		logrus.Errorf(proxyErr.Error())
+		proxyErr = err
 	}
-	// use the dedicated HTTP transport to avoid any TSL encrypt issue
+	// use a dedicated HTTP transport to avoid any TSL encrypt issue
 	proxy.Transport = defaultTransport
-	return proxy
+	// Reverse proxy request.
+	proxy.ServeHTTP(res, req)
+	// Return any error handled during proxying request.
+	return proxyErr
 }
