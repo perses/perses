@@ -33,7 +33,7 @@ Here an overview of what we are going to implement / provide in a short term
 * Define a proper datamodel for the dashboard.
     * The datamodel should be easy to use by SRE / developer (in a GitOps mode)
     * The architecture should support plugins (at least for the panels, but it makes to have it as well for the
-      datasources)
+      datasources). We are discussing how to do it under the discussion https://github.com/perses/perses/discussions/72
     * Focus is to support the Prometheus datasource
 * A REST API provides a CRUD to manage the dashboard
 * Regarding the UI, focus will be on visualization and for that we will only implement the display of the dashboards.
@@ -57,8 +57,8 @@ Here an overview of what we are going to implement / provide in a short term
 
 The goal is to be able to deploy Perses on Kubernetes and to support the dashboard a service
 
-* Define k8s CRDs that would be read by Perses. The idea would be to define and deploy the dashboard in the namespace of the
-  application. Then Perses will read the dashboards across the different namespaces and display it.
+* Define k8s CRDs that would be read by Perses. The idea would be to define and deploy the dashboard in the namespace of
+  the application. Then Perses will read the dashboards across the different namespaces and display it.
 * Be able to define a service discovery configuration for the datasource. The idea is instead of hardcoding a URL in the
   datasource configuration, we will define the configuration of a discovery that then will be used to find how to
   contact the datasource.
