@@ -9,74 +9,66 @@ Perses
 
 ## Overview
 
-Perses is part of the [CoreDash community](https://github.com/coredashio/community)
+Perses is part of the [CoreDash community](https://github.com/coredashio/community).
 
 Perses aims to become a dashboard visualization tool for Prometheus and other datasources. It will focus on being
-GitOps-compatible via a new and well-defined dashboard definition model. It should ease the adoption of the "Dashboard
-as Code"
+GitOps-compatible and thus enabling a smooth "dashboards as code" workflow via a new and well-defined dashboard definition model.
 
-It aims also to be k8s native and to support the Dashboard As A Service.
+It also aims to offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from individual application namespaces.
 
 ## Status
 
-Work in progress and far away to be prod ready. We have the API in place, a beginning of the front-end with plugin
-oriented architecture.
+Perses is an early work in progress and is far from production-ready. The current pieces that are in place are:
 
-Dashboard datamodel is still under review.
+* A backend API that allows read and write access to dashboard and datasource definitions.
+* A beginning of a frontend implementation with a plugin-oriented architecture.
+
+The dashboard data model is still evolving along with the dashboard implementation and new requirements.
 
 ### Roadmap
 
-Here an overview of what we are going to implement / provide in a short term
+Here is an overview of what we aim to implement / provide in the short term:
 
-#### First Milestone - Dashboard management
+#### First Milestone - Reading and displaying dashboards
 
-* Define a proper datamodel for the dashboard.
-    * The datamodel should be easy to use by SRE / developer (in a GitOps mode)
-    * The architecture should support plugins (at least for the panels, but it makes to have it as well for the
-      datasources). We are discussing how to do it under the discussion https://github.com/perses/perses/discussions/72
-    * Focus is to support the Prometheus datasource
-* A REST API provides a CRUD to manage the dashboard
-* Regarding the UI, focus will be on visualization and for that we will only implement the display of the dashboards.
-  Editing dashboard through the UI will be done in the next milestone.
-* In terms of visualization we will support for the moment the following chart:
-    * Timeseries chart
-    * Gauge
-    * Stat
-    * Table ?
-* The UI will support natively a dark and a light theme.
-* If possible the UI will be immediately responsive. The display should change depending on the screen size.
-* We should be able to load big dashboard without freezing the UI / the browser
-* We will be able to load an equivalent of the Node-exporter Dashboard available on
-  the [Grafana market](https://grafana.com/grafana/dashboards/1860)
-* Perses will be available through a Docker image, and through a binary. (OS targeted: linux, windows, darwin in amd64)
-* To prepare the ground around Dashboard as Code, Perses should be able to read the dashboard through the files. The
-  idea would be to run locally (and easily) Perses in order to visualize the local dashboard. It will give you an idea
-  about the result when you are editing your json/yaml file representing the dashboard.
+* Define a proper dashboard data model.
+    * The data model should be easy to use by SREs and developers in a GitOps / "dashboards as code" mode.
+    * The architecture should support plugins (at least for panels, but likely for
+      datasources as well). We are still discussing the plugin architecture design in https://github.com/perses/perses/discussions/72.
+    * The initial focus is to support Prometheus as a datasource.
+* A REST API that provides a [CRUD interface](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) to manage dashboards and datasources.
+* The UI will initially focus on displaying dashboards. Editing dashboards through the UI will be addressed in the next milestone.
+* We will initially support the following panel types:
+    * Time series charts.
+    * Gauge panels.
+    * Stat panels (single value with sparkline).
+    * Tables (possibly).
+* The UI will support light and dark themes.
+* The UI will use responsive layout principles to adapt to different screen sizes.
+* Large dashboards should not freeze the UI / the browser.
+* We want to be able to load an equivalent of the Grafana [Node Exporter dashboard](https://grafana.com/grafana/dashboards/1860).
+* Perses will be released as binaries and Docker images, with initial support for Linux, Windows, and Darwin / Mac OS X on amd64.
+* To enable initial dashboard-as-code use cases, Perses will be able to read dashboard definitions from local files. This will also allow quick iteration and experimentation when editing YAML/JSON dashboard representations.
 
-#### Second Milestone - K8s native
+#### Second Milestone - Native Kubernetes mode and UI-based dashboard editing
 
-The goal is to be able to deploy Perses on Kubernetes and to support the dashboard a service
+The goal of the second milestone is to support "dashboard as a service" use cases on Kubernetes, as well as allowing UI-based dashboard editing:
 
-* Define k8s CRDs that would be read by Perses. The idea would be to define and deploy the dashboard in the namespace of
-  the application. Then Perses will read the dashboards across the different namespaces and display it.
-* Be able to define a service discovery configuration for the datasource. The idea is instead of hardcoding a URL in the
-  datasource configuration, we will define the configuration of a discovery that then will be used to find how to
-  contact the datasource.
-* Possibility to define a datasource per namespace. Like that the dashboard of the application could use also a local
-  and private Prometheus.
-* Give the possibility to edit a dashboard through the UI directly.
-* Depending how Perses is loaded (on k8s using CRDs, or using a DB), it won't or will be possible to modify the
-  dashboard through Perses (Using the UI or the API directly)
+* Define Kubernetes CRDs containing dashboard definitions that will be read by Perses. This will allow defining and deploying dashboards along their respective applications in the same namespace. Perses will then allow reading and displaying dashboard definitions across multiple namespaces.
+* Allow dynamic discovery of datasources on Kubernetes, rather than hard-coding datasource URLs.
+* Allow defining datasources that are local and private to a namespace (e.g. for use cases where each namespace has its own Prometheus server).
+* Allow editing dashboards directly through the UI.
+* Depending on how Perses is configured (using Kubernetes CRDs or a database), modifying dashboards directly through Perses will or will not be possible (no matter whether the editing happens via the UI or using the API directly).
 
 #### Future Milestone - Not yet scoped
 
-* Define a way to secure the access to the different resource.
-* Start to support others interesting datasource.
-* Snapshot of dashboard
+* Define access restrictions and a security model for different resources.
+* Add support for datasources other than Prometheus.
+* Support creating dashboard snapshots.
 
 ## Contributing and development
 
-Refer to [CONTRIBUTING.md](CONTRIBUTING.md)
+Refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
