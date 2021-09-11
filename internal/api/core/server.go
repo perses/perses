@@ -17,7 +17,6 @@ import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
-	"github.com/perses/perses/internal/api/impl/v1/dashboard_feed"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
@@ -37,7 +36,6 @@ type api struct {
 func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
 	endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard()),
-		dashboard_feed.NewEndpoint(serviceManager.GetDashboardFeed()),
 		datasource.NewEndpoint(serviceManager.GetDatasource()),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject()),
