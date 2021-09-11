@@ -15,7 +15,6 @@ package variable
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -307,7 +306,7 @@ func TestGraph_BuildOrder(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			g := newGraph(test.variables, test.dependencies, nil, nil)
+			g := newGraph(test.variables, test.dependencies)
 			result, err := g.buildOrder()
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(result))
@@ -355,7 +354,7 @@ func TestGraph_BuildOrderError(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			g := newGraph(test.variables, test.dependencies, nil, nil)
+			g := newGraph(test.variables, test.dependencies)
 			_, err := g.buildOrder()
 			assert.Equal(t, fmt.Errorf("circular dependency detected"), err)
 		})
@@ -366,8 +365,6 @@ func TestBuildOrder(t *testing.T) {
 	testSuite := []struct {
 		title     string
 		variables map[string]*v1.DashboardVariable
-		current   map[string]string
-		previous  map[string]string
 		result    []Group
 	}{
 		{
@@ -419,81 +416,10 @@ func TestBuildOrder(t *testing.T) {
 				{Variables: []string{"myVariable"}},
 			},
 		},
-		{
-			title: "multiple usage of same variable with foo variable known",
-			variables: map[string]*v1.DashboardVariable{
-				"myVariable": {
-					Kind: v1.KindPromQLQueryVariable,
-					Parameter: &v1.PromQLQueryVariableParameter{
-						Expr: "sum by($doe, $bar) (rate($foo{label='$bar'}))",
-					},
-				},
-				"foo": {
-					Kind: v1.KindPromQLQueryVariable,
-					Parameter: &v1.PromQLQueryVariableParameter{
-						Expr: "test",
-					},
-				},
-				"bar": {
-					Kind: v1.KindPromQLQueryVariable,
-					Parameter: &v1.PromQLQueryVariableParameter{
-						Expr: "vector($foo)",
-					},
-				},
-				"doe": {
-					Kind: v1.KindConstantVariable,
-					Parameter: &v1.ConstantVariableParameter{
-						Values: []string{"myConstant"},
-					},
-				},
-			},
-			current: map[string]string{
-				"foo": "value",
-			},
-			result: []Group{
-				{Variables: []string{"bar", "doe"}},
-				{Variables: []string{"myVariable"}},
-			},
-		},
-		{
-			title: "all variable with an already known value",
-			variables: map[string]*v1.DashboardVariable{
-				"labelName": {
-					Kind: v1.KindLabelNamesQueryVariable,
-					Hide: false,
-					Parameter: &v1.LabelNamesQueryVariableParameter{
-						Matchers: []string{
-							"up",
-						},
-						CapturingRegexp: (*v1.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
-					},
-				},
-				"labelValue": {
-					Kind: v1.KindLabelValuesQueryVariable,
-					Hide: false,
-					Parameter: &v1.LabelValuesQueryVariableParameter{
-						LabelName: "$labelName",
-						Matchers: []string{
-							"up",
-						},
-						CapturingRegexp: (*v1.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
-					},
-				},
-			},
-			current: map[string]string{
-				"labelName":  "job",
-				"labelValue": "value1",
-			},
-			previous: map[string]string{
-				"labelName":  "job",
-				"labelValue": "value2",
-			},
-			result: []Group{},
-		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			groups, err := BuildOrder(test.variables, test.current, test.previous)
+			groups, err := BuildOrder(test.variables)
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(groups))
 			for i := 0; i < len(groups); i++ {

@@ -38,20 +38,15 @@ type Group struct {
 // 1. First calculate which variable depend of which other variable
 // 2. Then, thanks to the dependencies, we can create a dependency graph.
 // 3. Then we have to determinate the build order.
-
-func BuildOrder(variables map[string]*v1.DashboardVariable, current map[string]string, previous map[string]string) ([]Group, error) {
-	// calculate the build order of the variable just to verify there is no error
-	g, err := buildGraph(variables, current, previous)
+func BuildOrder(variables map[string]*v1.DashboardVariable) ([]Group, error) {
+	g, err := buildGraph(variables)
 	if err != nil {
 		return nil, err
 	}
-	// shake the graph to remove the already calculated node.
-	g.shaking()
-	// finally determinate the build order
 	return g.buildOrder()
 }
 
-func buildGraph(variables map[string]*v1.DashboardVariable, current map[string]string, previous map[string]string) (*graph, error) {
+func buildGraph(variables map[string]*v1.DashboardVariable) (*graph, error) {
 	deps, err := buildVariableDependencies(variables)
 	if err != nil {
 		return nil, err
@@ -60,7 +55,7 @@ func buildGraph(variables map[string]*v1.DashboardVariable, current map[string]s
 	for v := range variables {
 		vars = append(vars, v)
 	}
-	return newGraph(vars, deps, current, previous), nil
+	return newGraph(vars, deps), nil
 }
 
 func buildVariableDependencies(variables map[string]*v1.DashboardVariable) (map[string][]string, error) {
@@ -103,11 +98,9 @@ func findAllVariableUsed(str string) [][]string {
 	return variableRegexp2.FindAllStringSubmatch(str, -1)
 }
 
-func newGraph(variables []string, dependencies map[string][]string, current map[string]string, previous map[string]string) *graph {
+func newGraph(variables []string, dependencies map[string][]string) *graph {
 	g := &graph{
-		nodes:        make(map[string]*node),
-		currentValue: current,
-		diffMap:      diff(current, previous),
+		nodes: make(map[string]*node),
 	}
 	for _, variable := range variables {
 		g.nodes[variable] = &node{
@@ -124,9 +117,7 @@ func newGraph(variables []string, dependencies map[string][]string, current map[
 }
 
 type graph struct {
-	diffMap      map[string]bool
-	currentValue map[string]string
-	nodes        map[string]*node
+	nodes map[string]*node
 }
 
 // buildOrder determinate the build order of the variables
@@ -220,99 +211,8 @@ func (g *graph) buildInitialRemainingNodes() []*node {
 	return remainingNodes
 }
 
-// shaking is going loop other the graph and remove the nodes that are already calculated.
-// To know if a node needs to be calculated or not is based on:
-// 1. if a value for the variable wrapped by the node exists
-// 2. if this value changed between the currentSelectedValue and the previous one.
-//
-// If the condition 1 is false, then for sure the node needs to be calculated and so as its children
-// If the condition 1 and 2 is true, then the node doesn't need to be calculated but its children should be.
-// For example, we have this graph:
-// (a) (b)
-//   \ /
-//   (c)
-// Let's imagine that we have the value for each node (a,b,c). But we also know that the value (a) changed between two states.
-// Since (c) depends on the value of (a) and the current value of (c) is based on a previous value of (a).
-// Then we need to calculate again (c), since (a) doesn't have the same value.
-// So, based on this logic, after shaking the graph, the graph should look like this:
-// (c) (yes only c is remaining in the graph. Others nodes have been removed since their values are already known)
-//
-// To be able to know if the children can be removed as well if their values are known and if the parents value is known too
-// or if they have to be recalculated because or the parents value is not know or it changed, we will introduced a boolean on each node.
-// If it is true then, the node need to be recalculated even it has no incoming edged. Otherwise it can be removed too.
-//
-// Let see if it works with a more complex example:
-//          (f)         (d)
-//         / | \         |
-//       (c) |  (b)     (g)
-//        \  |  /|
-//          (a)  /
-//           |  /
-//           | /
-//           (e)
-// Let's imagine we know the value of (f) (c) and (g). We also know that the value of (a) and (d) changed.
-// So we don't know the value of (b) and (e).
-//
-// Let's start by the top of the graph. (f) is known same as (d). So, we don't need to calculate them and we can remove them.
-// Since the value of (f) doesn't change, then we can set the boolean of its children to false.
-// Which is not the same for (d), we know its value, but we also the value changed. Which means its children should all be set to true.
-// We now have the following graph:
-//       (c) false  (b) false     (g) true
-//         \        /|
-//          \      / |
-//           \    /  |
-//            \  /  /
-//             (a) /
-//              | /
-//             (e)
-//
-// We know the value of (c), it doesn't have any incoming edge and it is marked as false. So it can be removed and its outgoing edges as well.
-// We don't know the value of (b) so we can't remove it. Also we then need to set all its children to true so they have to be calculated as well.
-// We now have the following graph:
-//        (b) false     (g) true
-//         |\
-//         | \
-//         |  |
-//         |  |
-//  true  (a) |
-//         | /
-//        (e)
-// The shaking can be stopped as there is no more any nodes that we know the value with no incoming edges
-func (g *graph) shaking() {
-	remainingNodes := g.buildInitialRemainingNodes()
-	for len(remainingNodes) > 0 {
-		var newRemainingNodes []*node
-		for _, n := range remainingNodes {
-			if n.dependencies == 0 && !n.keep {
-				isChanged := g.diffMap[n.name]
-				isExists := false
-				if _, ok := g.currentValue[n.name]; ok {
-					isExists = ok
-				}
-				if isChanged || isExists {
-					// remove the node from the graph, we don't need to consider it anymore
-					delete(g.nodes, n.name)
-					for _, child := range n.children {
-						child.dependencies--
-						child.keep = isChanged
-					}
-				}
-			} else {
-				newRemainingNodes = append(newRemainingNodes, n)
-			}
-		}
-		if len(newRemainingNodes) == len(remainingNodes) {
-			// we have exactly the same number of node than in the previous loop
-			// It means we can't shake more this graph. So let's stop it
-			return
-		}
-		remainingNodes = newRemainingNodes
-	}
-}
-
 type node struct {
 	name     string
-	keep     bool
 	children map[string]*node
 	// dependencies is the number of node that the current node depends on. Saying differently it's the number of incoming edge to this node.
 	// Once this number is dropping to 0, the variable holt by this node can be built.
