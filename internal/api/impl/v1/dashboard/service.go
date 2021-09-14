@@ -18,9 +18,9 @@ import (
 	"time"
 
 	"github.com/perses/common/etcd"
+	"github.com/perses/perses/internal/api/impl/v1/dashboard/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/variable"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -49,7 +49,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// it won't be possible to create a resources into a not known project
 
 	// verify it's possible to calculate the build order for the variable.
-	if _, err := variable.BuildOrder(entity.Spec.Variables, nil, nil); err != nil {
+	if _, err := variable.BuildOrder(entity.Spec.Variables); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// Update the time contains in the entity
@@ -84,7 +84,7 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request doesn't match", shared.BadRequestError)
 	}
 	// verify it's possible to calculate the build order for the variable.
-	if _, err := variable.BuildOrder(entity.Spec.Variables, nil, nil); err != nil {
+	if _, err := variable.BuildOrder(entity.Spec.Variables); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// find the previous version of the dashboard

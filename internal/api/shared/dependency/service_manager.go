@@ -17,13 +17,11 @@ package dependency
 
 import (
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
-	dashboardFeedimpl "github.com/perses/perses/internal/api/impl/v1/dashboard_feed"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
-	"github.com/perses/perses/internal/api/interface/v1/dashboard_feed"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
@@ -32,7 +30,6 @@ import (
 
 type ServiceManager interface {
 	GetDashboard() dashboard.Service
-	GetDashboardFeed() dashboard_feed.Service
 	GetDatasource() datasource.Service
 	GetHealth() health.Service
 	GetProject() project.Service
@@ -41,37 +38,30 @@ type ServiceManager interface {
 
 type service struct {
 	ServiceManager
-	dashboard     dashboard.Service
-	dashboardFeed dashboard_feed.Service
-	datasource    datasource.Service
-	health        health.Service
-	project       project.Service
-	user          user.Service
+	dashboard  dashboard.Service
+	datasource datasource.Service
+	health     health.Service
+	project    project.Service
+	user       user.Service
 }
 
 func NewServiceManager(dao PersistenceManager) ServiceManager {
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard())
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource())
-	dashboardFeedService := dashboardFeedimpl.NewService(datasourceService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject())
 	userService := userImpl.NewService(dao.GetUser())
 	return &service{
-		dashboard:     dashboardService,
-		dashboardFeed: dashboardFeedService,
-		datasource:    datasourceService,
-		health:        healthService,
-		project:       projectService,
-		user:          userService,
+		dashboard:  dashboardService,
+		datasource: datasourceService,
+		health:     healthService,
+		project:    projectService,
+		user:       userService,
 	}
 }
 
 func (s *service) GetDashboard() dashboard.Service {
 	return s.dashboard
-}
-
-func (s *service) GetDashboardFeed() dashboard_feed.Service {
-	return s.dashboardFeed
 }
 
 func (s *service) GetDatasource() datasource.Service {
