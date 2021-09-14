@@ -16,72 +16,23 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
+
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	"gopkg.in/yaml.v2"
 )
 
 func GenerateDatasourceID(name string) string {
 	return fmt.Sprintf("/datasources/%s", name)
 }
 
-type DatasourceSpec struct {
-	URL *url.URL `json:"url" yaml:"url"`
+type DatasourceSpec interface {
+	GetKind() datasource.Kind
 }
 
-type tmpDatasourceSpec struct {
-	URL string `json:"url" yaml:"url"`
-}
-
-func (d *DatasourceSpec) MarshalJSON() ([]byte, error) {
-	urlAsString := ""
-	if d.URL != nil {
-		urlAsString = d.URL.String()
-	}
-	tmp := &tmpDatasourceSpec{
-		URL: urlAsString,
-	}
-	return json.Marshal(tmp)
-}
-
-func (d *DatasourceSpec) MarshalYAML() (interface{}, error) {
-	urlAsString := ""
-	if d.URL != nil {
-		urlAsString = d.URL.String()
-	}
-	tmp := &tmpDatasourceSpec{
-		URL: urlAsString,
-	}
-	return tmp, nil
-}
-
-func (d *DatasourceSpec) UnmarshalJSON(data []byte) error {
-	var tmp tmpDatasourceSpec
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	if err := d.validate(tmp); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (d *DatasourceSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp tmpDatasourceSpec
-	if err := unmarshal(&tmp); err != nil {
-		return err
-	}
-	if err := d.validate(tmp); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (d *DatasourceSpec) validate(spec tmpDatasourceSpec) error {
-	if u, err := url.Parse(spec.URL); err != nil {
-		return err
-	} else {
-		d.URL = u
-	}
-	return nil
+type tmpDatasource struct {
+	Kind     Kind                   `json:"kind" yaml:"kind"`
+	Metadata Metadata               `json:"metadata" yaml:"metadata"`
+	Spec     map[string]interface{} `json:"spec" yaml:"spec"`
 }
 
 type Datasource struct {
@@ -99,28 +50,43 @@ func (d *Datasource) GetMetadata() interface{} {
 }
 
 func (d *Datasource) UnmarshalJSON(data []byte) error {
-	var tmp Datasource
-	type plain Datasource
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
+	jsonUnmarshalFunc := func(spec interface{}) error {
+		return json.Unmarshal(data, spec)
 	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
+	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
 func (d *Datasource) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp Datasource
-	type plain Datasource
-	if err := unmarshal((*plain)(&tmp)); err != nil {
+	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
+}
+
+func (d *Datasource) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+	var tmp tmpDatasource
+	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
-	if err := (&tmp).validate(); err != nil {
-		return err
+	if tmp.Kind != KindDatasource {
+		return fmt.Errorf("invalid kind: '%s' for a Datasource type", tmp.Kind)
 	}
-	*d = tmp
+	d.Kind = tmp.Kind
+	d.Metadata = tmp.Metadata
+	if specKind, ok := tmp.Spec["kind"]; !ok {
+		return fmt.Errorf("attribute 'kind' not found in 'datasource.spec'")
+	} else {
+		rawSpec, err := staticMarshal(tmp.Spec)
+		if err != nil {
+			return err
+		}
+		var spec DatasourceSpec
+		switch specKind {
+		case string(datasource.PrometheusKind):
+			spec = &datasource.Prometheus{}
+		}
+		if err := staticUnmarshal(rawSpec, spec); err != nil {
+			return err
+		}
+		d.Spec = spec
+	}
 	return nil
 }
 
