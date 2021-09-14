@@ -16,11 +16,13 @@ package dependency
 import (
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
+	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -31,6 +33,7 @@ import (
 type PersistenceManager interface {
 	GetDashboard() dashboard.DAO
 	GetDatasource() datasource.DAO
+	GetGlobalDatasource() globaldatasource.DAO
 	GetHealth() health.DAO
 	GetPersesDAO() database.DAO
 	GetProject() project.DAO
@@ -39,12 +42,13 @@ type PersistenceManager interface {
 
 type persistence struct {
 	PersistenceManager
-	dashboard  dashboard.DAO
-	datasource datasource.DAO
-	health     health.DAO
-	perses     database.DAO
-	project    project.DAO
-	user       user.DAO
+	dashboard        dashboard.DAO
+	datasource       datasource.DAO
+	globalDatasource globaldatasource.DAO
+	health           health.DAO
+	perses           database.DAO
+	project          project.DAO
+	user             user.DAO
 }
 
 func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
@@ -54,16 +58,18 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	}
 	dashboardDAO := dashboardImpl.NewDAO(persesDAO)
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
+	globalDatatasourceDAO := globalDatasourceImpl.NewDAO(persesDAO)
 	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
 	userDAO := userImpl.NewDAO(persesDAO)
 	return &persistence{
-		dashboard:  dashboardDAO,
-		datasource: datasourceDAO,
-		health:     healthDAO,
-		perses:     persesDAO,
-		project:    projectDAO,
-		user:       userDAO,
+		dashboard:        dashboardDAO,
+		datasource:       datasourceDAO,
+		globalDatasource: globalDatatasourceDAO,
+		health:           healthDAO,
+		perses:           persesDAO,
+		project:          projectDAO,
+		user:             userDAO,
 	}, nil
 }
 
@@ -73,6 +79,10 @@ func (p *persistence) GetDashboard() dashboard.DAO {
 
 func (p *persistence) GetDatasource() datasource.DAO {
 	return p.datasource
+}
+
+func (p *persistence) GetGlobalDatasource() globaldatasource.DAO {
+	return p.globalDatasource
 }
 
 func (p *persistence) GetHealth() health.DAO {

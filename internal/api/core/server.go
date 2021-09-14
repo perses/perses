@@ -18,6 +18,7 @@ import (
 	echoUtils "github.com/perses/common/echo"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
+	"github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/user"
@@ -37,6 +38,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
 	endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard()),
 		datasource.NewEndpoint(serviceManager.GetDatasource()),
+		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource()),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject()),
 		user.NewEndpoint(serviceManager.GetUser()),

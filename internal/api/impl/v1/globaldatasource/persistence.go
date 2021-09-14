@@ -11,49 +11,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+package globaldatasource
 
 import (
 	"github.com/perses/common/etcd"
-	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/shared/database"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type dao struct {
-	datasource.DAO
+	globaldatasource.DAO
 	client database.DAO
 }
 
-func NewDAO(persesDAO database.DAO) datasource.DAO {
+func NewDAO(persesDAO database.DAO) globaldatasource.DAO {
 	return &dao{
 		client: persesDAO,
 	}
 }
 
-func (d *dao) Create(entity *v1.Datasource) error {
+func (d *dao) Create(entity *v1.GlobalDatasource) error {
 	key := entity.GenerateID()
 	return d.client.Create(key, entity)
 }
 
-func (d *dao) Update(entity *v1.Datasource) error {
+func (d *dao) Update(entity *v1.GlobalDatasource) error {
 	key := entity.GenerateID()
 	return d.client.Upsert(key, entity)
 }
 
-func (d *dao) Delete(project string, name string) error {
-	key := v1.GenerateDatasourceID(project, name)
+func (d *dao) Delete(name string) error {
+	key := v1.GenerateGlobalDatasourceID(name)
 	return d.client.Delete(key)
 }
 
-func (d *dao) Get(project string, name string) (*v1.Datasource, error) {
-	key := v1.GenerateDatasourceID(project, name)
-	entity := &v1.Datasource{}
+func (d *dao) Get(name string) (*v1.GlobalDatasource, error) {
+	key := v1.GenerateGlobalDatasourceID(name)
+	entity := &v1.GlobalDatasource{}
 	return entity, d.client.Get(key, entity)
 }
 
-func (d *dao) List(q etcd.Query) ([]*v1.Datasource, error) {
-	var result []*v1.Datasource
+func (d *dao) List(q etcd.Query) ([]*v1.GlobalDatasource, error) {
+	var result []*v1.GlobalDatasource
 	err := d.client.Query(q, &result)
 	return result, err
 }

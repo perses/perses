@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+package globaldatasource
 
 import (
 	"github.com/perses/common/etcd"
@@ -21,24 +21,21 @@ import (
 
 type Query struct {
 	etcd.Query
-	// Name is a prefix of the Datasource.metadata.name that is used to filter the list of the Datasource.
-	// Name can be empty in case you want to return the full list of Datasource available.
+	// Name is a prefix of the GlobalDatasource.metadata.name that is used to filter the list of the GlobalDatasource.
+	// Name can be empty in case you want to return the full list of GlobalDatasource available.
 	Name string `query:"name"`
-	// Project is the exact name of the project.
-	// The value can come or from the path of the URL or from the query parameter
-	Project string `path:"project" query:"project"`
 }
 
 func (q *Query) Build() (string, error) {
-	return v1.GenerateDatasourceID(q.Project, q.Name), nil
+	return v1.GenerateGlobalDatasourceID(q.Name), nil
 }
 
 type DAO interface {
-	Create(entity *v1.Datasource) error
-	Update(entity *v1.Datasource) error
-	Delete(project string, name string) error
-	Get(project string, name string) (*v1.Datasource, error)
-	List(q etcd.Query) ([]*v1.Datasource, error)
+	Create(entity *v1.GlobalDatasource) error
+	Update(entity *v1.GlobalDatasource) error
+	Delete(name string) error
+	Get(name string) (*v1.GlobalDatasource, error)
+	List(q etcd.Query) ([]*v1.GlobalDatasource, error)
 }
 
 type Service interface {

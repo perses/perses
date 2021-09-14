@@ -22,7 +22,8 @@ import (
 type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	Dashboard(project string) DashboardInterface
-	Datasource() DatasourceInterface
+	Datasource(project string) DatasourceInterface
+	GlobalDatasource() GlobalDatasourceInterface
 	Project() ProjectInterface
 	User() UserInterface
 }
@@ -46,8 +47,12 @@ func (c *client) Dashboard(project string) DashboardInterface {
 	return newDashboard(c.restClient, project)
 }
 
-func (c *client) Datasource() DatasourceInterface {
-	return newDatasource(c.restClient)
+func (c *client) Datasource(project string) DatasourceInterface {
+	return newDatasource(c.restClient, project)
+}
+
+func (c *client) GlobalDatasource() GlobalDatasourceInterface {
+	return newGlobalDatasource(c.restClient)
 }
 
 func (c *client) Project() ProjectInterface {

@@ -21,17 +21,19 @@ import (
 type Kind string
 
 const (
-	KindDashboard  Kind = "Dashboard"
-	KindDatasource Kind = "Datasource"
-	KindProject    Kind = "Project"
-	KindUser       Kind = "User"
+	KindDashboard        Kind = "Dashboard"
+	KindDatasource       Kind = "Datasource"
+	KindGlobalDatasource Kind = "GlobalDatasource"
+	KindProject          Kind = "Project"
+	KindUser             Kind = "User"
 )
 
 var KindMap = map[Kind]bool{
-	KindDashboard:  true,
-	KindDatasource: true,
-	KindProject:    true,
-	KindUser:       true,
+	KindDashboard:        true,
+	KindDatasource:       true,
+	KindGlobalDatasource: true,
+	KindProject:          true,
+	KindUser:             true,
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {
