@@ -206,7 +206,6 @@ type dao struct {
 }
 
 func NewDAO(persesDAO database.DAO) {{ $package }}.DAO {
-	client := etcd.NewDAO(etcdClient, timeout)
 	return &dao{
 		client: persesDAO,
 	}
