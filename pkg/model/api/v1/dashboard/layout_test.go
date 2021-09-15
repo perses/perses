@@ -1,4 +1,4 @@
-package v1
+package dashboard
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ func TestUnmarshallJSONLayout(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
-		result DashboardLayout
+		result Layout
 	}{
 		{
 			title: "grid layout",
@@ -47,7 +47,7 @@ func TestUnmarshallJSONLayout(t *testing.T) {
   }
 }
 `,
-			result: DashboardLayout{
+			result: Layout{
 				Kind: KindGridLayout,
 				Parameter: &GridLayoutParameter{
 					Children: [][]GridCell{
@@ -95,7 +95,7 @@ func TestUnmarshallJSONLayout(t *testing.T) {
   }
 }
 `,
-			result: DashboardLayout{
+			result: Layout{
 				Kind: KindExpandLayout,
 				Parameter: &ExpandLayoutParameter{
 					Open: true,
@@ -112,7 +112,7 @@ func TestUnmarshallJSONLayout(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := DashboardLayout{}
+			result := Layout{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
 			assert.Equal(t, test.result, result)
 		})
@@ -123,7 +123,7 @@ func TestUnmarshallYAMLLayout(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
-		result DashboardLayout
+		result Layout
 	}{
 		{
 			title: "grid layout",
@@ -140,7 +140,7 @@ parameter:
         $ref: "#/panels/load"
     - width: 1
 `,
-			result: DashboardLayout{
+			result: Layout{
 				Kind: KindGridLayout,
 				Parameter: &GridLayoutParameter{
 					Children: [][]GridCell{
@@ -182,7 +182,7 @@ parameter:
   children:
   - "$ref": "#/layouts/mainGrid"
 `,
-			result: DashboardLayout{
+			result: Layout{
 				Kind: KindExpandLayout,
 				Parameter: &ExpandLayoutParameter{
 					Open: true,
@@ -199,7 +199,7 @@ parameter:
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := DashboardLayout{}
+			result := Layout{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
 		})

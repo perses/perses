@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
 )
 
@@ -34,11 +35,11 @@ type DashboardSpec struct {
 	Datasource string `json:"datasource" yaml:"datasource"`
 	// Duration is the default time you would like to use to looking in the past when getting data to fill the
 	// dashboard
-	Duration   model.Duration                `json:"duration" yaml:"duration"`
-	Variables  map[string]*DashboardVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Panels     map[string]*DashboardPanel    `json:"panels" yaml:"panels"`
-	Layouts    map[string]*DashboardLayout   `json:"layouts" yaml:"layouts"`
-	Entrypoint *JSONRef                      `json:"entrypoint" yaml:"entrypoint"`
+	Duration   model.Duration                 `json:"duration" yaml:"duration"`
+	Variables  map[string]*dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Panels     map[string]*dashboard.Panel    `json:"panels" yaml:"panels"`
+	Layouts    map[string]*dashboard.Layout   `json:"layouts" yaml:"layouts"`
+	Entrypoint *dashboard.JSONRef             `json:"entrypoint" yaml:"entrypoint"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
@@ -141,7 +142,7 @@ func (d *Dashboard) validate() error {
 func (d *Dashboard) verifyAndSetJSONReferences() error {
 	for _, layout := range d.Spec.Layouts {
 		switch parameter := layout.Parameter.(type) {
-		case *GridLayoutParameter:
+		case *dashboard.GridLayoutParameter:
 			for _, line := range parameter.Children {
 				for _, cell := range line {
 					if cell.Content != nil {
@@ -151,7 +152,7 @@ func (d *Dashboard) verifyAndSetJSONReferences() error {
 					}
 				}
 			}
-		case *ExpandLayoutParameter:
+		case *dashboard.ExpandLayoutParameter:
 			for _, ref := range parameter.Children {
 				if err := d.checkAndSetRef(ref); err != nil {
 					return err
@@ -162,7 +163,7 @@ func (d *Dashboard) verifyAndSetJSONReferences() error {
 	return d.checkAndSetRef(d.Spec.Entrypoint)
 }
 
-func (d *Dashboard) checkAndSetRef(ref *JSONRef) error {
+func (d *Dashboard) checkAndSetRef(ref *dashboard.JSONRef) error {
 	// ref.Path should like that [ "spec", "layouts" | "panels", <name> ].
 	// So if the array is not equal to three then the reference is wrong.
 	if len(ref.Path) != 3 {

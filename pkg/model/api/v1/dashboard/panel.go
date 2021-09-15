@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1
+package dashboard
 
 import (
 	"encoding/json"
@@ -192,13 +192,13 @@ type tmpPanel struct {
 	Chart         map[string]interface{} `json:"chart" yaml:"chart"`
 }
 
-type DashboardPanel struct {
+type Panel struct {
 	DisplayedName string    `json:"displayed_name" yaml:"displayed_name"`
 	Kind          ChartKind `json:"kind" yaml:"kind"`
 	Chart         Chart     `json:"chart" yaml:"chart"`
 }
 
-func (p *DashboardPanel) UnmarshalJSON(data []byte) error {
+func (p *Panel) UnmarshalJSON(data []byte) error {
 	jsonUnmarshalFunc := func(panel interface{}) error {
 		return json.Unmarshal(data, panel)
 	}
@@ -208,14 +208,14 @@ func (p *DashboardPanel) UnmarshalJSON(data []byte) error {
 	return p.validate()
 }
 
-func (p *DashboardPanel) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *Panel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := p.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal); err != nil {
 		return err
 	}
 	return p.validate()
 }
 
-func (p *DashboardPanel) validate() error {
+func (p *Panel) validate() error {
 	if len(p.DisplayedName) == 0 {
 		return fmt.Errorf("panel.displayed_name cannot be empty")
 	}
@@ -225,7 +225,7 @@ func (p *DashboardPanel) validate() error {
 	return nil
 }
 
-func (p *DashboardPanel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (p *Panel) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
 	var tmp tmpPanel
 	if err := unmarshal(&tmp); err != nil {
 		return err

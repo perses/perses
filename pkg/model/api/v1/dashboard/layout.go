@@ -1,4 +1,4 @@
-package v1
+package dashboard
 
 import (
 	"encoding/json"
@@ -79,23 +79,23 @@ type tmpDashboardLayout struct {
 	Parameter map[string]interface{} `json:"parameter" yaml:"parameter"`
 }
 
-type DashboardLayout struct {
+type Layout struct {
 	Kind      LayoutKind      `json:"kind" yaml:"kind"`
 	Parameter LayoutParameter `json:"parameter" yaml:"parameter"`
 }
 
-func (d *DashboardLayout) UnmarshalJSON(data []byte) error {
+func (d *Layout) UnmarshalJSON(data []byte) error {
 	jsonUnmarshalFunc := func(panel interface{}) error {
 		return json.Unmarshal(data, panel)
 	}
 	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
-func (d *DashboardLayout) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *Layout) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (d *DashboardLayout) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (d *Layout) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
 	var tmpLayout tmpDashboardLayout
 	if err := unmarshal(&tmpLayout); err != nil {
 		return err

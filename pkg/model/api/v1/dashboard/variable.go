@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1
+package dashboard
 
 import (
 	"encoding/json"
@@ -315,7 +315,7 @@ type tmpDashboardVariable struct {
 	Parameter     map[string]interface{} `json:"parameter" yaml:"parameter"`
 }
 
-type DashboardVariable struct {
+type Variable struct {
 	// Kind is the type of the variable. Depending of the value of Kind, it will change the content of Parameter.
 	Kind VariableKind `json:"kind" yaml:"kind"`
 	// DisplayedName is the name that would be displayed by the UI. It should be filled only if Hide is set to false.
@@ -329,18 +329,18 @@ type DashboardVariable struct {
 	Parameter VariableParameter `json:"parameter" yaml:"parameter"`
 }
 
-func (d *DashboardVariable) UnmarshalJSON(data []byte) error {
+func (d *Variable) UnmarshalJSON(data []byte) error {
 	jsonUnmarshalFunc := func(panel interface{}) error {
 		return json.Unmarshal(data, panel)
 	}
 	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
-func (d *DashboardVariable) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *Variable) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (d *DashboardVariable) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (d *Variable) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
 	var tmpVariable tmpDashboardVariable
 	if err := unmarshal(&tmpVariable); err != nil {
 		return err
