@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 )
 
@@ -68,9 +69,52 @@ func (h *HTTPAccess) validate() error {
 	return nil
 }
 
-type HTTPWhiteListConfiguration struct {
+type HTTPWhiteListConfig struct {
 	Endpoint string `json:"endpoint" yaml:"endpoint"`
 	Method   string `json:"method" yaml:"method"`
+}
+
+func (h *HTTPWhiteListConfig) UnmarshalJSON(data []byte) error {
+	var tmp HTTPWhiteListConfig
+	type plain HTTPWhiteListConfig
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*h = tmp
+	return nil
+}
+
+func (h *HTTPWhiteListConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp HTTPWhiteListConfig
+	type plain HTTPWhiteListConfig
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*h = tmp
+	return nil
+}
+
+func (h *HTTPWhiteListConfig) validate() error {
+	if len(h.Method) == 0 {
+		return fmt.Errorf("HTTP method cannot be empty")
+	}
+	if len(h.Endpoint) == 0 {
+		return fmt.Errorf("HTTP endpoint cannot be empty")
+	}
+	if h.Method != http.MethodGet &&
+		h.Method != http.MethodPost &&
+		h.Method != http.MethodDelete &&
+		h.Method != http.MethodPut &&
+		h.Method != http.MethodPatch {
+		return fmt.Errorf("'%s' is not a valid http method. Current supported HTTP method: %s, %s, %s, %s, %s", h.Method, http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodPatch)
+	}
+	return nil
 }
 
 type BasicAuth struct {
@@ -169,7 +213,7 @@ type HTTPConfiguration struct {
 	Access HTTPAccess `json:"access,omitempty" yaml:"access,omitempty"`
 	// WhiteList is a list of tuple of http method and http endpoint that will be accessible.
 	// These parameters are only used when access is set to 'server'
-	WhiteList []HTTPWhiteListConfiguration `json:"white_list" yaml:"white_list"`
+	WhiteList []HTTPWhiteListConfig `json:"white_list" yaml:"white_list"`
 	// Auth is holding any security configuration for the http configuration.
 	// When defined, it's impossible to set the value of Access with 'browser'
 	Auth *HTTPAuth `json:"auth,omitempty" yaml:"auth,omitempty"`
@@ -181,11 +225,11 @@ type HTTPConfiguration struct {
 // tmpHTTPConfiguration is only used to custom the json/yaml marshalling/unmarshalling step.
 // It shouldn't be used for other purpose.
 type tmpHTTPConfiguration struct {
-	URL       string                       `json:"url" yaml:"url"`
-	Access    HTTPAccess                   `json:"access,omitempty" yaml:"access,omitempty"`
-	WhiteList []HTTPWhiteListConfiguration `json:"white_list" yaml:"white_list"`
-	Auth      *HTTPAuth                    `json:"auth,omitempty" yaml:"auth,omitempty"`
-	Headers   map[string]string            `yaml:"headers,omitempty"`
+	URL       string                `json:"url" yaml:"url"`
+	Access    HTTPAccess            `json:"access,omitempty" yaml:"access,omitempty"`
+	WhiteList []HTTPWhiteListConfig `json:"white_list" yaml:"white_list"`
+	Auth      *HTTPAuth             `json:"auth,omitempty" yaml:"auth,omitempty"`
+	Headers   map[string]string     `yaml:"headers,omitempty"`
 }
 
 func (h *HTTPConfiguration) MarshalJSON() ([]byte, error) {
