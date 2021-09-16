@@ -150,6 +150,17 @@ func (b *BasicAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+func (b *BasicAuth) GetPassword() (string, error) {
+	if len(b.PasswordFile) > 0 {
+		data, err := ioutil.ReadFile(b.PasswordFile)
+		if err != nil {
+			return "", err
+		}
+		return string(data), nil
+	}
+	return b.Password, nil
+}
+
 func (b *BasicAuth) validate() error {
 	if len(b.Username) == 0 || (len(b.Password) == 0 && len(b.PasswordFile) == 0) {
 		return fmt.Errorf("when using basic_auth, username and password/password_file cannot be empty")
