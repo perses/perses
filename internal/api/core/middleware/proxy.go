@@ -56,23 +56,18 @@ func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFu
 }
 
 func catchDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS globaldatasource.DAO) (v1.DatasourceSpec, string, error) {
-	req := c.Request()
-	requestPath := req.URL.Path
+	requestPath := c.Request().URL.Path
 	globalDatasourceMatch := globalProxyMatcher.MatchString(requestPath)
 	localDatasourceMatch := localProxyMatcher.MatchString(requestPath)
 	if !globalDatasourceMatch && !localDatasourceMatch {
 		// this is likely a request for the API itself
 		return nil, "", nil
 	}
-	var spec v1.DatasourceSpec
-	var err error
-	var path string
+
 	if globalDatasourceMatch {
-		spec, path, err = getGlobalDatasourceAndPath(globalDTS, requestPath)
-	} else {
-		spec, path, err = getLocalDatasourceAndPath(dts, requestPath)
+		return getGlobalDatasourceAndPath(globalDTS, requestPath)
 	}
-	return spec, path, err
+	return getLocalDatasourceAndPath(dts, requestPath)
 }
 
 func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
