@@ -46,7 +46,7 @@ func unmarshalDatasourceSpec(spec map[string]interface{}, staticMarshal func(int
 		case string(datasource.PrometheusKind):
 			result = &datasource.Prometheus{}
 		}
-		if err := staticUnmarshal(rawSpec, spec); err != nil {
+		if err := staticUnmarshal(rawSpec, result); err != nil {
 			return nil, err
 		}
 		return result, nil
