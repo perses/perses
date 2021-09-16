@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"regexp"
 
-	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 )
 
 var (
@@ -38,7 +38,7 @@ type Group struct {
 // 1. First calculate which variable depend of which other variable
 // 2. Then, thanks to the dependencies, we can create a dependency graph.
 // 3. Then we have to determinate the build order.
-func BuildOrder(variables map[string]*v1.DashboardVariable) ([]Group, error) {
+func BuildOrder(variables map[string]*dashboard.Variable) ([]Group, error) {
 	g, err := buildGraph(variables)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func BuildOrder(variables map[string]*v1.DashboardVariable) ([]Group, error) {
 	return g.buildOrder()
 }
 
-func buildGraph(variables map[string]*v1.DashboardVariable) (*graph, error) {
+func buildGraph(variables map[string]*dashboard.Variable) (*graph, error) {
 	deps, err := buildVariableDependencies(variables)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func buildGraph(variables map[string]*v1.DashboardVariable) (*graph, error) {
 	return newGraph(vars, deps), nil
 }
 
-func buildVariableDependencies(variables map[string]*v1.DashboardVariable) (map[string][]string, error) {
+func buildVariableDependencies(variables map[string]*dashboard.Variable) (map[string][]string, error) {
 	result := make(map[string][]string)
 	for name, variable := range variables {
 		if !variableRegexp.MatchString(name) {
@@ -66,13 +66,13 @@ func buildVariableDependencies(variables map[string]*v1.DashboardVariable) (map[
 		}
 		var matches [][]string
 		switch param := variable.Parameter.(type) {
-		case *v1.PromQLQueryVariableParameter:
+		case *dashboard.PromQLQueryVariableParameter:
 			matches = findAllVariableUsed(param.Expr)
-		case *v1.LabelNamesQueryVariableParameter:
+		case *dashboard.LabelNamesQueryVariableParameter:
 			for _, matcher := range param.Matchers {
 				matches = append(matches, findAllVariableUsed(matcher)...)
 			}
-		case *v1.LabelValuesQueryVariableParameter:
+		case *dashboard.LabelValuesQueryVariableParameter:
 			matches = findAllVariableUsed(param.LabelName)
 			for _, matcher := range param.Matchers {
 				matches = append(matches, findAllVariableUsed(matcher)...)

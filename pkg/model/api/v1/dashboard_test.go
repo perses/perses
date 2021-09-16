@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,13 +44,13 @@ func TestMarshalDashboard(t *testing.T) {
 					Datasource: "PrometheusDemo",
 					Duration:   model.Duration(6 * time.Hour),
 					Variables:  nil,
-					Panels: map[string]*DashboardPanel{
+					Panels: map[string]*dashboard.Panel{
 						"MyPanel": {
 							DisplayedName: "simple line chart",
-							Kind:          KindLineChart,
-							Chart: &LineChart{
+							Kind:          dashboard.KindLineChart,
+							Chart: &dashboard.LineChart{
 								ShowLegend: false,
-								Lines: []Line{
+								Lines: []dashboard.Line{
 									{
 										Expr: "up",
 									},
@@ -57,15 +58,15 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Entrypoint: &JSONRef{
+					Entrypoint: &dashboard.JSONRef{
 						Ref: "#/spec/layouts/main",
 					},
-					Layouts: map[string]*DashboardLayout{
+					Layouts: map[string]*dashboard.Layout{
 						"main": {
-							Kind: KindExpandLayout,
-							Parameter: ExpandLayoutParameter{
+							Kind: dashboard.KindExpandLayout,
+							Parameter: dashboard.ExpandLayoutParameter{
 								Open: false,
-								Children: []*JSONRef{
+								Children: []*dashboard.JSONRef{
 									{
 										Ref: "#/spec/panels/MyPanel",
 									},
@@ -132,36 +133,36 @@ func TestMarshalDashboard(t *testing.T) {
 				Spec: DashboardSpec{
 					Datasource: "PrometheusDemo",
 					Duration:   model.Duration(6 * time.Hour),
-					Variables: map[string]*DashboardVariable{
+					Variables: map[string]*dashboard.Variable{
 						"labelName": {
-							Kind: KindLabelNamesQueryVariable,
+							Kind: dashboard.KindLabelNamesQueryVariable,
 							Hide: true,
-							Parameter: &LabelNamesQueryVariableParameter{
+							Parameter: &dashboard.LabelNamesQueryVariableParameter{
 								Matchers: []string{
 									"up",
 								},
-								CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`(.*)`)),
+								CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
 							},
 						},
 						"labelValue": {
-							Kind: KindLabelValuesQueryVariable,
+							Kind: dashboard.KindLabelValuesQueryVariable,
 							Hide: true,
-							Parameter: &LabelValuesQueryVariableParameter{
+							Parameter: &dashboard.LabelValuesQueryVariableParameter{
 								LabelName: "$labelName",
 								Matchers: []string{
 									"up",
 								},
-								CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`(.*)`)),
+								CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
 							},
 						},
 					},
-					Panels: map[string]*DashboardPanel{
+					Panels: map[string]*dashboard.Panel{
 						"MyPanel": {
 							DisplayedName: "simple line chart",
-							Kind:          KindLineChart,
-							Chart: &LineChart{
+							Kind:          dashboard.KindLineChart,
+							Chart: &dashboard.LineChart{
 								ShowLegend: false,
-								Lines: []Line{
+								Lines: []dashboard.Line{
 									{
 										Expr: "up",
 									},
@@ -169,15 +170,15 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Entrypoint: &JSONRef{
+					Entrypoint: &dashboard.JSONRef{
 						Ref: "#/spec/layouts/main",
 					},
-					Layouts: map[string]*DashboardLayout{
+					Layouts: map[string]*dashboard.Layout{
 						"main": {
-							Kind: KindExpandLayout,
-							Parameter: ExpandLayoutParameter{
+							Kind: dashboard.KindExpandLayout,
+							Parameter: dashboard.ExpandLayoutParameter{
 								Open: false,
-								Children: []*JSONRef{
+								Children: []*dashboard.JSONRef{
 									{
 										Ref: "#/spec/panels/MyPanel",
 									},

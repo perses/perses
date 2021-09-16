@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1
+package dashboard
 
 import (
 	"encoding/json"
@@ -26,7 +26,7 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
-		result DashboardPanel
+		result Panel
 	}{
 		{
 			title: "line chart",
@@ -43,7 +43,7 @@ func TestUnmarshallJSONPanel(t *testing.T) {
   }
 }
 `,
-			result: DashboardPanel{
+			result: Panel{
 				DisplayedName: "simple line chart",
 				Kind:          KindLineChart,
 				Chart: &LineChart{
@@ -66,7 +66,7 @@ func TestUnmarshallJSONPanel(t *testing.T) {
   }
 }
 `,
-			result: DashboardPanel{
+			result: Panel{
 				DisplayedName: "simple gauge chart",
 				Kind:          KindGaugeChart,
 				Chart: &GaugeChart{
@@ -77,7 +77,7 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := DashboardPanel{}
+			result := Panel{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
 			assert.Equal(t, test.result, result)
 		})
@@ -88,7 +88,7 @@ func TestUnmarshallYAMLPanel(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
-		result DashboardPanel
+		result Panel
 	}{
 		{
 			title: "line chart",
@@ -99,7 +99,7 @@ chart:
   lines:
   - expr: "up{instance='localhost:8080'}"
 `,
-			result: DashboardPanel{
+			result: Panel{
 				DisplayedName: "simple line chart",
 				Kind:          KindLineChart,
 				Chart: &LineChart{
@@ -119,7 +119,7 @@ kind: "GaugeChart"
 chart:
   expr: "up"
 `,
-			result: DashboardPanel{
+			result: Panel{
 				DisplayedName: "simple gauge chart",
 				Kind:          KindGaugeChart,
 				Chart: &GaugeChart{
@@ -130,7 +130,7 @@ chart:
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := DashboardPanel{}
+			result := Panel{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
 		})
@@ -185,7 +185,7 @@ func TestUnmarshallPanelError(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := DashboardPanel{}
+			result := Panel{}
 			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
 		})
 	}

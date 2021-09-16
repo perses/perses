@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1
+package dashboard
 
 import (
 	"encoding/json"
@@ -27,7 +27,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
-		result *DashboardVariable
+		result *Variable
 	}{
 		{
 			title: "simple ConstantVariable",
@@ -42,7 +42,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   }
 }
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindConstantVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &ConstantVariableParameter{
@@ -63,7 +63,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   }
 }
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind: KindConstantVariable,
 				Hide: true,
 				Parameter: &ConstantVariableParameter{
@@ -82,7 +82,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   }
 }
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindLabelNamesQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
@@ -104,7 +104,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   }
 }
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindLabelNamesQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
@@ -128,7 +128,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   }
 }
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindLabelValuesQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &LabelValuesQueryVariableParameter{
@@ -151,7 +151,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
   }
 }
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindPromQLQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &PromQLQueryVariableParameter{
@@ -164,7 +164,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := &DashboardVariable{}
+			result := &Variable{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), result))
 			assert.Equal(t, test.result, result)
 		})
@@ -175,7 +175,7 @@ func TestUnmarshallYAMLVariable(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
-		result *DashboardVariable
+		result *Variable
 	}{
 		{
 			title: "simple ConstantVariable",
@@ -186,7 +186,7 @@ parameter:
   values:
   - "myVariable"
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindConstantVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &ConstantVariableParameter{
@@ -203,7 +203,7 @@ parameter:
   values:
   - "myVariable"
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind: KindConstantVariable,
 				Hide: true,
 				Parameter: &ConstantVariableParameter{
@@ -219,7 +219,7 @@ displayed_name: "my awesome variable"
 parameter:
   capturing_regexp: ".*"
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindLabelNamesQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
@@ -237,7 +237,7 @@ parameter:
   - "up"
   capturing_regexp: ".*"
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindLabelNamesQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &LabelNamesQueryVariableParameter{
@@ -257,7 +257,7 @@ parameter:
   - "up"
   capturing_regexp: ".*"
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindLabelValuesQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &LabelValuesQueryVariableParameter{
@@ -277,7 +277,7 @@ parameter:
   label_name: "instance"
   capturing_regexp: ".*"
 `,
-			result: &DashboardVariable{
+			result: &Variable{
 				Kind:          KindPromQLQueryVariable,
 				DisplayedName: "my awesome variable",
 				Parameter: &PromQLQueryVariableParameter{
@@ -290,7 +290,7 @@ parameter:
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := &DashboardVariable{}
+			result := &Variable{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), result))
 			assert.Equal(t, test.result, result)
 		})
@@ -413,7 +413,7 @@ func TestUnmarshallVariableError(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := &DashboardVariable{}
+			result := &Variable{}
 			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jsone), result))
 		})
 	}
