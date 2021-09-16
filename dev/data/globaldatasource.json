@@ -1,0 +1,28 @@
+[
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "PrometheusDemo"
+    },
+    "spec": {
+      "kind": "Prometheus",
+      "default": true,
+      "http": {
+        "url": "https://prometheus.demo.do.prometheus.io"
+      }
+    }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "PrometheusLocal"
+    },
+    "spec": {
+      "kind": "Prometheus",
+      "default": false,
+      "http": {
+        "url": "http://localhost:9090"
+      }
+    }
+  }
+]
