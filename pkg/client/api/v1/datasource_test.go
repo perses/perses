@@ -30,7 +30,7 @@ func TestCreateDatasource(t *testing.T) {
 	defer server.Close()
 	persesClient := createClient(t, server)
 
-	object, err := persesClient.Datasource().Create(entity)
+	object, err := persesClient.Datasource(entity.Metadata.Project).Create(entity)
 	assert.NoError(t, err)
 
 	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
@@ -47,7 +47,7 @@ func TestUpdateDatasource(t *testing.T) {
 
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	object, err := persesClient.Datasource().Update(entity)
+	object, err := persesClient.Datasource(entity.Metadata.Project).Update(entity)
 	assert.NoError(t, err)
 
 	// for the moment the only thing to test is that the dates are correctly updated
@@ -66,7 +66,7 @@ func TestGetDatasource(t *testing.T) {
 
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	object, err := persesClient.Datasource().Get(entity.Metadata.Name)
+	object, err := persesClient.Datasource(entity.Metadata.Project).Get(entity.Metadata.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, entity.Metadata.Name, object.Metadata.Name)
 	assert.Equal(t, entity.Spec, object.Spec)
@@ -83,7 +83,7 @@ func TestDeleteDatasource(t *testing.T) {
 
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	err := persesClient.Datasource().Delete(entity.Metadata.Name)
+	err := persesClient.Datasource(entity.Metadata.Project).Delete(entity.Metadata.Name)
 	assert.NoError(t, err)
 }
 
@@ -96,7 +96,7 @@ func TestListDatasource(t *testing.T) {
 
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	objects, err := persesClient.Datasource().List("")
+	objects, err := persesClient.Datasource(entity.Metadata.Project).List("")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(objects))
 	assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)

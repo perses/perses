@@ -44,7 +44,7 @@ func TestCreateDatasource(t *testing.T) {
 		Status(http.StatusOK)
 
 	// check the document exists in the db
-	_, err := persistenceManager.GetDatasource().Get(entity.Metadata.Name)
+	_, err := persistenceManager.GetDatasource().Get(entity.Metadata.Project, entity.Metadata.Name)
 	assert.NoError(t, err)
 	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
 }
@@ -119,7 +119,7 @@ func TestUpdateDatasource(t *testing.T) {
 	assert.True(t, result.Metadata.CreatedAt.UnixNano() < result.Metadata.UpdatedAt.UnixNano())
 
 	// check the document exists in the db
-	_, err = persistenceManager.GetDatasource().Get(entity.Metadata.Name)
+	_, err = persistenceManager.GetDatasource().Get(entity.Metadata.Project, entity.Metadata.Name)
 	assert.NoError(t, err)
 
 	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())

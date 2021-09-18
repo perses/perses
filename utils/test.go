@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
 )
 
 func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
@@ -52,7 +53,7 @@ func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.
 		}
 	case *v1.Datasource:
 		getFunc = func() (interface{}, error) {
-			return persistenceManager.GetDatasource().Get(entity.Metadata.Name)
+			return persistenceManager.GetDatasource().Get(entity.Metadata.Project, entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
 			return persistenceManager.GetDatasource().Update(entity)
@@ -102,15 +103,26 @@ func NewProject() *v1.Project {
 func NewDatasource(t *testing.T) *v1.Datasource {
 	promURL, err := url.Parse("https://prometheus.demo.do.prometheus.io")
 	if err != nil {
-
 		t.Fatal(err)
 	}
 	entity := &v1.Datasource{
 		Kind: v1.KindDatasource,
-		Metadata: v1.Metadata{
-			Name: "PrometheusDemo",
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: "PrometheusDemo",
+			},
+			Project: "perses",
 		},
-		Spec: v1.DatasourceSpec{URL: promURL},
+		Spec: &datasource.Prometheus{
+			BasicDatasource: datasource.BasicDatasource{
+				Kind:    datasource.PrometheusKind,
+				Default: false,
+			},
+			HTTP: datasource.HTTPConfiguration{
+				URL:    promURL,
+				Access: datasource.ServerHTTPAccess,
+			},
+		},
 	}
 	entity.Metadata.CreateNow()
 	return entity
