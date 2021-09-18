@@ -63,7 +63,7 @@ func TestUnmarshallJSONDatasource(t *testing.T) {
 							Host:   "prometheus.demo.do.prometheus.io",
 						},
 						Access: datasource.ServerHTTPAccess,
-						WhiteList: []datasource.HTTPWhiteListConfig{
+						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 							{
 								Endpoint: "/api/v1/labels",
 								Method:   http.MethodPost,
@@ -133,7 +133,7 @@ spec:
 							Host:   "prometheus.demo.do.prometheus.io",
 						},
 						Access: datasource.ServerHTTPAccess,
-						WhiteList: []datasource.HTTPWhiteListConfig{
+						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 							{
 								Endpoint: "/api/v1/labels",
 								Method:   http.MethodPost,

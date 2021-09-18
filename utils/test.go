@@ -122,7 +122,7 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 			HTTP: datasource.HTTPConfig{
 				URL:    promURL,
 				Access: datasource.ServerHTTPAccess,
-				WhiteList: []datasource.HTTPWhiteListConfig{
+				AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 					{
 						Endpoint: "/api/v1/labels",
 						Method:   http.MethodPost,

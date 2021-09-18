@@ -69,14 +69,14 @@ func (h *HTTPAccess) validate() error {
 	return nil
 }
 
-type HTTPWhiteListConfig struct {
+type HTTPAllowedEndpoint struct {
 	Endpoint string `json:"endpoint" yaml:"endpoint"`
 	Method   string `json:"method" yaml:"method"`
 }
 
-func (h *HTTPWhiteListConfig) UnmarshalJSON(data []byte) error {
-	var tmp HTTPWhiteListConfig
-	type plain HTTPWhiteListConfig
+func (h *HTTPAllowedEndpoint) UnmarshalJSON(data []byte) error {
+	var tmp HTTPAllowedEndpoint
+	type plain HTTPAllowedEndpoint
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -87,9 +87,9 @@ func (h *HTTPWhiteListConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (h *HTTPWhiteListConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp HTTPWhiteListConfig
-	type plain HTTPWhiteListConfig
+func (h *HTTPAllowedEndpoint) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp HTTPAllowedEndpoint
+	type plain HTTPAllowedEndpoint
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (h *HTTPWhiteListConfig) UnmarshalYAML(unmarshal func(interface{}) error) e
 	return nil
 }
 
-func (h *HTTPWhiteListConfig) validate() error {
+func (h *HTTPAllowedEndpoint) validate() error {
 	if len(h.Method) == 0 {
 		return fmt.Errorf("HTTP method cannot be empty")
 	}
@@ -224,9 +224,9 @@ type HTTPConfig struct {
 	// The way the UI will contact the datasource. Or through the Backend or directly.
 	// By default, Access is set with the value 'server'
 	Access HTTPAccess `json:"access,omitempty" yaml:"access,omitempty"`
-	// WhiteList is a list of tuple of http method and http endpoint that will be accessible.
+	// AllowedEndpoints is a list of tuple of http method and http endpoint that will be accessible.
 	// These parameters are only used when access is set to 'server'
-	WhiteList []HTTPWhiteListConfig `json:"white_list" yaml:"white_list"`
+	AllowedEndpoints []HTTPAllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
 	// Auth is holding any security configuration for the http configuration.
 	// When defined, it's impossible to set the value of Access with 'browser'
 	Auth *HTTPAuth `json:"auth,omitempty" yaml:"auth,omitempty"`
@@ -238,11 +238,11 @@ type HTTPConfig struct {
 // tmpHTTPConfig is only used to custom the json/yaml marshalling/unmarshalling step.
 // It shouldn't be used for other purpose.
 type tmpHTTPConfig struct {
-	URL       string                `json:"url" yaml:"url"`
-	Access    HTTPAccess            `json:"access,omitempty" yaml:"access,omitempty"`
-	WhiteList []HTTPWhiteListConfig `json:"white_list" yaml:"white_list"`
-	Auth      *HTTPAuth             `json:"auth,omitempty" yaml:"auth,omitempty"`
-	Headers   map[string]string     `yaml:"headers,omitempty"`
+	URL              string                `json:"url" yaml:"url"`
+	Access           HTTPAccess            `json:"access,omitempty" yaml:"access,omitempty"`
+	AllowedEndpoints []HTTPAllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
+	Auth             *HTTPAuth             `json:"auth,omitempty" yaml:"auth,omitempty"`
+	Headers          map[string]string     `yaml:"headers,omitempty"`
 }
 
 func (h *HTTPConfig) MarshalJSON() ([]byte, error) {
@@ -251,11 +251,11 @@ func (h *HTTPConfig) MarshalJSON() ([]byte, error) {
 		urlAsString = h.URL.String()
 	}
 	tmp := &tmpHTTPConfig{
-		URL:       urlAsString,
-		Access:    h.Access,
-		WhiteList: h.WhiteList,
-		Auth:      h.Auth,
-		Headers:   h.Headers,
+		URL:              urlAsString,
+		Access:           h.Access,
+		AllowedEndpoints: h.AllowedEndpoints,
+		Auth:             h.Auth,
+		Headers:          h.Headers,
 	}
 	return json.Marshal(tmp)
 }
@@ -266,11 +266,11 @@ func (h *HTTPConfig) MarshalYAML() (interface{}, error) {
 		urlAsString = h.URL.String()
 	}
 	tmp := &tmpHTTPConfig{
-		URL:       urlAsString,
-		Access:    h.Access,
-		WhiteList: h.WhiteList,
-		Auth:      h.Auth,
-		Headers:   h.Headers,
+		URL:              urlAsString,
+		Access:           h.Access,
+		AllowedEndpoints: h.AllowedEndpoints,
+		Auth:             h.Auth,
+		Headers:          h.Headers,
 	}
 	return tmp, nil
 }
@@ -310,7 +310,7 @@ func (h *HTTPConfig) validate(conf tmpHTTPConfig) error {
 		if conf.Auth != nil {
 			return fmt.Errorf("datasource cannot be used directly from the UI when 'http.auth' is configured. Set access value with 'server' instead")
 		}
-		if len(conf.WhiteList) > 0 {
+		if len(conf.AllowedEndpoints) > 0 {
 			return fmt.Errorf("http.whitelist cannot be set when 'http.access' is set with the value 'browser'")
 		}
 		if len(conf.Headers) > 0 {
@@ -320,6 +320,6 @@ func (h *HTTPConfig) validate(conf tmpHTTPConfig) error {
 	h.Access = conf.Access
 	h.Auth = conf.Auth
 	h.Headers = conf.Headers
-	h.WhiteList = conf.WhiteList
+	h.AllowedEndpoints = conf.AllowedEndpoints
 	return nil
 }

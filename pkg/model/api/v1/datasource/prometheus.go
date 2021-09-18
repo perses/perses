@@ -18,7 +18,7 @@ import (
 	"net/http"
 )
 
-var defaultPrometheusWhiteList = []HTTPWhiteListConfig{
+var defaultPrometheusAllowedEndpoints = []HTTPAllowedEndpoint{
 	{
 		Endpoint: "/api/v1/labels",
 		Method:   http.MethodPost,
@@ -77,8 +77,8 @@ func (p *Prometheus) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (p *Prometheus) validate() error {
-	if p.HTTP.Access == ServerHTTPAccess && len(p.HTTP.WhiteList) == 0 {
-		p.HTTP.WhiteList = defaultPrometheusWhiteList
+	if p.HTTP.Access == ServerHTTPAccess && len(p.HTTP.AllowedEndpoints) == 0 {
+		p.HTTP.AllowedEndpoints = defaultPrometheusAllowedEndpoints
 	}
 	return nil
 }
