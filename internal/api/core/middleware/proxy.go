@@ -135,7 +135,7 @@ func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
 }
 
 type httpProxy struct {
-	config datasourcev1.HTTPConfiguration
+	config datasourcev1.HTTPConfig
 	path   string
 }
 

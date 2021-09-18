@@ -184,7 +184,8 @@ type HTTPAuth struct {
 
 func (b *HTTPAuth) UnmarshalJSON(data []byte) error {
 	var tmp HTTPAuth
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	type plain HTTPAuth
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {
@@ -196,7 +197,8 @@ func (b *HTTPAuth) UnmarshalJSON(data []byte) error {
 
 func (b *HTTPAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var tmp HTTPAuth
-	if err := unmarshal(&tmp); err != nil {
+	type plain HTTPAuth
+	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {
@@ -216,7 +218,7 @@ func (b *HTTPAuth) validate() error {
 	return nil
 }
 
-type HTTPConfiguration struct {
+type HTTPConfig struct {
 	// URL is the url required to contact the datasource
 	URL *url.URL `json:"url" yaml:"url"`
 	// The way the UI will contact the datasource. Or through the Backend or directly.
@@ -233,9 +235,9 @@ type HTTPConfiguration struct {
 	Headers map[string]string `yaml:"headers,omitempty"`
 }
 
-// tmpHTTPConfiguration is only used to custom the json/yaml marshalling/unmarshalling step.
+// tmpHTTPConfig is only used to custom the json/yaml marshalling/unmarshalling step.
 // It shouldn't be used for other purpose.
-type tmpHTTPConfiguration struct {
+type tmpHTTPConfig struct {
 	URL       string                `json:"url" yaml:"url"`
 	Access    HTTPAccess            `json:"access,omitempty" yaml:"access,omitempty"`
 	WhiteList []HTTPWhiteListConfig `json:"white_list" yaml:"white_list"`
@@ -243,12 +245,12 @@ type tmpHTTPConfiguration struct {
 	Headers   map[string]string     `yaml:"headers,omitempty"`
 }
 
-func (h *HTTPConfiguration) MarshalJSON() ([]byte, error) {
+func (h *HTTPConfig) MarshalJSON() ([]byte, error) {
 	urlAsString := ""
 	if h.URL != nil {
 		urlAsString = h.URL.String()
 	}
-	tmp := &tmpHTTPConfiguration{
+	tmp := &tmpHTTPConfig{
 		URL:       urlAsString,
 		Access:    h.Access,
 		WhiteList: h.WhiteList,
@@ -258,12 +260,12 @@ func (h *HTTPConfiguration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(tmp)
 }
 
-func (h *HTTPConfiguration) MarshalYAML() (interface{}, error) {
+func (h *HTTPConfig) MarshalYAML() (interface{}, error) {
 	urlAsString := ""
 	if h.URL != nil {
 		urlAsString = h.URL.String()
 	}
-	tmp := &tmpHTTPConfiguration{
+	tmp := &tmpHTTPConfig{
 		URL:       urlAsString,
 		Access:    h.Access,
 		WhiteList: h.WhiteList,
@@ -273,8 +275,8 @@ func (h *HTTPConfiguration) MarshalYAML() (interface{}, error) {
 	return tmp, nil
 }
 
-func (h *HTTPConfiguration) UnmarshalJSON(data []byte) error {
-	var tmp tmpHTTPConfiguration
+func (h *HTTPConfig) UnmarshalJSON(data []byte) error {
+	var tmp tmpHTTPConfig
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
@@ -284,8 +286,8 @@ func (h *HTTPConfiguration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (h *HTTPConfiguration) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp tmpHTTPConfiguration
+func (h *HTTPConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp tmpHTTPConfig
 	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
@@ -295,7 +297,7 @@ func (h *HTTPConfiguration) UnmarshalYAML(unmarshal func(interface{}) error) err
 	return nil
 }
 
-func (h *HTTPConfiguration) validate(conf tmpHTTPConfiguration) error {
+func (h *HTTPConfig) validate(conf tmpHTTPConfig) error {
 	if u, err := url.Parse(conf.URL); err != nil {
 		return err
 	} else {
@@ -315,5 +317,9 @@ func (h *HTTPConfiguration) validate(conf tmpHTTPConfiguration) error {
 			return fmt.Errorf("http.headers cannot be set when 'http.access' is set with the value 'browser'")
 		}
 	}
+	h.Access = conf.Access
+	h.Auth = conf.Auth
+	h.Headers = conf.Headers
+	h.WhiteList = conf.WhiteList
 	return nil
 }

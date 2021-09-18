@@ -43,7 +43,7 @@ var defaultPrometheusWhiteList = []HTTPWhiteListConfig{
 
 type Prometheus struct {
 	BasicDatasource `json:",inline" yaml:",inline"`
-	HTTP            HTTPConfiguration `json:"http" yaml:"http"`
+	HTTP            HTTPConfig `json:"http" yaml:"http"`
 }
 
 func (p *Prometheus) GetKind() Kind {

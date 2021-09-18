@@ -17,6 +17,7 @@
 package utils
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
@@ -118,9 +119,31 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 				Kind:    datasource.PrometheusKind,
 				Default: false,
 			},
-			HTTP: datasource.HTTPConfiguration{
+			HTTP: datasource.HTTPConfig{
 				URL:    promURL,
 				Access: datasource.ServerHTTPAccess,
+				WhiteList: []datasource.HTTPWhiteListConfig{
+					{
+						Endpoint: "/api/v1/labels",
+						Method:   http.MethodPost,
+					},
+					{
+						Endpoint: "/api/v1/series",
+						Method:   http.MethodPost,
+					},
+					{
+						Endpoint: "/api/v1/metadata",
+						Method:   http.MethodGet,
+					},
+					{
+						Endpoint: "/api/v1/query",
+						Method:   http.MethodPost,
+					},
+					{
+						Endpoint: "/api/v1/query_range",
+						Method:   http.MethodPost,
+					},
+				},
 			},
 		},
 	}

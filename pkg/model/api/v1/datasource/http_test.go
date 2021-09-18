@@ -15,6 +15,7 @@ package datasource
 
 import (
 	"encoding/json"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,7 @@ func TestUnmarshallJSONBasicAuth(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLLayout(t *testing.T) {
+func TestUnmarshallYAMLBasicAuth(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -95,6 +96,169 @@ password_file: "./test/password_file.txt"
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			result := BasicAuth{}
+			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
+			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestUnmarshallJSONHTTPAuth(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		jason  string
+		result HTTPAuth
+	}{
+		{
+			title: "Bearer Token",
+			jason: `
+{
+  "bearer_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+}
+`,
+			result: HTTPAuth{
+				BearerToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+			},
+		},
+		{
+			title: "Basic Auth",
+			jason: `
+{
+  "basic_auth": {
+    "username": "john",
+    "password": "doe"
+  }
+}
+`,
+			result: HTTPAuth{
+				BasicAuth: &BasicAuth{
+					Username: "john",
+					Password: "doe",
+				},
+			},
+		},
+		{
+			title: "ca cert",
+			jason: `
+{
+  "ca_cert": "certificate"
+}
+`,
+			result: HTTPAuth{
+				CaCert: "certificate",
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := HTTPAuth{}
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
+			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestUnmarshallYAMLHTTPAuth(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		yamele string
+		result HTTPAuth
+	}{
+		{
+			title: "Bearer Token",
+			yamele: `
+bearer_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+`,
+			result: HTTPAuth{
+				BearerToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+			},
+		},
+		{
+			title: "Basic Auth",
+			yamele: `
+basic_auth:
+  username: "john"
+  password: "doe"
+`,
+			result: HTTPAuth{
+				BasicAuth: &BasicAuth{
+					Username: "john",
+					Password: "doe",
+				},
+			},
+		},
+		{
+			title: "ca cert",
+			yamele: `
+ca_cert: "certificate"
+`,
+			result: HTTPAuth{
+				CaCert: "certificate",
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := HTTPAuth{}
+			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
+			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestUnmarshallJSONHTTPConfig(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		jason  string
+		result HTTPConfig
+	}{
+		{
+			title: "basic config",
+			jason: `
+{
+  "url": "http://localhost:9090"
+}
+`,
+			result: HTTPConfig{
+				URL: &url.URL{
+					Scheme: "http",
+					Host:   "localhost:9090",
+				},
+				Access: ServerHTTPAccess,
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := HTTPConfig{}
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
+			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestUnmarshallYAMLHTTPConfig(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		yamele string
+		result HTTPConfig
+	}{
+		{
+			title: "basic config",
+			yamele: `
+url: "http://localhost:9090"
+`,
+			result: HTTPConfig{
+				URL: &url.URL{
+					Scheme: "http",
+					Host:   "localhost:9090",
+				},
+				Access: ServerHTTPAccess,
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := HTTPConfig{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
 		})

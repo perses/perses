@@ -15,6 +15,7 @@ package v1
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/url"
 	"testing"
 
@@ -56,10 +57,33 @@ func TestUnmarshallJSONDatasource(t *testing.T) {
 						Kind:    datasource.PrometheusKind,
 						Default: true,
 					},
-					HTTP: datasource.HTTPConfiguration{
+					HTTP: datasource.HTTPConfig{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "prometheus.demo.do.prometheus.io",
+						},
+						Access: datasource.ServerHTTPAccess,
+						WhiteList: []datasource.HTTPWhiteListConfig{
+							{
+								Endpoint: "/api/v1/labels",
+								Method:   http.MethodPost,
+							},
+							{
+								Endpoint: "/api/v1/series",
+								Method:   http.MethodPost,
+							},
+							{
+								Endpoint: "/api/v1/metadata",
+								Method:   http.MethodGet,
+							},
+							{
+								Endpoint: "/api/v1/query",
+								Method:   http.MethodPost,
+							},
+							{
+								Endpoint: "/api/v1/query_range",
+								Method:   http.MethodPost,
+							},
 						},
 					},
 				},
@@ -103,10 +127,33 @@ spec:
 						Kind:    datasource.PrometheusKind,
 						Default: true,
 					},
-					HTTP: datasource.HTTPConfiguration{
+					HTTP: datasource.HTTPConfig{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "prometheus.demo.do.prometheus.io",
+						},
+						Access: datasource.ServerHTTPAccess,
+						WhiteList: []datasource.HTTPWhiteListConfig{
+							{
+								Endpoint: "/api/v1/labels",
+								Method:   http.MethodPost,
+							},
+							{
+								Endpoint: "/api/v1/series",
+								Method:   http.MethodPost,
+							},
+							{
+								Endpoint: "/api/v1/metadata",
+								Method:   http.MethodGet,
+							},
+							{
+								Endpoint: "/api/v1/query",
+								Method:   http.MethodPost,
+							},
+							{
+								Endpoint: "/api/v1/query_range",
+								Method:   http.MethodPost,
+							},
 						},
 					},
 				},
