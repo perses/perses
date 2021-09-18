@@ -39,7 +39,7 @@ var (
 func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			spec, path, err := catchDatasourceAndPath(c, dts, globalDTS)
+			spec, path, err := extractDatasourceAndPath(c, dts, globalDTS)
 			if err != nil {
 				return err
 			}
@@ -55,7 +55,7 @@ func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFu
 	}
 }
 
-func catchDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS globaldatasource.DAO) (v1.DatasourceSpec, string, error) {
+func extractDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS globaldatasource.DAO) (v1.DatasourceSpec, string, error) {
 	requestPath := c.Request().URL.Path
 	globalDatasourceMatch := globalProxyMatcher.MatchString(requestPath)
 	localDatasourceMatch := localProxyMatcher.MatchString(requestPath)
@@ -159,7 +159,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 		logrus.Errorf(proxyErr.Error())
 		proxyErr = err
 	}
-	// use a dedicated HTTP transport to avoid any TSL encrypt issue
+	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	reverseProxy.Transport = h.prepareTransport()
 	// Reverse proxy request.
 	reverseProxy.ServeHTTP(res, req)
@@ -184,6 +184,7 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 	}
 	// set header according to the configuration
 	if len(h.config.Headers) > 0 {
+		// TODO list the headers that cannot be overridden.
 		for k, v := range h.config.Headers {
 			req.Header.Set(k, v)
 		}
@@ -196,7 +197,7 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 		if authConfig.BasicAuth != nil {
 			password, err := authConfig.BasicAuth.GetPassword()
 			if err != nil {
-				logrus.WithError(err).Error("unable to get access to the password for the basic auth")
+				logrus.WithError(err).Error("unable to retrieve the password for the basic auth")
 				return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 			}
 			req.SetBasicAuth(authConfig.BasicAuth.Username, password)

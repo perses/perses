@@ -21,16 +21,16 @@ import (
 
 type Query struct {
 	etcd.Query
-	// Name is a prefix of the Datasource.metadata.name that is used to filter the list of the Datasource.
-	// Name can be empty in case you want to return the full list of Datasource available.
-	Name string `query:"name"`
+	// NamePrefix is a prefix of the Datasource.metadata.name that is used to filter the list of the Datasource.
+	// NamePrefix can be empty in case you want to return the full list of Datasource available.
+	NamePrefix string `query:"name"`
 	// Project is the exact name of the project.
-	// The value can come or from the path of the URL or from the query parameter
+	// The value can come from the path of the URL or from the query parameter
 	Project string `path:"project" query:"project"`
 }
 
 func (q *Query) Build() (string, error) {
-	return v1.GenerateDatasourceID(q.Project, q.Name), nil
+	return v1.GenerateDatasourceID(q.Project, q.NamePrefix), nil
 }
 
 type DAO interface {

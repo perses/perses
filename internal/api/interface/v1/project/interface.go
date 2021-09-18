@@ -21,13 +21,13 @@ import (
 
 type Query struct {
 	etcd.Query
-	// Name is a prefix of the project.metadata.name that is used to filter the list of the project.
-	// Name can be empty in case you want to return the full list of project available.
-	Name string `query:"name"`
+	// NamePrefix is a prefix of the project.metadata.name that is used to filter the list of the project.
+	// NamePrefix can be empty in case you want to return the full list of project available.
+	NamePrefix string `query:"name"`
 }
 
 func (q *Query) Build() (string, error) {
-	return v1.GenerateProjectID(q.Name), nil
+	return v1.GenerateProjectID(q.NamePrefix), nil
 }
 
 type DAO interface {

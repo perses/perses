@@ -21,13 +21,13 @@ import (
 
 type Query struct {
 	etcd.Query
-	// Name is a prefix of the GlobalDatasource.metadata.name that is used to filter the list of the GlobalDatasource.
-	// Name can be empty in case you want to return the full list of GlobalDatasource available.
-	Name string `query:"name"`
+	// NamePrefix is a prefix of the GlobalDatasource.metadata.name that is used to filter the list of the GlobalDatasource.
+	// NamePrefix can be empty in case you want to return the full list of GlobalDatasource available.
+	NamePrefix string `query:"name"`
 }
 
 func (q *Query) Build() (string, error) {
-	return v1.GenerateGlobalDatasourceID(q.Name), nil
+	return v1.GenerateGlobalDatasourceID(q.NamePrefix), nil
 }
 
 type DAO interface {
