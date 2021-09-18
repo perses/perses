@@ -99,7 +99,7 @@ func TestUpdateDatasource(t *testing.T) {
 
 	// call now the update endpoint, shouldn't return an error
 
-	o := e.PUT(fmt.Sprintf("/%s/%s/%s/%s", shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
+	o := e.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusOK).
@@ -135,7 +135,7 @@ func TestUpdateDatasourceNotFound(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.PUT(fmt.Sprintf("/%s/%s/%s/%s", shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
+	e.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusNotFound)
@@ -151,7 +151,7 @@ func TestUpdateDatasourceBadRequest(t *testing.T) {
 	})
 
 	// the name in the metadata and the name in the path doesn't match, it should return a bad request
-	e.PUT(fmt.Sprintf("/%s/%s/%s/otherProject", shared.PathProject, entity.Metadata.Project, shared.PathDatasource)).
+	e.PUT(fmt.Sprintf("%s/%s/%s/%s/otherProject", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDatasource)).
 		WithJSON(entity).
 		Expect().
 		Status(http.StatusBadRequest)
@@ -167,7 +167,7 @@ func TestGetDatasource(t *testing.T) {
 	})
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	e.GET(fmt.Sprintf("/%s/%s/%s/%s", shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
+	e.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusOK)
 
@@ -182,7 +182,7 @@ func TestGetDatasourceNotFound(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.GET(fmt.Sprintf("/%s/perses/%s/otherProject", shared.PathProject, shared.PathDatasource)).
+	e.GET(fmt.Sprintf("%s/%s/perses/%s/otherProject", shared.APIV1Prefix, shared.PathProject, shared.PathDatasource)).
 		Expect().
 		Status(http.StatusNotFound)
 }
@@ -197,11 +197,11 @@ func TestDeleteDatasource(t *testing.T) {
 	})
 	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
 
-	e.DELETE(fmt.Sprintf("/%s/%s/%s/%s", shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
+	e.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusNoContent)
 
-	e.GET(fmt.Sprintf("/%s/%s/%s/%s", shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
+	e.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDatasource, entity.Metadata.Name)).
 		Expect().
 		Status(http.StatusNotFound)
 }
@@ -214,7 +214,7 @@ func TestDeleteDatasourceNotFound(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.DELETE(fmt.Sprintf("/%s/perses/%s/otherProject", shared.PathProject, shared.PathDatasource)).
+	e.DELETE(fmt.Sprintf("%s/%s/perses/%s/otherProject", shared.APIV1Prefix, shared.PathProject, shared.PathDatasource)).
 		Expect().
 		Status(http.StatusNotFound)
 }
@@ -232,7 +232,7 @@ func TestListDatasource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	e.GET(fmt.Sprintf("/%s/%s/%s", shared.PathProject, entity.Metadata.Project, shared.PathDatasource)).
+	e.GET(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDatasource)).
 		Expect().
 		Status(http.StatusOK)
 	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
