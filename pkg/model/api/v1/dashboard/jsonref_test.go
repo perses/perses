@@ -22,7 +22,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func TestUnmarshallJSONRef(t *testing.T) {
+func TestUnmarshalJSONRef(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -73,7 +73,7 @@ func TestUnmarshallJSONRef(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLJSONRef(t *testing.T) {
+func TestUnmarshalYAMLJSONRef(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -120,7 +120,7 @@ $ref: "#/my/incredible/super/long/path"
 	}
 }
 
-func TestUnmarshallJSONRefError(t *testing.T) {
+func TestUnmarshalJSONRefError(t *testing.T) {
 	testSuite := []struct {
 		title string
 		jsone string

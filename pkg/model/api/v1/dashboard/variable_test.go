@@ -23,7 +23,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func TestUnmarshallJSONVariable(t *testing.T) {
+func TestUnmarshalJSONVariable(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -171,7 +171,7 @@ func TestUnmarshallJSONVariable(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLVariable(t *testing.T) {
+func TestUnmarshalYAMLVariable(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -297,7 +297,7 @@ parameter:
 	}
 }
 
-func TestUnmarshallVariableError(t *testing.T) {
+func TestUnmarshalVariableError(t *testing.T) {
 	testSuite := []struct {
 		title string
 		jsone string

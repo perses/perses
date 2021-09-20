@@ -22,7 +22,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func TestUnmarshallJSONBasicAuth(t *testing.T) {
+func TestUnmarshalJSONBasicAuth(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -64,7 +64,7 @@ func TestUnmarshallJSONBasicAuth(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLBasicAuth(t *testing.T) {
+func TestUnmarshalYAMLBasicAuth(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -102,7 +102,7 @@ password_file: "./test/password_file.txt"
 	}
 }
 
-func TestUnmarshallJSONHTTPAuth(t *testing.T) {
+func TestUnmarshalJSONHTTPAuth(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -157,7 +157,7 @@ func TestUnmarshallJSONHTTPAuth(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLHTTPAuth(t *testing.T) {
+func TestUnmarshalYAMLHTTPAuth(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -205,7 +205,7 @@ ca_cert: "certificate"
 	}
 }
 
-func TestUnmarshallJSONHTTPConfig(t *testing.T) {
+func TestUnmarshalJSONHTTPConfig(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -236,7 +236,7 @@ func TestUnmarshallJSONHTTPConfig(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLHTTPConfig(t *testing.T) {
+func TestUnmarshalYAMLHTTPConfig(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string

@@ -21,7 +21,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func TestUnmarshallJSONLayout(t *testing.T) {
+func TestUnmarshalJSONLayout(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -132,7 +132,7 @@ func TestUnmarshallJSONLayout(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLLayout(t *testing.T) {
+func TestUnmarshalYAMLLayout(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
