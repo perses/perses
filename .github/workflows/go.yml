@@ -5,6 +5,20 @@ on:
       - master
   pull_request:
 jobs:
+  checklicense:
+    name: "check license headers"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
+      - name: install google/addlicense
+        run: go get -u github.com/google/addlicense
+      - name: check license headers
+        run: make checklicense
   gofmt:
     name: "check code format"
     runs-on: ubuntu-latest
