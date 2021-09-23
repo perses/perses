@@ -29,7 +29,7 @@ checkformat:
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"
-	addlicense -check -ignore "ui/node_modules/**" *.js *.ts *.go
+	./check_license.sh --check *.js *.ts *.go
 
 .PHONY: fixlicense
 fixlicense:
