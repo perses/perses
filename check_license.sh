@@ -34,7 +34,7 @@ function buildPatternList() {
   echo "${result}"
 }
 
-function findFileWithMissingLicense(){
+function findFilesWithMissingLicense(){
   local patterns=("$@")
   buildPattern=$(buildPatternList "${patterns[@]}")
   buildExcludeDir=$(buildExcludeDirectories)
@@ -56,7 +56,6 @@ function add() {
   do
     echo -e "${license_header}\n\n$(cat "${file}")" > "${file}"
   done
-
 }
 
 if [[ "$1" == "--check" ]]; then

@@ -33,7 +33,7 @@ checklicense:
 
 .PHONY: fixlicense
 fixlicense:
-	@echo ">> adding license header where it is missed"
+	@echo ">> adding license header where it's missing"
 	./check_license.sh --add *.js *.ts *.go
 
 fmt:
