@@ -33,7 +33,8 @@ checklicense:
 
 .PHONY: fixlicense
 fixlicense:
-	addlicense -ignore "ui/node_modules/**" -c "The Perses Authors" -l "apache" *.js *.ts *.go
+	@echo ">> adding license header where it is missed"
+	./check_license.sh --add *.js *.ts *.go
 
 fmt:
 	@echo ">> format code"
