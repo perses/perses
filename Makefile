@@ -26,6 +26,16 @@ checkformat:
 	@echo ">> checking code format"
 	! $(GOFMT) -d $$(find . -name '*.go' -print) | grep '^' ;\
 
+.PHONY: checklicense
+checklicense:
+	@echo ">> checking license"
+	./check_license.sh --check *.js *.ts *.go
+
+.PHONY: fixlicense
+fixlicense:
+	@echo ">> adding license header where it's missing"
+	./check_license.sh --add *.js *.ts *.go
+
 fmt:
 	@echo ">> format code"
 	$(GO) fmt ./...

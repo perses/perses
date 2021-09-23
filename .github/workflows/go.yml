@@ -5,6 +5,14 @@ on:
       - master
   pull_request:
 jobs:
+  checklicense:
+    name: "check license headers"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: check license headers
+        run: make checklicense
   gofmt:
     name: "check code format"
     runs-on: ubuntu-latest
