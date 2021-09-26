@@ -54,7 +54,7 @@ function check() {
 }
 
 function add() {
-  findFileWithMissingLicense "$@" | sed 's/..$//'| while read -d $'\n' file
+  findFilesWithMissingLicense "$@" | sed 's/..$//'| while read -d $'\n' file
   do
     echo -e "${license_header}\n\n$(cat "${file}")" > "${file}"
   done
