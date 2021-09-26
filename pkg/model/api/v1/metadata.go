@@ -35,6 +35,6 @@ func (m *Metadata) CreateNow() {
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
 type ProjectMetadata struct {
-	Metadata `json:",inline" yaml:";,inline"`
+	Metadata `json:",inline" yaml:",inline"`
 	Project  string `json:"project" yaml:"project"`
 }

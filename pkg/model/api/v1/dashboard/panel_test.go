@@ -22,7 +22,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func TestUnmarshallJSONPanel(t *testing.T) {
+func TestUnmarshalJSONPanel(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -84,7 +84,7 @@ func TestUnmarshallJSONPanel(t *testing.T) {
 	}
 }
 
-func TestUnmarshallYAMLPanel(t *testing.T) {
+func TestUnmarshalYAMLPanel(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -137,7 +137,7 @@ chart:
 	}
 }
 
-func TestUnmarshallPanelError(t *testing.T) {
+func TestUnmarshalPanelError(t *testing.T) {
 	testSuite := []struct {
 		title string
 		jason string

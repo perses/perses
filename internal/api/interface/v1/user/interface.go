@@ -21,13 +21,13 @@ import (
 
 type Query struct {
 	etcd.Query
-	// Name is a prefix of the User.metadata.name that is used to filter the list of the User.
-	// Name can be empty in case you want to return the full list of User available.
-	Name string `query:"name"`
+	// NamePrefix is a prefix of the User.metadata.name that is used to filter the list of the User.
+	// NamePrefix can be empty in case you want to return the full list of User available.
+	NamePrefix string `query:"name"`
 }
 
 func (q *Query) Build() (string, error) {
-	return v1.GenerateUserID(q.Name), nil
+	return v1.GenerateUserID(q.NamePrefix), nil
 }
 
 type DAO interface {

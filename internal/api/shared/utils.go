@@ -21,14 +21,14 @@ import (
 )
 
 const (
-	ParamName          = "name"
-	ParamProject       = "project"
-	APIV1Prefix        = "/api/v1"
-	PathDashboard      = "dashboards"
-	PathDatasource     = "datasources"
-	PathProject        = "projects"
-	PathPrometheusRule = "prometheusrules"
-	PathUser           = "users"
+	ParamName            = "name"
+	ParamProject         = "project"
+	APIV1Prefix          = "/api/v1"
+	PathDashboard        = "dashboards"
+	PathDatasource       = "datasources"
+	PathGlobalDatasource = "globaldatasources"
+	PathProject          = "projects"
+	PathUser             = "users"
 )
 
 func getNameParameter(ctx echo.Context) string {

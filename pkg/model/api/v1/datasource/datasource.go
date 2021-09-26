@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1
+package datasource
 
 import (
 	"encoding/json"
@@ -20,20 +20,10 @@ import (
 
 type Kind string
 
-const (
-	KindDashboard        Kind = "Dashboard"
-	KindDatasource       Kind = "Datasource"
-	KindGlobalDatasource Kind = "GlobalDatasource"
-	KindProject          Kind = "Project"
-	KindUser             Kind = "User"
-)
+const PrometheusKind Kind = "Prometheus"
 
-var KindMap = map[Kind]bool{
-	KindDashboard:        true,
-	KindDatasource:       true,
-	KindGlobalDatasource: true,
-	KindProject:          true,
-	KindUser:             true,
+var kindMap = map[Kind]bool{
+	PrometheusKind: true,
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {
@@ -64,10 +54,15 @@ func (k *Kind) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (k *Kind) validate() error {
 	if len(*k) == 0 {
-		return fmt.Errorf("kind cannot be empty")
+		return fmt.Errorf("spec.kind cannot be empty")
 	}
-	if _, ok := KindMap[*k]; !ok {
-		return fmt.Errorf("unknown kind '%s' used", *k)
+	if _, ok := kindMap[*k]; !ok {
+		return fmt.Errorf("unknown spec.kind '%s' used", *k)
 	}
 	return nil
+}
+
+type BasicDatasource struct {
+	Kind    Kind `json:"kind" yaml:"kind"`
+	Default bool `json:"default" yaml:"default"`
 }

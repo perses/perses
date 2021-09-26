@@ -142,18 +142,18 @@ import (
 
 type Query struct {
 	etcd.Query
-	// Name is a prefix of the {{ $kind }}.metadata.name that is used to filter the list of the {{ $kind }}.
-	// Name can be empty in case you want to return the full list of {{ $kind }} available.
-	Name string {{ tag "query:\"name\"" }}
+	// NamePrefix is a prefix of the {{ $kind }}.metadata.name that is used to filter the list of the {{ $kind }}.
+	// NamePrefix can be empty in case you want to return the full list of {{ $kind }} available.
+	NamePrefix string {{ tag "query:\"name\"" }}
 {{ if $endpoint.IsProjectResource -}}
 	// Project is the exact name of the project. 
-	// The value can come or from the path of the URL or from the query parameter
+	// The value can come from the path of the URL or from the query parameter
 	Project string {{ tag "path:\"project\" query:\"project\"" }}
 {{ end }}
 }
 
 func (q *Query) Build() (string, error) {
-	return v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}q.Project,{{- end -}}q.Name), nil
+	return v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}q.Project,{{- end -}}q.NamePrefix), nil
 }
 
 type DAO interface {
@@ -206,7 +206,6 @@ type dao struct {
 }
 
 func NewDAO(persesDAO database.DAO) {{ $package }}.DAO {
-	client := etcd.NewDAO(etcdClient, timeout)
 	return &dao{
 		client: persesDAO,
 	}

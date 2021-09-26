@@ -17,8 +17,8 @@ function getKindID() {
   kind=$1
   if [ "${kind}" = "Project" ]; then
     echo "projects"
-  elif [ "${kind}" = "Datasource" ]; then
-    echo "datasources"
+  elif [ "${kind}" = "GlobalDatasource" ]; then
+    echo "globaldatasources"
   elif [ "${kind}" = "Dashboard" ]; then
     echo "dashboards"
   fi
@@ -46,4 +46,4 @@ function insertResourceData() {
 
 insertResourceData ./data/dashboard.json true
 insertResourceData ./data/project.json
-insertResourceData ./data/datasource.json
+insertResourceData ./data/globaldatasource.json

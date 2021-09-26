@@ -37,12 +37,14 @@ type DatasourceInterface interface {
 
 type datasource struct {
 	DatasourceInterface
-	client *perseshttp.RESTClient
+	client  *perseshttp.RESTClient
+	project string
 }
 
-func newDatasource(client *perseshttp.RESTClient) DatasourceInterface {
+func newDatasource(client *perseshttp.RESTClient, project string) DatasourceInterface {
 	return &datasource{
-		client: client,
+		client:  client,
+		project: project,
 	}
 }
 
@@ -50,6 +52,7 @@ func (c *datasource) Create(entity *v1.Datasource) (*v1.Datasource, error) {
 	result := &v1.Datasource{}
 	err := c.client.Post().
 		Resource(datasourceResource).
+		Project(c.project).
 		Body(entity).
 		Do().
 		Object(result)
@@ -61,6 +64,7 @@ func (c *datasource) Update(entity *v1.Datasource) (*v1.Datasource, error) {
 	err := c.client.Put().
 		Resource(datasourceResource).
 		Name(entity.Metadata.Name).
+		Project(c.project).
 		Body(entity).
 		Do().
 		Object(result)
@@ -71,6 +75,7 @@ func (c *datasource) Delete(name string) error {
 	return c.client.Delete().
 		Resource(datasourceResource).
 		Name(name).
+		Project(c.project).
 		Do().
 		Error()
 }
@@ -80,6 +85,7 @@ func (c *datasource) Get(name string) (*v1.Datasource, error) {
 	err := c.client.Get().
 		Resource(datasourceResource).
 		Name(name).
+		Project(c.project).
 		Do().
 		Object(result)
 	return result, err
@@ -92,6 +98,7 @@ func (c *datasource) List(prefix string) ([]*v1.Datasource, error) {
 		Query(&query{
 			name: prefix,
 		}).
+		Project(c.project).
 		Do().
 		Object(&result)
 	return result, err

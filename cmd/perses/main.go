@@ -62,7 +62,7 @@ func main() {
 	runner.HTTPServerBuilder().
 		APIRegistration(persesAPI).
 		APIRegistration(persesFrontend).
-		Middleware(middleware.Proxy(persistenceManager.GetDatasource()))
+		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource()))
 	// start the application
 	runner.Start()
 }

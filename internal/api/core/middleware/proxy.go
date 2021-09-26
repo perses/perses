@@ -14,63 +14,66 @@
 package middleware
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"regexp"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	datasourcev1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	proxyMatcher                       = regexp.MustCompile(`/proxy/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
-	defaultTransport http.RoundTripper = &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			DualStack: true,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		TLSHandshakeTimeout: 10 * time.Second,
-		MaxIdleConns:        100,
-		IdleConnTimeout:     90 * time.Second,
-		ForceAttemptHTTP2:   true,
-	}
+	globalProxyMatcher = regexp.MustCompile(`/proxy/globaldatasources/([a-zA-Z-0-9_-]+)(/.*)?`)
+	localProxyMatcher  = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
 )
 
-func Proxy(dao datasource.DAO) echo.MiddlewareFunc {
+func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			targetURL, err := buildProxy(c, dao)
+			spec, path, err := extractDatasourceAndPath(c, dts, globalDTS)
 			if err != nil {
 				return err
 			}
-			if targetURL == nil {
+			if spec == nil {
 				return next(c)
 			}
-			return serveProxy(c, targetURL)
+			pr, err := newProxy(spec, path)
+			if err != nil {
+				return err
+			}
+			return pr.serve(c)
 		}
 	}
 }
 
-func buildProxy(c echo.Context, dao datasource.DAO) (*url.URL, error) {
-	req := c.Request()
-	requestPath := req.URL.Path
-	if !proxyMatcher.MatchString(requestPath) {
-		// request is not matching the proxy path. Probably it's a request to the API itself
-		// That's why no error is returned in order to let the request passed.
-		return nil, nil
+func extractDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS globaldatasource.DAO) (v1.DatasourceSpec, string, error) {
+	requestPath := c.Request().URL.Path
+	globalDatasourceMatch := globalProxyMatcher.MatchString(requestPath)
+	localDatasourceMatch := localProxyMatcher.MatchString(requestPath)
+	if !globalDatasourceMatch && !localDatasourceMatch {
+		// this is likely a request for the API itself
+		return nil, "", nil
 	}
-	logrus.Tracef("'%s' is a request to a datasource", requestPath)
-	matchingGroups := proxyMatcher.FindAllStringSubmatch(requestPath, -1)
+
+	if globalDatasourceMatch {
+		return getGlobalDatasourceAndPath(globalDTS, requestPath)
+	}
+	return getLocalDatasourceAndPath(dts, requestPath)
+}
+
+func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
+	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 1 {
-		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+		return nil, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
 	datasourceName := matchingGroups[0][1]
 	// getting the datasource object
@@ -78,10 +81,10 @@ func buildProxy(c echo.Context, dao datasource.DAO) (*url.URL, error) {
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource '%s'", datasourceName)
-			return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
+			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
@@ -89,22 +92,90 @@ func buildProxy(c echo.Context, dao datasource.DAO) (*url.URL, error) {
 	if len(matchingGroups[0]) > 1 {
 		path = matchingGroups[0][2]
 	}
-
-	// redirect the request to the datasource
-	req.URL.Path = path
-	return dts.Spec.URL, nil
+	return dts.Spec, path, nil
 }
 
-func serveProxy(c echo.Context, targetURL *url.URL) error {
+func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
+	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
+	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 2 {
+		return nil, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+	}
+	projectName := matchingGroups[0][1]
+	datasourceName := matchingGroups[0][2]
+	// getting the datasource object
+	dts, err := dao.Get(projectName, datasourceName)
+	if err != nil {
+		if etcd.IsKeyNotFound(err) {
+			logrus.Debugf("unable to find the Datasource '%s' in project '%s'", datasourceName, projectName)
+			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
+		}
+		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
+		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
+	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
+	path := "/"
+	if len(matchingGroups[0]) > 1 {
+		path = matchingGroups[0][2]
+	}
+	return dts.Spec, path, nil
+}
+
+type proxy interface {
+	serve(c echo.Context) error
+}
+
+func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
+	switch v := spec.(type) {
+	case *datasourcev1.Prometheus:
+		return &httpProxy{config: v.HTTP, path: path}, nil
+	default:
+		return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
+	}
+}
+
+// TODO take in consideration the `HTTPAllowedEndpoint`
+
+type httpProxy struct {
+	config datasourcev1.HTTPConfig
+	path   string
+}
+
+func (h *httpProxy) serve(c echo.Context) error {
 	req := c.Request()
 	res := c.Response()
 
+	if err := h.prepareRequest(c); err != nil {
+		return err
+	}
+
+	// redirect the request to the datasource
+	req.URL.Path = h.path
+
+	// Set up the proxy
+	var proxyErr error
+	reverseProxy := httputil.NewSingleHostReverseProxy(h.config.URL)
+	reverseProxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
+		desc := h.config.URL.String()
+		logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", desc, err)
+		proxyErr = err
+	}
+	// use a dedicated HTTP transport to avoid any TLS encryption issues
+	reverseProxy.Transport = h.prepareTransport()
+	// Reverse proxy request.
+	reverseProxy.ServeHTTP(res, req)
+	// Return any error handled during proxying request.
+	return proxyErr
+}
+
+func (h *httpProxy) prepareRequest(c echo.Context) error {
+	req := c.Request()
 	// We have to modify the HOST of the request in order to match the host of the targetURL
 	// So far I'm not sure to understand exactly why, but if you are going to remove it, be sure of what you are doing.
 	// It has been done to fix an error returned by Openshift itself saying the target doesn't exist.
 	// Since we are using HTTP/1, setting the HOST is setting also an header so if the host and the header are different
 	// then maybe it is blocked by the Openshift router.
-	req.Host = targetURL.Host
+	req.Host = h.config.URL.Host
 	// Fix header
 	if len(req.Header.Get(echo.HeaderXRealIP)) == 0 {
 		req.Header.Set(echo.HeaderXRealIP, c.RealIP())
@@ -112,20 +183,45 @@ func serveProxy(c echo.Context, targetURL *url.URL) error {
 	if len(req.Header.Get(echo.HeaderXForwardedProto)) == 0 {
 		req.Header.Set(echo.HeaderXForwardedProto, c.Scheme())
 	}
-
-	// Set up the proxy
-	var proxyErr error
-	proxy := httputil.NewSingleHostReverseProxy(targetURL)
-	proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
-		desc := targetURL.String()
-		proxyErr = fmt.Errorf("error proxying, remote unreachable: target=%s, err=%w", desc, err)
-		logrus.Errorf(proxyErr.Error())
-		proxyErr = err
+	// set header according to the configuration
+	if len(h.config.Headers) > 0 {
+		// TODO list the headers that cannot be overridden.
+		for k, v := range h.config.Headers {
+			req.Header.Set(k, v)
+		}
 	}
-	// use a dedicated HTTP transport to avoid any TSL encrypt issue
-	proxy.Transport = defaultTransport
-	// Reverse proxy request.
-	proxy.ServeHTTP(res, req)
-	// Return any error handled during proxying request.
-	return proxyErr
+	authConfig := h.config.Auth
+	if authConfig != nil {
+		if len(authConfig.BearerToken) > 0 {
+			req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", authConfig.BearerToken))
+		}
+		if authConfig.BasicAuth != nil {
+			password, err := authConfig.BasicAuth.GetPassword()
+			if err != nil {
+				logrus.WithError(err).Error("unable to retrieve the password for the basic auth")
+				return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+			}
+			req.SetBasicAuth(authConfig.BasicAuth.Username, password)
+		}
+	}
+	return nil
+}
+
+func (h *httpProxy) prepareTransport() *http.Transport {
+	tlsConfig := &tls.Config{}
+	if h.config.Auth != nil {
+		tlsConfig.InsecureSkipVerify = h.config.Auth.InsecureTLS
+		// TODO use the certificate
+	}
+	return &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout: 10 * time.Second,
+		IdleConnTimeout:     90 * time.Second,
+		ForceAttemptHTTP2:   true,
+		TLSClientConfig:     tlsConfig,
+	}
 }

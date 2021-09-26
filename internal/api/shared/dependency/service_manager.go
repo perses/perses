@@ -18,11 +18,13 @@ package dependency
 import (
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
+	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -31,6 +33,7 @@ import (
 type ServiceManager interface {
 	GetDashboard() dashboard.Service
 	GetDatasource() datasource.Service
+	GetGlobalDatasource() globaldatasource.Service
 	GetHealth() health.Service
 	GetProject() project.Service
 	GetUser() user.Service
@@ -38,25 +41,28 @@ type ServiceManager interface {
 
 type service struct {
 	ServiceManager
-	dashboard  dashboard.Service
-	datasource datasource.Service
-	health     health.Service
-	project    project.Service
-	user       user.Service
+	dashboard        dashboard.Service
+	datasource       datasource.Service
+	globalDatasource globaldatasource.Service
+	health           health.Service
+	project          project.Service
+	user             user.Service
 }
 
 func NewServiceManager(dao PersistenceManager) ServiceManager {
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard())
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource())
+	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource())
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject())
 	userService := userImpl.NewService(dao.GetUser())
 	return &service{
-		dashboard:  dashboardService,
-		datasource: datasourceService,
-		health:     healthService,
-		project:    projectService,
-		user:       userService,
+		dashboard:        dashboardService,
+		datasource:       datasourceService,
+		globalDatasource: globalDatasourceService,
+		health:           healthService,
+		project:          projectService,
+		user:             userService,
 	}
 }
 
@@ -66,6 +72,10 @@ func (s *service) GetDashboard() dashboard.Service {
 
 func (s *service) GetDatasource() datasource.Service {
 	return s.datasource
+}
+
+func (s *service) GetGlobalDatasource() globaldatasource.Service {
+	return s.globalDatasource
 }
 
 func (s *service) GetHealth() health.Service {
