@@ -39,6 +39,7 @@ var defaultPrometheusAllowedEndpoints = []HTTPAllowedEndpoint{
 		Endpoint: "/api/v1/query_range",
 		Method:   http.MethodPost,
 	},
+	// TODO manage variable in endpoint
 }
 
 type Prometheus struct {

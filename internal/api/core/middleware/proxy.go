@@ -81,7 +81,7 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource '%s'", datasourceName)
-			return nil, "", echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
+			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
 		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
@@ -107,7 +107,7 @@ func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.Datas
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource '%s' in project '%s'", datasourceName, projectName)
-			return nil, "", echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
+			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
 		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
@@ -134,6 +134,8 @@ func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
 	}
 }
 
+// TODO take in consideration the `HTTPAllowedEndpoint`
+
 type httpProxy struct {
 	config datasourcev1.HTTPConfig
 	path   string
@@ -155,8 +157,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 	reverseProxy := httputil.NewSingleHostReverseProxy(h.config.URL)
 	reverseProxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
 		desc := h.config.URL.String()
-		proxyErr = fmt.Errorf("error proxying, remote unreachable: target=%s, err=%w", desc, err)
-		logrus.Errorf(proxyErr.Error())
+		logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", desc, err)
 		proxyErr = err
 	}
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
