@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 exclude_directories=("./ui/node_modules" ".git" ".idea" ".github")
 year=$(date +'%Y')
 
@@ -42,7 +44,7 @@ function findFilesWithMissingLicense(){
 }
 
 function check() {
-  if findFileWithMissingLicense "$@"; then
+  if findFilesWithMissingLicense "$@"; then
     echo "The files above don't contain the license header."
     exit 1
   else
