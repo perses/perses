@@ -5,33 +5,34 @@ on:
       - master
   pull_request:
 jobs:
-#  build-front:
-#    name: "build frontend"
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: checkout
-#        uses: actions/checkout@v2
-#     - name: install nodejs
-#        uses: actions/setup-node@v2
-#        with:
-#          node-version: '14'
-#      - uses: actions/cache@v2
-#        with:
-#          path: ~/.npm
-#          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-#          restore-keys: |
-#            ${{ runner.os }}-node-
-#      - name: install deps
-#        run: cd ./web && npm ci
-#      - run: cd ./web && npm run build
-#      - name: store react production build
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: react-build
-#          path: web/build
-  build-back:
+  build-frontend:
+    name: "build frontend"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install nodejs
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: install deps
+        run: cd ./ui && npm ci
+      - name: build the app
+        run: cd ./ui && npm run build
+      - name: store react production build
+        uses: actions/upload-artifact@v2
+        with:
+          name: react-build
+          path: ui/app/dist
+  build-backend:
     name: "build backend"
-    #needs: build-front
+    needs: build-frontend
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -46,10 +47,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-#      - name: Download react build
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: react-build
+      - name: Download react build
+        uses: actions/download-artifact@v2
+        with:
+          name: react-build
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
