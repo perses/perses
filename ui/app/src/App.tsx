@@ -12,6 +12,9 @@
 // limitations under the License.
 
 import { DashboardResource } from '@perses-ui/core';
+// TODO: Figure out why the import path './context/plugin-registry' doesn't work
+// (the app throws a TypeScript error in the browser) although there is an index.ts
+// file in that directory that should expose everything.
 import { PluginRegistry } from './context/plugin-registry/PluginRegistry';
 import DashboardView from './views/dashboard/Dashboard';
 import AlertErrorFallback from './components/AlertErrorFallback';
