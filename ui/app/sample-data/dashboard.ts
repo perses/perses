@@ -19,7 +19,7 @@ const cadvisor: DashboardResource = {
     name: 'Kubelet - cAdvisor',
   },
   spec: {
-    datasource: { name: 'PromLabs Prometheus' },
+    datasource: { name: 'Public Prometheus Demo Server' },
     // TODO: Should duration actually be a time range?
     duration: '3h',
     variables: {

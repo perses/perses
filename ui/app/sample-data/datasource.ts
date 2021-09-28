@@ -16,7 +16,7 @@ import { DataSourceResource } from '@perses-ui/core';
 const dataSource: DataSourceResource = {
   kind: 'DataSource',
   metadata: {
-    name: 'PromLabs Prometheus',
+    name: 'Public Prometheus Demo Server',
   },
   spec: {
     data_source: {
