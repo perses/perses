@@ -2,7 +2,7 @@
 
 set -e
 
-exclude_directories=("./ui/node_modules" ".git" ".idea" ".github")
+exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" "*/dist/*")
 year=$(date +'%Y')
 
 license_copyright="The Perses Authors"
@@ -20,18 +20,18 @@ license_header="// Copyright ${year} ${license_copyright}
 // limitations under the License."
 
 function buildExcludeDirectories() {
-  local result
-  for dir in "${exclude_directories[@]}"; do
-    result+=" ! -path ${dir}"
+  local result="-not -path \"${exclude_directories[0]}\""
+  for dir in "${exclude_directories[@]:1}"; do
+    result+=" -and -not -path \"${dir}\""
   done
   echo "${result}"
 }
 
 function buildPatternList() {
   local patterns=("$@")
-  local result="-name ${patterns[0]}"
+  local result="-name \"${patterns[0]}\""
   for pattern in "${patterns[@]:1}"; do
-    result+=" -o -name ${pattern}"
+    result+=" -o -name \"${pattern}\""
   done
   echo "${result}"
 }
@@ -40,7 +40,8 @@ function findFilesWithMissingLicense(){
   local patterns=("$@")
   buildPattern=$(buildPatternList "${patterns[@]}")
   buildExcludeDir=$(buildExcludeDirectories)
-  find . -type f '(' ${buildPattern} ')' ${buildExcludeDir} -exec grep -H -E -o -c "${license_copyright}" {} \; | grep ':0$'
+  cmd="find . -type f \( ${buildPattern} \) -and \( ${buildExcludeDir} \) -exec grep -H -E -o -c \"${license_copyright}\" {} \; | grep ':0$'"
+  eval $cmd
 }
 
 function check() {
@@ -56,6 +57,7 @@ function check() {
 function add() {
   findFilesWithMissingLicense "$@" | sed 's/..$//'| while read -d $'\n' file
   do
+    echo "add license header in ${file}"
     echo -e "${license_header}\n\n$(cat "${file}")" > "${file}"
   done
 }
