@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,9 +42,12 @@ func TestMarshalDashboard(t *testing.T) {
 					Project: "perses",
 				},
 				Spec: DashboardSpec{
-					Datasource: "PrometheusDemo",
-					Duration:   model.Duration(6 * time.Hour),
-					Variables:  nil,
+					Datasource: dashboard.Datasource{
+						Name: "PrometheusDemo",
+						Kind: datasource.PrometheusKind,
+					},
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
 					Panels: map[string]*dashboard.Panel{
 						"MyPanel": {
 							DisplayedName: "simple line chart",
@@ -85,7 +89,11 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "datasource": "PrometheusDemo",
+    "datasource": {
+      "name": "PrometheusDemo",
+      "kind": "Prometheus",
+      "global": false
+    },
     "duration": "6h",
     "panels": {
       "MyPanel": {
@@ -131,8 +139,11 @@ func TestMarshalDashboard(t *testing.T) {
 					Project: "perses",
 				},
 				Spec: DashboardSpec{
-					Datasource: "PrometheusDemo",
-					Duration:   model.Duration(6 * time.Hour),
+					Datasource: dashboard.Datasource{
+						Name: "PrometheusDemo",
+						Kind: datasource.PrometheusKind,
+					},
+					Duration: model.Duration(6 * time.Hour),
 					Variables: map[string]*dashboard.Variable{
 						"labelName": {
 							Kind: dashboard.KindLabelNamesQueryVariable,
@@ -197,7 +208,11 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "datasource": "PrometheusDemo",
+    "datasource": {
+      "name": "PrometheusDemo",
+      "kind": "Prometheus",
+      "global": false
+    },
     "duration": "6h",
     "variables": {
       "labelName": {

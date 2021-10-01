@@ -29,10 +29,8 @@ func GenerateDashboardID(project string, name string) string {
 }
 
 type DashboardSpec struct {
-	// Datasource is the name of the datasource.
-	// It's the direct reference of the document of type `Datasource`.
-	// The datasource linked must exist in the database.
-	Datasource string `json:"datasource" yaml:"datasource"`
+	// Datasource is a set of value that will be used to find the datasource definition.
+	Datasource dashboard.Datasource `json:"datasource" yaml:"datasource"`
 	// Duration is the default time you would like to use to looking in the past when getting data to fill the
 	// dashboard
 	Duration   model.Duration                 `json:"duration" yaml:"duration"`
@@ -69,9 +67,6 @@ func (d *DashboardSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (d *DashboardSpec) validate() error {
-	if len(d.Datasource) == 0 {
-		return fmt.Errorf("dashboard.spec.datasource cannot be empty")
-	}
 	if len(d.Panels) == 0 {
 		return fmt.Errorf("dashboard.spec.panels cannot be empty")
 	}
