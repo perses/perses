@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 )
 
 type HTTPAccess string
@@ -70,43 +71,74 @@ func (h *HTTPAccess) validate() error {
 }
 
 type HTTPAllowedEndpoint struct {
+	Endpoint *regexp.Regexp `json:"endpoint" yaml:"endpoint"`
+	Method   string         `json:"method" yaml:"method"`
+}
+
+type tmpHTTPAllowedEndpoint struct {
 	Endpoint string `json:"endpoint" yaml:"endpoint"`
 	Method   string `json:"method" yaml:"method"`
 }
 
+func (h *HTTPAllowedEndpoint) MarshalJSON() ([]byte, error) {
+	endpointAsString := ""
+	if h.Endpoint != nil {
+		endpointAsString = h.Endpoint.String()
+	}
+	tmp := &tmpHTTPAllowedEndpoint{
+		Endpoint: endpointAsString,
+		Method:   h.Method,
+	}
+	return json.Marshal(tmp)
+}
+
+func (h *HTTPAllowedEndpoint) MarshalYAML() (interface{}, error) {
+	endpointAsString := ""
+	if h.Endpoint != nil {
+		endpointAsString = h.Endpoint.String()
+	}
+	tmp := &tmpHTTPAllowedEndpoint{
+		Endpoint: endpointAsString,
+		Method:   h.Method,
+	}
+	return tmp, nil
+}
+
 func (h *HTTPAllowedEndpoint) UnmarshalJSON(data []byte) error {
-	var tmp HTTPAllowedEndpoint
-	type plain HTTPAllowedEndpoint
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+	var tmp tmpHTTPAllowedEndpoint
+	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
-	if err := (&tmp).validate(); err != nil {
+	if err := h.validate(tmp); err != nil {
 		return err
 	}
-	*h = tmp
 	return nil
 }
 
 func (h *HTTPAllowedEndpoint) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp HTTPAllowedEndpoint
-	type plain HTTPAllowedEndpoint
-	if err := unmarshal((*plain)(&tmp)); err != nil {
+	var tmp tmpHTTPAllowedEndpoint
+	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
-	if err := (&tmp).validate(); err != nil {
+	if err := h.validate(tmp); err != nil {
 		return err
 	}
-	*h = tmp
 	return nil
 }
 
-func (h *HTTPAllowedEndpoint) validate() error {
-	if len(h.Method) == 0 {
+func (h *HTTPAllowedEndpoint) validate(tmp tmpHTTPAllowedEndpoint) error {
+	if len(tmp.Method) == 0 {
 		return fmt.Errorf("HTTP method cannot be empty")
 	}
-	if len(h.Endpoint) == 0 {
+	if len(tmp.Endpoint) == 0 {
 		return fmt.Errorf("HTTP endpoint cannot be empty")
 	}
+	if re, err := regexp.Compile(tmp.Endpoint); err != nil {
+		return err
+	} else {
+		h.Endpoint = re
+	}
+	h.Method = tmp.Method
 	if h.Method != http.MethodGet &&
 		h.Method != http.MethodPost &&
 		h.Method != http.MethodDelete &&

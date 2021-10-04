@@ -16,30 +16,34 @@ package datasource
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 )
 
 var defaultPrometheusAllowedEndpoints = []HTTPAllowedEndpoint{
 	{
-		Endpoint: "/api/v1/labels",
+		Endpoint: regexp.MustCompile("/api/v1/labels"),
 		Method:   http.MethodPost,
 	},
 	{
-		Endpoint: "/api/v1/series",
+		Endpoint: regexp.MustCompile("/api/v1/series"),
 		Method:   http.MethodPost,
 	},
 	{
-		Endpoint: "/api/v1/metadata",
+		Endpoint: regexp.MustCompile("/api/v1/metadata"),
 		Method:   http.MethodGet,
 	},
 	{
-		Endpoint: "/api/v1/query",
+		Endpoint: regexp.MustCompile("/api/v1/query"),
 		Method:   http.MethodPost,
 	},
 	{
-		Endpoint: "/api/v1/query_range",
+		Endpoint: regexp.MustCompile("/api/v1/query_range"),
 		Method:   http.MethodPost,
 	},
-	// TODO manage variable in endpoint
+	{
+		Endpoint: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+		Method:   http.MethodGet,
+	},
 }
 
 type Prometheus struct {

@@ -134,8 +134,6 @@ func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
 	}
 }
 
-// TODO take in consideration the `HTTPAllowedEndpoint`
-
 type httpProxy struct {
 	config datasourcev1.HTTPConfig
 	path   string
@@ -145,12 +143,23 @@ func (h *httpProxy) serve(c echo.Context) error {
 	req := c.Request()
 	res := c.Response()
 
+	isAllowed := false
+	for i := 0; i < len(h.config.AllowedEndpoints) && !isAllowed; i++ {
+		allowedEndpoint := h.config.AllowedEndpoints[i]
+		isAllowed = isAllowed || (allowedEndpoint.Method == req.Method && len(allowedEndpoint.Endpoint.FindAllString(h.path, -1)) > 0)
+	}
+
+	if !isAllowed {
+		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint '%s' with the HTTP method %s", h.path, req.Method))
+	}
+
 	if err := h.prepareRequest(c); err != nil {
 		return err
 	}
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
+	logrus.Debugf("request will be redirected to '%s'", h.config.URL.String())
 
 	// Set up the proxy
 	var proxyErr error
