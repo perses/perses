@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import path from 'path';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { Configuration } from 'webpack';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 export const commonConfig: Configuration = {
   entry: path.resolve(__dirname, './src/index.tsx'),
@@ -26,14 +26,16 @@ export const commonConfig: Configuration = {
     extensions: ['.ts', '.tsx', '.js', 'jsx', '.json'],
   },
   plugins: [
-    new CleanWebpackPlugin({
-      dangerouslyAllowCleanPatternsOutsideProject: true,
-    }),
-
     // Generates HTML index page with bundle injected
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './src/index.html'),
       templateParameters: {},
+    }),
+    // Does TS type-checking in a separate process
+    new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        configFile: path.resolve(__dirname, './tsconfig.json'),
+      },
     }),
   ],
   module: {
@@ -45,6 +47,7 @@ export const commonConfig: Configuration = {
             loader: 'ts-loader',
             options: {
               // Type-checking happens in separate plugin process
+              transpileOnly: true,
               projectReferences: true,
             },
           },
@@ -62,6 +65,7 @@ export const commonConfig: Configuration = {
         test: /\.(png|jpg|gif)$/,
         type: 'asset',
       },
+      // SVG as React components
       {
         test: /\.svg$/,
         use: [

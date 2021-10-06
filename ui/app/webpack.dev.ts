@@ -40,6 +40,7 @@ const devConfig: Configuration = {
     open: true,
     historyApiFallback: true,
   },
+  cache: true,
 };
 
 const merged = merge(commonConfig, devConfig);
