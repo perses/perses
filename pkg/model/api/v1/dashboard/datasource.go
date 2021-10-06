@@ -25,8 +25,8 @@ type Datasource struct {
 	Name string `json:"name" yaml:"name"`
 	// Kind is the datasource kind
 	Kind datasource.Kind `json:"kind" yaml:"kind"`
-	// Global when is true indicates to use the global datasources
-	// When set to false, then you need to use the datasource in the same project than the current dashboard.
+	// If global is true, we are referencing a global datasource.
+	// When set to false, we are referencing a datasource in the same project as the current dashboard.
 	Global bool `json:"global" yaml:"global"`
 }
 

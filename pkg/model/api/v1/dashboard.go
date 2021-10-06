@@ -29,7 +29,7 @@ func GenerateDashboardID(project string, name string) string {
 }
 
 type DashboardSpec struct {
-	// Datasource is a set of value that will be used to find the datasource definition.
+	// Datasource is a set of values that will be used to find the datasource definition.
 	Datasource dashboard.Datasource `json:"datasource" yaml:"datasource"`
 	// Duration is the default time you would like to use to looking in the past when getting data to fill the
 	// dashboard
