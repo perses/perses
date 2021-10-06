@@ -3,6 +3,14 @@
   "include": ["src"],
   "compilerOptions": {
     "declaration": true,
-    "outDir": "dist"
-  }
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "../.build-cache/panels-plugin.tsbuildinfo"
+  },
+  "references": [
+    {
+      "path": "../core",
+      "prepend": false
+    },
+  ]
 }

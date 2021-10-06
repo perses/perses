@@ -1,10 +1,29 @@
 {
   "extends": "../tsconfig.web.json",
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "compilerOptions": {
     "sourceMap": true,
-    "noEmit": true
+    "outDir": "./dist",
+    "rootDir": "../",
+    "tsBuildInfoFile": "../.build-cache/app.tsbuildinfo",
+    "incremental": true
   },
+  "references": [
+    {
+      "path": "../core",
+      "prepend": false
+    },
+    {
+      "path": "../panels-plugin",
+      "prepend": false
+    },
+    {
+      "path": "../prometheus-plugin",
+      "prepend": false
+    }
+  ],
   // For webpack builds that use ts-node to compile the configs
   "ts-node": {
     "compilerOptions": {
