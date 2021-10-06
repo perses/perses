@@ -6,7 +6,11 @@
       "project": "perses"
     },
     "spec": {
-      "datasource": "PrometheusDemo",
+      "datasource": {
+        "name": "PrometheusDemo",
+        "kind": "Prometheus",
+        "global": true
+      },
       "duration": "6h",
       "variables": {
         "labelName": {
@@ -87,7 +91,11 @@
       "project": "perses"
     },
     "spec": {
-      "datasource": "PrometheusDemo",
+      "datasource": {
+        "name": "PrometheusDemo",
+        "kind": "Prometheus",
+        "global": true
+      },
       "duration": "6h",
       "variables": {
         "job": {
