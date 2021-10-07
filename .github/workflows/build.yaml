@@ -22,7 +22,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: install deps
-        run: cd ./ui && npm ci
+        run: cd ./ui && npm install
       - name: build the app
         run: cd ./ui && npm run build
       - name: store react production build
