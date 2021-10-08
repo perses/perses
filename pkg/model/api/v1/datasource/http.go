@@ -71,35 +71,35 @@ func (h *HTTPAccess) validate() error {
 }
 
 type HTTPAllowedEndpoint struct {
-	Endpoint *regexp.Regexp `json:"endpoint" yaml:"endpoint"`
-	Method   string         `json:"method" yaml:"method"`
+	EndpointPattern *regexp.Regexp `json:"endpoint_pattern" yaml:"endpoint_pattern"`
+	Method          string         `json:"method" yaml:"method"`
 }
 
 type tmpHTTPAllowedEndpoint struct {
-	Endpoint string `json:"endpoint" yaml:"endpoint"`
-	Method   string `json:"method" yaml:"method"`
+	EndpointPattern string `json:"endpoint_pattern" yaml:"endpoint_pattern"`
+	Method          string `json:"method" yaml:"method"`
 }
 
 func (h *HTTPAllowedEndpoint) MarshalJSON() ([]byte, error) {
 	endpointAsString := ""
-	if h.Endpoint != nil {
-		endpointAsString = h.Endpoint.String()
+	if h.EndpointPattern != nil {
+		endpointAsString = h.EndpointPattern.String()
 	}
 	tmp := &tmpHTTPAllowedEndpoint{
-		Endpoint: endpointAsString,
-		Method:   h.Method,
+		EndpointPattern: endpointAsString,
+		Method:          h.Method,
 	}
 	return json.Marshal(tmp)
 }
 
 func (h *HTTPAllowedEndpoint) MarshalYAML() (interface{}, error) {
 	endpointAsString := ""
-	if h.Endpoint != nil {
-		endpointAsString = h.Endpoint.String()
+	if h.EndpointPattern != nil {
+		endpointAsString = h.EndpointPattern.String()
 	}
 	tmp := &tmpHTTPAllowedEndpoint{
-		Endpoint: endpointAsString,
-		Method:   h.Method,
+		EndpointPattern: endpointAsString,
+		Method:          h.Method,
 	}
 	return tmp, nil
 }
@@ -130,13 +130,13 @@ func (h *HTTPAllowedEndpoint) validate(tmp tmpHTTPAllowedEndpoint) error {
 	if len(tmp.Method) == 0 {
 		return fmt.Errorf("HTTP method cannot be empty")
 	}
-	if len(tmp.Endpoint) == 0 {
-		return fmt.Errorf("HTTP endpoint cannot be empty")
+	if len(tmp.EndpointPattern) == 0 {
+		return fmt.Errorf("HTTP endpoint pattern cannot be empty")
 	}
-	if re, err := regexp.Compile(tmp.Endpoint); err != nil {
+	if re, err := regexp.Compile(tmp.EndpointPattern); err != nil {
 		return err
 	} else {
-		h.Endpoint = re
+		h.EndpointPattern = re
 	}
 	h.Method = tmp.Method
 	if h.Method != http.MethodGet &&
@@ -144,7 +144,7 @@ func (h *HTTPAllowedEndpoint) validate(tmp tmpHTTPAllowedEndpoint) error {
 		h.Method != http.MethodDelete &&
 		h.Method != http.MethodPut &&
 		h.Method != http.MethodPatch {
-		return fmt.Errorf("'%s' is not a valid http method. Current supported HTTP method: %s, %s, %s, %s, %s", h.Method, http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodPatch)
+		return fmt.Errorf("%q is not a valid http method. Current supported HTTP method: %s, %s, %s, %s, %s", h.Method, http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodPatch)
 	}
 	return nil
 }

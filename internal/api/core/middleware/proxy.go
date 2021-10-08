@@ -80,10 +80,10 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 	dts, err := dao.Get(datasourceName)
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the Datasource '%s'", datasourceName)
-			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
+			logrus.Debugf("unable to find the Datasource %q", datasourceName)
+			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
-		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
+		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", datasourceName)
 		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
@@ -106,10 +106,10 @@ func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.Datas
 	dts, err := dao.Get(projectName, datasourceName)
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the Datasource '%s' in project '%s'", datasourceName, projectName)
-			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource '%s', datasource doesn't exist", datasourceName))
+			logrus.Debugf("unable to find the Datasource %q in project %q", datasourceName, projectName)
+			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
-		logrus.WithError(err).Errorf("unable to find the datasource '%s', something wrong with the database", datasourceName)
+		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", datasourceName)
 		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
@@ -144,13 +144,15 @@ func (h *httpProxy) serve(c echo.Context) error {
 	res := c.Response()
 
 	isAllowed := false
-	for i := 0; i < len(h.config.AllowedEndpoints) && !isAllowed; i++ {
-		allowedEndpoint := h.config.AllowedEndpoints[i]
-		isAllowed = isAllowed || (allowedEndpoint.Method == req.Method && len(allowedEndpoint.Endpoint.FindAllString(h.path, -1)) > 0)
+	for _, allowedEndpoint := range h.config.AllowedEndpoints {
+		if allowedEndpoint.Method == req.Method && len(allowedEndpoint.EndpointPattern.FindAllString(h.path, -1)) > 0 {
+			isAllowed = true
+			break
+		}
 	}
 
 	if !isAllowed {
-		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint '%s' with the HTTP method %s", h.path, req.Method))
+		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
 	if err := h.prepareRequest(c); err != nil {
@@ -159,7 +161,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
-	logrus.Debugf("request will be redirected to '%s'", h.config.URL.String())
+	logrus.Debugf("request will be redirected to %q", h.config.URL.String())
 
 	// Set up the proxy
 	var proxyErr error

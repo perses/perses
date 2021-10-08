@@ -66,28 +66,28 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 						Access: datasource.ServerHTTPAccess,
 						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 							{
-								Endpoint: regexp.MustCompile("/api/v1/labels"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/labels"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/series"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/series"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/metadata"),
-								Method:   http.MethodGet,
+								EndpointPattern: regexp.MustCompile("/api/v1/metadata"),
+								Method:          http.MethodGet,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/query"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/query"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/query_range"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/query_range"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-								Method:   http.MethodGet,
+								EndpointPattern: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+								Method:          http.MethodGet,
 							},
 						},
 					},
@@ -140,28 +140,28 @@ spec:
 						Access: datasource.ServerHTTPAccess,
 						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 							{
-								Endpoint: regexp.MustCompile("/api/v1/labels"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/labels"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/series"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/series"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/metadata"),
-								Method:   http.MethodGet,
+								EndpointPattern: regexp.MustCompile("/api/v1/metadata"),
+								Method:          http.MethodGet,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/query"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/query"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/query_range"),
-								Method:   http.MethodPost,
+								EndpointPattern: regexp.MustCompile("/api/v1/query_range"),
+								Method:          http.MethodPost,
 							},
 							{
-								Endpoint: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-								Method:   http.MethodGet,
+								EndpointPattern: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+								Method:          http.MethodGet,
 							},
 						},
 					},
