@@ -9,6 +9,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "composite": true,
+    "paths": {
+      "@perses-ui/*": ["./*/src"]
+    }
   }
 }

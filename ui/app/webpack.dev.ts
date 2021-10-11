@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('dotenv-defaults').config();
 import fs from 'fs';
 import { Configuration } from 'webpack';
 import { Configuration as DevServerConfig } from 'webpack-dev-server';
 import { merge } from 'webpack-merge';
 import { commonConfig } from './webpack.common';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv-defaults').config();
 
 declare module 'webpack' {
   interface Configuration {
@@ -55,18 +55,13 @@ const devConfig: Configuration = {
   },
 
   devServer: {
-    port: parseInt(process.env.PORT ?? '3001'),
+    port: parseInt(process.env.PORT ?? '3000'),
     open: true,
     https: getHttpsConfig(),
     historyApiFallback: true,
   },
+  cache: true,
 };
 
-let localConfig = {};
-try {
-  localConfig = require('./webpack.local.js');
-  console.log('Using local config from webpack.local.js');
-} catch {}
-
-const merged = merge(commonConfig, devConfig, localConfig);
+const merged = merge(commonConfig, devConfig);
 export default merged;

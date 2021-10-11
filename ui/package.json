@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "bash ./build.sh",
+    "build": "npm run build -w app",
     "lint": "npm run lint --workspaces",
-    "start": "npm run start -w app"
+    "lint:fix": "npm run lint:fix --workspaces",
+    "start": "npm run start -w app",
+    "clean": "rimraf .build-cache && npm run clean --workspaces"
   },
   "workspaces": [
     "app",

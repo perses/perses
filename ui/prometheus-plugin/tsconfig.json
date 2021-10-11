@@ -3,6 +3,14 @@
   "include": ["src"],
   "compilerOptions": {
     "declaration": true,
-    "outDir": "dist"
-  }
+    "outDir": "dist",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "../.build-cache/prometheus-plugin.tsbuildinfo"
+  },
+  "references": [
+    {
+      "path": "../core",
+      "prepend": false
+    },
+  ]
 }

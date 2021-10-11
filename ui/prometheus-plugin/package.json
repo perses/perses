@@ -8,6 +8,7 @@
     "clean": "rimraf dist/",
     "build": "tsc",
     "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint --fix src --ext .ts,.tsx",
     "start": "npm run clean && npm run build -- --watch"
   },
   "dependencies": {
