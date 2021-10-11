@@ -36,6 +36,9 @@ export const commonConfig: Configuration = {
       typescript: {
         configFile: path.resolve(__dirname, './tsconfig.json'),
       },
+      eslint: {
+        files: '../*/src/**/*.{ts,tsx,js,jsx}',
+      },
     }),
   ],
   module: {
