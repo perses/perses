@@ -89,7 +89,8 @@ The API is now available :).
 To be able to use the Web app, you will have to follow the steps to run the API first. For the moment there is no
 particular desire to run the Web-app on the development environment without the API at the same time.
 
-* Once the API is running, you have to install nodeJS v14 minimum.
+* Install nodejs [version 14 or greater](https://nodejs.org/).
+* Install npm [version 7 or greater](https://www.npmjs.com/).
 * Then go to the folder `./web`, and install all necessary packages:
 
 ```bash
