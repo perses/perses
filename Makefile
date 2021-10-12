@@ -21,6 +21,8 @@ COVER_PROFILE := coverage.txt
 PKG_LDFLAGS   := github.com/prometheus/common/version
 LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}"
 
+all: build-ui build
+
 .PHONY: checkformat
 checkformat:
 	@echo ">> checking code format"
@@ -57,6 +59,10 @@ build: generate
 	@echo ">> build the perses api"
 	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/perses ./cmd/perses
 
+.PHONY: build-ui
+build-ui:
+	cd ./web && npm install && npm run build
+
 .PHONY: crossbuild
 crossbuild: generate
 	goreleaser --snapshot --skip-publish --rm-dist
@@ -65,3 +71,8 @@ crossbuild: generate
 generate:
 	$(GO) generate ./internal/api
 	$(GO) generate ./internal/api/front
+
+.PHONY: clean
+clean:
+	rm -rf ./bin
+	cd ./ui && npm run clean
