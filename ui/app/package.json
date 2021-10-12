@@ -6,10 +6,10 @@
     "clean": "rimraf dist/",
     "start": "webpack serve --config webpack.dev.ts",
     "build": "webpack --config webpack.prod.ts",
+    "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
-    "analyze": "webpack --config webpack.analyze.ts",
-    "tsc": "tsc --project tsconfig.json --noEmit false --outDir build"
+    "analyze": "webpack --config webpack.analyze.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.4.0",
@@ -47,5 +47,15 @@
     "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.3.1",
     "webpack-merge": "^5.8.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js|jsx)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ]
   }
 }
