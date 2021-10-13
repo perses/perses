@@ -7,9 +7,9 @@
   "scripts": {
     "clean": "rimraf dist/",
     "build": "tsc",
+    "test": "echo 'no test to run' && exit 0",
     "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint --fix src --ext .ts,.tsx",
-    "start": "npm run clean && npm run build -- --watch"
+    "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
     "date-fns": "^2.23.0",
