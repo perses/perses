@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert } from '@material-ui/core';
+import { Alert } from '@mui/material';
 import { FallbackProps } from 'react-error-boundary';
 
 /**

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Drawer, Typography } from '@material-ui/core';
+import { Drawer, Typography } from '@mui/material';
 import { useDashboardSpec } from '@perses-ui/core';
 import AlertErrorFallback from '../../components/AlertErrorFallback';
 import VariableAutocomplete from '../../components/VariableAutocomplete';

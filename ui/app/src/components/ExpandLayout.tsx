@@ -12,13 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import {
-  Box,
-  BoxProps,
-  ButtonBase,
-  Collapse,
-  Typography,
-} from '@material-ui/core';
+import { Box, BoxProps, ButtonBase, Collapse, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronUp';
 import CollapsedIcon from 'mdi-material-ui/ChevronDown';
 import { ExpandLayoutDefinition } from '@perses-ui/core';

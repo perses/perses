@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps } from '@material-ui/core';
+import { Box, BoxProps } from '@mui/material';
 import { useDashboardSpec } from '@perses-ui/core';
 import AlertErrorBoundary from './AlertErrorBoundary';
 import ContentRefResolver from './ContentRefResolver';

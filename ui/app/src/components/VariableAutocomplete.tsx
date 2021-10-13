@@ -17,7 +17,7 @@ import {
   AutocompleteProps as MuiAutocompleteProps,
   TextField,
   TextFieldProps,
-} from '@material-ui/core';
+} from '@mui/material';
 import { AnyVariableDefinition } from '@perses-ui/core';
 import { useVariableOptions } from '../context/plugin-registry';
 import { useDashboardContext } from '../context/dashboard';
