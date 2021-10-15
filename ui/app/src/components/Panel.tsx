@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardContent,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { AnyPanelDefinition } from '@perses-ui/core';
 import { PluginBoundary, usePanelComponent } from '../context/plugin-registry';
 import { PanelContextProvider } from '../context/PanelContextProvider';

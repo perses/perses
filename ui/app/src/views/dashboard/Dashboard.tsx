@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Hidden } from '@material-ui/core';
-import { Box } from '@material-ui/system';
+import { Box, Hidden } from '@mui/material';
 import { DashboardResource } from '@perses-ui/core';
 import Dashboard from '../../components/Dashboard';
 import { DashboardContextProvider } from '../../context/dashboard';

@@ -15,8 +15,8 @@ import '@fontsource/lato/300.css';
 import '@fontsource/lato/400.css';
 import '@fontsource/lato/700.css';
 import '@fontsource/lato/900.css';
-import { createTheme as createMuiTheme } from '@material-ui/core';
-import { blueGrey } from '@material-ui/core/colors';
+import { createTheme as createMuiTheme } from '@mui/material';
+import { blueGrey } from '@mui/material/colors';
 
 /**
  * Creates the Perses MUI theme.
