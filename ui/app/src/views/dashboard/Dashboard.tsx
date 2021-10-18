@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Hidden } from '@mui/material';
+import { Box } from '@mui/material';
 import { DashboardResource } from '@perses-ui/core';
 import Dashboard from '../../components/Dashboard';
 import { DashboardContextProvider } from '../../context/dashboard';
-import OptionsDrawer from './OptionsDrawer';
 
 export interface DashboardViewProps {
   resource: DashboardResource;
@@ -32,9 +31,11 @@ function DashboardView(props: DashboardViewProps) {
         <Box sx={{ padding: (theme) => theme.spacing(1, 2), flexGrow: 1 }}>
           <Dashboard />
         </Box>
-        <Hidden mdDown>
+        {/*
+ TODO: find a way to display the variable by not going above the header and the footer.
+<Hidden mdDown>
           <OptionsDrawer />
-        </Hidden>
+        </Hidden>*/}
       </Box>
     </DashboardContextProvider>
   );
