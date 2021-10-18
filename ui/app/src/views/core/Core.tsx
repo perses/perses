@@ -21,10 +21,10 @@ export interface CoreProps {
 
 export default function CoreView(props: CoreProps) {
   return (
-    <div>
+    <>
       <HeaderView />
       {props.children}
       <FooterView />
-    </div>
+    </>
   );
 }
