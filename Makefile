@@ -31,7 +31,7 @@ checkformat:
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"
-	./check_license.sh --check *.js *.ts *.go
+	./check_license.sh --check *.js *.jsx *.ts *.tsx *.go
 
 .PHONY: fixlicense
 fixlicense:
