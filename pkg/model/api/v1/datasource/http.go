@@ -19,7 +19,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type HTTPAccess string
@@ -71,74 +72,43 @@ func (h *HTTPAccess) validate() error {
 }
 
 type HTTPAllowedEndpoint struct {
-	EndpointPattern *regexp.Regexp `json:"endpoint_pattern" yaml:"endpoint_pattern"`
-	Method          string         `json:"method" yaml:"method"`
-}
-
-type tmpHTTPAllowedEndpoint struct {
-	EndpointPattern string `json:"endpoint_pattern" yaml:"endpoint_pattern"`
-	Method          string `json:"method" yaml:"method"`
-}
-
-func (h *HTTPAllowedEndpoint) MarshalJSON() ([]byte, error) {
-	endpointAsString := ""
-	if h.EndpointPattern != nil {
-		endpointAsString = h.EndpointPattern.String()
-	}
-	tmp := &tmpHTTPAllowedEndpoint{
-		EndpointPattern: endpointAsString,
-		Method:          h.Method,
-	}
-	return json.Marshal(tmp)
-}
-
-func (h *HTTPAllowedEndpoint) MarshalYAML() (interface{}, error) {
-	endpointAsString := ""
-	if h.EndpointPattern != nil {
-		endpointAsString = h.EndpointPattern.String()
-	}
-	tmp := &tmpHTTPAllowedEndpoint{
-		EndpointPattern: endpointAsString,
-		Method:          h.Method,
-	}
-	return tmp, nil
+	EndpointPattern common.Regexp `json:"endpoint_pattern" yaml:"endpoint_pattern"`
+	Method          string        `json:"method" yaml:"method"`
 }
 
 func (h *HTTPAllowedEndpoint) UnmarshalJSON(data []byte) error {
-	var tmp tmpHTTPAllowedEndpoint
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	var tmp HTTPAllowedEndpoint
+	type plain HTTPAllowedEndpoint
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
-	if err := h.validate(tmp); err != nil {
+	if err := h.validate(); err != nil {
 		return err
 	}
+	*h = tmp
 	return nil
 }
 
 func (h *HTTPAllowedEndpoint) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp tmpHTTPAllowedEndpoint
-	if err := unmarshal(&tmp); err != nil {
+	var tmp HTTPAllowedEndpoint
+	type plain HTTPAllowedEndpoint
+	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
-	if err := h.validate(tmp); err != nil {
+	if err := (&tmp).validate(); err != nil {
 		return err
 	}
+	*h = tmp
 	return nil
 }
 
-func (h *HTTPAllowedEndpoint) validate(tmp tmpHTTPAllowedEndpoint) error {
-	if len(tmp.Method) == 0 {
+func (h *HTTPAllowedEndpoint) validate() error {
+	if len(h.Method) == 0 {
 		return fmt.Errorf("HTTP method cannot be empty")
 	}
-	if len(tmp.EndpointPattern) == 0 {
+	if h.EndpointPattern.Regexp == nil {
 		return fmt.Errorf("HTTP endpoint pattern cannot be empty")
 	}
-	if re, err := regexp.Compile(tmp.EndpointPattern); err != nil {
-		return err
-	} else {
-		h.EndpointPattern = re
-	}
-	h.Method = tmp.Method
 	if h.Method != http.MethodGet &&
 		h.Method != http.MethodPost &&
 		h.Method != http.MethodDelete &&

@@ -20,7 +20,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"regexp"
 	"testing"
 	"time"
 
@@ -30,6 +29,7 @@ import (
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 )
 
@@ -125,27 +125,27 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 				Access: datasource.ServerHTTPAccess,
 				AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 					{
-						EndpointPattern: regexp.MustCompile("/api/v1/labels"),
+						EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 						Method:          http.MethodPost,
 					},
 					{
-						EndpointPattern: regexp.MustCompile("/api/v1/series"),
+						EndpointPattern: common.MustNewRegexp("/api/v1/series"),
 						Method:          http.MethodPost,
 					},
 					{
-						EndpointPattern: regexp.MustCompile("/api/v1/metadata"),
+						EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
 						Method:          http.MethodGet,
 					},
 					{
-						EndpointPattern: regexp.MustCompile("/api/v1/query"),
+						EndpointPattern: common.MustNewRegexp("/api/v1/query"),
 						Method:          http.MethodPost,
 					},
 					{
-						EndpointPattern: regexp.MustCompile("/api/v1/query_range"),
+						EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
 						Method:          http.MethodPost,
 					},
 					{
-						EndpointPattern: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+						EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
 						Method:          http.MethodGet,
 					},
 				},

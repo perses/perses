@@ -17,9 +17,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
-	"regexp"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -66,27 +66,27 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 						Access: datasource.ServerHTTPAccess,
 						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/labels"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/series"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/series"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/metadata"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
 								Method:          http.MethodGet,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/query"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/query"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/query_range"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
 								Method:          http.MethodGet,
 							},
 						},
@@ -140,27 +140,27 @@ spec:
 						Access: datasource.ServerHTTPAccess,
 						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/labels"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/series"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/series"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/metadata"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
 								Method:          http.MethodGet,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/query"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/query"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/query_range"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
 								Method:          http.MethodPost,
 							},
 							{
-								EndpointPattern: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+								EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
 								Method:          http.MethodGet,
 							},
 						},

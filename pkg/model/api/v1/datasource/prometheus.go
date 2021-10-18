@@ -16,32 +16,33 @@ package datasource
 import (
 	"encoding/json"
 	"net/http"
-	"regexp"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 var defaultPrometheusAllowedEndpoints = []HTTPAllowedEndpoint{
 	{
-		EndpointPattern: regexp.MustCompile("/api/v1/labels"),
+		EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 		Method:          http.MethodPost,
 	},
 	{
-		EndpointPattern: regexp.MustCompile("/api/v1/series"),
+		EndpointPattern: common.MustNewRegexp("/api/v1/series"),
 		Method:          http.MethodPost,
 	},
 	{
-		EndpointPattern: regexp.MustCompile("/api/v1/metadata"),
+		EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
 		Method:          http.MethodGet,
 	},
 	{
-		EndpointPattern: regexp.MustCompile("/api/v1/query"),
+		EndpointPattern: common.MustNewRegexp("/api/v1/query"),
 		Method:          http.MethodPost,
 	},
 	{
-		EndpointPattern: regexp.MustCompile("/api/v1/query_range"),
+		EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
 		Method:          http.MethodPost,
 	},
 	{
-		EndpointPattern: regexp.MustCompile("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+		EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
 		Method:          http.MethodGet,
 	},
 }
