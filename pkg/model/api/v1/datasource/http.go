@@ -19,6 +19,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type HTTPAccess string
@@ -70,8 +72,8 @@ func (h *HTTPAccess) validate() error {
 }
 
 type HTTPAllowedEndpoint struct {
-	Endpoint string `json:"endpoint" yaml:"endpoint"`
-	Method   string `json:"method" yaml:"method"`
+	EndpointPattern common.Regexp `json:"endpoint_pattern" yaml:"endpoint_pattern"`
+	Method          string        `json:"method" yaml:"method"`
 }
 
 func (h *HTTPAllowedEndpoint) UnmarshalJSON(data []byte) error {
@@ -104,15 +106,15 @@ func (h *HTTPAllowedEndpoint) validate() error {
 	if len(h.Method) == 0 {
 		return fmt.Errorf("HTTP method cannot be empty")
 	}
-	if len(h.Endpoint) == 0 {
-		return fmt.Errorf("HTTP endpoint cannot be empty")
+	if h.EndpointPattern.Regexp == nil {
+		return fmt.Errorf("HTTP endpoint pattern cannot be empty")
 	}
 	if h.Method != http.MethodGet &&
 		h.Method != http.MethodPost &&
 		h.Method != http.MethodDelete &&
 		h.Method != http.MethodPut &&
 		h.Method != http.MethodPatch {
-		return fmt.Errorf("'%s' is not a valid http method. Current supported HTTP method: %s, %s, %s, %s, %s", h.Method, http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodPatch)
+		return fmt.Errorf("%q is not a valid http method. Current supported HTTP method: %s, %s, %s, %s, %s", h.Method, http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodPatch)
 	}
 	return nil
 }

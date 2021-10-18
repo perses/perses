@@ -15,9 +15,11 @@ package datasource
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/url"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -261,6 +263,160 @@ url: "http://localhost:9090"
 			result := HTTPConfig{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestUnmarshalJSONHTTPAllowedEndpoint(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		jason  string
+		result HTTPAllowedEndpoint
+	}{
+		{
+			title: "simple endpoint",
+			jason: `
+{
+  "endpoint_pattern": "/api/v1/labels",
+  "method": "POST"
+}
+`,
+			result: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+				Method:          http.MethodPost,
+			},
+		},
+		{
+			title: "complex endpoint patter",
+			jason: `
+{
+  "endpoint_pattern": "^/?api/v./[a-zA-Z0-9]$",
+  "method": "POST"
+}
+`,
+			result: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
+				Method:          http.MethodPost,
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := HTTPAllowedEndpoint{}
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
+			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestUnmarshalYAMLHTTPAllowedEndpoint(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		yamele string
+		result HTTPAllowedEndpoint
+	}{
+		{
+			title: "simple endpoint",
+			yamele: `
+endpoint_pattern: "/api/v1/labels"
+method: "POST"
+`,
+			result: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+				Method:          http.MethodPost,
+			},
+		},
+		{
+			title: "complex endpoint patter",
+			yamele: `
+endpoint_pattern: "^/?api/v./[a-zA-Z0-9]$"
+method: "POST"
+`,
+			result: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
+				Method:          http.MethodPost,
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := HTTPAllowedEndpoint{}
+			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
+			assert.Equal(t, test.result, result)
+		})
+	}
+}
+
+func TestMarshalJSONHTTPAllowedEndpoint(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		allowedEndpoint HTTPAllowedEndpoint
+		result          string
+	}{
+		{
+			title: "simple endpoint",
+			allowedEndpoint: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+				Method:          http.MethodPost,
+			},
+			result: `{
+  "endpoint_pattern": "/api/v1/labels",
+  "method": "POST"
+}`,
+		},
+		{
+			title: "complex endpoint patter",
+			allowedEndpoint: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
+				Method:          http.MethodPost,
+			},
+			result: `{
+  "endpoint_pattern": "^/?api/v./[a-zA-Z0-9]$",
+  "method": "POST"
+}`,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			data, err := json.MarshalIndent(test.allowedEndpoint, "", "  ")
+			assert.NoError(t, err)
+			assert.Equal(t, test.result, string(data))
+		})
+	}
+}
+
+func TestMarshalYAMLHTTPAllowedEndpoint(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		allowedEndpoint HTTPAllowedEndpoint
+		result          string
+	}{
+		{
+			title: "simple endpoint",
+			allowedEndpoint: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+				Method:          http.MethodPost,
+			},
+			result: `endpoint_pattern: /api/v1/labels
+method: POST
+`,
+		},
+		{
+			title: "complex endpoint patter",
+			allowedEndpoint: HTTPAllowedEndpoint{
+				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
+				Method:          http.MethodPost,
+			},
+			result: `endpoint_pattern: ^/?api/v./[a-zA-Z0-9]$
+method: POST
+`,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			data, err := yaml.Marshal(test.allowedEndpoint)
+			assert.NoError(t, err)
+			assert.Equal(t, test.result, string(data))
 		})
 	}
 }
