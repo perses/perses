@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -71,7 +72,7 @@ func TestUnmarshalJSONLayout(t *testing.T) {
 							},
 							{
 								Width: 1,
-								Content: &JSONRef{
+								Content: &common.JSONRef{
 									Ref:  "#/panels/cpu",
 									Path: []string{"panels", "cpu"},
 								},
@@ -80,7 +81,7 @@ func TestUnmarshalJSONLayout(t *testing.T) {
 						{
 							{
 								Width: 1,
-								Content: &JSONRef{
+								Content: &common.JSONRef{
 									Ref:  "#/panels/load",
 									Path: []string{"panels", "load"},
 								},
@@ -112,7 +113,7 @@ func TestUnmarshalJSONLayout(t *testing.T) {
 				Kind: KindExpandLayout,
 				Parameter: &ExpandLayoutParameter{
 					Open: true,
-					Children: []*JSONRef{
+					Children: []*common.JSONRef{
 						{
 							Ref:    "#/layouts/mainGrid",
 							Path:   []string{"layouts", "mainGrid"},
@@ -164,7 +165,7 @@ parameter:
 							},
 							{
 								Width: 1,
-								Content: &JSONRef{
+								Content: &common.JSONRef{
 									Ref:  "#/panels/cpu",
 									Path: []string{"panels", "cpu"},
 								},
@@ -173,7 +174,7 @@ parameter:
 						{
 							{
 								Width: 1,
-								Content: &JSONRef{
+								Content: &common.JSONRef{
 									Ref:  "#/panels/load",
 									Path: []string{"panels", "load"},
 								},
@@ -199,7 +200,7 @@ parameter:
 				Kind: KindExpandLayout,
 				Parameter: &ExpandLayoutParameter{
 					Open: true,
-					Children: []*JSONRef{
+					Children: []*common.JSONRef{
 						{
 							Ref:    "#/layouts/mainGrid",
 							Path:   []string{"layouts", "mainGrid"},

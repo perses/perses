@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
 )
@@ -39,7 +40,7 @@ type DashboardSpec struct {
 	Variables  map[string]*dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Panels     map[string]*dashboard.Panel    `json:"panels" yaml:"panels"`
 	Layouts    map[string]*dashboard.Layout   `json:"layouts" yaml:"layouts"`
-	Entrypoint *dashboard.JSONRef             `json:"entrypoint" yaml:"entrypoint"`
+	Entrypoint *common.JSONRef                `json:"entrypoint" yaml:"entrypoint"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
@@ -163,7 +164,7 @@ func (d *Dashboard) verifyAndSetJSONReferences() error {
 	return d.checkAndSetRef(d.Spec.Entrypoint)
 }
 
-func (d *Dashboard) checkAndSetRef(ref *dashboard.JSONRef) error {
+func (d *Dashboard) checkAndSetRef(ref *common.JSONRef) error {
 	// ref.Path should like that [ "spec", "layouts" | "panels", <name> ].
 	// So if the array is not equal to three then the reference is wrong.
 	if len(ref.Path) != 3 {

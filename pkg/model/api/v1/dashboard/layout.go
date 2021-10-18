@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"gopkg.in/yaml.v2"
 )
 
@@ -73,13 +74,13 @@ type LayoutParameter interface {
 
 type ExpandLayoutParameter struct {
 	LayoutParameter `json:"-" yaml:"-"`
-	Open            bool       `json:"open" yaml:"open"`
-	Children        []*JSONRef `json:"children" yaml:"children"`
+	Open            bool              `json:"open" yaml:"open"`
+	Children        []*common.JSONRef `json:"children" yaml:"children"`
 }
 
 type GridCell struct {
-	Width   uint     `json:"width" yaml:"width"`
-	Content *JSONRef `json:"content,omitempty" yaml:"content,omitempty"`
+	Width   uint            `json:"width" yaml:"width"`
+	Content *common.JSONRef `json:"content,omitempty" yaml:"content,omitempty"`
 }
 
 type GridLayoutParameter struct {

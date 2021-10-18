@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
@@ -58,7 +59,7 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Entrypoint: &dashboard.JSONRef{
+					Entrypoint: &common.JSONRef{
 						Ref: "#/spec/layouts/main",
 					},
 					Layouts: map[string]*dashboard.Layout{
@@ -66,7 +67,7 @@ func TestMarshalDashboard(t *testing.T) {
 							Kind: dashboard.KindExpandLayout,
 							Parameter: dashboard.ExpandLayoutParameter{
 								Open: false,
-								Children: []*dashboard.JSONRef{
+								Children: []*common.JSONRef{
 									{
 										Ref: "#/spec/panels/MyPanel",
 									},
@@ -170,7 +171,7 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Entrypoint: &dashboard.JSONRef{
+					Entrypoint: &common.JSONRef{
 						Ref: "#/spec/layouts/main",
 					},
 					Layouts: map[string]*dashboard.Layout{
@@ -178,7 +179,7 @@ func TestMarshalDashboard(t *testing.T) {
 							Kind: dashboard.KindExpandLayout,
 							Parameter: dashboard.ExpandLayoutParameter{
 								Open: false,
-								Children: []*dashboard.JSONRef{
+								Children: []*common.JSONRef{
 									{
 										Ref: "#/spec/panels/MyPanel",
 									},
