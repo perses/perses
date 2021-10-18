@@ -82,7 +82,7 @@ func (h *HTTPAllowedEndpoint) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
-	if err := h.validate(); err != nil {
+	if err := (&tmp).validate(); err != nil {
 		return err
 	}
 	*h = tmp

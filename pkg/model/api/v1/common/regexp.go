@@ -43,14 +43,6 @@ func MustNewRegexp(s string) Regexp {
 	return re
 }
 
-func (re *Regexp) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var s string
-	if err := unmarshal(&s); err != nil {
-		return err
-	}
-	return re.validate(s)
-}
-
 func (re *Regexp) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
@@ -59,17 +51,24 @@ func (re *Regexp) UnmarshalJSON(data []byte) error {
 	return re.validate(s)
 }
 
-// MarshalYAML implements the yaml.Marshaler interface.
-func (re Regexp) MarshalYAML() (interface{}, error) {
-	if len(re.original) > 0 {
-		return re.original, nil
+func (re *Regexp) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var s string
+	if err := unmarshal(&s); err != nil {
+		return err
 	}
-	return nil, nil
+	return re.validate(s)
 }
 
 func (re Regexp) MarshalJSON() ([]byte, error) {
 	if len(re.original) > 0 {
-		return []byte(re.original), nil
+		return json.Marshal(re.original)
+	}
+	return nil, nil
+}
+
+func (re Regexp) MarshalYAML() (interface{}, error) {
+	if len(re.original) > 0 {
+		return re.original, nil
 	}
 	return nil, nil
 }
