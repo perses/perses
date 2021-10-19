@@ -1,7 +1,8 @@
-import { Box, Theme } from '@mui/material';
+import { Box, CircularProgress, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { Github } from 'mdi-material-ui';
 import useHealth from './health-client';
+import Toast from './components/Toast';
 
 const style: SxProps<Theme> = {
   display: 'flex',
@@ -23,26 +24,33 @@ const style: SxProps<Theme> = {
 };
 
 export default function Footer(): JSX.Element {
-  const { response } = useHealth();
+  const { response, loading, error } = useHealth();
   return (
-    <Box sx={style}>
-      <ul>
-        <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
-        <li>
-          <a
-            href="https://github.com/perses/perses"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Github sx={{ verticalAlign: 'bottom' }} />
-          </a>
-        </li>
-        <li>
-          {response && response.version.length > 0
-            ? response.version
-            : 'development version'}
-        </li>
-      </ul>
-    </Box>
+    <>
+      <Box sx={style}>
+        <ul>
+          <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
+          <li>
+            <a
+              href="https://github.com/perses/perses"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Github sx={{ verticalAlign: 'bottom' }} />
+            </a>
+          </li>
+          <li>
+            {loading ? (
+              <CircularProgress size="1rem" />
+            ) : response && response.version.length > 0 ? (
+              response.version
+            ) : (
+              'development version'
+            )}
+          </li>
+        </ul>
+      </Box>
+      <Toast loading={loading} severity={'error'} message={error?.message} />
+    </>
   );
 }
