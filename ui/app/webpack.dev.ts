@@ -59,6 +59,9 @@ const devConfig: Configuration = {
     open: true,
     https: getHttpsConfig(),
     historyApiFallback: true,
+    proxy: {
+      '/api': 'http://localhost:8080',
+    },
   },
   cache: true,
 };
