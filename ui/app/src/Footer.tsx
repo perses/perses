@@ -21,7 +21,7 @@ const style: SxProps<Theme> = {
   },
 };
 
-export function FooterView(): JSX.Element {
+export default function Footer(): JSX.Element {
   return (
     <Box sx={style}>
       <ul>

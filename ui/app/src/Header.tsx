@@ -13,7 +13,7 @@
 
 import { AppBar, Switch, Toolbar, Typography } from '@material-ui/core';
 
-export function HeaderView(): JSX.Element {
+export default function Header(): JSX.Element {
   return (
     <AppBar position="relative">
       <Toolbar>
