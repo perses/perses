@@ -1,6 +1,7 @@
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { Github } from 'mdi-material-ui';
+import useHealth from './health-client';
 
 const style: SxProps<Theme> = {
   display: 'flex',
@@ -22,6 +23,7 @@ const style: SxProps<Theme> = {
 };
 
 export default function Footer(): JSX.Element {
+  const { response } = useHealth();
   return (
     <Box sx={style}>
       <ul>
@@ -35,7 +37,11 @@ export default function Footer(): JSX.Element {
             <Github sx={{ verticalAlign: 'bottom' }} />
           </a>
         </li>
-        <li>v0.1.0</li>
+        <li>
+          {response && response.version.length > 0
+            ? response.version
+            : 'development version'}
+        </li>
       </ul>
     </Box>
   );
