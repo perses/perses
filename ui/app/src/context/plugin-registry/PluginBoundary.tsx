@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactNode } from 'react';
 import { ErrorBoundary, ErrorBoundaryProps } from 'react-error-boundary';
 import {
   PluginLoadingBoundary,
@@ -20,7 +21,7 @@ import {
 export interface PluginBoundaryProps {
   loadingFallback: PluginLoadingBoundaryProps['fallback'];
   ErrorFallbackComponent: Required<ErrorBoundaryProps>['FallbackComponent'];
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /**

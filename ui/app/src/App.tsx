@@ -20,6 +20,8 @@ import DashboardView from './views/dashboard/Dashboard';
 import AlertErrorFallback from './components/AlertErrorFallback';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import { useSampleData } from './utils/temp-sample-data';
+import Header from './Header';
+import Footer from './Footer';
 
 function App() {
   const dashboard = useSampleData<DashboardResource>('dashboard');
@@ -28,14 +30,18 @@ function App() {
   }
 
   return (
-    <PluginRegistry
-      loadingFallback="Loading..."
-      ErrorFallbackComponent={AlertErrorFallback}
-    >
-      <DataSourceRegistry>
-        <DashboardView resource={dashboard} />
-      </DataSourceRegistry>
-    </PluginRegistry>
+    <>
+      <Header />
+      <PluginRegistry
+        loadingFallback="Loading..."
+        ErrorFallbackComponent={AlertErrorFallback}
+      >
+        <DataSourceRegistry>
+          <DashboardView resource={dashboard} />
+        </DataSourceRegistry>
+      </PluginRegistry>
+      <Footer />
+    </>
   );
 }
 
