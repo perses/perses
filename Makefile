@@ -61,7 +61,7 @@ build: generate
 
 .PHONY: build-ui
 build-ui:
-	cd ./web && npm install && npm run build
+	cd ./ui && npm install && npm run build
 
 .PHONY: crossbuild
 crossbuild: generate
