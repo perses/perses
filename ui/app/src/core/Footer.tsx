@@ -1,8 +1,8 @@
 import { Box, CircularProgress, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { Github } from 'mdi-material-ui';
+import Toast from '../shared/components/Toast';
 import useHealth from './health-client';
-import Toast from './components/Toast';
 
 const style: SxProps<Theme> = {
   display: 'flex',

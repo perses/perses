@@ -13,8 +13,8 @@
 
 import { Box } from '@mui/material';
 import { DashboardResource } from '@perses-ui/core';
-import Dashboard from '../../components/Dashboard';
-import { DashboardContextProvider } from '../../context/dashboard';
+import Dashboard from './components/Dashboard';
+import { DashboardContextProvider } from './context/dashboard';
 
 export interface DashboardViewProps {
   resource: DashboardResource;

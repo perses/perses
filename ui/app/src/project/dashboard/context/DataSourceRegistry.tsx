@@ -13,7 +13,7 @@
 
 import { createContext, useContext, useCallback, useMemo } from 'react';
 import { DataSourceResource, ResourceSelector } from '@perses-ui/core';
-import { useSampleData } from '../utils/temp-sample-data';
+import { useSampleData } from '../../../shared/utils/temp-sample-data';
 
 export interface DataSourceRegistryContextType {
   getDataSources(selector: ResourceSelector): DataSourceResource[];

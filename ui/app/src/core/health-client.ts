@@ -11,20 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
+import { useFetch } from '@perses-ui/core';
+import { URLBuilderUtil } from '../shared/utils/url-builder';
 
-interface SampleDataModule<T> {
-  default: T;
+const healthResource = 'health';
+
+export interface HealthModel {
+  buildTime: string;
+  version: string;
+  commit: string;
 }
 
-export function useSampleData<T>(name: string) {
-  const [data, setData] = useState<T>();
-  useEffect(() => {
-    async function loadData() {
-      const js: SampleDataModule<T> = await import(`../../sample-data/${name}`);
-      setData(js.default);
-    }
-    loadData();
-  }, [name]);
-  return data;
+export default function useHealth() {
+  const url = new URLBuilderUtil().setResource(healthResource).build();
+  return useFetch<HealthModel>(url);
 }

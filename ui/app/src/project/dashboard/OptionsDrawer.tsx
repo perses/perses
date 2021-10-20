@@ -13,9 +13,9 @@
 
 import { Drawer, Typography } from '@mui/material';
 import { useDashboardSpec } from '@perses-ui/core';
-import AlertErrorFallback from '../../components/AlertErrorFallback';
-import VariableAutocomplete from '../../components/VariableAutocomplete';
-import { PluginBoundary } from '../../context/plugin-registry';
+import AlertErrorFallback from './components/AlertErrorFallback';
+import VariableAutocomplete from './components/VariableAutocomplete';
+import { PluginBoundary } from './context/plugin-registry';
 
 const DRAWER_WIDTH = 296;
 
