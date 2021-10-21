@@ -19,8 +19,8 @@ import {
   TextFieldProps,
 } from '@mui/material';
 import { AnyVariableDefinition } from '@perses-ui/core';
-import { useVariableOptions } from '../context/plugin-registry';
-import { useDashboardContext } from '../context/dashboard';
+import { useVariableOptions } from '../../context/plugin-registry';
+import { useDashboardContext } from './DashboardContextProvider';
 
 // What kind of AutocompleteProps we're using internally here
 type AutocompleteProps = MuiAutocompleteProps<string, boolean, true, false>;

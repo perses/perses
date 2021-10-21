@@ -16,8 +16,8 @@ import { Box, BoxProps, ButtonBase, Collapse, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronUp';
 import CollapsedIcon from 'mdi-material-ui/ChevronDown';
 import { ExpandLayoutDefinition } from '@perses-ui/core';
+import AlertErrorBoundary from '../../components/AlertErrorBoundary';
 import ContentRefResolver from './ContentRefResolver';
-import AlertErrorBoundary from './AlertErrorBoundary';
 
 export interface ExpandLayoutProps extends Omit<BoxProps, 'children'> {
   definition: ExpandLayoutDefinition;

@@ -12,8 +12,11 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo, useRef } from 'react';
-import { PluginModule, PluginRuntimeProvider } from '@perses-ui/core';
-import { pluginRuntime } from '../../model/plugin-runtime';
+import {
+  PluginModule,
+  PluginRuntime,
+  PluginRuntimeProvider,
+} from '@perses-ui/core';
 import { PluginBoundary, PluginBoundaryProps } from './PluginBoundary';
 import {
   LoadedPluginsByTypeAndKind,
@@ -31,14 +34,16 @@ export interface PluginRegistryContextType {
   register: (pluginModule: PluginModule) => void;
 }
 
-export type PluginRegistryProviderProps = PluginBoundaryProps;
+export interface PluginRegistryProviderProps extends PluginBoundaryProps {
+  runtime: PluginRuntime;
+}
 
 /**
  * PluginRegistryContext provider that keeps track of all available plugins and
  * their implementations once they've been loaded.
  */
 export function PluginRegistry(props: PluginRegistryProviderProps) {
-  const { children, ...others } = props;
+  const { children, runtime, ...others } = props;
 
   // TODO: Fetch from server
   const installedPlugins = useRef([]);
@@ -54,7 +59,7 @@ export function PluginRegistry(props: PluginRegistryProviderProps) {
 
   return (
     <PluginRegistryContext.Provider value={registry}>
-      <PluginRuntimeProvider value={pluginRuntime}>
+      <PluginRuntimeProvider value={runtime}>
         <PluginBoundary {...others}>{children}</PluginBoundary>
       </PluginRuntimeProvider>
     </PluginRegistryContext.Provider>

@@ -17,7 +17,7 @@ import {
   GridLayoutDefinition,
   GridRowDefinition,
 } from '@perses-ui/core';
-import AlertErrorBoundary from './AlertErrorBoundary';
+import AlertErrorBoundary from '../../components/AlertErrorBoundary';
 import ContentRefResolver from './ContentRefResolver';
 
 const GRID_SPACING = 1;

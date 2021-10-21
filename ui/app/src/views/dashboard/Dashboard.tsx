@@ -11,34 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
-import { DashboardResource } from '@perses-ui/core';
-import Dashboard from '../../components/Dashboard';
-import { DashboardContextProvider } from '../../context/dashboard';
+import { Box, BoxProps } from '@mui/material';
+import { useDashboardSpec } from '@perses-ui/core';
+import AlertErrorBoundary from '../../components/AlertErrorBoundary';
+import ContentRefResolver from './ContentRefResolver';
 
-export interface DashboardViewProps {
-  resource: DashboardResource;
-}
+export type DashboardProps = BoxProps;
 
 /**
- * The View for viewing a Dashboard.
+ * Renders a Dashboard for the current Dashboard spec.
  */
-function DashboardView(props: DashboardViewProps) {
-  const { resource } = props;
+function Dashboard(props: DashboardProps) {
+  const spec = useDashboardSpec();
+
   return (
-    <DashboardContextProvider resource={resource}>
-      <Box sx={{ display: 'flex' }}>
-        <Box sx={{ padding: (theme) => theme.spacing(1, 2), flexGrow: 1 }}>
-          <Dashboard />
-        </Box>
-        {/*
- TODO: find a way to display the variable by not going above the header and the footer.
-<Hidden mdDown>
-          <OptionsDrawer />
-        </Hidden>*/}
-      </Box>
-    </DashboardContextProvider>
+    <Box {...props}>
+      <AlertErrorBoundary>
+        <ContentRefResolver contentRef={spec.entrypoint} />
+      </AlertErrorBoundary>
+    </Box>
   );
 }
 
-export default DashboardView;
+export default Dashboard;
