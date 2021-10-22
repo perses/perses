@@ -117,7 +117,7 @@ to ensure you are writing modular UI code.
   components instead of making it do too many things.
 - Use Null or Undefined checks instead of relying on JS falsiness
 - Feature specific code within `/views` should not be imported by a different feature
-  or global component This is a sign of too much coupling between things OR a sign
+  or global component. This is a sign of too much coupling between things OR a sign
   that the thing should be turned into a globally reusable component or utility.
 - Try to put the application state as close to where it’s used. When writing feature
   specific code, don’t worry about putting all of the state in a single "container"
