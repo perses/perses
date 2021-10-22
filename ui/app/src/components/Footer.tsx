@@ -1,7 +1,7 @@
 import { Box, CircularProgress, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { Github } from 'mdi-material-ui';
-import { useHealth } from '../model/perses-client';
+import { useHealth } from '../model/health-client';
 import Toast from './Toast';
 
 const style: SxProps<Theme> = {
