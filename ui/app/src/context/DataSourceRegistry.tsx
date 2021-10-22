@@ -40,19 +40,14 @@ export function DataSourceRegistry(props: DataSourceRegistryProps) {
     return [dataSource];
   }, [dataSource]);
 
-  const getDataSources = useCallback(
-    (selector: ResourceSelector) => {
-      // TODO: Is this how K8s selectors actually work?
-      return dataSources.filter((d) => {
-        for (const key in selector) {
-          const value = selector[key];
-          if (d.metadata[key] !== value) return false;
-        }
-        return true;
-      });
-    },
-    [dataSources]
-  );
+  const getDataSources = useCallback(() => {
+    // TODO: Is this how K8s selectors actually work?
+    // k8s selector is looking at the metadata.labels, which doesn't exist in the current datamodel
+    // TODO @nexucis review the way to fetch the datasources (Global datasource vs Local datasource)
+    return dataSources.filter(() => {
+      return true;
+    });
+  }, [dataSources]);
 
   const context: DataSourceRegistryContextType = useMemo(
     () => ({ getDataSources }),

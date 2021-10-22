@@ -13,14 +13,14 @@
 
 import { LayoutRef, PanelRef } from './json-references';
 import { AnyPanelDefinition } from './panels';
-import { ResourceMetadata, ResourceSelector } from './resource';
+import { ProjectMetadata, ResourceSelector } from './resource';
 import { AnyVariableDefinition } from './variables';
 import { DurationString } from './time';
 import { Definition, JsonObject } from './definitions';
 
 export interface DashboardResource {
   kind: 'Dashboard';
-  metadata: ResourceMetadata;
+  metadata: ProjectMetadata;
   spec: DashboardSpec;
 }
 
