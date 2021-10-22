@@ -21,6 +21,8 @@ are commonly used across multiple packages in the workspace.
 
 ## Development Environment
 
+First, check out the [UI Guidelines](./ui-guidelines.md) for some information
+on how the codebase is organized and our approach to development in the UI.
 You'll need to have the following installed locally before you can start
 developing:
 

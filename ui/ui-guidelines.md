@@ -34,6 +34,11 @@ are reflected in how the codebase is organized.
 
 - Most of our CSS lives inline with components because we believe that the look
   and behavior of a component should be coupled
+- Use the `SxProps` API in Material UI for doing most custom styling inline with
+  the components. We may use the `styled` hook in the future as the UI matures
+  and becomes more stable.
+- External CSS files should typically only be used for third-party libraries that
+  require them for styling
 - Material UI is themeable, so we define any global overrides for Material UI
   components in the theme
 - The theme includes our color palette, typography, spacing units and more and is
@@ -68,8 +73,8 @@ are reflected in how the codebase is organized.
 
 ### Tests
 
-- Unit and integration tests live alongside the application code in `__tests__`
-  folders
+- Unit and integration tests live alongside the application code in `*.test.ts`
+  files
 - Server mocks live in `__server__` folders alongside app code
 - Any new feature work or essential bug fixes should include integration tests
   written with jest and react-testing-library.
@@ -115,7 +120,9 @@ to ensure you are writing modular UI code.
   single module)
 - If a component has multiple boolean flag props, consider to split it into multiple
   components instead of making it do too many things.
-- Use Null or Undefined checks instead of relying on JS falsiness
+- Use explicit `null` or `undefined` checks instead of relying on JS falsiness
+- Bias towards using optional properties (i.e. `foo?: bar`) and `undefined` over
+  `null`, unless an explicit `null` is required or has semantic meaning
 - Feature specific code within `/views` should not be imported by a different feature
   or global component. This is a sign of too much coupling between things OR a sign
   that the thing should be turned into a globally reusable component or utility.
