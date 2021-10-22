@@ -11,26 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps } from '@mui/material';
-import { useDashboardSpec } from '@perses-ui/core';
-import AlertErrorBoundary from './AlertErrorBoundary';
-import ContentRefResolver from './ContentRefResolver';
+import { useFetch } from '@perses-ui/core';
+import { URLBuilderUtil } from './url-builder';
 
-export type DashboardProps = BoxProps;
+const healthResource = 'health';
 
-/**
- * Renders a Dashboard for the current Dashboard spec.
- */
-function Dashboard(props: DashboardProps) {
-  const spec = useDashboardSpec();
-
-  return (
-    <Box {...props}>
-      <AlertErrorBoundary>
-        <ContentRefResolver contentRef={spec.entrypoint} />
-      </AlertErrorBoundary>
-    </Box>
-  );
+export interface HealthModel {
+  buildTime: string;
+  version: string;
+  commit: string;
 }
 
-export default Dashboard;
+/**
+ * Gets version information from the Perses server API.
+ */
+export function useHealth() {
+  const url = new URLBuilderUtil().setResource(healthResource).build();
+  return useFetch<HealthModel>(url);
+}

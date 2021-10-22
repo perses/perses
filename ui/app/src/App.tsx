@@ -12,16 +12,14 @@
 // limitations under the License.
 
 import { DashboardResource } from '@perses-ui/core';
-// TODO: Figure out why the import path './context/plugin-registry' doesn't work
-// (the app throws a TypeScript error in the browser) although there is an index.ts
-// file in that directory that should expose everything.
-import { PluginRegistry } from './context/plugin-registry/PluginRegistry';
-import DashboardView from './views/dashboard/Dashboard';
+import { PluginRegistry } from './context/plugin-registry';
+import ViewDashboard from './views/dashboard/ViewDashboard';
 import AlertErrorFallback from './components/AlertErrorFallback';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import { useSampleData } from './utils/temp-sample-data';
-import Header from './Header';
-import Footer from './Footer';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import { pluginRuntime } from './model/plugin-runtime';
 
 function App() {
   const dashboard = useSampleData<DashboardResource>('dashboard');
@@ -35,9 +33,10 @@ function App() {
       <PluginRegistry
         loadingFallback="Loading..."
         ErrorFallbackComponent={AlertErrorFallback}
+        runtime={pluginRuntime}
       >
         <DataSourceRegistry>
-          <DashboardView resource={dashboard} />
+          <ViewDashboard resource={dashboard} />
         </DataSourceRegistry>
       </PluginRegistry>
       <Footer />

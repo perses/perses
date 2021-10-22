@@ -21,9 +21,12 @@ import {
   Typography,
 } from '@mui/material';
 import { AnyPanelDefinition } from '@perses-ui/core';
-import { PluginBoundary, usePanelComponent } from '../context/plugin-registry';
-import { PanelContextProvider } from '../context/PanelContextProvider';
-import AlertErrorFallback from './AlertErrorFallback';
+import {
+  PluginBoundary,
+  usePanelComponent,
+} from '../../context/plugin-registry';
+import AlertErrorFallback from '../../components/AlertErrorFallback';
+import { PanelContextProvider } from './PanelContextProvider';
 
 const CONTENT_HEIGHT = 152;
 

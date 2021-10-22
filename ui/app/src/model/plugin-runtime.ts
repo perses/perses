@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { PluginRuntime } from '@perses-ui/core';
-import { useDashboardContext } from '../context/dashboard';
+import { useDashboardContext } from '../views/dashboard/DashboardContextProvider';
 import { useDataSources } from '../context/DataSourceRegistry';
-import { usePanelContext } from '../context/PanelContextProvider';
+import { usePanelContext } from '../views/dashboard/PanelContextProvider';
 import { useChartQuery } from '../context/plugin-registry';
 
 /**
