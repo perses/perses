@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useFetch } from '@perses-ui/core';
-import { URLBuilderUtil } from './url-builder';
+import buildURL from './url-builder';
 
 const healthResource = 'health';
 
@@ -26,6 +26,6 @@ export interface HealthModel {
  * Gets version information from the Perses server API.
  */
 export function useHealth() {
-  const url = new URLBuilderUtil().setResource(healthResource).build();
+  const url = buildURL({ resource: healthResource });
   return useFetch<HealthModel>(url);
 }

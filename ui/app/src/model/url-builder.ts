@@ -11,42 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export class URLBuilderUtil {
-  private readonly prefixAPI = '/api/v1';
-  private resource: string;
-  private project: string;
-  private name: string;
+const prefixAPI = '/api/v1';
 
-  constructor() {
-    this.resource = '';
-    this.project = '';
-    this.name = '';
-  }
+export type BuildURLParams = {
+  resource: string;
+  name?: string;
+  project?: string;
+};
 
-  setProject(project: string): URLBuilderUtil {
-    this.project = project;
-    return this;
+export default function buildURL(params: BuildURLParams): string {
+  let url = prefixAPI;
+  if (params.project && params.project.length > 0) {
+    url = `${url}/projects/${params.project}`;
   }
-
-  setName(name: string): URLBuilderUtil {
-    this.name = name;
-    return this;
+  url = `${url}/${params.resource}`;
+  if (params.name && params.name.length > 0) {
+    url = `${url}/${params.name}`;
   }
-
-  setResource(resource: string): URLBuilderUtil {
-    this.resource = resource;
-    return this;
-  }
-
-  build(): string {
-    let url = this.prefixAPI;
-    if (this.project && this.project.length > 0) {
-      url = `${url}/projects/${this.project}`;
-    }
-    url = `${url}/${this.resource}`;
-    if (this.name.length > 0) {
-      url = `${url}/${this.name}`;
-    }
-    return url;
-  }
+  return url;
 }

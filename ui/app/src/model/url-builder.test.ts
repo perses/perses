@@ -11,31 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { URLBuilderUtil } from './url-builder';
+import buildURL from './url-builder';
 
 describe('URLBuilderUtil', () => {
-  let builder: URLBuilderUtil;
+  const testSuite = [
+    {
+      title: 'if no params, should return no params in the uri',
+      expectedURI: '/api/v1/test',
+      parameter: {
+        resource: 'test',
+      },
+    },
+    {
+      title: 'check if set project is considered',
+      expectedURI: '/api/v1/projects/perses/test',
+      parameter: {
+        resource: 'test',
+        project: 'perses',
+      },
+    },
+    {
+      title: 'complete test',
+      expectedURI: '/api/v1/projects/perses/test/superName',
+      parameter: {
+        resource: 'test',
+        project: 'perses',
+        name: 'superName',
+      },
+    },
+  ];
 
-  beforeEach(() => {
-    builder = new URLBuilderUtil();
-  });
-
-  it('if no params, should return no params in the uri', () => {
-    const expectedURI = '/api/v1/test';
-    builder.setResource('test');
-
-    expect(builder.build()).toEqual(expectedURI);
-  });
-
-  it('check if set project is considered', () => {
-    const expectedURI = '/api/v1/projects/perses/test';
-    builder.setProject('perses').setResource('test');
-    expect(builder.build()).toEqual(expectedURI);
-  });
-
-  it('complete test', () => {
-    const expectedURI = '/api/v1/projects/perses/test/superName';
-    builder.setResource('test').setProject('perses').setName('superName');
-    expect(builder.build()).toEqual(expectedURI);
+  testSuite.forEach(({ title, expectedURI, parameter }) => {
+    it(title, () => {
+      expect(buildURL(parameter)).toEqual(expectedURI);
+    });
   });
 });
