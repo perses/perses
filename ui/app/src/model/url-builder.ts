@@ -11,21 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const prefixAPI = '/api/v1';
+const apiPrefix = '/api/v1';
 
-export type BuildURLParams = {
+export type URLParams = {
   resource: string;
   name?: string;
   project?: string;
 };
 
-export default function buildURL(params: BuildURLParams): string {
-  let url = prefixAPI;
-  if (params.project && params.project.length > 0) {
+export default function buildURL(params: URLParams): string {
+  let url = apiPrefix;
+  if (params.project !== undefined && params.project.length > 0) {
     url = `${url}/projects/${params.project}`;
   }
   url = `${url}/${params.resource}`;
-  if (params.name && params.name.length > 0) {
+  if (params.name !== undefined && params.name.length > 0) {
     url = `${url}/${params.name}`;
   }
   return url;

@@ -13,19 +13,19 @@
 
 import buildURL from './url-builder';
 
-describe('URLBuilderUtil', () => {
+describe('buildURL', () => {
   const testSuite = [
     {
       title: 'if no params, should return no params in the uri',
       expectedURI: '/api/v1/test',
-      parameter: {
+      parameters: {
         resource: 'test',
       },
     },
     {
       title: 'check if set project is considered',
       expectedURI: '/api/v1/projects/perses/test',
-      parameter: {
+      parameters: {
         resource: 'test',
         project: 'perses',
       },
@@ -33,7 +33,7 @@ describe('URLBuilderUtil', () => {
     {
       title: 'complete test',
       expectedURI: '/api/v1/projects/perses/test/superName',
-      parameter: {
+      parameters: {
         resource: 'test',
         project: 'perses',
         name: 'superName',
@@ -41,9 +41,9 @@ describe('URLBuilderUtil', () => {
     },
   ];
 
-  testSuite.forEach(({ title, expectedURI, parameter }) => {
+  testSuite.forEach(({ title, expectedURI, parameters }) => {
     it(title, () => {
-      expect(buildURL(parameter)).toEqual(expectedURI);
+      expect(buildURL(parameters)).toEqual(expectedURI);
     });
   });
 });
