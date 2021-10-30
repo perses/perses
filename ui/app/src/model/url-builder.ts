@@ -22,11 +22,11 @@ export type URLParams = {
 export default function buildURL(params: URLParams): string {
   let url = apiPrefix;
   if (params.project !== undefined && params.project.length > 0) {
-    url = `${url}/projects/${params.project}`;
+    url = `${url}/projects/${encodeURIComponent(params.project)}`;
   }
   url = `${url}/${params.resource}`;
   if (params.name !== undefined && params.name.length > 0) {
-    url = `${url}/${params.name}`;
+    url = `${url}/${encodeURIComponent(params.name)}`;
   }
   return url;
 }

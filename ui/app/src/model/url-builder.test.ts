@@ -39,6 +39,23 @@ describe('buildURL', () => {
         name: 'superName',
       },
     },
+    {
+      title: 'a french project name',
+      expectedURI: '/api/v1/projects/%C3%A7a%20marche',
+      parameters: {
+        resource: 'projects',
+        name: 'ça marche',
+      },
+    },
+    {
+      title: 'a french project and a french resource name',
+      expectedURI: '/api/v1/projects/%C3%A7a%20marche/dashboards/h%C3%B4pital',
+      parameters: {
+        resource: 'dashboards',
+        project: 'ça marche',
+        name: 'hôpital',
+      },
+    },
   ];
 
   testSuite.forEach(({ title, expectedURI, parameters }) => {
