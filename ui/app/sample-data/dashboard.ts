@@ -17,6 +17,9 @@ const cadvisor: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'Kubelet - cAdvisor',
+    project: 'perses',
+    created_at: '2021-10-20',
+    updated_at: '2021-10-20',
   },
   spec: {
     datasource: { name: 'Public Prometheus Demo Server' },

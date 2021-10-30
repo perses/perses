@@ -11,31 +11,56 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { URLBuilderUtil } from './url-builder';
+import buildURL from './url-builder';
 
-describe('URLBuilderUtil', () => {
-  let builder: URLBuilderUtil;
+describe('buildURL', () => {
+  const testSuite = [
+    {
+      title: 'if no params, should return no params in the uri',
+      expectedURI: '/api/v1/test',
+      parameters: {
+        resource: 'test',
+      },
+    },
+    {
+      title: 'check if set project is considered',
+      expectedURI: '/api/v1/projects/perses/test',
+      parameters: {
+        resource: 'test',
+        project: 'perses',
+      },
+    },
+    {
+      title: 'complete test',
+      expectedURI: '/api/v1/projects/perses/test/superName',
+      parameters: {
+        resource: 'test',
+        project: 'perses',
+        name: 'superName',
+      },
+    },
+    {
+      title: 'a french project name',
+      expectedURI: '/api/v1/projects/%C3%A7a%20marche',
+      parameters: {
+        resource: 'projects',
+        name: 'ça marche',
+      },
+    },
+    {
+      title: 'a french project and a french resource name',
+      expectedURI: '/api/v1/projects/%C3%A7a%20marche/dashboards/h%C3%B4pital',
+      parameters: {
+        resource: 'dashboards',
+        project: 'ça marche',
+        name: 'hôpital',
+      },
+    },
+  ];
 
-  beforeEach(() => {
-    builder = new URLBuilderUtil();
-  });
-
-  it('if no params, should return no params in the uri', () => {
-    const expectedURI = '/api/v1/test';
-    builder.setResource('test');
-
-    expect(builder.build()).toEqual(expectedURI);
-  });
-
-  it('check if set project is considered', () => {
-    const expectedURI = '/api/v1/projects/perses/test';
-    builder.setProject('perses').setResource('test');
-    expect(builder.build()).toEqual(expectedURI);
-  });
-
-  it('complete test', () => {
-    const expectedURI = '/api/v1/projects/perses/test/superName';
-    builder.setResource('test').setProject('perses').setName('superName');
-    expect(builder.build()).toEqual(expectedURI);
+  testSuite.forEach(({ title, expectedURI, parameters }) => {
+    it(title, () => {
+      expect(buildURL(parameters)).toEqual(expectedURI);
+    });
   });
 });

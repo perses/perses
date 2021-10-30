@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { Definition, JsonObject } from './definitions';
-import { ResourceMetadata } from './resource';
+import { Metadata } from './resource';
 
 export interface DataSourceResource {
   kind: 'DataSource';
-  metadata: ResourceMetadata;
+  metadata: Metadata;
   spec: {
     data_source: AnyDataSourceDefinition;
   };

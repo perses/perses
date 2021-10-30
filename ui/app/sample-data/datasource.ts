@@ -17,6 +17,8 @@ const dataSource: DataSourceResource = {
   kind: 'DataSource',
   metadata: {
     name: 'Public Prometheus Demo Server',
+    created_at: '2021-10-20',
+    updated_at: '2021-10-20',
   },
   spec: {
     data_source: {

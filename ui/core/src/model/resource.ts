@@ -13,4 +13,14 @@
 
 export type ResourceSelector = Record<string, string>;
 
+// ResourceMetadata is deprecated and will be removed in favor of Metadata
+// TODO To be removed
 export type ResourceMetadata = Record<string, string> & { name: string };
+
+export type Metadata = {
+  name: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProjectMetadata = Metadata & { project: string };
