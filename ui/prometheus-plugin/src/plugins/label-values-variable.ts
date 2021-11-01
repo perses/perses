@@ -59,14 +59,18 @@ export function usePrometheusLabelValues(
     start,
     end,
   };
-  const { response, loading, error } = useLabelValues(dataSource, request, {
-    pause: needsVariableValuesFor.size > 0,
+  const {
+    data: response,
+    isLoading: loading,
+    error,
+  } = useLabelValues(dataSource, request, {
+    enabled: needsVariableValuesFor.size === 0,
   });
 
   const data = useMemoized(() => response?.data ?? [], [response]);
   return {
     data: data,
     loading: loading || needsVariableValuesFor.size > 0,
-    error: error,
+    error: error ?? undefined,
   };
 }

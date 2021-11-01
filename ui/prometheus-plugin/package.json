@@ -16,7 +16,8 @@
     "date-fns": "^2.23.0",
     "lezer": "^0.13.5",
     "lezer-promql": "^0.20.0",
-    "react": "^17.0.2"
+    "react": "^17.0.2",
+    "react-query": "^3.31.0"
   },
   "perses": {
     "kind": "Plugin",

@@ -24,7 +24,7 @@ const style: SxProps<Theme> = {
 };
 
 export default function Footer(): JSX.Element {
-  const { response, loading, error } = useHealth();
+  const { data, isLoading, error } = useHealth();
   return (
     <>
       <Box sx={style}>
@@ -40,17 +40,17 @@ export default function Footer(): JSX.Element {
             </a>
           </li>
           <li>
-            {loading ? (
+            {isLoading ? (
               <CircularProgress size="1rem" />
-            ) : response && response.version.length > 0 ? (
-              response.version
+            ) : data !== undefined && data.version !== '' ? (
+              data.version
             ) : (
               'development version'
             )}
           </li>
         </ul>
       </Box>
-      <Toast loading={loading} severity={'error'} message={error?.message} />
+      <Toast loading={isLoading} severity={'error'} message={error?.message} />
     </>
   );
 }

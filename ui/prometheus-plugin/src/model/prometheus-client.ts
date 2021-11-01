@@ -11,12 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  FetchOptions,
-  ResourceSelector,
-  useDeepMemo,
-  useFetch,
-} from '@perses-ui/core';
+import { useQuery, UseQueryOptions } from 'react-query';
+import { ResourceSelector, useDeepMemo, fetchJson } from '@perses-ui/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -29,16 +25,23 @@ import {
 } from './api-types';
 import { usePrometheusConfig } from './datasource';
 
+export type QueryOptions = Pick<UseQueryOptions, 'enabled'>;
+
 /**
  * Calls the `/api/v1/query` endpoint to get metrics data.
  */
 export function useInstantQuery(
   dataSource: ResourceSelector,
   params: InstantQueryRequestParameters,
-  fetchOptions?: FetchOptions
+  queryOptions?: QueryOptions
 ) {
-  const { url, init } = usePostFetchArgs(dataSource, '/api/v1/query', params);
-  return useFetch<InstantQueryResponse>(url, init, fetchOptions);
+  return useQueryWithPost<InstantQueryRequestParameters, InstantQueryResponse>(
+    dataSource,
+    '/api/v1/query',
+    params,
+    undefined,
+    queryOptions
+  );
 }
 
 /**
@@ -47,7 +50,7 @@ export function useInstantQuery(
 export function useRangeQuery(
   dataSource: ResourceSelector,
   params: RangeQueryRequestParameters,
-  fetchOptions?: FetchOptions
+  queryOptions?: QueryOptions
 ) {
   // Align the time range so that it's a multiple of the step
   const alignedParams = useDeepMemo(() => {
@@ -66,12 +69,13 @@ export function useRangeQuery(
     };
   }, [params]);
 
-  const { url, init } = usePostFetchArgs(
+  return useQueryWithPost<RangeQueryRequestParameters, RangeQueryResponse>(
     dataSource,
     '/api/v1/query_range',
-    alignedParams
+    alignedParams,
+    undefined,
+    queryOptions
   );
-  return useFetch<RangeQueryResponse>(url, init, fetchOptions);
 }
 
 /**
@@ -80,12 +84,15 @@ export function useRangeQuery(
 export function useLabelNames(
   dataSource: ResourceSelector,
   params: LabelNamesRequestParameters,
-  fetchOptions?: FetchOptions
+  queryOptions?: QueryOptions
 ) {
-  const { url, init } = usePostFetchArgs(dataSource, '/api/v1/labels', params, {
-    match: 'match[]',
-  });
-  return useFetch<LabelNamesResponse>(url, init, fetchOptions);
+  return useQueryWithPost<LabelNamesRequestParameters, LabelNamesResponse>(
+    dataSource,
+    '/api/v1/labels',
+    params,
+    { match: 'match[]' },
+    queryOptions
+  );
 }
 
 /**
@@ -95,54 +102,70 @@ export function useLabelNames(
 export function useLabelValues(
   dataSource: ResourceSelector,
   params: LabelValuesRequestParameters,
-  fetchOptions?: FetchOptions
+  queryOptions?: QueryOptions
 ) {
   const { labelName, ...searchParams } = params;
   const apiUrl = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
-  const { url, init } = useGetFetchArgs(dataSource, apiUrl, searchParams, {
-    match: 'match[]',
-  });
-  return useFetch<LabelValuesResponse>(url, init, fetchOptions);
+  return useQueryWithGet<typeof searchParams, LabelValuesResponse>(
+    dataSource,
+    apiUrl,
+    searchParams,
+    { match: 'match[]' },
+    queryOptions
+  );
 }
 
-function useGetFetchArgs<T extends RequestParams<T>>(
+function useQueryWithGet<T extends RequestParams<T>, TResponse>(
   dataSource: ResourceSelector,
   apiUrl: string,
   params: T,
-  rename?: KeyNameMap<T>
+  rename?: KeyNameMap<T>,
+  queryOptions?: QueryOptions
 ) {
   const { base_url: baseUrl } = usePrometheusConfig(dataSource);
-  return useDeepMemo(() => {
-    let url = `${baseUrl}${apiUrl}`;
+  const key = [baseUrl, apiUrl, params] as const;
 
-    const urlParams = createSearchParams(params, rename).toString();
-    if (urlParams !== '') {
-      url += `?${urlParams}`;
-    }
+  return useQuery<TResponse, Error, TResponse, typeof key>(
+    key,
+    () => {
+      let url = `${baseUrl}${apiUrl}`;
 
-    return { url, init: { method: 'GET' } };
-  }, [baseUrl, apiUrl, params, rename]);
+      const urlParams = createSearchParams(params, rename).toString();
+      if (urlParams !== '') {
+        url += `?${urlParams}`;
+      }
+
+      return fetchJson<TResponse>(url, { method: 'GET' });
+    },
+    queryOptions
+  );
 }
 
-function usePostFetchArgs<T extends RequestParams<T>>(
+function useQueryWithPost<T extends RequestParams<T>, TResponse>(
   dataSource: ResourceSelector,
   apiUrl: string,
   params: T,
-  rename?: KeyNameMap<T>
+  rename?: KeyNameMap<T>,
+  queryOptions?: QueryOptions
 ) {
   const { base_url: baseUrl } = usePrometheusConfig(dataSource);
-  return useDeepMemo(() => {
-    return {
-      url: `${baseUrl}${apiUrl}`,
-      init: {
+  const key = [baseUrl, apiUrl, params] as const;
+
+  return useQuery<TResponse, Error, TResponse, typeof key>(
+    key,
+    () => {
+      const url = `${baseUrl}${apiUrl}`;
+      const init = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: createSearchParams<T>(params, rename),
-      },
-    };
-  }, [baseUrl, apiUrl, params, rename]);
+        body: createSearchParams(params, rename),
+      };
+      return fetchJson<TResponse>(url, init);
+    },
+    queryOptions
+  );
 }
 
 // Request parameter values we know how to serialize

@@ -56,14 +56,18 @@ export function usePrometheusLabelNames(
     start,
     end,
   };
-  const { response, loading, error } = useLabelNames(dataSource, request, {
-    pause: needsVariableValuesFor.size > 0,
+  const {
+    data: response,
+    isLoading: loading,
+    error,
+  } = useLabelNames(dataSource, request, {
+    enabled: needsVariableValuesFor.size === 0,
   });
 
   const data = response?.data ?? [];
   return {
     data: data,
     loading: loading || needsVariableValuesFor.size > 0,
-    error: error,
+    error: error ?? undefined,
   };
 }
