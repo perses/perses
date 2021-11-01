@@ -42,7 +42,7 @@ function ProjectMenu(props: { projectList: ProjectModel[] }): JSX.Element {
   return (
     <>
       <Button
-        aria-label="list of the available project"
+        aria-label="List of the available projects"
         aria-controls="menu-project-list-appbar"
         aria-haspopup="true"
         color="inherit"
@@ -59,7 +59,7 @@ function ProjectMenu(props: { projectList: ProjectModel[] }): JSX.Element {
           horizontal: 'left',
         }}
         keepMounted
-        open={Boolean(anchorEl)}
+        open={anchorEl !== null}
         onClose={handleCloseMenu}
       >
         {props.projectList.map((value, index) => {
@@ -102,7 +102,7 @@ export default function Header(): JSX.Element {
         </Box>
         <Switch />
       </Toolbar>
-      {/* TODO manage in a single place the pull of fetching error */}
+      {/* TODO manage in a single place the pool of fetching error */}
       <Toast loading={loading} severity={'error'} message={error?.message} />
     </AppBar>
   );
