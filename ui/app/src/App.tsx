@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DashboardResource } from '@perses-ui/core';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { PluginRegistry } from './context/plugin-registry';
 import ViewDashboard from './views/dashboard/ViewDashboard';
 import AlertErrorFallback from './components/AlertErrorFallback';
@@ -21,6 +22,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import { pluginRuntime } from './model/plugin-runtime';
 
+const queryClient = new QueryClient();
+
 function App() {
   const dashboard = useSampleData<DashboardResource>('dashboard');
   if (dashboard === undefined) {
@@ -28,7 +31,7 @@ function App() {
   }
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <Header />
       <PluginRegistry
         loadingFallback="Loading..."
@@ -40,7 +43,7 @@ function App() {
         </DataSourceRegistry>
       </PluginRegistry>
       <Footer />
-    </>
+    </QueryClientProvider>
   );
 }
 

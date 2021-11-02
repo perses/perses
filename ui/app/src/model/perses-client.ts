@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useFetch } from '@perses-ui/core';
+import { fetchJson } from '@perses-ui/core';
+import { useQuery } from 'react-query';
 import buildURL from './url-builder';
 
 const healthResource = 'health';
@@ -26,6 +27,8 @@ export interface HealthModel {
  * Gets version information from the Perses server API.
  */
 export function useHealth() {
-  const url = buildURL({ resource: healthResource });
-  return useFetch<HealthModel>(url);
+  return useQuery<HealthModel, Error>(healthResource, () => {
+    const url = buildURL({ resource: healthResource });
+    return fetchJson<HealthModel>(url);
+  });
 }

@@ -64,10 +64,14 @@ export function usePrometheusRangeChartQuery(
     step,
   };
 
-  const { response, loading, error } = useRangeQuery(dataSource, request, {
-    pause: needsVariableValuesFor.size > 0,
+  const {
+    data: response,
+    isLoading: loading,
+    error,
+  } = useRangeQuery(dataSource, request, {
+    enabled: needsVariableValuesFor.size === 0,
   });
 
   const data = useMemo(() => createDataFrames(response), [response]);
-  return { data, loading, error };
+  return { data, loading, error: error ?? undefined };
 }
