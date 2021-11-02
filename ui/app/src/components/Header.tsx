@@ -30,7 +30,9 @@ import { MouseEvent, useState } from 'react';
 import { ProjectModel, useProjectQuery } from '../model/project-client';
 import Toast from './Toast';
 
-function ProjectMenu(props: { projectList: ProjectModel[] }): JSX.Element {
+function ProjectMenuComponent(props: {
+  projectList: ProjectModel[];
+}): JSX.Element {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
@@ -75,13 +77,28 @@ function ProjectMenu(props: { projectList: ProjectModel[] }): JSX.Element {
   );
 }
 
+function ProjectMenu(): JSX.Element {
+  const { data, isLoading, error } = useProjectQuery();
+
+  return (
+    <>
+      {isLoading ? (
+        <CircularProgress size="1rem" />
+      ) : (
+        data && <ProjectMenuComponent projectList={data} />
+      )}
+      {/* TODO manage in a single place the pool of fetching error */}
+      <Toast loading={isLoading} severity={'error'} message={error?.message} />
+    </>
+  );
+}
+
 const style: SxProps<Theme> = {
   display: 'flex',
   flexDirection: 'row',
 };
 
 export default function Header(): JSX.Element {
-  const { response, loading, error } = useProjectQuery();
   return (
     <AppBar position="relative">
       <Toolbar>
@@ -94,16 +111,10 @@ export default function Header(): JSX.Element {
             flexItem
             sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }}
           />
-          {loading ? (
-            <CircularProgress size="1rem" />
-          ) : (
-            response && <ProjectMenu projectList={response} />
-          )}
+          <ProjectMenu />
         </Box>
         <Switch />
       </Toolbar>
-      {/* TODO manage in a single place the pool of fetching error */}
-      <Toast loading={loading} severity={'error'} message={error?.message} />
     </AppBar>
   );
 }

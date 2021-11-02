@@ -15,7 +15,7 @@ import { fetchJson } from '@perses-ui/core';
 import { useQuery } from 'react-query';
 import buildURL from './url-builder';
 
-const healthResource = 'health';
+const resource = 'health';
 
 export interface HealthModel {
   buildTime: string;
@@ -27,8 +27,8 @@ export interface HealthModel {
  * Gets version information from the Perses server API.
  */
 export function useHealth() {
-  return useQuery<HealthModel, Error>(healthResource, () => {
-    const url = buildURL({ resource: healthResource });
+  return useQuery<HealthModel, Error>(resource, () => {
+    const url = buildURL({ resource });
     return fetchJson<HealthModel>(url);
   });
 }

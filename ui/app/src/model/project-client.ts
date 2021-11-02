@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata, useFetch } from '@perses-ui/core';
+import { fetchJson, Metadata } from '@perses-ui/core';
+import { useQuery } from 'react-query';
 import buildURL from './url-builder';
 
 const resource = 'projects';
@@ -22,6 +23,8 @@ export interface ProjectModel {
 }
 
 export function useProjectQuery() {
-  const url = buildURL({ resource });
-  return useFetch<ProjectModel[]>(url);
+  return useQuery<ProjectModel[], Error>(resource, () => {
+    const url = buildURL({ resource });
+    return fetchJson<ProjectModel[]>(url);
+  });
 }
