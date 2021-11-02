@@ -18,6 +18,7 @@ import { enableMapSet } from 'immer';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
 import { createTheme } from './styles/theme';
+import { SnackbarProvider } from './context/SnackbarProvider';
 
 const queryClient = new QueryClient();
 
@@ -26,8 +27,10 @@ function renderApp() {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={createTheme()}>
-          <CssBaseline />
-          <App />
+          <SnackbarProvider>
+            <CssBaseline />
+            <App />
+          </SnackbarProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </React.StrictMode>,
