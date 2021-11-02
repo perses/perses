@@ -15,16 +15,21 @@ import { ThemeProvider, CssBaseline } from '@material-ui/core';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { enableMapSet } from 'immer';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
 import { createTheme } from './styles/theme';
+
+const queryClient = new QueryClient();
 
 function renderApp() {
   ReactDOM.render(
     <React.StrictMode>
-      <ThemeProvider theme={createTheme()}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={createTheme()}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
+      </QueryClientProvider>
     </React.StrictMode>,
     document.getElementById('root')
   );
