@@ -27,12 +27,11 @@ import {
 import { ChevronDown } from 'mdi-material-ui';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
-import { ProjectModel, useProjectQuery } from '../model/project-client';
+import { useProjectQuery } from '../model/project-client';
 import Toast from './Toast';
 
-function ProjectMenuComponent(props: {
-  projectList: ProjectModel[];
-}): JSX.Element {
+function ProjectMenu(): JSX.Element {
+  const { data, isLoading, error } = useProjectQuery();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
@@ -41,55 +40,50 @@ function ProjectMenuComponent(props: {
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
-  return (
-    <>
-      <Button
-        aria-label="List of the available projects"
-        aria-controls="menu-project-list-appbar"
-        aria-haspopup="true"
-        color="inherit"
-        endIcon={<ChevronDown />}
-        onClick={handleMenu}
-      >
-        Projects
-      </Button>
-      <Menu
-        id="menu-project-list-appbar"
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        keepMounted
-        open={anchorEl !== null}
-        onClose={handleCloseMenu}
-      >
-        {props.projectList.map((value, index) => {
-          return (
-            // TODO when routing is in place, use the button to redirect to the project page
-            <MenuItem key={index} onClick={handleCloseMenu}>
-              {value.metadata.name}
-            </MenuItem>
-          );
-        })}
-      </Menu>
-    </>
-  );
-}
 
-function ProjectMenu(): JSX.Element {
-  const { data, isLoading, error } = useProjectQuery();
+  if (isLoading) {
+    return <CircularProgress size="1rem" />;
+  }
+
+  if (data !== undefined) {
+    return (
+      <>
+        <Button
+          aria-label="List of the available projects"
+          aria-controls="menu-project-list-appbar"
+          aria-haspopup="true"
+          color="inherit"
+          endIcon={<ChevronDown />}
+          onClick={handleMenu}
+        >
+          Projects
+        </Button>
+        <Menu
+          id="menu-project-list-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          keepMounted
+          open={anchorEl !== null}
+          onClose={handleCloseMenu}
+        >
+          {data.map((value, index) => {
+            return (
+              // TODO when routing is in place, use the button to redirect to the project page
+              <MenuItem key={index} onClick={handleCloseMenu}>
+                {value.metadata.name}
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      </>
+    );
+  }
 
   return (
-    <>
-      {isLoading ? (
-        <CircularProgress size="1rem" />
-      ) : (
-        data && <ProjectMenuComponent projectList={data} />
-      )}
-      {/* TODO manage in a single place the pool of fetching error */}
-      <Toast loading={isLoading} severity={'error'} message={error?.message} />
-    </>
+    <Toast loading={isLoading} severity={'error'} message={error?.message} />
   );
 }
 
