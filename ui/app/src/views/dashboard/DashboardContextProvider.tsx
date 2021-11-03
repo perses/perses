@@ -12,13 +12,17 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo, useState } from 'react';
-import { DashboardResource, TimeRange } from '@perses-ui/core';
+import {
+  DashboardResource,
+  AbsoluteTimeRange,
+  toAbsoluteTimeRange,
+} from '@perses-ui/core';
 import { useVariablesState, VariablesState } from './variables';
 
 export interface DashboardContextType {
   resource: DashboardResource;
   variables: VariablesState;
-  timeRange: TimeRange;
+  timeRange: AbsoluteTimeRange;
 }
 
 export const DashboardContext = createContext<DashboardContextType | undefined>(
@@ -38,9 +42,9 @@ export function DashboardContextProvider(props: DashboardContextProviderProps) {
 
   const variables = useVariablesState(resource);
 
-  const [timeRange] = useState<TimeRange>({
-    pastDuration: resource.spec.duration,
-  });
+  const [timeRange] = useState<AbsoluteTimeRange>(
+    toAbsoluteTimeRange({ pastDuration: resource.spec.duration })
+  );
 
   const context: DashboardContextType = useMemo(
     () => ({
