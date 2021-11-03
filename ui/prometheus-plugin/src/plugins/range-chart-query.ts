@@ -18,10 +18,12 @@ import {
   DurationString,
   useDashboardSpec,
   useMemoized,
+  ChartData,
 } from '@perses-ui/core';
+import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';
-import { createDataFrames } from '../model/data-frames';
+import { parseValueTuple } from '../model/parse-sample-values';
 import { useRangeQuery } from '../model/prometheus-client';
 import { TemplateString, useReplaceTemplateString } from '../model/templating';
 import {
@@ -92,6 +94,34 @@ export function usePrometheusRangeChartQuery(
     enabled: needsVariableValuesFor.size === 0,
   });
 
-  const data = useMemo(() => createDataFrames(response), [response]);
+  const data = useMemo(() => {
+    if (response === undefined) return undefined;
+    if (response.status === 'error') return undefined;
+
+    // TODO: Maybe do a proper Iterable implementation that defers some of this
+    // processing until its needed
+    const chartData: ChartData = {
+      timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
+      stepMs: step * 1000,
+      series: response.data.result.map((value) => {
+        const { metric, values } = value;
+
+        // Name the series after the metric labels or if no metric, just use the
+        // overall query
+        let name = Object.entries(metric)
+          .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`)
+          .join(', ');
+        if (name === '') name = query;
+
+        return {
+          name,
+          values: values.map(parseValueTuple),
+        };
+      }),
+    };
+
+    return chartData;
+  }, [response, start, end, step, query]);
+
   return { data, loading, error: error ?? undefined };
 }

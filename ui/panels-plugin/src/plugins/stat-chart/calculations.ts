@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { findLast, mean as _mean } from 'lodash-es';
+import { ChartValueTuple } from '@perses-ui/core';
+import { findLast, meanBy } from 'lodash-es';
 
 export const CalculationsMap = {
   First: first,
@@ -22,20 +23,28 @@ export const CalculationsMap = {
 
 export type CalculationType = keyof typeof CalculationsMap;
 
-function first(values: number[]): number | undefined {
-  return values[0];
+function first(values: ChartValueTuple[]): number | undefined {
+  const tuple = values[0];
+  return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function last(values: number[]): number | undefined {
+function last(values: ChartValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
-  return values[values.length - 1];
+
+  const tuple = values[values.length - 1];
+  return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function lastNumber(values: number[]): number | undefined {
-  return findLast(values, (val) => isNaN(val) === false);
+function lastNumber(values: ChartValueTuple[]): number | undefined {
+  const tuple = findLast(values, (tuple) => isNaN(getValue(tuple)) === false);
+  return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function mean(values: number[]): number | undefined {
+function mean(values: ChartValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
-  return _mean(values);
+  return meanBy(values, getValue);
+}
+
+function getValue(valueTuple: ChartValueTuple) {
+  return valueTuple[1];
 }

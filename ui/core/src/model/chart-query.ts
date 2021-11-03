@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataFrame } from './data-frame';
+import { UnixTimeMs } from '..';
+import { AbsoluteTimeRange } from './time';
 import { Definition, JsonObject } from './definitions';
 import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 import { ResourceSelector } from './resource';
@@ -34,10 +35,23 @@ export type UseChartQueryHook<
   Kind extends string,
   Options extends JsonObject
 > = (definition: ChartQueryDefinition<Kind, Options>) => {
-  data: DataFrame[];
+  data?: ChartData;
   loading: boolean;
   error?: Error;
 };
+
+export interface ChartData {
+  timeRange: AbsoluteTimeRange;
+  stepMs: number;
+  series: Iterable<ChartSeries>;
+}
+
+export interface ChartSeries {
+  name: string;
+  values: Iterable<ChartValueTuple>;
+}
+
+export type ChartValueTuple = [timestamp: UnixTimeMs, value: number];
 
 export type AnyChartQueryDefinition = AnyPluginDefinition<'ChartQuery'>;
 

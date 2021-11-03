@@ -51,7 +51,7 @@ export function useChartQuery(definition: AnyChartQueryDefinition) {
   const plugin = usePlugin('ChartQuery', definition);
   if (plugin === undefined) {
     // Provide default values while the plugin is being loaded
-    return { data: [], loading: true };
+    return { loading: true };
   }
   return plugin.useChartQuery(definition);
 }
