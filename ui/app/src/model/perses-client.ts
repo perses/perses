@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-ui/core';
-import { useQuery } from 'react-query';
+import { useQuery, UseQueryOptions } from 'react-query';
 import buildURL from './url-builder';
 
 const healthResource = 'health';
@@ -23,12 +23,21 @@ export interface HealthModel {
   commit: string;
 }
 
+type HealthOptions = Omit<
+  UseQueryOptions<HealthModel, Error>,
+  'queryKey' | 'queryFn'
+>;
+
 /**
  * Gets version information from the Perses server API.
  */
-export function useHealth() {
-  return useQuery<HealthModel, Error>(healthResource, () => {
-    const url = buildURL({ resource: healthResource });
-    return fetchJson<HealthModel>(url);
-  });
+export function useHealth(options?: HealthOptions) {
+  return useQuery<HealthModel, Error>(
+    healthResource,
+    () => {
+      const url = buildURL({ resource: healthResource });
+      return fetchJson<HealthModel>(url);
+    },
+    options
+  );
 }
