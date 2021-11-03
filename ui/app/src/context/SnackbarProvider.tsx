@@ -44,7 +44,7 @@ type SnackbarOptions = Omit<OptionsObject, 'variant'>;
 /**
  * Application-wide provider for showing snackbars/toasts.
  */
-export const SnackbarProvider = NotistackProvider;
+export { NotistackProvider as SnackbarProvider };
 
 /**
  * Gets the SnackbarContext with methods for displaying snackbars/toasts.
