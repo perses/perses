@@ -14,13 +14,9 @@
 import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
-import {
-  GridComponent,
-  DatasetComponent,
-  TransformComponent,
-} from 'echarts/components';
+import { GridComponent, DatasetComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useMemo, useState, useLayoutEffect } from 'react';
+import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useRunningTimeSeriesQueries } from './TimeSeriesQueryRunner';
 
@@ -28,7 +24,6 @@ echarts.use([
   EChartsLineChart,
   GridComponent,
   DatasetComponent,
-  TransformComponent,
   CanvasRenderer,
 ]);
 
@@ -37,17 +32,24 @@ export interface LineChartProps {
   height: number;
 }
 
+/**
+ * Draws a LineChart with Apache ECharts for the current running time series.
+ */
 function LineChart(props: LineChartProps) {
   const { width, height } = props;
   const queries = useRunningTimeSeriesQueries();
 
+  // Calculate the LineChart options based on the query results
   const option: EChartsOption = useMemo(() => {
     const dataset: EChartsOption['dataset'] = [];
     const series: EChartsOption['series'] = [];
 
     for (const query of queries) {
+      // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
 
+      // For every series that comes back from a query, add a Dataset and a Series
+      // to the chart
       let id = 0;
       for (const dataSeries of query.data.series) {
         dataset.push({
@@ -87,6 +89,8 @@ function LineChart(props: LineChartProps) {
 
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [chart, setChart] = useState<echarts.ECharts | undefined>(undefined);
+
+  // Create a chart instance in the container
   useLayoutEffect(() => {
     if (containerRef === null) return;
 
@@ -98,12 +102,31 @@ function LineChart(props: LineChartProps) {
     };
   }, [containerRef]);
 
+  // Sync options with chart instance
   useLayoutEffect(() => {
-    if (chart !== undefined) {
-      console.log(option);
-      chart.setOption(option);
-    }
+    // Can't set options if no chart yet
+    if (chart === undefined) return;
+
+    chart.setOption(option);
   }, [chart, option]);
+
+  // Resize the chart to match as width/height changes
+  const prevSize = useRef({ width, height });
+  useLayoutEffect(() => {
+    // No need to resize initially
+    if (
+      prevSize.current.width === width &&
+      prevSize.current.height === height
+    ) {
+      return;
+    }
+
+    // Can't resize if no chart yet
+    if (chart === undefined) return;
+
+    chart.resize({ width, height });
+    prevSize.current = { width, height };
+  }, [chart, width, height]);
 
   return <Box ref={setContainerRef} sx={{ width, height }}></Box>;
 }
