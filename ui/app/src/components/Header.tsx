@@ -28,10 +28,11 @@ import { ChevronDown } from 'mdi-material-ui';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
 import { useProjectQuery } from '../model/project-client';
-import Toast from './Toast';
+import { useSnackbar } from '../context/SnackbarProvider';
 
 function ProjectMenu(): JSX.Element {
-  const { data, isLoading, error } = useProjectQuery();
+  const { exceptionSnackbar } = useSnackbar();
+  const { data, isLoading } = useProjectQuery({ onError: exceptionSnackbar });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
@@ -81,10 +82,9 @@ function ProjectMenu(): JSX.Element {
       </>
     );
   }
-
-  return (
-    <Toast loading={isLoading} severity={'error'} message={error?.message} />
-  );
+  // In case the loading is finished and there is an error, it will be handled by the snackbar.
+  // That's why we return an empty bracket
+  return <></>;
 }
 
 const style: SxProps<Theme> = {

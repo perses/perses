@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetchJson, Metadata } from '@perses-ui/core';
-import { useQuery } from 'react-query';
+import { useQuery, UseQueryOptions } from 'react-query';
 import buildURL from './url-builder';
 
 const resource = 'projects';
@@ -22,9 +22,21 @@ export interface ProjectModel {
   metadata: Metadata;
 }
 
-export function useProjectQuery() {
-  return useQuery<ProjectModel[], Error>(resource, () => {
-    const url = buildURL({ resource });
-    return fetchJson<ProjectModel[]>(url);
-  });
+type ProjectListOptions = Omit<
+  UseQueryOptions<ProjectModel[], Error>,
+  'queryKey' | 'queryFn'
+>;
+
+/**
+ * Gets version information from the Perses server API.
+ */
+export function useProjectQuery(options?: ProjectListOptions) {
+  return useQuery<ProjectModel[], Error>(
+    resource,
+    () => {
+      const url = buildURL({ resource });
+      return fetchJson<ProjectModel[]>(url);
+    },
+    options
+  );
 }
