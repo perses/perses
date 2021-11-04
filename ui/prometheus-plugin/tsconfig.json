@@ -5,12 +5,13 @@
     "declaration": true,
     "outDir": "dist",
     "rootDir": "./src",
-    "tsBuildInfoFile": "../.build-cache/prometheus-plugin.tsbuildinfo"
+    "tsBuildInfoFile": "../.build-cache/prometheus-plugin.tsbuildinfo",
+    "composite": true
   },
   "references": [
     {
       "path": "../core",
       "prepend": false
-    },
+    }
   ]
 }
