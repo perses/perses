@@ -17,7 +17,8 @@ import {
   PanelProps,
   usePanelState,
 } from '@perses-ui/core';
-import { Box } from '@mui/material';
+import LineChart from './LineChart';
+import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
 
 export const LineChartKind = 'LineChart' as const;
 
@@ -35,14 +36,15 @@ export function LineChartPanel(props: LineChartProps) {
     },
   } = props;
   const { contentDimensions } = usePanelState();
+
   return (
-    <Box
-      sx={{
-        width: contentDimensions?.width,
-        height: contentDimensions?.height,
-      }}
-    >
-      {JSON.stringify(queries)}
-    </Box>
+    <TimeSeriesQueryRunner queries={queries}>
+      {contentDimensions !== undefined && (
+        <LineChart
+          width={contentDimensions.width}
+          height={contentDimensions.height}
+        />
+      )}
+    </TimeSeriesQueryRunner>
   );
 }

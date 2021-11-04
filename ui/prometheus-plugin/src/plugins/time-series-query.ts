@@ -32,16 +32,15 @@ import {
   usePanelRangeStep,
 } from '../model/time';
 
-export const PrometheusRangeChartQueryKind = 'PrometheusRangeChartQuery';
+export const PrometheusTimeSeriesQueryKind =
+  'PrometheusTimeSeriesQuery' as const;
 
 type PrometheusTimeSeriesQuery = TimeSeriesQueryDefinition<
-  RangeChartQueryKind,
-  RangeChartQueryOptions
+  typeof PrometheusTimeSeriesQueryKind,
+  TimeSeriesQueryOptions
 >;
 
-type RangeChartQueryKind = typeof PrometheusRangeChartQueryKind;
-
-interface RangeChartQueryOptions extends JsonObject {
+interface TimeSeriesQueryOptions extends JsonObject {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
@@ -50,7 +49,10 @@ interface RangeChartQueryOptions extends JsonObject {
 export function usePrometheusTimeSeriesQuery(
   definition: PrometheusTimeSeriesQuery
 ): ReturnType<
-  UseTimeSeriesQueryHook<RangeChartQueryKind, RangeChartQueryOptions>
+  UseTimeSeriesQueryHook<
+    typeof PrometheusTimeSeriesQueryKind,
+    TimeSeriesQueryOptions
+  >
 > {
   const spec = useDashboardSpec();
   const dataSource = definition.datasource ?? spec.datasource;

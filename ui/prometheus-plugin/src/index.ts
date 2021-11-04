@@ -13,7 +13,7 @@
 
 import { PluginSetupFunction } from '@perses-ui/core';
 import {
-  PrometheusRangeChartQueryKind,
+  PrometheusTimeSeriesQueryKind,
   usePrometheusTimeSeriesQuery,
 } from './plugins/time-series-query';
 import { IntervalKind, useIntervalValues } from './plugins/interval-variable';
@@ -53,7 +53,7 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   });
   registerPlugin({
     pluginType: 'TimeSeriesQuery',
-    kind: PrometheusRangeChartQueryKind,
+    kind: PrometheusTimeSeriesQueryKind,
     validate: undefined, // TODO
     plugin: {
       useTimeSeriesQuery: usePrometheusTimeSeriesQuery,
