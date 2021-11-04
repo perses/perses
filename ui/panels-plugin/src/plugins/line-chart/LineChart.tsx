@@ -11,19 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
-import { GridComponent, DatasetComponent } from 'echarts/components';
+import {
+  GridComponent,
+  DatasetComponent,
+  TransformComponent,
+} from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useMemo } from 'react';
+import { useMemo, useState, useLayoutEffect } from 'react';
+import { Box } from '@mui/material';
 import { useRunningTimeSeriesQueries } from './TimeSeriesQueryRunner';
 
 echarts.use([
   EChartsLineChart,
   GridComponent,
   DatasetComponent,
+  TransformComponent,
   CanvasRenderer,
 ]);
 
@@ -43,14 +48,21 @@ function LineChart(props: LineChartProps) {
     for (const query of queries) {
       if (query.loading || query.data === undefined) continue;
 
+      let id = 0;
       for (const dataSeries of query.data.series) {
         dataset.push({
+          id,
           source: [['timestamp', 'value'], ...dataSeries.values],
         });
 
         series.push({
           type: 'line',
+          datasetId: id,
+          name: dataSeries.name,
+          symbol: 'none',
         });
+
+        id++;
       }
     }
 
@@ -63,17 +75,37 @@ function LineChart(props: LineChartProps) {
       yAxis: {
         type: 'value',
       },
+      grid: {
+        top: 10,
+        right: 10,
+        bottom: 0,
+        left: 0,
+        containLabel: true,
+      },
     };
   }, [queries]);
 
-  return (
-    <ReactEChartsCore
-      echarts={echarts}
-      option={option}
-      style={{ width, height }}
-      opts={{ width, height }}
-    />
-  );
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const [chart, setChart] = useState<echarts.ECharts | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (containerRef === null) return;
+
+    const chart = echarts.init(containerRef);
+    setChart(chart);
+
+    return () => {
+      chart.dispose();
+    };
+  }, [containerRef]);
+
+  useLayoutEffect(() => {
+    if (chart !== undefined) {
+      console.log(option);
+      chart.setOption(option);
+    }
+  }, [chart, option]);
+
+  return <Box ref={setContainerRef} sx={{ width, height }}></Box>;
 }
 
 export default LineChart;
