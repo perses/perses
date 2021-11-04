@@ -1,8 +1,8 @@
 import { Box, CircularProgress, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { Github } from 'mdi-material-ui';
+import { useSnackbar } from '../context/SnackbarProvider';
 import { useHealth } from '../model/health-client';
-import Toast from './Toast';
 
 const style: SxProps<Theme> = {
   display: 'flex',
@@ -24,7 +24,8 @@ const style: SxProps<Theme> = {
 };
 
 export default function Footer(): JSX.Element {
-  const { data, isLoading, error } = useHealth();
+  const { exceptionSnackbar } = useSnackbar();
+  const { data, isLoading } = useHealth({ onError: exceptionSnackbar });
   return (
     <>
       <Box sx={style}>
@@ -50,7 +51,6 @@ export default function Footer(): JSX.Element {
           </li>
         </ul>
       </Box>
-      <Toast loading={isLoading} severity={'error'} message={error?.message} />
     </>
   );
 }
