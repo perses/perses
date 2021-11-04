@@ -12,22 +12,37 @@
 // limitations under the License.
 
 import {
-  AnyChartQueryDefinition,
+  AnyTimeSeriesQueryDefinition,
   JsonObject,
   PanelProps,
+  usePanelState,
 } from '@perses-ui/core';
+import { Box } from '@mui/material';
 
 export const LineChartKind = 'LineChart' as const;
 
-type LineChartKind = typeof LineChartKind;
-
-export type LineChartProps = PanelProps<LineChartKind, LineChartOptions>;
+export type LineChartProps = PanelProps<typeof LineChartKind, LineChartOptions>;
 
 interface LineChartOptions extends JsonObject {
-  query: AnyChartQueryDefinition;
+  queries: AnyTimeSeriesQueryDefinition[];
   show_legend?: boolean;
 }
 
-export function LineChart(props: LineChartProps) {
-  return <div>{JSON.stringify(props)}</div>;
+export function LineChartPanel(props: LineChartProps) {
+  const {
+    definition: {
+      options: { queries },
+    },
+  } = props;
+  const { contentDimensions } = usePanelState();
+  return (
+    <Box
+      sx={{
+        width: contentDimensions?.width,
+        height: contentDimensions?.height,
+      }}
+    >
+      {JSON.stringify(queries)}
+    </Box>
+  );
 }

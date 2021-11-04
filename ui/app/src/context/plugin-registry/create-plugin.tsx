@@ -13,7 +13,7 @@
 
 import { useRef } from 'react';
 import {
-  AnyChartQueryDefinition,
+  AnyTimeSeriesQueryDefinition,
   JsonObject,
   AnyVariableDefinition,
   PanelProps,
@@ -83,30 +83,30 @@ export function createPanelPlugin<
 }
 
 /**
- * Take a ChartQuery plugin and wrap it so it works with AnyChartQueryDefinition,
+ * Take a TimeSeriesQuery plugin and wrap it so it works with AnyChartQueryDefinition,
  * doing runtime validation of the definition before delegating to the plugin.
  */
-export function createChartQueryPlugin<
+export function createTimeSeriesQueryPlugin<
   Kind extends string,
   Options extends JsonObject
 >(
-  config: PluginConfig<'ChartQuery', Kind, Options>
-): AnyPluginImplementation<'ChartQuery'> {
+  config: PluginConfig<'TimeSeriesQuery', Kind, Options>
+): AnyPluginImplementation<'TimeSeriesQuery'> {
   // Create runtime validation function
   const useRuntimeValidation = createValidationHook(config);
 
   // Wrap hook with validation (TODO: Can this wrapper become generic for all
   // plugin hooks?)
-  function useChartQuery(definition: AnyChartQueryDefinition) {
+  function useTimeSeriesQuery(definition: AnyTimeSeriesQueryDefinition) {
     const { isValid, errorRef } = useRuntimeValidation();
     if (isValid(definition)) {
-      return config.plugin.useChartQuery(definition);
+      return config.plugin.useTimeSeriesQuery(definition);
     }
     throw errorRef.current;
   }
 
   return {
-    useChartQuery,
+    useTimeSeriesQuery,
   };
 }
 

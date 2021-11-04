@@ -17,42 +17,44 @@ import { Definition, JsonObject } from './definitions';
 import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 import { ResourceSelector } from './resource';
 
-export interface ChartQueryDefinition<
+export interface TimeSeriesQueryDefinition<
   Kind extends string,
   Options extends JsonObject
 > extends Definition<Kind, Options> {
   datasource?: ResourceSelector;
 }
 
-export interface ChartQueryPlugin<
+export interface TimeSeriesQueryPlugin<
   Kind extends string,
   Options extends JsonObject
 > {
-  useChartQuery: UseChartQueryHook<Kind, Options>;
+  useTimeSeriesQuery: UseTimeSeriesQueryHook<Kind, Options>;
 }
 
-export type UseChartQueryHook<
+export type UseTimeSeriesQueryHook<
   Kind extends string,
   Options extends JsonObject
-> = (definition: ChartQueryDefinition<Kind, Options>) => {
-  data?: ChartData;
+> = (definition: TimeSeriesQueryDefinition<Kind, Options>) => {
+  data?: TimeSeriesData;
   loading: boolean;
   error?: Error;
 };
 
-export interface ChartData {
+export interface TimeSeriesData {
   timeRange: AbsoluteTimeRange;
   stepMs: number;
-  series: Iterable<ChartSeries>;
+  series: Iterable<TimeSeries>;
 }
 
-export interface ChartSeries {
+export interface TimeSeries {
   name: string;
-  values: Iterable<ChartValueTuple>;
+  values: Iterable<TimeSeriesValueTuple>;
 }
 
-export type ChartValueTuple = [timestamp: UnixTimeMs, value: number];
+export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
-export type AnyChartQueryDefinition = AnyPluginDefinition<'ChartQuery'>;
+export type AnyTimeSeriesQueryDefinition =
+  AnyPluginDefinition<'TimeSeriesQuery'>;
 
-export type AnyChartQueryPlugin = AnyPluginImplementation<'ChartQuery'>;
+export type AnyTimeSeriesQueryPlugin =
+  AnyPluginImplementation<'TimeSeriesQuery'>;

@@ -13,12 +13,12 @@
 
 import {
   JsonObject,
-  UseChartQueryHook,
-  ChartQueryDefinition,
+  UseTimeSeriesQueryHook,
+  TimeSeriesQueryDefinition,
   DurationString,
   useDashboardSpec,
   useMemoized,
-  ChartData,
+  TimeSeriesData,
 } from '@perses-ui/core';
 import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
@@ -34,7 +34,7 @@ import {
 
 export const PrometheusRangeChartQueryKind = 'PrometheusRangeChartQuery';
 
-type PrometheusRangeChartQuery = ChartQueryDefinition<
+type PrometheusTimeSeriesQuery = TimeSeriesQueryDefinition<
   RangeChartQueryKind,
   RangeChartQueryOptions
 >;
@@ -47,9 +47,11 @@ interface RangeChartQueryOptions extends JsonObject {
   resolution?: number;
 }
 
-export function usePrometheusRangeChartQuery(
-  definition: PrometheusRangeChartQuery
-): ReturnType<UseChartQueryHook<RangeChartQueryKind, RangeChartQueryOptions>> {
+export function usePrometheusTimeSeriesQuery(
+  definition: PrometheusTimeSeriesQuery
+): ReturnType<
+  UseTimeSeriesQueryHook<RangeChartQueryKind, RangeChartQueryOptions>
+> {
   const spec = useDashboardSpec();
   const dataSource = definition.datasource ?? spec.datasource;
 
@@ -100,7 +102,7 @@ export function usePrometheusRangeChartQuery(
 
     // TODO: Maybe do a proper Iterable implementation that defers some of this
     // processing until its needed
-    const chartData: ChartData = {
+    const chartData: TimeSeriesData = {
       timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
       stepMs: step * 1000,
       series: response.data.result.map((value) => {

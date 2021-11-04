@@ -29,8 +29,7 @@
         "PrometheusLabelNames": "Variable",
         "PrometheusLabelValues": "Variable",
         "Interval": "Variable",
-        "PrometheusInstantChartQuery": "ChartQuery",
-        "PrometheusRangeChartQuery": "ChartQuery"
+        "PrometheusTimeSeriesQuery": "TimeSeriesQuery"
       },
       "plugin_module_path": "./dist/index.js"
     }

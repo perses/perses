@@ -14,7 +14,10 @@
 import { PluginSetupFunction } from '@perses-ui/core';
 import { EmptyChart, EmptyChartKind } from './plugins/empty-chart/EmptyChart';
 import { GaugeChart, GaugeChartKind } from './plugins/gauge-chart/GaugeChart';
-import { LineChart, LineChartKind } from './plugins/line-chart/LineChart';
+import {
+  LineChartPanel,
+  LineChartKind,
+} from './plugins/line-chart/LineChartPanel';
 import {
   StatChartKind,
   StatChartPanel,
@@ -26,7 +29,7 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
     kind: LineChartKind,
     validate: undefined,
     plugin: {
-      PanelComponent: LineChart,
+      PanelComponent: LineChartPanel,
     },
   });
 

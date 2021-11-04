@@ -13,7 +13,7 @@
 
 import { useEffect } from 'react';
 import {
-  AnyChartQueryDefinition,
+  AnyTimeSeriesQueryDefinition,
   AnyPanelDefinition,
   AnyVariableDefinition,
   PluginType,
@@ -47,13 +47,13 @@ export function usePanelComponent(definition: AnyPanelDefinition) {
   return plugin.PanelComponent;
 }
 
-export function useChartQuery(definition: AnyChartQueryDefinition) {
-  const plugin = usePlugin('ChartQuery', definition);
+export function useTimeSeriesQuery(definition: AnyTimeSeriesQueryDefinition) {
+  const plugin = usePlugin('TimeSeriesQuery', definition);
   if (plugin === undefined) {
     // Provide default values while the plugin is being loaded
     return { loading: true };
   }
-  return plugin.useChartQuery(definition);
+  return plugin.useTimeSeriesQuery(definition);
 }
 
 // Generic usePlugin that will register the dependency with the loading boundary

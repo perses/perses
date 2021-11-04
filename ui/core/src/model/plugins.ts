@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartQueryDefinition, ChartQueryPlugin } from './chart-query';
+import {
+  TimeSeriesQueryDefinition,
+  TimeSeriesQueryPlugin,
+} from './time-series-query';
 import { JsonObject } from './definitions';
 import { PanelDefinition, PanelPlugin } from './panels';
 import { ResourceMetadata } from './resource';
@@ -59,9 +62,9 @@ type SupportedPlugins<Kind extends string, Options extends JsonObject> = {
     Def: PanelDefinition<Kind, Options>;
     Impl: PanelPlugin<Kind, Options>;
   };
-  ChartQuery: {
-    Def: ChartQueryDefinition<Kind, Options>;
-    Impl: ChartQueryPlugin<Kind, Options>;
+  TimeSeriesQuery: {
+    Def: TimeSeriesQueryDefinition<Kind, Options>;
+    Impl: TimeSeriesQueryPlugin<Kind, Options>;
   };
 };
 

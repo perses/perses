@@ -94,7 +94,7 @@ const cadvisor: DashboardResource = {
         display: { name: 'Uptime' },
         options: {
           query: {
-            kind: 'PrometheusRangeChartQuery',
+            kind: 'PrometheusTimeSeriesQuery',
             options: {
               query: 'avg(time() - node_boot_time_seconds{instance=~"$node"})',
             },
@@ -108,7 +108,7 @@ const cadvisor: DashboardResource = {
         display: { name: 'Containers' },
         options: {
           query: {
-            kind: 'PrometheusRangeChartQuery',
+            kind: 'PrometheusTimeSeriesQuery',
             options: {
               query:
                 'count(rate(container_last_seen{name=~".+",instance=~"$node",pod=~"$pod.*"}[$interval]))',
@@ -123,7 +123,7 @@ const cadvisor: DashboardResource = {
         display: { name: 'Load' },
         options: {
           query: {
-            kind: 'PrometheusRangeChartQuery',
+            kind: 'PrometheusTimeSeriesQuery',
             options: {
               query:
                 'avg(node_load1{instance=~"$node"}) /  count(count(node_cpu_seconds_total{instance=~"$node"}) by (cpu))',
@@ -144,9 +144,19 @@ const cadvisor: DashboardResource = {
         options: {},
       },
       networkTraffic: {
-        kind: 'EmptyChart',
+        kind: 'LineChart',
         display: { name: 'Network Traffic' },
-        options: {},
+        options: {
+          queries: [
+            {
+              kind: 'PrometheusTimeSeriesQuery',
+              options: {
+                query:
+                  'sum by (device) (rate(node_network_receive_bytes_total[5m]))',
+              },
+            },
+          ],
+        },
       },
       memory: { kind: 'EmptyChart', display: { name: 'Memory' }, options: {} },
       diskSpace: {
