@@ -13,8 +13,6 @@
 
 import { Duration, sub } from 'date-fns';
 
-export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
-
 export interface AbsoluteTimeRange {
   start: Date;
   end: Date;
@@ -27,13 +25,11 @@ export interface RelativeTimeRange {
 }
 
 /**
- * Returns an absolute time range from a TimeRange that may be relative.
+ * Returns an absolute time range from a RelativeTimeRange.
  */
-export function toAbsoluteTimeRange(timeRange: TimeRange): AbsoluteTimeRange {
-  if ('start' in timeRange) {
-    return timeRange;
-  }
-
+export function toAbsoluteTimeRange(
+  timeRange: RelativeTimeRange
+): AbsoluteTimeRange {
   const end = timeRange.end ?? new Date();
 
   return {

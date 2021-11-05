@@ -17,6 +17,7 @@ import {
   ChartQueryDefinition,
   DurationString,
   useDashboardSpec,
+  useMemoized,
 } from '@perses-ui/core';
 import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';
@@ -54,13 +55,32 @@ export function usePrometheusRangeChartQuery(
   const timeRange = useDashboardPrometheusTimeRange();
   const step = usePanelRangeStep(timeRange, minStep);
 
+  // Align the time range so that it's a multiple of the step (TODO: we may
+  // ultimately want to return this from the hook so that charts will know what
+  // time range was actually used?)
+  const { start, end } = useMemoized(() => {
+    const { start, end } = timeRange;
+    const utcOffsetSec = new Date().getTimezoneOffset() * 60;
+
+    const alignedEnd =
+      Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
+    const alignedStart =
+      Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
+
+    return {
+      start: alignedStart,
+      end: alignedEnd,
+    };
+  }, [timeRange, step]);
+
   const { result: query, needsVariableValuesFor } = useReplaceTemplateString(
     definition.options.query
   );
 
   const request: RangeQueryRequestParameters = {
     query,
-    ...timeRange,
+    start,
+    end,
     step,
   };
 

@@ -14,13 +14,11 @@
 import {
   DurationString,
   parseDurationString,
-  TimeRange,
-  toAbsoluteTimeRange,
   useMemoized,
   usePanelState,
   useDashboardTimeRange,
 } from '@perses-ui/core';
-import { milliseconds } from 'date-fns';
+import { milliseconds, getUnixTime } from 'date-fns';
 import { useRef } from 'react';
 import { UnixTimestampSeconds } from './api-types';
 
@@ -33,11 +31,15 @@ export interface PrometheusTimeRange {
  * Get the time range for the current dashboard, converted to Prometheus time.
  */
 export function useDashboardPrometheusTimeRange() {
-  const timeRange = useDashboardTimeRange();
+  const { start, end } = useDashboardTimeRange();
 
-  // Only recalculate the time range if the value on the dashboard changes,
-  // otherwise relative time ranges will change every time this hook is called
-  return useMemoized(() => toPrometheusTimeRange(timeRange), [timeRange]);
+  // Only recalculate the time range if the value on the dashboard changes
+  return useMemoized(() => {
+    return {
+      start: Math.ceil(getUnixTime(start)),
+      end: Math.ceil(getUnixTime(end)),
+    };
+  }, [start, end]);
 }
 
 // Max data points to allow returning from a Prom Query, used to calculate a
@@ -78,18 +80,6 @@ export function usePanelRangeStep(
 
     return Math.max(suggestedStep * resolution, minStepSeconds, safeStep);
   }, [timeRange, minStepSeconds, resolution]);
-}
-
-/**
- * Converts a TimeRange to Prometheus start and end dates in unix seconds, with
- * fractional seconds rounded up.
- */
-function toPrometheusTimeRange(timeRange: TimeRange): PrometheusTimeRange {
-  const { start, end } = toAbsoluteTimeRange(timeRange);
-  return {
-    start: Math.ceil(start.valueOf() / 1000),
-    end: Math.ceil(end.valueOf() / 1000),
-  };
 }
 
 /**

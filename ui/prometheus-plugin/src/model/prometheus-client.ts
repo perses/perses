@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from 'react-query';
-import { ResourceSelector, useDeepMemo, fetchJson } from '@perses-ui/core';
+import { ResourceSelector, fetchJson } from '@perses-ui/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -52,27 +52,10 @@ export function useRangeQuery(
   params: RangeQueryRequestParameters,
   queryOptions?: QueryOptions
 ) {
-  // Align the time range so that it's a multiple of the step
-  const alignedParams = useDeepMemo(() => {
-    const { start, end, step } = params;
-    const utcOffsetSec = new Date().getTimezoneOffset() * 60;
-
-    const alignedEnd =
-      Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
-    const alignedStart =
-      Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
-
-    return {
-      ...params,
-      start: alignedStart,
-      end: alignedEnd,
-    };
-  }, [params]);
-
   return useQueryWithPost<RangeQueryRequestParameters, RangeQueryResponse>(
     dataSource,
     '/api/v1/query_range',
-    alignedParams,
+    params,
     undefined,
     queryOptions
   );

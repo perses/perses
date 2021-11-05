@@ -13,7 +13,7 @@
 
 import { usePluginRuntime } from '../context/PluginRuntimeContext';
 import { DashboardSpec } from '../model/dashboard';
-import { TimeRange } from '../model/time';
+import { AbsoluteTimeRange } from '../model/time';
 
 /**
  * Gets the spec for the current Dashboard.
@@ -40,6 +40,6 @@ export function useDashboardVariables(): Record<string, VariableState> {
 /**
  * Gets the selected time range for the current Dashboard.
  */
-export function useDashboardTimeRange(): TimeRange {
+export function useDashboardTimeRange(): AbsoluteTimeRange {
   return usePluginRuntime('useDashboardTimeRange')();
 }
