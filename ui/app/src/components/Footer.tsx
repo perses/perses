@@ -2,7 +2,7 @@ import { Box, CircularProgress, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { Github } from 'mdi-material-ui';
 import { useSnackbar } from '../context/SnackbarProvider';
-import { useHealth } from '../model/perses-client';
+import { useHealth } from '../model/health-client';
 
 const style: SxProps<Theme> = {
   display: 'flex',
