@@ -17,8 +17,10 @@ import {
   PanelProps,
   usePanelState,
 } from '@perses-ui/core';
+import { useMemo } from 'react';
 import LineChart from './LineChart';
 import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
+import UPlotChart from './UPlotChart';
 
 export const LineChartKind = 'LineChart' as const;
 
@@ -37,10 +39,17 @@ export function LineChartPanel(props: LineChartProps) {
   } = props;
   const { contentDimensions } = usePanelState();
 
+  const isUPlot = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('uplot') === 'true';
+  }, []);
+
+  const Chart = isUPlot ? UPlotChart : LineChart;
+
   return (
     <TimeSeriesQueryRunner queries={queries}>
       {contentDimensions !== undefined && (
-        <LineChart
+        <Chart
           width={contentDimensions.width}
           height={contentDimensions.height}
         />

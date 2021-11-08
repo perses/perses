@@ -18,7 +18,7 @@ import {
 } from '@perses-ui/core';
 import { createContext, useContext } from 'react';
 
-type QueryState = ReturnType<typeof useTimeSeriesQuery>;
+export type QueryState = ReturnType<typeof useTimeSeriesQuery>;
 
 const EMPTY_RESULTS: QueryState[] = [];
 
