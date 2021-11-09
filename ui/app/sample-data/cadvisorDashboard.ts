@@ -13,7 +13,7 @@
 
 import { DashboardResource, AnyVariableDefinition } from '@perses-ui/core';
 
-const cadvisor: DashboardResource = {
+const cadvisorDashboard: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'Kubelet - cAdvisor',
@@ -296,4 +296,4 @@ const cadvisor: DashboardResource = {
   },
 };
 
-export default cadvisor;
+export default cadvisorDashboard;
