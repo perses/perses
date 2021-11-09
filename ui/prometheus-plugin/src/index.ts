@@ -13,9 +13,9 @@
 
 import { PluginSetupFunction } from '@perses-ui/core';
 import {
-  PrometheusTimeSeriesQueryKind,
-  usePrometheusTimeSeriesQuery,
-} from './plugins/time-series-query';
+  PrometheusGraphQueryKind,
+  usePrometheusGraphQuery,
+} from './plugins/graph-query';
 import { IntervalKind, useIntervalValues } from './plugins/interval-variable';
 import {
   PrometheusLabelNamesKind,
@@ -52,11 +52,11 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
     },
   });
   registerPlugin({
-    pluginType: 'TimeSeriesQuery',
-    kind: PrometheusTimeSeriesQueryKind,
+    pluginType: 'GraphQuery',
+    kind: PrometheusGraphQueryKind,
     validate: undefined, // TODO
     plugin: {
-      useTimeSeriesQuery: usePrometheusTimeSeriesQuery,
+      useGraphQuery: usePrometheusGraphQuery,
     },
   });
 };

@@ -18,7 +18,7 @@ import { GridComponent, DatasetComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
-import { useRunningTimeSeriesQueries } from './TimeSeriesQueryRunner';
+import { useRunningGraphQueries } from './GraphQueryRunner';
 
 echarts.use([
   EChartsLineChart,
@@ -37,7 +37,7 @@ export interface LineChartProps {
  */
 function LineChart(props: LineChartProps) {
   const { width, height } = props;
-  const queries = useRunningTimeSeriesQueries();
+  const queries = useRunningGraphQueries();
 
   // Calculate the LineChart options based on the query results
   const option: EChartsOption = useMemo(() => {

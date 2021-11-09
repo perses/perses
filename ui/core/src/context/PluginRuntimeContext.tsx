@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, useContext, useRef } from 'react';
-import { useTimeSeriesQuery } from '../hooks/time-series';
+import { useGraphQuery } from '../hooks/graph-query';
 import {
   useDashboardSpec,
   useDashboardTimeRange,
@@ -31,7 +31,7 @@ export interface PluginRuntime {
   useDashboardVariables: typeof useDashboardVariables;
   useDashboardTimeRange: typeof useDashboardTimeRange;
   useDataSources: typeof useDataSources;
-  useTimeSeriesQuery: typeof useTimeSeriesQuery;
+  useGraphQuery: typeof useGraphQuery;
   usePanelState: typeof usePanelState;
 }
 

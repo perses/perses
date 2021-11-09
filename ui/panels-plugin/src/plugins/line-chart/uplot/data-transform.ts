@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeSeries } from '@perses-ui/core';
+import { AbsoluteTimeRange, GraphSeries } from '@perses-ui/core';
 import { gcd } from 'mathjs';
-import { QueryState } from '../TimeSeriesQueryRunner';
+import { QueryState } from '../GraphQueryRunner';
 
 export interface TimeScale {
   startMs: number;
@@ -90,7 +90,7 @@ export function getXValues(timeScale: TimeScale): number[] {
  * series data with `null` values.
  */
 export function getYValues(
-  series: TimeSeries,
+  series: GraphSeries,
   timeScale: TimeScale
 ): Array<number | null> {
   let timestamp = timeScale.startMs;

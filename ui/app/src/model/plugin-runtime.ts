@@ -15,7 +15,7 @@ import { PluginRuntime } from '@perses-ui/core';
 import { useDashboardContext } from '../views/dashboard/DashboardContextProvider';
 import { useDataSources } from '../context/DataSourceRegistry';
 import { usePanelContext } from '../views/dashboard/PanelContextProvider';
-import { useTimeSeriesQuery } from '../context/plugin-registry';
+import { useGraphQuery } from '../context/plugin-registry';
 
 /**
  * The runtime implementations exposed to plugins.
@@ -25,6 +25,6 @@ export const pluginRuntime: PluginRuntime = {
   useDashboardVariables: () => useDashboardContext().variables.state,
   useDashboardTimeRange: () => useDashboardContext().timeRange,
   useDataSources: useDataSources,
-  useTimeSeriesQuery: useTimeSeriesQuery,
+  useGraphQuery: useGraphQuery,
   usePanelState: usePanelContext,
 };

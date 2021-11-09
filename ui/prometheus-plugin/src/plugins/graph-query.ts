@@ -13,12 +13,12 @@
 
 import {
   JsonObject,
-  UseTimeSeriesQueryHook,
-  TimeSeriesQueryDefinition,
+  UseGraphQueryHook,
+  GraphQueryDefinition,
   DurationString,
   useDashboardSpec,
   useMemoized,
-  TimeSeriesData,
+  GraphData,
 } from '@perses-ui/core';
 import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
@@ -32,27 +32,23 @@ import {
   usePanelRangeStep,
 } from '../model/time';
 
-export const PrometheusTimeSeriesQueryKind =
-  'PrometheusTimeSeriesQuery' as const;
+export const PrometheusGraphQueryKind = 'PrometheusGraphQuery' as const;
 
-type PrometheusTimeSeriesQuery = TimeSeriesQueryDefinition<
-  typeof PrometheusTimeSeriesQueryKind,
-  TimeSeriesQueryOptions
+type PrometheusGraphQuery = GraphQueryDefinition<
+  typeof PrometheusGraphQueryKind,
+  GraphQueryOptions
 >;
 
-interface TimeSeriesQueryOptions extends JsonObject {
+interface GraphQueryOptions extends JsonObject {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
 }
 
-export function usePrometheusTimeSeriesQuery(
-  definition: PrometheusTimeSeriesQuery
+export function usePrometheusGraphQuery(
+  definition: PrometheusGraphQuery
 ): ReturnType<
-  UseTimeSeriesQueryHook<
-    typeof PrometheusTimeSeriesQueryKind,
-    TimeSeriesQueryOptions
-  >
+  UseGraphQueryHook<typeof PrometheusGraphQueryKind, GraphQueryOptions>
 > {
   const spec = useDashboardSpec();
   const dataSource = definition.datasource ?? spec.datasource;
@@ -104,7 +100,7 @@ export function usePrometheusTimeSeriesQuery(
 
     // TODO: Maybe do a proper Iterable implementation that defers some of this
     // processing until its needed
-    const chartData: TimeSeriesData = {
+    const chartData: GraphData = {
       timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
       stepMs: step * 1000,
       series: response.data.result.map((value) => {

@@ -12,14 +12,14 @@
 // limitations under the License.
 
 import {
-  AnyTimeSeriesQueryDefinition,
+  AnyGraphQueryDefinition,
   JsonObject,
   PanelProps,
   usePanelState,
 } from '@perses-ui/core';
 import { useMemo } from 'react';
 import LineChart from './LineChart';
-import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
+import GraphQueryRunner from './GraphQueryRunner';
 import UPlotChart from './uplot/UPlotChart';
 
 export const LineChartKind = 'LineChart' as const;
@@ -27,7 +27,7 @@ export const LineChartKind = 'LineChart' as const;
 export type LineChartProps = PanelProps<typeof LineChartKind, LineChartOptions>;
 
 interface LineChartOptions extends JsonObject {
-  queries: AnyTimeSeriesQueryDefinition[];
+  queries: AnyGraphQueryDefinition[];
   show_legend?: boolean;
 }
 
@@ -47,13 +47,13 @@ export function LineChartPanel(props: LineChartProps) {
   const Chart = isUPlot ? UPlotChart : LineChart;
 
   return (
-    <TimeSeriesQueryRunner queries={queries}>
+    <GraphQueryRunner queries={queries}>
       {contentDimensions !== undefined && (
         <Chart
           width={contentDimensions.width}
           height={contentDimensions.height}
         />
       )}
-    </TimeSeriesQueryRunner>
+    </GraphQueryRunner>
   );
 }

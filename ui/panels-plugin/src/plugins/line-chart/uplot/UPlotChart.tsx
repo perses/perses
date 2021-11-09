@@ -15,7 +15,7 @@ import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
 import { useState, useMemo, useLayoutEffect } from 'react';
 import { Box, useTheme } from '@mui/material';
-import { useRunningTimeSeriesQueries } from '../TimeSeriesQueryRunner';
+import { useRunningGraphQueries } from '../GraphQueryRunner';
 import { getCommonTimeScale, getXValues, getYValues } from './data-transform';
 
 // Formatter for dates on the X axis
@@ -36,7 +36,7 @@ export interface UPlotChartProps {
 function UPlotChart(props: UPlotChartProps) {
   const { width, height } = props;
   const theme = useTheme();
-  const queries = useRunningTimeSeriesQueries();
+  const queries = useRunningGraphQueries();
 
   const { data, options } = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);

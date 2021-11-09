@@ -12,56 +12,50 @@
 // limitations under the License.
 
 import {
-  AnyTimeSeriesQueryDefinition,
+  AnyGraphQueryDefinition,
   useMemoized,
-  useTimeSeriesQuery,
+  useGraphQuery,
 } from '@perses-ui/core';
 import { createContext, useContext } from 'react';
 
-export type QueryState = ReturnType<typeof useTimeSeriesQuery>;
+export type QueryState = ReturnType<typeof useGraphQuery>;
 
 const EMPTY_RESULTS: QueryState[] = [];
 
-// Context provided by the TimeSeriesQueryRunner
-const TimeSeriesQueryContext = createContext<QueryState[] | undefined>(
-  undefined
-);
+// Context provided by the GraphQueryRunner
+const GraphQueryContext = createContext<QueryState[] | undefined>(undefined);
 
-export interface TimeSeriesQueryRunnerProps {
-  queries: AnyTimeSeriesQueryDefinition[];
+export interface GraphQueryRunnerProps {
+  queries: AnyGraphQueryDefinition[];
   children: React.ReactNode;
 }
 
 /**
- * Component that runs a list of time series queries and then provides the
+ * Component that runs a list of graph queries and then provides the
  * list of results to children via context.
  */
-function TimeSeriesQueryRunner(props: TimeSeriesQueryRunnerProps) {
+function GraphQueryRunner(props: GraphQueryRunnerProps) {
   const { queries, children } = props;
 
   if (queries.length === 0) {
     return (
-      <TimeSeriesQueryContext.Provider value={EMPTY_RESULTS}>
+      <GraphQueryContext.Provider value={EMPTY_RESULTS}>
         {children}
-      </TimeSeriesQueryContext.Provider>
+      </GraphQueryContext.Provider>
     );
   }
 
   return (
-    <RunTimeSeriesQuery
-      queries={queries}
-      index={0}
-      previousResults={EMPTY_RESULTS}
-    >
+    <RunGraphQuery queries={queries} index={0} previousResults={EMPTY_RESULTS}>
       {children}
-    </RunTimeSeriesQuery>
+    </RunGraphQuery>
   );
 }
 
-export default TimeSeriesQueryRunner;
+export default GraphQueryRunner;
 
-interface RunTimeSeriesQueryProps {
-  queries: AnyTimeSeriesQueryDefinition[];
+interface RunGraphQueryProps {
+  queries: AnyGraphQueryDefinition[];
   index: number;
   previousResults: QueryState[];
   children: React.ReactNode;
@@ -69,7 +63,7 @@ interface RunTimeSeriesQueryProps {
 
 // Internal component that actually runs a query in the array and adds the
 // results of that query to the previous ones
-function RunTimeSeriesQuery(props: RunTimeSeriesQueryProps) {
+function RunGraphQuery(props: RunGraphQueryProps) {
   const { queries, index, previousResults, children } = props;
 
   const query = queries[index];
@@ -77,7 +71,7 @@ function RunTimeSeriesQuery(props: RunTimeSeriesQueryProps) {
     throw new Error(`No query to run at index ${index}`);
   }
 
-  const { data, loading, error } = useTimeSeriesQuery(query);
+  const { data, loading, error } = useGraphQuery(query);
   const results = useMemoized(() => {
     return [...previousResults, { data, loading, error }];
   }, [previousResults, data, loading, error]);
@@ -86,33 +80,33 @@ function RunTimeSeriesQuery(props: RunTimeSeriesQueryProps) {
   if (index === queries.length - 1) {
     // Provide the state for all the running queries via context
     return (
-      <TimeSeriesQueryContext.Provider value={results}>
+      <GraphQueryContext.Provider value={results}>
         {children}
-      </TimeSeriesQueryContext.Provider>
+      </GraphQueryContext.Provider>
     );
   }
 
   // Otherwise, recursively render to keep unrolling the array
   return (
-    <RunTimeSeriesQuery
+    <RunGraphQuery
       queries={queries}
       index={index + 1}
       previousResults={results}
     >
       {children}
-    </RunTimeSeriesQuery>
+    </RunGraphQuery>
   );
 }
 
 /**
- * Allows chilren of TimeSeriesQueryRunner to get the states of all queries that
+ * Allows chilren of GraphQueryRunner to get the states of all queries that
  * have been run.
  */
-export function useRunningTimeSeriesQueries(): QueryState[] {
-  const context = useContext(TimeSeriesQueryContext);
+export function useRunningGraphQueries(): QueryState[] {
+  const context = useContext(GraphQueryContext);
   if (context === undefined) {
     throw new Error(
-      'No time series queries found. Did you forget TimeSeriesQueryRunner?'
+      'No time series queries found. Did you forget GraphQueryRunner?'
     );
   }
   return context;

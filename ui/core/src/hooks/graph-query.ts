@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { usePluginRuntime } from '../context/PluginRuntimeContext';
-import { UseTimeSeriesQueryHook } from '../model/time-series-query';
+import { UseGraphQueryHook } from '../model/graph-query';
 import { JsonObject } from '../model/definitions';
 
-export const useTimeSeriesQuery: UseTimeSeriesQueryHook<string, JsonObject> = (
+export const useGraphQuery: UseGraphQueryHook<string, JsonObject> = (
   definition
 ) => {
-  return usePluginRuntime('useTimeSeriesQuery')(definition);
+  return usePluginRuntime('useGraphQuery')(definition);
 };

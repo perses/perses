@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesValueTuple } from '@perses-ui/core';
+import { GraphSeriesValueTuple } from '@perses-ui/core';
 import { findLast, meanBy } from 'lodash-es';
 
 export const CalculationsMap = {
@@ -23,28 +23,28 @@ export const CalculationsMap = {
 
 export type CalculationType = keyof typeof CalculationsMap;
 
-function first(values: TimeSeriesValueTuple[]): number | undefined {
+function first(values: GraphSeriesValueTuple[]): number | undefined {
   const tuple = values[0];
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function last(values: TimeSeriesValueTuple[]): number | undefined {
+function last(values: GraphSeriesValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
 
   const tuple = values[values.length - 1];
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function lastNumber(values: TimeSeriesValueTuple[]): number | undefined {
+function lastNumber(values: GraphSeriesValueTuple[]): number | undefined {
   const tuple = findLast(values, (tuple) => isNaN(getValue(tuple)) === false);
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function mean(values: TimeSeriesValueTuple[]): number | undefined {
+function mean(values: GraphSeriesValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
   return meanBy(values, getValue);
 }
 
-function getValue(valueTuple: TimeSeriesValueTuple) {
+function getValue(valueTuple: GraphSeriesValueTuple) {
   return valueTuple[1];
 }

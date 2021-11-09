@@ -13,9 +13,9 @@
 
 import {
   JsonObject,
-  AnyTimeSeriesQueryDefinition,
+  AnyGraphQueryDefinition,
   PanelProps,
-  useTimeSeriesQuery,
+  useGraphQuery,
 } from '@perses-ui/core';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from './calculations';
@@ -28,7 +28,7 @@ type StatChartKind = typeof StatChartKind;
 export type StatChartPanelProps = PanelProps<StatChartKind, StatChartOptions>;
 
 interface StatChartOptions extends JsonObject {
-  query: AnyTimeSeriesQueryDefinition;
+  query: AnyGraphQueryDefinition;
   calculation: CalculationType;
   unit?: UnitOptions;
 }
@@ -39,7 +39,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       options: { query, calculation, unit },
     },
   } = props;
-  const { data, loading, error } = useTimeSeriesQuery(query);
+  const { data, loading, error } = useGraphQuery(query);
 
   const displayValue = useMemo(() => {
     if (data === undefined) return 'No data';
