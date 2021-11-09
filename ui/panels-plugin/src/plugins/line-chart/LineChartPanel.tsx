@@ -20,7 +20,7 @@ import {
 import { useMemo } from 'react';
 import LineChart from './LineChart';
 import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
-import UPlotChart from './UPlotChart';
+import UPlotChart from './uplot/UPlotChart';
 
 export const LineChartKind = 'LineChart' as const;
 

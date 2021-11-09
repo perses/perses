@@ -15,12 +15,15 @@ import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
 import { useState, useMemo, useLayoutEffect } from 'react';
 import { Box, useTheme } from '@mui/material';
-import { gcd } from 'mathjs';
-import { AbsoluteTimeRange, TimeSeries } from '@perses-ui/core';
-import {
-  QueryState,
-  useRunningTimeSeriesQueries,
-} from './TimeSeriesQueryRunner';
+import { useRunningTimeSeriesQueries } from '../TimeSeriesQueryRunner';
+import { getCommonTimeScale, getXValues, getYValues } from './data-transform';
+
+// Formatter for dates on the X axis
+const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
+  hour: 'numeric',
+  minute: 'numeric',
+  hour12: false,
+});
 
 export interface UPlotChartProps {
   width: number;
@@ -102,6 +105,8 @@ function UPlotChart(props: UPlotChartProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>();
   const [, setPlot] = useState<uPlot | undefined>(undefined);
 
+  // Create the plot in the container div and recreate whenever data or options
+  // change
   useLayoutEffect(() => {
     if (containerRef === null) return;
     if (data === undefined || options === undefined) return;
@@ -124,98 +129,7 @@ function UPlotChart(props: UPlotChartProps) {
 
 export default UPlotChart;
 
-interface TimeScale {
-  startMs: number;
-  endMs: number;
-  stepMs: number;
-}
-
-function getCommonTimeScale(queries: QueryState[]): TimeScale | undefined {
-  let timeRange: AbsoluteTimeRange | undefined = undefined;
-  const steps: number[] = [];
-  for (const { loading, data } of queries) {
-    if (loading || data === undefined) continue;
-
-    // Keep track of query steps so we can calculate a common one for the graph
-    steps.push(data.stepMs);
-
-    // If we don't have an overall time range yet, just start with this one
-    if (timeRange === undefined) {
-      timeRange = data.timeRange;
-      continue;
-    }
-
-    // Otherwise, see if this query has a start or end outside of the current
-    // time range
-    if (data.timeRange.start < timeRange.start) {
-      timeRange.start = data.timeRange.start;
-    }
-    if (data.timeRange.end > timeRange.end) {
-      timeRange.end = data.timeRange.end;
-    }
-  }
-
-  if (timeRange === undefined) return undefined;
-
-  // Use the greatest common divisor of all step values as the overall step
-  // for the x axis
-  let stepMs: number;
-  if (steps.length === 1) {
-    stepMs = steps[0] as number;
-  } else {
-    stepMs = gcd(...steps);
-  }
-
-  const startMs = timeRange.start.valueOf();
-  const endMs = timeRange.end.valueOf();
-
-  return { startMs, endMs, stepMs };
-}
-
-function getXValues(timeScale: TimeScale): number[] {
-  const xValues: number[] = [];
-  let timestamp = timeScale.startMs;
-  while (timestamp <= timeScale.endMs) {
-    xValues.push(timestamp);
-    timestamp += timeScale.stepMs;
-  }
-  return xValues;
-}
-
-function getYValues(
-  series: TimeSeries,
-  timeScale: TimeScale
-): Array<number | null> {
-  let timestamp = timeScale.startMs;
-
-  const yValues: Array<number | null> = [];
-  for (const valueTuple of series.values) {
-    // Fill in values up to the current series value timestamp with nulls
-    while (timestamp < valueTuple[0]) {
-      yValues.push(null);
-      timestamp += timeScale.stepMs;
-    }
-
-    // Now add the current value since timestamp should match
-    yValues.push(valueTuple[1]);
-    timestamp += timeScale.stepMs;
-  }
-
-  // Add null values at the end of the series if necessary
-  while (timestamp <= timeScale.endMs) {
-    yValues.push(null);
-    timestamp += timeScale.stepMs;
-  }
-
-  return yValues;
-}
-
-const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
-  hour: 'numeric',
-  minute: 'numeric',
-  hour12: false,
-});
-
+// Helper function to generate a random color for a chart series based on its name
 function getRandomColor(identifier: string): string {
   let hash = 0;
   for (let index = 0; index < identifier.length; index++) {
