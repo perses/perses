@@ -6,13 +6,12 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.11.0 // indirect
 	github.com/perses/common v0.7.0
-	github.com/prometheus/client_golang v1.10.0
-	github.com/prometheus/common v0.20.0
+	github.com/prometheus/client_golang v1.11.0 // indirect
+	github.com/prometheus/common v0.26.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/atomic v1.7.0 // indirect
