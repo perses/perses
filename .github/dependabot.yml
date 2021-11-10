@@ -1,0 +1,30 @@
+version: 2
+updates:
+- package-ecosystem: "gomod"
+  directory: "/"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "npm"
+  directory: "/ui"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "npm"
+  directory: "/ui/app"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "npm"
+  directory: "/ui/core"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "npm"
+  directory: "/ui/panels-plugin"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "npm"
+  directory: "/ui/prometheus-plugin"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
