@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@perses-ui/core": "^1.0.0",
-    "date-fns": "^2.23.0",
+    "date-fns": "^2.25.0",
     "lodash-es": "^4.17.21",
     "react": "^17.0.2"
   },
