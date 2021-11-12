@@ -13,12 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+container=dev_etcd_1
+if [ "$( docker ps -a | grep -c dev-etcd-1 )" -gt 0 ]; then
+  container=dev-etcd-1
+fi
+
 function getKindID() {
   kind=$1
   if [ "${kind}" = "Project" ]; then
     echo "projects"
   elif [ "${kind}" = "GlobalDatasource" ]; then
     echo "globaldatasources"
+  elif [ "${kind}" = "Datasource" ]; then
+    echo "datasources"
   elif [ "${kind}" = "Dashboard" ]; then
     echo "dashboards"
   fi
@@ -39,11 +46,12 @@ function insertResourceData() {
       fi
       id=${id}$(_jq '.metadata.name')
       echo "injected document at with the key $id"
-      MSYS_NO_PATHCONV=1 docker exec dev_etcd_1 etcdctl put "${id}" "${entity}"
+      MSYS_NO_PATHCONV=1 docker exec ${container} etcdctl put "${id}" "${entity}"
   done
 }
 
 
+insertResourceData ./data/localdatasource.json true
 insertResourceData ./data/dashboard.json true
 insertResourceData ./data/project.json
 insertResourceData ./data/globaldatasource.json

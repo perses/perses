@@ -26,7 +26,7 @@ type Query struct {
 	NamePrefix string `query:"name"`
 	// Project is the exact name of the project.
 	// The value can come from the path of the URL or from the query parameter
-	Project string `path:"project" query:"project"`
+	Project string `param:"project" query:"project"`
 }
 
 func (q *Query) Build() (string, error) {
