@@ -1,76 +1,74 @@
 Contributing
 ============
 
-As Perses is still in progress, process to contribute is not entirely in place.
+As Perses is still a work in progress, the contribution process is still evolving.
 
-We are using GitHub for the development.
+We are using GitHub as our main development and discussion forum.
 
-* All PRs should go there
-* We are opening issue when we are sure about a feature, and we want to trace it. We also open issues when the feature proposed should be small and doesn't require huge talk.
-* If you are thinking about something more involved, you can use the [GitHub discussion](https://github.com/perses/perses/discussions)
-* Be sure to sign off on the [DCO](https://github.com/probot/dco#how-it-works)
+* All PRs should go there.
+* We use pull requests and issues for tracking the development of features that are either uncontroversial and/or small and don't need much up-front discussion.
+* If you are thinking about contributing something more involved, you can use the [GitHub discussions](https://github.com/perses/perses/discussions) feature for design discussions before sending a pull request or creating a feature request issue.
+* Be sure to add [DCO signoffs](https://github.com/probot/dco#how-it-works) to all of your commits.
 
-If you are unsure about what to do, and you are eager to contribute, you can reach us on the development channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) available on matrix.
+If you are unsure about what to do, and you are eager to contribute, you can reach us on the development channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) on [Matrix](https://matrix.org/).
 
 ## Development
 
-This section should help to build and start the project, and to enter in the project.
+This section explains how to build, launch, and start using Perses.
 
-In this repository you have :
+This repository contains two major components of Perses:
 
-* the API written in Golang
-* the web app written in Typescript (using React)
+* The backend API server written in Go.
+* The web application frontend written in TypeScript (using React).
 
-Each side of this project can be easily started and tested, you just have to follow the steps described below.
+Both components can be started and tested individually as described below.
 
-### API
+### Backend API Server
 
-To be able to start the API, you need to install the following tool:
+Building and starting the backend API server requires the following tools:
 
-* Golang (usually the last version as we are following closely the latest version of Golang)
+* Go (usually the latest version as we are following upstream Go releases closely)
 * Docker & docker-compose
 * Make
 
-Once it is done, you can proceed as followed:
+With these dependencies installed, you can proceed as follows:
 
-* go the `dev` folder, where you can find a `docker-compose.yaml` file.
-* start the different container described in the file:
+* Change to the `dev` folder and start an [etcd](https://etcd.io/) server, which is currently still required for storing and retrieving dashboard definitions:
 
 ```bash
 cd dev/
 docker-compose up -d
-```  
+```
 
-* You have a bash script that would populate the database with a default setup. It can help if you just want to run a
-  demo.
+* To populate the etcd database with a default dashboard and datasource setup for demonstration purposes, run the `populate.sh` script:
 
 ```bash
 bash populate.sh
 ```
 
-* come back to the root of the project and then build the api:
+* Return to the root of the project and build the API server:
 
 ```bash
 cd ../
 make build
 ```
 
-* finally, run the binary built by using the simple configuration file from the `dev` folder:
+* Finally, run the built binary by using the simple configuration file from the `dev` folder:
 
 ```bash
 ./bin/perses -config ./dev/config.yaml
 ```
 
-You should see something like that displayed in your terminal:
+You should see something like this displayed in your terminal:
 
 ```log
 $> ./bin/perses -config ./bin/config.yaml
-______                       
-| ___ \                      
-| |_/ /__ _ __ ___  ___  ___ 
+______
+| ___ \
+| |_/ /__ _ __ ___  ___  ___
 |  __/ _ \ '__/ __|/ _ \/ __|
 | | |  __/ |  \__ \  __/\__ \
-\_|  \___|_|  |___/\___||___/ 
+\_|  \___|_|  |___/\___||___/
 
 The secure way to configure your monitoring.               <\
                                                             \\
@@ -82,26 +80,8 @@ The secure way to configure your monitoring.               <\
 
 ```
 
-The API is now available :).
+The API backend is now available on port 8080 :).
 
 ### Web App
 
-To be able to use the Web app, you will have to follow the steps to run the API first. For the moment there is no
-particular desire to run the Web-app on the development environment without the API at the same time.
-
-* Install nodejs [version 14 or greater](https://nodejs.org/).
-* Install npm [version 7 or greater](https://www.npmjs.com/).
-* Then go to the folder `./ui`, and install all necessary packages:
-
-```bash
-cd ./ui
-npm install
-```
-
-* Finally, start the web-app:
-
-```bash
-npm start
-```
-
-The web-app is now available using the url http://localhost:3000.
+See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI. The web UI currently still shows a canned test dashboard that is not loaded from the Perses API backend yet, but it already runs health checks that require the backend to be running in order to not show errors in the UI.
