@@ -27,6 +27,11 @@ declare module 'webpack' {
 
 // Get dev server HTTPS options
 function getHttpsConfig() {
+  // in case you would like to disable explicitly the https config of Perses (dev environment only).
+  // It's useful in a gitpod environment since the https config is blocking the preview of the UI.
+  if (process.env.PERSES_DISABLE_HTTPS === 'true') {
+    return false;
+  }
   // If key/cert not specified, just use the default self-signed cert
   if (
     process.env.SSL_KEY_FILE === undefined ||
@@ -59,6 +64,7 @@ const devConfig: Configuration = {
     open: true,
     https: getHttpsConfig(),
     historyApiFallback: true,
+    allowedHosts: 'all',
     proxy: {
       '/api': 'http://localhost:8080',
     },
