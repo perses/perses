@@ -13,15 +13,17 @@
 
 import {
   JsonObject,
-  UseChartQueryHook,
-  ChartQueryDefinition,
+  UseGraphQueryHook,
+  GraphQueryDefinition,
   DurationString,
   useDashboardSpec,
   useMemoized,
+  GraphData,
 } from '@perses-ui/core';
+import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';
-import { createDataFrames } from '../model/data-frames';
+import { parseValueTuple } from '../model/parse-sample-values';
 import { useRangeQuery } from '../model/prometheus-client';
 import { TemplateString, useReplaceTemplateString } from '../model/templating';
 import {
@@ -30,24 +32,24 @@ import {
   usePanelRangeStep,
 } from '../model/time';
 
-export const PrometheusRangeChartQueryKind = 'PrometheusRangeChartQuery';
+export const PrometheusGraphQueryKind = 'PrometheusGraphQuery' as const;
 
-type PrometheusRangeChartQuery = ChartQueryDefinition<
-  RangeChartQueryKind,
-  RangeChartQueryOptions
+type PrometheusGraphQuery = GraphQueryDefinition<
+  typeof PrometheusGraphQueryKind,
+  GraphQueryOptions
 >;
 
-type RangeChartQueryKind = typeof PrometheusRangeChartQueryKind;
-
-interface RangeChartQueryOptions extends JsonObject {
+interface GraphQueryOptions extends JsonObject {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
 }
 
-export function usePrometheusRangeChartQuery(
-  definition: PrometheusRangeChartQuery
-): ReturnType<UseChartQueryHook<RangeChartQueryKind, RangeChartQueryOptions>> {
+export function usePrometheusGraphQuery(
+  definition: PrometheusGraphQuery
+): ReturnType<
+  UseGraphQueryHook<typeof PrometheusGraphQueryKind, GraphQueryOptions>
+> {
   const spec = useDashboardSpec();
   const dataSource = definition.datasource ?? spec.datasource;
 
@@ -92,6 +94,34 @@ export function usePrometheusRangeChartQuery(
     enabled: needsVariableValuesFor.size === 0,
   });
 
-  const data = useMemo(() => createDataFrames(response), [response]);
+  const data = useMemo(() => {
+    if (response === undefined) return undefined;
+    if (response.status === 'error') return undefined;
+
+    // TODO: Maybe do a proper Iterable implementation that defers some of this
+    // processing until its needed
+    const chartData: GraphData = {
+      timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
+      stepMs: step * 1000,
+      series: response.data.result.map((value) => {
+        const { metric, values } = value;
+
+        // Name the series after the metric labels or if no metric, just use the
+        // overall query
+        let name = Object.entries(metric)
+          .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`)
+          .join(', ');
+        if (name === '') name = query;
+
+        return {
+          name,
+          values: values.map(parseValueTuple),
+        };
+      }),
+    };
+
+    return chartData;
+  }, [response, start, end, step, query]);
+
   return { data, loading, error: error ?? undefined };
 }

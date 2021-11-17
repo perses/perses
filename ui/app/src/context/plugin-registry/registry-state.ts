@@ -24,7 +24,7 @@ import {
 } from '@perses-ui/core';
 import { BUNDLED_PLUGINS } from './bundled-plugins';
 import {
-  createChartQueryPlugin,
+  createGraphQueryPlugin,
   createPanelPlugin,
   createVariablePlugin,
 } from './create-plugin';
@@ -50,7 +50,7 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
     const loadableProps: PluginResourcesByTypeAndKind = {
       Variable: new Map(),
       Panel: new Map(),
-      ChartQuery: new Map(),
+      GraphQuery: new Map(),
     };
 
     const addToLoadable = (resource: PluginResource) => {
@@ -84,7 +84,7 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
   const [plugins, setPlugins] = useImmer<LoadedPluginsByTypeAndKind>(() => ({
     Variable: new Map(),
     Panel: new Map(),
-    ChartQuery: new Map(),
+    GraphQuery: new Map(),
   }));
 
   // Create the register callback to pass to the module's setup function
@@ -103,9 +103,9 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
             draft.Panel.set(config.kind, createPanelPlugin(config));
           });
           return;
-        case 'ChartQuery':
+        case 'GraphQuery':
           setPlugins((draft) => {
-            draft.ChartQuery.set(config.kind, createChartQueryPlugin(config));
+            draft.GraphQuery.set(config.kind, createGraphQueryPlugin(config));
           });
           return;
         default:

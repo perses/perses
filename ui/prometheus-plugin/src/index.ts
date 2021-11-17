@@ -13,13 +13,9 @@
 
 import { PluginSetupFunction } from '@perses-ui/core';
 import {
-  PrometheusInstantChartQueryKind,
-  usePrometheusInstantChartQuery,
-} from './plugins/instant-chart-query';
-import {
-  PrometheusRangeChartQueryKind,
-  usePrometheusRangeChartQuery,
-} from './plugins/range-chart-query';
+  PrometheusGraphQueryKind,
+  usePrometheusGraphQuery,
+} from './plugins/graph-query';
 import { IntervalKind, useIntervalValues } from './plugins/interval-variable';
 import {
   PrometheusLabelNamesKind,
@@ -56,19 +52,11 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
     },
   });
   registerPlugin({
-    pluginType: 'ChartQuery',
-    kind: PrometheusInstantChartQueryKind,
+    pluginType: 'GraphQuery',
+    kind: PrometheusGraphQueryKind,
     validate: undefined, // TODO
     plugin: {
-      useChartQuery: usePrometheusInstantChartQuery,
-    },
-  });
-  registerPlugin({
-    pluginType: 'ChartQuery',
-    kind: PrometheusRangeChartQueryKind,
-    validate: undefined, // TODO
-    plugin: {
-      useChartQuery: usePrometheusRangeChartQuery,
+      useGraphQuery: usePrometheusGraphQuery,
     },
   });
 };

@@ -13,7 +13,7 @@
 
 import { useRef } from 'react';
 import {
-  AnyChartQueryDefinition,
+  AnyGraphQueryDefinition,
   JsonObject,
   AnyVariableDefinition,
   PanelProps,
@@ -83,30 +83,30 @@ export function createPanelPlugin<
 }
 
 /**
- * Take a ChartQuery plugin and wrap it so it works with AnyChartQueryDefinition,
+ * Take a GraphQuery plugin and wrap it so it works with AnyChartQueryDefinition,
  * doing runtime validation of the definition before delegating to the plugin.
  */
-export function createChartQueryPlugin<
+export function createGraphQueryPlugin<
   Kind extends string,
   Options extends JsonObject
 >(
-  config: PluginConfig<'ChartQuery', Kind, Options>
-): AnyPluginImplementation<'ChartQuery'> {
+  config: PluginConfig<'GraphQuery', Kind, Options>
+): AnyPluginImplementation<'GraphQuery'> {
   // Create runtime validation function
   const useRuntimeValidation = createValidationHook(config);
 
   // Wrap hook with validation (TODO: Can this wrapper become generic for all
   // plugin hooks?)
-  function useChartQuery(definition: AnyChartQueryDefinition) {
+  function useGraphQuery(definition: AnyGraphQueryDefinition) {
     const { isValid, errorRef } = useRuntimeValidation();
     if (isValid(definition)) {
-      return config.plugin.useChartQuery(definition);
+      return config.plugin.useGraphQuery(definition);
     }
     throw errorRef.current;
   }
 
   return {
-    useChartQuery,
+    useGraphQuery,
   };
 }
 

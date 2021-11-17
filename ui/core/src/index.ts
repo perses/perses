@@ -12,12 +12,12 @@
 // limitations under the License.
 
 export * from './context/PluginRuntimeContext';
-export * from './hooks/chart';
+export * from './hooks/graph-query';
 export * from './hooks/dashboard';
 export * from './hooks/datasource';
 export * from './hooks/memo';
 export * from './hooks/panel';
-export * from './model/chart-query';
+export * from './model/graph-query';
 export * from './model/data-frame';
 export * from './model/definitions';
 export * from './model/dashboard';

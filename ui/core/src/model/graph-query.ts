@@ -11,34 +11,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataFrame } from './data-frame';
+import { UnixTimeMs } from '..';
+import { AbsoluteTimeRange } from './time';
 import { Definition, JsonObject } from './definitions';
 import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 import { ResourceSelector } from './resource';
 
-export interface ChartQueryDefinition<
+export interface GraphQueryDefinition<
   Kind extends string,
   Options extends JsonObject
 > extends Definition<Kind, Options> {
   datasource?: ResourceSelector;
 }
 
-export interface ChartQueryPlugin<
+export interface GraphQueryPlugin<
   Kind extends string,
   Options extends JsonObject
 > {
-  useChartQuery: UseChartQueryHook<Kind, Options>;
+  useGraphQuery: UseGraphQueryHook<Kind, Options>;
 }
 
-export type UseChartQueryHook<
+export type UseGraphQueryHook<
   Kind extends string,
   Options extends JsonObject
-> = (definition: ChartQueryDefinition<Kind, Options>) => {
-  data: DataFrame[];
+> = (definition: GraphQueryDefinition<Kind, Options>) => {
+  data?: GraphData;
   loading: boolean;
   error?: Error;
 };
 
-export type AnyChartQueryDefinition = AnyPluginDefinition<'ChartQuery'>;
+export interface GraphData {
+  timeRange: AbsoluteTimeRange;
+  stepMs: number;
+  series: Iterable<GraphSeries>;
+}
 
-export type AnyChartQueryPlugin = AnyPluginImplementation<'ChartQuery'>;
+export interface GraphSeries {
+  name: string;
+  values: Iterable<GraphSeriesValueTuple>;
+}
+
+export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
+
+export type AnyGraphQueryDefinition = AnyPluginDefinition<'GraphQuery'>;
+
+export type AnyGraphQueryPlugin = AnyPluginImplementation<'GraphQuery'>;

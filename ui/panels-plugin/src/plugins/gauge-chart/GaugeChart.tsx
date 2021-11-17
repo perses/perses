@@ -14,7 +14,7 @@
 import {
   JsonObject,
   PanelProps,
-  AnyChartQueryDefinition,
+  AnyGraphQueryDefinition,
 } from '@perses-ui/core';
 
 export const GaugeChartKind = 'GaugeChart' as const;
@@ -24,7 +24,7 @@ type GaugeChartKind = typeof GaugeChartKind;
 export type GaugeChartProps = PanelProps<GaugeChartKind, GaugeChartOptions>;
 
 interface GaugeChartOptions extends JsonObject {
-  query: AnyChartQueryDefinition;
+  query: AnyGraphQueryDefinition;
 }
 
 export function GaugeChart(props: GaugeChartProps) {

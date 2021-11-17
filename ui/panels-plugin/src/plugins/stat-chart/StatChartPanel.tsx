@@ -13,10 +13,9 @@
 
 import {
   JsonObject,
-  AnyChartQueryDefinition,
+  AnyGraphQueryDefinition,
   PanelProps,
-  Series,
-  useChartQuery,
+  useGraphQuery,
 } from '@perses-ui/core';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from './calculations';
@@ -29,7 +28,7 @@ type StatChartKind = typeof StatChartKind;
 export type StatChartPanelProps = PanelProps<StatChartKind, StatChartOptions>;
 
 interface StatChartOptions extends JsonObject {
-  query: AnyChartQueryDefinition;
+  query: AnyGraphQueryDefinition;
   calculation: CalculationType;
   unit?: UnitOptions;
 }
@@ -40,15 +39,17 @@ export function StatChartPanel(props: StatChartPanelProps) {
       options: { query, calculation, unit },
     },
   } = props;
-  const { data, loading, error } = useChartQuery(query);
+  const { data, loading, error } = useGraphQuery(query);
 
   const displayValue = useMemo(() => {
-    // TODO: Some better way to configure what is the "value" column?
-    const valueColumn = data?.[0]?.columns.find(isNumberColumn);
-    if (valueColumn === undefined) return 'No data';
+    if (data === undefined) return 'No data';
+
+    // TODO: something smarter with iterable?
+    const series = Array.from(data.series)[0];
+    if (series === undefined) return 'No data';
 
     const calculate = CalculationsMap[calculation];
-    const value = calculate(valueColumn.values);
+    const value = calculate(Array.from(series.values));
     if (value === undefined) return 'No data';
 
     return formatValue(value, unit);
@@ -58,8 +59,4 @@ export function StatChartPanel(props: StatChartPanelProps) {
   if (loading) return <div>Loading...</div>;
 
   return <div>{displayValue}</div>;
-}
-
-function isNumberColumn(column: Series): column is Series<'Number'> {
-  return column.seriesType === 'Number';
 }
