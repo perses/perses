@@ -50,8 +50,9 @@ function LineChart(props: LineChartProps) {
 
       // For every series that comes back from a query, add a Dataset and a Series
       // to the chart
-      let id = 0;
       for (const dataSeries of query.data.series) {
+        const id = dataset.length;
+
         dataset.push({
           id,
           source: [['timestamp', 'value'], ...dataSeries.values],
@@ -63,8 +64,6 @@ function LineChart(props: LineChartProps) {
           name: dataSeries.name,
           symbol: 'none',
         });
-
-        id++;
       }
     }
 
