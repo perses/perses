@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { DashboardResource } from '@perses-ui/core';
+import { Box, Theme } from '@mui/material';
+import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { PluginRegistry } from './context/plugin-registry';
 import ViewDashboard from './views/dashboard/ViewDashboard';
 import AlertErrorFallback from './components/AlertErrorFallback';
@@ -20,6 +22,12 @@ import { useSampleData } from './utils/temp-sample-data';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { pluginRuntime } from './model/plugin-runtime';
+
+const appStyle: SxProps<Theme> = {
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100vh',
+};
 
 function App() {
   const dashboard = useSampleData<DashboardResource>(
@@ -31,19 +39,21 @@ function App() {
   }
 
   return (
-    <>
+    <Box sx={appStyle}>
       <Header />
-      <PluginRegistry
-        loadingFallback="Loading..."
-        ErrorFallbackComponent={AlertErrorFallback}
-        runtime={pluginRuntime}
-      >
-        <DataSourceRegistry>
-          <ViewDashboard resource={dashboard} />
-        </DataSourceRegistry>
-      </PluginRegistry>
+      <Box sx={{ flexGrow: 1 }}>
+        <PluginRegistry
+          loadingFallback="Loading..."
+          ErrorFallbackComponent={AlertErrorFallback}
+          runtime={pluginRuntime}
+        >
+          <DataSourceRegistry>
+            <ViewDashboard resource={dashboard} />
+          </DataSourceRegistry>
+        </PluginRegistry>
+      </Box>
       <Footer />
-    </>
+    </Box>
   );
 }
 
