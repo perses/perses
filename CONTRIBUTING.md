@@ -91,10 +91,10 @@ particular desire to run the Web-app on the development environment without the 
 
 * Install nodejs [version 14 or greater](https://nodejs.org/).
 * Install npm [version 7 or greater](https://www.npmjs.com/).
-* Then go to the folder `./web`, and install all necessary packages:
+* Then go to the folder `./ui`, and install all necessary packages:
 
 ```bash
-cd ./web
+cd ./ui
 npm install
 ```
 

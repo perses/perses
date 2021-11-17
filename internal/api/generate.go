@@ -148,7 +148,7 @@ type Query struct {
 {{ if $endpoint.IsProjectResource -}}
 	// Project is the exact name of the project. 
 	// The value can come from the path of the URL or from the query parameter
-	Project string {{ tag "path:\"project\" query:\"project\"" }}
+	Project string {{ tag "param:\"project\" query:\"project\"" }}
 {{ end }}
 }
 

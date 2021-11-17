@@ -12,14 +12,14 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "date-fns": "^2.23.0",
+    "date-fns": "^2.25.0",
     "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
     "react": "^17.0.2"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.4"
+    "@types/lodash-es": "^4.17.5"
   },
   "license": "Apache-2.0",
   "files": [

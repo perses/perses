@@ -234,7 +234,7 @@ type HTTPConfig struct {
 	Auth *HTTPAuth `json:"auth,omitempty" yaml:"auth,omitempty"`
 	// Headers can be used to provide additional header that needs to be forwarded when requesting the datasource
 	// When defined, it's impossible to set the value of Access with 'browser'
-	Headers map[string]string `yaml:"headers,omitempty"`
+	Headers map[string]string `json:"headers" yaml:"headers,omitempty"`
 }
 
 // tmpHTTPConfig is only used to custom the json/yaml marshalling/unmarshalling step.
@@ -244,7 +244,7 @@ type tmpHTTPConfig struct {
 	Access           HTTPAccess            `json:"access,omitempty" yaml:"access,omitempty"`
 	AllowedEndpoints []HTTPAllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
 	Auth             *HTTPAuth             `json:"auth,omitempty" yaml:"auth,omitempty"`
-	Headers          map[string]string     `yaml:"headers,omitempty"`
+	Headers          map[string]string     `json:"headers" yaml:"headers,omitempty"`
 }
 
 func (h *HTTPConfig) MarshalJSON() ([]byte, error) {

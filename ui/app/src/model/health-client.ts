@@ -15,7 +15,7 @@ import { fetchJson } from '@perses-ui/core';
 import { useQuery, UseQueryOptions } from 'react-query';
 import buildURL from './url-builder';
 
-const healthResource = 'health';
+const resource = 'health';
 
 export interface HealthModel {
   buildTime: string;
@@ -33,9 +33,9 @@ type HealthOptions = Omit<
  */
 export function useHealth(options?: HealthOptions) {
   return useQuery<HealthModel, Error>(
-    healthResource,
+    resource,
     () => {
-      const url = buildURL({ resource: healthResource });
+      const url = buildURL({ resource });
       return fetchJson<HealthModel>(url);
     },
     options

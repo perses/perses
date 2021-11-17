@@ -11,15 +11,102 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AppBar, Switch, Toolbar, Typography } from '@material-ui/core';
+import {
+  AppBar,
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  Menu,
+  MenuItem,
+  Switch,
+  Theme,
+  Toolbar,
+  Typography,
+} from '@mui/material';
+import { ChevronDown } from 'mdi-material-ui';
+import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import { MouseEvent, useState } from 'react';
+import { useProjectQuery } from '../model/project-client';
+import { useSnackbar } from '../context/SnackbarProvider';
+
+function ProjectMenu(): JSX.Element {
+  const { exceptionSnackbar } = useSnackbar();
+  const { data, isLoading } = useProjectQuery({ onError: exceptionSnackbar });
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  if (isLoading) {
+    return <CircularProgress size="1rem" />;
+  }
+
+  if (data !== undefined) {
+    return (
+      <>
+        <Button
+          aria-label="List of the available projects"
+          aria-controls="menu-project-list-appbar"
+          aria-haspopup="true"
+          color="inherit"
+          endIcon={<ChevronDown />}
+          onClick={handleMenu}
+        >
+          Projects
+        </Button>
+        <Menu
+          id="menu-project-list-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          keepMounted
+          open={anchorEl !== null}
+          onClose={handleCloseMenu}
+        >
+          {data.map((value, index) => {
+            return (
+              // TODO when routing is in place, use the button to redirect to the project page
+              <MenuItem key={index} onClick={handleCloseMenu}>
+                {value.metadata.name}
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      </>
+    );
+  }
+  // In case the loading is finished and there is an error, it will be handled by the snackbar.
+  // That's why we return an empty bracket
+  return <></>;
+}
+
+const style: SxProps<Theme> = {
+  display: 'flex',
+  flexDirection: 'row',
+};
 
 export default function Header(): JSX.Element {
   return (
     <AppBar position="relative">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Perses
-        </Typography>
+        <Box sx={style} flexGrow={1}>
+          <Typography variant="h6" sx={{ marginRight: '1rem' }}>
+            Perses
+          </Typography>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }}
+          />
+          <ProjectMenu />
+        </Box>
         <Switch />
       </Toolbar>
     </AppBar>
