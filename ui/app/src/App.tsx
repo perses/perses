@@ -22,7 +22,10 @@ import Footer from './components/Footer';
 import { pluginRuntime } from './model/plugin-runtime';
 
 function App() {
-  const dashboard = useSampleData<DashboardResource>('dashboard');
+  const dashboard = useSampleData<DashboardResource>(
+    new URLSearchParams(window.location.search).get('dashboard') ||
+      'nodeExporterDashboard'
+  );
   if (dashboard === undefined) {
     return null;
   }
