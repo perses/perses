@@ -32,11 +32,12 @@ const appStyle: SxProps<Theme> = {
 function App() {
   const dashboard = useSampleData<DashboardResource>(
     new URLSearchParams(window.location.search).get('dashboard') ||
-      'nodeExporterDashboard'
+      'node-exporter-full'
   );
   if (dashboard === undefined) {
     return null;
   }
+  console.log(dashboard);
 
   return (
     <Box sx={appStyle}>
