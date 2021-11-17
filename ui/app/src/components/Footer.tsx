@@ -27,30 +27,28 @@ export default function Footer(): JSX.Element {
   const { exceptionSnackbar } = useSnackbar();
   const { data, isLoading } = useHealth({ onError: exceptionSnackbar });
   return (
-    <>
-      <Box sx={style}>
-        <ul>
-          <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
-          <li>
-            <a
-              href="https://github.com/perses/perses"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Github sx={{ verticalAlign: 'bottom' }} />
-            </a>
-          </li>
-          <li>
-            {isLoading ? (
-              <CircularProgress size="1rem" />
-            ) : data !== undefined && data.version !== '' ? (
-              data.version
-            ) : (
-              'development version'
-            )}
-          </li>
-        </ul>
-      </Box>
-    </>
+    <Box sx={style}>
+      <ul>
+        <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
+        <li>
+          <a
+            href="https://github.com/perses/perses"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Github sx={{ verticalAlign: 'bottom' }} />
+          </a>
+        </li>
+        <li>
+          {isLoading ? (
+            <CircularProgress size="1rem" />
+          ) : data !== undefined && data.version !== '' ? (
+            data.version
+          ) : (
+            'development version'
+          )}
+        </li>
+      </ul>
+    </Box>
   );
 }
