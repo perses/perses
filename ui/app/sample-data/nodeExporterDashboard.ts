@@ -71,6 +71,59 @@ const nodeExporterDashboard: DashboardResource = {
       } as AnyVariableDefinition,
     },
     panels: {
+      gaugeEx: {
+        kind: 'GaugeChart',
+        display: { name: 'Gauge Example' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                'sum(irate(node_cpu_seconds_total[5m])) / count(count(node_cpu_seconds_total) by (cpu, instance))',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'PercentDecimal', decimal_places: 0 },
+          // TODO (sjcobb): pass optional threshold data to GaugeChart
+          // thresholds: {
+          //   steps: [
+          //     [0.8, 'rgb(115, 191, 105)'],
+          //     [0.9, 'rgba(237, 129, 40, 0.89)'],
+          //     [1, 'rgba(245, 54, 54, 0.9)'],
+          //   ],
+          // },
+        },
+      },
+      gaugeExAlt: {
+        kind: 'GaugeChart',
+        display: { name: 'Gauge Example 2' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+            },
+          },
+          calculation: 'Mean',
+          unit: { kind: 'PercentDecimal', decimal_places: 0 },
+        },
+      },
+      emptyExample: {
+        kind: 'EmptyChart',
+        display: { name: 'Empty Example 1' },
+        options: {},
+      },
+      emptyExample2: {
+        kind: 'EmptyChart',
+        display: { name: 'Empty Example 2' },
+        options: {},
+      },
+      emptyExample3: {
+        kind: 'EmptyChart',
+        display: { name: 'Empty Example 3' },
+        options: {},
+      },
       cpu: {
         kind: 'LineChart',
         display: { name: 'CPU' },
@@ -163,6 +216,13 @@ const nodeExporterDashboard: DashboardResource = {
         options: {
           children: [
             // Row 1
+            [
+              { width: 2, content: { $ref: '#/panels/gaugeEx' } },
+              { width: 2, content: { $ref: '#/panels/gaugeExAlt' } },
+              { width: 2, content: { $ref: '#/panels/emptyExample' } },
+              { width: 2, content: { $ref: '#/panels/emptyExample2' } },
+            ],
+            // Row 2
             [
               { width: 1, content: { $ref: '#/panels/cpu' } },
               { width: 1, content: { $ref: '#/panels/memory' } },

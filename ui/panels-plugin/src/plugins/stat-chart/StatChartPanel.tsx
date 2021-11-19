@@ -18,8 +18,8 @@ import {
   useGraphQuery,
 } from '@perses-ui/core';
 import { useMemo } from 'react';
-import { CalculationsMap, CalculationType } from './calculations';
-import { formatValue, UnitOptions } from './units';
+import { CalculationsMap, CalculationType } from '../../model/calculations';
+import { formatValue, UnitOptions } from '../../model/units';
 
 export const StatChartKind = 'StatChart' as const;
 
