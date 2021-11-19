@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, BoxProps, Collapse } from '@mui/material';
 import {
   GridDefinition,
@@ -40,6 +40,40 @@ function GridLayout(props: GridLayoutProps) {
 
   const [isOpen, setIsOpen] = useState(display?.collapse?.open ?? true);
 
+  const gridItems = useMemo(() => {
+    const gridItems: React.ReactNode[] = [];
+    let mobileRowStart = 1;
+
+    items.forEach((item, idx) => {
+      // Try to maintain the chart's aspect ratio on mobile
+      const widthScale = 24 / item.width;
+      const mobileRows = Math.floor(item.height * widthScale);
+
+      gridItems.push(
+        <Box
+          key={idx}
+          sx={{
+            gridColumn: {
+              xs: `1 / span ${COLUMNS}`,
+              sm: `${item.x + 1} / span ${item.width}`,
+            },
+            gridRow: {
+              xs: `${mobileRowStart} / span ${mobileRows}`,
+              sm: `${item.y + 1} / span ${item.height}`,
+            },
+          }}
+        >
+          <AlertErrorBoundary>
+            <GridItemContent content={item.content} />
+          </AlertErrorBoundary>
+        </Box>
+      );
+
+      mobileRowStart += mobileRows;
+    });
+    return gridItems;
+  }, [items]);
+
   return (
     <Box {...others} component="section">
       {display !== undefined && (
@@ -57,24 +91,16 @@ function GridLayout(props: GridLayoutProps) {
           sx={{
             display: 'grid',
             gridTemplateColumns: `repeat(${COLUMNS}, 1fr)`,
-            gridAutoRows: (theme) => theme.spacing(8),
+            gridAutoRows: {
+              xs: 24,
+              sm: 48,
+              lg: 72,
+            },
             columnGap: (theme) => theme.spacing(1),
             rowGap: (theme) => theme.spacing(1),
           }}
         >
-          {items.map((item, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                gridColumn: `${item.x + 1} / span ${item.width}`,
-                gridRow: `${item.y + 1} / span ${item.height}`,
-              }}
-            >
-              <AlertErrorBoundary>
-                <GridItemContent content={item.content} />
-              </AlertErrorBoundary>
-            </Box>
-          ))}
+          {gridItems}
         </Box>
       </Collapse>
     </Box>
