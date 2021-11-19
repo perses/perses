@@ -75,7 +75,11 @@ function GridLayout(props: GridLayoutProps) {
   }, [items]);
 
   return (
-    <Box {...others} component="section">
+    <Box
+      {...others}
+      component="section"
+      sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}
+    >
       {display !== undefined && (
         <GridTitle
           title={display.title}
