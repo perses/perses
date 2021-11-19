@@ -23,6 +23,8 @@ import AlertErrorBoundary from '../../components/AlertErrorBoundary';
 import GridTitle from './GridTitle';
 import Panel from './Panel';
 
+const COLUMNS = 24;
+
 export interface GridLayoutProps extends BoxProps {
   definition: GridDefinition;
 }
@@ -54,14 +56,24 @@ function GridLayout(props: GridLayoutProps) {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(24, 1fr)',
+            gridTemplateColumns: `repeat(${COLUMNS}, 1fr)`,
             gridAutoRows: (theme) => theme.spacing(8),
             columnGap: (theme) => theme.spacing(1),
             rowGap: (theme) => theme.spacing(1),
           }}
         >
           {items.map((item, idx) => (
-            <GridItem key={idx} item={item} />
+            <Box
+              key={idx}
+              sx={{
+                gridColumn: `${item.x + 1} / span ${item.width}`,
+                gridRow: `${item.y + 1} / span ${item.height}`,
+              }}
+            >
+              <AlertErrorBoundary>
+                <GridItemContent content={item.content} />
+              </AlertErrorBoundary>
+            </Box>
           ))}
         </Box>
       </Collapse>
@@ -70,36 +82,6 @@ function GridLayout(props: GridLayoutProps) {
 }
 
 export default GridLayout;
-
-interface GridItemProps extends BoxProps {
-  item: GridItemDefinition;
-}
-
-function GridItem(props: GridItemProps) {
-  const { item, ...others } = props;
-
-  const gridColumnStart = item.x + 1;
-  const gridColumnEnd = gridColumnStart + item.width;
-  const gridRowStart = item.y + 1;
-  const gridRowEnd = gridRowStart + item.height;
-
-  return (
-    <Box
-      sx={{
-        ...others.sx,
-        gridColumnStart,
-        gridColumnEnd,
-        gridRowStart,
-        gridRowEnd,
-      }}
-      {...others}
-    >
-      <AlertErrorBoundary>
-        <GridItemContent content={item.content} />
-      </AlertErrorBoundary>
-    </Box>
-  );
-}
 
 interface GridItemContentProps {
   content: GridItemDefinition['content'];
