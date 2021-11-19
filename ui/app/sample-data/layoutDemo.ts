@@ -158,8 +158,12 @@ const nodeExporterDashboard: DashboardResource = {
       },
     },
     layouts: [
+      // Regular Title, no collapse enabled
       {
         kind: 'Grid',
+        display: {
+          title: 'CPU Stats',
+        },
         items: [
           // First Row
           {
@@ -169,26 +173,43 @@ const nodeExporterDashboard: DashboardResource = {
             height: 4,
             content: { $ref: '#/panels/cpu' },
           },
+        ],
+      },
+      // No title,
+      {
+        kind: 'Grid',
+        items: [
           {
-            x: 12,
+            x: 8,
             y: 0,
-            width: 12,
-            height: 4,
+            width: 8,
+            height: 3,
             content: { $ref: '#/panels/memory' },
           },
-          // Second Row
+        ],
+      },
+      // Collapsed
+      {
+        kind: 'Grid',
+        display: {
+          title: 'Disk Stats',
+          collapse: {
+            open: false,
+          },
+        },
+        items: [
           {
             x: 0,
-            y: 4,
-            width: 12,
-            height: 4,
+            y: 0,
+            width: 6,
+            height: 2,
             content: { $ref: '#/panels/diskIO' },
           },
           {
-            x: 12,
-            y: 4,
-            width: 12,
-            height: 4,
+            x: 18,
+            y: 0,
+            width: 6,
+            height: 2,
             content: { $ref: '#/panels/filesystemFullness' },
           },
         ],
