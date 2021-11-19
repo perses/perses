@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LayoutRef, PanelRef } from './json-references';
+import { LayoutRef } from './json-references';
 import { AnyPanelDefinition } from './panels';
 import { ProjectMetadata, ResourceSelector } from './resource';
 import { AnyVariableDefinition } from './variables';
 import { DurationString } from './time';
-import { Definition, JsonObject } from './definitions';
+import { LayoutDefinition } from './layout';
 
 export interface DashboardResource {
   kind: 'Dashboard';
@@ -32,27 +32,3 @@ export interface DashboardSpec {
   layouts: Record<string, LayoutDefinition>;
   entrypoint: LayoutRef;
 }
-
-export type LayoutDefinition = ExpandLayoutDefinition | GridLayoutDefinition;
-
-export type ExpandLayoutDefinition = Definition<'expand', ExpandLayoutOptions>;
-
-export interface ExpandLayoutOptions extends JsonObject {
-  open: boolean;
-  children: ContentRef[];
-}
-
-export type GridLayoutDefinition = Definition<'grid', GridLayoutOptions>;
-
-export interface GridLayoutOptions extends JsonObject {
-  children: GridRowDefinition[];
-}
-
-export type GridRowDefinition = GridCellDefinition[];
-
-export interface GridCellDefinition extends JsonObject {
-  width: number;
-  content?: ContentRef;
-}
-
-export type ContentRef = LayoutRef | PanelRef;

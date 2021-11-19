@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ContentRef, DashboardSpec } from './dashboard';
+import { DashboardSpec } from './dashboard';
 import { JsonObject } from './definitions';
 
 export interface LayoutRef extends JsonObject {
@@ -25,6 +25,8 @@ export interface PanelRef extends JsonObject {
 }
 
 export type PanelPointer = `#/panels/${string}`;
+
+export type ContentRef = LayoutRef | PanelRef;
 
 /**
  * Check whether a ContentRef is a LayoutRef.

@@ -13,6 +13,8 @@
 
 import { Duration, sub } from 'date-fns';
 
+export type UnixTimeMs = number;
+
 export interface AbsoluteTimeRange {
   start: Date;
   end: Date;
