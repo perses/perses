@@ -157,28 +157,43 @@ const nodeExporterDashboard: DashboardResource = {
         },
       },
     },
-    layouts: {
-      main: {
-        kind: 'grid',
-        options: {
-          children: [
-            // Row 1
-            [
-              { width: 1, content: { $ref: '#/panels/cpu' } },
-              { width: 1, content: { $ref: '#/panels/memory' } },
-            ],
-            // Row 2
-            [
-              { width: 1, content: { $ref: '#/panels/diskIO' } },
-              { width: 1, content: { $ref: '#/panels/filesystemFullness' } },
-            ],
-          ],
-        },
+    layouts: [
+      {
+        kind: 'Grid',
+        items: [
+          // First Row
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 4,
+            content: { $ref: '#/panels/cpu' },
+          },
+          {
+            x: 14,
+            y: 0,
+            width: 10,
+            height: 3,
+            content: { $ref: '#/panels/memory' },
+          },
+          // Second Row
+          {
+            x: 0,
+            y: 4,
+            width: 12,
+            height: 4,
+            content: { $ref: '#/panels/diskIO' },
+          },
+          {
+            x: 12,
+            y: 4,
+            width: 12,
+            height: 4,
+            content: { $ref: '#/panels/filesystemFullness' },
+          },
+        ],
       },
-    },
-    entrypoint: {
-      $ref: '#/layouts/main',
-    },
+    ],
   },
 };
 

@@ -1,24 +1,22 @@
-import { Definition, JsonObject } from './definitions';
-import { ContentRef } from './json-references';
+import { PanelRef } from './json-references';
 
-export type LayoutDefinition = ExpandLayoutDefinition | GridLayoutDefinition;
+export type LayoutDefinition = GridDefinition;
 
-export type ExpandLayoutDefinition = Definition<'expand', ExpandLayoutOptions>;
-
-export interface ExpandLayoutOptions extends JsonObject {
-  open: boolean;
-  children: ContentRef[];
+export interface GridDefinition {
+  kind: 'Grid';
+  display?: {
+    title: string;
+    collapse?: {
+      open: boolean;
+    };
+  };
+  items: GridItemDefinition[];
 }
 
-export type GridLayoutDefinition = Definition<'grid', GridLayoutOptions>;
-
-export interface GridLayoutOptions extends JsonObject {
-  children: GridRowDefinition[];
-}
-
-export type GridRowDefinition = GridCellDefinition[];
-
-export interface GridCellDefinition extends JsonObject {
+export interface GridItemDefinition {
+  x: number;
+  y: number;
   width: number;
-  content?: ContentRef;
+  height: number;
+  content: PanelRef;
 }

@@ -13,7 +13,6 @@
 
 import { useState } from 'react';
 import {
-  Box,
   Card,
   CardProps,
   CardHeader,
@@ -27,8 +26,6 @@ import {
 } from '../../context/plugin-registry';
 import AlertErrorFallback from '../../components/AlertErrorFallback';
 import { PanelContextProvider } from './PanelContextProvider';
-
-const CONTENT_HEIGHT = 152;
 
 export interface PanelProps extends CardProps {
   definition: AnyPanelDefinition;
@@ -45,7 +42,17 @@ function Panel(props: PanelProps) {
   );
 
   return (
-    <Card variant="outlined" {...others}>
+    <Card
+      sx={{
+        ...others.sx,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column nowrap',
+      }}
+      variant="outlined"
+      {...others}
+    >
       <CardHeader
         title={
           <Typography
@@ -57,6 +64,7 @@ function Panel(props: PanelProps) {
           </Typography>
         }
         sx={{
+          flexGrow: 0,
           padding: (theme) => theme.spacing(1, 2),
         }}
       />
@@ -64,38 +72,24 @@ function Panel(props: PanelProps) {
         sx={{
           position: 'relative',
           overflow: 'hidden',
-          height: CONTENT_HEIGHT,
-          padding: 0,
+          flexGrow: 1,
+          padding: (theme) => theme.spacing(1, 2),
           // Override MUI default style for last-child
           ':last-child': {
-            padding: 0,
+            padding: (theme) => theme.spacing(1, 2),
           },
         }}
+        ref={setContentElement}
       >
-        <Box
-          component="div"
-          ref={(el) => setContentElement(el as HTMLDivElement | null)}
-          sx={{
-            // Use absolute positioning to prevent panel content from
-            // overflowing the container and breaking the layout
-            position: 'absolute',
-            width: (theme) => `calc(100% - ${theme.spacing(2)})`,
-            height: (theme) => `calc(100% - ${theme.spacing(1)})`,
-            top: 0,
-            left: (theme) => theme.spacing(1),
-            overflow: 'hidden',
-          }}
-        >
-          {/* Actually render plugin with PanelContent component so we can wrap with a loading/error boundary */}
-          <PanelContextProvider contentElement={contentElement}>
-            <PluginBoundary
-              loadingFallback="Loading..."
-              ErrorFallbackComponent={AlertErrorFallback}
-            >
-              <PanelContent definition={definition} />
-            </PluginBoundary>
-          </PanelContextProvider>
-        </Box>
+        {/* Actually render plugin with PanelContent component so we can wrap with a loading/error boundary */}
+        <PanelContextProvider contentElement={contentElement}>
+          <PluginBoundary
+            loadingFallback="Loading..."
+            ErrorFallbackComponent={AlertErrorFallback}
+          >
+            <PanelContent definition={definition} />
+          </PluginBoundary>
+        </PanelContextProvider>
       </CardContent>
     </Card>
   );

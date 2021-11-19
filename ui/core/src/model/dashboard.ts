@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LayoutRef } from './json-references';
+import { LayoutDefinition } from './layout';
 import { AnyPanelDefinition } from './panels';
 import { ProjectMetadata, ResourceSelector } from './resource';
 import { AnyVariableDefinition } from './variables';
 import { DurationString } from './time';
-import { LayoutDefinition } from './layout';
 
 export interface DashboardResource {
   kind: 'Dashboard';
@@ -29,6 +28,5 @@ export interface DashboardSpec {
   duration: DurationString;
   variables: Record<string, AnyVariableDefinition>;
   panels: Record<string, AnyPanelDefinition>;
-  layouts: Record<string, LayoutDefinition>;
-  entrypoint: LayoutRef;
+  layouts: LayoutDefinition[];
 }
