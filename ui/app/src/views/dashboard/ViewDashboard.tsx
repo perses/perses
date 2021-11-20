@@ -13,8 +13,10 @@
 
 import { Box } from '@mui/material';
 import { DashboardResource } from '@perses-ui/core';
+import Footer from '../../components/Footer';
 import { DashboardContextProvider } from './DashboardContextProvider';
 import Dashboard from './Dashboard';
+import OptionsDrawer from './OptionsDrawer';
 
 export interface DashboardViewProps {
   resource: DashboardResource;
@@ -27,15 +29,28 @@ function ViewDashboard(props: DashboardViewProps) {
   const { resource } = props;
   return (
     <DashboardContextProvider resource={resource}>
-      <Box sx={{ display: 'flex' }}>
-        <Box sx={{ padding: (theme) => theme.spacing(1, 2), flexGrow: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          sx={{
+            padding: (theme) => theme.spacing(1, 2),
+            flexGrow: 1,
+            overflowX: 'hidden',
+            overflowY: 'auto',
+          }}
+        >
           <Dashboard />
+          <Footer />
         </Box>
-        {/*
- TODO: find a way to display the variable by not going above the header and the footer.
-<Hidden mdDown>
-          <OptionsDrawer />
-        </Hidden>*/}
+
+        <OptionsDrawer />
       </Box>
     </DashboardContextProvider>
   );

@@ -20,7 +20,6 @@ import AlertErrorFallback from './components/AlertErrorFallback';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import { useSampleData } from './utils/temp-sample-data';
 import Header from './components/Header';
-import Footer from './components/Footer';
 import { pluginRuntime } from './model/plugin-runtime';
 
 const appStyle: SxProps<Theme> = {
@@ -41,7 +40,12 @@ function App() {
   return (
     <Box sx={appStyle}>
       <Header />
-      <Box sx={{ flexGrow: 1 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflow: 'hidden',
+        }}
+      >
         <PluginRegistry
           loadingFallback="Loading..."
           ErrorFallbackComponent={AlertErrorFallback}
@@ -52,7 +56,6 @@ function App() {
           </DataSourceRegistry>
         </PluginRegistry>
       </Box>
-      <Footer />
     </Box>
   );
 }
