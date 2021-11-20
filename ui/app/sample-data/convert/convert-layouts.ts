@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DashboardSpec, GridDefinition } from '@perses-ui/core';
+import { minBy } from 'lodash-es';
 import { GrafanaPanel, GrafanaRow } from './grafana-json-model';
 
 export function convertLayouts(
@@ -20,16 +21,13 @@ export function convertLayouts(
 ): DashboardSpec['layouts'] {
   const layouts: GridDefinition[] = [];
 
-  let maxGrafanaY = 0;
-
   // Helper function to create and add a grid definition to layouts
   const addGridDefinition = (group?: PanelGroup) => {
     if (group === undefined) return;
 
-    const grid = createGridDefinition(group, maxGrafanaY, panelKeys);
+    const grid = createGridDefinition(group, panelKeys);
     if (grid !== undefined) {
-      layouts.push(grid.definition);
-      maxGrafanaY = grid.maxGrafanaY;
+      layouts.push(grid);
     }
   };
 
@@ -78,16 +76,12 @@ function isPanel(
 
 function createGridDefinition(
   group: PanelGroup,
-  maxGrafanaY: number,
   panelKeys: Map<number, string>
-): { definition: GridDefinition; maxGrafanaY: number } | undefined {
+): GridDefinition | undefined {
   // If no row and no panels, no grid necessary
   if (group.row === undefined && group.panels.length === 0) {
     return undefined;
   }
-
-  // Start by adjusting Y values by the max we've seen from Grafana before
-  let adjustY = maxGrafanaY;
 
   const definition: GridDefinition = {
     kind: 'Grid',
@@ -101,11 +95,14 @@ function createGridDefinition(
         open: !group.row.collapsed,
       },
     };
-
-    // Grafana rows always take up 1 vertical unit of space
-    adjustY++;
-    maxGrafanaY++;
   }
+
+  if (group.panels.length === 0) return definition;
+
+  // Grafana doesn't allow unused vertical space at the top of a group of
+  // panels, so treat whatever the min Y value is as 0 for positioning in
+  // our grids
+  const adjustY = minBy(group.panels, (p) => p.gridPos.y).gridPos.y;
 
   for (const panel of group.panels) {
     const panelKey = panelKeys.get(panel.id);
@@ -119,11 +116,6 @@ function createGridDefinition(
       height: panel.gridPos.h,
       content: { $ref: `#/panels/${panelKey}` },
     });
-
-    const maybeMaxY = panel.gridPos.y + panel.gridPos.h;
-    if (maybeMaxY > maxGrafanaY) {
-      maxGrafanaY = maybeMaxY;
-    }
   }
-  return { definition, maxGrafanaY };
+  return definition;
 }
