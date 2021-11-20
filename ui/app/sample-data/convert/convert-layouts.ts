@@ -20,13 +20,16 @@ export function convertLayouts(
 ): DashboardSpec['layouts'] {
   const layouts: GridDefinition[] = [];
 
+  let maxGrafanaY = 0;
+
   // Helper function to create and add a grid definition to layouts
   const addGridDefinition = (group?: PanelGroup) => {
     if (group === undefined) return;
 
-    const grid = createGridDefinition(group, panelKeys);
+    const grid = createGridDefinition(group, maxGrafanaY, panelKeys);
     if (grid !== undefined) {
-      layouts.push(grid);
+      layouts.push(grid.definition);
+      maxGrafanaY = grid.maxGrafanaY;
     }
   };
 
@@ -75,25 +78,33 @@ function isPanel(
 
 function createGridDefinition(
   group: PanelGroup,
+  maxGrafanaY: number,
   panelKeys: Map<number, string>
-): GridDefinition | undefined {
+): { definition: GridDefinition; maxGrafanaY: number } | undefined {
   // If no row and no panels, no grid necessary
   if (group.row === undefined && group.panels.length === 0) {
     return undefined;
   }
 
-  const grid: GridDefinition = {
+  // Start by adjusting Y values by the max we've seen from Grafana before
+  let adjustY = maxGrafanaY;
+
+  const definition: GridDefinition = {
     kind: 'Grid',
     items: [],
   };
 
   if (group.row !== undefined) {
-    grid.display = {
+    definition.display = {
       title: group.row.title,
       collapse: {
         open: !group.row.collapsed,
       },
     };
+
+    // Grafana rows always take up 1 vertical unit of space
+    adjustY++;
+    maxGrafanaY++;
   }
 
   for (const panel of group.panels) {
@@ -101,13 +112,18 @@ function createGridDefinition(
     if (panelKey === undefined) {
       throw new Error(`Could not find panel key for id ${panel.id}`);
     }
-    grid.items.push({
+    definition.items.push({
       x: panel.gridPos.x,
-      y: panel.gridPos.y,
+      y: panel.gridPos.y - adjustY,
       width: panel.gridPos.w,
       height: panel.gridPos.h,
       content: { $ref: `#/panels/${panelKey}` },
     });
+
+    const maybeMaxY = panel.gridPos.y + panel.gridPos.h;
+    if (maybeMaxY > maxGrafanaY) {
+      maxGrafanaY = maybeMaxY;
+    }
   }
-  return grid;
+  return { definition, maxGrafanaY };
 }
