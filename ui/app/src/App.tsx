@@ -37,7 +37,6 @@ function App() {
   if (dashboard === undefined) {
     return null;
   }
-  console.log(dashboard);
 
   return (
     <Box sx={appStyle}>

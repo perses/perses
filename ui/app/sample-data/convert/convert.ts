@@ -17,6 +17,8 @@ import {
   isDurationString,
 } from '@perses-ui/core';
 import { convertVariables } from './convert-variables';
+import { convertPanels } from './convert-panels';
+import { convertLayouts } from './convert-layouts';
 import { GrafanaDashboardJson, GrafanaTimeRange } from './grafana-json-model';
 
 export function convertDashboardJson(
@@ -24,6 +26,7 @@ export function convertDashboardJson(
 ): DashboardResource {
   const now = new Date();
 
+  const { panels, panelKeys } = convertPanels(json.panels);
   return {
     kind: 'Dashboard',
     metadata: {
@@ -36,11 +39,8 @@ export function convertDashboardJson(
       datasource: { name: 'Public Prometheus Demo Server' },
       duration: convertTimeRange(json.time),
       variables: convertVariables(json.templating.list),
-      panels: {},
-      layouts: {},
-      entrypoint: {
-        $ref: '#/layouts/main',
-      },
+      panels,
+      layouts: convertLayouts(json.panels, panelKeys),
     },
   };
 }

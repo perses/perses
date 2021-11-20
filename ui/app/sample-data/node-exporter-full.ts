@@ -15,4 +15,6 @@ import { convertDashboardJson } from './convert/convert';
 import { GrafanaDashboardJson } from './convert/grafana-json-model';
 import json from './node-exporter-full_rev23.json';
 
-export default convertDashboardJson(json as GrafanaDashboardJson);
+const converted = convertDashboardJson(json as GrafanaDashboardJson);
+console.log(converted);
+export default converted;

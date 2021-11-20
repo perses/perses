@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export interface GrafanaDashboardJson {
+  panels: Array<GrafanaRow | GrafanaPanel>;
   templating: {
     list: GrafanaVariable[];
   };
@@ -80,4 +81,41 @@ type GrafanaMultiVariable = GrafanaVariableCommon & {
     text: string[];
     value: string[];
   };
+};
+
+export type GrafanaRow = ExpandedRow | CollapsedRow;
+
+type GrafanaRowCommon = {
+  type: 'row';
+  id: number;
+  title: string;
+  gridPos: GrafanaGridPosition;
+};
+
+type ExpandedRow = GrafanaRowCommon & {
+  collapsed: false;
+};
+
+type CollapsedRow = GrafanaRowCommon & {
+  collapsed: true;
+  panels: GrafanaPanel[];
+};
+
+export type GrafanaPanel = GrafanaGaugePanel;
+
+type GrafanaGaugePanel = GrafanaPanelCommon & {
+  type: 'gauge';
+};
+
+type GrafanaPanelCommon = {
+  id: number;
+  title: string;
+  gridPos: GrafanaGridPosition;
+};
+
+export type GrafanaGridPosition = {
+  h: number;
+  w: number;
+  x: number;
+  y: number;
 };
