@@ -90,7 +90,7 @@ function GridLayout(props: GridLayoutProps) {
           }
         />
       )}
-      <Collapse in={isOpen}>
+      <Collapse in={isOpen} unmountOnExit>
         <Box
           sx={{
             display: 'grid',

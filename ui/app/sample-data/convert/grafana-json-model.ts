@@ -101,11 +101,14 @@ type CollapsedRow = GrafanaRowCommon & {
   panels: GrafanaPanel[];
 };
 
-export type GrafanaPanel = GrafanaGaugePanel;
-
-type GrafanaGaugePanel = GrafanaPanelCommon & {
-  type: 'gauge';
+type GrafanaGridPosition = {
+  h: number;
+  w: number;
+  x: number;
+  y: number;
 };
+
+export type GrafanaPanel = GrafanaGaugePanel | GrafanaGraphPanel;
 
 type GrafanaPanelCommon = {
   id: number;
@@ -113,9 +116,16 @@ type GrafanaPanelCommon = {
   gridPos: GrafanaGridPosition;
 };
 
-export type GrafanaGridPosition = {
-  h: number;
-  w: number;
-  x: number;
-  y: number;
+export type GrafanaGaugePanel = GrafanaPanelCommon & {
+  type: 'gauge';
+};
+
+export type GrafanaGraphPanel = GrafanaPanelCommon & {
+  type: 'graph';
+  targets: PromQueryTarget[];
+};
+
+export type PromQueryTarget = {
+  expr: string;
+  step: number;
 };

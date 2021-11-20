@@ -11,9 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardSpec } from '@perses-ui/core';
+import {
+  AnyGraphQueryDefinition,
+  AnyPanelDefinition,
+  DashboardSpec,
+} from '@perses-ui/core';
 import { camelCase } from 'lodash-es';
-import { GrafanaPanel, GrafanaRow } from './grafana-json-model';
+import {
+  GrafanaGraphPanel,
+  GrafanaPanel,
+  GrafanaRow,
+  PromQueryTarget,
+} from './grafana-json-model';
 
 export function convertPanels(
   rowsAndPanels: Array<GrafanaRow | GrafanaPanel>
@@ -41,26 +50,51 @@ export function convertPanels(
 
       for (const panel of rowOrPanel.panels) {
         const key = addPanelKey(panel);
-        panels[key] = {
-          kind: 'EmptyChart',
-          display: {
-            name: panel.title,
-          },
-          options: {},
-        };
+        panels[key] = convertPanel(panel);
       }
       continue;
     }
 
     const key = addPanelKey(rowOrPanel);
-    panels[key] = {
-      kind: 'EmptyChart',
-      display: {
-        name: rowOrPanel.title,
-      },
-      options: {},
-    };
+    panels[key] = convertPanel(rowOrPanel);
   }
 
   return { panels, panelKeys };
+}
+
+function convertPanel(grafanaPanel: GrafanaPanel): AnyPanelDefinition {
+  switch (grafanaPanel.type) {
+    case 'graph':
+      return convertGraphPanel(grafanaPanel);
+    default:
+      return {
+        kind: 'EmptyChart',
+        display: {
+          name: grafanaPanel.title,
+        },
+        options: {},
+      };
+  }
+}
+
+function convertGraphPanel(graphPanel: GrafanaGraphPanel): AnyPanelDefinition {
+  return {
+    kind: 'LineChart',
+    display: {
+      name: graphPanel.title,
+    },
+    options: {
+      queries: graphPanel.targets.map(convertQueryTarget),
+    },
+  };
+}
+
+function convertQueryTarget(target: PromQueryTarget): AnyGraphQueryDefinition {
+  return {
+    kind: 'PrometheusGraphQuery',
+    options: {
+      query: target.expr,
+      min_step: `${target.step}s`,
+    },
+  };
 }
