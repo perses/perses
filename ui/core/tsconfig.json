@@ -2,10 +2,8 @@
   "extends": "../tsconfig.web.json",
   "include": ["src"],
   "compilerOptions": {
-    "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "tsBuildInfoFile": "../.build-cache/core.tsbuildinfo",
-    "composite": true
+    "tsBuildInfoFile": "../.build-cache/core.tsbuildinfo"
   }
 }

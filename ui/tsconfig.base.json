@@ -11,8 +11,7 @@
     "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
     "composite": true,
-    "paths": {
-      "@perses-ui/*": ["./*/src"]
-    }
+    "declaration": true,
+    "declarationMap": true
   }
 }

@@ -4,9 +4,12 @@
   "compilerOptions": {
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "../",
     "tsBuildInfoFile": "../.build-cache/app.tsbuildinfo",
-    "incremental": true
+    "incremental": true,
+    // Don't need composite since the app is an endpoint project
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
   },
   "references": [
     {
