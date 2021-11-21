@@ -35,6 +35,7 @@ export const commonConfig: Configuration = {
     new ForkTsCheckerWebpackPlugin({
       typescript: {
         configFile: path.resolve(__dirname, './tsconfig.json'),
+        build: true, // Since we use project references...
       },
       eslint: {
         files: '../*/src/**/*.{ts,tsx,js,jsx}',
