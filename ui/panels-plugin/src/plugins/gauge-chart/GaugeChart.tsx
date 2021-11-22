@@ -85,7 +85,7 @@ function GaugeChart(props: GaugeChartProps) {
 
     const calculate = CalculationsMap[calculation];
 
-    const calculatedValue = calculate(Array.from(series.values));
+    const calculatedValue = calculate(Array.from(series.values)) || 0;
 
     return {
       title: {
@@ -98,7 +98,7 @@ function GaugeChart(props: GaugeChartProps) {
         {
           type: 'gauge',
           center: ['50%', '65%'],
-          radius: '110%',
+          radius: '100%',
           startAngle: 200,
           endAngle: -20,
           // TODO (sjcobb): min and max should come from dashboard metadata
@@ -164,7 +164,7 @@ function GaugeChart(props: GaugeChartProps) {
         {
           type: 'gauge',
           center: ['50%', '65%'],
-          radius: '125%',
+          radius: '112%',
           startAngle: 200,
           endAngle: -20,
           min: 0,

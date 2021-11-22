@@ -283,6 +283,7 @@ const nodeExporterDashboard: DashboardResource = {
               { width: 1, content: { $ref: '#/panels/gaugeRam' } },
               { width: 1, content: { $ref: '#/panels/gaugeSwap' } },
               { width: 1, content: { $ref: '#/panels/gaugeRoot' } },
+              { width: 2, content: { $ref: '#/panels/emptyExample' } },
             ],
             // Row 2
             [
