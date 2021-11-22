@@ -71,19 +71,19 @@ const nodeExporterDashboard: DashboardResource = {
       } as AnyVariableDefinition,
     },
     panels: {
-      gaugeEx: {
+      gaugeCpuBusy: {
         kind: 'GaugeChart',
-        display: { name: 'Gauge Example' },
+        display: { name: 'CPU Busy' },
         options: {
           query: {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                'sum(irate(node_cpu_seconds_total[5m])) / count(count(node_cpu_seconds_total) by (cpu, instance))',
+                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
             },
           },
           calculation: 'LastNumber',
-          unit: { kind: 'PercentDecimal', decimal_places: 0 },
+          unit: { kind: 'Percent' },
           // TODO (sjcobb): pass optional threshold data to GaugeChart
           // thresholds: {
           //   steps: [
@@ -94,19 +94,79 @@ const nodeExporterDashboard: DashboardResource = {
           // },
         },
       },
-      gaugeExAlt: {
+      gaugeSystemLoad: {
         kind: 'GaugeChart',
-        display: { name: 'Gauge Example 2' },
+        display: { name: 'Sys Load (5m avg)' },
         options: {
           query: {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+                'avg(node_load5{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
             },
           },
-          calculation: 'Mean',
-          unit: { kind: 'PercentDecimal', decimal_places: 0 },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+        },
+      },
+      gaugeSystemLoadAlt: {
+        kind: 'GaugeChart',
+        display: { name: 'Sys Load (15m avg)' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+        },
+      },
+      gaugeRam: {
+        kind: 'GaugeChart',
+        display: { name: 'RAM Used' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                '100 - ((node_memory_MemAvailable_bytes{job="node",instance="$instance"} * 100) / node_memory_MemTotal_bytes{job="node",instance="$instance"})',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+        },
+      },
+      gaugeSwap: {
+        kind: 'GaugeChart',
+        display: { name: 'SWAP Used' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                '((node_memory_SwapTotal_bytes{job="node",instance="$instance"} - node_memory_SwapFree_bytes{job="node",instance="$instance"}) / (node_memory_SwapTotal_bytes{job="node",instance="$instance"} )) * 100',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+        },
+      },
+      gaugeRoot: {
+        kind: 'GaugeChart',
+        display: { name: 'Root FS Used' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+              '100 - ((node_filesystem_avail_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"})',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
         },
       },
       emptyExample: {
@@ -217,10 +277,12 @@ const nodeExporterDashboard: DashboardResource = {
           children: [
             // Row 1
             [
-              { width: 2, content: { $ref: '#/panels/gaugeEx' } },
-              { width: 2, content: { $ref: '#/panels/gaugeExAlt' } },
-              { width: 2, content: { $ref: '#/panels/emptyExample' } },
-              { width: 2, content: { $ref: '#/panels/emptyExample2' } },
+              { width: 1, content: { $ref: '#/panels/gaugeCpuBusy' } },
+              { width: 1, content: { $ref: '#/panels/gaugeSystemLoad' } },
+              { width: 1, content: { $ref: '#/panels/gaugeSystemLoadAlt' } },
+              { width: 1, content: { $ref: '#/panels/gaugeRam' } },
+              { width: 1, content: { $ref: '#/panels/gaugeSwap' } },
+              { width: 1, content: { $ref: '#/panels/gaugeRoot' } },
             ],
             // Row 2
             [

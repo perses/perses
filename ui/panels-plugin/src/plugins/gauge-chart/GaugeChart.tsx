@@ -19,6 +19,7 @@ import {
   GridComponent,
   DatasetComponent,
   TitleComponent,
+  TooltipComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
@@ -31,6 +32,7 @@ echarts.use([
   GridComponent,
   DatasetComponent,
   TitleComponent,
+  TooltipComponent,
   CanvasRenderer,
 ]);
 
@@ -89,7 +91,7 @@ function GaugeChart(props: GaugeChartProps) {
       title: {
         show: false,
       },
-      tootip: {
+      tooltip: {
         show: false,
       },
       series: [
@@ -101,7 +103,7 @@ function GaugeChart(props: GaugeChartProps) {
           endAngle: -20,
           // TODO (sjcobb): min and max should come from dashboard metadata
           min: 0,
-          max: 1,
+          max: 100,
           splitNumber: 12,
           silent: true,
           progress: {
@@ -166,7 +168,7 @@ function GaugeChart(props: GaugeChartProps) {
           startAngle: 200,
           endAngle: -20,
           min: 0,
-          max: 1,
+          max: 100,
           pointer: {
             show: false,
             itemStyle: {
