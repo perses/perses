@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, AnyVariableDefinition } from '@perses-ui/core';
+import { AnyVariableDefinition, DashboardResource } from '@perses-ui/core';
 
 const cadvisorDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -22,7 +22,7 @@ const cadvisorDashboard: DashboardResource = {
     updated_at: '2021-10-20',
   },
   spec: {
-    datasource: { name: 'Public Prometheus Demo Server' },
+    datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
     // TODO: Should duration actually be a time range?
     duration: '3h',
     variables: {

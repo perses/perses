@@ -12,26 +12,21 @@
 // limitations under the License.
 
 import {
-  DataSourceDefinition,
-  AnyDataSourceDefinition,
-  JsonObject,
-  ResourceSelector,
+  AnyDatasourceSpecDefinition,
+  DatasourceSelector,
+  DatasourceSpecDefinition,
+  HTTPConfig,
   useDataSourceConfig,
 } from '@perses-ui/core';
 
-export const PrometheusDataSourceKind = 'PrometheusDataSource' as const;
-
-type PrometheusDataSource = DataSourceDefinition<Kind, PrometheusDataSourceOptions>;
-
-type Kind = typeof PrometheusDataSourceKind;
-export interface PrometheusDataSourceOptions extends JsonObject {
-  base_url: string;
+export interface PrometheusSpecDatasource extends DatasourceSpecDefinition<'Prometheus'> {
+  http: HTTPConfig;
 }
 
-export function usePrometheusConfig(selector: ResourceSelector) {
-  return useDataSourceConfig(selector, isPromDataSource).options;
+function isPrometheusDatasource(def: AnyDatasourceSpecDefinition): def is PrometheusSpecDatasource {
+  return def.kind === 'Prometheus';
 }
 
-function isPromDataSource(def: AnyDataSourceDefinition): def is PrometheusDataSource {
-  return typeof def.options['base_url'] === 'string';
+export function usePrometheusConfig(selector: DatasourceSelector) {
+  return useDataSourceConfig(selector, isPrometheusDatasource);
 }
