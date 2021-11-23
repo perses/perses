@@ -90,15 +90,14 @@ function GridLayout(props: GridLayoutProps) {
           }
         />
       )}
-      <Collapse in={isOpen}>
+      <Collapse in={isOpen} unmountOnExit>
         <Box
           sx={{
             display: 'grid',
             gridTemplateColumns: `repeat(${COLUMNS}, 1fr)`,
             gridAutoRows: {
               xs: 24,
-              sm: 48,
-              lg: 72,
+              sm: 36,
             },
             columnGap: (theme) => theme.spacing(1),
             rowGap: (theme) => theme.spacing(1),

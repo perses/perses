@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Drawer, Typography } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
 import { useDashboardSpec } from '@perses-ui/core';
 import AlertErrorFallback from '../../components/AlertErrorFallback';
 import { PluginBoundary } from '../../context/plugin-registry';
@@ -26,18 +26,15 @@ function OptionsDrawer() {
   const spec = useDashboardSpec();
 
   return (
-    <Drawer
+    <Paper
       sx={{
         width: DRAWER_WIDTH,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: DRAWER_WIDTH,
-          padding: (theme) => theme.spacing(1, 2),
-        },
+        padding: (theme) => theme.spacing(1, 2),
+        borderLeft: (theme) => `1px solid ${theme.palette.divider}`,
       }}
-      variant="persistent"
-      anchor="right"
-      open={true}
+      square
+      elevation={0}
     >
       <Typography component="h2" variant="h6">
         Variables
@@ -55,7 +52,7 @@ function OptionsDrawer() {
           </PluginBoundary>
         );
       })}
-    </Drawer>
+    </Paper>
   );
 }
 
