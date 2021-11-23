@@ -11,25 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Revisit whether something like danfo.js is appropriate to use here once
-// they've finished their Typescript rewrite (https://danfo.jsdata.org/)
-export interface DataFrame {
-  name: string;
-  columns: Series[];
+import { PanelRef } from './json-references';
+
+export type LayoutDefinition = GridDefinition;
+
+export interface GridDefinition {
+  kind: 'Grid';
+  display?: {
+    title: string;
+    collapse?: {
+      open: boolean;
+    };
+  };
+  items: GridItemDefinition[];
 }
 
-type SeriesMap = {
-  Date: UnixTimeMs;
-  String: string;
-  Number: number;
-};
-
-export type UnixTimeMs = number;
-
-export type SeriesType = keyof SeriesMap;
-
-export interface Series<T extends SeriesType = SeriesType> {
-  seriesType: T;
-  name: string;
-  values: Array<SeriesMap[T]>;
+export interface GridItemDefinition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content: PanelRef;
 }

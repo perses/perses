@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnixTimeMs } from '..';
-import { AbsoluteTimeRange } from './time';
+import { AbsoluteTimeRange, UnixTimeMs } from './time';
 import { Definition, JsonObject } from './definitions';
 import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 import { ResourceSelector } from './resource';

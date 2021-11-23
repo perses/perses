@@ -11,83 +11,116 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Grid, GridProps, GridSize } from '@mui/material';
+import { useState, useMemo } from 'react';
+import { Box, BoxProps, Collapse } from '@mui/material';
 import {
-  GridCellDefinition,
-  GridLayoutDefinition,
-  GridRowDefinition,
+  GridDefinition,
+  GridItemDefinition,
+  resolvePanelRef,
+  useDashboardSpec,
 } from '@perses-ui/core';
 import AlertErrorBoundary from '../../components/AlertErrorBoundary';
-import ContentRefResolver from './ContentRefResolver';
+import GridTitle from './GridTitle';
+import Panel from './Panel';
 
-const GRID_SPACING = 1;
+const COLUMNS = 24;
 
-export interface GridLayoutProps extends GridProps {
-  definition: GridLayoutDefinition;
+export interface GridLayoutProps extends BoxProps {
+  definition: GridDefinition;
 }
 
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
 function GridLayout(props: GridLayoutProps) {
-  const { definition, ...others } = props;
+  const {
+    definition: { display, items },
+    ...others
+  } = props;
+
+  const [isOpen, setIsOpen] = useState(display?.collapse?.open ?? true);
+
+  const gridItems = useMemo(() => {
+    const gridItems: React.ReactNode[] = [];
+    let mobileRowStart = 1;
+
+    items.forEach((item, idx) => {
+      // Try to maintain the chart's aspect ratio on mobile
+      const widthScale = 24 / item.width;
+      const mobileRows = Math.floor(item.height * widthScale);
+
+      gridItems.push(
+        <Box
+          key={idx}
+          sx={{
+            gridColumn: {
+              xs: `1 / span ${COLUMNS}`,
+              sm: `${item.x + 1} / span ${item.width}`,
+            },
+            gridRow: {
+              xs: `${mobileRowStart} / span ${mobileRows}`,
+              sm: `${item.y + 1} / span ${item.height}`,
+            },
+          }}
+        >
+          <AlertErrorBoundary>
+            <GridItemContent content={item.content} />
+          </AlertErrorBoundary>
+        </Box>
+      );
+
+      mobileRowStart += mobileRows;
+    });
+    return gridItems;
+  }, [items]);
 
   return (
-    <Grid container spacing={GRID_SPACING} {...others}>
-      {definition.options.children.map((gridRow, idx) => (
-        <GridRow key={idx} definition={gridRow} />
-      ))}
-    </Grid>
+    <Box
+      {...others}
+      component="section"
+      sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}
+    >
+      {display !== undefined && (
+        <GridTitle
+          title={display.title}
+          collapse={
+            display.collapse === undefined
+              ? undefined
+              : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
+          }
+        />
+      )}
+      <Collapse in={isOpen} unmountOnExit>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${COLUMNS}, 1fr)`,
+            gridAutoRows: {
+              xs: 24,
+              sm: 36,
+            },
+            columnGap: (theme) => theme.spacing(1),
+            rowGap: (theme) => theme.spacing(1),
+          }}
+        >
+          {gridItems}
+        </Box>
+      </Collapse>
+    </Box>
   );
 }
 
 export default GridLayout;
 
-interface GridRowProps {
-  definition: GridRowDefinition;
+interface GridItemContentProps {
+  content: GridItemDefinition['content'];
 }
 
 /**
- * A row in a GridLayout.
+ * Resolves the reference to panel content and renders the panel.
  */
-function GridRow(props: GridRowProps) {
-  const { definition } = props;
-
-  // Count the overall number of columns in the row as we create the cells
-  let columns = 0;
-  const cells: React.ReactNode[] = [];
-  definition.forEach((cell, idx) => {
-    columns += cell.width;
-    cells.push(<GridCell key={idx} definition={cell} />);
-  });
-
-  return (
-    <Grid item container columns={columns} spacing={GRID_SPACING}>
-      {cells}
-    </Grid>
-  );
-}
-
-interface GridCellProps extends Omit<GridProps, 'children'> {
-  definition: GridCellDefinition;
-}
-
-/**
- * An individual cell in a GridRow that renders a ContentRefResolver for
- * resolving the cell's contents.
- */
-function GridCell(props: GridCellProps) {
-  const { definition, ...others } = props;
-  let content: React.ReactNode;
-  if (definition.content === undefined) {
-    content = null;
-  } else {
-    content = <ContentRefResolver contentRef={definition.content} />;
-  }
-
-  return (
-    <Grid item xs={12} md={definition.width as GridSize} {...others}>
-      <AlertErrorBoundary>{content}</AlertErrorBoundary>
-    </Grid>
-  );
+function GridItemContent(props: GridItemContentProps) {
+  const spec = useDashboardSpec();
+  const definition = resolvePanelRef(spec, props.content);
+  return <Panel definition={definition} />;
 }

@@ -11,22 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LayoutDefinition } from './layout';
-import { AnyPanelDefinition } from './panels';
-import { ProjectMetadata, ResourceSelector } from './resource';
-import { AnyVariableDefinition } from './variables';
-import { DurationString } from './time';
+import { convertDashboardJson } from './convert/convert';
+import { GrafanaDashboardJson } from './convert/grafana-json-model';
+import json from './node-exporter-full_rev23.json';
 
-export interface DashboardResource {
-  kind: 'Dashboard';
-  metadata: ProjectMetadata;
-  spec: DashboardSpec;
-}
-
-export interface DashboardSpec {
-  datasource: ResourceSelector;
-  duration: DurationString;
-  variables: Record<string, AnyVariableDefinition>;
-  panels: Record<string, AnyPanelDefinition>;
-  layouts: LayoutDefinition[];
-}
+const converted = convertDashboardJson(json as GrafanaDashboardJson);
+console.log(converted);
+export default converted;

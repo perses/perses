@@ -14,7 +14,7 @@
 import { Box, BoxProps } from '@mui/material';
 import { useDashboardSpec } from '@perses-ui/core';
 import AlertErrorBoundary from '../../components/AlertErrorBoundary';
-import ContentRefResolver from './ContentRefResolver';
+import GridLayout from './GridLayout';
 
 export type DashboardProps = BoxProps;
 
@@ -27,7 +27,9 @@ function Dashboard(props: DashboardProps) {
   return (
     <Box {...props}>
       <AlertErrorBoundary>
-        <ContentRefResolver contentRef={spec.entrypoint} />
+        {spec.layouts.map((layout, idx) => (
+          <GridLayout key={idx} definition={layout} />
+        ))}
       </AlertErrorBoundary>
     </Box>
   );

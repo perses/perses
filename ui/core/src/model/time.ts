@@ -13,6 +13,8 @@
 
 import { Duration, sub } from 'date-fns';
 
+export type UnixTimeMs = number;
+
 export interface AbsoluteTimeRange {
   start: Date;
   end: Date;
@@ -60,9 +62,9 @@ const DURATION_REGEX =
 
 /**
  * Parses a DurationString into a Duration object with numeric values that can
- * be used to do Date math.
+ * be used to do Date math. Throws if not a valid duration string.
  */
-export function parseDurationString(durationString: DurationString): Duration {
+export function parseDurationString(durationString: string): Duration {
   const matches = DURATION_REGEX.exec(durationString);
   if (matches === null) {
     throw new Error(`Invalid duration string '${durationString}'`);
@@ -77,4 +79,14 @@ export function parseDurationString(durationString: DurationString): Duration {
     minutes: parseInt(matches[5] ?? '0'),
     seconds: parseInt(matches[6] ?? '0') + parseInt(matches[7] ?? '0') / 1000,
   };
+}
+
+/**
+ * Returns true if the given string is a valid DurationString.
+ */
+export function isDurationString(
+  maybeDuration: string
+): maybeDuration is DurationString {
+  if (maybeDuration === '') return false;
+  return DURATION_REGEX.test(maybeDuration);
 }

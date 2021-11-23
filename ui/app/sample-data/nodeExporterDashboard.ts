@@ -358,38 +358,97 @@ const nodeExporterDashboard: DashboardResource = {
         },
       },
     },
-    layouts: {
-      main: {
-        kind: 'grid',
-        options: {
-          children: [
-            // Row 1
-            [
-              { width: 1, content: { $ref: '#/panels/gaugeCpuBusy' } },
-              { width: 1, content: { $ref: '#/panels/gaugeSystemLoad' } },
-              { width: 1, content: { $ref: '#/panels/gaugeSystemLoadAlt' } },
-              { width: 1, content: { $ref: '#/panels/gaugeRam' } },
-              { width: 1, content: { $ref: '#/panels/gaugeSwap' } },
-              { width: 1, content: { $ref: '#/panels/gaugeRoot' } },
-              { width: 2, content: { $ref: '#/panels/emptyExample' } },
-            ],
-            // Row 2
-            [
-              { width: 1, content: { $ref: '#/panels/cpu' } },
-              { width: 1, content: { $ref: '#/panels/memory' } },
-            ],
-            // Row 2
-            [
-              { width: 1, content: { $ref: '#/panels/diskIO' } },
-              { width: 1, content: { $ref: '#/panels/filesystemFullness' } },
-            ],
-          ],
-        },
+    layouts: [
+      {
+        kind: 'Grid',
+        items: [
+          {
+            x: 0,
+            y: 0,
+            width: 3,
+            height: 4,
+            content: { $ref: '#/panels/gaugeCpuBusy' },
+          },
+          {
+            x: 3,
+            y: 0,
+            width: 3,
+            height: 4,
+            content: { $ref: '#/panels/gaugeSystemLoad' },
+          },
+          {
+            x: 6,
+            y: 0,
+            width: 3,
+            height: 4,
+            content: { $ref: '#/panels/gaugeSystemLoadAlt' },
+          },
+          {
+            x: 9,
+            y: 0,
+            width: 3,
+            height: 4,
+            content: { $ref: '#/panels/gaugeRam' },
+          },
+          {
+            x: 12,
+            y: 0,
+            width: 3,
+            height: 4,
+            content: { $ref: '#/panels/gaugeSwap' },
+          },
+          {
+            x: 15,
+            y: 0,
+            width: 3,
+            height: 4,
+            content: { $ref: '#/panels/gaugeRoot' },
+          },
+          {
+            x: 18,
+            y: 0,
+            width: 6,
+            height: 4,
+            content: { $ref: '#/panels/emptyExample' },
+          },
+        ],
       },
-    },
-    entrypoint: {
-      $ref: '#/layouts/main',
-    },
+      {
+        kind: 'Grid',
+        items: [
+          // First Row
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/cpu' },
+          },
+          {
+            x: 12,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/memory' },
+          },
+          // Second Row
+          {
+            x: 0,
+            y: 6,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/diskIO' },
+          },
+          {
+            x: 12,
+            y: 6,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/filesystemFullness' },
+          },
+        ],
+      },
+    ],
   },
 };
 
