@@ -18,7 +18,8 @@ import {
   usePanelState,
 } from '@perses-ui/core';
 import { UnitOptions } from '../../model/units';
-import { CalculationType } from '../../model/calculations'; // CalculationsMap
+import { CalculationType } from '../../model/calculations';
+import { ThresholdOptions } from './thresholds';
 import GaugeChart from './GaugeChart';
 
 export const GaugeChartKind = 'GaugeChart' as const;
@@ -32,13 +33,13 @@ interface GaugeChartOptions extends JsonObject {
   query: AnyGraphQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
-  // TODO (sjcobb): define threshold option structure
+  thresholds: ThresholdOptions;
 }
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const {
     definition: {
-      options: { query, calculation, unit },
+      options: { query, calculation, unit, thresholds },
     },
   } = props;
   const { contentDimensions } = usePanelState();
@@ -51,6 +52,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
           query={query}
           calculation={calculation}
           unit={unit}
+          thresholds={thresholds}
         />
       )}
     </>

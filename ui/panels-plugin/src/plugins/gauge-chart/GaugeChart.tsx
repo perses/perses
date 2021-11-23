@@ -26,6 +26,7 @@ import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { formatValue, UnitOptions } from '../../model/units';
+import { ThresholdColorsMap, ThresholdOptions } from './thresholds';
 
 echarts.use([
   EChartsGaugeChart,
@@ -42,15 +43,8 @@ export interface GaugeChartProps {
   height: number;
   calculation: CalculationType;
   unit: UnitOptions;
+  thresholds: ThresholdOptions;
 }
-
-// TODO (sjcobb): take threshold default colors from theme (green, red, yellow, gray)
-const thresholdColors = {
-  green: 'rgb(115, 191, 105)',
-  yellow: 'rgba(237, 129, 40, 0.89)',
-  red: 'rgba(245, 54, 54, 0.9)',
-  gray: '#e1e5e9',
-};
 
 const noDataOption = {
   title: {
@@ -73,7 +67,7 @@ const noDataOption = {
 };
 
 function GaugeChart(props: GaugeChartProps) {
-  const { query, width, height, calculation, unit } = props;
+  const { query, width, height, calculation, unit, thresholds } = props;
   const { data } = useGraphQuery(query);
 
   const option: EChartsOption = useMemo(() => {
@@ -84,8 +78,14 @@ function GaugeChart(props: GaugeChartProps) {
     if (series === undefined) return noDataOption;
 
     const calculate = CalculationsMap[calculation];
-
     const calculatedValue = calculate(Array.from(series.values)) || 0;
+
+    const axisLineThresholdColors: Array<[number, string]> = thresholds
+      ? thresholds.steps.map((step) => [
+          step.value,
+          ThresholdColorsMap[step.color],
+        ])
+      : [[0, ThresholdColorsMap.green]];
 
     return {
       title: {
@@ -101,7 +101,6 @@ function GaugeChart(props: GaugeChartProps) {
           radius: '100%',
           startAngle: 200,
           endAngle: -20,
-          // TODO (sjcobb): min and max should come from dashboard metadata
           min: 0,
           max: 100,
           splitNumber: 12,
@@ -118,7 +117,7 @@ function GaugeChart(props: GaugeChartProps) {
           },
           axisLine: {
             lineStyle: {
-              color: [[1, thresholdColors.gray]],
+              color: [[1, '#e1e5e9']],
               width: 24,
             },
           },
@@ -179,12 +178,7 @@ function GaugeChart(props: GaugeChartProps) {
             show: true,
             lineStyle: {
               width: 6,
-              // TODO (sjcobb): threshold data from dashboard.ts
-              color: [
-                [0.8, thresholdColors.green],
-                [0.9, thresholdColors.yellow],
-                [1, thresholdColors.red],
-              ],
+              color: axisLineThresholdColors,
             },
           },
           axisTick: {
@@ -207,11 +201,8 @@ function GaugeChart(props: GaugeChartProps) {
             fontWeight: 'bolder',
             color: 'inherit',
             formatter: (value: number) => {
-              // TODO (sjcobb): pass decimal_places from dashboard
-              // https://echarts.apache.org/en/option.html#series-gauge.detail.formatter
               return formatValue(value, {
                 kind: unit.kind,
-                // decimal_places: unit.decimal_places, // aka minimumFractionDigits
                 decimal_places: 0,
               });
             },
@@ -224,7 +215,7 @@ function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, calculation, unit]);
+  }, [data, calculation, unit, thresholds]);
 
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [chart, setChart] = useState<echarts.ECharts | undefined>(undefined);

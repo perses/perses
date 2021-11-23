@@ -84,14 +84,22 @@ const nodeExporterDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
-          // TODO (sjcobb): pass optional threshold data to GaugeChart
-          // thresholds: {
-          //   steps: [
-          //     [0.8, 'rgb(115, 191, 105)'],
-          //     [0.9, 'rgba(237, 129, 40, 0.89)'],
-          //     [1, 'rgba(245, 54, 54, 0.9)'],
-          //   ],
-          // },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.85,
+              },
+              {
+                color: 'orange',
+                value: 0.95,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
         },
       },
       gaugeSystemLoad: {
@@ -107,6 +115,22 @@ const nodeExporterDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.85,
+              },
+              {
+                color: 'orange',
+                value: 0.95,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
         },
       },
       gaugeSystemLoadAlt: {
@@ -122,6 +146,22 @@ const nodeExporterDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.85,
+              },
+              {
+                color: 'orange',
+                value: 0.95,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
         },
       },
       gaugeRam: {
@@ -137,6 +177,22 @@ const nodeExporterDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.8,
+              },
+              {
+                color: 'orange',
+                value: 0.9,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
         },
       },
       gaugeSwap: {
@@ -152,6 +208,22 @@ const nodeExporterDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.1,
+              },
+              {
+                color: 'orange',
+                value: 0.25,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
         },
       },
       gaugeRoot: {
@@ -162,11 +234,27 @@ const nodeExporterDashboard: DashboardResource = {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-              '100 - ((node_filesystem_avail_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"})',
+                '100 - ((node_filesystem_avail_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"})',
             },
           },
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.8,
+              },
+              {
+                color: 'orange',
+                value: 0.9,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
         },
       },
       emptyExample: {
