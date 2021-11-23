@@ -57,14 +57,17 @@ function Panel(props: PanelProps) {
         title={
           <Typography
             component="h2"
-            variant="body1"
+            variant="body2"
             fontWeight={(theme) => theme.typography.fontWeightBold}
+            whiteSpace="nowrap"
+            overflow="hidden"
+            textOverflow="ellipsis"
           >
             {definition.display.name}
           </Typography>
         }
         sx={{
-          flexGrow: 0,
+          display: 'block',
           padding: (theme) => theme.spacing(1, 2),
         }}
       />
