@@ -18,6 +18,7 @@ import {
 } from '@perses-ui/core';
 import { camelCase } from 'lodash-es';
 import {
+  GrafanaGaugePanel,
   GrafanaGraphPanel,
   GrafanaPanel,
   GrafanaRow,
@@ -66,6 +67,8 @@ function convertPanel(grafanaPanel: GrafanaPanel): AnyPanelDefinition {
   switch (grafanaPanel.type) {
     case 'graph':
       return convertGraphPanel(grafanaPanel);
+    case 'gauge':
+      return convertGaugePanel(grafanaPanel);
     default:
       return {
         kind: 'EmptyChart',
@@ -89,12 +92,30 @@ function convertGraphPanel(graphPanel: GrafanaGraphPanel): AnyPanelDefinition {
   };
 }
 
-function convertQueryTarget(target: PromQueryTarget): AnyGraphQueryDefinition {
+function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
+  // TODO: Does a Gauge chart with multiple queries even make sense?
+  const target = gaugePanel.targets[0];
+
+  return {
+    kind: 'GaugeChart',
+    display: {
+      name: gaugePanel.title,
+    },
+    options: {
+      query: convertQueryTarget(target),
+    },
+  };
+}
+
+function convertQueryTarget(target?: PromQueryTarget): AnyGraphQueryDefinition {
+  const query = target.expr ?? '';
+  const min_step = target.step === undefined ? undefined : `${target.step}s`;
+
   return {
     kind: 'PrometheusGraphQuery',
     options: {
-      query: target.expr,
-      min_step: `${target.step}s`,
+      query,
+      min_step,
     },
   };
 }

@@ -108,7 +108,10 @@ type GrafanaGridPosition = {
   y: number;
 };
 
-export type GrafanaPanel = GrafanaGaugePanel | GrafanaGraphPanel;
+export type GrafanaPanel =
+  | GrafanaGaugePanel
+  | GrafanaGraphPanel
+  | GrafanaSingleStatPanel;
 
 type GrafanaPanelCommon = {
   id: number;
@@ -118,11 +121,16 @@ type GrafanaPanelCommon = {
 
 export type GrafanaGaugePanel = GrafanaPanelCommon & {
   type: 'gauge';
+  targets: PromQueryTarget[];
 };
 
 export type GrafanaGraphPanel = GrafanaPanelCommon & {
   type: 'graph';
   targets: PromQueryTarget[];
+};
+
+export type GrafanaSingleStatPanel = GrafanaPanelCommon & {
+  type: 'singlestat';
 };
 
 export type PromQueryTarget = {
