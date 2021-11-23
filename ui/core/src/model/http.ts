@@ -30,3 +30,12 @@ export interface HTTPConfig {
   auth?: HTTPAuth;
   headers?: Record<string, string>;
 }
+
+export function buildDatasourceURL(
+  datasourceName: string,
+  config: HTTPConfig
+): string {
+  return config.access === 'server'
+    ? `/proxy/globaldatasources/${datasourceName}`
+    : config.url;
+}

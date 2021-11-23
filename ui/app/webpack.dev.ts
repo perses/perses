@@ -64,6 +64,7 @@ const devConfig: Configuration = {
     allowedHosts: 'all',
     proxy: {
       '/api': 'http://localhost:8080',
+      '/proxy': 'http://localhost:8080',
     },
   },
   cache: true,

@@ -12,7 +12,11 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from 'react-query';
-import { DatasourceSelector, fetchJson } from '@perses-ui/core';
+import {
+  buildDatasourceURL,
+  DatasourceSelector,
+  fetchJson,
+} from '@perses-ui/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -88,10 +92,10 @@ export function useLabelValues(
   queryOptions?: QueryOptions
 ) {
   const { labelName, ...searchParams } = params;
-  const apiUrl = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
+  const apiURI = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
   return useQueryWithGet<typeof searchParams, LabelValuesResponse>(
     datasource,
-    apiUrl,
+    apiURI,
     searchParams,
     { match: 'match[]' },
     queryOptions
@@ -99,19 +103,22 @@ export function useLabelValues(
 }
 
 function useQueryWithGet<T extends RequestParams<T>, TResponse>(
-  datasource: DatasourceSelector,
-  apiUrl: string,
+  datasourceSelector: DatasourceSelector,
+  apiURI: string,
   params: T,
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const spec = <PrometheusSpecDatasource>usePrometheusConfig(datasource);
-  const key = [spec.http.url, apiUrl, params] as const;
+  const httpConfig = (<PrometheusSpecDatasource>(
+    usePrometheusConfig(datasourceSelector)
+  )).http;
+  const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
+  const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
     key,
     () => {
-      let url = `${spec.http.url}${apiUrl}`;
+      let url = `${datasourceURL}${apiURI}`;
 
       const urlParams = createSearchParams(params, rename).toString();
       if (urlParams !== '') {
@@ -125,22 +132,22 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
 }
 
 function useQueryWithPost<T extends RequestParams<T>, TResponse>(
-  datasource: DatasourceSelector,
-  apiUrl: string,
+  datasourceSelector: DatasourceSelector,
+  apiURI: string,
   params: T,
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  // TODO: @Nexucis find a way to share how to contact the datasource.
-  // Like for each query implemented you will have the condition to know if you can contact directly the datasource
-  // or if you have to pass through the backend to contact it
-  const spec = <PrometheusSpecDatasource>usePrometheusConfig(datasource);
-  const key = [spec.http.url, apiUrl, params] as const;
+  const httpConfig = (<PrometheusSpecDatasource>(
+    usePrometheusConfig(datasourceSelector)
+  )).http;
+  const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
+  const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
     key,
     () => {
-      const url = `${spec.http.url}${apiUrl}`;
+      const url = `${datasourceURL}${apiURI}`;
       const init = {
         method: 'POST',
         headers: {
