@@ -65,10 +65,6 @@ const DURATION_REGEX =
  * be used to do Date math. Throws if not a valid duration string.
  */
 export function parseDurationString(durationString: string): Duration {
-  if (durationString === '') {
-    throw new Error('Empty string is not valid for duration strings');
-  }
-
   const matches = DURATION_REGEX.exec(durationString);
   if (matches === null) {
     throw new Error(`Invalid duration string '${durationString}'`);

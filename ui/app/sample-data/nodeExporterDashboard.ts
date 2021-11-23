@@ -71,6 +71,207 @@ const nodeExporterDashboard: DashboardResource = {
       } as AnyVariableDefinition,
     },
     panels: {
+      gaugeCpuBusy: {
+        kind: 'GaugeChart',
+        display: { name: 'CPU Busy' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.85,
+              },
+              {
+                color: 'orange',
+                value: 0.95,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+      gaugeSystemLoad: {
+        kind: 'GaugeChart',
+        display: { name: 'Sys Load (5m avg)' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                'avg(node_load5{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.85,
+              },
+              {
+                color: 'orange',
+                value: 0.95,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+      gaugeSystemLoadAlt: {
+        kind: 'GaugeChart',
+        display: { name: 'Sys Load (15m avg)' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.85,
+              },
+              {
+                color: 'orange',
+                value: 0.95,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+      gaugeRam: {
+        kind: 'GaugeChart',
+        display: { name: 'RAM Used' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                '100 - ((node_memory_MemAvailable_bytes{job="node",instance="$instance"} * 100) / node_memory_MemTotal_bytes{job="node",instance="$instance"})',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.8,
+              },
+              {
+                color: 'orange',
+                value: 0.9,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+      gaugeSwap: {
+        kind: 'GaugeChart',
+        display: { name: 'SWAP Used' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                '((node_memory_SwapTotal_bytes{job="node",instance="$instance"} - node_memory_SwapFree_bytes{job="node",instance="$instance"}) / (node_memory_SwapTotal_bytes{job="node",instance="$instance"} )) * 100',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.1,
+              },
+              {
+                color: 'orange',
+                value: 0.25,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+      gaugeRoot: {
+        kind: 'GaugeChart',
+        display: { name: 'Root FS Used' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                '100 - ((node_filesystem_avail_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{job="node",instance="$instance",mountpoint="/",fstype!="rootfs"})',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' },
+          thresholds: {
+            steps: [
+              {
+                color: 'green',
+                value: 0.8,
+              },
+              {
+                color: 'orange',
+                value: 0.9,
+              },
+              {
+                color: 'red',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+      emptyExample: {
+        kind: 'EmptyChart',
+        display: { name: 'Empty Example 1' },
+        options: {},
+      },
+      emptyExample2: {
+        kind: 'EmptyChart',
+        display: { name: 'Empty Example 2' },
+        options: {},
+      },
+      emptyExample3: {
+        kind: 'EmptyChart',
+        display: { name: 'Empty Example 3' },
+        options: {},
+      },
       cpu: {
         kind: 'LineChart',
         display: { name: 'CPU' },
