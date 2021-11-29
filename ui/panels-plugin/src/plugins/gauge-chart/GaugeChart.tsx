@@ -80,12 +80,8 @@ function GaugeChart(props: GaugeChartProps) {
     const calculate = CalculationsMap[calculation];
     const calculatedValue = calculate(Array.from(series.values)) || 0;
 
-    const initialThresholds = thresholds || {
-      steps: [{ value: 0, color: 'Green' }],
-    };
-
     const axisLineColors: Array<[number, string]> =
-      convertThresholds(initialThresholds);
+      convertThresholds(thresholds);
 
     return {
       title: {

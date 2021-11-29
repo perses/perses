@@ -32,9 +32,11 @@ export type StepOptions = {
   color: ThresholdColorsType;
 };
 
-// TODO (scobb): should this be useConvertThresholds(thresholds: ThresholdOptions)
-// see: useFilterAlertRules
-export function convertThresholds(thresholds: ThresholdOptions) {
+export function convertThresholds(
+  thresholds: ThresholdOptions = {
+    steps: [{ value: 0, color: ThresholdColors.GREEN }],
+  }
+) {
   const defaultThresholdColor =
     thresholds.default_color || ThresholdColors.GREEN;
   const defaultThresholdArr: [number, string] = [0, defaultThresholdColor];
@@ -68,20 +70,16 @@ export function convertThresholds(thresholds: ThresholdOptions) {
   const lastColor = lastItem[1] || defaultAlertColor;
   const shiftedArr: Array<[number, string]> = [...stepsArr, [1, lastColor]];
 
-  // TODO (sjcobb): fix colors for 4th, 5th, etc. steps passed
+  // shifts values since ECharts expects color with max instead of min
   return shiftedArr.map((item, index, arr) => {
     if (index === arr.length - 1) return item;
-    const currentItemValue = item[0];
     if (index >= 1) {
       const prevItem = arr[index - 1] || defaultThresholdArr;
       const prevItemColor = prevItem[1];
-      const newItem: [number, string] = [currentItemValue, prevItemColor];
-      return newItem;
+      const offsetItem: [number, string] = [item[0], prevItemColor];
+      return offsetItem;
     } else {
-      const firstItem: [number, string] = [
-        currentItemValue,
-        defaultThresholdColor,
-      ];
+      const firstItem: [number, string] = [item[0], defaultThresholdColor];
       return firstItem;
     }
   });

@@ -85,22 +85,12 @@ const nodeExporterDashboard: DashboardResource = {
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
           thresholds: {
-            default_color: '#000',
+            // default_color: '#000',
             steps: [
               {
-                color: '#FFFF00', // yellow
-                value: 25,
+                value: 85,
               },
               {
-                value: 55,
-                color: '#0000FF', // blue
-              },
-              {
-                value: 75,
-                color: '#96ccfc', // ltblue
-              },
-              {
-                color: '#f9d44f',
                 value: 95,
               },
             ],
@@ -148,11 +138,9 @@ const nodeExporterDashboard: DashboardResource = {
           thresholds: {
             steps: [
               {
-                color: 'Orange',
                 value: 85,
               },
               {
-                color: 'Red',
                 value: 95,
               },
             ],
