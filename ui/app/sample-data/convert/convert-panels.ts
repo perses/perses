@@ -100,7 +100,7 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
     options: {
       query: convertQueryTarget(target),
       calculation: 'LastNumber',
-      unit: { kind: 'Percent' },
+      unit: { kind: 'Percent' }, // TODO (sjcobb): add calc mapping, support gauge formats other than percents
       thresholds: {
         steps: filteredThresholdSteps,
       },
