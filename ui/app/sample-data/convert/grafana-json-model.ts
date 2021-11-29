@@ -118,7 +118,6 @@ export type GrafanaGaugePanel = GrafanaPanelCommon & {
   targets: PromQueryTarget[];
   fieldConfig: {
     defaults: {
-      // TODO: Can this be more specific to string values we support?
       unit: string;
       thresholds: {
         steps: Array<{
@@ -130,7 +129,7 @@ export type GrafanaGaugePanel = GrafanaPanelCommon & {
   };
   options: {
     reduceOptions: {
-      // TODO: Can this be more specific also?
+      // TODO: define supported units and calcs
       calcs: string[];
     };
   };

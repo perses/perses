@@ -17,7 +17,6 @@ export const ThresholdColors = {
   GREEN: 'rgba(115, 191, 105, 1)',
   ORANGE: 'rgba(237, 129, 40, 0.9)',
   RED: 'rgba(245, 54, 54, 0.9)',
-  BLUE: '#0000FF',
 };
 
 export type ThresholdColorsType = keyof typeof ThresholdColors | string;
@@ -58,10 +57,10 @@ export function convertThresholds(
 
   // converts to 2d array structure needed for series-gauge.axisLine.lineStyle.color
   const stepsArr = thresholds.steps.map((step: StepOptions, index) => {
-    const thresholdTemplate = defaultThresholds.steps[index] || defaultThresholds.steps[0];
-    const stepObj: StepOptions = merge(thresholdTemplate, step);
-    stepObj.value = stepObj.value / 100;
-    return Object.values(stepObj) as [number, string];
+    const defaultThresholdStep = defaultThresholds.steps[index] || defaultThresholds.steps[0];
+    const mergedStep: StepOptions = merge(defaultThresholdStep, step);
+    mergedStep.value = mergedStep.value / 100; // TODO (sjcobb): support gauge formats other than percents
+    return Object.values(mergedStep) as [number, string];
   });
 
   const lastItem = stepsArr[stepsArr.length - 1] || [1, defaultAlertColor];
