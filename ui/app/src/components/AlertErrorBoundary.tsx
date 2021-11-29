@@ -23,11 +23,7 @@ export interface AlertErrorBoundaryProps {
  */
 function AlertErrorBoundary(props: AlertErrorBoundaryProps) {
   const { children } = props;
-  return (
-    <ErrorBoundary FallbackComponent={AlertErrorFallback}>
-      {children}
-    </ErrorBoundary>
-  );
+  return <ErrorBoundary FallbackComponent={AlertErrorFallback}>{children}</ErrorBoundary>;
 }
 
 export default AlertErrorBoundary;

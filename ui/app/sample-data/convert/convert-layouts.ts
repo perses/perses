@@ -68,16 +68,11 @@ type PanelGroup = {
   panels: GrafanaPanel[];
 };
 
-function isPanel(
-  maybePanel: GrafanaRow | GrafanaPanel
-): maybePanel is GrafanaPanel {
+function isPanel(maybePanel: GrafanaRow | GrafanaPanel): maybePanel is GrafanaPanel {
   return maybePanel.type !== 'row';
 }
 
-function createGridDefinition(
-  group: PanelGroup,
-  panelKeys: Map<number, string>
-): GridDefinition | undefined {
+function createGridDefinition(group: PanelGroup, panelKeys: Map<number, string>): GridDefinition | undefined {
   // If no row and no panels, no grid necessary
   if (group.row === undefined && group.panels.length === 0) {
     return undefined;

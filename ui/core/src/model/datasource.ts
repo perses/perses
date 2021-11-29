@@ -22,10 +22,8 @@ export interface DataSourceResource {
   };
 }
 
-export interface DataSourceDefinition<
-  Kind extends string,
-  Options extends JsonObject
-> extends Definition<Kind, Options> {
+export interface DataSourceDefinition<Kind extends string, Options extends JsonObject>
+  extends Definition<Kind, Options> {
   display: {
     hide?: boolean;
   };

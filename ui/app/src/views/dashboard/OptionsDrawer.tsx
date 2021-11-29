@@ -43,11 +43,7 @@ function OptionsDrawer() {
         if (variableDef.display.hide === true) return null;
 
         return (
-          <PluginBoundary
-            key={key}
-            loadingFallback="Loading..."
-            ErrorFallbackComponent={AlertErrorFallback}
-          >
+          <PluginBoundary key={key} loadingFallback="Loading..." ErrorFallbackComponent={AlertErrorFallback}>
             <VariableAutocomplete variableName={key} definition={variableDef} />
           </PluginBoundary>
         );

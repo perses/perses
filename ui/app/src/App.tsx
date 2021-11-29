@@ -30,8 +30,7 @@ const appStyle: SxProps<Theme> = {
 
 function App() {
   const dashboard = useSampleData<DashboardResource>(
-    new URLSearchParams(window.location.search).get('dashboard') ||
-      'node-exporter-full'
+    new URLSearchParams(window.location.search).get('dashboard') || 'node-exporter-full'
   );
   if (dashboard === undefined) {
     return null;

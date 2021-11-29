@@ -168,10 +168,7 @@ type KeyNameMap<T> = {
 /**
  * Creates URLSearchParams from a request params object.
  */
-function createSearchParams<T extends RequestParams<T>>(
-  params: T,
-  rename?: KeyNameMap<T>
-) {
+function createSearchParams<T extends RequestParams<T>>(params: T, rename?: KeyNameMap<T>) {
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value: ParamValue = params[key];

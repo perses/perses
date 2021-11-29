@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  JsonObject,
-  AnyGraphQueryDefinition,
-  PanelProps,
-  useGraphQuery,
-} from '@perses-ui/core';
+import { JsonObject, AnyGraphQueryDefinition, PanelProps, useGraphQuery } from '@perses-ui/core';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { formatValue, UnitOptions } from '../../model/units';

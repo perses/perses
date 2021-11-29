@@ -15,12 +15,7 @@ import { AnyGraphQueryDefinition, useGraphQuery } from '@perses-ui/core';
 import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
 import { GaugeChart as EChartsGaugeChart } from 'echarts/charts';
-import {
-  GridComponent,
-  DatasetComponent,
-  TitleComponent,
-  TooltipComponent,
-} from 'echarts/components';
+import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
@@ -28,14 +23,7 @@ import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { formatValue, UnitOptions } from '../../model/units';
 import { ThresholdColorsMap, ThresholdOptions } from './thresholds';
 
-echarts.use([
-  EChartsGaugeChart,
-  GridComponent,
-  DatasetComponent,
-  TitleComponent,
-  TooltipComponent,
-  CanvasRenderer,
-]);
+echarts.use([EChartsGaugeChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 export interface GaugeChartProps {
   query: AnyGraphQueryDefinition;
@@ -81,10 +69,7 @@ function GaugeChart(props: GaugeChartProps) {
     const calculatedValue = calculate(Array.from(series.values)) || 0;
 
     const axisLineThresholdColors: Array<[number, string]> = thresholds
-      ? thresholds.steps.map((step) => [
-          step.value,
-          ThresholdColorsMap[step.color],
-        ])
+      ? thresholds.steps.map((step) => [step.value, ThresholdColorsMap[step.color]])
       : [[0, ThresholdColorsMap.green]];
 
     return {
@@ -245,10 +230,7 @@ function GaugeChart(props: GaugeChartProps) {
   const prevSize = useRef({ width, height });
   useLayoutEffect(() => {
     // No need to resize initially
-    if (
-      prevSize.current.width === width &&
-      prevSize.current.height === height
-    ) {
+    if (prevSize.current.width === width && prevSize.current.height === height) {
       return;
     }
 

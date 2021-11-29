@@ -31,10 +31,7 @@ function GridTitle(props: GridTitleProps) {
   const { title, collapse } = props;
 
   const text = (
-    <Typography
-      variant="h5"
-      sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}
-    >
+    <Typography variant="h5" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
       {title}
     </Typography>
   );

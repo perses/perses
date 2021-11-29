@@ -11,11 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyGraphQueryDefinition,
-  useMemoized,
-  useGraphQuery,
-} from '@perses-ui/core';
+import { AnyGraphQueryDefinition, useMemoized, useGraphQuery } from '@perses-ui/core';
 import { createContext, useContext } from 'react';
 
 export type QueryState = ReturnType<typeof useGraphQuery>;
@@ -38,11 +34,7 @@ function GraphQueryRunner(props: GraphQueryRunnerProps) {
   const { queries, children } = props;
 
   if (queries.length === 0) {
-    return (
-      <GraphQueryContext.Provider value={EMPTY_RESULTS}>
-        {children}
-      </GraphQueryContext.Provider>
-    );
+    return <GraphQueryContext.Provider value={EMPTY_RESULTS}>{children}</GraphQueryContext.Provider>;
   }
 
   return (
@@ -79,20 +71,12 @@ function RunGraphQuery(props: RunGraphQueryProps) {
   // If we're the last query in the array...
   if (index === queries.length - 1) {
     // Provide the state for all the running queries via context
-    return (
-      <GraphQueryContext.Provider value={results}>
-        {children}
-      </GraphQueryContext.Provider>
-    );
+    return <GraphQueryContext.Provider value={results}>{children}</GraphQueryContext.Provider>;
   }
 
   // Otherwise, recursively render to keep unrolling the array
   return (
-    <RunGraphQuery
-      queries={queries}
-      index={index + 1}
-      previousResults={results}
-    >
+    <RunGraphQuery queries={queries} index={index + 1} previousResults={results}>
       {children}
     </RunGraphQuery>
   );
@@ -105,9 +89,7 @@ function RunGraphQuery(props: RunGraphQueryProps) {
 export function useRunningGraphQueries(): QueryState[] {
   const context = useContext(GraphQueryContext);
   if (context === undefined) {
-    throw new Error(
-      'No time series queries found. Did you forget GraphQueryRunner?'
-    );
+    throw new Error('No time series queries found. Did you forget GraphQueryRunner?');
   }
   return context;
 }

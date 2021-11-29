@@ -119,12 +119,7 @@ function UPlotChart(props: UPlotChartProps) {
     };
   }, [containerRef, data, options]);
 
-  return (
-    <Box
-      ref={setContainerRef}
-      sx={{ width, height, position: 'relative' }}
-    ></Box>
-  );
+  return <Box ref={setContainerRef} sx={{ width, height, position: 'relative' }}></Box>;
 }
 
 export default UPlotChart;

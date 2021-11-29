@@ -12,12 +12,7 @@
 // limitations under the License.
 
 import { Duration, parser, StringLiteral } from 'lezer-promql';
-import {
-  DEFAULT_ALL_VALUE,
-  useMemoized,
-  useDashboardVariables,
-  VariableState,
-} from '@perses-ui/core';
+import { DEFAULT_ALL_VALUE, useMemoized, useDashboardVariables, VariableState } from '@perses-ui/core';
 
 const REPLACE_IN_NODE_TYPES = new Set([StringLiteral, Duration]);
 
@@ -98,39 +93,36 @@ function replaceTemplateVariables(
 
     let nodeText = templateString.substring(from, to);
 
-    nodeText = nodeText.replaceAll(
-      /\$([a-zA-Z0-9_-]+)/g,
-      (match, variableName) => {
-        const state = variablesState[variableName];
-        if (state === undefined) {
-          throw new Error(`Unknown variable '${variableName}'`);
-        }
-
-        const { value, options } = state;
-        let replacement: string;
-        if (Array.isArray(value)) {
-          let selectedValues = value;
-          // Is the default ALL value?
-          if (value.length === 1 && value[0] === DEFAULT_ALL_VALUE) {
-            // For the default ALL value, we want to use all options as the
-            // selected values
-            if (options === undefined) {
-              // Wait until options are loaded before we do replacement
-              needsVariableValuesFor.add(variableName);
-              return match;
-            }
-            selectedValues = options;
-          }
-
-          // TODO: Escape v for regex
-          replacement = selectedValues.map((v) => v).join('|');
-        } else {
-          replacement = escapeVariableValue(value);
-        }
-
-        return replacement;
+    nodeText = nodeText.replaceAll(/\$([a-zA-Z0-9_-]+)/g, (match, variableName) => {
+      const state = variablesState[variableName];
+      if (state === undefined) {
+        throw new Error(`Unknown variable '${variableName}'`);
       }
-    );
+
+      const { value, options } = state;
+      let replacement: string;
+      if (Array.isArray(value)) {
+        let selectedValues = value;
+        // Is the default ALL value?
+        if (value.length === 1 && value[0] === DEFAULT_ALL_VALUE) {
+          // For the default ALL value, we want to use all options as the
+          // selected values
+          if (options === undefined) {
+            // Wait until options are loaded before we do replacement
+            needsVariableValuesFor.add(variableName);
+            return match;
+          }
+          selectedValues = options;
+        }
+
+        // TODO: Escape v for regex
+        replacement = selectedValues.map((v) => v).join('|');
+      } else {
+        replacement = escapeVariableValue(value);
+      }
+
+      return replacement;
+    });
 
     // Replace the string literal with the new one and since that may change the
     // overall length of the string, keep track of an "index adjustment" so we
@@ -138,10 +130,7 @@ function replaceTemplateVariables(
     const oldLength = to - from;
     indexAdjustment += nodeText.length - oldLength;
 
-    templateString =
-      templateString.substring(0, from) +
-      nodeText +
-      templateString.substring(from + oldLength);
+    templateString = templateString.substring(0, from) + nodeText + templateString.substring(from + oldLength);
   } while (cursor.next());
 
   return {

@@ -12,28 +12,17 @@
 // limitations under the License.
 
 import { usePluginRuntime } from '../context/PluginRuntimeContext';
-import {
-  DataSourceDefinition,
-  DataSourceResource,
-  AnyDataSourceDefinition,
-} from '../model/datasource';
+import { DataSourceDefinition, DataSourceResource, AnyDataSourceDefinition } from '../model/datasource';
 import { JsonObject } from '../model/definitions';
 import { ResourceSelector } from '../model/resource';
 
-export function useDataSources(
-  selector: ResourceSelector
-): DataSourceResource[] {
+export function useDataSources(selector: ResourceSelector): DataSourceResource[] {
   return usePluginRuntime('useDataSources')(selector);
 }
 
-export function useDataSourceConfig<
-  Kind extends string,
-  Options extends JsonObject
->(
+export function useDataSourceConfig<Kind extends string, Options extends JsonObject>(
   selector: ResourceSelector,
-  validate: (
-    value: AnyDataSourceDefinition
-  ) => value is DataSourceDefinition<Kind, Options>
+  validate: (value: AnyDataSourceDefinition) => value is DataSourceDefinition<Kind, Options>
 ): DataSourceDefinition<Kind, Options> {
   const dataSources = useDataSources(selector);
   if (dataSources.length > 1) {

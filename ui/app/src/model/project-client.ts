@@ -22,10 +22,7 @@ export interface ProjectModel {
   metadata: Metadata;
 }
 
-type ProjectListOptions = Omit<
-  UseQueryOptions<ProjectModel[], Error>,
-  'queryKey' | 'queryFn'
->;
+type ProjectListOptions = Omit<UseQueryOptions<ProjectModel[], Error>, 'queryKey' | 'queryFn'>;
 
 /**
  * Gets version information from the Perses server API.

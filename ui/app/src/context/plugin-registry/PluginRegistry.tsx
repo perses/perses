@@ -12,21 +12,11 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo, useRef } from 'react';
-import {
-  PluginModule,
-  PluginRuntime,
-  PluginRuntimeProvider,
-} from '@perses-ui/core';
+import { PluginModule, PluginRuntime, PluginRuntimeProvider } from '@perses-ui/core';
 import { PluginBoundary, PluginBoundaryProps } from './PluginBoundary';
-import {
-  LoadedPluginsByTypeAndKind,
-  PluginResourcesByTypeAndKind,
-  useRegistryState,
-} from './registry-state';
+import { LoadedPluginsByTypeAndKind, PluginResourcesByTypeAndKind, useRegistryState } from './registry-state';
 
-export const PluginRegistryContext = createContext<
-  PluginRegistryContextType | undefined
->(undefined);
+export const PluginRegistryContext = createContext<PluginRegistryContextType | undefined>(undefined);
 
 export interface PluginRegistryContextType {
   loadablePlugins: PluginResourcesByTypeAndKind;
@@ -48,14 +38,9 @@ export function PluginRegistry(props: PluginRegistryProviderProps) {
   // TODO: Fetch from server
   const installedPlugins = useRef([]);
 
-  const { loadablePlugins, plugins, register } = useRegistryState(
-    installedPlugins.current
-  );
+  const { loadablePlugins, plugins, register } = useRegistryState(installedPlugins.current);
 
-  const registry = useMemo(
-    () => ({ loadablePlugins, plugins, register }),
-    [loadablePlugins, plugins, register]
-  );
+  const registry = useMemo(() => ({ loadablePlugins, plugins, register }), [loadablePlugins, plugins, register]);
 
   return (
     <PluginRegistryContext.Provider value={registry}>
@@ -72,9 +57,7 @@ export function PluginRegistry(props: PluginRegistryProviderProps) {
 export function usePluginRegistry() {
   const ctx = useContext(PluginRegistryContext);
   if (ctx === undefined) {
-    throw new Error(
-      'No PluginRegistry context found. Did you forget a Provider?'
-    );
+    throw new Error('No PluginRegistry context found. Did you forget a Provider?');
   }
   return ctx;
 }

@@ -13,11 +13,7 @@
 
 import { createContext, useContext, useRef } from 'react';
 import { useGraphQuery } from '../hooks/graph-query';
-import {
-  useDashboardSpec,
-  useDashboardTimeRange,
-  useDashboardVariables,
-} from '../hooks/dashboard';
+import { useDashboardSpec, useDashboardTimeRange, useDashboardVariables } from '../hooks/dashboard';
 import { useDataSources } from '../hooks/datasource';
 import { usePanelState } from '../hooks/panel';
 
@@ -35,9 +31,7 @@ export interface PluginRuntime {
   usePanelState: typeof usePanelState;
 }
 
-export const PluginRuntimeContext = createContext<PluginRuntime | undefined>(
-  undefined
-);
+export const PluginRuntimeContext = createContext<PluginRuntime | undefined>(undefined);
 
 export interface PluginRuntimeProviderProps {
   value: PluginRuntime;
@@ -52,21 +46,13 @@ export function PluginRuntimeProvider(props: PluginRuntimeProviderProps) {
     context.current = props.value;
   }
 
-  return (
-    <PluginRuntimeContext.Provider value={context.current}>
-      {props.children}
-    </PluginRuntimeContext.Provider>
-  );
+  return <PluginRuntimeContext.Provider value={context.current}>{props.children}</PluginRuntimeContext.Provider>;
 }
 
-export function usePluginRuntime<T extends keyof PluginRuntime>(
-  hook: T
-): PluginRuntime[T] {
+export function usePluginRuntime<T extends keyof PluginRuntime>(hook: T): PluginRuntime[T] {
   const context = useContext(PluginRuntimeContext);
   if (context === undefined) {
-    throw new Error(
-      'Could not find ExposeToPlugin context. Did you forget a provider?'
-    );
+    throw new Error('Could not find ExposeToPlugin context. Did you forget a provider?');
   }
   return context[hook];
 }

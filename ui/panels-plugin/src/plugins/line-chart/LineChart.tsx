@@ -20,12 +20,7 @@ import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 
-echarts.use([
-  EChartsLineChart,
-  GridComponent,
-  DatasetComponent,
-  CanvasRenderer,
-]);
+echarts.use([EChartsLineChart, GridComponent, DatasetComponent, CanvasRenderer]);
 
 export interface LineChartProps {
   width: number;
@@ -113,10 +108,7 @@ function LineChart(props: LineChartProps) {
   const prevSize = useRef({ width, height });
   useLayoutEffect(() => {
     // No need to resize initially
-    if (
-      prevSize.current.width === width &&
-      prevSize.current.height === height
-    ) {
+    if (prevSize.current.width === width && prevSize.current.height === height) {
       return;
     }
 

@@ -41,7 +41,5 @@ export const PluginLoader = loadable.lib(
  * Gets a unique cache key for a plugin resource.
  */
 export function getResourceCacheKey(resource: PluginResource) {
-  return (
-    BUNDLED_PLUGINS.get(resource)?.cacheKey ?? resource.spec.plugin_module_path
-  );
+  return BUNDLED_PLUGINS.get(resource)?.cacheKey ?? resource.spec.plugin_module_path;
 }

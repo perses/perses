@@ -19,9 +19,7 @@ export interface DataSourceRegistryContextType {
   getDataSources(selector: ResourceSelector): DataSourceResource[];
 }
 
-export const DataSourceRegistryContext = createContext<
-  DataSourceRegistryContextType | undefined
->(undefined);
+export const DataSourceRegistryContext = createContext<DataSourceRegistryContextType | undefined>(undefined);
 
 export interface DataSourceRegistryProps {
   children: React.ReactNode;
@@ -49,24 +47,15 @@ export function DataSourceRegistry(props: DataSourceRegistryProps) {
     });
   }, [dataSources]);
 
-  const context: DataSourceRegistryContextType = useMemo(
-    () => ({ getDataSources }),
-    [getDataSources]
-  );
+  const context: DataSourceRegistryContextType = useMemo(() => ({ getDataSources }), [getDataSources]);
 
-  return (
-    <DataSourceRegistryContext.Provider value={context}>
-      {children}
-    </DataSourceRegistryContext.Provider>
-  );
+  return <DataSourceRegistryContext.Provider value={context}>{children}</DataSourceRegistryContext.Provider>;
 }
 
 export function useDataSourceRegistry() {
   const context = useContext(DataSourceRegistryContext);
   if (context === undefined) {
-    throw new Error(
-      'No DataSourceRegistry context found. Did you forget a Provider?'
-    );
+    throw new Error('No DataSourceRegistry context found. Did you forget a Provider?');
   }
   return context;
 }

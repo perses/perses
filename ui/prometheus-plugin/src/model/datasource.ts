@@ -21,10 +21,7 @@ import {
 
 export const PrometheusDataSourceKind = 'PrometheusDataSource' as const;
 
-type PrometheusDataSource = DataSourceDefinition<
-  Kind,
-  PrometheusDataSourceOptions
->;
+type PrometheusDataSource = DataSourceDefinition<Kind, PrometheusDataSourceOptions>;
 
 type Kind = typeof PrometheusDataSourceKind;
 export interface PrometheusDataSourceOptions extends JsonObject {
@@ -35,8 +32,6 @@ export function usePrometheusConfig(selector: ResourceSelector) {
   return useDataSourceConfig(selector, isPromDataSource).options;
 }
 
-function isPromDataSource(
-  def: AnyDataSourceDefinition
-): def is PrometheusDataSource {
+function isPromDataSource(def: AnyDataSourceDefinition): def is PrometheusDataSource {
   return typeof def.options['base_url'] === 'string';
 }
