@@ -116,13 +116,17 @@ type GrafanaPanelCommon = {
 export type GrafanaGaugePanel = GrafanaPanelCommon & {
   type: 'gauge';
   targets: PromQueryTarget[];
-  // TODO: Can this be more specific to string values we support?
-  unit: string;
-  thresholds: {
-    steps: Array<{
-      color: string;
-      value: number | null;
-    }>;
+  fieldConfig: {
+    defaults: {
+      // TODO: Can this be more specific to string values we support?
+      unit: string;
+      thresholds: {
+        steps: Array<{
+          color: string;
+          value: number | null;
+        }>;
+      };
+    };
   };
   options: {
     reduceOptions: {

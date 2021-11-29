@@ -15,8 +15,8 @@ import { merge } from 'lodash-es';
 
 export const ThresholdColors = {
   GREEN: 'rgba(115, 191, 105, 1)',
-  ORANGE: 'rgba(237, 129, 40, 1)',
-  RED: 'rgba(245, 54, 54, 1)',
+  ORANGE: 'rgba(237, 129, 40, 0.9)',
+  RED: 'rgba(245, 54, 54, 0.9)',
   BLUE: '#0000FF',
 };
 
