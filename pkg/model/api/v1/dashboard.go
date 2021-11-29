@@ -73,12 +73,12 @@ func (d *DashboardSpec) validate() error {
 	}
 	for variableKey := range d.Variables {
 		if len(keyRegexp.FindAllString(variableKey, -1)) <= 0 {
-			return fmt.Errorf("variable reference '%s' is containing spaces or special characters", variableKey)
+			return fmt.Errorf("variable reference %q is containing spaces or special characters", variableKey)
 		}
 	}
 	for panelKey := range d.Panels {
 		if len(keyRegexp.FindAllString(panelKey, -1)) <= 0 {
-			return fmt.Errorf("panel reference '%s' is containing spaces or special characters", panelKey)
+			return fmt.Errorf("panel reference %q is containing spaces or special characters", panelKey)
 		}
 	}
 	if d.Entrypoint == nil {
@@ -129,7 +129,7 @@ func (d *Dashboard) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (d *Dashboard) validate() error {
 	if d.Kind != KindDashboard {
-		return fmt.Errorf("invalid kind: '%s' for a Dashboard type", d.Kind)
+		return fmt.Errorf("invalid kind: %q for a Dashboard type", d.Kind)
 	}
 	return d.verifyAndSetJSONReferences()
 }
@@ -163,26 +163,26 @@ func (d *Dashboard) checkAndSetRef(ref *common.JSONRef) error {
 	// ref.Path should like that [ "spec", "layouts" | "panels", <name> ].
 	// So if the array is not equal to three then the reference is wrong.
 	if len(ref.Path) != 3 {
-		return fmt.Errorf("reference '%s' is pointing to the void", ref.Ref)
+		return fmt.Errorf("reference %q is pointing to the void", ref.Ref)
 	}
 	if ref.Path[0] != "spec" {
-		return fmt.Errorf("reference '%s' doesn't start by 'spec'", ref.Ref)
+		return fmt.Errorf("reference %q doesn't start by 'spec'", ref.Ref)
 	}
 	switch ref.Path[1] {
 	case "layouts":
 		if obj, ok := d.Spec.Layouts[ref.Path[2]]; !ok {
-			return fmt.Errorf("there is no existing layout called '%s' in the current dashboard", ref.Path[2])
+			return fmt.Errorf("there is no existing layout called %q in the current dashboard", ref.Path[2])
 		} else {
 			ref.Object = obj
 		}
 	case "panels":
 		if obj, ok := d.Spec.Panels[ref.Path[2]]; !ok {
-			return fmt.Errorf("there is no existing panel called '%s' in the current dashboard", ref.Path[2])
+			return fmt.Errorf("there is no existing panel called %q in the current dashboard", ref.Path[2])
 		} else {
 			ref.Object = obj
 		}
 	default:
-		return fmt.Errorf("'%s' is not a known object", ref.Path[1])
+		return fmt.Errorf("%q is not a known object", ref.Path[1])
 	}
 	return nil
 }

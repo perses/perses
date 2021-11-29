@@ -65,10 +65,10 @@ func (s *service) create(entity *v1.User) (*v1.User, error) {
 	entity.Spec.Password = hash
 	if err := s.dao.Create(entity); err != nil {
 		if etcd.IsKeyConflict(err) {
-			logrus.Debugf("unable to create the user '%s'. It already exits", entity.Metadata.Name)
+			logrus.Debugf("unable to create the user %q. It already exits", entity.Metadata.Name)
 			return nil, shared.ConflictError
 		}
-		logrus.WithError(err).Errorf("unable to perform the creation of the user '%s', something wrong with etcd", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the creation of the user %q, something wrong with etcd", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	// once the user is stored, remove the password so it won't be leaked
@@ -85,7 +85,7 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 
 func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.User, error) {
 	if entity.Metadata.Name != parameters.Name {
-		logrus.Debugf("name in user '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Name, parameters.Name)
+		logrus.Debugf("name in user %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
 	}
 	// find the previous version of the project
@@ -117,7 +117,7 @@ func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.Use
 		entity.Spec.LastName = oldObject.Spec.LastName
 	}
 	if err := s.dao.Update(entity); err != nil {
-		logrus.WithError(err).Errorf("unable to perform the update of the project '%s', something wrong with etcd", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the update of the project %q, something wrong with etcd", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	// once the user is stored, remove the password so it won't be leaked
@@ -128,10 +128,10 @@ func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.Use
 func (s *service) Delete(parameters shared.Parameters) error {
 	if err := s.dao.Delete(parameters.Name); err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the user '%s'", parameters.Name)
+			logrus.Debugf("unable to find the user %q", parameters.Name)
 			return shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to delete the user '%s', something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to delete the user %q, something wrong with etcd", parameters.Name)
 		return shared.InternalError
 	}
 	return nil
@@ -141,10 +141,10 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	entity, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the user '%s'", parameters.Name)
+			logrus.Debugf("unable to find the user %q", parameters.Name)
 			return nil, shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the user '%s', something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to find the previous version of the user %q, something wrong with etcd", parameters.Name)
 		return nil, shared.InternalError
 	}
 	// remove the password so it won't be leaked

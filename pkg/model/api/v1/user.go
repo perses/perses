@@ -106,7 +106,7 @@ func (p *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *User) validate() error {
 	if p.Kind != KindUser {
-		return fmt.Errorf("invalid kind: '%s' for a User type", p.Kind)
+		return fmt.Errorf("invalid kind: %q for a User type", p.Kind)
 	}
 	return nil
 }

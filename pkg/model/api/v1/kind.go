@@ -67,7 +67,7 @@ func (k *Kind) validate() error {
 		return fmt.Errorf("kind cannot be empty")
 	}
 	if _, ok := KindMap[*k]; !ok {
-		return fmt.Errorf("unknown kind '%s' used", *k)
+		return fmt.Errorf("unknown kind %q used", *k)
 	}
 	return nil
 }

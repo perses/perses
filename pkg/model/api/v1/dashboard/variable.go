@@ -119,7 +119,7 @@ func (k *VariableKind) validate() error {
 		return fmt.Errorf("variable.kind cannot be empty")
 	}
 	if _, ok := variableKindMap[*k]; !ok {
-		return fmt.Errorf("unknown variable.kind '%s' used", *k)
+		return fmt.Errorf("unknown variable.kind %q used", *k)
 	}
 	return nil
 }

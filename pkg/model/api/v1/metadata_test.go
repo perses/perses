@@ -34,7 +34,7 @@ func TestKind_validateError(t *testing.T) {
 		{
 			title:       "unknown kind",
 			kind:        "unknown",
-			resultError: fmt.Errorf("unknown kind 'unknown' used"),
+			resultError: fmt.Errorf("unknown kind \"unknown\" used"),
 		},
 	}
 	for _, test := range testSuites {

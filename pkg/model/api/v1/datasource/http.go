@@ -66,7 +66,7 @@ func (h *HTTPAccess) validate() error {
 		*h = ServerHTTPAccess
 	}
 	if _, ok := httpAccessMap[*h]; !ok {
-		return fmt.Errorf("unknown http.access '%s' used", *h)
+		return fmt.Errorf("unknown http.access %q used", *h)
 	}
 	return nil
 }

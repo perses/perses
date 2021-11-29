@@ -311,7 +311,7 @@ func TestUnmarshalVariableError(t *testing.T) {
   "parameter": "insane"
 }
 `,
-			err: fmt.Errorf("unknown variable.kind 'Awkward' used"),
+			err: fmt.Errorf("unknown variable.kind \"Awkward\" used"),
 		},
 		{
 			title: "no displayed name provided",

@@ -62,7 +62,7 @@ func buildVariableDependencies(variables map[string]*dashboard.Variable) (map[st
 	result := make(map[string][]string)
 	for name, variable := range variables {
 		if !variableRegexp.MatchString(name) {
-			return nil, fmt.Errorf("'%s' is not a correct variable name. It should match the regexp: %s", name, variableRegexp.String())
+			return nil, fmt.Errorf("%q is not a correct variable name. It should match the regexp: %s", name, variableRegexp.String())
 		}
 		var matches [][]string
 		switch param := variable.Parameter.(type) {
@@ -83,7 +83,7 @@ func buildVariableDependencies(variables map[string]*dashboard.Variable) (map[st
 			// match[0] is the string that is matching the regexp (including the $)
 			// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
 			if _, ok := variables[match[1]]; !ok {
-				return nil, fmt.Errorf("variable '%s' is used in the variable '%s' but not defined", match[1], name)
+				return nil, fmt.Errorf("variable %q is used in the variable %q but not defined", match[1], name)
 			}
 			deps[match[1]] = true
 		}

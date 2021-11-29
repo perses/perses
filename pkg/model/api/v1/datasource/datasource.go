@@ -57,7 +57,7 @@ func (k *Kind) validate() error {
 		return fmt.Errorf("spec.kind cannot be empty")
 	}
 	if _, ok := kindMap[*k]; !ok {
-		return fmt.Errorf("unknown spec.kind '%s' used", *k)
+		return fmt.Errorf("unknown spec.kind %q used", *k)
 	}
 	return nil
 }

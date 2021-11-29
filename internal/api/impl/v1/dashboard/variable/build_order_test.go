@@ -232,7 +232,7 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 					Parameter: &dashboard.PromQLQueryVariableParameter{},
 				},
 			},
-			err: fmt.Errorf("'%s' is not a correct variable name. It should match the regexp: %s", "VariableW$thI%ValidChar", variableRegexp.String()),
+			err: fmt.Errorf("%q is not a correct variable name. It should match the regexp: %s", "VariableW$thI%ValidChar", variableRegexp.String()),
 		},
 		{
 			title: "variable used but not defined",
@@ -244,7 +244,7 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 					},
 				},
 			},
-			err: fmt.Errorf("variable '%s' is used in the variable '%s' but not defined", "foo", "myVariable"),
+			err: fmt.Errorf("variable %q is used in the variable %q but not defined", "foo", "myVariable"),
 		},
 	}
 	for _, test := range testSuite {

@@ -48,10 +48,10 @@ func (s *service) create(entity *v1.Project) (*v1.Project, error) {
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		if etcd.IsKeyConflict(err) {
-			logrus.Debugf("unable to create the project '%s'. It already exits", entity.Metadata.Name)
+			logrus.Debugf("unable to create the project %q. It already exits", entity.Metadata.Name)
 			return nil, shared.ConflictError
 		}
-		logrus.WithError(err).Errorf("unable to perform the creation of the project '%s', something wrong with etcd", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the creation of the project %q, something wrong with etcd", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil
@@ -66,7 +66,7 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 
 func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.Project, error) {
 	if entity.Metadata.Name != parameters.Name {
-		logrus.Debugf("name in project '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Name, parameters.Name)
+		logrus.Debugf("name in project %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
 	}
 	// find the previous version of the project
@@ -80,7 +80,7 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 	// update the field UpdatedAt with the new time
 	entity.Metadata.UpdatedAt = time.Now().UTC()
 	if err := s.dao.Update(entity); err != nil {
-		logrus.WithError(err).Errorf("unable to perform the update of the project '%s', something wrong with etcd", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the update of the project %q, something wrong with etcd", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil
@@ -89,10 +89,10 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 func (s *service) Delete(parameters shared.Parameters) error {
 	if err := s.dao.Delete(parameters.Name); err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the project '%s'", parameters.Name)
+			logrus.Debugf("unable to find the project %q", parameters.Name)
 			return shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to delete the project '%s', something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to delete the project %q, something wrong with etcd", parameters.Name)
 		return shared.InternalError
 	}
 	return nil
@@ -102,10 +102,10 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	entity, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the project '%s'", parameters.Name)
+			logrus.Debugf("unable to find the project %q", parameters.Name)
 			return nil, shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the project '%s', something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to find the previous version of the project %q, something wrong with etcd", parameters.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil

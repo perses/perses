@@ -64,7 +64,7 @@ func (k *LayoutKind) validate() error {
 		return fmt.Errorf("layout.kind cannot be empty")
 	}
 	if _, ok := layoutKindMap[*k]; !ok {
-		return fmt.Errorf("unknown layout.kind '%s' used", *k)
+		return fmt.Errorf("unknown layout.kind %q used", *k)
 	}
 	return nil
 }

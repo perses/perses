@@ -158,7 +158,7 @@ func TestUnmarshalPanelError(t *testing.T) {
   "kind": "UnknownChart"
 }
 `,
-			err: fmt.Errorf("unknown panel.kind 'UnknownChart' used"),
+			err: fmt.Errorf("unknown panel.kind \"UnknownChart\" used"),
 		},
 		{
 			title: "no lines defined for a lineChart",
