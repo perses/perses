@@ -85,13 +85,22 @@ const nodeExporterDashboard: DashboardResource = {
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
           thresholds: {
-            // TODO (scobb): should this be snake_case, default_color, instead of camelCase?
-            // defaultColor: '#000000',
+            default_color: '#000',
             steps: [
               {
-                value: 85,
+                color: '#FFFF00', // yellow
+                value: 25,
               },
               {
+                value: 55,
+                color: '#0000FF', // blue
+              },
+              {
+                value: 75,
+                color: '#96ccfc', // ltblue
+              },
+              {
+                color: '#f9d44f',
                 value: 95,
               },
             ],

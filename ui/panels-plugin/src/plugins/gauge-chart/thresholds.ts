@@ -24,7 +24,7 @@ export type ThresholdColorsType = keyof typeof ThresholdColors | string;
 
 export type ThresholdOptions = {
   steps: StepOptions[];
-  defaultColor?: string;
+  default_color?: string;
 };
 
 export type StepOptions = {
@@ -36,13 +36,13 @@ export type StepOptions = {
 // see: useFilterAlertRules
 export function convertThresholds(thresholds: ThresholdOptions) {
   const defaultThresholdColor =
-    thresholds.defaultColor || ThresholdColors.GREEN;
+    thresholds.default_color || ThresholdColors.GREEN;
   const defaultThresholdArr: [number, string] = [0, defaultThresholdColor];
   const defaultWarningColor = ThresholdColors.ORANGE;
   const defaultAlertColor = ThresholdColors.RED;
 
   const defaultThresholds: ThresholdOptions = {
-    defaultColor: defaultThresholdColor,
+    default_color: defaultThresholdColor,
     steps: [
       {
         value: 85,
@@ -57,7 +57,8 @@ export function convertThresholds(thresholds: ThresholdOptions) {
 
   // converts to 2d array structure needed for series-gauge.axisLine.lineStyle.color
   const stepsArr = thresholds.steps.map((step: StepOptions, index) => {
-    const thresholdTemplate = defaultThresholds.steps[index];
+    const thresholdTemplate =
+      defaultThresholds.steps[index] || defaultThresholds.steps[0];
     const stepObj: StepOptions = merge(thresholdTemplate, step);
     stepObj.value = stepObj.value / 100;
     return Object.values(stepObj) as [number, string];
