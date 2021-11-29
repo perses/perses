@@ -21,7 +21,7 @@
     "@perses-ui/panels-plugin": "^1.0.0",
     "@perses-ui/prometheus-plugin": "^1.0.0",
     "clsx": "^1.1.1",
-    "immer": "^9.0.5",
+    "immer": "^9.0.7",
     "lodash-es": "^4.17.21",
     "mdi-material-ui": "^7.0.0",
     "notistack": "^2.0.3",
