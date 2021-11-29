@@ -12,7 +12,7 @@
     "analyze": "webpack --config webpack.analyze.ts"
   },
   "dependencies": {
-    "@emotion/react": "^11.6.0",
+    "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.6.0",
     "@fontsource/lato": "^4.5.0",
     "@loadable/component": "^5.15.0",
