@@ -133,7 +133,7 @@ func TestUnmarshalJSONRefError(t *testing.T) {
   "$ref": ""
 }
 `,
-			err: fmt.Errorf("ref '' is not accepted"),
+			err: fmt.Errorf("ref \"\" is not accepted"),
 		},
 		{
 			title: "reference with space",
@@ -142,7 +142,7 @@ func TestUnmarshalJSONRefError(t *testing.T) {
   "$ref": "#/foo/ref with space"
 }
 `,
-			err: fmt.Errorf("ref '#/foo/ref with space' is not accepted"),
+			err: fmt.Errorf("ref \"#/foo/ref with space\" is not accepted"),
 		},
 	}
 	for _, test := range testSuite {

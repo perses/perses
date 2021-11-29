@@ -64,7 +64,7 @@ func (j *JSONRef) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (j *JSONRef) validate() error {
 	if !jsonRefMatching.MatchString(j.Ref) {
-		return fmt.Errorf("ref '%s' is not accepted", j.Ref)
+		return fmt.Errorf("ref %q is not accepted", j.Ref)
 	}
 	for _, matches := range jsonRefCapturedGroup.FindAllStringSubmatch(j.Ref, -1) {
 		for i := 1; i < len(matches); i++ {

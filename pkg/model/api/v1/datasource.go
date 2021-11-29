@@ -92,7 +92,7 @@ func (d *GlobalDatasource) unmarshal(unmarshal func(interface{}) error, staticMa
 		return err
 	}
 	if tmp.Kind != KindGlobalDatasource {
-		return fmt.Errorf("invalid kind: '%s' for a GlobalDatasource type", tmp.Kind)
+		return fmt.Errorf("invalid kind: %q for a GlobalDatasource type", tmp.Kind)
 	}
 	d.Kind = tmp.Kind
 	d.Metadata = tmp.Metadata
@@ -144,7 +144,7 @@ func (d *Datasource) unmarshal(unmarshal func(interface{}) error, staticMarshal 
 		return err
 	}
 	if tmp.Kind != KindDatasource {
-		return fmt.Errorf("invalid kind: '%s' for a Datasource type", tmp.Kind)
+		return fmt.Errorf("invalid kind: %q for a Datasource type", tmp.Kind)
 	}
 	d.Kind = tmp.Kind
 	d.Metadata = tmp.Metadata

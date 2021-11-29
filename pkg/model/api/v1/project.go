@@ -63,7 +63,7 @@ func (p *Project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *Project) validate() error {
 	if p.Kind != KindProject {
-		return fmt.Errorf("invalid kind: '%s' for a Project type", p.Kind)
+		return fmt.Errorf("invalid kind: %q for a Project type", p.Kind)
 	}
 	return nil
 }

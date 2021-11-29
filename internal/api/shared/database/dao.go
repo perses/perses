@@ -109,7 +109,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	// to avoid any miss usage when using this method, slice should be a pointer to a slice.
 	// first check if slice is a pointer
 	if typeParameter.Kind() != reflect.Ptr {
-		return fmt.Errorf("slice in parameter is not a pointer to a slice but a '%s'", typeParameter.Kind())
+		return fmt.Errorf("slice in parameter is not a pointer to a slice but a %q", typeParameter.Kind())
 	}
 
 	// it's a pointer, so move to the actual element behind the pointer.
@@ -121,7 +121,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	typeParameter = typeParameter.Elem()
 
 	if typeParameter.Kind() != reflect.Slice {
-		return fmt.Errorf("slice in parameter is not actually a slice but a '%s'", typeParameter.Kind())
+		return fmt.Errorf("slice in parameter is not actually a slice but a %q", typeParameter.Kind())
 	}
 	q, err := query.Build()
 	if err != nil {

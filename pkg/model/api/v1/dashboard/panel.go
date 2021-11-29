@@ -63,7 +63,7 @@ func (k *ChartKind) validate() error {
 		return fmt.Errorf("panel.kind cannot be empty")
 	}
 	if _, ok := chartKindMap[*k]; !ok {
-		return fmt.Errorf("unknown panel.kind '%s' used", *k)
+		return fmt.Errorf("unknown panel.kind %q used", *k)
 	}
 	return nil
 }
