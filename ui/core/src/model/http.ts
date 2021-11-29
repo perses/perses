@@ -31,11 +31,6 @@ export interface HTTPConfig {
   headers?: Record<string, string>;
 }
 
-export function buildDatasourceURL(
-  datasourceName: string,
-  config: HTTPConfig
-): string {
-  return config.access === 'server'
-    ? `/proxy/globaldatasources/${datasourceName}`
-    : config.url;
+export function buildDatasourceURL(datasourceName: string, config: HTTPConfig): string {
+  return config.access === 'server' ? `/proxy/globaldatasources/${datasourceName}` : config.url;
 }

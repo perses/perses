@@ -12,11 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from 'react-query';
-import {
-  buildDatasourceURL,
-  DatasourceSelector,
-  fetchJson,
-} from '@perses-ui/core';
+import { buildDatasourceURL, DatasourceSelector, fetchJson } from '@perses-ui/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -109,9 +105,7 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const httpConfig = (<PrometheusSpecDatasource>(
-    usePrometheusConfig(datasourceSelector)
-  )).http;
+  const httpConfig = (<PrometheusSpecDatasource>usePrometheusConfig(datasourceSelector)).http;
   const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
   const key = [datasourceURL, apiURI, params] as const;
 
@@ -138,9 +132,7 @@ function useQueryWithPost<T extends RequestParams<T>, TResponse>(
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const httpConfig = (<PrometheusSpecDatasource>(
-    usePrometheusConfig(datasourceSelector)
-  )).http;
+  const httpConfig = (<PrometheusSpecDatasource>usePrometheusConfig(datasourceSelector)).http;
   const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
   const key = [datasourceURL, apiURI, params] as const;
 

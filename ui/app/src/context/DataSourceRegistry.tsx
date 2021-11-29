@@ -45,11 +45,7 @@ export function DataSourceRegistry(props: DataSourceRegistryProps) {
   const getDataSources = useCallback(
     (selector: DatasourceSelector) => {
       return datasourceList.filter((ds: GlobalDatasourceModel) => {
-        return (
-          selector.global &&
-          selector.kind === ds.spec.kind &&
-          selector.name === ds.metadata.name
-        );
+        return selector.global && selector.kind === ds.spec.kind && selector.name === ds.metadata.name;
       });
     },
     [datasourceList]

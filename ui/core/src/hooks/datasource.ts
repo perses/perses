@@ -12,24 +12,16 @@
 // limitations under the License.
 
 import { usePluginRuntime } from '../context/PluginRuntimeContext';
-import {
-  AnyDatasourceSpecDefinition,
-  DatasourceSpecDefinition,
-  GlobalDatasourceModel,
-} from '../model/datasource';
+import { AnyDatasourceSpecDefinition, DatasourceSpecDefinition, GlobalDatasourceModel } from '../model/datasource';
 import { DatasourceSelector } from '../model/dashboard';
 
-export function useDataSources(
-  selector: DatasourceSelector
-): GlobalDatasourceModel[] {
+export function useDataSources(selector: DatasourceSelector): GlobalDatasourceModel[] {
   return usePluginRuntime('useDataSources')(selector);
 }
 
 export function useDataSourceConfig<Kind extends string>(
   selector: DatasourceSelector,
-  validate: (
-    value: AnyDatasourceSpecDefinition
-  ) => value is DatasourceSpecDefinition<Kind>
+  validate: (value: AnyDatasourceSpecDefinition) => value is DatasourceSpecDefinition<Kind>
 ): DatasourceSpecDefinition<Kind> {
   const datasources = useDataSources(selector);
 
