@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  JsonObject,
-  VariableDefinition,
-  UseVariableOptionsHook,
-  useDashboardSpec,
-  useMemoized,
-} from '@perses-ui/core';
+import { JsonObject, VariableDefinition, UseVariableOptionsHook, useDashboardSpec, useMemoized } from '@perses-ui/core';
 import { LabelValuesRequestParameters } from '../model/api-types';
 import { useDashboardPrometheusTimeRange } from '../model/time';
 import { TemplateString, useReplaceTemplateStrings } from '../model/templating';
@@ -25,10 +19,7 @@ import { useLabelValues } from '../model/prometheus-client';
 
 export const PrometheusLabelValuesKind = 'PrometheusLabelValues' as const;
 
-type PrometheusLabelValues = VariableDefinition<
-  LabelValuesKind,
-  LabelValuesOptions
->;
+type PrometheusLabelValues = VariableDefinition<LabelValuesKind, LabelValuesOptions>;
 
 type LabelValuesKind = typeof PrometheusLabelValuesKind;
 
@@ -47,9 +38,7 @@ export function usePrometheusLabelValues(
   const dataSource = definition.datasource ?? spec.datasource;
 
   const { start, end } = useDashboardPrometheusTimeRange();
-  const { result: match, needsVariableValuesFor } = useReplaceTemplateStrings(
-    definition.options.match
-  );
+  const { result: match, needsVariableValuesFor } = useReplaceTemplateStrings(definition.options.match);
 
   // Make the request, pausing any requests that are still waiting on variable
   // values to be filled in/selected

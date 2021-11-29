@@ -52,11 +52,7 @@ const MAX_PROM_DATA_POINTS = 10000;
  * a "safe" step based on the max data points we want to allow returning from
  * a Prom query.
  */
-export function usePanelRangeStep(
-  timeRange: PrometheusTimeRange,
-  minStepSeconds = 15,
-  resolution = 1
-) {
+export function usePanelRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15, resolution = 1) {
   // Keep track of the latest panel width in a ref
   const { contentDimensions } = usePanelState();
   const panelWidth = useRef(contentDimensions?.width);

@@ -73,9 +73,7 @@ const cadvisorDashboard: DashboardResource = {
         kind: 'PrometheusLabelValues',
         options: {
           label_name: 'pod',
-          match: [
-            'container_network_receive_bytes_total{k8s_cluster="$cluster"}',
-          ],
+          match: ['container_network_receive_bytes_total{k8s_cluster="$cluster"}'],
         },
         display: {
           label: 'Pod Group',
@@ -84,8 +82,7 @@ const cadvisorDashboard: DashboardResource = {
           default_value: ['gateway'],
           all_value: '.+',
         },
-        capturing_regexp:
-          '/((?:[^-]|(?:-(?!(?:[a-z0-9]{8,10}(?:-|$))|(?:[a-z0-9]{4,5}$))))*)/',
+        capturing_regexp: '/((?:[^-]|(?:-(?!(?:[a-z0-9]{8,10}(?:-|$))|(?:[a-z0-9]{4,5}$))))*)/',
       } as AnyVariableDefinition,
     },
     panels: {
@@ -110,8 +107,7 @@ const cadvisorDashboard: DashboardResource = {
           query: {
             kind: 'PrometheusGraphQuery',
             options: {
-              query:
-                'count(rate(container_last_seen{name=~".+",instance=~"$node",pod=~"$pod.*"}[$interval]))',
+              query: 'count(rate(container_last_seen{name=~".+",instance=~"$node",pod=~"$pod.*"}[$interval]))',
             },
           },
           calculation: 'LastNumber',
@@ -151,8 +147,7 @@ const cadvisorDashboard: DashboardResource = {
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query:
-                  'sum by (device) (rate(node_network_receive_bytes_total[5m]))',
+                query: 'sum by (device) (rate(node_network_receive_bytes_total[5m]))',
               },
             },
           ],

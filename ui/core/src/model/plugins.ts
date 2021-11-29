@@ -92,25 +92,14 @@ export type PluginImplementation<
  * Configuration (including the plugin implementation) that's expected when
  * registering a plugin with Perses.
  */
-export type PluginRegistrationConfig<
-  Kind extends string,
-  Options extends JsonObject
-> = {
-  [Type in keyof SupportedPlugins<Kind, Options>]: PluginConfig<
-    Type,
-    Kind,
-    Options
-  >;
+export type PluginRegistrationConfig<Kind extends string, Options extends JsonObject> = {
+  [Type in keyof SupportedPlugins<Kind, Options>]: PluginConfig<Type, Kind, Options>;
 }[PluginType];
 
 /**
  * Configuration expected for a particular plugin type.
  */
-export type PluginConfig<
-  Type extends PluginType,
-  Kind extends string,
-  Options extends JsonObject
-> = {
+export type PluginConfig<Type extends PluginType, Kind extends string, Options extends JsonObject> = {
   pluginType: Type;
   kind: Kind;
   validate?: (config: AnyPluginDefinition<Type>) => string[];
@@ -121,15 +110,10 @@ export type PluginConfig<
  * A PluginDefinition at runtime where we know the plugin type, but not the
  * specific Kind/Options that it handles.
  */
-export type AnyPluginDefinition<Type extends PluginType> = PluginDefinition<
-  Type,
-  string,
-  JsonObject
->;
+export type AnyPluginDefinition<Type extends PluginType> = PluginDefinition<Type, string, JsonObject>;
 
 /**
  * A PluginImplementation at runtime where we know the plugin type, but not the
  * specific Kind/Options that it handles.
  */
-export type AnyPluginImplementation<Type extends PluginType> =
-  PluginImplementation<Type, string, JsonObject>;
+export type AnyPluginImplementation<Type extends PluginType> = PluginImplementation<Type, string, JsonObject>;

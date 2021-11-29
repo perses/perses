@@ -27,9 +27,7 @@ function renderApp() {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={createTheme()}>
-          <SnackbarProvider
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          >
+          <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
             <CssBaseline />
             <App />
           </SnackbarProvider>

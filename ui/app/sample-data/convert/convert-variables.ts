@@ -11,22 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyVariableDefinition,
-  DashboardSpec,
-  DEFAULT_ALL_VALUE,
-} from '@perses-ui/core';
+import { AnyVariableDefinition, DashboardSpec, DEFAULT_ALL_VALUE } from '@perses-ui/core';
 import { GrafanaVariable } from './grafana-json-model';
 
 const LABEL_NAMES = /^label_names\(\)\s*$/;
-const LABEL_VALUES =
-  /^label_values\((?:(.+),\s*)?([a-zA-Z_][a-zA-Z0-9_]*)\)\s*$/;
+const LABEL_VALUES = /^label_values\((?:(.+),\s*)?([a-zA-Z_][a-zA-Z0-9_]*)\)\s*$/;
 const METRIC_NAMES = /^metrics\((.+)\)\s*$/;
 const QUERY_RESULT = /^query_result\((.+)\)\s*$/;
 
-export function convertVariables(
-  grafanaVariables: GrafanaVariable[]
-): DashboardSpec['variables'] {
+export function convertVariables(grafanaVariables: GrafanaVariable[]): DashboardSpec['variables'] {
   const variables: DashboardSpec['variables'] = {};
   for (const grafanaVariable of grafanaVariables) {
     if (grafanaVariable.name === '') continue;
@@ -50,8 +43,7 @@ export function convertVariables(
       const { current, includeAll, allValue } = grafanaVariable;
       selection = {
         default_value: current.value,
-        all_value:
-          includeAll === false ? undefined : allValue ?? DEFAULT_ALL_VALUE,
+        all_value: includeAll === false ? undefined : allValue ?? DEFAULT_ALL_VALUE,
       };
     }
 

@@ -28,14 +28,12 @@ export function useVariablesState(resource: DashboardResource): VariablesState {
   // TODO: Do we need to support re-init if resource changes?
   const [state, setState] = useImmer(() => {
     const variables: Record<string, VariableState> = {};
-    Object.entries(resource.spec.variables).forEach(
-      ([variableName, definition]) => {
-        variables[variableName] = {
-          value: definition.selection.default_value,
-          options: undefined,
-        };
-      }
-    );
+    Object.entries(resource.spec.variables).forEach(([variableName, definition]) => {
+      variables[variableName] = {
+        value: definition.selection.default_value,
+        options: undefined,
+      };
+    });
     return variables;
   });
 
@@ -47,10 +45,7 @@ export function useVariablesState(resource: DashboardResource): VariablesState {
       }
 
       const defaultValue = variableDef.selection.default_value;
-      const allValue =
-        'all_value' in variableDef.selection
-          ? variableDef.selection.all_value
-          : undefined;
+      const allValue = 'all_value' in variableDef.selection ? variableDef.selection.all_value : undefined;
       if (typeof defaultValue === 'object') {
         // Shouldn't be able to assign a string to a multi select
         if (typeof next !== 'object') {
@@ -78,12 +73,7 @@ export function useVariablesState(resource: DashboardResource): VariablesState {
         // If the "All" value is in the next selections, we need to either
         // remove it (because they selected something more specific) or
         // ensure it's the only selection (because they just selected it)
-        if (
-          allValue !== undefined &&
-          typeof next === 'object' &&
-          next.length > 1 &&
-          next.includes(allValue)
-        ) {
+        if (allValue !== undefined && typeof next === 'object' && next.length > 1 && next.includes(allValue)) {
           const current = variableState.value;
           if (typeof current === 'object') {
             const hasAll = current.includes(allValue);
@@ -153,8 +143,5 @@ export function useVariablesState(resource: DashboardResource): VariablesState {
   );
 
   // Memo since it's being passed via context
-  return useMemo(
-    () => ({ state, setValue, setOptions }),
-    [state, setValue, setOptions]
-  );
+  return useMemo(() => ({ state, setValue, setOptions }), [state, setValue, setOptions]);
 }

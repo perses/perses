@@ -15,8 +15,6 @@ import { usePluginRuntime } from '../context/PluginRuntimeContext';
 import { UseGraphQueryHook } from '../model/graph-query';
 import { JsonObject } from '../model/definitions';
 
-export const useGraphQuery: UseGraphQueryHook<string, JsonObject> = (
-  definition
-) => {
+export const useGraphQuery: UseGraphQueryHook<string, JsonObject> = (definition) => {
   return usePluginRuntime('useGraphQuery')(definition);
 };

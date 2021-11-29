@@ -25,10 +25,7 @@ export interface GrafanaTimeRange {
   to: string;
 }
 
-export type GrafanaVariable =
-  | DataSourceVariable
-  | QueryVariable
-  | CustomVariable;
+export type GrafanaVariable = DataSourceVariable | QueryVariable | CustomVariable;
 
 export type DataSourceVariable = GrafanaVariableBase & {
   type: 'datasource';
@@ -108,10 +105,7 @@ type GrafanaGridPosition = {
   y: number;
 };
 
-export type GrafanaPanel =
-  | GrafanaGaugePanel
-  | GrafanaGraphPanel
-  | GrafanaSingleStatPanel;
+export type GrafanaPanel = GrafanaGaugePanel | GrafanaGraphPanel | GrafanaSingleStatPanel;
 
 type GrafanaPanelCommon = {
   id: number;

@@ -23,11 +23,7 @@ import {
   JsonObject,
 } from '@perses-ui/core';
 import { BUNDLED_PLUGINS } from './bundled-plugins';
-import {
-  createGraphQueryPlugin,
-  createPanelPlugin,
-  createVariablePlugin,
-} from './create-plugin';
+import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from './create-plugin';
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
 export type PluginResourcesByTypeAndKind = {
@@ -61,9 +57,7 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
 
         const map = loadableProps[pluginType];
         if (map.has(kind)) {
-          console.warn(
-            `Got multiple ${pluginType} plugin definitions for kind ${kind}`
-          );
+          console.warn(`Got multiple ${pluginType} plugin definitions for kind ${kind}`);
           continue;
         }
         map.set(kind, resource);
@@ -89,9 +83,7 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
 
   // Create the register callback to pass to the module's setup function
   const registerPlugin: RegisterPlugin = useCallback(
-    <Kind extends string, Options extends JsonObject>(
-      config: PluginRegistrationConfig<Kind, Options>
-    ) => {
+    <Kind extends string, Options extends JsonObject>(config: PluginRegistrationConfig<Kind, Options>) => {
       switch (config.pluginType) {
         case 'Variable':
           setPlugins((draft) => {

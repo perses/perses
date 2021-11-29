@@ -33,16 +33,7 @@ export function formatValue(value: number, unitOptions?: UnitOptions): string {
   throw new Error(`Unknown unit options ${exhaustive}`);
 }
 
-const timeUnitKinds = [
-  'Milliseconds',
-  'Seconds',
-  'Minutes',
-  'Hours',
-  'Days',
-  'Weeks',
-  'Months',
-  'Years',
-] as const;
+const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'] as const;
 const timeUnitKindsSet = new Set<string>(timeUnitKinds);
 
 type TimeUnitOptions = {
@@ -129,9 +120,7 @@ type PercentUnitOptions = {
   decimal_places: number;
 };
 
-function isPercentUnit(
-  unitOptions: UnitOptions
-): unitOptions is PercentUnitOptions {
+function isPercentUnit(unitOptions: UnitOptions): unitOptions is PercentUnitOptions {
   return percentUnitKindsSet.has(unitOptions.kind);
 }
 

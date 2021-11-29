@@ -15,10 +15,7 @@ import { Definition, JsonObject } from './definitions';
 import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 import { ResourceSelector } from './resource';
 
-export interface VariableDefinition<
-  Kind extends string,
-  Options extends JsonObject
-> extends Definition<Kind, Options> {
+export interface VariableDefinition<Kind extends string, Options extends JsonObject> extends Definition<Kind, Options> {
   datasource?: ResourceSelector;
   display: VariableDisplayOptions;
   selection: VariableSelectionOptions;
@@ -46,10 +43,7 @@ export const DEFAULT_ALL_VALUE = '$__all' as const;
 /**
  * Plugin for handling custom VariableDefinitions.
  */
-export interface VariablePlugin<
-  Kind extends string,
-  Options extends JsonObject
-> {
+export interface VariablePlugin<Kind extends string, Options extends JsonObject> {
   useVariableOptions: UseVariableOptionsHook<Kind, Options>;
 }
 
@@ -57,10 +51,9 @@ export interface VariablePlugin<
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type UseVariableOptionsHook<
-  Kind extends string,
-  Options extends JsonObject
-> = (definition: VariableDefinition<Kind, Options>) => {
+export type UseVariableOptionsHook<Kind extends string, Options extends JsonObject> = (
+  definition: VariableDefinition<Kind, Options>
+) => {
   data: string[];
   loading: boolean;
   error?: Error;

@@ -13,10 +13,7 @@
 
 import { ReactNode } from 'react';
 import { ErrorBoundary, ErrorBoundaryProps } from 'react-error-boundary';
-import {
-  PluginLoadingBoundary,
-  PluginLoadingBoundaryProps,
-} from './PluginLoadingBoundary';
+import { PluginLoadingBoundary, PluginLoadingBoundaryProps } from './PluginLoadingBoundary';
 
 export interface PluginBoundaryProps {
   loadingFallback: PluginLoadingBoundaryProps['fallback'];
@@ -32,9 +29,7 @@ export function PluginBoundary(props: PluginBoundaryProps) {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallbackComponent}>
-      <PluginLoadingBoundary fallback={loadingFallback}>
-        {children}
-      </PluginLoadingBoundary>
+      <PluginLoadingBoundary fallback={loadingFallback}>{children}</PluginLoadingBoundary>
     </ErrorBoundary>
   );
 }

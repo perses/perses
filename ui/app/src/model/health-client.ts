@@ -23,10 +23,7 @@ export interface HealthModel {
   commit: string;
 }
 
-type HealthOptions = Omit<
-  UseQueryOptions<HealthModel, Error>,
-  'queryKey' | 'queryFn'
->;
+type HealthOptions = Omit<UseQueryOptions<HealthModel, Error>, 'queryKey' | 'queryFn'>;
 
 /**
  * Gets version information from the Perses server API.

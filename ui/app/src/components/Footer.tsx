@@ -31,11 +31,7 @@ export default function Footer(): JSX.Element {
       <ul>
         <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
         <li>
-          <a
-            href="https://github.com/perses/perses"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://github.com/perses/perses" target="_blank" rel="noreferrer">
             <Github sx={{ verticalAlign: 'bottom' }} />
           </a>
         </li>

@@ -12,12 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useMemo } from 'react';
-import {
-  Autocomplete,
-  AutocompleteProps as MuiAutocompleteProps,
-  TextField,
-  TextFieldProps,
-} from '@mui/material';
+import { Autocomplete, AutocompleteProps as MuiAutocompleteProps, TextField, TextFieldProps } from '@mui/material';
 import { AnyVariableDefinition } from '@perses-ui/core';
 import { useVariableOptions } from '../../context/plugin-registry';
 import { useDashboardContext } from './DashboardContextProvider';
@@ -47,10 +42,7 @@ function VariableAutocomplete(props: VariableAutocompleteProps) {
   }
   const { value, options } = variableState;
 
-  const allValue =
-    'all_value' in definition.selection
-      ? definition.selection.all_value
-      : undefined;
+  const allValue = 'all_value' in definition.selection ? definition.selection.all_value : undefined;
 
   const displayOptions = useMemo(() => {
     let displayOptions = options;

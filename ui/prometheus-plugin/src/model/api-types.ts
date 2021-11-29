@@ -35,10 +35,7 @@ export type DurationSeconds = number;
 
 export type UnixTimestampSeconds = number;
 
-export type ValueTuple = [
-  unixTimeSeconds: UnixTimestampSeconds,
-  sampleValue: string
-];
+export type ValueTuple = [unixTimeSeconds: UnixTimestampSeconds, sampleValue: string];
 
 export type Metric = Record<string, string>;
 
@@ -69,9 +66,7 @@ export interface InstantQueryRequestParameters {
   timeout?: DurationString;
 }
 
-export type InstantQueryResponse = ApiResponse<
-  MatrixData | VectorData | ScalarData
->;
+export type InstantQueryResponse = ApiResponse<MatrixData | VectorData | ScalarData>;
 
 export interface RangeQueryRequestParameters {
   query: string;
@@ -119,6 +114,4 @@ export interface MetricMetadataRequestParameters {
   metric?: string;
 }
 
-export type MetricMetadataResponse = ApiResponse<
-  Record<string, MetricMetadata[]>
->;
+export type MetricMetadataResponse = ApiResponse<Record<string, MetricMetadata[]>>;

@@ -13,10 +13,7 @@
 
 // Base eslint configuration for typescript projects
 module.exports = {
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
+  extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
 
   plugins: ['import'],
 
@@ -46,7 +43,7 @@ module.exports = {
     ],
     'import/order': 'warn',
     // you must disable the base rule as it can report incorrect errors
-    "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["error"]
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['error'],
   },
 };

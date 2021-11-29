@@ -102,22 +102,19 @@ const nodeExporterDashboard: DashboardResource = {
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query:
-                  'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+                query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
               },
             },
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query:
-                  'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
               },
             },
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query:
-                  'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
               },
             },
           ],
