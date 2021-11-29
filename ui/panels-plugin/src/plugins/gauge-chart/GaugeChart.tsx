@@ -26,7 +26,7 @@ import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { formatValue, UnitOptions } from '../../model/units';
-import { ThresholdColorsMap, ThresholdOptions } from './thresholds';
+import { convertThresholds, ThresholdOptions } from './thresholds';
 
 echarts.use([
   EChartsGaugeChart,
@@ -80,12 +80,12 @@ function GaugeChart(props: GaugeChartProps) {
     const calculate = CalculationsMap[calculation];
     const calculatedValue = calculate(Array.from(series.values)) || 0;
 
-    const axisLineThresholdColors: Array<[number, string]> = thresholds
-      ? thresholds.steps.map((step) => [
-          step.value,
-          ThresholdColorsMap[step.color],
-        ])
-      : [[0, ThresholdColorsMap.green]];
+    const initialThresholds = thresholds || {
+      steps: [{ value: 0, color: 'Green' }],
+    };
+
+    const axisLineColors: Array<[number, string]> =
+      convertThresholds(initialThresholds);
 
     return {
       title: {
@@ -107,7 +107,7 @@ function GaugeChart(props: GaugeChartProps) {
           silent: true,
           progress: {
             show: true,
-            width: 24,
+            width: 22,
             itemStyle: {
               color: 'auto',
             },
@@ -118,7 +118,7 @@ function GaugeChart(props: GaugeChartProps) {
           axisLine: {
             lineStyle: {
               color: [[1, '#e1e5e9']],
-              width: 24,
+              width: 22,
             },
           },
           axisTick: {
@@ -177,8 +177,8 @@ function GaugeChart(props: GaugeChartProps) {
           axisLine: {
             show: true,
             lineStyle: {
-              width: 6,
-              color: axisLineThresholdColors,
+              width: 4,
+              color: axisLineColors,
             },
           },
           axisTick: {
@@ -196,8 +196,8 @@ function GaugeChart(props: GaugeChartProps) {
             width: '60%',
             lineHeight: 40,
             borderRadius: 8,
-            offsetCenter: [0, '-15%'],
-            fontSize: 26,
+            offsetCenter: [0, '-10%'],
+            fontSize: 22,
             fontWeight: 'bolder',
             color: 'inherit',
             formatter: (value: number) => {
