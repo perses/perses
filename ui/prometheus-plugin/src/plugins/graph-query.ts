@@ -26,18 +26,11 @@ import { RangeQueryRequestParameters } from '../model/api-types';
 import { parseValueTuple } from '../model/parse-sample-values';
 import { useRangeQuery } from '../model/prometheus-client';
 import { TemplateString, useReplaceTemplateString } from '../model/templating';
-import {
-  getDurationStringSeconds,
-  useDashboardPrometheusTimeRange,
-  usePanelRangeStep,
-} from '../model/time';
+import { getDurationStringSeconds, useDashboardPrometheusTimeRange, usePanelRangeStep } from '../model/time';
 
 export const PrometheusGraphQueryKind = 'PrometheusGraphQuery' as const;
 
-type PrometheusGraphQuery = GraphQueryDefinition<
-  typeof PrometheusGraphQueryKind,
-  GraphQueryOptions
->;
+type PrometheusGraphQuery = GraphQueryDefinition<typeof PrometheusGraphQueryKind, GraphQueryOptions>;
 
 interface GraphQueryOptions extends JsonObject {
   query: TemplateString;
@@ -47,9 +40,7 @@ interface GraphQueryOptions extends JsonObject {
 
 export function usePrometheusGraphQuery(
   definition: PrometheusGraphQuery
-): ReturnType<
-  UseGraphQueryHook<typeof PrometheusGraphQueryKind, GraphQueryOptions>
-> {
+): ReturnType<UseGraphQueryHook<typeof PrometheusGraphQueryKind, GraphQueryOptions>> {
   const spec = useDashboardSpec();
   const dataSource = definition.datasource ?? spec.datasource;
 
@@ -64,10 +55,8 @@ export function usePrometheusGraphQuery(
     const { start, end } = timeRange;
     const utcOffsetSec = new Date().getTimezoneOffset() * 60;
 
-    const alignedEnd =
-      Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
-    const alignedStart =
-      Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
+    const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
+    const alignedStart = Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
 
     return {
       start: alignedStart,
@@ -75,9 +64,7 @@ export function usePrometheusGraphQuery(
     };
   }, [timeRange, step]);
 
-  const { result: query, needsVariableValuesFor } = useReplaceTemplateString(
-    definition.options.query
-  );
+  const { result: query, needsVariableValuesFor } = useReplaceTemplateString(definition.options.query);
 
   const request: RangeQueryRequestParameters = {
     query,

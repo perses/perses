@@ -26,9 +26,7 @@ export interface TimeScale {
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScale(
-  queries: QueryState[]
-): TimeScale | undefined {
+export function getCommonTimeScale(queries: QueryState[]): TimeScale | undefined {
   let timeRange: AbsoluteTimeRange | undefined = undefined;
   const steps: number[] = [];
   for (const { loading, data } of queries) {
@@ -89,10 +87,7 @@ export function getXValues(timeScale: TimeScale): number[] {
  * y axis of a graph, filling in any timestamps that are missing from the time
  * series data with `null` values.
  */
-export function getYValues(
-  series: GraphSeries,
-  timeScale: TimeScale
-): Array<number | null> {
+export function getYValues(series: GraphSeries, timeScale: TimeScale): Array<number | null> {
   let timestamp = timeScale.startMs;
 
   const yValues: Array<number | null> = [];

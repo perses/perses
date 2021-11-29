@@ -33,10 +33,7 @@ function getHttpsConfig() {
     return false;
   }
   // If key/cert not specified, just use the default self-signed cert
-  if (
-    process.env.SSL_KEY_FILE === undefined ||
-    process.env.SSL_CRT_FILE === undefined
-  ) {
+  if (process.env.SSL_KEY_FILE === undefined || process.env.SSL_CRT_FILE === undefined) {
     return true;
   }
 

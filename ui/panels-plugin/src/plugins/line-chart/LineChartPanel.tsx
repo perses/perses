@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyGraphQueryDefinition,
-  JsonObject,
-  PanelProps,
-  usePanelState,
-} from '@perses-ui/core';
+import { AnyGraphQueryDefinition, JsonObject, PanelProps, usePanelState } from '@perses-ui/core';
 import { useMemo } from 'react';
 import LineChart from './LineChart';
 import GraphQueryRunner from './GraphQueryRunner';
@@ -48,12 +43,7 @@ export function LineChartPanel(props: LineChartProps) {
 
   return (
     <GraphQueryRunner queries={queries}>
-      {contentDimensions !== undefined && (
-        <Chart
-          width={contentDimensions.width}
-          height={contentDimensions.height}
-        />
-      )}
+      {contentDimensions !== undefined && <Chart width={contentDimensions.width} height={contentDimensions.height} />}
     </GraphQueryRunner>
   );
 }

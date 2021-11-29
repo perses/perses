@@ -29,9 +29,7 @@ export interface RelativeTimeRange {
 /**
  * Returns an absolute time range from a RelativeTimeRange.
  */
-export function toAbsoluteTimeRange(
-  timeRange: RelativeTimeRange
-): AbsoluteTimeRange {
+export function toAbsoluteTimeRange(timeRange: RelativeTimeRange): AbsoluteTimeRange {
   const end = timeRange.end ?? new Date();
 
   return {
@@ -49,16 +47,13 @@ type WeeksDurationString = `${number}w`;
 type YearsDurationString = `${number}y`;
 
 export type DurationString = Exclude<
-  `${YearsDurationString | ''}${WeeksDurationString | ''}${
-    | DaysDurationString
-    | ''}${HoursDurationString | ''}${MinutesDurationString | ''}${
-    | SecondsDurationString
-    | ''}${MillisecondsDurationString | ''}`,
+  `${YearsDurationString | ''}${WeeksDurationString | ''}${DaysDurationString | ''}${HoursDurationString | ''}${
+    | MinutesDurationString
+    | ''}${SecondsDurationString | ''}${MillisecondsDurationString | ''}`,
   ''
 >;
 
-const DURATION_REGEX =
-  /^(?:(\d+)y)?(?:(\d+)w)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?(?:(\d+)ms)?$/;
+const DURATION_REGEX = /^(?:(\d+)y)?(?:(\d+)w)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?(?:(\d+)ms)?$/;
 
 /**
  * Parses a DurationString into a Duration object with numeric values that can
@@ -84,9 +79,7 @@ export function parseDurationString(durationString: string): Duration {
 /**
  * Returns true if the given string is a valid DurationString.
  */
-export function isDurationString(
-  maybeDuration: string
-): maybeDuration is DurationString {
+export function isDurationString(maybeDuration: string): maybeDuration is DurationString {
   if (maybeDuration === '') return false;
   return DURATION_REGEX.test(maybeDuration);
 }

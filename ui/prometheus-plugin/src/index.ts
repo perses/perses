@@ -12,19 +12,10 @@
 // limitations under the License.
 
 import { PluginSetupFunction } from '@perses-ui/core';
-import {
-  PrometheusGraphQueryKind,
-  usePrometheusGraphQuery,
-} from './plugins/graph-query';
+import { PrometheusGraphQueryKind, usePrometheusGraphQuery } from './plugins/graph-query';
 import { IntervalKind, useIntervalValues } from './plugins/interval-variable';
-import {
-  PrometheusLabelNamesKind,
-  usePrometheusLabelNames,
-} from './plugins/label-names-variable';
-import {
-  PrometheusLabelValuesKind,
-  usePrometheusLabelValues,
-} from './plugins/label-values-variable';
+import { PrometheusLabelNamesKind, usePrometheusLabelNames } from './plugins/label-names-variable';
+import { PrometheusLabelValuesKind, usePrometheusLabelValues } from './plugins/label-values-variable';
 
 export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({

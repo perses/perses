@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyGraphQueryDefinition,
-  JsonObject,
-  PanelProps,
-  usePanelState,
-} from '@perses-ui/core';
+import { AnyGraphQueryDefinition, JsonObject, PanelProps, usePanelState } from '@perses-ui/core';
 import { UnitOptions } from '../../model/units';
 import { CalculationType } from '../../model/calculations';
 import { ThresholdOptions } from './thresholds';
@@ -24,10 +19,7 @@ import GaugeChart from './GaugeChart';
 
 export const GaugeChartKind = 'GaugeChart' as const;
 
-export type GaugeChartPanelProps = PanelProps<
-  typeof GaugeChartKind,
-  GaugeChartOptions
->;
+export type GaugeChartPanelProps = PanelProps<typeof GaugeChartKind, GaugeChartOptions>;
 
 interface GaugeChartOptions extends JsonObject {
   query: AnyGraphQueryDefinition;

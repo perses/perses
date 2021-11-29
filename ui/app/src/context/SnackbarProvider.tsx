@@ -34,10 +34,7 @@ export interface SnackbarContext extends NotistackContext {
   exceptionSnackbar: (error: unknown, options?: SnackbarOptions) => SnackbarKey;
 }
 
-type EnqueueFunction = (
-  message: SnackbarMessage,
-  options?: SnackbarOptions
-) => SnackbarKey;
+type EnqueueFunction = (message: SnackbarMessage, options?: SnackbarOptions) => SnackbarKey;
 
 type SnackbarOptions = Omit<OptionsObject, 'variant'>;
 
@@ -62,10 +59,7 @@ export function useSnackbar(): SnackbarContext {
     (error, options) => {
       // Try to use message prop, but fallback to a default message that
       // will just stringify the error provided
-      const message =
-        error instanceof Error
-          ? error.message
-          : `An unexpected error occurred: ${error}`;
+      const message = error instanceof Error ? error.message : `An unexpected error occurred: ${error}`;
 
       return errorSnackbar(message, options);
     },

@@ -11,19 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DashboardResource,
-  DurationString,
-  isDurationString,
-} from '@perses-ui/core';
+import { DashboardResource, DurationString, isDurationString } from '@perses-ui/core';
 import { convertVariables } from './convert-variables';
 import { convertPanels } from './convert-panels';
 import { convertLayouts } from './convert-layouts';
 import { GrafanaDashboardJson, GrafanaTimeRange } from './grafana-json-model';
 
-export function convertDashboardJson(
-  json: GrafanaDashboardJson
-): DashboardResource {
+export function convertDashboardJson(json: GrafanaDashboardJson): DashboardResource {
   const now = new Date();
 
   const { panels, panelKeys } = convertPanels(json.panels);

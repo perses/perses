@@ -100,11 +100,7 @@ export default function Header(): JSX.Element {
           <Typography variant="h6" sx={{ marginRight: '1rem' }}>
             Perses
           </Typography>
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }}
-          />
+          <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
         <Switch />

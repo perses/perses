@@ -11,23 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyGraphQueryDefinition,
-  AnyPanelDefinition,
-  DashboardSpec,
-} from '@perses-ui/core';
+import { AnyGraphQueryDefinition, AnyPanelDefinition, DashboardSpec } from '@perses-ui/core';
 import { camelCase } from 'lodash-es';
-import {
-  GrafanaGaugePanel,
-  GrafanaGraphPanel,
-  GrafanaPanel,
-  GrafanaRow,
-  PromQueryTarget,
-} from './grafana-json-model';
+import { GrafanaGaugePanel, GrafanaGraphPanel, GrafanaPanel, GrafanaRow, PromQueryTarget } from './grafana-json-model';
 
-export function convertPanels(
-  rowsAndPanels: Array<GrafanaRow | GrafanaPanel>
-): { panels: DashboardSpec['panels']; panelKeys: Map<number, string> } {
+export function convertPanels(rowsAndPanels: Array<GrafanaRow | GrafanaPanel>): {
+  panels: DashboardSpec['panels'];
+  panelKeys: Map<number, string>;
+} {
   const panels: DashboardSpec['panels'] = {};
 
   // Generate unique keys for Grafana panels, trying to make them human-readable

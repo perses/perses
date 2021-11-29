@@ -22,9 +22,7 @@ export interface PanelContextType {
   };
 }
 
-export const PanelContext = createContext<PanelContextType | undefined>(
-  undefined
-);
+export const PanelContext = createContext<PanelContextType | undefined>(undefined);
 
 export interface PanelContextProviderProps {
   contentElement: HTMLDivElement | null;
@@ -36,16 +34,11 @@ export function PanelContextProvider(props: PanelContextProviderProps) {
   const { width, height } = useResizeObserver({ ref: contentElement });
 
   const context: PanelContextType = useMemo(() => {
-    const contentDimensions =
-      width !== undefined && height !== undefined
-        ? { width, height }
-        : undefined;
+    const contentDimensions = width !== undefined && height !== undefined ? { width, height } : undefined;
     return { contentDimensions };
   }, [width, height]);
 
-  return (
-    <PanelContext.Provider value={context}>{children}</PanelContext.Provider>
-  );
+  return <PanelContext.Provider value={context}>{children}</PanelContext.Provider>;
 }
 
 export function usePanelContext() {

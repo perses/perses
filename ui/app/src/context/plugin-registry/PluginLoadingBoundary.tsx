@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Fragment,
-  createContext,
-  useContext,
-  useMemo,
-  useCallback,
-} from 'react';
+import { Fragment, createContext, useContext, useMemo, useCallback } from 'react';
 import { useImmer } from 'use-immer';
 import { useErrorHandler } from 'react-error-boundary';
 import { PluginModule, PluginType, PluginResource } from '@perses-ui/core';
@@ -28,9 +22,7 @@ export interface PluginLoadingBoundaryContextType {
   registerPluginDependency: (pluginType: PluginType, kind: string) => void;
 }
 
-export const PluginLoadingBoundaryContext = createContext<
-  PluginLoadingBoundaryContextType | undefined
->(undefined);
+export const PluginLoadingBoundaryContext = createContext<PluginLoadingBoundaryContextType | undefined>(undefined);
 
 export interface PluginLoadingBoundaryProps {
   fallback: React.ReactNode;
@@ -49,9 +41,7 @@ export function PluginLoadingBoundary(props: PluginLoadingBoundaryProps) {
 
   // Keep a Map of PluginResource that our children have registered as
   // dependencies -> whether it's currently loading
-  const [boundaryState, setBoundaryState] = useImmer<
-    Map<PluginResource, boolean>
-  >(() => new Map());
+  const [boundaryState, setBoundaryState] = useImmer<Map<PluginResource, boolean>>(() => new Map());
 
   const throwError = useErrorHandler();
 
@@ -62,9 +52,7 @@ export function PluginLoadingBoundary(props: PluginLoadingBoundaryProps) {
       // Is this a plugin we know about?
       const resource = loadablePlugins[pluginType].get(kind);
       if (resource === undefined) {
-        return throwError(
-          new Error(`No ${pluginType} plugin is available for kind ${kind}`)
-        );
+        return throwError(new Error(`No ${pluginType} plugin is available for kind ${kind}`));
       }
 
       // Is it already loaded?
@@ -91,10 +79,7 @@ export function PluginLoadingBoundary(props: PluginLoadingBoundaryProps) {
     [register, setBoundaryState]
   );
 
-  const context = useMemo(
-    () => ({ registerPluginDependency }),
-    [registerPluginDependency]
-  );
+  const context = useMemo(() => ({ registerPluginDependency }), [registerPluginDependency]);
 
   // Use the dependency Map to build up a list of plugins that need to load,
   // whether or not we've finished loading all dependencies for our children,
@@ -143,9 +128,7 @@ export function PluginLoadingBoundary(props: PluginLoadingBoundaryProps) {
 export function usePluginLoadingBoundary() {
   const ctx = useContext(PluginLoadingBoundaryContext);
   if (ctx === undefined) {
-    throw new Error(
-      `PluginLoadingBoundary context not found. Did you forget a Provider?`
-    );
+    throw new Error(`PluginLoadingBoundary context not found. Did you forget a Provider?`);
   }
   return ctx;
 }
