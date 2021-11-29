@@ -23,6 +23,7 @@ type Kind string
 const (
 	KindDashboard        Kind = "Dashboard"
 	KindDatasource       Kind = "Datasource"
+	KindFolder           Kind = "Folder"
 	KindGlobalDatasource Kind = "GlobalDatasource"
 	KindProject          Kind = "Project"
 	KindUser             Kind = "User"
@@ -31,6 +32,7 @@ const (
 var KindMap = map[Kind]bool{
 	KindDashboard:        true,
 	KindDatasource:       true,
+	KindFolder:           true,
 	KindGlobalDatasource: true,
 	KindProject:          true,
 	KindUser:             true,

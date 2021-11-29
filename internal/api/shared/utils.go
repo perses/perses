@@ -26,6 +26,7 @@ const (
 	APIV1Prefix          = "/api/v1"
 	PathDashboard        = "dashboards"
 	PathDatasource       = "datasources"
+	PathFolder           = "folders"
 	PathGlobalDatasource = "globaldatasources"
 	PathProject          = "projects"
 	PathUser             = "users"

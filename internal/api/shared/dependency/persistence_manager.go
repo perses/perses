@@ -16,12 +16,14 @@ package dependency
 import (
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
+	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
@@ -33,6 +35,7 @@ import (
 type PersistenceManager interface {
 	GetDashboard() dashboard.DAO
 	GetDatasource() datasource.DAO
+	GetFolder() folder.DAO
 	GetGlobalDatasource() globaldatasource.DAO
 	GetHealth() health.DAO
 	GetPersesDAO() database.DAO
@@ -44,6 +47,7 @@ type persistence struct {
 	PersistenceManager
 	dashboard        dashboard.DAO
 	datasource       datasource.DAO
+	folder           folder.DAO
 	globalDatasource globaldatasource.DAO
 	health           health.DAO
 	perses           database.DAO
@@ -58,6 +62,7 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	}
 	dashboardDAO := dashboardImpl.NewDAO(persesDAO)
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
+	folderDAO := folderImpl.NewDAO(persesDAO)
 	globalDatatasourceDAO := globalDatasourceImpl.NewDAO(persesDAO)
 	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
@@ -65,6 +70,7 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	return &persistence{
 		dashboard:        dashboardDAO,
 		datasource:       datasourceDAO,
+		folder:           folderDAO,
 		globalDatasource: globalDatatasourceDAO,
 		health:           healthDAO,
 		perses:           persesDAO,
@@ -79,6 +85,10 @@ func (p *persistence) GetDashboard() dashboard.DAO {
 
 func (p *persistence) GetDatasource() datasource.DAO {
 	return p.datasource
+}
+
+func (p *persistence) GetFolder() folder.DAO {
+	return p.folder
 }
 
 func (p *persistence) GetGlobalDatasource() globaldatasource.DAO {
