@@ -21,6 +21,8 @@ export const ThresholdColors = {
 
 export type ThresholdColorsType = keyof typeof ThresholdColors | string;
 
+export type GaugeColorStop = [number, string];
+
 export type ThresholdOptions = {
   steps: StepOptions[];
   default_color?: string;
@@ -37,7 +39,7 @@ export function convertThresholds(
   }
 ) {
   const defaultThresholdColor = thresholds.default_color || ThresholdColors.GREEN;
-  const defaultThresholdArr: [number, string] = [0, defaultThresholdColor];
+  const defaultThresholdArr: GaugeColorStop = [0, defaultThresholdColor];
   const defaultWarningColor = ThresholdColors.ORANGE;
   const defaultAlertColor = ThresholdColors.RED;
 
@@ -60,12 +62,12 @@ export function convertThresholds(
     const defaultThresholdStep = defaultThresholds.steps[index] || defaultThresholds.steps[0];
     const mergedStep: StepOptions = merge(defaultThresholdStep, step);
     mergedStep.value = mergedStep.value / 100; // TODO (sjcobb): support gauge formats other than percents
-    return Object.values(mergedStep) as [number, string];
+    return Object.values(mergedStep) as GaugeColorStop;
   });
 
   const lastItem = stepsArr[stepsArr.length - 1] || [1, defaultAlertColor];
   const lastColor = lastItem[1] || defaultAlertColor;
-  const shiftedArr: Array<[number, string]> = [...stepsArr, [1, lastColor]];
+  const shiftedArr: GaugeColorStop[] = [...stepsArr, [1, lastColor]];
 
   // shifts values since ECharts expects color with max instead of min
   return shiftedArr.map((item, index, arr) => {
@@ -73,10 +75,10 @@ export function convertThresholds(
     if (index >= 1) {
       const prevItem = arr[index - 1] || defaultThresholdArr;
       const prevItemColor = prevItem[1];
-      const offsetItem: [number, string] = [item[0], prevItemColor];
+      const offsetItem: GaugeColorStop = [item[0], prevItemColor];
       return offsetItem;
     } else {
-      const firstItem: [number, string] = [item[0], defaultThresholdColor];
+      const firstItem: GaugeColorStop = [item[0], defaultThresholdColor];
       return firstItem;
     }
   });
