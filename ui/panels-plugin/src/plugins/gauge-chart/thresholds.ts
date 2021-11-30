@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { JsonObject } from '@perses-ui/core';
 import { merge } from 'lodash-es';
 
 export const ThresholdColors = {
@@ -23,15 +24,15 @@ export type ThresholdColorsType = keyof typeof ThresholdColors | string;
 
 export type GaugeColorStop = [number, string];
 
-export type ThresholdOptions = {
-  steps: StepOptions[];
-  default_color?: string;
-};
-
-export type StepOptions = {
+export interface StepOptions extends JsonObject {
   value: number;
   color: ThresholdColorsType;
-};
+}
+
+export interface ThresholdOptions extends JsonObject {
+  steps: StepOptions[];
+  default_color?: string;
+}
 
 export function convertThresholds(
   thresholds: ThresholdOptions = {
