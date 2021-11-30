@@ -21,7 +21,7 @@ import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { formatValue, UnitOptions } from '../../model/units';
-import { convertThresholds, GaugeColorStop, ThresholdOptions } from './thresholds';
+import { convertThresholds, ThresholdOptions } from './thresholds';
 
 echarts.use([EChartsGaugeChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -68,7 +68,7 @@ function GaugeChart(props: GaugeChartProps) {
     const calculate = CalculationsMap[calculation];
     const calculatedValue = calculate(Array.from(series.values)) || 0;
 
-    const axisLineColors: GaugeColorStop[] = convertThresholds(thresholds);
+    const axisLineColors = convertThresholds(thresholds);
 
     return {
       title: {
