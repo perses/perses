@@ -34,18 +34,12 @@ export interface ThresholdOptions extends JsonObject {
   default_color?: string;
 }
 
-export function convertThresholds(
-  thresholds: ThresholdOptions = {
-    steps: [{ value: 0, color: ThresholdColors.GREEN }],
-  }
-) {
-  const defaultThresholdColor = thresholds.default_color || ThresholdColors.GREEN;
-  const defaultThresholdArr: GaugeColorStop = [0, defaultThresholdColor];
-  const defaultWarningColor = ThresholdColors.ORANGE;
-  const defaultAlertColor = ThresholdColors.RED;
+const defaultWarningColor = ThresholdColors.ORANGE;
+const defaultAlertColor = ThresholdColors.RED;
 
+// converts to 2d array structure needed for series-gauge.axisLine.lineStyle.color
+function transformStepsToArray(thresholds: ThresholdOptions): GaugeColorStop[] {
   const defaultThresholds: ThresholdOptions = {
-    default_color: defaultThresholdColor,
     steps: [
       {
         value: 85,
@@ -57,30 +51,34 @@ export function convertThresholds(
       },
     ],
   };
-
-  // converts to 2d array structure needed for series-gauge.axisLine.lineStyle.color
-  const stepsArr = thresholds.steps.map((step: StepOptions, index) => {
+  return thresholds.steps.map((step: StepOptions, index) => {
     const defaultThresholdStep = defaultThresholds.steps[index] || defaultThresholds.steps[0];
     const mergedStep: StepOptions = merge(defaultThresholdStep, step);
     mergedStep.value = mergedStep.value / 100; // TODO (sjcobb): support gauge formats other than percents
     return Object.values(mergedStep) as GaugeColorStop;
   });
+}
 
+export function convertThresholds(
+  thresholds: ThresholdOptions = {
+    steps: [{ value: 0, color: ThresholdColors.GREEN }],
+  }
+): GaugeColorStop[] {
+  const defaultThresholdColor = thresholds.default_color || ThresholdColors.GREEN;
+  const defaultThresholdArr: GaugeColorStop = [0, defaultThresholdColor];
+  const stepsArr = transformStepsToArray(thresholds);
+
+  // shifts values since ECharts expects color with max instead of min
   const lastItem = stepsArr[stepsArr.length - 1] || [1, defaultAlertColor];
   const lastColor = lastItem[1] || defaultAlertColor;
   const shiftedArr: GaugeColorStop[] = [...stepsArr, [1, lastColor]];
-
-  // shifts values since ECharts expects color with max instead of min
   return shiftedArr.map((item, index, arr) => {
     if (index === arr.length - 1) return item;
     if (index >= 1) {
       const prevItem = arr[index - 1] || defaultThresholdArr;
-      const prevItemColor = prevItem[1];
-      const offsetItem: GaugeColorStop = [item[0], prevItemColor];
-      return offsetItem;
+      return [item[0], prevItem[1]];
     } else {
-      const firstItem: GaugeColorStop = [item[0], defaultThresholdColor];
-      return firstItem;
+      return [item[0], defaultThresholdColor];
     }
   });
 }
