@@ -27,35 +27,39 @@ export type ThresholdColorsType = keyof typeof ThresholdColors | string;
 
 export type GaugeColorStop = [number, string];
 
+export type EChartsAxisLineColors = GaugeColorStop[];
+
 export interface StepOptions extends JsonObject {
   value: number;
   color: ThresholdColorsType;
 }
 
 export interface ThresholdOptions extends JsonObject {
-  steps: StepOptions[];
+  steps?: StepOptions[];
   default_color?: string;
 }
 
-const stepDefaultColor = ThresholdColors.GREEN;
+const defaultThresholdColor = ThresholdColors.GREEN;
+export const defaultThresholdInput: ThresholdOptions = { steps: [{ value: 0, color: ThresholdColors.GREEN }] };
+const defaultThresholdSteps: EChartsAxisLineColors = [[0, defaultThresholdColor]];
 
-export function convertThresholds(
-  thresholds: ThresholdOptions = {
-    steps: [{ value: 0, color: ThresholdColors.GREEN }],
+export function convertThresholds(thresholds: ThresholdOptions): EChartsAxisLineColors {
+  if (thresholds.steps) {
+    const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => step.value / 100);
+    valuesArr.push(1);
+
+    const colorsArr = thresholds.steps.map((step: StepOptions, index) => {
+      return step.color ?? ThresholdColorsArr[index];
+    });
+    colorsArr.unshift(defaultThresholdColor);
+
+    const zippedArr = zip(valuesArr, colorsArr);
+    return zippedArr.map((elem) => {
+      const convertedValues = elem[0] ?? 1;
+      const convertedColors = elem[1] ?? defaultThresholdColor;
+      return [convertedValues, convertedColors];
+    });
+  } else {
+    return defaultThresholdSteps;
   }
-): GaugeColorStop[] {
-  const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => step.value / 100);
-  valuesArr.push(1);
-
-  const colorsArr = thresholds.steps.map((step: StepOptions, index) => {
-    return step.color || ThresholdColorsArr[index];
-  });
-  colorsArr.unshift(stepDefaultColor);
-
-  const zippedArr = zip(valuesArr, colorsArr);
-  return zippedArr.map((elem) => {
-    const convertedValues = elem[0] ?? 1;
-    const convertedColors = elem[1] ?? stepDefaultColor;
-    return [convertedValues, convertedColors];
-  });
 }

@@ -21,7 +21,7 @@ import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { formatValue, UnitOptions } from '../../model/units';
-import { convertThresholds, ThresholdOptions } from './thresholds';
+import { convertThresholds, defaultThresholdInput, ThresholdOptions } from './thresholds';
 
 echarts.use([EChartsGaugeChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -31,7 +31,7 @@ export interface GaugeChartProps {
   height: number;
   calculation: CalculationType;
   unit: UnitOptions;
-  thresholds: ThresholdOptions;
+  thresholds?: ThresholdOptions;
 }
 
 const noDataOption = {
@@ -55,7 +55,8 @@ const noDataOption = {
 };
 
 function GaugeChart(props: GaugeChartProps) {
-  const { query, width, height, calculation, unit, thresholds } = props;
+  const { query, width, height, calculation, unit } = props;
+  const thresholds = props.thresholds ?? defaultThresholdInput;
   const { data } = useGraphQuery(query);
 
   const option: EChartsOption = useMemo(() => {
@@ -66,7 +67,7 @@ function GaugeChart(props: GaugeChartProps) {
     if (series === undefined) return noDataOption;
 
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = calculate(Array.from(series.values)) || 0;
+    const calculatedValue = calculate(Array.from(series.values)) ?? 0;
 
     const axisLineColors = convertThresholds(thresholds);
 
