@@ -11,20 +11,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const ThresholdColorsMap = {
-  green: 'rgb(115, 191, 105)',
-  orange: 'rgba(237, 129, 40, 0.89)',
-  red: 'rgba(245, 54, 54, 0.9)',
+import { JsonObject } from '@perses-ui/core';
+import { zip } from 'lodash-es';
+
+export const ThresholdColors = {
+  GREEN: 'rgba(115, 191, 105, 1)',
+  ORANGE: 'rgba(237, 129, 40, 0.9)',
+  RED: 'rgba(245, 54, 54, 0.9)',
 };
 
-export type ThresholdColorsType = keyof typeof ThresholdColorsMap;
+export const ThresholdColorsPalette = [ThresholdColors.ORANGE, ThresholdColors.RED];
 
-export type ThresholdOptions = {
-  steps: StepOptions[];
-};
+export type ThresholdColorsType = keyof typeof ThresholdColors | string;
 
-type StepOptions = {
-  // color: string;
-  color: ThresholdColorsType;
+export type GaugeColorStop = [number, string];
+
+export type EChartsAxisLineColors = GaugeColorStop[];
+
+export interface StepOptions extends JsonObject {
   value: number;
-};
+  color: ThresholdColorsType;
+}
+
+export interface ThresholdOptions extends JsonObject {
+  default_color?: string;
+  steps?: StepOptions[];
+}
+
+export const defaultThresholdInput: ThresholdOptions = { steps: [{ value: 0, color: ThresholdColors.GREEN }] };
+
+export function convertThresholds(thresholds: ThresholdOptions): EChartsAxisLineColors {
+  const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.GREEN;
+  const defaultThresholdSteps: EChartsAxisLineColors = [[0, defaultThresholdColor]];
+
+  if (thresholds.steps) {
+    const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => step.value / 100);
+    valuesArr.push(1);
+
+    const colorsArr = thresholds.steps.map((step: StepOptions, index) => step.color ?? ThresholdColorsPalette[index]);
+    colorsArr.unshift(defaultThresholdColor);
+
+    const zippedArr = zip(valuesArr, colorsArr);
+    return zippedArr.map((elem) => {
+      const convertedValues = elem[0] ?? 1;
+      const convertedColors = elem[1] ?? defaultThresholdColor;
+      return [convertedValues, convertedColors];
+    });
+  } else {
+    return defaultThresholdSteps;
+  }
+}

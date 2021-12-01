@@ -21,7 +21,7 @@ import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { formatValue, UnitOptions } from '../../model/units';
-import { ThresholdColorsMap, ThresholdOptions } from './thresholds';
+import { convertThresholds, defaultThresholdInput, ThresholdOptions } from './thresholds';
 
 echarts.use([EChartsGaugeChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -31,7 +31,7 @@ export interface GaugeChartProps {
   height: number;
   calculation: CalculationType;
   unit: UnitOptions;
-  thresholds: ThresholdOptions;
+  thresholds?: ThresholdOptions;
 }
 
 const noDataOption = {
@@ -55,7 +55,8 @@ const noDataOption = {
 };
 
 function GaugeChart(props: GaugeChartProps) {
-  const { query, width, height, calculation, unit, thresholds } = props;
+  const { query, width, height, calculation, unit } = props;
+  const thresholds = props.thresholds ?? defaultThresholdInput;
   const { data } = useGraphQuery(query);
 
   const option: EChartsOption = useMemo(() => {
@@ -66,11 +67,9 @@ function GaugeChart(props: GaugeChartProps) {
     if (series === undefined) return noDataOption;
 
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = calculate(Array.from(series.values)) || 0;
+    const calculatedValue = calculate(Array.from(series.values)) ?? 0;
 
-    const axisLineThresholdColors: Array<[number, string]> = thresholds
-      ? thresholds.steps.map((step) => [step.value, ThresholdColorsMap[step.color]])
-      : [[0, ThresholdColorsMap.green]];
+    const axisLineColors = convertThresholds(thresholds);
 
     return {
       title: {
@@ -92,7 +91,7 @@ function GaugeChart(props: GaugeChartProps) {
           silent: true,
           progress: {
             show: true,
-            width: 24,
+            width: 22,
             itemStyle: {
               color: 'auto',
             },
@@ -102,8 +101,8 @@ function GaugeChart(props: GaugeChartProps) {
           },
           axisLine: {
             lineStyle: {
-              color: [[1, '#e1e5e9']],
-              width: 24,
+              color: [[1, '#e1e5e9']], // TODO (sjcobb): use future chart theme colors
+              width: 22,
             },
           },
           axisTick: {
@@ -148,7 +147,7 @@ function GaugeChart(props: GaugeChartProps) {
         {
           type: 'gauge',
           center: ['50%', '65%'],
-          radius: '112%',
+          radius: '114%',
           startAngle: 200,
           endAngle: -20,
           min: 0,
@@ -162,8 +161,8 @@ function GaugeChart(props: GaugeChartProps) {
           axisLine: {
             show: true,
             lineStyle: {
-              width: 6,
-              color: axisLineThresholdColors,
+              width: 5,
+              color: axisLineColors,
             },
           },
           axisTick: {
@@ -179,10 +178,9 @@ function GaugeChart(props: GaugeChartProps) {
             show: true,
             valueAnimation: false,
             width: '60%',
-            lineHeight: 40,
             borderRadius: 8,
-            offsetCenter: [0, '-15%'],
-            fontSize: 26,
+            offsetCenter: [0, '-9%'],
+            fontSize: 20,
             fontWeight: 'bolder',
             color: 'inherit',
             formatter: (value: number) => {

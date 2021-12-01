@@ -85,18 +85,15 @@ const nodeExporterDashboard: DashboardResource = {
           calculation: 'LastNumber',
           unit: { kind: 'Percent' },
           thresholds: {
+            // default_color: '#000', // optional
             steps: [
               {
-                color: 'green',
-                value: 0.85,
+                value: 85,
+                // color: '#800080', // optional, overrides defaultWarningColor
               },
               {
-                color: 'orange',
-                value: 0.95,
-              },
-              {
-                color: 'red',
-                value: 1,
+                value: 95,
+                // color: '#0000FF', // optional, overrides defaultAlertColor
               },
             ],
           },
@@ -118,16 +115,10 @@ const nodeExporterDashboard: DashboardResource = {
           thresholds: {
             steps: [
               {
-                color: 'green',
-                value: 0.85,
+                value: 85,
               },
               {
-                color: 'orange',
-                value: 0.95,
-              },
-              {
-                color: 'red',
-                value: 1,
+                value: 95,
               },
             ],
           },
@@ -149,16 +140,10 @@ const nodeExporterDashboard: DashboardResource = {
           thresholds: {
             steps: [
               {
-                color: 'green',
-                value: 0.85,
+                value: 85,
               },
               {
-                color: 'orange',
-                value: 0.95,
-              },
-              {
-                color: 'red',
-                value: 1,
+                value: 95,
               },
             ],
           },
@@ -180,16 +165,10 @@ const nodeExporterDashboard: DashboardResource = {
           thresholds: {
             steps: [
               {
-                color: 'green',
-                value: 0.8,
+                value: 80,
               },
               {
-                color: 'orange',
-                value: 0.9,
-              },
-              {
-                color: 'red',
-                value: 1,
+                value: 90,
               },
             ],
           },
@@ -211,16 +190,10 @@ const nodeExporterDashboard: DashboardResource = {
           thresholds: {
             steps: [
               {
-                color: 'green',
-                value: 0.1,
+                value: 10,
               },
               {
-                color: 'orange',
-                value: 0.25,
-              },
-              {
-                color: 'red',
-                value: 1,
+                value: 25,
               },
             ],
           },
@@ -242,16 +215,10 @@ const nodeExporterDashboard: DashboardResource = {
           thresholds: {
             steps: [
               {
-                color: 'green',
-                value: 0.8,
+                value: 80,
               },
               {
-                color: 'orange',
-                value: 0.9,
-              },
-              {
-                color: 'red',
-                value: 1,
+                value: 90,
               },
             ],
           },

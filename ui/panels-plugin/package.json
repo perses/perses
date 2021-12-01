@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rimraf dist/",
     "build": "tsc",
-    "test": "echo 'no test to run' && exit 0",
+    "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
@@ -20,6 +20,20 @@
     "mathjs": "^10.0.0",
     "react": "^17.0.2",
     "uplot": "^1.6.16"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js|jsx)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "modulePathIgnorePatterns": ["<rootDir>/dist/"],
+    "moduleNameMapper": {
+      "^lodash-es$": "lodash"
+    }
   },
   "perses": {
     "kind": "Plugin",
