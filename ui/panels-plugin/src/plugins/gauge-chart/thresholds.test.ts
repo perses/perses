@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { convertThresholds } from './thresholds';
-console.log(convertThresholds);
 
 describe('convertThresholds', () => {
   const thresholdInput = {
@@ -30,8 +29,7 @@ describe('convertThresholds', () => {
   };
 
   const thresholdOutput = [
-    // [0.85, '#000'],
-    [0.85, 'rgba(115, 191, 105, 1)'],
+    [0.85, '#000'],
     [0.95, '#FFA500'],
     [1, '#ff0000'],
   ];

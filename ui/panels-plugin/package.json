@@ -30,6 +30,7 @@
       "js",
       "jsx"
     ],
+    "modulePathIgnorePatterns": ["<rootDir>/dist/"],
     "moduleNameMapper": {
       "^lodash-es$": "lodash"
     }

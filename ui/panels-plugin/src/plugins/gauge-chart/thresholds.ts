@@ -39,11 +39,12 @@ export interface ThresholdOptions extends JsonObject {
   default_color?: string;
 }
 
-const defaultThresholdColor = ThresholdColors.GREEN;
 export const defaultThresholdInput: ThresholdOptions = { steps: [{ value: 0, color: ThresholdColors.GREEN }] };
-const defaultThresholdSteps: EChartsAxisLineColors = [[0, defaultThresholdColor]];
 
 export function convertThresholds(thresholds: ThresholdOptions): EChartsAxisLineColors {
+  const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.GREEN;
+  const defaultThresholdSteps: EChartsAxisLineColors = [[0, defaultThresholdColor]];
+
   if (thresholds.steps) {
     const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => step.value / 100);
     valuesArr.push(1);
