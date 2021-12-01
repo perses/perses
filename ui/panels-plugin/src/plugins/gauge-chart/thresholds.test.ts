@@ -34,7 +34,7 @@ describe('convertThresholds', () => {
     [1, '#ff0000'],
   ];
 
-  test('check gauge threshold to echarts option conversion', () => {
+  it('should convert gauge thresholds to valid echarts option colors', () => {
     expect(convertThresholds(thresholdInput)).toEqual(thresholdOutput);
   });
 });
