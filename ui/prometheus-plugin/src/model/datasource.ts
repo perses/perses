@@ -21,9 +21,8 @@ import {
 
 export const PrometheusDataSourceKind = 'PrometheusDataSource' as const;
 
-type PrometheusDataSource = DataSourceDefinition<Kind, PrometheusDataSourceOptions>;
+type PrometheusDataSource = DataSourceDefinition<PrometheusDataSourceOptions>;
 
-type Kind = typeof PrometheusDataSourceKind;
 export interface PrometheusDataSourceOptions extends JsonObject {
   base_url: string;
 }

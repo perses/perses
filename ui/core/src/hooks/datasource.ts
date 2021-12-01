@@ -20,10 +20,10 @@ export function useDataSources(selector: ResourceSelector): DataSourceResource[]
   return usePluginRuntime('useDataSources')(selector);
 }
 
-export function useDataSourceConfig<Kind extends string, Options extends JsonObject>(
+export function useDataSourceConfig<Options extends JsonObject>(
   selector: ResourceSelector,
-  validate: (value: AnyDataSourceDefinition) => value is DataSourceDefinition<Kind, Options>
-): DataSourceDefinition<Kind, Options> {
+  validate: (value: AnyDataSourceDefinition) => value is DataSourceDefinition<Options>
+): DataSourceDefinition<Options> {
   const dataSources = useDataSources(selector);
   if (dataSources.length > 1) {
     console.warn(`Got more than one DataSource for selector ${selector}`);

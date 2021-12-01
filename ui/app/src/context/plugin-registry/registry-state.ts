@@ -83,7 +83,7 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
 
   // Create the register callback to pass to the module's setup function
   const registerPlugin: RegisterPlugin = useCallback(
-    <Kind extends string, Options extends JsonObject>(config: PluginRegistrationConfig<Kind, Options>) => {
+    <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => {
       switch (config.pluginType) {
         case 'Variable':
           setPlugins((draft) => {

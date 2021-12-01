@@ -19,7 +19,7 @@ import GaugeChart from './GaugeChart';
 
 export const GaugeChartKind = 'GaugeChart' as const;
 
-export type GaugeChartPanelProps = PanelProps<typeof GaugeChartKind, GaugeChartOptions>;
+export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
 interface GaugeChartOptions extends JsonObject {
   query: AnyGraphQueryDefinition;

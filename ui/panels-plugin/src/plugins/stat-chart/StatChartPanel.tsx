@@ -18,9 +18,7 @@ import { formatValue, UnitOptions } from '../../model/units';
 
 export const StatChartKind = 'StatChart' as const;
 
-type StatChartKind = typeof StatChartKind;
-
-export type StatChartPanelProps = PanelProps<StatChartKind, StatChartOptions>;
+export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 interface StatChartOptions extends JsonObject {
   query: AnyGraphQueryDefinition;

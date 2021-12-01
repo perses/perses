@@ -19,7 +19,7 @@ import UPlotChart from './uplot/UPlotChart';
 
 export const LineChartKind = 'LineChart' as const;
 
-export type LineChartProps = PanelProps<typeof LineChartKind, LineChartOptions>;
+export type LineChartProps = PanelProps<LineChartOptions>;
 
 interface LineChartOptions extends JsonObject {
   queries: AnyGraphQueryDefinition[];

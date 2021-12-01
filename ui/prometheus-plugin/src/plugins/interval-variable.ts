@@ -15,9 +15,7 @@ import { JsonObject, DurationString, UseVariableOptionsHook, VariableDefinition 
 
 export const IntervalKind = 'Inverval' as const;
 
-type IntervalVariable = VariableDefinition<IntervalKind, IntervalOptions>;
-
-type IntervalKind = typeof IntervalKind;
+type IntervalVariable = VariableDefinition<IntervalOptions>;
 
 interface IntervalOptions extends JsonObject {
   values: DurationString[];
@@ -31,9 +29,7 @@ interface IntervalOptions extends JsonObject {
  * Variable plugin for getting a list of variable options from a predefined
  * list of duration values.
  */
-export function useIntervalValues(
-  definition: IntervalVariable
-): ReturnType<UseVariableOptionsHook<IntervalKind, IntervalOptions>> {
+export function useIntervalValues(definition: IntervalVariable): ReturnType<UseVariableOptionsHook<IntervalOptions>> {
   // TODO: What about auto?
   const {
     options: { values },

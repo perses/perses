@@ -45,75 +45,71 @@ export type PluginSetupFunction = (registerPlugin: RegisterPlugin) => void;
 /**
  * Callback function that registers a plugin with Perses.
  */
-export type RegisterPlugin = <Kind extends string, Options extends JsonObject>(
-  config: PluginRegistrationConfig<Kind, Options>
-) => void;
+export type RegisterPlugin = <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => void;
 
 // Map of plugin type -> config and implementation type
-type SupportedPlugins<Kind extends string, Options extends JsonObject> = {
+type SupportedPlugins<Options extends JsonObject> = {
   Variable: {
-    Def: VariableDefinition<Kind, Options>;
-    Impl: VariablePlugin<Kind, Options>;
+    Def: VariableDefinition<Options>;
+    Impl: VariablePlugin<Options>;
   };
   Panel: {
-    Def: PanelDefinition<Kind, Options>;
-    Impl: PanelPlugin<Kind, Options>;
+    Def: PanelDefinition<Options>;
+    Impl: PanelPlugin<Options>;
   };
   GraphQuery: {
-    Def: GraphQueryDefinition<Kind, Options>;
-    Impl: GraphQueryPlugin<Kind, Options>;
+    Def: GraphQueryDefinition<Options>;
+    Impl: GraphQueryPlugin<Options>;
   };
 };
 
 /**
  * All supported plugin types.
  */
-export type PluginType = keyof SupportedPlugins<string, JsonObject>;
+export type PluginType = keyof SupportedPlugins<JsonObject>;
 
 /**
  * The definition handled for a given plugin type.
  */
 export type PluginDefinition<
   Type extends PluginType,
-  Kind extends string,
   Options extends JsonObject
-> = SupportedPlugins<Kind, Options>[Type]['Def'];
+> = SupportedPlugins<Options>[Type]['Def'];
 
 /**
  * The implementation for a given plugin type.
  */
 export type PluginImplementation<
   Type extends PluginType,
-  Kind extends string,
   Options extends JsonObject
-> = SupportedPlugins<Kind, Options>[Type]['Impl'];
+> = SupportedPlugins<Options>[Type]['Impl'];
 
 /**
  * Configuration (including the plugin implementation) that's expected when
  * registering a plugin with Perses.
  */
-export type PluginRegistrationConfig<Kind extends string, Options extends JsonObject> = {
-  [Type in keyof SupportedPlugins<Kind, Options>]: PluginConfig<Type, Kind, Options>;
+export type PluginRegistrationConfig<Options extends JsonObject> = {
+  [Type in keyof SupportedPlugins<Options>]: PluginConfig<Type, Options>;
 }[PluginType];
 
 /**
  * Configuration expected for a particular plugin type.
  */
-export type PluginConfig<Type extends PluginType, Kind extends string, Options extends JsonObject> = {
+export type PluginConfig<Type extends PluginType, Options extends JsonObject> = {
   pluginType: Type;
-  kind: Kind;
+  kind: string;
   validate?: (config: AnyPluginDefinition<Type>) => string[];
-  plugin: PluginImplementation<Type, Kind, Options>;
+  plugin: PluginImplementation<Type, Options>;
 };
 
 /**
  * A PluginDefinition at runtime where we know the plugin type, but not the
  * specific Kind/Options that it handles.
  */
-export type AnyPluginDefinition<Type extends PluginType> = PluginDefinition<Type, string, JsonObject>;
+export type AnyPluginDefinition<Type extends PluginType> = PluginDefinition<Type, JsonObject>;
 
 /**
  * A PluginImplementation at runtime where we know the plugin type, but not the
  * specific Kind/Options that it handles.
  */
-export type AnyPluginImplementation<Type extends PluginType> = PluginImplementation<Type, string, JsonObject>;
+export type AnyPluginImplementation<Type extends PluginType> = PluginImplementation<Type, JsonObject>;

@@ -16,18 +16,15 @@ import { Definition, JsonObject } from './definitions';
 import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 import { ResourceSelector } from './resource';
 
-export interface GraphQueryDefinition<Kind extends string, Options extends JsonObject>
-  extends Definition<Kind, Options> {
+export interface GraphQueryDefinition<Options extends JsonObject> extends Definition<Options> {
   datasource?: ResourceSelector;
 }
 
-export interface GraphQueryPlugin<Kind extends string, Options extends JsonObject> {
-  useGraphQuery: UseGraphQueryHook<Kind, Options>;
+export interface GraphQueryPlugin<Options extends JsonObject> {
+  useGraphQuery: UseGraphQueryHook<Options>;
 }
 
-export type UseGraphQueryHook<Kind extends string, Options extends JsonObject> = (
-  definition: GraphQueryDefinition<Kind, Options>
-) => {
+export type UseGraphQueryHook<Options extends JsonObject> = (definition: GraphQueryDefinition<Options>) => {
   data?: GraphData;
   loading: boolean;
   error?: Error;
