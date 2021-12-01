@@ -21,6 +21,7 @@ import {
   PluginType,
   AnyPluginImplementation,
   JsonObject,
+  ALL_PLUGIN_TYPES,
 } from '@perses-ui/core';
 import { BUNDLED_PLUGINS } from './bundled-plugins';
 import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from './create-plugin';
@@ -43,11 +44,10 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
   // Go through all installed plugins and bundled plugins and build an index of
   // those resources by type and kind
   const loadablePlugins = useMemo(() => {
-    const loadableProps: PluginResourcesByTypeAndKind = {
-      Variable: new Map(),
-      Panel: new Map(),
-      GraphQuery: new Map(),
-    };
+    const loadableProps = {} as PluginResourcesByTypeAndKind;
+    for (const pluginType of ALL_PLUGIN_TYPES) {
+      loadableProps[pluginType] = new Map();
+    }
 
     const addToLoadable = (resource: PluginResource) => {
       const supportedKinds = resource.spec.supported_kinds;
@@ -75,11 +75,13 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
     return loadableProps;
   }, [installedPlugins]);
 
-  const [plugins, setPlugins] = useImmer<LoadedPluginsByTypeAndKind>(() => ({
-    Variable: new Map(),
-    Panel: new Map(),
-    GraphQuery: new Map(),
-  }));
+  const [plugins, setPlugins] = useImmer<LoadedPluginsByTypeAndKind>(() => {
+    const loadedPlugins = {} as LoadedPluginsByTypeAndKind;
+    for (const pluginType of ALL_PLUGIN_TYPES) {
+      loadedPlugins[pluginType] = new Map();
+    }
+    return loadedPlugins;
+  });
 
   // Create the register callback to pass to the module's setup function
   const registerPlugin: RegisterPlugin = useCallback(

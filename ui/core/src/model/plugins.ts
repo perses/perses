@@ -47,6 +47,16 @@ export type PluginSetupFunction = (registerPlugin: RegisterPlugin) => void;
  */
 export type RegisterPlugin = <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => void;
 
+/**
+ * All supported plugin type values as an array for use at runtime.
+ */
+export const ALL_PLUGIN_TYPES = ['Variable', 'Panel', 'GraphQuery'] as const;
+
+/**
+ * All supported plugin types.
+ */
+export type PluginType = typeof ALL_PLUGIN_TYPES[number];
+
 // Map of plugin type -> config and implementation type
 type SupportedPlugins<Options extends JsonObject> = {
   Variable: {
@@ -62,11 +72,6 @@ type SupportedPlugins<Options extends JsonObject> = {
     Impl: GraphQueryPlugin<Options>;
   };
 };
-
-/**
- * All supported plugin types.
- */
-export type PluginType = keyof SupportedPlugins<JsonObject>;
 
 /**
  * The definition handled for a given plugin type.
@@ -89,7 +94,7 @@ export type PluginImplementation<
  * registering a plugin with Perses.
  */
 export type PluginRegistrationConfig<Options extends JsonObject> = {
-  [Type in keyof SupportedPlugins<Options>]: PluginConfig<Type, Options>;
+  [Type in PluginType]: PluginConfig<Type, Options>;
 }[PluginType];
 
 /**
