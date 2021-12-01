@@ -20,8 +20,7 @@ export const ThresholdColors = {
   RED: 'rgba(245, 54, 54, 0.9)',
 };
 
-// export const ThresholdColorsArr = [ThresholdColors.GREEN, ThresholdColors.ORANGE, ThresholdColors.RED];
-export const ThresholdColorsArr = [ThresholdColors.ORANGE, ThresholdColors.RED];
+export const ThresholdColorsPalette = [ThresholdColors.ORANGE, ThresholdColors.RED];
 
 export type ThresholdColorsType = keyof typeof ThresholdColors | string;
 
@@ -35,8 +34,8 @@ export interface StepOptions extends JsonObject {
 }
 
 export interface ThresholdOptions extends JsonObject {
-  steps?: StepOptions[];
   default_color?: string;
+  steps?: StepOptions[];
 }
 
 export const defaultThresholdInput: ThresholdOptions = { steps: [{ value: 0, color: ThresholdColors.GREEN }] };
@@ -49,9 +48,7 @@ export function convertThresholds(thresholds: ThresholdOptions): EChartsAxisLine
     const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => step.value / 100);
     valuesArr.push(1);
 
-    const colorsArr = thresholds.steps.map((step: StepOptions, index) => {
-      return step.color ?? ThresholdColorsArr[index];
-    });
+    const colorsArr = thresholds.steps.map((step: StepOptions, index) => step.color ?? ThresholdColorsPalette[index]);
     colorsArr.unshift(defaultThresholdColor);
 
     const zippedArr = zip(valuesArr, colorsArr);

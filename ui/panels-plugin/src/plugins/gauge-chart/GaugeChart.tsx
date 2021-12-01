@@ -101,7 +101,7 @@ function GaugeChart(props: GaugeChartProps) {
           },
           axisLine: {
             lineStyle: {
-              color: [[1, '#e1e5e9']],
+              color: [[1, '#e1e5e9']], // TODO (sjcobb): use future chart theme colors
               width: 22,
             },
           },
@@ -147,7 +147,7 @@ function GaugeChart(props: GaugeChartProps) {
         {
           type: 'gauge',
           center: ['50%', '65%'],
-          radius: '112%',
+          radius: '114%',
           startAngle: 200,
           endAngle: -20,
           min: 0,
@@ -161,7 +161,7 @@ function GaugeChart(props: GaugeChartProps) {
           axisLine: {
             show: true,
             lineStyle: {
-              width: 4,
+              width: 5,
               color: axisLineColors,
             },
           },
@@ -178,10 +178,9 @@ function GaugeChart(props: GaugeChartProps) {
             show: true,
             valueAnimation: false,
             width: '60%',
-            lineHeight: 40,
             borderRadius: 8,
-            offsetCenter: [0, '-10%'],
-            fontSize: 22,
+            offsetCenter: [0, '-9%'],
+            fontSize: 20,
             fontWeight: 'bolder',
             color: 'inherit',
             formatter: (value: number) => {
