@@ -12,31 +12,26 @@
 // limitations under the License.
 
 import { usePluginRuntime } from '../context/PluginRuntimeContext';
-import { DataSourceDefinition, DataSourceResource, AnyDataSourceDefinition } from '../model/datasource';
-import { JsonObject } from '../model/definitions';
-import { ResourceSelector } from '../model/resource';
+import { AnyDatasourceSpecDefinition, DatasourceSpecDefinition, GlobalDatasourceModel } from '../model/datasource';
+import { DatasourceSelector } from '../model/dashboard';
 
-export function useDataSources(selector: ResourceSelector): DataSourceResource[] {
+export function useDataSources(selector: DatasourceSelector): GlobalDatasourceModel[] {
   return usePluginRuntime('useDataSources')(selector);
 }
 
-export function useDataSourceConfig<Kind extends string, Options extends JsonObject>(
-  selector: ResourceSelector,
-  validate: (value: AnyDataSourceDefinition) => value is DataSourceDefinition<Kind, Options>
-): DataSourceDefinition<Kind, Options> {
-  const dataSources = useDataSources(selector);
-  if (dataSources.length > 1) {
-    console.warn(`Got more than one DataSource for selector ${selector}`);
+export function useDataSourceConfig<Kind extends string>(
+  selector: DatasourceSelector,
+  validate: (value: AnyDatasourceSpecDefinition) => value is DatasourceSpecDefinition<Kind>
+): DatasourceSpecDefinition<Kind> {
+  const datasources = useDataSources(selector);
+
+  if (datasources.length !== 1 || datasources[0] === undefined) {
+    throw new Error(`Could not find Datasource for selector ${selector}`);
   }
 
-  const ds = dataSources[0];
-  if (ds === undefined) {
-    throw new Error(`Could not find DataSource for selector ${selector}`);
+  if (validate(datasources[0].spec)) {
+    return datasources[0].spec;
   }
 
-  if (validate(ds.spec.data_source)) {
-    return ds.spec.data_source;
-  }
-
-  throw new Error(`DataSource spec for selector ${selector} is not valid`);
+  throw new Error(`Datasource spec for selector ${selector} is not valid`);
 }

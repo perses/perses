@@ -13,10 +13,8 @@
 
 import { Definition, JsonObject } from './definitions';
 import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
-import { ResourceSelector } from './resource';
 
 export interface VariableDefinition<Kind extends string, Options extends JsonObject> extends Definition<Kind, Options> {
-  datasource?: ResourceSelector;
   display: VariableDisplayOptions;
   selection: VariableSelectionOptions;
   capturing_regexp?: string;

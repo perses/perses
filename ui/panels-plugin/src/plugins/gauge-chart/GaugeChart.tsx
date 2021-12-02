@@ -239,7 +239,7 @@ function GaugeChart(props: GaugeChartProps) {
     prevSize.current = { width, height };
   }, [chart, width, height]);
 
-  return <Box ref={setContainerRef} sx={{ width, height }}></Box>;
+  return <Box ref={setContainerRef} sx={{ width, height }} />;
 }
 
 export default GaugeChart;

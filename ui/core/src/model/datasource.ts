@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, JsonObject } from './definitions';
-import { Metadata } from './resource';
+import { Metadata, ProjectMetadata } from './resource';
 
-export interface DataSourceResource {
-  kind: 'DataSource';
+export interface DatasourceSpecDefinition<Kind extends string> {
+  kind: Kind;
+  default: boolean;
+}
+
+export type AnyDatasourceSpecDefinition = DatasourceSpecDefinition<string>;
+
+export interface DatasourceModel {
+  kind: 'Datasource';
+  metadata: ProjectMetadata;
+  spec: AnyDatasourceSpecDefinition;
+}
+
+export interface GlobalDatasourceModel {
+  kind: 'GlobalDatasource';
   metadata: Metadata;
-  spec: {
-    data_source: AnyDataSourceDefinition;
-  };
+  spec: AnyDatasourceSpecDefinition;
 }
-
-export interface DataSourceDefinition<Kind extends string, Options extends JsonObject>
-  extends Definition<Kind, Options> {
-  display: {
-    hide?: boolean;
-  };
-}
-
-export type AnyDataSourceDefinition = DataSourceDefinition<string, JsonObject>;

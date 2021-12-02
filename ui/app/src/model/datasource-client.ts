@@ -11,22 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyDatasourceSpecDefinition,
-  DatasourceSelector,
-  DatasourceSpecDefinition,
-  HTTPConfig,
-  useDataSourceConfig,
-} from '@perses-ui/core';
+import { useQuery, UseQueryOptions } from 'react-query';
+import { fetchJson, GlobalDatasourceModel } from '@perses-ui/core';
+import buildURL from './url-builder';
 
-export interface PrometheusSpecDatasource extends DatasourceSpecDefinition<'Prometheus'> {
-  http: HTTPConfig;
-}
+const resource = 'globaldatasources';
 
-function isPrometheusDatasource(def: AnyDatasourceSpecDefinition): def is PrometheusSpecDatasource {
-  return def.kind === 'Prometheus';
-}
+type GlobalDatasourceListOptions = Omit<UseQueryOptions<GlobalDatasourceModel[], Error>, 'queryKey' | 'queryFn'>;
 
-export function usePrometheusConfig(selector: DatasourceSelector) {
-  return useDataSourceConfig(selector, isPrometheusDatasource);
+export function useGlobalDatasourceQuery(options?: GlobalDatasourceListOptions) {
+  return useQuery<GlobalDatasourceModel[], Error>(
+    resource,
+    () => {
+      const url = buildURL({ resource });
+      return fetchJson<GlobalDatasourceModel[]>(url);
+    },
+    options
+  );
 }

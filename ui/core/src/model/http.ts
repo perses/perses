@@ -11,22 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataSourceResource } from '@perses-ui/core';
+export interface BasicAuth {
+  username: string;
+  password: string;
+  password_file: string;
+}
 
-const dataSource: DataSourceResource = {
-  kind: 'DataSource',
-  metadata: {
-    name: 'Public Prometheus Demo Server',
-    created_at: '2021-10-20',
-    updated_at: '2021-10-20',
-  },
-  spec: {
-    data_source: {
-      kind: 'PrometheusDataSource',
-      display: {},
-      options: { base_url: 'https://prometheus.demo.do.prometheus.io' },
-    },
-  },
-};
+export interface HTTPAuth {
+  insecure_tls: boolean;
+  bearer_token: string;
+  basic_auth?: BasicAuth;
+  cac_cert: string;
+}
 
-export default dataSource;
+export interface HTTPConfig {
+  url: string;
+  access: 'browser' | 'server';
+  auth?: HTTPAuth;
+  headers?: Record<string, string>;
+}
+
+export function buildDatasourceURL(datasourceName: string, config: HTTPConfig): string {
+  return config.access === 'server' ? `/proxy/globaldatasources/${datasourceName}` : config.url;
+}
