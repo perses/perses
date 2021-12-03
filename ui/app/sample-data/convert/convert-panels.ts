@@ -87,6 +87,11 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
   // TODO: Does a Gauge chart with multiple queries even make sense?
   const target = gaugePanel.targets[0];
 
+  const filteredThresholdSteps = gaugePanel.fieldConfig.defaults.thresholds.steps.filter((elem) => {
+    delete elem.color; // defaults defined in thresholds.ts used instead
+    return elem.value != null;
+  });
+
   return {
     kind: 'GaugeChart',
     display: {
@@ -94,6 +99,11 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
     },
     options: {
       query: convertQueryTarget(target),
+      calculation: 'LastNumber',
+      unit: { kind: 'Percent' }, // TODO (sjcobb): add calc mapping, support gauge formats other than percents
+      thresholds: {
+        steps: filteredThresholdSteps,
+      },
     },
   };
 }

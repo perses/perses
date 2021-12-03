@@ -32,7 +32,6 @@ export function usePrometheusLabelNames(
   definition: PrometheusLabelNames
 ): ReturnType<UseVariableOptionsHook<LabelNamesOptions>> {
   const spec = useDashboardSpec();
-  const dataSource = definition.datasource ?? spec.datasource;
 
   const { start, end } = useDashboardPrometheusTimeRange();
   const { result: match, needsVariableValuesFor } = useReplaceTemplateStrings(definition.options.match);
@@ -48,7 +47,7 @@ export function usePrometheusLabelNames(
     data: response,
     isLoading: loading,
     error,
-  } = useLabelNames(dataSource, request, {
+  } = useLabelNames(spec.datasource, request, {
     enabled: needsVariableValuesFor.size === 0,
   });
 

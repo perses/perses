@@ -15,7 +15,6 @@ import { Duration, milliseconds } from 'date-fns';
 
 export type UnitOptions = TimeUnitOptions | PercentUnitOptions;
 
-// TODO (sjcobb): should formatValue move to utils folder?
 export function formatValue(value: number, unitOptions?: UnitOptions): string {
   if (unitOptions === undefined) {
     return value.toString();

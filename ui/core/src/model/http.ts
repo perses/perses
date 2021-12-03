@@ -11,23 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata, ProjectMetadata } from './resource';
-
-export interface DatasourceSpecDefinition<Kind extends string> {
-  kind: Kind;
-  default: boolean;
+export interface BasicAuth {
+  username: string;
+  password: string;
+  password_file: string;
 }
 
-export type AnyDatasourceSpecDefinition = DatasourceSpecDefinition<string>;
-
-export interface DatasourceModel {
-  kind: 'Datasource';
-  metadata: ProjectMetadata;
-  spec: AnyDatasourceSpecDefinition;
+export interface HTTPAuth {
+  insecure_tls: boolean;
+  bearer_token: string;
+  basic_auth?: BasicAuth;
+  cac_cert: string;
 }
 
-export interface GlobalDatasourceModel {
-  kind: 'GlobalDatasource';
-  metadata: Metadata;
-  spec: AnyDatasourceSpecDefinition;
+export interface HTTPConfig {
+  url: string;
+  access: 'browser' | 'server';
+  auth?: HTTPAuth;
+  headers?: Record<string, string>;
+}
+
+export function buildDatasourceURL(datasourceName: string, config: HTTPConfig): string {
+  return config.access === 'server' ? `/proxy/globaldatasources/${datasourceName}` : config.url;
 }

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from 'react-query';
-import { ResourceSelector, fetchJson } from '@perses-ui/core';
+import { buildDatasourceURL, DatasourceSelector, fetchJson } from '@perses-ui/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -23,7 +23,7 @@ import {
   RangeQueryRequestParameters,
   RangeQueryResponse,
 } from './api-types';
-import { usePrometheusConfig } from './datasource';
+import { PrometheusSpecDatasource, usePrometheusConfig } from './datasource';
 
 export type QueryOptions = Pick<UseQueryOptions, 'enabled'>;
 
@@ -31,12 +31,12 @@ export type QueryOptions = Pick<UseQueryOptions, 'enabled'>;
  * Calls the `/api/v1/query` endpoint to get metrics data.
  */
 export function useInstantQuery(
-  dataSource: ResourceSelector,
+  datasource: DatasourceSelector,
   params: InstantQueryRequestParameters,
   queryOptions?: QueryOptions
 ) {
   return useQueryWithPost<InstantQueryRequestParameters, InstantQueryResponse>(
-    dataSource,
+    datasource,
     '/api/v1/query',
     params,
     undefined,
@@ -48,12 +48,12 @@ export function useInstantQuery(
  * Calls the `/api/v1/query_range` endpoint to get metrics data.
  */
 export function useRangeQuery(
-  dataSource: ResourceSelector,
+  datasource: DatasourceSelector,
   params: RangeQueryRequestParameters,
   queryOptions?: QueryOptions
 ) {
   return useQueryWithPost<RangeQueryRequestParameters, RangeQueryResponse>(
-    dataSource,
+    datasource,
     '/api/v1/query_range',
     params,
     undefined,
@@ -65,12 +65,12 @@ export function useRangeQuery(
  * Calls the `/api/v1/labels` endpoint to get a list of label names.
  */
 export function useLabelNames(
-  dataSource: ResourceSelector,
+  datasource: DatasourceSelector,
   params: LabelNamesRequestParameters,
   queryOptions?: QueryOptions
 ) {
   return useQueryWithPost<LabelNamesRequestParameters, LabelNamesResponse>(
-    dataSource,
+    datasource,
     '/api/v1/labels',
     params,
     { match: 'match[]' },
@@ -83,15 +83,15 @@ export function useLabelNames(
  * values for a label.
  */
 export function useLabelValues(
-  dataSource: ResourceSelector,
+  datasource: DatasourceSelector,
   params: LabelValuesRequestParameters,
   queryOptions?: QueryOptions
 ) {
   const { labelName, ...searchParams } = params;
-  const apiUrl = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
+  const apiURI = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
   return useQueryWithGet<typeof searchParams, LabelValuesResponse>(
-    dataSource,
-    apiUrl,
+    datasource,
+    apiURI,
     searchParams,
     { match: 'match[]' },
     queryOptions
@@ -99,19 +99,20 @@ export function useLabelValues(
 }
 
 function useQueryWithGet<T extends RequestParams<T>, TResponse>(
-  dataSource: ResourceSelector,
-  apiUrl: string,
+  datasourceSelector: DatasourceSelector,
+  apiURI: string,
   params: T,
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const { base_url: baseUrl } = usePrometheusConfig(dataSource);
-  const key = [baseUrl, apiUrl, params] as const;
+  const httpConfig = (<PrometheusSpecDatasource>usePrometheusConfig(datasourceSelector)).http;
+  const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
+  const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
     key,
     () => {
-      let url = `${baseUrl}${apiUrl}`;
+      let url = `${datasourceURL}${apiURI}`;
 
       const urlParams = createSearchParams(params, rename).toString();
       if (urlParams !== '') {
@@ -125,19 +126,20 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
 }
 
 function useQueryWithPost<T extends RequestParams<T>, TResponse>(
-  dataSource: ResourceSelector,
-  apiUrl: string,
+  datasourceSelector: DatasourceSelector,
+  apiURI: string,
   params: T,
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const { base_url: baseUrl } = usePrometheusConfig(dataSource);
-  const key = [baseUrl, apiUrl, params] as const;
+  const httpConfig = (<PrometheusSpecDatasource>usePrometheusConfig(datasourceSelector)).http;
+  const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
+  const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
     key,
     () => {
-      const url = `${baseUrl}${apiUrl}`;
+      const url = `${datasourceURL}${apiURI}`;
       const init = {
         method: 'POST',
         headers: {

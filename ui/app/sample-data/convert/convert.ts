@@ -30,7 +30,7 @@ export function convertDashboardJson(json: GrafanaDashboardJson): DashboardResou
       project: 'perses',
     },
     spec: {
-      datasource: { name: 'Public Prometheus Demo Server' },
+      datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
       duration: convertTimeRange(json.time),
       variables: convertVariables(json.templating.list),
       panels,

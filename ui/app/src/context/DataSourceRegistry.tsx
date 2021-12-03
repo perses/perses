@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext, useCallback, useMemo } from 'react';
-import { DataSourceResource, ResourceSelector } from '@perses-ui/core';
-import { useSampleData } from '../utils/temp-sample-data';
+import { createContext, useCallback, useContext, useMemo } from 'react';
+import { DatasourceSelector, GlobalDatasourceModel } from '@perses-ui/core';
+import { useGlobalDatasourceQuery } from '../model/datasource-client';
+import { useSnackbar } from './SnackbarProvider';
 
 export interface DataSourceRegistryContextType {
-  getDataSources(selector: ResourceSelector): DataSourceResource[];
+  getDataSources(selector: DatasourceSelector): GlobalDatasourceModel[];
 }
 
 export const DataSourceRegistryContext = createContext<DataSourceRegistryContextType | undefined>(undefined);
@@ -30,22 +31,25 @@ export interface DataSourceRegistryProps {
  */
 export function DataSourceRegistry(props: DataSourceRegistryProps) {
   const { children } = props;
+  const { exceptionSnackbar } = useSnackbar();
+  const { data, isLoading } = useGlobalDatasourceQuery({
+    onError: exceptionSnackbar,
+  });
+  const datasourceList: GlobalDatasourceModel[] = useMemo(() => {
+    if (isLoading || data === undefined) {
+      return [];
+    }
+    return data;
+  }, [isLoading, data]);
 
-  // TODO: Load from Perses server?
-  const dataSource = useSampleData<DataSourceResource>('datasource');
-  const dataSources: DataSourceResource[] = useMemo(() => {
-    if (dataSource === undefined) return [];
-    return [dataSource];
-  }, [dataSource]);
-
-  const getDataSources = useCallback(() => {
-    // TODO: Is this how K8s selectors actually work?
-    // k8s selector is looking at the metadata.labels, which doesn't exist in the current datamodel
-    // TODO @nexucis review the way to fetch the datasources (Global datasource vs Local datasource)
-    return dataSources.filter(() => {
-      return true;
-    });
-  }, [dataSources]);
+  const getDataSources = useCallback(
+    (selector: DatasourceSelector) => {
+      return datasourceList.filter((ds: GlobalDatasourceModel) => {
+        return selector.global && selector.kind === ds.spec.kind && selector.name === ds.metadata.name;
+      });
+    },
+    [datasourceList]
+  );
 
   const context: DataSourceRegistryContextType = useMemo(() => ({ getDataSources }), [getDataSources]);
 
@@ -60,6 +64,6 @@ export function useDataSourceRegistry() {
   return context;
 }
 
-export function useDataSources(selector: ResourceSelector) {
+export function useDataSources(selector: DatasourceSelector) {
   return useDataSourceRegistry().getDataSources(selector);
 }

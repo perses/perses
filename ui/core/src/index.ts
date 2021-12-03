@@ -28,4 +28,5 @@ export * from './model/plugins';
 export * from './model/resource';
 export * from './model/time';
 export * from './model/variables';
+export * from './model/http';
 export * from './utils/fetch';

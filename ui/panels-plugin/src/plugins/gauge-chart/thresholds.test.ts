@@ -11,22 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataSourceResource } from '@perses-ui/core';
+import { convertThresholds } from './thresholds';
 
-const dataSource: DataSourceResource = {
-  kind: 'DataSource',
-  metadata: {
-    name: 'Public Prometheus Demo Server',
-    created_at: '2021-10-20',
-    updated_at: '2021-10-20',
-  },
-  spec: {
-    data_source: {
-      kind: 'PrometheusDataSource',
-      display: {},
-      options: { base_url: 'https://prometheus.demo.do.prometheus.io' },
-    },
-  },
-};
+describe('convertThresholds', () => {
+  const thresholdInput = {
+    default_color: '#000',
+    steps: [
+      {
+        value: 85,
+        color: '#FFA500',
+      },
+      {
+        value: 95,
+        color: '#ff0000',
+      },
+    ],
+  };
 
-export default dataSource;
+  const thresholdOutput = [
+    [0.85, '#000'],
+    [0.95, '#FFA500'],
+    [1, '#ff0000'],
+  ];
+
+  it('should convert gauge thresholds to valid echarts option colors', () => {
+    expect(convertThresholds(thresholdInput)).toEqual(thresholdOutput);
+  });
+});

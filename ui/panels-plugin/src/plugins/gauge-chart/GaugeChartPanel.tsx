@@ -25,7 +25,7 @@ interface GaugeChartOptions extends JsonObject {
   query: AnyGraphQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
-  thresholds: ThresholdOptions;
+  thresholds?: ThresholdOptions;
 }
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
