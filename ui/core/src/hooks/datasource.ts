@@ -19,10 +19,10 @@ export function useDataSources(selector: DatasourceSelector): GlobalDatasourceMo
   return usePluginRuntime('useDataSources')(selector);
 }
 
-export function useDataSourceConfig<Kind extends string>(
+export function useDataSourceConfig<T extends DatasourceSpecDefinition>(
   selector: DatasourceSelector,
-  validate: (value: AnyDatasourceSpecDefinition) => value is DatasourceSpecDefinition<Kind>
-): DatasourceSpecDefinition<Kind> {
+  validate: (value: AnyDatasourceSpecDefinition) => value is T
+): T {
   const datasources = useDataSources(selector);
 
   if (datasources.length !== 1 || datasources[0] === undefined) {

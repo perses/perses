@@ -19,7 +19,8 @@ import {
   useDataSourceConfig,
 } from '@perses-ui/core';
 
-export interface PrometheusSpecDatasource extends DatasourceSpecDefinition<'Prometheus'> {
+export interface PrometheusSpecDatasource extends DatasourceSpecDefinition {
+  kind: 'Prometheus';
   http: HTTPConfig;
 }
 

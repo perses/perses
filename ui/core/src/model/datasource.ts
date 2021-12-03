@@ -13,12 +13,13 @@
 
 import { Metadata, ProjectMetadata } from './resource';
 
-export interface DatasourceSpecDefinition<Kind extends string> {
-  kind: Kind;
+// TODO: Should use Definition<> and JsonObject?
+export interface DatasourceSpecDefinition {
+  kind: string;
   default: boolean;
 }
 
-export type AnyDatasourceSpecDefinition = DatasourceSpecDefinition<string>;
+export type AnyDatasourceSpecDefinition = DatasourceSpecDefinition;
 
 export interface DatasourceModel {
   kind: 'Datasource';
