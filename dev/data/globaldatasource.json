@@ -8,6 +8,7 @@
       "kind": "Prometheus",
       "default": true,
       "http": {
+        "access": "browser",
         "url": "https://prometheus.demo.do.prometheus.io"
       }
     }
