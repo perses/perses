@@ -8,6 +8,19 @@
       "kind": "Prometheus",
       "default": true,
       "http": {
+        "url": "https://prometheus.demo.do.prometheus.io"
+      }
+    }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "PrometheusDemoBrowser"
+    },
+    "spec": {
+      "kind": "Prometheus",
+      "default": false,
+      "http": {
         "access": "browser",
         "url": "https://prometheus.demo.do.prometheus.io"
       }

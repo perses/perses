@@ -60,6 +60,7 @@ const devConfig: Configuration = {
     port: parseInt(process.env.PORT ?? '3000'),
     open: true,
     https: getHttpsConfig(),
+    http2: true,
     historyApiFallback: true,
     allowedHosts: 'all',
     proxy: {
