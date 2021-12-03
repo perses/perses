@@ -20,7 +20,7 @@ import App from './App';
 import { createTheme } from './styles/theme';
 import { SnackbarProvider } from './context/SnackbarProvider';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
 
 function renderApp() {
   ReactDOM.render(
