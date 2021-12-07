@@ -14,7 +14,7 @@
   "dependencies": {
     "@mui/material": "^5.2.1",
     "@perses-ui/core": "^1.0.0",
-    "date-fns": "^2.26.0",
+    "date-fns": "^2.27.0",
     "echarts": "^5.2.2",
     "lodash-es": "^4.17.21",
     "mathjs": "^10.0.0",

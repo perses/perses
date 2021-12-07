@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@perses-ui/core": "^1.0.0",
-    "date-fns": "^2.26.0",
+    "date-fns": "^2.27.0",
     "lezer": "^0.13.5",
     "lezer-promql": "^0.20.0",
     "react": "^17.0.2",

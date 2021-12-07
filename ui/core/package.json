@@ -12,7 +12,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "date-fns": "^2.26.0",
+    "date-fns": "^2.27.0",
     "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
