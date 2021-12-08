@@ -38,9 +38,11 @@ const tooltipFormatter: TooltipFormatterCallback = (params: TooltipFormatterPara
   const seriesName = params.seriesName ?? '';
   const formattedNames = seriesName.split(',').join('<br />');
   const formattedTime = echarts.format.formatTime('yyyy-MM-dd hh:mm:ss', Number(params.name));
+  const customMarker = `<span style="float:left; width:9px; height:9px; margin:5px 6px 0 0; background-color:${params.color};"></span>`;
   return `
     <h4 style="margin: 2px 0 3px;">${formattedTime}</h4>
-    <div>${params.marker}${formattedNames}</div>
+    <div>${customMarker}<span>value: ${params.value}</span></div>
+    <div style="margin-bottom:4px; font-size:10px; font-weight:300;">${formattedNames}</div>
   `;
 };
 
@@ -108,12 +110,12 @@ function LineChart(props: LineChartProps) {
       tooltip: {
         show: true,
         trigger: 'item',
-        enterable: true,
+        enterable: false,
         confine: true,
         extraCssText: 'max-height: 220px; max-width: 350px; overflow: auto;',
-        showDelay: 20,
+        showDelay: 0,
         hideDelay: 100,
-        transitionDuration: 0.4,
+        transitionDuration: 0.2,
         backgroundColor: '#333',
         borderColor: '#333',
         borderRadius: 2,
@@ -123,7 +125,7 @@ function LineChart(props: LineChartProps) {
           color: '#fff',
           fontFamily: '"Lato", sans-serif',
           fontSize: 11,
-          fontWeight: 300,
+          fontWeight: 400,
         },
         formatter: tooltipFormatter,
       },

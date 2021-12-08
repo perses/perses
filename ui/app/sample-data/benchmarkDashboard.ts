@@ -73,13 +73,14 @@ const benchmarkDashboard: DashboardResource = {
     panels: {
       seriesTest: {
         kind: 'LineChart',
-        display: { name: '1572 Series' },
+        display: { name: '1500+ Series' },
         options: {
           queries: [
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
+                query: 'caddy_http_request_duration_seconds_bucket',
+                // query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
               },
             },
           ],
@@ -88,13 +89,14 @@ const benchmarkDashboard: DashboardResource = {
       },
       seriesTestAlt: {
         kind: 'LineChart',
-        display: { name: '131 Series' },
+        display: { name: '~130 Series' },
         options: {
           queries: [
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
+                query: 'caddy_http_response_duration_seconds_sum',
+                // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
               },
             },
           ],
@@ -156,13 +158,13 @@ const benchmarkDashboard: DashboardResource = {
       {
         kind: 'Grid',
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/seriesTest' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/seriesTest' },
+          },
           {
             x: 12,
             y: 0,
@@ -175,13 +177,13 @@ const benchmarkDashboard: DashboardResource = {
       {
         kind: 'Grid',
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/seriesTestAlt' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/seriesTestAlt' },
+          },
           // {
           //   x: 12,
           //   y: 0,
