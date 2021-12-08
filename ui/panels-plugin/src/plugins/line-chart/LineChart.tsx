@@ -76,6 +76,7 @@ function LineChart(props: LineChartProps) {
           type: 'line',
           name: timeSeries.name,
           data: yValues,
+          sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
           // connectNulls: true,
           showAllSymbol: false,
         });
