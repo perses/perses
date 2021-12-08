@@ -14,13 +14,14 @@
 import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
-import { GridComponent, DatasetComponent } from 'echarts/components';
+import { GridComponent, DataZoomComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useRunningGraphQueries } from './GraphQueryRunner';
+import { getCommonTimeScale, getXValues } from './data-transform';
 
-echarts.use([EChartsLineChart, GridComponent, DatasetComponent, CanvasRenderer]);
+echarts.use([EChartsLineChart, GridComponent, DataZoomComponent, TooltipComponent, CanvasRenderer]);
 
 export interface LineChartProps {
   width: number;
@@ -35,38 +36,47 @@ function LineChart(props: LineChartProps) {
   const queries = useRunningGraphQueries();
 
   // Calculate the LineChart options based on the query results
+  // const option = useMemo(() => {
   const option: EChartsOption = useMemo(() => {
-    const dataset: EChartsOption['dataset'] = [];
+    const timeScale = getCommonTimeScale(queries);
+    if (timeScale === undefined) {
+      return { data: undefined, options: undefined };
+    }
+
     const series: EChartsOption['series'] = [];
+    const xAxisData = [...getXValues(timeScale)];
 
     for (const query of queries) {
       // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
 
-      // For every series that comes back from a query, add a Dataset and a Series
-      // to the chart
-      for (const dataSeries of query.data.series) {
-        const id = dataset.length;
-
-        dataset.push({
-          id,
-          source: [['timestamp', 'value'], ...dataSeries.values],
-        });
-
+      for (const timeSeries of query.data.series) {
+        const yValues: number[] = [];
+        for (const valueTuple of timeSeries.values) {
+          yValues.push(valueTuple[1]);
+        }
         series.push({
           type: 'line',
-          datasetId: id,
-          name: dataSeries.name,
-          symbol: 'none',
+          name: timeSeries.name,
+          data: yValues,
+          // connectNulls: true,
+          showAllSymbol: false,
         });
       }
     }
 
     return {
-      dataset,
       series,
       xAxis: {
-        type: 'time',
+        type: 'category',
+        data: xAxisData,
+        boundaryGap: false,
+        axisLabel: {
+          formatter: (label: string) => {
+            const formattedTime = echarts.format.formatTime('hh-mm', Number(label));
+            return formattedTime;
+          },
+        },
       },
       yAxis: {
         type: 'value',
@@ -74,9 +84,16 @@ function LineChart(props: LineChartProps) {
       grid: {
         top: 10,
         right: 10,
-        bottom: 0,
+        bottom: 10,
         left: 0,
         containLabel: true,
+      },
+      animation: false,
+      tooltip: {
+        show: true,
+        trigger: 'item',
+        enterable: true,
+        extraCssText: 'max-height: 220px; max-width: 350px; overflow: auto;',
       },
     };
   }, [queries]);

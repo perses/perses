@@ -16,7 +16,7 @@ import 'uplot/dist/uPlot.min.css';
 import { useState, useMemo, useLayoutEffect } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { useRunningGraphQueries } from '../GraphQueryRunner';
-import { getCommonTimeScale, getXValues, getYValues } from './data-transform';
+import { getCommonTimeScale, getXValues, getYValues } from '../data-transform';
 
 // Formatter for dates on the X axis
 const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
