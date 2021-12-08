@@ -23,7 +23,6 @@ const benchmarkDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    // TODO: Should duration actually be a time range?
     duration: '24h',
     variables: {
       job: {
@@ -103,9 +102,9 @@ const benchmarkDashboard: DashboardResource = {
           unit: { kind: 'Bytes' },
         },
       },
-      filesystemFullness: {
+      basicEx: {
         kind: 'LineChart',
-        display: { name: 'Filesystem Fullness' },
+        display: { name: 'Single Query' },
         options: {
           queries: [
             {
@@ -170,7 +169,7 @@ const benchmarkDashboard: DashboardResource = {
             y: 0,
             width: 12,
             height: 6,
-            content: { $ref: '#/panels/filesystemFullness' },
+            content: { $ref: '#/panels/basicEx' },
           },
         ],
       },
@@ -184,13 +183,13 @@ const benchmarkDashboard: DashboardResource = {
             height: 6,
             content: { $ref: '#/panels/seriesTestAlt' },
           },
-          // {
-          //   x: 12,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/multiQueries' },
-          // },
+          {
+            x: 12,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/multiQueries' },
+          },
         ],
       },
     ],
