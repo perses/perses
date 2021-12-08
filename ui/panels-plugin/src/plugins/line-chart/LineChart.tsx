@@ -14,14 +14,14 @@
 import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
-import { GridComponent, DataZoomComponent, TooltipComponent, TooltipComponentOption } from 'echarts/components';
+import { GridComponent, TooltipComponent, TooltipComponentOption } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getCommonTimeScale, getXValues } from './data-transform';
 
-echarts.use([EChartsLineChart, GridComponent, DataZoomComponent, TooltipComponent, CanvasRenderer]);
+echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 export interface LineChartProps {
   width: number;
@@ -107,6 +107,7 @@ function LineChart(props: LineChartProps) {
         containLabel: true,
       },
       animation: false,
+      // TODO (sjcobb): move shared tooltip styles to chart theme
       tooltip: {
         show: true,
         trigger: 'item',

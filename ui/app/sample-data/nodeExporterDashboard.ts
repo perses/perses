@@ -239,24 +239,6 @@ const nodeExporterDashboard: DashboardResource = {
         display: { name: 'Empty Example 3' },
         options: {},
       },
-      seriesTest: {
-        kind: 'LineChart',
-        display: { name: 'Series Test' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                // query: 'caddy_http_request_duration_seconds_bucket',
-                query: 'rate(caddy_http_request_duration_seconds_bucket[5m])',
-                // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[5m]))',
-                // query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
-              },
-            },
-          ],
-          unit: { kind: 'Bytes' },
-        },
-      },
       cpu: {
         kind: 'LineChart',
         display: { name: 'CPU' },
@@ -405,7 +387,6 @@ const nodeExporterDashboard: DashboardResource = {
             width: 12,
             height: 6,
             content: { $ref: '#/panels/cpu' },
-            // content: { $ref: '#/panels/seriesTest' },
           },
           {
             x: 12,
