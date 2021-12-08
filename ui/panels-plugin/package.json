@@ -21,20 +21,6 @@
     "react": "^17.0.2",
     "uplot": "^1.6.16"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js|jsx)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx"
-    ],
-    "modulePathIgnorePatterns": ["<rootDir>/dist/"],
-    "moduleNameMapper": {
-      "^lodash-es$": "lodash"
-    }
-  },
   "perses": {
     "kind": "Plugin",
     "metadata": {

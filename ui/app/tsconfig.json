@@ -24,13 +24,5 @@
       "path": "../prometheus-plugin",
       "prepend": false
     }
-  ],
-  // For webpack builds that use ts-node to compile the configs
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs",
-      "target": "es5",
-      "esModuleInterop": true
-    }
-  }
+  ]
 }
