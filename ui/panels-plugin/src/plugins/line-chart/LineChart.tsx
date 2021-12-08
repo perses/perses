@@ -14,7 +14,7 @@
 import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
-import { GridComponent, DataZoomComponent, TooltipComponent } from 'echarts/components';
+import { GridComponent, DataZoomComponent, TooltipComponent, TooltipComponentOption } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
@@ -28,6 +28,22 @@ export interface LineChartProps {
   height: number;
 }
 
+type TooltipFormatterCallback = Exclude<NonNullable<TooltipComponentOption['formatter']>, string>;
+type TooltipFormatterParams = Parameters<TooltipFormatterCallback>[0];
+const tooltipFormatter: TooltipFormatterCallback = (params: TooltipFormatterParams) => {
+  if (Array.isArray(params)) {
+    const tooltipData = params[0] ?? { data: 'Tooltip data empty' };
+    return tooltipData.data.toString();
+  }
+  const seriesName = params.seriesName ?? '';
+  const formattedNames = seriesName.split(',').join('<br />');
+  const formattedTime = echarts.format.formatTime('yyyy-MM-dd hh:mm:ss', Number(params.name));
+  return `
+    <h4 style="margin: 2px 0 3px;">${formattedTime}</h4>
+    <div>${params.marker}${formattedNames}</div>
+  `;
+};
+
 /**
  * Draws a LineChart with Apache ECharts for the current running time series.
  */
@@ -36,7 +52,6 @@ function LineChart(props: LineChartProps) {
   const queries = useRunningGraphQueries();
 
   // Calculate the LineChart options based on the query results
-  // const option = useMemo(() => {
   const option: EChartsOption = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
     if (timeScale === undefined) {
@@ -73,6 +88,7 @@ function LineChart(props: LineChartProps) {
         boundaryGap: false,
         axisLabel: {
           formatter: (label: string) => {
+            // TODO (sjcobb): adjust format for different intervals
             const formattedTime = echarts.format.formatTime('hh-mm', Number(label));
             return formattedTime;
           },
@@ -93,7 +109,23 @@ function LineChart(props: LineChartProps) {
         show: true,
         trigger: 'item',
         enterable: true,
+        confine: true,
         extraCssText: 'max-height: 220px; max-width: 350px; overflow: auto;',
+        showDelay: 20,
+        hideDelay: 100,
+        transitionDuration: 0.4,
+        backgroundColor: '#333',
+        borderColor: '#333',
+        borderRadius: 2,
+        borderWidth: 0,
+        padding: [6, 12],
+        textStyle: {
+          color: '#fff',
+          fontFamily: '"Lato", sans-serif',
+          fontSize: 11,
+          fontWeight: 300,
+        },
+        formatter: tooltipFormatter,
       },
     };
   }, [queries]);
