@@ -11,8 +11,15 @@
     "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
     "composite": true,
-    "paths": {
-      "@perses-ui/*": ["./*/src"]
+    "declaration": true,
+    "declarationMap": true
+  },
+  // For builds that use ts-node to compile the configs (e.g. webpack, jest)
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es5",
+      "esModuleInterop": true
     }
   }
 }

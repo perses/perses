@@ -11,23 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyDatasourceSpecDefinition,
-  DatasourceSelector,
-  DatasourceSpecDefinition,
-  HTTPConfig,
-  useDataSourceConfig,
-} from '@perses-ui/core';
+import type { Config } from '@jest/types';
 
-export interface PrometheusSpecDatasource extends DatasourceSpecDefinition {
-  kind: 'Prometheus';
-  http: HTTPConfig;
-}
+// Common Jest configuration shared across packages
+const config: Config.InitialOptions = {
+  preset: 'ts-jest',
+  roots: ['<rootDir>/src'],
+  moduleNameMapper: {
+    // Jest currently doesn't natively support ES Modules, so use the non ES Modules version instead
+    '^lodash-es$': 'lodash',
+  },
+  globals: {
+    'ts-jest': {
+      tsconfig: '<rootDir>/../tsconfig.test.json',
+    },
+  },
+};
 
-function isPrometheusDatasource(def: AnyDatasourceSpecDefinition): def is PrometheusSpecDatasource {
-  return def.kind === 'Prometheus';
-}
-
-export function usePrometheusConfig(selector: DatasourceSelector) {
-  return useDataSourceConfig(selector, isPrometheusDatasource);
-}
+export default config;

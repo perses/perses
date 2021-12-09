@@ -15,9 +15,7 @@ import { JsonObject, PanelProps } from '@perses-ui/core';
 
 export const EmptyChartKind = 'EmptyChart' as const;
 
-type EmptyChartKind = typeof EmptyChartKind;
-
-export type EmptyChartProps = PanelProps<EmptyChartKind, EmptyChartOptions>;
+export type EmptyChartProps = PanelProps<EmptyChartOptions>;
 
 type EmptyChartOptions = JsonObject;
 

@@ -23,7 +23,7 @@ import {
   RangeQueryRequestParameters,
   RangeQueryResponse,
 } from './api-types';
-import { PrometheusSpecDatasource, usePrometheusConfig } from './datasource';
+import { usePrometheusConfig } from './datasource';
 
 export type QueryOptions = Pick<UseQueryOptions, 'enabled'>;
 
@@ -105,7 +105,7 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const httpConfig = (<PrometheusSpecDatasource>usePrometheusConfig(datasourceSelector)).http;
+  const httpConfig = usePrometheusConfig(datasourceSelector).http;
   const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
   const key = [datasourceURL, apiURI, params] as const;
 
@@ -132,7 +132,7 @@ function useQueryWithPost<T extends RequestParams<T>, TResponse>(
   rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const httpConfig = (<PrometheusSpecDatasource>usePrometheusConfig(datasourceSelector)).http;
+  const httpConfig = usePrometheusConfig(datasourceSelector).http;
   const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
   const key = [datasourceURL, apiURI, params] as const;
 

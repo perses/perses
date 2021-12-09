@@ -28,8 +28,8 @@ import {
  * Take a Variable plugin and wrap it so it works with AnyVariableDefinition,
  * doing runtime checking of the definition before delegating to the plugin.
  */
-export function createVariablePlugin<Kind extends string, Options extends JsonObject>(
-  config: PluginConfig<'Variable', Kind, Options>
+export function createVariablePlugin<Options extends JsonObject>(
+  config: PluginConfig<'Variable', Options>
 ): AnyPluginImplementation<'Variable'> {
   // Create runtime validation function
   const useRuntimeValidation = createValidationHook(config);
@@ -53,14 +53,14 @@ export function createVariablePlugin<Kind extends string, Options extends JsonOb
  * Take a Panel plugin and wraps it so it works with AnyPanelDefinition, doing
  * runtime checking of the definition before delegating to the plugin.
  */
-export function createPanelPlugin<Kind extends string, Options extends JsonObject>(
-  config: PluginConfig<'Panel', Kind, Options>
+export function createPanelPlugin<Options extends JsonObject>(
+  config: PluginConfig<'Panel', Options>
 ): AnyPluginImplementation<'Panel'> {
   const useRuntimeValidation = createValidationHook(config);
 
   // Wrap PanelComponent from config with validation (TODO: Can this wrapper
   // become generic for all Plugin components?)
-  function PanelComponent(props: PanelProps<string, JsonObject>) {
+  function PanelComponent(props: PanelProps<JsonObject>) {
     const { definition, ...others } = props;
 
     const { isValid, errorRef } = useRuntimeValidation();
@@ -80,8 +80,8 @@ export function createPanelPlugin<Kind extends string, Options extends JsonObjec
  * Take a GraphQuery plugin and wrap it so it works with AnyChartQueryDefinition,
  * doing runtime validation of the definition before delegating to the plugin.
  */
-export function createGraphQueryPlugin<Kind extends string, Options extends JsonObject>(
-  config: PluginConfig<'GraphQuery', Kind, Options>
+export function createGraphQueryPlugin<Options extends JsonObject>(
+  config: PluginConfig<'GraphQuery', Options>
 ): AnyPluginImplementation<'GraphQuery'> {
   // Create runtime validation function
   const useRuntimeValidation = createValidationHook(config);
@@ -102,23 +102,23 @@ export function createGraphQueryPlugin<Kind extends string, Options extends Json
 }
 
 // A hook for doing runtime validation of a PluginDefinition
-type UseRuntimeValidationHook<Type extends PluginType, Kind extends string, Options extends JsonObject> = () => {
-  isValid: (definition: AnyPluginDefinition<Type>) => definition is PluginDefinition<Type, Kind, Options>;
+type UseRuntimeValidationHook<Type extends PluginType, Options extends JsonObject> = () => {
+  isValid: (definition: AnyPluginDefinition<Type>) => definition is PluginDefinition<Type, Options>;
   errorRef: React.MutableRefObject<InvalidPluginDefinitionError | undefined>;
 };
 
 // Create a hook for doing runtime validation of a plugin definition, given the
 // plugin's config
-function createValidationHook<Type extends PluginType, Kind extends string, Options extends JsonObject>(
-  config: PluginConfig<Type, Kind, Options>
-): UseRuntimeValidationHook<Type, Kind, Options> {
+function createValidationHook<Type extends PluginType, Options extends JsonObject>(
+  config: PluginConfig<Type, Options>
+): UseRuntimeValidationHook<Type, Options> {
   const useRuntimeValidation = () => {
     // Ref for storing any validation errors as a side-effect of calling isValid
     const errorRef = useRef<InvalidPluginDefinitionError | undefined>(undefined);
 
     // Type guard that validates the generic runtime plugin definition data
     // is correct for Kind/Options
-    const isValid = (definition: AnyPluginDefinition<Type>): definition is PluginDefinition<Type, Kind, Options> => {
+    const isValid = (definition: AnyPluginDefinition<Type>): definition is PluginDefinition<Type, Options> => {
       // If they don't give us a validate function in the plugin config, not
       // much we can do so just assume we're OK
       const validateErrors = config.validate?.(definition) ?? [];

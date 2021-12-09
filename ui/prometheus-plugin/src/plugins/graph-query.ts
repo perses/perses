@@ -30,7 +30,7 @@ import { getDurationStringSeconds, useDashboardPrometheusTimeRange, usePanelRang
 
 export const PrometheusGraphQueryKind = 'PrometheusGraphQuery' as const;
 
-type PrometheusGraphQuery = GraphQueryDefinition<typeof PrometheusGraphQueryKind, GraphQueryOptions>;
+type PrometheusGraphQuery = GraphQueryDefinition<GraphQueryOptions>;
 
 interface GraphQueryOptions extends JsonObject {
   query: TemplateString;
@@ -40,7 +40,7 @@ interface GraphQueryOptions extends JsonObject {
 
 export function usePrometheusGraphQuery(
   definition: PrometheusGraphQuery
-): ReturnType<UseGraphQueryHook<typeof PrometheusGraphQueryKind, GraphQueryOptions>> {
+): ReturnType<UseGraphQueryHook<GraphQueryOptions>> {
   const spec = useDashboardSpec();
 
   const minStep = getDurationStringSeconds(definition.options.min_step);

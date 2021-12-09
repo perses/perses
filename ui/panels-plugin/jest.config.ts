@@ -11,23 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyDatasourceSpecDefinition,
-  DatasourceSelector,
-  DatasourceSpecDefinition,
-  HTTPConfig,
-  useDataSourceConfig,
-} from '@perses-ui/core';
+import shared from '../jest.shared';
 
-export interface PrometheusSpecDatasource extends DatasourceSpecDefinition {
-  kind: 'Prometheus';
-  http: HTTPConfig;
-}
-
-function isPrometheusDatasource(def: AnyDatasourceSpecDefinition): def is PrometheusSpecDatasource {
-  return def.kind === 'Prometheus';
-}
-
-export function usePrometheusConfig(selector: DatasourceSelector) {
-  return useDataSourceConfig(selector, isPrometheusDatasource);
-}
+// Just use shared config as-is for now
+export default shared;

@@ -19,9 +19,7 @@ import { useLabelNames } from '../model/prometheus-client';
 
 export const PrometheusLabelNamesKind = 'PrometheusLabelNames' as const;
 
-type PrometheusLabelNames = VariableDefinition<LabelNamesKind, LabelNamesOptions>;
-
-type LabelNamesKind = typeof PrometheusLabelNamesKind;
+type PrometheusLabelNames = VariableDefinition<LabelNamesOptions>;
 
 interface LabelNamesOptions extends JsonObject {
   match: TemplateString[];
@@ -32,7 +30,7 @@ interface LabelNamesOptions extends JsonObject {
  */
 export function usePrometheusLabelNames(
   definition: PrometheusLabelNames
-): ReturnType<UseVariableOptionsHook<LabelNamesKind, LabelNamesOptions>> {
+): ReturnType<UseVariableOptionsHook<LabelNamesOptions>> {
   const spec = useDashboardSpec();
 
   const { start, end } = useDashboardPrometheusTimeRange();
