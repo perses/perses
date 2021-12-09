@@ -17,13 +17,14 @@ import type { Config } from '@jest/types';
 const config: Config.InitialOptions = {
   preset: 'ts-jest',
   roots: ['<rootDir>/src'],
-  testRegex: '(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js|jsx)$',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   moduleNameMapper: {
     // Jest currently doesn't natively support ES Modules, so use the non ES Modules version instead
     '^lodash-es$': 'lodash',
-    // Tell ts-jest where our project references live since it doesn't currently support them
-    '^@perses-ui/(.*)': '<rootDir>/../$1/src/index.ts',
+  },
+  globals: {
+    'ts-jest': {
+      tsconfig: '<rootDir>/../tsconfig.test.json',
+    },
   },
 };
 

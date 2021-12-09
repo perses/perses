@@ -1,0 +1,11 @@
+// Used in jest for compiling typescript with ts-jest when running tests
+{
+  "extends": "./tsconfig.web.json",
+  "compilerOptions": {
+    // ts-jest doesn't understand project references, so tell it how to find our packages
+    // (see https://github.com/kulshekhar/ts-jest/issues/1648)
+    "paths": {
+      "@perses-ui/*": ["./*/src"]
+    }
+  }
+}
