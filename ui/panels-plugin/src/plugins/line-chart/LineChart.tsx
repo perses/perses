@@ -84,6 +84,9 @@ function LineChart(props: LineChartProps) {
     }
 
     return {
+      title: {
+        show: false,
+      },
       series,
       xAxis: {
         type: 'category',
@@ -153,6 +156,12 @@ function LineChart(props: LineChartProps) {
   useLayoutEffect(() => {
     // Can't set options if no chart yet
     if (chart === undefined) return;
+
+    if (option.series === undefined) {
+      chart.showLoading();
+    } else {
+      chart.hideLoading();
+    }
 
     chart.setOption(option);
   }, [chart, option]);
