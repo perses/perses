@@ -13,10 +13,12 @@
 
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
-import { useState, useMemo, useLayoutEffect } from 'react';
+import { useState, useMemo, useLayoutEffect, useRef } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { useRunningGraphQueries } from '../GraphQueryRunner';
 import { getCommonTimeScale, getXValues, getYValues } from '../data-transform';
+import TooltipPlugin from './tooltip/TooltipPlugin';
+import UPlotContextProvider from './UPlotContextProvider';
 
 // Formatter for dates on the X axis
 const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
@@ -35,6 +37,7 @@ export interface UPlotChartProps {
  */
 function UPlotChart(props: UPlotChartProps) {
   const { width, height } = props;
+  const plotInstance = useRef<uPlot>();
   const theme = useTheme();
   const queries = useRunningGraphQueries();
 
@@ -44,8 +47,7 @@ function UPlotChart(props: UPlotChartProps) {
       return { data: undefined, options: undefined };
     }
 
-    // Create initial data/options with x values and an empty series for the
-    // x-axis values
+    // Create initial data/options with x values and an empty series for the x-axis values
     const series: uPlot.Options['series'] = [{}];
     const data: uPlot.AlignedData = [getXValues(timeScale)];
 
@@ -89,6 +91,9 @@ function UPlotChart(props: UPlotChartProps) {
       cursor: {
         x: false,
         y: false,
+        focus: {
+          prox: 50,
+        },
       },
       legend: {
         show: false,
@@ -105,21 +110,31 @@ function UPlotChart(props: UPlotChartProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>();
   const [, setPlot] = useState<uPlot | undefined>(undefined);
 
-  // Create the plot in the container div and recreate whenever data or options
-  // change
+  // Create the plot in the container div and recreate whenever data or options change
   useLayoutEffect(() => {
     if (containerRef === null) return;
     if (data === undefined || options === undefined) return;
 
-    const plot = new uPlot(options, data, containerRef);
-    setPlot(plot);
+    plotInstance.current = new uPlot(options, data, containerRef);
+    setPlot(plotInstance.current);
 
     return () => {
-      plot.destroy();
+      if (plotInstance.current) {
+        plotInstance.current.destroy();
+      }
     };
   }, [containerRef, data, options]);
 
-  return <Box ref={setContainerRef} sx={{ width, height, position: 'relative' }}></Box>;
+  if (data === undefined || options === undefined) {
+    return <p>Chart loading...</p>;
+  }
+  return (
+    <Box ref={setContainerRef} sx={{ width, height, position: 'relative' }}>
+      <UPlotContextProvider {...options} data={data}>
+        <TooltipPlugin />
+      </UPlotContextProvider>
+    </Box>
+  );
 }
 
 export default UPlotChart;
