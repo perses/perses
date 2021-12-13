@@ -15,7 +15,7 @@
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.6.0",
     "@fontsource/lato": "^4.5.0",
-    "@loadable/component": "^5.15.0",
+    "@loadable/component": "^5.15.2",
     "@mui/material": "^5.2.3",
     "@perses-ui/core": "^1.0.0",
     "@perses-ui/panels-plugin": "^1.0.0",
