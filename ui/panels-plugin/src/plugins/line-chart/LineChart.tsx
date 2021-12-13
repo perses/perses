@@ -78,7 +78,8 @@ function LineChart(props: LineChartProps) {
           data: yValues,
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
           progressiveThreshold: 1,
-          symbol: 'rect',
+          symbol: 'image://',
+          symbolSize: 35,
           // connectNulls: true,
         });
       }
