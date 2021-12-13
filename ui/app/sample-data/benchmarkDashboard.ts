@@ -23,7 +23,7 @@ const benchmarkDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '24h',
+    duration: '1h',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',
@@ -78,8 +78,8 @@ const benchmarkDashboard: DashboardResource = {
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query: 'caddy_http_request_duration_seconds_bucket',
-                // query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
+                query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
+                // query: 'caddy_http_request_duration_seconds_bucket',
               },
             },
           ],
@@ -94,7 +94,7 @@ const benchmarkDashboard: DashboardResource = {
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query: 'caddy_http_response_duration_seconds_sum',
+                query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
                 // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
               },
             },
