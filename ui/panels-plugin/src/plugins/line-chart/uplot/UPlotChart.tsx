@@ -13,7 +13,7 @@
 
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
-import { useState, useMemo, useLayoutEffect, useRef } from 'react';
+import { useMemo } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { useRunningGraphQueries } from '../GraphQueryRunner';
 import { getCommonTimeScale, getXValues, getYValues } from '../data-transform';
@@ -37,7 +37,6 @@ export interface UPlotChartProps {
  */
 function UPlotChart(props: UPlotChartProps) {
   const { width, height } = props;
-  const plotInstance = useRef<uPlot>();
   const theme = useTheme();
   const queries = useRunningGraphQueries();
 
@@ -107,29 +106,11 @@ function UPlotChart(props: UPlotChartProps) {
     };
   }, [queries, width, height, theme]);
 
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>();
-  const [, setPlot] = useState<uPlot | undefined>(undefined);
-
-  // Create the plot in the container div and recreate whenever data or options change
-  useLayoutEffect(() => {
-    if (containerRef === null) return;
-    if (data === undefined || options === undefined) return;
-
-    plotInstance.current = new uPlot(options, data, containerRef);
-    setPlot(plotInstance.current);
-
-    return () => {
-      if (plotInstance.current) {
-        plotInstance.current.destroy();
-      }
-    };
-  }, [containerRef, data, options]);
-
   if (data === undefined || options === undefined) {
     return <p>Chart loading...</p>;
   }
   return (
-    <Box ref={setContainerRef} sx={{ width, height, position: 'relative' }}>
+    <Box sx={{ width, height, position: 'relative' }}>
       <UPlotContextProvider {...options} data={data}>
         <TooltipPlugin />
       </UPlotContextProvider>
