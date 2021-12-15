@@ -33,7 +33,7 @@
     "use-resize-observer": "^8.0.0"
   },
   "devDependencies": {
-    "@svgr/webpack": "^6.1.1",
+    "@svgr/webpack": "^6.1.2",
     "@types/loadable__component": "^5.13.4",
     "@types/webpack-bundle-analyzer": "^4.4.1",
     "@types/webpack-dev-server": "^4.5.0",
