@@ -12,14 +12,30 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { JsonObject, PanelProps } from '@perses-ui/core';
 
-export const EmptyChartKind = 'EmptyChart' as const;
-
-export type EmptyChartProps = PanelProps<EmptyChartOptions>;
-
-type EmptyChartOptions = JsonObject;
-
-export function EmptyChart(props: EmptyChartProps) {
-  return <Box sx={{ overflow: 'hidden' }}>{props.definition.kind}</Box>;
+interface SeriesMarkerProps {
+  markerColor: string;
 }
+
+function SeriesMarker(props: SeriesMarkerProps) {
+  const { markerColor } = props;
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        margin: '0 6px 0 0',
+      }}
+    >
+      <Box
+        sx={{
+          width: '9px',
+          height: '9px',
+          backgroundColor: markerColor,
+        }}
+      ></Box>
+    </Box>
+  );
+}
+
+export default SeriesMarker;

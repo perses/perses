@@ -14,13 +14,33 @@
 import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
-import { GridComponent, DatasetComponent } from 'echarts/components';
+import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
+import { getRandomColor } from '../../utils/palette';
 import { useRunningGraphQueries } from './GraphQueryRunner';
+import { getCommonTimeScale } from './data-transform';
+import { FocusedSeriesArray, getFocusedSeries, GraphCursorPositionValues } from './tooltip/tooltip-model';
+import Tooltip from './tooltip/Tooltip';
 
-echarts.use([EChartsLineChart, GridComponent, DatasetComponent, CanvasRenderer]);
+echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
+
+const defaultCursorData = {
+  coords: {
+    plotCanvas: {
+      x: 0,
+      y: 0,
+    },
+    viewport: {
+      x: 0,
+      y: 0,
+    },
+  },
+  chartWidth: 0,
+  focusedSeriesIdx: null,
+  focusedPointIdx: null,
+};
 
 export interface LineChartProps {
   width: number;
@@ -33,50 +53,69 @@ export interface LineChartProps {
 function LineChart(props: LineChartProps) {
   const { width, height } = props;
   const queries = useRunningGraphQueries();
+  const [focusedSeries, setFocusedSeries] = useState<FocusedSeriesArray>([
+    { seriesIdx: null, datumIdx: null, date: '', seriesName: '', x: 0, y: 0, markerColor: '' },
+  ]);
+  const [cursorData, setCursorData] = useState<GraphCursorPositionValues>(defaultCursorData);
+  const [stepInterval, setStepInterval] = useState(60000);
 
   // Calculate the LineChart options based on the query results
   const option: EChartsOption = useMemo(() => {
-    const dataset: EChartsOption['dataset'] = [];
+    const timeScale = getCommonTimeScale(queries);
+    if (timeScale === undefined) {
+      return { data: undefined, options: undefined };
+    }
+    setStepInterval(timeScale.stepMs);
+
     const series: EChartsOption['series'] = [];
 
     for (const query of queries) {
       // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
 
-      // For every series that comes back from a query, add a Dataset and a Series
-      // to the chart
       for (const dataSeries of query.data.series) {
-        const id = dataset.length;
-
-        dataset.push({
-          id,
-          source: [['timestamp', 'value'], ...dataSeries.values],
-        });
-
         series.push({
           type: 'line',
-          datasetId: id,
           name: dataSeries.name,
+          data: [...dataSeries.values],
+          color: getRandomColor(dataSeries.name),
           symbol: 'none',
+          showSymbol: false,
+          lineStyle: { width: 1.5 },
+          emphasis: { lineStyle: { width: 2 } },
+          sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
+          progressiveThreshold: 1,
+          // connectNulls: true,
         });
       }
     }
 
     return {
-      dataset,
+      title: {
+        show: false,
+      },
       series,
       xAxis: {
         type: 'time',
+        boundaryGap: false,
       },
       yAxis: {
         type: 'value',
+        axisPointer: {
+          show: false,
+          triggerTooltip: false,
+        },
       },
       grid: {
         top: 10,
         right: 10,
-        bottom: 0,
+        bottom: 10,
         left: 0,
         containLabel: true,
+      },
+      animation: false,
+      tooltip: {
+        show: false,
       },
     };
   }, [queries]);
@@ -101,8 +140,59 @@ function LineChart(props: LineChartProps) {
     // Can't set options if no chart yet
     if (chart === undefined) return;
 
+    if (option.series === undefined) {
+      chart.showLoading();
+    } else {
+      chart.hideLoading();
+    }
+
     chart.setOption(option);
   }, [chart, option]);
+
+  // Populate tooltip data from getZr cursor coordinates
+  useMemo(() => {
+    if (chart === undefined) return;
+
+    const chartWidth = chart.getWidth();
+    let lastPosX = 0;
+    let lastPosY = 0;
+    chart.getZr().on('mousemove', (params) => {
+      const pointInPixel = [params.offsetX, params.offsetY];
+      const mouseEvent = params.event as MouseEvent;
+
+      // only trigger tooltip when within chart canvas
+      if (!chart.containPixel('grid', pointInPixel)) {
+        // TODO (sjcobb): fix bug where exit canvas quickly and tooltip content not reset
+        setFocusedSeries([]); // reset tooltip content
+        return;
+      }
+
+      // only trigger when cursor has moved
+      if (lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
+        setCursorData({
+          coords: {
+            plotCanvas: {
+              x: params.offsetX,
+              y: params.offsetY,
+            },
+            viewport: {
+              x: mouseEvent.pageX,
+              y: mouseEvent.pageY,
+            },
+          },
+          chartWidth: chartWidth,
+          focusedSeriesIdx: null,
+          focusedPointIdx: null,
+        });
+        const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
+        if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
+          setFocusedSeries(getFocusedSeries(option.series, pointInGrid, stepInterval));
+        }
+      }
+      lastPosX = params.offsetX;
+      lastPosY = params.offsetY;
+    });
+  }, [chart, option, stepInterval]);
 
   // Resize the chart to match as width/height changes
   const prevSize = useRef({ width, height });
@@ -119,7 +209,12 @@ function LineChart(props: LineChartProps) {
     prevSize.current = { width, height };
   }, [chart, width, height]);
 
-  return <Box ref={setContainerRef} sx={{ width, height }}></Box>;
+  return (
+    <>
+      <Box ref={setContainerRef} sx={{ width, height }}></Box>
+      <Tooltip cursorData={cursorData} focusedSeries={focusedSeries}></Tooltip>
+    </>
+  );
 }
 
 export default LineChart;
