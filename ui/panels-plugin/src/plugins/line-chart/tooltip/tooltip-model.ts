@@ -14,7 +14,7 @@
 import type { EChartsOption } from 'echarts';
 import { GraphSeriesValueTuple } from '@perses-ui/core';
 
-export const TOOLTIP_MAX_WIDTH = 400;
+export const TOOLTIP_MIN_WIDTH = 350;
 
 export const TOOLTIP_MAX_ITEMS = 12;
 

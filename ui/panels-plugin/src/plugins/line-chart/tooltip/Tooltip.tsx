@@ -13,13 +13,13 @@
 
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
-import { FocusedSeriesArray, GraphCursorPositionValues, TOOLTIP_MAX_WIDTH } from './tooltip-model';
+import { FocusedSeriesArray, GraphCursorPositionValues, TOOLTIP_MIN_WIDTH } from './tooltip-model';
 import TooltipContent from './TooltipContent';
 
 const tooltipContentStyle: SxProps<Theme> = {
   display: 'block',
-  width: TOOLTIP_MAX_WIDTH,
-  minWidth: TOOLTIP_MAX_WIDTH,
+  minWidth: TOOLTIP_MIN_WIDTH,
+  minHeight: '100px',
   maxHeight: '180px',
   overflow: 'scroll',
   position: 'absolute',
@@ -28,7 +28,7 @@ const tooltipContentStyle: SxProps<Theme> = {
   fontSize: '11px',
   color: '#fff',
   zIndex: 1,
-  resize: 'both',
+  transition: 'all 0.2s ease',
 };
 
 interface TooltipProps {
@@ -43,8 +43,9 @@ function Tooltip(props: TooltipProps) {
   const cursorBufferY = 16;
   const flipTooltipPosThreshold = cursorData.chartWidth / 2 + 30;
   const adjustedX =
-    coords.x > flipTooltipPosThreshold ? coords.x - (TOOLTIP_MAX_WIDTH + cursorBufferX) : (coords.x += cursorBufferX);
+    coords.x > flipTooltipPosThreshold ? coords.x - (TOOLTIP_MIN_WIDTH + cursorBufferX) : (coords.x += cursorBufferX);
   const adjustedY = coords.y + cursorBufferY;
+  const resizeDir = focusedSeries.length > 1 ? 'both' : 'none';
   return (
     <>
       <Box
@@ -52,6 +53,7 @@ function Tooltip(props: TooltipProps) {
           ...tooltipContentStyle,
           top: adjustedY,
           left: adjustedX,
+          resize: resizeDir,
         }}
       >
         <TooltipContent focusedSeries={focusedSeries} />
