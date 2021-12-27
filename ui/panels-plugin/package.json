@@ -12,7 +12,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@mui/material": "^5.2.4",
+    "@mui/material": "^5.2.5",
     "@perses-ui/core": "^1.0.0",
     "date-fns": "^2.27.0",
     "echarts": "^5.2.2",
