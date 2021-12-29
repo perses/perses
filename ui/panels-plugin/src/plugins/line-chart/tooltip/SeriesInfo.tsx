@@ -13,7 +13,7 @@
 
 import { Box, Typography } from '@mui/material';
 import SeriesMarker from './SeriesMarker';
-import { TOOLTIP_MIN_WIDTH } from './tooltip-model';
+// import { TOOLTIP_MIN_WIDTH } from './tooltip-model';
 
 interface SeriesInfoProps {
   seriesName: string;
@@ -45,7 +45,7 @@ function SeriesInfo(props: SeriesInfoProps) {
     );
   }
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'row', width: TOOLTIP_MIN_WIDTH }}>
+    <Box sx={{ display: 'flex', flexDirection: 'row' }}>
       <SeriesMarker markerColor={markerColor} />
       <Box component="span" sx={{ mr: '4px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
         {seriesName}

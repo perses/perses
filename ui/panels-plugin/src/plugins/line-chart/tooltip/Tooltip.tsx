@@ -18,8 +18,9 @@ import TooltipContent from './TooltipContent';
 
 const tooltipContentStyle: SxProps<Theme> = {
   display: 'block',
-  minWidth: TOOLTIP_MIN_WIDTH,
-  minHeight: '100px',
+  // minWidth: TOOLTIP_MIN_WIDTH,
+  // minHeight: '100px',
+  width: TOOLTIP_MIN_WIDTH,
   maxHeight: '180px',
   overflow: 'scroll',
   position: 'absolute',
@@ -28,7 +29,7 @@ const tooltipContentStyle: SxProps<Theme> = {
   fontSize: '11px',
   color: '#fff',
   zIndex: 1,
-  transition: 'all 0.2s ease',
+  transition: 'all 0.1s ease',
 };
 
 interface TooltipProps {

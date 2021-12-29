@@ -55,7 +55,7 @@ export interface FocusedSeriesInfo {
 
 export type FocusedSeriesArray = FocusedSeriesInfo[];
 
-export function getFocusedSeries(
+export function getNearbySeries(
   series: EChartsOption['series'],
   pointInGrid: number[],
   stepIntervalMs: number

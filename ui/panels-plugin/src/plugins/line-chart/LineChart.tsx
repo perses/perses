@@ -21,7 +21,7 @@ import { Box } from '@mui/material';
 import { getRandomColor } from '../../utils/palette';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getCommonTimeScale } from './data-transform';
-import { FocusedSeriesArray, getFocusedSeries, GraphCursorPositionValues } from './tooltip/tooltip-model';
+import { FocusedSeriesArray, getNearbySeries, GraphCursorPositionValues } from './tooltip/tooltip-model';
 import Tooltip from './tooltip/Tooltip';
 
 echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
@@ -186,7 +186,7 @@ function LineChart(props: LineChartProps) {
         });
         const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
         if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-          setFocusedSeries(getFocusedSeries(option.series, pointInGrid, stepInterval));
+          setFocusedSeries(getNearbySeries(option.series, pointInGrid, stepInterval));
         }
       }
       lastPosX = params.offsetX;
