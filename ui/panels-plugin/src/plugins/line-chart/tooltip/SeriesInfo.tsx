@@ -31,6 +31,7 @@ interface SeriesInfoProps {
 
 function SeriesInfo(props: SeriesInfoProps) {
   const { seriesName, y, markerColor } = props;
+  const formattedSeriesName = seriesName.replaceAll('=', ': ');
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row' }}>
       <SeriesMarker markerColor={markerColor} />
@@ -44,7 +45,7 @@ function SeriesInfo(props: SeriesInfoProps) {
           },
         }}
       >
-        {seriesName}
+        {formattedSeriesName}
       </Box>
       <Box>{y}</Box>
     </Box>
