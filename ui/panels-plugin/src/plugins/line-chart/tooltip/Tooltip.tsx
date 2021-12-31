@@ -19,7 +19,6 @@ import TooltipContent from './TooltipContent';
 
 const tooltipContentStyle: SxProps<Theme> = {
   width: TOOLTIP_MIN_WIDTH,
-  maxHeight: '180px',
   overflow: 'scroll',
   position: 'absolute',
   top: 0,
@@ -50,7 +49,7 @@ function Tooltip(props: TooltipProps) {
   const adjustedY = coords.y + cursorPaddingY;
 
   const focusedSeriesNum = focusedSeries.length;
-  const resizeDir = focusedSeriesNum > 1 ? 'both' : 'none';
+  const resizeDir = focusedSeriesNum > 2 ? 'vertical' : 'none';
 
   let cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0)`;
   if (coords.x > flipTooltipPosThreshold) {
@@ -62,7 +61,11 @@ function Tooltip(props: TooltipProps) {
   }
 
   useEffect(() => {
-    setTooltipVisibility(true);
+    if (focusedSeriesNum >= 1) {
+      setTooltipVisibility(true);
+    } else {
+      setTooltipVisibility(false);
+    }
   }, [focusedSeriesNum]);
 
   return (
@@ -71,8 +74,9 @@ function Tooltip(props: TooltipProps) {
         sx={{
           ...tooltipContentStyle,
           visibility: isTooltipVisible ? 'visible' : 'hidden',
-          transform: cursorTransform,
           resize: resizeDir,
+          height: resizeDir === 'vertical' ? '180px' : 'auto',
+          transform: cursorTransform,
         }}
         onMouseLeave={handleHoverOff}
       >
