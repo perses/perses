@@ -40,8 +40,7 @@ export function useGraphCursorPosition(): GraphCursorPositionValues | null {
     plotCanvas: Coordinate;
   } | null>(null);
 
-  // TODO (sjcobb): how to get chartWidth, is it within plotCanvas?
-  const chartWidth = 700;
+  const chartWidth = plotCanvasBBox.current.width;
 
   const clearCoords = useCallback(() => {
     setCoords(null);
