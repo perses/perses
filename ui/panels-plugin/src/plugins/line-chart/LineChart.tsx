@@ -154,8 +154,8 @@ function LineChart(props: LineChartProps) {
     if (chart === undefined) return;
 
     const chartWidth = chart.getWidth();
-    let lastPosX = 0;
-    let lastPosY = 0;
+    let lastPosX = -1;
+    let lastPosY = -1;
     chart.getZr().on('mousemove', (params) => {
       const pointInPixel = [params.offsetX, params.offsetY];
       const mouseEvent = params.event as MouseEvent;

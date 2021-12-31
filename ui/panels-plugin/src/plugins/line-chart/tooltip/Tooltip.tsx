@@ -43,7 +43,8 @@ function Tooltip(props: TooltipProps) {
 
   const coords = cursorData.coords.plotCanvas;
   const cursorPaddingX = 8;
-  const cursorPaddingY = 16;
+  const cursorPaddingY = 14;
+  const cursorWidth = 14;
   const flipTooltipPosThreshold = cursorData.chartWidth / 2 + 30;
   const adjustedX = (coords.x += cursorPaddingX);
   const adjustedY = coords.y + cursorPaddingY;
@@ -53,7 +54,9 @@ function Tooltip(props: TooltipProps) {
 
   let cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0)`;
   if (coords.x > flipTooltipPosThreshold) {
-    cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0) translateX(-100%) translateX(-30px)`;
+    cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0) translateX(-100%) translateX(-${
+      cursorPaddingX + cursorWidth
+    }px)`;
   }
 
   function handleHoverOff() {
