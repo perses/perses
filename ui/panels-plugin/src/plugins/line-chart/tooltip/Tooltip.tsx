@@ -13,6 +13,7 @@
 
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import { useEffect, useState } from 'react';
 import { FocusedSeriesArray, GraphCursorPositionValues, TOOLTIP_MIN_WIDTH } from './tooltip-model';
 import TooltipContent from './TooltipContent';
 
@@ -30,6 +31,10 @@ const tooltipContentStyle: SxProps<Theme> = {
   color: '#fff',
   zIndex: 1,
   transition: 'all 0.1s ease',
+  //
+  top: 0,
+  left: 0,
+  // transform: translate3d(716px, 66px, 0px);
 };
 
 interface TooltipProps {
@@ -39,23 +44,42 @@ interface TooltipProps {
 
 function Tooltip(props: TooltipProps) {
   const { focusedSeries, cursorData } = props;
+
+  const [isTooltipVisible, setTooltipVisibility] = useState(true);
+
   const coords = cursorData.coords.plotCanvas;
-  const cursorBufferX = 8;
-  const cursorBufferY = 16;
+  const cursorPaddingX = 8;
+  const cursorPaddingY = 16;
   const flipTooltipPosThreshold = cursorData.chartWidth / 2 + 30;
-  const adjustedX =
-    coords.x > flipTooltipPosThreshold ? coords.x - (TOOLTIP_MIN_WIDTH + cursorBufferX) : (coords.x += cursorBufferX);
-  const adjustedY = coords.y + cursorBufferY;
-  const resizeDir = focusedSeries.length > 1 ? 'both' : 'none';
+  const adjustedX = (coords.x += cursorPaddingX);
+  const adjustedY = coords.y + cursorPaddingY;
+
+  const focusedSeriesNum = focusedSeries.length;
+  const resizeDir = focusedSeriesNum > 1 ? 'both' : 'none';
+
+  let cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0)`;
+  if (coords.x > flipTooltipPosThreshold) {
+    cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0) translateX(-100%) translateX(-30px)`;
+  }
+
+  function handleHoverOff() {
+    setTooltipVisibility(false);
+  }
+
+  useEffect(() => {
+    setTooltipVisibility(true);
+  }, [focusedSeriesNum]);
+
   return (
     <>
       <Box
         sx={{
           ...tooltipContentStyle,
-          top: adjustedY,
-          left: adjustedX,
+          visibility: isTooltipVisible ? 'visible' : 'hidden',
+          transform: cursorTransform,
           resize: resizeDir,
         }}
+        onMouseLeave={handleHoverOff}
       >
         <TooltipContent focusedSeries={focusedSeries} />
       </Box>

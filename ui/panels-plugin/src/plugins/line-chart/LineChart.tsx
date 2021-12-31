@@ -162,8 +162,7 @@ function LineChart(props: LineChartProps) {
 
       // only trigger tooltip when within chart canvas
       if (!chart.containPixel('grid', pointInPixel)) {
-        // TODO (sjcobb): fix bug where exit canvas quickly and tooltip content not reset
-        setFocusedSeries([]); // reset tooltip content
+        setFocusedSeries([]); // resets tooltip content
         return;
       }
 

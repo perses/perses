@@ -1454,7 +1454,6 @@ describe('getNearbySeries', () => {
       y: 0.08486496097624885,
     },
   ];
-  console.log(seriesMock, pointInGridMock, focusedSeriesOutput);
 
   it('should return focused series data for points nearby the cursor', () => {
     expect(getNearbySeries(seriesMock, pointInGridMock, 31000)).toEqual(focusedSeriesOutput);
