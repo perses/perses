@@ -17,16 +17,27 @@ import SeriesInfo from './SeriesInfo';
 
 function TooltipContent(props: { focusedSeries: FocusedSeriesArray }) {
   const { focusedSeries } = props;
+  let lastDate = focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : '';
   return (
     <>
-      {focusedSeries.map(({ datumIdx, seriesIdx, seriesName, date, y, markerColor }) => {
+      {focusedSeries.map(({ datumIdx, seriesIdx, seriesName, date, y, markerColor }, index) => {
         if (datumIdx === null || seriesIdx === null) return null;
         const key = seriesIdx.toString() + datumIdx.toString();
+
+        if (index === 0 || date !== lastDate) {
+          return (
+            <Box key={key} sx={{ padding: '5px 10px' }}>
+              <Typography variant="body2" sx={{ mb: '2px' }}>
+                {date}
+              </Typography>
+              <SeriesInfo seriesName={seriesName} y={y} markerColor={markerColor} totalSeries={focusedSeries.length} />
+            </Box>
+          );
+        }
+
+        lastDate = date;
         return (
           <Box key={key} sx={{ padding: '5px 10px' }}>
-            <Typography variant="body2" sx={{ mb: '2px' }}>
-              {date}
-            </Typography>
             <SeriesInfo seriesName={seriesName} y={y} markerColor={markerColor} totalSeries={focusedSeries.length} />
           </Box>
         );
