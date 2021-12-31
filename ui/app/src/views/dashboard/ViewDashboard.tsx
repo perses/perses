@@ -42,8 +42,8 @@ function ViewDashboard(props: DashboardViewProps) {
           sx={{
             padding: (theme) => theme.spacing(1, 2),
             flexGrow: 1,
-            overflowX: 'hidden',
-            overflowY: 'auto',
+            // overflowX: 'hidden',
+            // overflowY: 'auto',
           }}
         >
           <Dashboard />

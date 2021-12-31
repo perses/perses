@@ -18,23 +18,18 @@ import { FocusedSeriesArray, GraphCursorPositionValues, TOOLTIP_MIN_WIDTH } from
 import TooltipContent from './TooltipContent';
 
 const tooltipContentStyle: SxProps<Theme> = {
-  display: 'block',
-  // minWidth: TOOLTIP_MIN_WIDTH,
-  // minHeight: '100px',
   width: TOOLTIP_MIN_WIDTH,
   maxHeight: '180px',
   overflow: 'scroll',
   position: 'absolute',
+  top: 0,
+  left: 0,
   backgroundColor: '#000',
   opacity: 0.9,
   fontSize: '11px',
   color: '#fff',
   zIndex: 1,
   transition: 'all 0.1s ease',
-  //
-  top: 0,
-  left: 0,
-  // transform: translate3d(716px, 66px, 0px);
 };
 
 interface TooltipProps {

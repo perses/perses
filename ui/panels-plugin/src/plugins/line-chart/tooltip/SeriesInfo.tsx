@@ -11,9 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Typography } from '@mui/material';
+import { Box, Theme } from '@mui/material';
+// import { Box, Theme, Typography } from '@mui/material';
+import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import SeriesMarker from './SeriesMarker';
 // import { TOOLTIP_MIN_WIDTH } from './tooltip-model';
+
+const seriesNameStyle: SxProps<Theme> = {
+  mr: '4px',
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  // ':hover': {
+  //   overflow: 'visible',
+  //   white-space: 'normal'
+  // },
+};
 
 interface SeriesInfoProps {
   seriesName: string;
@@ -23,31 +36,41 @@ interface SeriesInfoProps {
 }
 
 function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, y, markerColor, totalSeries } = props;
-  if (totalSeries === 1) {
-    const namesArr = seriesName.split(',');
-    return (
-      <>
-        <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-          <SeriesMarker markerColor={markerColor} />
-          <Box>value: {y}</Box>
-        </Box>
-        <Box sx={{ m: '5px 0' }}>
-          {namesArr.map((value, idx) => {
-            return (
-              <Typography key={idx} sx={{ m: '0 0 4px', fontSize: '11px' }}>
-                {value}
-              </Typography>
-            );
-          })}
-        </Box>
-      </>
-    );
-  }
+  // const { seriesName, y, markerColor, totalSeries } = props;
+  const { seriesName, y, markerColor } = props;
+  // if (totalSeries === 1) {
+  //   const namesArr = seriesName.split(',');
+  //   return (
+  //     <>
+  //       <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+  //         <SeriesMarker markerColor={markerColor} />
+  //         <Box>value: {y}</Box>
+  //       </Box>
+  //       <Box sx={{ m: '5px 0' }}>
+  //         {namesArr.map((value, idx) => {
+  //           return (
+  //             <Typography key={idx} sx={{ m: '0 0 4px', fontSize: '11px' }}>
+  //               {value}
+  //             </Typography>
+  //           );
+  //         })}
+  //       </Box>
+  //     </>
+  //   );
+  // }
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row' }}>
       <SeriesMarker markerColor={markerColor} />
-      <Box component="span" sx={{ mr: '4px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+      <Box
+        component="span"
+        sx={{
+          ...seriesNameStyle,
+          '&:hover': {
+            overflow: 'visible',
+            whiteSpace: 'normal',
+          },
+        }}
+      >
         {seriesName}
       </Box>
       <Box>{y}</Box>
