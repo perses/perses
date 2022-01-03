@@ -16,7 +16,7 @@
     "@emotion/styled": "^11.6.0",
     "@fontsource/lato": "^4.5.0",
     "@loadable/component": "^5.15.2",
-    "@mui/material": "^5.2.5",
+    "@mui/material": "^5.2.7",
     "@perses-ui/core": "^1.0.0",
     "@perses-ui/panels-plugin": "^1.0.0",
     "@perses-ui/prometheus-plugin": "^1.0.0",
