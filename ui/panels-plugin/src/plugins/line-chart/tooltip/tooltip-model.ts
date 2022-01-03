@@ -92,7 +92,7 @@ export function getNearbySeries(
   if (focusedX === null || focusedY === null) {
     return currentFocusedData;
   }
-  const xBufferMs = stepIntervalMs * 0.75; // decrease milliseconds to narrow date range shown in tooltip
+  const xBufferMs = stepIntervalMs * 0.5; // decrease milliseconds to narrow date range shown in tooltip
   const yBufferMultiplier = 0.3; // increase to expand focus area vertically
   if (Array.isArray(series)) {
     for (let seriesIdx = 0; seriesIdx < series.length; seriesIdx++) {
