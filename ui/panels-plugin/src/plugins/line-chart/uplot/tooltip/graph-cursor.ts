@@ -13,9 +13,9 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AlignedData, Series } from 'uplot';
-import { Coordinate, TOOLTIP_DATE_FORMAT } from '../../tooltip/tooltip-model';
+import { Coordinate, GraphCursorPositionValues, TOOLTIP_DATE_FORMAT } from '../../tooltip/tooltip-model';
 import { usePlotContext } from '../UPlotContext';
-import { FocusedSeriesArray, GraphCursorPositionValues } from '../../tooltip/tooltip-model';
+import { FocusedSeriesArray } from '../../utils/focused-series';
 
 /**
  * Exposes API for the Graph cursor position

@@ -16,8 +16,8 @@ import 'uplot/dist/uPlot.min.css';
 import { useMemo } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { useRunningGraphQueries } from '../GraphQueryRunner';
-import { getCommonTimeScale, getXValues, getYValues } from '../data-transform';
-import { getRandomColor } from '../../../utils/palette';
+import { getCommonTimeScale, getXValues, getYValues } from '../utils/data-transform';
+import { getRandomColor } from '../utils/palette-gen';
 import UPlotTooltipPlugin from './tooltip/UPlotTooltipPlugin';
 import UPlotContextProvider from './UPlotContextProvider';
 

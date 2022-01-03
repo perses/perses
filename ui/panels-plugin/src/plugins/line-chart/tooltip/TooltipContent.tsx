@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Typography } from '@mui/material';
-import { FocusedSeriesArray } from './tooltip-model';
+import { FocusedSeriesArray } from '../utils/focused-series';
 import SeriesInfo from './SeriesInfo';
 
 function TooltipContent(props: { focusedSeries: FocusedSeriesArray }) {

@@ -18,10 +18,11 @@ import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
-import { getRandomColor } from '../../utils/palette';
 import { useRunningGraphQueries } from './GraphQueryRunner';
-import { getCommonTimeScale } from './data-transform';
-import { getNearbySeries, TooltipData, emptyTooltipData } from './tooltip/tooltip-model';
+import { TooltipData, emptyTooltipData } from './tooltip/tooltip-model';
+import { getRandomColor } from './utils/palette-gen';
+import { getCommonTimeScale } from './utils/data-transform';
+import { getNearbySeries } from './utils/focused-series';
 import Tooltip from './tooltip/Tooltip';
 
 echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);

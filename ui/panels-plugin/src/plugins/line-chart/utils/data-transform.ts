@@ -13,7 +13,7 @@
 
 import { AbsoluteTimeRange, GraphSeries } from '@perses-ui/core';
 import { gcd } from 'mathjs';
-import { QueryState } from './GraphQueryRunner';
+import { QueryState } from '../GraphQueryRunner';
 
 export interface TimeScale {
   startMs: number;
