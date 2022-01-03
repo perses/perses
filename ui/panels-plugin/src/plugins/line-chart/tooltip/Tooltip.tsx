@@ -14,7 +14,7 @@
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { useEffect, useState } from 'react';
-import { FocusedSeriesArray, GraphCursorPositionValues, TOOLTIP_MIN_WIDTH } from './tooltip-model';
+import { TooltipData, TOOLTIP_MIN_WIDTH } from './tooltip-model';
 import TooltipContent from './TooltipContent';
 
 const tooltipContentStyle: SxProps<Theme> = {
@@ -32,20 +32,18 @@ const tooltipContentStyle: SxProps<Theme> = {
 };
 
 interface TooltipProps {
-  focusedSeries: FocusedSeriesArray;
-  cursorData: GraphCursorPositionValues;
+  tooltipData: TooltipData;
 }
 
 function Tooltip(props: TooltipProps) {
-  const { focusedSeries, cursorData } = props;
-
+  const { focusedSeries, cursor } = props.tooltipData;
   const [isTooltipVisible, setTooltipVisibility] = useState(true);
 
-  const coords = cursorData.coords.plotCanvas;
+  const coords = cursor.coords.plotCanvas;
   const cursorPaddingX = 8;
   const cursorPaddingY = 14;
   const cursorWidth = 14;
-  const flipTooltipPosThreshold = cursorData.chartWidth / 2 + 30;
+  const flipTooltipPosThreshold = cursor.chartWidth / 2 + 30;
   const adjustedX = (coords.x += cursorPaddingX);
   const adjustedY = coords.y + cursorPaddingY;
 

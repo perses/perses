@@ -33,7 +33,7 @@ function UPlotTooltipPlugin() {
     return null;
   }
 
-  return <Tooltip cursorData={cursor} focusedSeries={focusedSeries}></Tooltip>;
+  return <Tooltip tooltipData={{ cursor, focusedSeries }}></Tooltip>;
 }
 
 export default UPlotTooltipPlugin;

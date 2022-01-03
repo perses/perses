@@ -28,6 +28,32 @@ export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   hour12: true,
 });
 
+export interface TooltipData {
+  focusedSeries: FocusedSeriesArray;
+  cursor: GraphCursorPositionValues;
+}
+
+export const defaultCursorData = {
+  coords: {
+    plotCanvas: {
+      x: 0,
+      y: 0,
+    },
+    viewport: {
+      x: 0,
+      y: 0,
+    },
+  },
+  chartWidth: 0,
+  focusedSeriesIdx: null,
+  focusedPointIdx: null,
+};
+
+export const emptyTooltipData = {
+  cursor: defaultCursorData,
+  focusedSeries: [{ seriesIdx: null, datumIdx: null, date: '', seriesName: '', x: 0, y: 0, markerColor: '' }],
+};
+
 export interface Coordinate {
   x: number;
   y: number;

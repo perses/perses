@@ -21,26 +21,10 @@ import { Box } from '@mui/material';
 import { getRandomColor } from '../../utils/palette';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getCommonTimeScale } from './data-transform';
-import { FocusedSeriesArray, getNearbySeries, GraphCursorPositionValues } from './tooltip/tooltip-model';
+import { getNearbySeries, TooltipData, emptyTooltipData } from './tooltip/tooltip-model';
 import Tooltip from './tooltip/Tooltip';
 
 echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
-
-const defaultCursorData = {
-  coords: {
-    plotCanvas: {
-      x: 0,
-      y: 0,
-    },
-    viewport: {
-      x: 0,
-      y: 0,
-    },
-  },
-  chartWidth: 0,
-  focusedSeriesIdx: null,
-  focusedPointIdx: null,
-};
 
 export interface LineChartProps {
   width: number;
@@ -53,10 +37,7 @@ export interface LineChartProps {
 function LineChart(props: LineChartProps) {
   const { width, height } = props;
   const queries = useRunningGraphQueries();
-  const [focusedSeries, setFocusedSeries] = useState<FocusedSeriesArray>([
-    { seriesIdx: null, datumIdx: null, date: '', seriesName: '', x: 0, y: 0, markerColor: '' },
-  ]);
-  const [cursorData, setCursorData] = useState<GraphCursorPositionValues>(defaultCursorData);
+  const [tooltipData, setTooltipData] = useState<TooltipData>(emptyTooltipData);
   const [stepInterval, setStepInterval] = useState(60000);
 
   // Calculate the LineChart options based on the query results
@@ -162,30 +143,32 @@ function LineChart(props: LineChartProps) {
 
       // only trigger tooltip when within chart canvas
       if (!chart.containPixel('grid', pointInPixel)) {
-        setFocusedSeries([]); // resets tooltip content
+        setTooltipData(emptyTooltipData); // resets tooltip content
         return;
       }
 
       // only trigger when cursor has moved
       if (lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
-        setCursorData({
-          coords: {
-            plotCanvas: {
-              x: params.offsetX,
-              y: params.offsetY,
-            },
-            viewport: {
-              x: mouseEvent.pageX,
-              y: mouseEvent.pageY,
-            },
-          },
-          chartWidth: chartWidth,
-          focusedSeriesIdx: null,
-          focusedPointIdx: null,
-        });
         const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
         if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-          setFocusedSeries(getNearbySeries(option.series, pointInGrid, stepInterval));
+          setTooltipData({
+            cursor: {
+              coords: {
+                plotCanvas: {
+                  x: params.offsetX,
+                  y: params.offsetY,
+                },
+                viewport: {
+                  x: mouseEvent.pageX,
+                  y: mouseEvent.pageY,
+                },
+              },
+              chartWidth: chartWidth,
+              focusedSeriesIdx: null,
+              focusedPointIdx: null,
+            },
+            focusedSeries: getNearbySeries(option.series, pointInGrid, stepInterval),
+          });
         }
       }
       lastPosX = params.offsetX;
@@ -211,7 +194,7 @@ function LineChart(props: LineChartProps) {
   return (
     <>
       <Box ref={setContainerRef} sx={{ width, height }}></Box>
-      <Tooltip cursorData={cursorData} focusedSeries={focusedSeries}></Tooltip>
+      <Tooltip tooltipData={tooltipData}></Tooltip>
     </>
   );
 }
