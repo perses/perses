@@ -13,14 +13,14 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AlignedData, Series } from 'uplot';
-import { Coordinate, GraphCursorPositionValues, TOOLTIP_DATE_FORMAT } from '../../tooltip/tooltip-model';
+import { Coordinate, CursorData, TOOLTIP_DATE_FORMAT } from '../../tooltip/tooltip-model';
 import { usePlotContext } from '../UPlotContext';
 import { FocusedSeriesArray } from '../../utils/focused-series';
 
 /**
  * Exposes API for the Graph cursor position
  */
-export function useGraphCursorPosition(): GraphCursorPositionValues | null {
+export function useGraphCursorPosition(): CursorData | null {
   const { plotCanvas, addPlotEventListeners } = usePlotContext();
   const plotCanvasBBox = useRef({
     left: 0,
@@ -31,10 +31,8 @@ export function useGraphCursorPosition(): GraphCursorPositionValues | null {
     height: 0,
   });
 
-  // nearest time series to the cursor
-  const [focusedSeriesIdx, setFocusedSeriesIdx] = useState<number | null>(null);
-  // nearest x-value to the cursor
-  const [focusedPointIdx, setFocusedPointIdx] = useState<number | null>(null);
+  const [focusedSeriesIdx, setFocusedSeriesIdx] = useState<number | null>(null); // nearest time series to the cursor
+  const [focusedPointIdx, setFocusedPointIdx] = useState<number | null>(null); // nearest x-value to the cursor
   const [coords, setCoords] = useState<{
     viewport: Coordinate;
     plotCanvas: Coordinate;
@@ -103,11 +101,7 @@ export function useGraphCursorPosition(): GraphCursorPositionValues | null {
 }
 
 /**
- * Since the uPlot only finds a single series, this method finds
- * all values that are equal to the cursor's focused value.
- *
- * @param focusedSeriesIdx The index of the series that is focused by the cursor
- * @param focusedPointIdx The current index along the x axis
+ * Finds all values that are equal to the cursor's focused value (since uPlot only finds a single series)
  */
 export function getOverlappingSeriesIndices(
   focusedSeriesIdx: number | null,
@@ -174,7 +168,7 @@ export function getFocusedSeriesInfo(
   return focusedSeries;
 }
 
-export function useOverlappingSeries(cursor: GraphCursorPositionValues | null, series: Series[], data: AlignedData) {
+export function useOverlappingSeries(cursor: CursorData | null, series: Series[], data: AlignedData) {
   return useMemo(() => {
     if (cursor === null || cursor?.focusedPointIdx === null || cursor?.focusedSeriesIdx === null) return [];
     const { focusedSeriesIdx, focusedPointIdx } = cursor;

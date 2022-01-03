@@ -14,7 +14,7 @@
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { useEffect, useState } from 'react';
-import { TooltipData, TOOLTIP_MIN_WIDTH } from './tooltip-model';
+import { Coordinate, TooltipData, TOOLTIP_MIN_WIDTH } from './tooltip-model';
 import TooltipContent from './TooltipContent';
 
 const tooltipContentStyle: SxProps<Theme> = {
@@ -31,6 +31,16 @@ const tooltipContentStyle: SxProps<Theme> = {
   transition: 'all 0.1s ease',
 };
 
+function assembleTransform(coords: Coordinate, chartWidth: number) {
+  const cursorPaddingX = 30;
+  const cursorPaddingY = 14;
+  const adjustedY = coords.y + cursorPaddingY;
+  const flipTooltipPosThreshold = chartWidth / 2 + 30;
+  return coords.x < flipTooltipPosThreshold
+    ? `translate3d(${coords.x + cursorPaddingX}px, ${adjustedY}px, 0)`
+    : `translate3d(${coords.x}px, ${adjustedY}px, 0) translateX(-100%)`;
+}
+
 interface TooltipProps {
   tooltipData: TooltipData;
 }
@@ -38,24 +48,9 @@ interface TooltipProps {
 function Tooltip(props: TooltipProps) {
   const { focusedSeries, cursor } = props.tooltipData;
   const [isTooltipVisible, setTooltipVisibility] = useState(true);
-
-  const coords = cursor.coords.plotCanvas;
-  const cursorPaddingX = 8;
-  const cursorPaddingY = 14;
-  const cursorWidth = 14;
-  const flipTooltipPosThreshold = cursor.chartWidth / 2 + 30;
-  const adjustedX = (coords.x += cursorPaddingX);
-  const adjustedY = coords.y + cursorPaddingY;
-
+  const cursorTransform = assembleTransform(cursor.coords.plotCanvas, cursor.chartWidth);
   const focusedSeriesNum = focusedSeries.length;
   const resizeDir = focusedSeriesNum > 2 ? 'vertical' : 'none';
-
-  let cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0)`;
-  if (coords.x > flipTooltipPosThreshold) {
-    cursorTransform = `translate3d(${adjustedX}px, ${adjustedY}px, 0) translateX(-100%) translateX(-${
-      cursorPaddingX + cursorWidth
-    }px)`;
-  }
 
   function handleHoverOff() {
     setTooltipVisibility(false);

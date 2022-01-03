@@ -53,10 +53,10 @@ export interface Coordinate {
   y: number;
 }
 
-export interface GraphCursorPositionValues {
+export interface CursorData {
   coords: {
-    plotCanvas: Coordinate; // coords relative to plot canvas, css px
-    viewport: Coordinate; // coords relative to viewport , css px
+    plotCanvas: Coordinate;
+    viewport: Coordinate;
   };
   chartWidth: number;
   focusedSeriesIdx: number | null;
@@ -65,5 +65,5 @@ export interface GraphCursorPositionValues {
 
 export interface TooltipData {
   focusedSeries: FocusedSeriesArray;
-  cursor: GraphCursorPositionValues;
+  cursor: CursorData;
 }

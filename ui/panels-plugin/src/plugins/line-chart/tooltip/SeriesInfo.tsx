@@ -16,7 +16,7 @@ import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import SeriesMarker from './SeriesMarker';
 
 const seriesNameStyle: SxProps<Theme> = {
-  mr: '4px',
+  marginRight: '4px',
   textOverflow: 'ellipsis',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
