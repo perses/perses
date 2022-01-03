@@ -38,15 +38,13 @@ function LineChart(props: LineChartProps) {
   const { width, height } = props;
   const queries = useRunningGraphQueries();
   const [tooltipData, setTooltipData] = useState<TooltipData>(emptyTooltipData);
-  const [stepInterval, setStepInterval] = useState(60000);
 
   // Calculate the LineChart options based on the query results
-  const option: EChartsOption = useMemo(() => {
+  const { option, timeScale } = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
     if (timeScale === undefined) {
-      return { data: undefined, options: undefined };
+      return { option: { series: undefined }, timeScale: undefined };
     }
-    setStepInterval(timeScale.stepMs);
 
     const series: EChartsOption['series'] = [];
 
@@ -66,12 +64,11 @@ function LineChart(props: LineChartProps) {
           emphasis: { lineStyle: { width: 2 } },
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
           progressiveThreshold: 1,
-          // connectNulls: true,
         });
       }
     }
 
-    return {
+    const option: EChartsOption = {
       title: {
         show: false,
       },
@@ -99,6 +96,11 @@ function LineChart(props: LineChartProps) {
         show: false,
       },
     };
+
+    return {
+      option,
+      timeScale,
+    };
   }, [queries]);
 
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -118,7 +120,6 @@ function LineChart(props: LineChartProps) {
 
   // Sync options with chart instance
   useLayoutEffect(() => {
-    // Can't set options if no chart yet
     if (chart === undefined) return;
 
     if (option.series === undefined) {
@@ -151,6 +152,7 @@ function LineChart(props: LineChartProps) {
       if (lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
         const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
         if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
+          const stepInterval = timeScale ? timeScale.stepMs : 0;
           setTooltipData({
             cursor: {
               coords: {
@@ -174,7 +176,7 @@ function LineChart(props: LineChartProps) {
       lastPosX = params.offsetX;
       lastPosY = params.offsetY;
     });
-  }, [chart, option, stepInterval]);
+  }, [chart, option, timeScale]);
 
   // Resize the chart to match as width/height changes
   const prevSize = useRef({ width, height });

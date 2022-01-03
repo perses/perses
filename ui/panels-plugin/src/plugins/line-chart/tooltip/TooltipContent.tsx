@@ -25,6 +25,7 @@ function TooltipContent(props: { focusedSeries: FocusedSeriesArray }) {
         const key = seriesIdx.toString() + datumIdx.toString();
 
         if (index === 0 || date !== lastDate) {
+          lastDate = date;
           return (
             <Box key={key} sx={{ padding: '5px 10px' }}>
               <Typography variant="body2" sx={{ mb: '2px' }}>
