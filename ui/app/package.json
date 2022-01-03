@@ -16,7 +16,7 @@
     "@emotion/styled": "^11.6.0",
     "@fontsource/lato": "^4.5.0",
     "@loadable/component": "^5.15.2",
-    "@mui/material": "^5.2.4",
+    "@mui/material": "^5.2.7",
     "@perses-ui/core": "^1.0.0",
     "@perses-ui/panels-plugin": "^1.0.0",
     "@perses-ui/prometheus-plugin": "^1.0.0",
@@ -28,7 +28,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-error-boundary": "^3.1.4",
-    "react-query": "^3.34.5",
+    "react-query": "^3.34.7",
     "use-immer": "^0.6.0",
     "use-resize-observer": "^8.0.0"
   },
@@ -36,7 +36,7 @@
     "@svgr/webpack": "^6.1.2",
     "@types/loadable__component": "^5.13.4",
     "@types/webpack-bundle-analyzer": "^4.4.1",
-    "@types/webpack-dev-server": "^4.5.0",
+    "@types/webpack-dev-server": "^4.5.1",
     "css-loader": "^6.5.1",
     "dotenv-defaults": "^3.0.0",
     "fork-ts-checker-webpack-plugin": "^6.5.0",
@@ -47,7 +47,7 @@
     "webpack": "^5.65.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.6.0",
+    "webpack-dev-server": "^4.7.2",
     "webpack-merge": "^5.8.0"
   }
 }
