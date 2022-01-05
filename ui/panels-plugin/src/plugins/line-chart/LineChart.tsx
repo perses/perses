@@ -80,10 +80,6 @@ function LineChart(props: LineChartProps) {
       },
       yAxis: {
         type: 'value',
-        axisPointer: {
-          show: false,
-          triggerTooltip: false,
-        },
       },
       grid: {
         top: 10,
