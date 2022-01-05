@@ -38,6 +38,7 @@ export function getNearbySeries(
   if (focusedX === null || focusedY === null) {
     return currentFocusedData;
   }
+  // TODO: remove yBufferMultiplier, calculate interval using yAxis max
   const xBufferMs = stepIntervalMs * 0.5; // decrease milliseconds to narrow date range shown in tooltip
   const yBufferMultiplier = 0.3; // increase to expand focus area vertically
   if (Array.isArray(series)) {

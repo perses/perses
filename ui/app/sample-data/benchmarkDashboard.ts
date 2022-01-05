@@ -157,13 +157,13 @@ const benchmarkDashboard: DashboardResource = {
       {
         kind: 'Grid',
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/seriesTest' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/seriesTest' },
+          },
           {
             x: 12,
             y: 0,
@@ -176,13 +176,13 @@ const benchmarkDashboard: DashboardResource = {
       {
         kind: 'Grid',
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/seriesTestAlt' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/seriesTestAlt' },
+          },
           {
             x: 12,
             y: 0,

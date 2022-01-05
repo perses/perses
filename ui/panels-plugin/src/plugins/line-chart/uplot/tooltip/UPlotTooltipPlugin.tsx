@@ -27,7 +27,6 @@ function UPlotTooltipPlugin() {
     return null;
   }
 
-  // const { focusedSeriesIdx, focusedPointIdx, coords } = cursor;
   const { focusedSeriesIdx, focusedPointIdx } = cursor;
   if (!focusedPointIdx || !focusedSeriesIdx) {
     return null;

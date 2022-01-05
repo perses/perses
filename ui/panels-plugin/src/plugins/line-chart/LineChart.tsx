@@ -128,13 +128,14 @@ function LineChart(props: LineChartProps) {
     chart.setOption(option);
   }, [chart, option]);
 
-  // Populate tooltip data from getZr cursor coordinates
+  // TODO: refactor
   useMemo(() => {
     if (chart === undefined) return;
 
     const chartWidth = chart.getWidth();
     let lastPosX = -1;
     let lastPosY = -1;
+    // Populate tooltip data from getZr cursor coordinates
     chart.getZr().on('mousemove', (params) => {
       const pointInPixel = [params.offsetX, params.offsetY];
       const mouseEvent = params.event as MouseEvent;
