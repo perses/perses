@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rimraf dist/",
     "build": "tsc",
-    "test": "jest",
+    "test": "TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },

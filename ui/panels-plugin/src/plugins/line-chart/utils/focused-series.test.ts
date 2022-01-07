@@ -73,7 +73,7 @@ describe('getNearbySeries', () => {
 
   const focusedSeriesOutput = [
     {
-      date: '12/29/2021, 1:27:32 PM',
+      date: '12/29/2021, 6:27:32 PM',
       datumIdx: 10,
       markerColor: 'hsla(569657620,50%,50%,0.8)',
       seriesIdx: 1,
