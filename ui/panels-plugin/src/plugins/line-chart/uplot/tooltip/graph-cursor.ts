@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AlignedData, Series } from 'uplot';
-import { Coordinate, CursorData, TOOLTIP_DATE_FORMAT } from '../../tooltip/tooltip-model';
+import { Coordinate, CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from '../../tooltip/tooltip-model';
 import { usePlotContext } from '../UPlotContext';
 import { FocusedSeriesArray } from '../../utils/focused-series';
 
@@ -143,6 +143,7 @@ export function getFocusedSeriesInfo(
   const xValue = data[0][focusedPointIdx] ?? 0;
   const formattedDate = TOOLTIP_DATE_FORMAT.format(xValue);
   for (const seriesIdx of overlappingIndices) {
+    if (focusedSeries.length > TOOLTIP_MAX_ITEMS) break;
     const overlapSeries = series[seriesIdx];
     if (overlapSeries !== undefined) {
       const label = overlapSeries.label ?? '';

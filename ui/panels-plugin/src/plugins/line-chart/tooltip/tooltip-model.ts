@@ -15,7 +15,7 @@ import { FocusedSeriesArray } from '../utils/focused-series';
 
 export const TOOLTIP_MIN_WIDTH = 350;
 
-export const TOOLTIP_MAX_ITEMS = 12;
+export const TOOLTIP_MAX_ITEMS = 50;
 
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
