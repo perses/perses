@@ -53,6 +53,7 @@ function Tooltip(props: TooltipProps) {
   const resizeDir = focusedSeriesNum > 5 ? 'vertical' : 'none';
 
   function handleHoverOff() {
+    // TODO (sjcobb): partially fixes lingering tooltip but still needs adjustments
     setTooltipVisibility(false);
   }
 
