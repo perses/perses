@@ -50,7 +50,7 @@ function Tooltip(props: TooltipProps) {
   const [isTooltipVisible, setTooltipVisibility] = useState(true);
   const cursorTransform = assembleTransform(cursor.coords.plotCanvas, cursor.chartWidth);
   const focusedSeriesNum = focusedSeries.length;
-  const resizeDir = focusedSeriesNum > 2 ? 'vertical' : 'none';
+  const resizeDir = focusedSeriesNum > 5 ? 'vertical' : 'none';
 
   function handleHoverOff() {
     setTooltipVisibility(false);

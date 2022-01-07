@@ -30,7 +30,8 @@ export type FocusedSeriesArray = FocusedSeriesInfo[];
 export function getNearbySeries(
   series: EChartsOption['series'],
   pointInGrid: number[],
-  stepIntervalMs: number
+  xBuffer: number,
+  yBuffer: number
 ): FocusedSeriesArray {
   const currentFocusedData: FocusedSeriesArray = [];
   const focusedX: number | null = pointInGrid[0] ?? null;
@@ -38,9 +39,7 @@ export function getNearbySeries(
   if (focusedX === null || focusedY === null) {
     return currentFocusedData;
   }
-  // TODO: remove yBufferMultiplier, calculate interval using yAxis max
-  const xBufferMs = stepIntervalMs * 0.5; // decrease milliseconds to narrow date range shown in tooltip
-  const yBufferMultiplier = 0.3; // increase to expand focus area vertically
+
   if (Array.isArray(series)) {
     for (let seriesIdx = 0; seriesIdx < series.length; seriesIdx++) {
       const currentSeries = series[seriesIdx];
@@ -53,18 +52,20 @@ export function getNearbySeries(
             const datum: GraphSeriesValueTuple = currentSeries.data[datumIdx];
             const xValue = datum[0];
             const yValue = datum[1];
-            if (focusedX <= xValue + xBufferMs && focusedX >= xValue - xBufferMs) {
-              if (focusedY <= yValue + yValue * yBufferMultiplier && focusedY >= yValue - yValue * yBufferMultiplier) {
-                const formattedDate = TOOLTIP_DATE_FORMAT.format(xValue);
-                currentFocusedData.push({
-                  seriesIdx: seriesIdx,
-                  datumIdx: datumIdx,
-                  seriesName: currentSeriesName,
-                  date: formattedDate,
-                  x: xValue,
-                  y: yValue,
-                  markerColor: markerColor.toString(),
-                });
+            if (yValue) {
+              if (focusedX <= xValue + xBuffer && focusedX >= xValue - xBuffer) {
+                if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                  const formattedDate = TOOLTIP_DATE_FORMAT.format(xValue);
+                  currentFocusedData.push({
+                    seriesIdx: seriesIdx,
+                    datumIdx: datumIdx,
+                    seriesName: currentSeriesName,
+                    date: formattedDate,
+                    x: xValue,
+                    y: yValue,
+                    markerColor: markerColor.toString(),
+                  });
+                }
               }
             }
           }

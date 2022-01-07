@@ -16,7 +16,7 @@ import type { EChartsOption } from 'echarts';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useMemo, useState, useLayoutEffect, useRef } from 'react';
+import { useEffect, useMemo, useState, useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { TooltipData, emptyTooltipData } from './tooltip/tooltip-model';
@@ -60,11 +60,9 @@ function LineChart(props: LineChartProps) {
           data: [...dataSeries.values],
           color: getRandomColor(dataSeries.name),
           symbol: 'none',
-          showSymbol: false,
           lineStyle: { width: 1.5 },
           emphasis: { lineStyle: { width: 2 } },
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
-          progressiveThreshold: 1,
         });
       }
     }
@@ -89,6 +87,7 @@ function LineChart(props: LineChartProps) {
         containLabel: true,
       },
       animation: false,
+      progressiveThreshold: 1000,
       tooltip: {
         show: false,
       },
@@ -128,17 +127,23 @@ function LineChart(props: LineChartProps) {
     chart.setOption(option);
   }, [chart, option]);
 
-  // TODO: refactor
-  useMemo(() => {
-    if (chart === undefined) return;
+  // Populate tooltip data from getZr cursor coordinates
+  useEffect(() => {
+    if (chart === undefined || option.series === undefined) return;
 
     const chartWidth = chart.getWidth();
+    const xAxisInterval = timeScale ? timeScale.stepMs : 0;
+    const xBuffer = xAxisInterval * 0.5;
+
+    // @ts-ignore
+    const yAxisInterval = chart.getModel().getComponent('yAxis').axis.scale._interval;
+    const yBuffer = yAxisInterval * 0.5;
+
     let lastPosX = -1;
     let lastPosY = -1;
-    // Populate tooltip data from getZr cursor coordinates
     chart.getZr().on('mousemove', (params) => {
-      const pointInPixel = [params.offsetX, params.offsetY];
       const mouseEvent = params.event as MouseEvent;
+      const pointInPixel = [params.offsetX, params.offsetY];
 
       // only trigger tooltip when within chart canvas
       if (!chart.containPixel('grid', pointInPixel)) {
@@ -150,7 +155,6 @@ function LineChart(props: LineChartProps) {
       if (lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
         const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
         if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-          const stepInterval = timeScale ? timeScale.stepMs : 0;
           setTooltipData({
             cursor: {
               coords: {
@@ -167,7 +171,7 @@ function LineChart(props: LineChartProps) {
               focusedSeriesIdx: null,
               focusedPointIdx: null,
             },
-            focusedSeries: getNearbySeries(option.series, pointInGrid, stepInterval),
+            focusedSeries: getNearbySeries(option.series, pointInGrid, xBuffer, yBuffer),
           });
         }
       }
