@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { getNearbySeries } from './focused-series';
-console.log(getNearbySeries);
-/*
+
 describe('getNearbySeries', () => {
   const seriesDataInput = [
     {
@@ -69,7 +68,8 @@ describe('getNearbySeries', () => {
   // https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
   const pointInGrid = [1640802452000.2622, 0.09444444444444444]; // converted from chart.getZr() mousemove coordinates
 
-  const stepIntervalMs = 31000; // used for calculating x axis buffer range, how many dates to show in tooltip
+  const xBuffer = 15500;
+  const yBuffer = 0.05;
 
   const focusedSeriesOutput = [
     {
@@ -85,7 +85,6 @@ describe('getNearbySeries', () => {
   ];
 
   it('should return focused series data for points nearby the cursor', () => {
-    expect(getNearbySeries(seriesDataInput, pointInGrid, stepIntervalMs)).toEqual(focusedSeriesOutput);
+    expect(getNearbySeries(seriesDataInput, pointInGrid, xBuffer, yBuffer)).toEqual(focusedSeriesOutput);
   });
 });
-*/

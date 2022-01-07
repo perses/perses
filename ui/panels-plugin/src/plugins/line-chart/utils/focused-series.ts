@@ -52,20 +52,18 @@ export function getNearbySeries(
             const datum: GraphSeriesValueTuple = currentSeries.data[datumIdx];
             const xValue = datum[0];
             const yValue = datum[1];
-            if (yValue) {
-              if (focusedX <= xValue + xBuffer && focusedX >= xValue - xBuffer) {
-                if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-                  const formattedDate = TOOLTIP_DATE_FORMAT.format(xValue);
-                  currentFocusedData.push({
-                    seriesIdx: seriesIdx,
-                    datumIdx: datumIdx,
-                    seriesName: currentSeriesName,
-                    date: formattedDate,
-                    x: xValue,
-                    y: yValue,
-                    markerColor: markerColor.toString(),
-                  });
-                }
+            if (focusedX <= xValue + xBuffer && focusedX >= xValue - xBuffer) {
+              if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                const formattedDate = TOOLTIP_DATE_FORMAT.format(xValue);
+                currentFocusedData.push({
+                  seriesIdx: seriesIdx,
+                  datumIdx: datumIdx,
+                  seriesName: currentSeriesName,
+                  date: formattedDate,
+                  x: xValue,
+                  y: yValue,
+                  markerColor: markerColor.toString(),
+                });
               }
             }
           }
