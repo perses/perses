@@ -158,8 +158,7 @@ function LineChart(props: LineChartProps) {
     const xAxisInterval = timeScale ? timeScale.stepMs : 0;
     const xBuffer = xAxisInterval * 0.5;
 
-    // @ts-ignore
-    const yAxisInterval = chart.getModel().getComponent('yAxis').axis.scale._interval;
+    const yAxisInterval = chart['_model'].getComponent('yAxis').axis.scale._interval;
     const yBuffer = yAxisInterval * 0.5;
 
     let lastPosX = -1;
