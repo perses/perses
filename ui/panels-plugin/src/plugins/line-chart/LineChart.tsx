@@ -27,6 +27,27 @@ import Tooltip from './tooltip/Tooltip';
 
 echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
+// TODO (sjcobb): move to chart theme, share with GaugeChart
+const noDataOption = {
+  title: {
+    show: true,
+    textStyle: {
+      color: 'grey',
+      fontSize: 20,
+    },
+    text: 'No data',
+    left: 'center',
+    top: 'center',
+  },
+  xAxis: {
+    show: false,
+  },
+  yAxis: {
+    show: false,
+  },
+  series: [],
+};
+
 export interface LineChartProps {
   width: number;
   height: number;
@@ -66,6 +87,8 @@ function LineChart(props: LineChartProps) {
         });
       }
     }
+
+    if (series.length === 0) return { option: noDataOption, timeScale };
 
     const option: EChartsOption = {
       title: {

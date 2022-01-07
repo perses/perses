@@ -23,7 +23,7 @@ const benchmarkDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '6h',
+    duration: '24h',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',

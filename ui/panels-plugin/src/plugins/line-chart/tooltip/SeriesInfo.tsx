@@ -31,6 +31,7 @@ interface SeriesInfoProps {
 
 function SeriesInfo(props: SeriesInfoProps) {
   const { seriesName, y, markerColor } = props;
+  // TODO (sjcobb): regex to remove __name__ and quotes
   const formattedSeriesName = seriesName.replaceAll('=', ': ');
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row' }}>
