@@ -28,12 +28,12 @@ const tooltipContentStyle: SxProps<Theme> = {
   fontSize: '11px',
   color: '#fff',
   zIndex: 1,
-  transition: 'all 0.1s ease',
+  transition: 'all 0.1s ease-out',
 };
 
 function assembleTransform(coords: Coordinate, chartWidth: number) {
-  const cursorPaddingX = 30;
-  const cursorPaddingY = 14;
+  const cursorPaddingX = 32;
+  const cursorPaddingY = 16;
   const adjustedY = coords.y + cursorPaddingY;
   const flipTooltipPosThreshold = chartWidth / 2 + 30;
   return coords.x < flipTooltipPosThreshold
@@ -47,7 +47,7 @@ interface TooltipProps {
 
 function Tooltip(props: TooltipProps) {
   const { focusedSeries, cursor } = props.tooltipData;
-  const [isTooltipVisible, setTooltipVisibility] = useState(true);
+  const [isTooltipVisible, setTooltipVisibility] = useState<boolean>(true);
   const cursorTransform = assembleTransform(cursor.coords.plotCanvas, cursor.chartWidth);
   const focusedSeriesNum = focusedSeries.length;
   const resizeDir = focusedSeriesNum > 5 ? 'vertical' : 'none';
@@ -71,6 +71,7 @@ function Tooltip(props: TooltipProps) {
         sx={{
           ...tooltipContentStyle,
           visibility: isTooltipVisible ? 'visible' : 'hidden',
+          opacity: isTooltipVisible ? 1 : 0,
           resize: resizeDir,
           height: resizeDir === 'vertical' ? '180px' : 'auto',
           transform: cursorTransform,

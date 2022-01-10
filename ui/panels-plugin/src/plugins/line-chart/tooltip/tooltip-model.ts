@@ -13,7 +13,7 @@
 
 import { FocusedSeriesArray } from '../utils/focused-series';
 
-export const TOOLTIP_MIN_WIDTH = 350;
+export const TOOLTIP_MIN_WIDTH = 360;
 
 export const TOOLTIP_MAX_ITEMS = 50;
 
