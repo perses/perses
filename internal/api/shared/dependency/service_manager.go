@@ -18,12 +18,14 @@ package dependency
 import (
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
+	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
@@ -33,6 +35,7 @@ import (
 type ServiceManager interface {
 	GetDashboard() dashboard.Service
 	GetDatasource() datasource.Service
+	GetFolder() folder.Service
 	GetGlobalDatasource() globaldatasource.Service
 	GetHealth() health.Service
 	GetProject() project.Service
@@ -43,6 +46,7 @@ type service struct {
 	ServiceManager
 	dashboard        dashboard.Service
 	datasource       datasource.Service
+	folder           folder.Service
 	globalDatasource globaldatasource.Service
 	health           health.Service
 	project          project.Service
@@ -52,6 +56,7 @@ type service struct {
 func NewServiceManager(dao PersistenceManager) ServiceManager {
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard())
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource())
+	folderService := folderImpl.NewService(dao.GetFolder())
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource())
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject())
@@ -59,6 +64,7 @@ func NewServiceManager(dao PersistenceManager) ServiceManager {
 	return &service{
 		dashboard:        dashboardService,
 		datasource:       datasourceService,
+		folder:           folderService,
 		globalDatasource: globalDatasourceService,
 		health:           healthService,
 		project:          projectService,
@@ -72,6 +78,10 @@ func (s *service) GetDashboard() dashboard.Service {
 
 func (s *service) GetDatasource() datasource.Service {
 	return s.datasource
+}
+
+func (s *service) GetFolder() folder.Service {
+	return s.folder
 }
 
 func (s *service) GetGlobalDatasource() globaldatasource.Service {

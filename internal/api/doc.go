@@ -19,3 +19,4 @@ package api
 //go:generate go run generate.go -package=datasource -plural=datasources -kind=Datasource -isProjectResource=true
 //go:generate go run generate.go -package=project -plural=projects -kind=Project
 //go:generate go run generate.go -package=dashboard -plural=dashboards -kind=Dashboard -isProjectResource=true
+//go:generate go run generate.go -package=folder -plural=folders -kind=Folder -isProjectResource=true
