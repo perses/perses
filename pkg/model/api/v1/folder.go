@@ -124,7 +124,7 @@ func (f *Folder) validate() error {
 	// Because the number of folders you can describe in this document is not limited but the URL is limited, you won't be able to put the folder tree in the URL.
 	//
 	// So if the dashboard is referenced in multiple sub-folder, the UI won't be able to know from which folder the dashboard is coming from.
-	var folderList []FolderSpec
+	folderList := make([]FolderSpec, len(f.Spec))
 	copy(folderList, f.Spec)
 	dashboardSet := make(map[string]bool)
 	for len(folderList) > 0 {
