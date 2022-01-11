@@ -118,5 +118,27 @@ func (f *Folder) validate() error {
 	if len(f.Spec) == 0 {
 		return fmt.Errorf("spec cannot be empty")
 	}
+	// Verify there is only one reference to a dashboard.
+	// We have to limit it because otherwise in the UI we won't be able to determinate from which folder the dashboard is coming from.
+	// You will likely have this link https://perses-dev/project/<your_project>/folders/<folder_name>/<dashboard_name>.
+	// Because the number of folders you can describe in this document is not limited but the URL is limited, you won't be able to put the folder tree in the URL.
+	//
+	// So if the dashboard is referenced in multiple sub-folder, the UI won't be able to know from which folder the dashboard is coming from.
+	var folderList []FolderSpec
+	copy(folderList, f.Spec)
+	dashboardSet := make(map[string]bool)
+	for len(folderList) > 0 {
+		var current FolderSpec
+		current, folderList = folderList[0], folderList[1:]
+		if current.Kind == KindDashboard {
+			if !dashboardSet[current.Name] {
+				dashboardSet[current.Name] = true
+			} else {
+				return fmt.Errorf("dashboard %q is referenced multiple times in the folder %q", current.Name, f.Metadata.Name)
+			}
+		} else {
+			folderList = append(folderList, current.Spec...)
+		}
+	}
 	return nil
 }
