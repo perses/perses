@@ -68,8 +68,8 @@ describe('getNearbySeries', () => {
   // https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
   const pointInGrid = [1640802452000.2622, 0.09444444444444444]; // converted from chart.getZr() mousemove coordinates
 
-  const xBuffer = 15500;
-  const yBuffer = 0.05;
+  const xBuffer = 15500; // milliseconds
+  const yBuffer = 0.05; // calculated from y axis interval
 
   const focusedSeriesOutput = [
     {

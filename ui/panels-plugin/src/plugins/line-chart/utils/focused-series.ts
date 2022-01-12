@@ -27,6 +27,11 @@ export interface FocusedSeriesInfo {
 
 export type FocusedSeriesArray = FocusedSeriesInfo[];
 
+/**
+ * Returns formatted series data for the points that are close to the user's cursor
+ * Increase xBuffer (ms) to show multiple x axis dates for a given series in the tooltip
+ * Adjust yBuffer (defaults to half of y axis interval) to increase or decrease number of series shown
+ */
 export function getNearbySeries(
   series: EChartsOption['series'],
   pointInGrid: number[],
