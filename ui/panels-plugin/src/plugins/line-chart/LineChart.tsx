@@ -84,6 +84,7 @@ function LineChart(props: LineChartProps) {
           lineStyle: { width: 1.5 },
           emphasis: { lineStyle: { width: 2 } },
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
+          progressiveThreshold: 100,
         });
       }
     }
@@ -110,7 +111,6 @@ function LineChart(props: LineChartProps) {
         containLabel: true,
       },
       animation: false,
-      progressiveThreshold: 1000,
       tooltip: {
         show: false,
       },
