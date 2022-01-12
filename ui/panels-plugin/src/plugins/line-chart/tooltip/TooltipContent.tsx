@@ -28,7 +28,7 @@ function TooltipContent(props: { focusedSeries: FocusedSeriesArray }) {
           lastDate = date;
           return (
             <Box key={key} sx={{ padding: '5px 10px' }}>
-              <Typography variant="body2" sx={{ mb: '2px' }}>
+              <Typography variant="body2" sx={{ margin: '4px 0 2px' }}>
                 {date}
               </Typography>
               <SeriesInfo seriesName={seriesName} y={y} markerColor={markerColor} totalSeries={focusedSeries.length} />
@@ -38,7 +38,7 @@ function TooltipContent(props: { focusedSeries: FocusedSeriesArray }) {
 
         lastDate = date;
         return (
-          <Box key={key} sx={{ padding: '5px 10px' }}>
+          <Box key={key} sx={{ margin: '0 0 2px', padding: '5px 10px' }}>
             <SeriesInfo seriesName={seriesName} y={y} markerColor={markerColor} totalSeries={focusedSeries.length} />
           </Box>
         );

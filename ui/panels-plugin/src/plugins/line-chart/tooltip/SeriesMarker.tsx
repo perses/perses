@@ -29,8 +29,8 @@ function SeriesMarker(props: SeriesMarkerProps) {
     >
       <Box
         sx={{
-          width: '9px',
-          height: '9px',
+          width: '10px',
+          height: '10px',
           backgroundColor: markerColor,
         }}
       ></Box>

@@ -22,11 +22,31 @@ interface SeriesInfoProps {
 }
 
 function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, y, markerColor } = props;
-  // TODO (sjcobb): regex to remove __name__ and quotes
-  const formattedSeriesName = seriesName.replaceAll('=', ': ');
+  const { seriesName, y, markerColor, totalSeries } = props;
+  // TODO (sjcobb): regex to remove __name__ and quotes, replace = with :
+  if (totalSeries === 1) {
+    return (
+      <Box sx={{ margin: '0 0 4px' }}>
+        <Box
+          sx={{
+            height: '16px',
+            margin: '0 0 2px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'left',
+          }}
+        >
+          <SeriesMarker markerColor={markerColor} />
+          <Box component="span">value: {y}</Box>
+        </Box>
+        <Box>{seriesName}</Box>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+    <Box sx={{ minHeight: '16px', margin: '0 0 2px', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <SeriesMarker markerColor={markerColor} />
       <Box
         component="span"
@@ -41,7 +61,7 @@ function SeriesInfo(props: SeriesInfoProps) {
           },
         }}
       >
-        {formattedSeriesName}
+        {seriesName}
       </Box>
       <Box>{y}</Box>
     </Box>
