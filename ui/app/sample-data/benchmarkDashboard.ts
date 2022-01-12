@@ -23,7 +23,7 @@ const benchmarkDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '24h',
+    duration: '12h',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',
@@ -156,6 +156,12 @@ const benchmarkDashboard: DashboardResource = {
     layouts: [
       {
         kind: 'Grid',
+        display: {
+          title: 'Row 1',
+          collapse: {
+            open: true,
+          },
+        },
         items: [
           {
             x: 0,
@@ -175,6 +181,12 @@ const benchmarkDashboard: DashboardResource = {
       },
       {
         kind: 'Grid',
+        display: {
+          title: 'Row 2',
+          collapse: {
+            open: true,
+          },
+        },
         items: [
           {
             x: 0,

@@ -153,6 +153,7 @@ function LineChart(props: LineChartProps) {
   // Populate tooltip data from getZr cursor coordinates
   useEffect(() => {
     if (chart === undefined || option.series === undefined) return;
+    if (Array.isArray(option.series) && option.series.length === 0) return;
 
     const chartWidth = chart.getWidth();
     const xAxisInterval = timeScale ? timeScale.stepMs : 0;
@@ -161,9 +162,10 @@ function LineChart(props: LineChartProps) {
     const yAxisInterval = chart['_model'].getComponent('yAxis').axis.scale._interval;
     const yBuffer = yAxisInterval * 0.5;
 
-    let lastPosX = -1;
-    let lastPosY = -1;
-    chart.getZr().on('mousemove', (params) => {
+    let lastPosX: number | null = null;
+    let lastPosY: number | null = null;
+    const zr = chart.getZr();
+    zr.on('mousemove', (params) => {
       const mouseEvent = params.event as MouseEvent;
       const pointInPixel = [params.offsetX, params.offsetY];
 
@@ -174,7 +176,7 @@ function LineChart(props: LineChartProps) {
       }
 
       // only trigger when cursor has moved
-      if (lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
+      if (lastPosX === null || lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
         const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
         if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
           setTooltipData({
@@ -200,6 +202,12 @@ function LineChart(props: LineChartProps) {
       lastPosX = params.offsetX;
       lastPosY = params.offsetY;
     });
+
+    return () => {
+      if (zr.handler !== null) {
+        zr.off('mousemove');
+      }
+    };
   }, [chart, option, timeScale]);
 
   // Resize the chart to match as width/height changes
