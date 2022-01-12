@@ -11,25 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Theme } from '@mui/material';
-import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Coordinate, TooltipData, TOOLTIP_MIN_WIDTH } from './tooltip-model';
 import TooltipContent from './TooltipContent';
-
-const tooltipContentStyle: SxProps<Theme> = {
-  width: TOOLTIP_MIN_WIDTH,
-  overflow: 'scroll',
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  backgroundColor: '#000',
-  opacity: 0.9,
-  fontSize: '11px',
-  color: '#fff',
-  zIndex: 1,
-  transition: 'all 0.1s ease-out',
-};
 
 function assembleTransform(coords: Coordinate, chartWidth: number) {
   const cursorPaddingX = 32;
@@ -69,12 +54,21 @@ function Tooltip(props: TooltipProps) {
     <>
       <Box
         sx={{
-          ...tooltipContentStyle,
+          width: TOOLTIP_MIN_WIDTH,
+          height: resizeDir === 'vertical' ? '180px' : 'auto',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          overflow: 'scroll',
+          backgroundColor: '#000',
+          color: '#fff',
+          fontSize: '11px',
           visibility: isTooltipVisible ? 'visible' : 'hidden',
           opacity: isTooltipVisible ? 1 : 0,
-          resize: resizeDir,
-          height: resizeDir === 'vertical' ? '180px' : 'auto',
           transform: cursorTransform,
+          transition: 'all 0.1s ease-out',
+          resize: resizeDir,
+          zIndex: 1,
         }}
         onMouseLeave={handleHoverOff}
       >

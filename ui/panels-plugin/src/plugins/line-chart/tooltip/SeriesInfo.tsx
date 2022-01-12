@@ -11,16 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Theme } from '@mui/material';
-import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import { Box } from '@mui/material';
 import SeriesMarker from './SeriesMarker';
-
-const seriesNameStyle: SxProps<Theme> = {
-  marginRight: '4px',
-  textOverflow: 'ellipsis',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-};
 
 interface SeriesInfoProps {
   seriesName: string;
@@ -39,7 +31,10 @@ function SeriesInfo(props: SeriesInfoProps) {
       <Box
         component="span"
         sx={{
-          ...seriesNameStyle,
+          marginRight: '4px',
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
           '&:hover': {
             overflow: 'visible',
             whiteSpace: 'normal',
