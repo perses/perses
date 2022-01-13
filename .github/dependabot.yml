@@ -9,7 +9,7 @@ updates:
   directory: "/ui"
   open-pull-requests-limit: 10
   schedule:
-    interval: "weekly"
+    interval: "monthly"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
