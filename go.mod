@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gavv/httpexpect/v2 v2.3.1
-	github.com/labstack/echo/v4 v4.6.2
+	github.com/labstack/echo/v4 v4.6.3
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.11.0 // indirect
 	github.com/perses/common v0.8.0
