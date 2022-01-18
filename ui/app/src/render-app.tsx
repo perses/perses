@@ -20,9 +20,14 @@ import App from './App';
 import { createTheme } from './styles/theme';
 import { SnackbarProvider } from './context/SnackbarProvider';
 
-const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
+/**
+ * Renders the Perses application in the target container.
+ */
+export function renderApp(container: ReactDOM.Container | null) {
+  enableMapSet();
 
-function renderApp() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
+
   ReactDOM.render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
@@ -34,9 +39,6 @@ function renderApp() {
         </ThemeProvider>
       </QueryClientProvider>
     </React.StrictMode>,
-    document.getElementById('root')
+    container
   );
 }
-
-enableMapSet();
-renderApp();

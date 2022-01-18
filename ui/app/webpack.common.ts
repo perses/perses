@@ -17,9 +17,9 @@ import { Configuration } from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 export const commonConfig: Configuration = {
-  entry: path.resolve(__dirname, './src/index.tsx'),
+  entry: path.resolve(__dirname, './src/bundle.ts'),
   output: {
-    path: path.resolve(__dirname, './dist'),
+    path: path.resolve(__dirname, './dist/bundle'),
     publicPath: '/',
   },
   resolve: {

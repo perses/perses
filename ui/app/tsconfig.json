@@ -3,13 +3,10 @@
   "include": ["src"],
   "compilerOptions": {
     "sourceMap": true,
-    "outDir": "./dist",
     "tsBuildInfoFile": "../.build-cache/app.tsbuildinfo",
     "incremental": true,
     // Don't need composite since the app is an endpoint project
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false
+    "composite": false
   },
   "references": [
     {
