@@ -29,7 +29,7 @@ const (
 
 func ValidateOutput(o string) error {
 	if o != YAMLOutput && o != JSONOutput {
-		return fmt.Errorf("--ouput must be %q or %q", YAMLOutput, YAMLOutput)
+		return fmt.Errorf("--ouput must be %q or %q", JSONOutput, YAMLOutput)
 	}
 	return nil
 }

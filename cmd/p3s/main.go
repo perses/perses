@@ -24,7 +24,7 @@ import (
 func newRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "p3s",
-		Short: "command line interface to interact with Perses API",
+		Short: "Command line interface to interact with the Perses API",
 	}
 
 	cmd.AddCommand(version.NewCMD())

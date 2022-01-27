@@ -60,7 +60,7 @@ func NewCMD() *cobra.Command {
 			cmdUtils.HandleError(o.Execute())
 		},
 	}
-	cmd.Flags().BoolVar(&o.Short, "short", o.Short, "If true, print just the version number.")
+	cmd.Flags().BoolVar(&o.Short, "short", o.Short, "If true, just print the version number.")
 	cmd.Flags().StringVarP(&o.Output, "output", "o", o.Output, "One of 'yaml' or 'json'. Default is 'yaml'")
 	return cmd
 }
