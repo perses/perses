@@ -11,30 +11,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
-	"github.com/perses/perses/internal/cli/version"
-	"github.com/spf13/cobra"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
-func newRootCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "p3s",
-		Short: "command line interface to interact with Perses API",
-	}
+const (
+	JSONOutput = "json"
+	YAMLOutput = "yaml"
+)
 
-	cmd.AddCommand(version.NewCMD())
-	return cmd
+func ValidateOutput(o string) error {
+	if o != YAMLOutput && o != JSONOutput {
+		return fmt.Errorf("--ouput must be %q or %q", YAMLOutput, YAMLOutput)
+	}
+	return nil
 }
 
-func main() {
-	rootCmd := newRootCommand()
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+func HandleOutput(output string, obj interface{}) error {
+	var data []byte
+	var err error
+	if output == JSONOutput {
+		data, err = json.Marshal(obj)
+	} else {
+		data, err = yaml.Marshal(obj)
+	}
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(data))
+	return nil
+}
+
+func HandleError(err error) {
+	if err != nil {
+		logrus.Error(err)
 		os.Exit(1)
 	}
 }
