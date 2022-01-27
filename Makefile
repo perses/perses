@@ -21,7 +21,7 @@ COVER_PROFILE := coverage.txt
 PKG_LDFLAGS   := github.com/prometheus/common/version
 LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}"
 
-all: build-ui build
+all: build-ui build-cli build
 
 .PHONY: checkformat
 checkformat:
@@ -62,6 +62,11 @@ build: generate
 .PHONY: build-ui
 build-ui:
 	cd ./ui && npm install && npm run build
+
+.PHONY: build-cli
+build-cli:
+	@echo ">> build the perses cli"
+	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/p3s ./cmd/p3s
 
 .PHONY: crossbuild
 crossbuild: generate
