@@ -113,10 +113,10 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	}
 
 	// it's a pointer, so move to the actual element behind the pointer.
-	// Having a pointer avoid to get the error:
+	// Having a pointer avoid getting the error:
 	//           reflect.Value.Set using unaddressable value
 	// It's because the slice is usually not initialized and doesn't have any memory allocated.
-	// So it's simpler to required a pointer at the beginning.
+	// So it's simpler to require a pointer at the beginning.
 	sliceElem := result.Elem()
 	typeParameter = typeParameter.Elem()
 
@@ -129,7 +129,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	}
 	// the query returned looks like a path and can finish with a partial name.
 	// So we have to figure if the last path is the actual directory to looking for.
-	// Or it's the partial name and it should only be used to filter the list of the document.
+	// Or it's the partial name, and it should only be used to filter the list of the document.
 	// For example: `/projects/per`.
 	// `/projects` is the folder we are looking for, `per` is the partial name.
 	folder := path.Join(d.folder, q)
@@ -142,7 +142,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 		folder = filepath.Dir(folder)
 		// Let's try again if the path exists this time.
 		if _, err = os.Stat(folder); os.IsNotExist(err) {
-			// worst case, there is nothing to return. So let's initialize the slice just to avoid to return a nil slice
+			// worst case, there is nothing to return. So let's initialize the slice just to avoid returning a nil slice
 			sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
 			//and finally reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
 			result.Elem().Set(sliceElem)
@@ -155,7 +155,8 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 		return err
 	}
 	if len(files) <= 0 {
-		// in case the result is empty, let's initialize the slice just to avoid to return a nil slice
+		// in case the result is empty, let's initialize the slice just to avoid returning a nil slice
+		// TODO we should look inside the nested folder, that could make sense when we want to list all dashboards across project
 		sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
 	}
 	for _, file := range files {
@@ -218,15 +219,13 @@ func (d *fileDAO) marshal(entity interface{}) ([]byte, error) {
 }
 
 func (d *fileDAO) visit(files *[]string, path string, prefix string) error {
-	filesInfo, err := ioutil.ReadDir(path)
+	filesInfo, err := os.ReadDir(path)
 	if err != nil {
 		return err
 	}
 
 	for _, info := range filesInfo {
 		if info.IsDir() {
-			// we are not interested by a folder and it would be weird to have a folder actually.
-			// So let's skip it
 			return nil
 		}
 		file := info.Name()

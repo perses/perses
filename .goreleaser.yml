@@ -1,6 +1,7 @@
 builds:
   - id: "perses"
     main: ./cmd/perses/main.go
+    binary: "perses"
     goos:
       - linux
       - windows
@@ -12,11 +13,32 @@ builds:
       - PKG_LDFLAGS=github.com/prometheus/common/version
     ldflags:
       - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Revision={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildDate={{.Date}} -X {{.Env.PKG_LDFLAGS}}.Branch={{.Branch}}"
+  - id: "percli"
+    main: ./cmd/percli/main.go
+    binary: "percli"
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+      - PKG_LDFLAGS=github.com/prometheus/common/version
+    ldflags:
+      - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Revision={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildDate={{.Date}} -X {{.Env.PKG_LDFLAGS}}.Branch={{.Branch}}"
+archives:
+  - id: "default"
+    builds:
+      - "perses"
+      - "percli"
+    format: "tar.gz"
 dockers:
   - goos: linux
     goarch: amd64
     ids:
       - "perses"
+      - "percli"
     image_templates:
       - "docker.io/persesdev/perses:latest"
       - "docker.io/persesdev/perses:{{ .Tag }}"
