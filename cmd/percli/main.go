@@ -23,7 +23,7 @@ import (
 
 func newRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "p3s",
+		Use:   "percli",
 		Short: "Command line interface to interact with the Perses API",
 	}
 
