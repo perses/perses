@@ -15,6 +15,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/cli/login"
+	"github.com/sirupsen/logrus"
 	"os"
 
 	"github.com/perses/perses/internal/cli/version"
@@ -28,10 +30,21 @@ func newRootCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(version.NewCMD())
+	cmd.AddCommand(login.NewCMD())
 	return cmd
 }
 
+func initLogrus() {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		// Useful when you have a TTY attached.
+		// Issue explained here when this field is set to false by default:
+		// https://github.com/sirupsen/logrus/issues/896
+		FullTimestamp: true,
+	})
+}
+
 func main() {
+	initLogrus()
 	rootCmd := newRootCommand()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
