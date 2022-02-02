@@ -14,7 +14,7 @@
 import { Fragment, createContext, useContext, useMemo, useCallback } from 'react';
 import { useImmer } from 'use-immer';
 import { useErrorHandler } from 'react-error-boundary';
-import { PluginModule, PluginType, PluginResource } from '@perses-ui/core';
+import { PluginModule, PluginType, PluginResource } from '@perses-dev/core';
 import { getResourceCacheKey, PluginLoader } from './PluginLoader';
 import { usePluginRegistry } from './PluginRegistry';
 

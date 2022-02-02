@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { useDashboardSpec } from '@perses-ui/core';
+import { useDashboardSpec } from '@perses-dev/core';
 import AlertErrorBoundary from '../../components/AlertErrorBoundary';
 import GridLayout from './GridLayout';
 

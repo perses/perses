@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { DatasourceSelector, GlobalDatasourceModel } from '@perses-ui/core';
+import { DatasourceSelector, GlobalDatasourceModel } from '@perses-dev/core';
 import { useGlobalDatasourceQuery } from '../model/datasource-client';
 import { useSnackbar } from './SnackbarProvider';
 

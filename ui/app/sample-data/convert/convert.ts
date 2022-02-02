@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, DurationString, isDurationString } from '@perses-ui/core';
+import { DashboardResource, DurationString, isDurationString } from '@perses-dev/core';
 import { convertVariables } from './convert-variables';
 import { convertPanels } from './convert-panels';
 import { convertLayouts } from './convert-layouts';

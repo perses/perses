@@ -17,7 +17,7 @@ import {
   useMemoized,
   usePanelState,
   useDashboardTimeRange,
-} from '@perses-ui/core';
+} from '@perses-dev/core';
 import { milliseconds, getUnixTime } from 'date-fns';
 import { useRef } from 'react';
 import { UnixTimestampSeconds } from './api-types';

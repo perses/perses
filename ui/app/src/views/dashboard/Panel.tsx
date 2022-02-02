@@ -13,7 +13,7 @@
 
 import { useState } from 'react';
 import { Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
-import { AnyPanelDefinition } from '@perses-ui/core';
+import { AnyPanelDefinition } from '@perses-dev/core';
 import { PluginBoundary, usePanelComponent } from '../../context/plugin-registry';
 import AlertErrorFallback from '../../components/AlertErrorFallback';
 import { PanelContextProvider } from './PanelContextProvider';

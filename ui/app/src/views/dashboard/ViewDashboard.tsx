@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { DashboardResource } from '@perses-ui/core';
+import { DashboardResource } from '@perses-dev/core';
 import Footer from '../../components/Footer';
 import { DashboardContextProvider } from './DashboardContextProvider';
 import Dashboard from './Dashboard';

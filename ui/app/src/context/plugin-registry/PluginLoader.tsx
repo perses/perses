@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import loadable, { LoadableLibrary } from '@loadable/component';
-import { PluginModule, PluginResource } from '@perses-ui/core';
+import { PluginModule, PluginResource } from '@perses-dev/core';
 import { BUNDLED_PLUGINS } from './bundled-plugins';
 
 type LoadableLibraryProps = React.ComponentProps<LoadableLibrary<PluginModule>>;

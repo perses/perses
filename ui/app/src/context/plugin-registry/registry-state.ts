@@ -22,7 +22,7 @@ import {
   AnyPluginImplementation,
   JsonObject,
   ALL_PLUGIN_TYPES,
-} from '@perses-ui/core';
+} from '@perses-dev/core';
 import { BUNDLED_PLUGINS } from './bundled-plugins';
 import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from './create-plugin';
 

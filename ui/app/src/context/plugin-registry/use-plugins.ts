@@ -19,7 +19,7 @@ import {
   PluginType,
   AnyPluginDefinition,
   AnyPluginImplementation,
-} from '@perses-ui/core';
+} from '@perses-dev/core';
 import { usePluginLoadingBoundary } from './PluginLoadingBoundary';
 import { usePluginRegistry } from './PluginRegistry';
 

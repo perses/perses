@@ -1,6 +1,6 @@
 {
-  "name": "perses-ui",
-  "version": "1.0.0",
+  "name": "perses-dev",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "npm run build -w app",

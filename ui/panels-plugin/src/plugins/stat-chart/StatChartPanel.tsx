@@ -18,7 +18,7 @@ import {
   JsonObject,
   PanelProps,
   usePanelState,
-} from '@perses-ui/core';
+} from '@perses-dev/core';
 import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { JsonObject, PanelProps } from '@perses-ui/core';
+import { JsonObject, PanelProps } from '@perses-dev/core';
 
 export const EmptyChartKind = 'EmptyChart' as const;
 

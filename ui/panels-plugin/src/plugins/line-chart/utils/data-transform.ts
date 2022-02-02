@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, GraphSeries } from '@perses-ui/core';
+import { AbsoluteTimeRange, GraphSeries } from '@perses-dev/core';
 import { gcd } from 'mathjs';
 import { QueryState } from '../GraphQueryRunner';
 

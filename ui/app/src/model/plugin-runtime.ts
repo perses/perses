@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginRuntime } from '@perses-ui/core';
+import { PluginRuntime } from '@perses-dev/core';
 import { useDashboardContext } from '../views/dashboard/DashboardContextProvider';
 import { useDataSources } from '../context/DataSourceRegistry';
 import { usePanelContext } from '../views/dashboard/PanelContextProvider';

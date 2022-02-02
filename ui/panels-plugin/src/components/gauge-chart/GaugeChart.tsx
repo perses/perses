@@ -17,7 +17,7 @@ import { use } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { JsonObject } from '@perses-ui/core';
+import { JsonObject } from '@perses-dev/core';
 import { formatValue, UnitOptions } from '../../model/units';
 import { convertThresholds, defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
 import { EChartsWrapper } from '../../components/echarts-wrapper/EChartsWrapper';

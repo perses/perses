@@ -13,7 +13,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { Autocomplete, AutocompleteProps as MuiAutocompleteProps, TextField, TextFieldProps } from '@mui/material';
-import { AnyVariableDefinition } from '@perses-ui/core';
+import { AnyVariableDefinition } from '@perses-dev/core';
 import { useVariableOptions } from '../../context/plugin-registry';
 import { useDashboardContext } from './DashboardContextProvider';
 

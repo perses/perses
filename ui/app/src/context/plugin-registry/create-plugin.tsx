@@ -22,7 +22,7 @@ import {
   PluginType,
   AnyPluginImplementation,
   AnyPluginDefinition,
-} from '@perses-ui/core';
+} from '@perses-dev/core';
 
 /**
  * Take a Variable plugin and wrap it so it works with AnyVariableDefinition,

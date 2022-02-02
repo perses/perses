@@ -19,7 +19,7 @@ import {
   useDashboardSpec,
   UseGraphQueryHook,
   useMemoized,
-} from '@perses-ui/core';
+} from '@perses-dev/core';
 import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson } from '@perses-ui/core';
+import { fetchJson } from '@perses-dev/core';
 import { useQuery, UseQueryOptions } from 'react-query';
 import buildURL from './url-builder';
 

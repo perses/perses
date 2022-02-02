@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, useDashboardSpec, useMemoized, UseVariableOptionsHook, VariableDefinition } from '@perses-ui/core';
+import {
+  JsonObject,
+  useDashboardSpec,
+  useMemoized,
+  UseVariableOptionsHook,
+  VariableDefinition,
+} from '@perses-dev/core';
 import { LabelValuesRequestParameters } from '../model/api-types';
 import { useDashboardPrometheusTimeRange } from '../model/time';
 import { TemplateString, useReplaceTemplateStrings } from '../model/templating';

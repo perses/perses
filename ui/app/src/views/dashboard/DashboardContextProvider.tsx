@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo, useState } from 'react';
-import { DashboardResource, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-ui/core';
+import { DashboardResource, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 import { useVariablesState, VariablesState } from './variables';
 
 export interface DashboardContextType {

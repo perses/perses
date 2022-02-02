@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardSpec, DEFAULT_ALL_VALUE } from '@perses-ui/core';
+import { AnyVariableDefinition, DashboardSpec, DEFAULT_ALL_VALUE } from '@perses-dev/core';
 import { GrafanaVariable } from './grafana-json-model';
 
 const LABEL_NAMES = /^label_names\(\)\s*$/;

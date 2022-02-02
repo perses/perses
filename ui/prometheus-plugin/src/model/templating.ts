@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Duration, parser, StringLiteral } from 'lezer-promql';
-import { DEFAULT_ALL_VALUE, useMemoized, useDashboardVariables, VariableState } from '@perses-ui/core';
+import { DEFAULT_ALL_VALUE, useMemoized, useDashboardVariables, VariableState } from '@perses-dev/core';
 
 const REPLACE_IN_NODE_TYPES = new Set([StringLiteral, Duration]);
 

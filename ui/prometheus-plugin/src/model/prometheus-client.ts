@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from 'react-query';
-import { buildDatasourceURL, DatasourceSelector, fetchJson } from '@perses-ui/core';
+import { buildDatasourceURL, DatasourceSelector, fetchJson } from '@perses-dev/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,

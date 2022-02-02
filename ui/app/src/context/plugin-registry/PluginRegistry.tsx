@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo, useRef } from 'react';
-import { PluginModule, PluginRuntime, PluginRuntimeProvider } from '@perses-ui/core';
+import { PluginModule, PluginRuntime, PluginRuntimeProvider } from '@perses-dev/core';
 import { PluginBoundary, PluginBoundaryProps } from './PluginBoundary';
 import { LoadedPluginsByTypeAndKind, PluginResourcesByTypeAndKind, useRegistryState } from './registry-state';
 

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, JsonObject, PanelProps, usePanelState } from '@perses-ui/core';
+import { AnyGraphQueryDefinition, JsonObject, PanelProps, usePanelState } from '@perses-dev/core';
 import { useMemo } from 'react';
 import LineChart from './LineChart';
 import GraphQueryRunner from './GraphQueryRunner';
