@@ -11,6 +11,9 @@
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
+  "dependencies": {
+    "@mui/material": "^5.2.8"
+  },
   "license": "Apache-2.0",
   "files": [
     "dist"
