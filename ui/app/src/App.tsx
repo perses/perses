@@ -14,9 +14,9 @@
 import { DashboardResource } from '@perses-dev/core';
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import { ErrorAlert } from '@perses-dev/components';
 import { PluginRegistry } from './context/plugin-registry';
 import ViewDashboard from './views/dashboard/ViewDashboard';
-import AlertErrorFallback from './components/AlertErrorFallback';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import { useSampleData } from './utils/temp-sample-data';
 import Header from './components/Header';
@@ -45,11 +45,7 @@ function App() {
           overflow: 'hidden',
         }}
       >
-        <PluginRegistry
-          loadingFallback="Loading..."
-          ErrorFallbackComponent={AlertErrorFallback}
-          runtime={pluginRuntime}
-        >
+        <PluginRegistry loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert} runtime={pluginRuntime}>
           <DataSourceRegistry>
             <ViewDashboard resource={dashboard} />
           </DataSourceRegistry>

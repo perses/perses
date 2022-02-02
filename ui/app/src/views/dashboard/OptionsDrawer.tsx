@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Paper, Typography } from '@mui/material';
+import { ErrorAlert } from '@perses-dev/components';
 import { useDashboardSpec } from '@perses-dev/core';
-import AlertErrorFallback from '../../components/AlertErrorFallback';
 import { PluginBoundary } from '../../context/plugin-registry';
 import VariableAutocomplete from './VariableAutocomplete';
 
@@ -43,7 +43,7 @@ function OptionsDrawer() {
         if (variableDef.display.hide === true) return null;
 
         return (
-          <PluginBoundary key={key} loadingFallback="Loading..." ErrorFallbackComponent={AlertErrorFallback}>
+          <PluginBoundary key={key} loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
             <VariableAutocomplete variableName={key} definition={variableDef} />
           </PluginBoundary>
         );

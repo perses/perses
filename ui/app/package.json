@@ -18,6 +18,7 @@
     "@loadable/component": "^5.15.2",
     "@mui/material": "^5.4.0",
     "@perses-dev/core": "^0.1.0",
+    "@perses-dev/components": "^0.1.0",
     "@perses-dev/panels-plugin": "^0.1.0",
     "@perses-dev/prometheus-plugin": "^0.1.0",
     "immer": "^9.0.12",

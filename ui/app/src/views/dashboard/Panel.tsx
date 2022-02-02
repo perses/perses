@@ -14,8 +14,8 @@
 import { useState } from 'react';
 import { Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
 import { AnyPanelDefinition } from '@perses-dev/core';
+import { ErrorAlert } from '@perses-dev/components';
 import { PluginBoundary, usePanelComponent } from '../../context/plugin-registry';
-import AlertErrorFallback from '../../components/AlertErrorFallback';
 import { PanelContextProvider } from './PanelContextProvider';
 
 export interface PanelProps extends CardProps {
@@ -78,7 +78,7 @@ function Panel(props: PanelProps) {
       >
         {/* Actually render plugin with PanelContent component so we can wrap with a loading/error boundary */}
         <PanelContextProvider contentElement={contentElement}>
-          <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={AlertErrorFallback}>
+          <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
             <PanelContent definition={definition} />
           </PluginBoundary>
         </PanelContextProvider>

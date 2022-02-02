@@ -10,6 +10,10 @@
   },
   "references": [
     {
+      "path": "../components",
+      "prepend": false
+    },
+    {
       "path": "../core",
       "prepend": false
     },

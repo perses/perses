@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ErrorBoundary } from 'react-error-boundary';
-import AlertErrorFallback from './AlertErrorFallback';
+import { ErrorAlert } from '@perses-dev/components';
 
 export interface AlertErrorBoundaryProps {
   children?: React.ReactNode;
@@ -23,7 +23,7 @@ export interface AlertErrorBoundaryProps {
  */
 function AlertErrorBoundary(props: AlertErrorBoundaryProps) {
   const { children } = props;
-  return <ErrorBoundary FallbackComponent={AlertErrorFallback}>{children}</ErrorBoundary>;
+  return <ErrorBoundary FallbackComponent={ErrorAlert}>{children}</ErrorBoundary>;
 }
 
 export default AlertErrorBoundary;
