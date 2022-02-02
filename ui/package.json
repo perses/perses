@@ -1,5 +1,6 @@
 {
   "name": "perses-dev",
+  "description": "Monorepo for the Perses UI",
   "version": "0.1.0",
   "private": true,
   "scripts": {
