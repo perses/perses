@@ -13,9 +13,12 @@
   },
   "workspaces": [
     "app",
+    "components",
     "core",
-    "prometheus-plugin",
-    "panels-plugin"
+    "dashboards",
+    "panels-plugin",
+    "plugin-system",
+    "prometheus-plugin"
   ],
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.1",

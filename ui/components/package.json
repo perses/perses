@@ -1,0 +1,18 @@
+{
+  "name": "@perses-dev/components",
+  "version": "0.1.0",
+  "description": "Common UI components used across Perses features",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "tsc",
+    "test": "echo 'no test to run' && exit 0",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint --fix src --ext .ts,.tsx"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ]
+}
