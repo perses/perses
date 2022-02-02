@@ -12,7 +12,6 @@
   },
   "workspaces": [
     "app",
-    "components",
     "core",
     "prometheus-plugin",
     "panels-plugin"
