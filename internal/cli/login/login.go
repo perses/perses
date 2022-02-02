@@ -11,56 +11,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package login
 
 import (
+	"fmt"
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/prometheus/common/version"
 	"github.com/spf13/cobra"
+	"net/url"
 )
 
-type outputVersion struct {
-	BuildTime string `json:"buildTime,omitempty" yaml:"buildTime,omitempty"`
-	Version   string `json:"version" yaml:"version"`
-	Commit    string `json:"commit,omitempty" yaml:"commit,omitempty"`
+type option struct {
+	url         string
+	insecureTLS bool
 }
 
-type option struct {
-	short  bool
-	output string
+func (o *option) complete(args []string) error {
+	if len(args) == 0 || len(args) > 1 {
+		return fmt.Errorf("only the server URL should be specified as an argument")
+	}
+	o.url = args[0]
+	return nil
 }
 
 func (o *option) validate() error {
-	if o.output != "" {
-		return cmdUtils.ValidateOutput(o.output)
-	} else {
-		o.output = "yaml"
-		return nil
+	if _, err := url.Parse(o.url); err != nil {
+		return err
 	}
+	return nil
 }
 
 func (o *option) execute() error {
-	v := &outputVersion{
-		Version: version.Version,
-	}
-	if !o.short {
-		v.BuildTime = version.BuildDate
-		v.Commit = version.Revision
-	}
-	return cmdUtils.HandleOutput(o.output, v)
+	return cmdUtils.WriteConfig(&cmdUtils.CLIConfig{
+		URL:         o.url,
+		InsecureTLS: o.insecureTLS,
+	})
 }
 
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "version",
-		Short: "Display client version",
+		Use:   "login URL",
+		Short: "Lo in to the Perses' API",
+		Example: `
+# Log in to the given server
+percli login https://perses.dev
+`,
 		Run: func(cmd *cobra.Command, args []string) {
+			cmdUtils.HandleError(o.complete(args))
 			cmdUtils.HandleError(o.validate())
 			cmdUtils.HandleError(o.execute())
 		},
 	}
-	cmd.Flags().BoolVar(&o.short, "short", o.short, "If true, just print the version number.")
-	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "One of 'yaml' or 'json'. Default is 'yaml'")
+	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "if true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure")
 	return cmd
 }
