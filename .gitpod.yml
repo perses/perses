@@ -1,7 +1,9 @@
 image:
   file: .gitpod.Dockerfile
 tasks:
-  - init: make build # runs during prebuild
+  - init: | # runs during prebuild
+      make build
+      make build-cli
     command: |
       cd ./dev
       docker-compose up -d
