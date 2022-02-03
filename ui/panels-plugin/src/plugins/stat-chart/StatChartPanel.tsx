@@ -32,6 +32,7 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 interface StatChartOptions extends JsonObject {
   name: string;
+  show_panel_header: string;
   query: AnyGraphQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
