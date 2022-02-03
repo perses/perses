@@ -166,7 +166,7 @@ const benchmarkDashboard: DashboardResource = {
                 '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
             },
           },
-          calculation: 'Mean',
+          calculation: 'Sum',
           unit: {
             kind: 'Decimal',
             decimal_places: 2,

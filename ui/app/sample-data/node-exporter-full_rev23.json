@@ -624,7 +624,7 @@
           "value": "null"
         }
       ],
-      "valueName": "current"
+      "valueName": "sum"
     },
     {
       "cacheTimeout": null,

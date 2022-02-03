@@ -21,6 +21,7 @@ import {
   GrafanaRow,
   PromQueryTarget,
 } from './grafana-json-model';
+import { convertTransformation } from './convert-transformations';
 
 export function convertPanels(rowsAndPanels: Array<GrafanaRow | GrafanaPanel>): {
   panels: DashboardSpec['panels'];
@@ -121,8 +122,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
   const target = statPanel.targets[0];
   const { format } = statPanel;
   const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
-  // TODO (sjcobb): map statPanel.valueName to options.calculation (see migrateFromAngularSinglestat), support node-exporter-full_rev23 formats
-  // TODO (sjcobb): convert props for sparkline color and panel backgroundColor customization
+  // TODO (sjcobb): convert sparkline color / backgroundColor and remaining formats, use migrateFromAngularSinglestat
   return {
     kind: 'StatChart',
     display: {
@@ -131,7 +131,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
     },
     options: {
       query: convertQueryTarget(target),
-      calculation: 'LastNumber',
+      calculation: convertTransformation(statPanel.valueName),
       unit: {
         kind: 'Decimal',
         suffix: convertedFormat,

@@ -11,29 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO (sjcobb): update after package reorg
-import { CalculationsMap } from '../../../panels-plugin/src/model/calculations';
-
-// https://github.com/grafana/grafana/blob/v7.5.x/packages/grafana-data/src/transformations/fieldReducer.ts
+// Mapping of Grafana 7 reducers to Perses calculations
 export const TransformationsMap = {
-  sum: 'tbd',
-  max: 'tbd',
-  min: 'tbd',
-  logmin: 'tbd',
-  mean: CalculationsMap.Mean,
-  last: CalculationsMap.Last,
-  first: CalculationsMap.First,
-  count: 'tbd',
-  range: 'tbd',
-  diff: 'tbd',
-  diffperc: 'tbd',
-  delta: 'tbd',
-  step: 'tbd',
-  firstNotNull: 'tbd',
-  lastNotNull: CalculationsMap.LastNumber,
-  changeCount: 'tbd',
-  distinctCount: 'tbd',
-  allIsZero: 'tbd',
-  allIsNull: 'tbd',
-  allValues: 'tbd',
+  sum: 'Sum',
+  max: null,
+  min: null,
+  logmin: null,
+  mean: 'Mean',
+  last: 'Last',
+  first: 'First',
+  count: null,
+  range: null,
+  diff: null,
+  diffperc: null,
+  delta: null,
+  step: null,
+  firstNotNull: null,
+  lastNotNull: 'LastNumber',
+  changeCount: null,
+  distinctCount: null,
+  allIsZero: null,
+  allIsNull: null,
+  allValues: null,
+  current: 'LastNumber',
 };
+
+export function convertTransformation(name: string): string {
+  return TransformationsMap[name] ?? 'LastNumber';
+}
