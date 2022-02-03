@@ -161,6 +161,7 @@ export type GrafanaSingleStatPanel = GrafanaPanelCommon & {
     };
   };
   format: string;
+  decimals: number;
   sparkline: {
     show: boolean;
     fillColor?: string;

@@ -121,6 +121,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
   const target = statPanel.targets[0];
   const { format } = statPanel;
   const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
+  // TODO (sjcobb): map statPanel.valueName to options.calculation (see migrateFromAngularSinglestat)
   return {
     kind: 'StatChart',
     display: {
@@ -133,6 +134,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
       unit: {
         kind: 'Decimal',
         suffix: convertedFormat,
+        decimal_places: statPanel.decimals ?? 2,
       },
       sparkline: statPanel.sparkline,
     },
