@@ -58,25 +58,24 @@ export function StatChartPanel(props: StatChartPanelProps) {
 
   if (error) throw error;
 
-  const contentWidth = (contentDimensions && contentDimensions.width) ?? 170;
-  const contentHeight = (contentDimensions && contentDimensions.height) ?? 170;
+  if (contentDimensions === undefined) return <></>;
 
   if (loading === true) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={contentWidth}
-        height={contentHeight}
+        width={contentDimensions.width}
+        height={contentDimensions.height}
       >
-        <Skeleton variant="text" width={contentWidth - 20} height={contentHeight / 2} />
+        <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
       </Box>
     );
   }
 
   return (
     <StatChart
-      width={contentWidth}
-      height={contentHeight}
+      width={contentDimensions.width}
+      height={contentDimensions.height}
       data={chartData}
       unit={unit}
       thresholds={thresholds}
