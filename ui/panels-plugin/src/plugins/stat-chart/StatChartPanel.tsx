@@ -11,45 +11,106 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, AnyGraphQueryDefinition, PanelProps, useGraphQuery } from '@perses-ui/core';
+import {
+  AnyGraphQueryDefinition,
+  GraphData,
+  useGraphQuery,
+  JsonObject,
+  PanelProps,
+  usePanelState,
+} from '@perses-ui/core';
+import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
-import { formatValue, UnitOptions } from '../../model/units';
+import { UnitOptions } from '../../model/units';
+import { ThresholdOptions, defaultThresholdInput } from '../../model/thresholds';
+import { StatChartData, StatChart } from '../../components/stat-chart/StatChart';
 
 export const StatChartKind = 'StatChart' as const;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 interface StatChartOptions extends JsonObject {
+  name: string;
   query: AnyGraphQueryDefinition;
   calculation: CalculationType;
-  unit?: UnitOptions;
+  unit: UnitOptions;
+  thresholds?: ThresholdOptions;
+  sparkline?: {
+    show: boolean;
+  };
 }
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
     definition: {
-      options: { query, calculation, unit },
+      display: { name },
+      options: { query, calculation, unit, sparkline },
     },
   } = props;
+  const showName = props.definition.display.show_panel_header === true ? false : true;
+  const showSparkline = sparkline && sparkline.show === true ? true : false;
+  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
+  const { contentDimensions } = usePanelState();
   const { data, loading, error } = useGraphQuery(query);
-
-  const displayValue = useMemo(() => {
-    if (data === undefined) return 'No data';
-
-    // TODO: something smarter with iterable?
-    const series = Array.from(data.series)[0];
-    if (series === undefined) return 'No data';
-
-    const calculate = CalculationsMap[calculation];
-    const value = calculate(Array.from(series.values));
-    if (value === undefined) return 'No data';
-
-    return formatValue(value, unit);
-  }, [data, calculation, unit]);
+  const chartData = useChartData(data, calculation, name, showName);
 
   if (error) throw error;
-  if (loading) return <div>Loading...</div>;
 
-  return <div>{displayValue}</div>;
+  if (loading) {
+    return (
+      <>
+        {contentDimensions !== undefined && (
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            width={contentDimensions.width}
+            height={contentDimensions.height}
+          >
+            <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
+          </Box>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {contentDimensions !== undefined && (
+        <StatChart
+          width={contentDimensions.width}
+          height={contentDimensions.height}
+          data={chartData}
+          unit={unit}
+          thresholds={thresholds}
+          showSparkline={showSparkline}
+        />
+      )}
+    </>
+  );
 }
+
+const useChartData = (
+  data: GraphData | undefined,
+  calculation: CalculationType,
+  name: string,
+  showName: boolean
+): StatChartData => {
+  return useMemo(() => {
+    const loadingData = {
+      calculatedValue: undefined,
+      seriesData: undefined,
+    };
+    if (data === undefined) return loadingData;
+
+    const seriesData = Array.from(data.series)[0] ?? null;
+    const calculate = CalculationsMap[calculation];
+    const calculatedValue = seriesData !== null ? calculate(Array.from(seriesData.values)) : null;
+
+    return {
+      calculatedValue,
+      seriesData,
+      name,
+      showName,
+    };
+  }, [data, calculation, name, showName]);
+};

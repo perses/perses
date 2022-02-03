@@ -13,7 +13,14 @@
 
 import { AnyGraphQueryDefinition, AnyPanelDefinition, DashboardSpec } from '@perses-ui/core';
 import { camelCase } from 'lodash-es';
-import { GrafanaGaugePanel, GrafanaGraphPanel, GrafanaPanel, GrafanaRow, PromQueryTarget } from './grafana-json-model';
+import {
+  GrafanaGaugePanel,
+  GrafanaGraphPanel,
+  GrafanaSingleStatPanel,
+  GrafanaPanel,
+  GrafanaRow,
+  PromQueryTarget,
+} from './grafana-json-model';
 
 export function convertPanels(rowsAndPanels: Array<GrafanaRow | GrafanaPanel>): {
   panels: DashboardSpec['panels'];
@@ -58,6 +65,8 @@ function convertPanel(grafanaPanel: GrafanaPanel): AnyPanelDefinition {
   switch (grafanaPanel.type) {
     case 'graph':
       return convertGraphPanel(grafanaPanel);
+    case 'singlestat':
+      return convertSingleStatPanel(grafanaPanel);
     case 'gauge':
       return convertGaugePanel(grafanaPanel);
     default:
@@ -104,6 +113,28 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
       thresholds: {
         steps: filteredThresholdSteps,
       },
+    },
+  };
+}
+
+function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefinition {
+  const target = statPanel.targets[0];
+  const { format } = statPanel;
+  const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
+  return {
+    kind: 'StatChart',
+    display: {
+      name: statPanel.title,
+      show_panel_header: false,
+    },
+    options: {
+      query: convertQueryTarget(target),
+      calculation: 'LastNumber',
+      unit: {
+        kind: 'Decimal',
+        suffix: convertedFormat,
+      },
+      sparkline: statPanel.sparkline,
     },
   };
 }

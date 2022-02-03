@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, JsonObject, PanelProps, usePanelState } from '@perses-ui/core';
+import { AnyGraphQueryDefinition, useGraphQuery, JsonObject, PanelProps, usePanelState } from '@perses-ui/core';
+import { Skeleton } from '@mui/material';
+import { useMemo } from 'react';
+import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
-import { CalculationType } from '../../model/calculations';
-import { ThresholdOptions } from './thresholds';
-import GaugeChart from './GaugeChart';
+import { GaugeChart, GaugeChartData } from '../../components/gauge-chart/GaugeChart';
+import { defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
 
 export const GaugeChartKind = 'GaugeChart' as const;
 
@@ -24,24 +26,60 @@ export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 interface GaugeChartOptions extends JsonObject {
   query: AnyGraphQueryDefinition;
   calculation: CalculationType;
-  unit: UnitOptions;
+  unit?: UnitOptions;
   thresholds?: ThresholdOptions;
 }
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const {
     definition: {
-      options: { query, calculation, unit, thresholds },
+      options: { query, calculation },
     },
   } = props;
+  const unit = props.definition.options.unit ?? { kind: 'Percent', decimal_places: 1 };
+  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
   const { contentDimensions } = usePanelState();
+  const { data, loading, error } = useGraphQuery(query);
+
+  const chartData: GaugeChartData = useMemo(() => {
+    if (data === undefined) return undefined;
+
+    const series = Array.from(data.series)[0];
+    if (series === undefined) return undefined;
+
+    const calculate = CalculationsMap[calculation];
+    const value = calculate(Array.from(series.values));
+    if (value === undefined) return null;
+
+    return value;
+  }, [data, calculation]);
+
+  if (error) throw error;
+
+  if (loading) {
+    return (
+      <>
+        {contentDimensions !== undefined && (
+          <Skeleton
+            sx={{ margin: '0 auto' }}
+            variant="circular"
+            width={
+              contentDimensions.width > contentDimensions.height ? contentDimensions.height : contentDimensions.width
+            }
+            height={contentDimensions.height}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       {contentDimensions !== undefined && (
         <GaugeChart
           width={contentDimensions.width}
           height={contentDimensions.height}
-          query={query}
+          data={chartData}
           calculation={calculation}
           unit={unit}
           thresholds={thresholds}
