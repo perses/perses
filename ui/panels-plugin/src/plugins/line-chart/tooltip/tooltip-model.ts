@@ -46,7 +46,7 @@ export const defaultCursorData = {
 
 export const emptyTooltipData = {
   cursor: defaultCursorData,
-  focusedSeries: [{ seriesIdx: null, datumIdx: null, date: '', seriesName: '', x: 0, y: 0, markerColor: '' }],
+  focusedSeries: null, //[{ seriesIdx: null, datumIdx: null, date: '', seriesName: '', x: 0, y: 0, markerColor: '' }],
 };
 
 export interface Coordinate {
@@ -65,6 +65,6 @@ export interface CursorData {
 }
 
 export interface TooltipData {
-  focusedSeries: FocusedSeriesArray;
+  focusedSeries: FocusedSeriesArray | null;
   cursor: CursorData;
 }

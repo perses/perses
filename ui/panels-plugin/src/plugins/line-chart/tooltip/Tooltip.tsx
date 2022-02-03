@@ -28,17 +28,13 @@ function assembleTransform(coords: Coordinate, chartWidth: number) {
 
 interface TooltipProps {
   tooltipData: TooltipData;
-  /**
-   * Specify if the labels should wrap instead of truncate.
-   */
-  wrapLabels?: boolean;
 }
 
 function Tooltip(props: TooltipProps) {
   const { focusedSeries, cursor } = props.tooltipData;
-  const [isTooltipVisible, setTooltipVisibility] = useState<boolean>(true);
+  const [isTooltipVisible, setTooltipVisibility] = useState<boolean>(false);
   const cursorTransform = assembleTransform(cursor.coords.plotCanvas, cursor.chartWidth);
-  const focusedSeriesNum = focusedSeries.length;
+  const focusedSeriesNum = focusedSeries ? focusedSeries.length : 0;
 
   function handleHoverOff() {
     // TODO (sjcobb): partially fixes lingering tooltip but still needs adjustments
@@ -75,7 +71,7 @@ function Tooltip(props: TooltipProps) {
         }}
         onMouseLeave={handleHoverOff}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={props.wrapLabels || false} />
+        <TooltipContent focusedSeries={focusedSeries} />
       </Box>
     </>
   );

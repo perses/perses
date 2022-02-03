@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, Stack } from '@mui/material';
+import { Box, Divider, Stack, Typography } from '@mui/material';
 import SeriesMarker from './SeriesMarker';
 
 interface SeriesInfoProps {
@@ -19,12 +19,20 @@ interface SeriesInfoProps {
   y: number;
   markerColor: string;
   totalSeries: number;
-  wrapLabels?: boolean;
 }
 
+// type ReplaceCharacters = '' | ':'
+
+// interface CharactersToReplace {
+//   ": ReplaceCharacters;
+//   =': ReplaceCharacters;
+// }
+
 function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, y, markerColor, totalSeries, wrapLabels } = props;
-  // TODO (sjcobb): regex to remove __name__ and quotes, replace = with :
+  const { seriesName, y, markerColor, totalSeries } = props;
+  // TODO (sjcobb): regex to remove __name__ and quotes, replace = with :`
+  const formattedSeriesLabels = seriesName.replaceAll('"', '');
+
   if (totalSeries === 1) {
     return (
       <Stack spacing={0.5}>
@@ -52,12 +60,25 @@ function SeriesInfo(props: SeriesInfoProps) {
             </Box>
           </Box>
         </Box>
-        <Divider sx={{ borderColor: 'grey.800' }} />
+        <Divider sx={{ borderColor: 'grey.800', fontSize: 'body2' }} />
         <Box>
-          {seriesName.split(',').map((name) => {
+          {formattedSeriesLabels.split(',').map((name) => {
+            const [key, value] = name.split('=');
+
             return (
-              <Box key={name} color="grey.300">
-                {name}
+              <Box key={name} sx={{ display: 'flex', gap: '4px' }}>
+                <Typography fontSize="11px" color="grey.300">
+                  {key}:
+                </Typography>
+                <Typography
+                  sx={{
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                  }}
+                >
+                  {value}
+                </Typography>
               </Box>
             );
           })}
@@ -76,7 +97,7 @@ function SeriesInfo(props: SeriesInfoProps) {
       <Box
         sx={{
           display: 'table-cell',
-          maxWidth: '550px',
+          maxWidth: '520px',
         }}
       >
         <SeriesMarker markerColor={markerColor} />
@@ -88,7 +109,7 @@ function SeriesInfo(props: SeriesInfoProps) {
             maxWidth: '550px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            whiteSpace: wrapLabels ? 'normal' : 'nowrap',
+            whiteSpace: 'nowrap',
             width: 'calc(100% - 20px)',
           }}
         >

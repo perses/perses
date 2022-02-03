@@ -15,13 +15,12 @@ import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FocusedSeriesArray } from '../utils/focused-series';
 import SeriesInfo from './SeriesInfo';
 
-function TooltipContent(props: { focusedSeries: FocusedSeriesArray; wrapLabels?: boolean }) {
-  const { focusedSeries, wrapLabels } = props;
+function TooltipContent(props: { focusedSeries: FocusedSeriesArray | null }) {
+  const { focusedSeries } = props;
   // let lastDate = focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : '';
-  const seriesTime = focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : false;
+  const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : false;
 
   const formatTimeSeriesHeader = (timeString: string) => {
-    console.log('time string is', timeString);
     const [month, year, time] = timeString.split(',');
     return (
       <>
@@ -35,41 +34,44 @@ function TooltipContent(props: { focusedSeries: FocusedSeriesArray; wrapLabels?:
     );
   };
 
-  return (
-    <Stack py={1} px={1.5} spacing={0.5}>
-      {seriesTime && <Typography variant="caption">{formatTimeSeriesHeader(seriesTime)}</Typography>}
-      <Divider sx={{ borderColor: 'grey.800' }} />
-      <Box
-        sx={{
-          display: 'table',
-        }}
-      >
-        {focusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, markerColor }) => {
-          if (datumIdx === null || seriesIdx === null) return null;
-          const key = seriesIdx.toString() + datumIdx.toString();
+  if (focusedSeries && seriesTime) {
+    return (
+      <Stack py={1} px={1.5} spacing={0.5}>
+        <Typography variant="caption">{formatTimeSeriesHeader(seriesTime)}</Typography>
+        <Divider sx={{ borderColor: 'grey.800' }} />
+        <Box
+          sx={{
+            display: 'table',
+          }}
+        >
+          {focusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, markerColor }) => {
+            if (datumIdx === null || seriesIdx === null) return null;
+            const key = seriesIdx.toString() + datumIdx.toString();
 
-          // if (index === 0 || date !== lastDate) {
-          //   lastDate = date;
-          //   return (
-          //     <SeriesInfo key={key} seriesName={seriesName} y={y} markerColor={markerColor} totalSeries={focusedSeries.length} />
-          //   );
-          // }
+            // if (index === 0 || date !== lastDate) {
+            //   lastDate = date;
+            //   return (
+            //     <SeriesInfo key={key} seriesName={seriesName} y={y} markerColor={markerColor} totalSeries={focusedSeries.length} />
+            //   );
+            // }
 
-          // lastDate = date;
-          return (
-            <SeriesInfo
-              key={key}
-              seriesName={seriesName}
-              y={y}
-              markerColor={markerColor}
-              totalSeries={focusedSeries.length}
-              wrapLabels={wrapLabels}
-            />
-          );
-        })}
-      </Box>
-    </Stack>
-  );
+            // lastDate = date;
+            return (
+              <SeriesInfo
+                key={key}
+                seriesName={seriesName}
+                y={y}
+                markerColor={markerColor}
+                totalSeries={focusedSeries.length}
+              />
+            );
+          })}
+        </Box>
+      </Stack>
+    );
+  } else {
+    return <></>;
+  }
 }
 
 export default TooltipContent;
