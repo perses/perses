@@ -36,7 +36,7 @@
     "@svgr/webpack": "^6.2.1",
     "@types/loadable__component": "^5.13.4",
     "@types/webpack-bundle-analyzer": "^4.4.1",
-    "css-loader": "^6.5.1",
+    "css-loader": "^6.6.0",
     "dotenv-defaults": "^5.0.0",
     "fork-ts-checker-webpack-plugin": "^6.5.0",
     "html-webpack-plugin": "^5.5.0",
