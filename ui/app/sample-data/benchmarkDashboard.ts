@@ -173,13 +173,11 @@ const benchmarkDashboard: DashboardResource = {
             suffix: 'kilogram', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
           sparkline: {
-            show: false,
+            show: true,
           },
           thresholds: {
             default_color: '#EA4747', // red
           },
-          // textMode: 'auto', // 'value'
-          // colorMode: 'background', // 'value'
         },
       },
       statRAM: {
@@ -222,10 +220,9 @@ const benchmarkDashboard: DashboardResource = {
       },
       statMd: {
         kind: 'StatChart',
-        // kind: 'GaugeChart',
         display: {
           name: 'Stat Md',
-          // show_panel_header: false,
+          show_panel_header: false,
         },
         options: {
           query: {
@@ -236,16 +233,12 @@ const benchmarkDashboard: DashboardResource = {
               // '((node_memory_SwapTotal_bytes{job="node",instance="$instance"} - node_memory_SwapFree_bytes{job="node",instance="$instance"}) / (node_memory_SwapTotal_bytes{job="node",instance="$instance"} )) * 100',
             },
           },
-          // calculation: 'Mean',
-          // calculation: 'LastNumber', // hangs
-          calculation: 'Last',
+          calculation: 'Mean',
           unit: {
             kind: 'Decimal',
             decimal_places: 3,
             suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
-          // textMode: 'auto', // 'value'
-          // colorMode: 'background', // 'value'
         },
       },
       statLg: {
@@ -323,20 +316,20 @@ const benchmarkDashboard: DashboardResource = {
           },
         },
         items: [
-          {
-            x: 0,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/seriesTest' },
-          },
-          {
-            x: 12,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/basicEx' },
-          },
+          // {
+          //   x: 0,
+          //   y: 0,
+          //   width: 12,
+          //   height: 6,
+          //   content: { $ref: '#/panels/seriesTest' },
+          // },
+          // {
+          //   x: 12,
+          //   y: 0,
+          //   width: 12,
+          //   height: 6,
+          //   content: { $ref: '#/panels/basicEx' },
+          // },
         ],
       },
       {

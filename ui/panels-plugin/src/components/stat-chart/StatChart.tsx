@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import { useTheme } from '@mui/material';
 import type { EChartsOption } from 'echarts';
 import { use } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
@@ -73,6 +74,15 @@ interface StatChartProps {
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, showSparkline } = props;
   const thresholds = props.thresholds ?? defaultThresholdInput;
+  const theme = useTheme();
+
+  // TODO (sjcobb): improve sparkline color override, theme integration
+  let backgroundColor = 'transparent';
+  if (thresholds.default_color) {
+    backgroundColor = thresholds.default_color;
+  } else if (showSparkline === true) {
+    backgroundColor = theme.palette.primary.light;
+  }
 
   const option: EChartsOption = useMemo(() => {
     if (data.seriesData === undefined) return {};
@@ -82,7 +92,6 @@ export function StatChart(props: StatChartProps) {
     const showName = data.showName ?? true;
     const series = data.seriesData;
     const calculatedValue = data.calculatedValue ?? 0;
-    const backgroundColor = thresholds.default_color ?? 'transparent';
     const isLargePanel = width > 250 ? true : false;
     const nameFontSize = isLargePanel === true ? 30 : 12;
 
@@ -160,7 +169,7 @@ export function StatChart(props: StatChartProps) {
         },
         {
           show: false,
-          top: 100,
+          top: '45%', // adds space above sparkline
           right: 0,
           bottom: 0,
           left: 0,
@@ -171,7 +180,7 @@ export function StatChart(props: StatChartProps) {
         type: 'time',
         show: false,
         boundaryGap: false,
-        gridIndex: 1, // adds space above sparkline
+        gridIndex: 1, // sparkline grid
       },
       yAxis: {
         type: 'value',
@@ -204,7 +213,7 @@ export function StatChart(props: StatChartProps) {
     };
 
     return option;
-  }, [data, unit, thresholds, width, showSparkline]);
+  }, [data, unit, width, showSparkline, backgroundColor]);
 
   return (
     <EChartsWrapper
