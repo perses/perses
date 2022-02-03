@@ -59,7 +59,7 @@ function Tooltip(props: TooltipProps) {
           position: 'absolute',
           top: 0,
           left: 0,
-          overflow: 'scroll',
+          overflow: 'hidden',
           backgroundColor: '#000',
           color: '#fff',
           fontSize: '11px',
