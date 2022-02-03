@@ -57,35 +57,30 @@ export function StatChartPanel(props: StatChartPanelProps) {
 
   if (error) throw error;
 
-  if (loading) {
+  const contentWidth = (contentDimensions && contentDimensions.width) ?? 170;
+  const contentHeight = (contentDimensions && contentDimensions.height) ?? 170;
+
+  if (loading === true) {
     return (
-      <>
-        {contentDimensions !== undefined && (
-          <Box
-            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            width={contentDimensions.width}
-            height={contentDimensions.height}
-          >
-            <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
-          </Box>
-        )}
-      </>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        width={contentWidth}
+        height={contentHeight}
+      >
+        <Skeleton variant="text" width={contentWidth - 20} height={contentHeight / 2} />
+      </Box>
     );
   }
 
   return (
-    <>
-      {contentDimensions !== undefined && (
-        <StatChart
-          width={contentDimensions.width}
-          height={contentDimensions.height}
-          data={chartData}
-          unit={unit}
-          thresholds={thresholds}
-          showSparkline={showSparkline}
-        />
-      )}
-    </>
+    <StatChart
+      width={contentWidth}
+      height={contentHeight}
+      data={chartData}
+      unit={unit}
+      thresholds={thresholds}
+      showSparkline={showSparkline}
+    />
   );
 }
 

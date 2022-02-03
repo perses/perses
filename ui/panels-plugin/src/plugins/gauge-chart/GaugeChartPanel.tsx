@@ -56,35 +56,28 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
 
   if (error) throw error;
 
-  if (loading) {
+  const contentWidth = (contentDimensions && contentDimensions.width) ?? 170;
+  const contentHeight = (contentDimensions && contentDimensions.height) ?? 170;
+
+  if (loading === true) {
     return (
-      <>
-        {contentDimensions !== undefined && (
-          <Skeleton
-            sx={{ margin: '0 auto' }}
-            variant="circular"
-            width={
-              contentDimensions.width > contentDimensions.height ? contentDimensions.height : contentDimensions.width
-            }
-            height={contentDimensions.height}
-          />
-        )}
-      </>
+      <Skeleton
+        sx={{ margin: '0 auto' }}
+        variant="circular"
+        width={contentWidth > contentHeight ? contentHeight : contentWidth}
+        height={contentHeight}
+      />
     );
   }
 
   return (
-    <>
-      {contentDimensions !== undefined && (
-        <GaugeChart
-          width={contentDimensions.width}
-          height={contentDimensions.height}
-          data={chartData}
-          calculation={calculation}
-          unit={unit}
-          thresholds={thresholds}
-        />
-      )}
-    </>
+    <GaugeChart
+      width={contentWidth}
+      height={contentHeight}
+      data={chartData}
+      calculation={calculation}
+      unit={unit}
+      thresholds={thresholds}
+    />
   );
 }
