@@ -121,7 +121,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
   const target = statPanel.targets[0];
   const { format } = statPanel;
   const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
-  // TODO (sjcobb): map statPanel.valueName to options.calculation (see migrateFromAngularSinglestat)
+  // TODO (sjcobb): map statPanel.valueName to options.calculation (see migrateFromAngularSinglestat), support node-exporter-full_rev23 formats
   return {
     kind: 'StatChart',
     display: {
