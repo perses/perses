@@ -154,6 +154,30 @@ export type GrafanaSingleStatPanel = GrafanaPanelCommon & {
       };
     };
   };
+  valueName: string; // aka options.reduceOptions.calcs
+  format: string;
+  decimals: number;
+  sparkline: {
+    show: boolean;
+    fillColor?: string;
+    lineColor?: string;
+  };
+};
+
+export type GrafanaStatPanel = GrafanaPanelCommon & {
+  type: 'stat';
+  targets: PromQueryTarget[];
+  fieldConfig: {
+    defaults: {
+      unit: string;
+      thresholds: {
+        steps: Array<{
+          color: string;
+          value: number | null;
+        }>;
+      };
+    };
+  };
   options: {
     reduceOptions: {
       // TODO: define supported units and calcs

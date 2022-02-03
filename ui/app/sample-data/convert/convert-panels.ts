@@ -122,6 +122,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
   const { format } = statPanel;
   const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
   // TODO (sjcobb): map statPanel.valueName to options.calculation (see migrateFromAngularSinglestat), support node-exporter-full_rev23 formats
+  // TODO (sjcobb): convert props for sparkline color and panel backgroundColor customization
   return {
     kind: 'StatChart',
     display: {
