@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GraphQueryDefinition, GraphQueryPlugin } from './graph-query';
-import { JsonObject } from './definitions';
+import { JsonObject, ResourceMetadata } from '@perses-dev/core';
+import { GraphQueryDefinition, GraphQueryPlugin } from './graph-queries';
 import { PanelDefinition, PanelPlugin } from './panels';
-import { ResourceMetadata } from './resource';
 import { VariableDefinition, VariablePlugin } from './variables';
 
 export interface PluginResource {
@@ -101,18 +100,6 @@ export type PluginRegistrationConfig<Options extends JsonObject> = {
 export type PluginConfig<Type extends PluginType, Options extends JsonObject> = {
   pluginType: Type;
   kind: string;
-  validate?: (config: AnyPluginDefinition<Type>) => string[];
+  validate?: (config: PluginDefinition<Type, JsonObject>) => string[];
   plugin: PluginImplementation<Type, Options>;
 };
-
-/**
- * A PluginDefinition at runtime where we know the plugin type, but not the
- * specific Kind/Options that it handles.
- */
-export type AnyPluginDefinition<Type extends PluginType> = PluginDefinition<Type, JsonObject>;
-
-/**
- * A PluginImplementation at runtime where we know the plugin type, but not the
- * specific Kind/Options that it handles.
- */
-export type AnyPluginImplementation<Type extends PluginType> = PluginImplementation<Type, JsonObject>;

@@ -24,7 +24,7 @@ export const GaugeChartKind = 'GaugeChart' as const;
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
 interface GaugeChartOptions extends JsonObject {
-  query: AnyGraphQueryDefinition;
+  query: GraphQueryDefinition;
   calculation: CalculationType;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;

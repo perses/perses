@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, JsonObject, PanelProps, usePanelState } from '@perses-dev/core';
+import { JsonObject, usePanelState } from '@perses-dev/core';
+import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 import LineChart from './LineChart';
 import GraphQueryRunner from './GraphQueryRunner';
@@ -22,7 +23,7 @@ export const LineChartKind = 'LineChart' as const;
 export type LineChartProps = PanelProps<LineChartOptions>;
 
 interface LineChartOptions extends JsonObject {
-  queries: AnyGraphQueryDefinition[];
+  queries: GraphQueryDefinition[];
   show_legend?: boolean;
 }
 

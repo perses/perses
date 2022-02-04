@@ -41,7 +41,7 @@ export interface SparklineOptions extends JsonObject {
 
 interface StatChartOptions extends JsonObject {
   name: string;
-  query: AnyGraphQueryDefinition;
+  query: GraphQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;

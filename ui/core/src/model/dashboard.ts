@@ -12,9 +12,7 @@
 // limitations under the License.
 
 import { LayoutDefinition } from './layout';
-import { AnyPanelDefinition } from './panels';
 import { ProjectMetadata } from './resource';
-import { AnyVariableDefinition } from './variables';
 import { DurationString } from './time';
 
 export interface DatasourceSelector {
@@ -32,7 +30,5 @@ export interface DashboardResource {
 export interface DashboardSpec {
   datasource: DatasourceSelector;
   duration: DurationString;
-  variables: Record<string, AnyVariableDefinition>;
-  panels: Record<string, AnyPanelDefinition>;
   layouts: LayoutDefinition[];
 }

@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo, useCallback } from 'react';
-import { PluginModule, PluginResource, PluginRuntime, PluginRuntimeProvider, PluginType } from '@perses-dev/core';
+import { PluginRuntime, PluginRuntimeProvider } from '@perses-dev/core';
 import { useQuery } from 'react-query';
+import { PluginModule, PluginResource, PluginType } from '../../model';
 import { LoadedPluginsByTypeAndKind, useRegistryState } from './registry-state';
 
 export interface PluginRegistryProps {

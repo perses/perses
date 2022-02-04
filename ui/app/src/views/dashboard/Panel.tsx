@@ -13,14 +13,13 @@
 
 import { useState } from 'react';
 import { Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
-import { AnyPanelDefinition } from '@perses-dev/core';
+import { PanelDefinition, PanelComponent } from '@perses-dev/plugin-system';
 import { ErrorAlert } from '@perses-dev/components';
 import { PluginBoundary } from '@perses-dev/plugin-system';
-import { usePanelComponent } from '../../context/plugin-registry';
 import { PanelContextProvider } from './PanelContextProvider';
 
 export interface PanelProps extends CardProps {
-  definition: AnyPanelDefinition;
+  definition: PanelDefinition;
 }
 
 /**
@@ -80,7 +79,7 @@ function Panel(props: PanelProps) {
         {/* Actually render plugin with PanelContent component so we can wrap with a loading/error boundary */}
         <PanelContextProvider contentElement={contentElement}>
           <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-            <PanelContent definition={definition} />
+            <PanelComponent definition={definition} />
           </PluginBoundary>
         </PanelContextProvider>
       </CardContent>
@@ -89,14 +88,3 @@ function Panel(props: PanelProps) {
 }
 
 export default Panel;
-
-interface PanelContentProps {
-  definition: AnyPanelDefinition;
-}
-
-// Render the actual panel's content using a Plugin
-function PanelContent(props: PanelContentProps) {
-  const { definition } = props;
-  const PanelComponent = usePanelComponent(definition);
-  return <PanelComponent definition={definition} />;
-}

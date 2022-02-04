@@ -11,15 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DurationString,
-  GraphData,
-  GraphQueryDefinition,
-  JsonObject,
-  useDashboardSpec,
-  UseGraphQueryHook,
-  useMemoized,
-} from '@perses-dev/core';
+import { DurationString, JsonObject, useDashboardSpec, useMemoized } from '@perses-dev/core';
+import { GraphData, GraphQueryDefinition, UseGraphQueryHook } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';

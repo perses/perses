@@ -13,16 +13,16 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { useImmer } from 'use-immer';
+import { JsonObject } from '@perses-dev/core';
 import {
   PluginRegistrationConfig,
   PluginModule,
   PluginResource,
   RegisterPlugin,
   PluginType,
-  AnyPluginImplementation,
-  JsonObject,
   ALL_PLUGIN_TYPES,
-} from '@perses-dev/core';
+  PluginImplementation,
+} from '../../model';
 import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from './create-plugin';
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
@@ -32,7 +32,7 @@ export type PluginResourcesByTypeAndKind = {
 
 // Once a plugin is registered, it's stored by plugin type and kind
 export type LoadedPluginsByTypeAndKind = {
-  [Type in PluginType]: Map<string, AnyPluginImplementation<Type>>;
+  [Type in PluginType]: Map<string, PluginImplementation<Type, JsonObject>>;
 };
 
 /**

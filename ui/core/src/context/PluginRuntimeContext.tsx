@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { createContext, useContext, useRef } from 'react';
-import { useGraphQuery } from '../hooks/graph-query';
 import { useDashboardSpec, useDashboardTimeRange, useDashboardVariables } from '../hooks/dashboard';
 import { useDataSources } from '../hooks/datasource';
 import { usePanelState } from '../hooks/panel';
@@ -27,7 +26,6 @@ export interface PluginRuntime {
   useDashboardVariables: typeof useDashboardVariables;
   useDashboardTimeRange: typeof useDashboardTimeRange;
   useDataSources: typeof useDataSources;
-  useGraphQuery: typeof useGraphQuery;
   usePanelState: typeof usePanelState;
 }
 

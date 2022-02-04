@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Fragment, createContext, useContext, useMemo, useCallback } from 'react';
+import { JsonObject } from '@perses-dev/core';
+import { Fragment, createContext, useContext, useMemo, useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
-import { PluginType, ALL_PLUGIN_TYPES } from '@perses-dev/core';
+import { PluginType, ALL_PLUGIN_TYPES, PluginDefinition, PluginImplementation } from '../../model';
 import { usePluginRegistry } from '../PluginRegistry';
 import { PluginLoader } from './PluginLoader';
 
@@ -113,4 +114,23 @@ export function usePluginLoadingBoundary() {
     throw new Error(`PluginLoadingBoundary context not found. Did you forget a Provider?`);
   }
   return ctx;
+}
+
+/**
+ * Generic usePlugin that will register the dependency with the nearest LoadingBoundary and get the plugin if it's
+ * already loaded
+ */
+export function usePlugin<Type extends PluginType>(
+  pluginType: Type,
+  definition: PluginDefinition<Type, JsonObject>
+): PluginImplementation<Type, JsonObject> | undefined {
+  // Tell the loading boundary about the dependency
+  const { registerPluginDependency } = usePluginLoadingBoundary();
+  useEffect(() => {
+    registerPluginDependency(pluginType, definition.kind);
+  }, [pluginType, definition.kind, registerPluginDependency]);
+
+  // Get the plugin, which could be undefined if it hasn't loaded yet
+  const { plugins } = usePluginRegistry();
+  return plugins[pluginType].get(definition.kind);
 }

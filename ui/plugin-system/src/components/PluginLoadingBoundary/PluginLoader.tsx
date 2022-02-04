@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginType } from '@perses-dev/core';
 import { useQuery } from 'react-query';
+import { PluginType } from '../../model';
 import { usePluginRegistry } from '../PluginRegistry';
 
 export interface PluginLoaderProps {

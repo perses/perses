@@ -12,17 +12,18 @@
 // limitations under the License.
 
 import { useRef } from 'react';
+import { JsonObject } from '@perses-dev/core';
 import {
-  AnyGraphQueryDefinition,
-  JsonObject,
-  AnyVariableDefinition,
   PanelProps,
+  PanelPlugin,
   PluginConfig,
   PluginDefinition,
   PluginType,
-  AnyPluginImplementation,
-  AnyPluginDefinition,
-} from '@perses-dev/core';
+  VariablePlugin,
+  VariableDefinition,
+  GraphQueryPlugin,
+  GraphQueryDefinition,
+} from '../../model';
 
 /**
  * Take a Variable plugin and wrap it so it works with AnyVariableDefinition,
@@ -30,13 +31,13 @@ import {
  */
 export function createVariablePlugin<Options extends JsonObject>(
   config: PluginConfig<'Variable', Options>
-): AnyPluginImplementation<'Variable'> {
+): VariablePlugin {
   // Create runtime validation function
   const useRuntimeValidation = createValidationHook(config);
 
   // Wrap hook with validation (TODO: Can this wrapper become generic for all
   // plugin hooks?)
-  function useVariableOptions(definition: AnyVariableDefinition) {
+  function useVariableOptions(definition: VariableDefinition) {
     const { isValid, errorRef } = useRuntimeValidation();
     if (isValid(definition)) {
       return config.plugin.useVariableOptions(definition);
@@ -53,9 +54,7 @@ export function createVariablePlugin<Options extends JsonObject>(
  * Take a Panel plugin and wraps it so it works with AnyPanelDefinition, doing
  * runtime checking of the definition before delegating to the plugin.
  */
-export function createPanelPlugin<Options extends JsonObject>(
-  config: PluginConfig<'Panel', Options>
-): AnyPluginImplementation<'Panel'> {
+export function createPanelPlugin<Options extends JsonObject>(config: PluginConfig<'Panel', Options>): PanelPlugin {
   const useRuntimeValidation = createValidationHook(config);
 
   // Wrap PanelComponent from config with validation (TODO: Can this wrapper
@@ -82,13 +81,13 @@ export function createPanelPlugin<Options extends JsonObject>(
  */
 export function createGraphQueryPlugin<Options extends JsonObject>(
   config: PluginConfig<'GraphQuery', Options>
-): AnyPluginImplementation<'GraphQuery'> {
+): GraphQueryPlugin {
   // Create runtime validation function
   const useRuntimeValidation = createValidationHook(config);
 
   // Wrap hook with validation (TODO: Can this wrapper become generic for all
   // plugin hooks?)
-  function useGraphQuery(definition: AnyGraphQueryDefinition) {
+  function useGraphQuery(definition: GraphQueryDefinition) {
     const { isValid, errorRef } = useRuntimeValidation();
     if (isValid(definition)) {
       return config.plugin.useGraphQuery(definition);
@@ -103,7 +102,7 @@ export function createGraphQueryPlugin<Options extends JsonObject>(
 
 // A hook for doing runtime validation of a PluginDefinition
 type UseRuntimeValidationHook<Type extends PluginType, Options extends JsonObject> = () => {
-  isValid: (definition: AnyPluginDefinition<Type>) => definition is PluginDefinition<Type, Options>;
+  isValid: (definition: PluginDefinition<Type, JsonObject>) => definition is PluginDefinition<Type, Options>;
   errorRef: React.MutableRefObject<InvalidPluginDefinitionError | undefined>;
 };
 
@@ -118,7 +117,7 @@ function createValidationHook<Type extends PluginType, Options extends JsonObjec
 
     // Type guard that validates the generic runtime plugin definition data
     // is correct for Kind/Options
-    const isValid = (definition: AnyPluginDefinition<Type>): definition is PluginDefinition<Type, Options> => {
+    const isValid = (definition: PluginDefinition<Type, JsonObject>): definition is PluginDefinition<Type, Options> => {
       // If they don't give us a validate function in the plugin config, not
       // much we can do so just assume we're OK
       const validateErrors = config.validate?.(definition) ?? [];

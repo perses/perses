@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardSpec, DEFAULT_ALL_VALUE } from '@perses-dev/core';
+import { DashboardSpec, UnknownOptions } from '@perses-dev/core';
+import { VariableDefinition, DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
 import { GrafanaVariable } from './grafana-json-model';
 
 const LABEL_NAMES = /^label_names\(\)\s*$/;
@@ -33,7 +34,7 @@ export function convertVariables(grafanaVariables: GrafanaVariable[]): Dashboard
     const { name, query, label, hide } = grafanaVariable;
 
     // Figure out selection options
-    let selection: AnyVariableDefinition['selection'];
+    let selection: VariableDefinition<UnknownOptions>['selection'];
     if (grafanaVariable.multi === false) {
       const { current } = grafanaVariable;
       selection = {
@@ -48,7 +49,7 @@ export function convertVariables(grafanaVariables: GrafanaVariable[]): Dashboard
     }
 
     // Figure out other common options
-    const def: AnyVariableDefinition = {
+    const def: VariableDefinition<UnknownOptions> = {
       kind: '',
       options: {},
       display: {

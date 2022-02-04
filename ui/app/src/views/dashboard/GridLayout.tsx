@@ -13,7 +13,8 @@
 
 import { useState, useMemo } from 'react';
 import { Box, BoxProps, Collapse } from '@mui/material';
-import { GridDefinition, GridItemDefinition, resolvePanelRef, useDashboardSpec } from '@perses-dev/core';
+import { GridDefinition, GridItemDefinition, useDashboardSpec } from '@perses-dev/core';
+import { resolvePanelRef } from '@perses-dev/plugin-system';
 import AlertErrorBoundary from '../../components/AlertErrorBoundary';
 import GridTitle from './GridTitle';
 import Panel from './Panel';

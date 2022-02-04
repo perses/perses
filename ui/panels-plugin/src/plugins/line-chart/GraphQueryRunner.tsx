@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, useMemoized, useGraphQuery } from '@perses-dev/core';
+import { useMemoized } from '@perses-dev/core';
+import { GraphQueryDefinition, useGraphQuery } from '@perses-dev/plugin-system';
 import { createContext, useContext } from 'react';
 
 export type QueryState = ReturnType<typeof useGraphQuery>;
@@ -22,7 +23,7 @@ const EMPTY_RESULTS: QueryState[] = [];
 const GraphQueryContext = createContext<QueryState[] | undefined>(undefined);
 
 export interface GraphQueryRunnerProps {
-  queries: AnyGraphQueryDefinition[];
+  queries: GraphQueryDefinition[];
   children: React.ReactNode;
 }
 
@@ -47,7 +48,7 @@ function GraphQueryRunner(props: GraphQueryRunnerProps) {
 export default GraphQueryRunner;
 
 interface RunGraphQueryProps {
-  queries: AnyGraphQueryDefinition[];
+  queries: GraphQueryDefinition[];
   index: number;
   previousResults: QueryState[];
   children: React.ReactNode;

@@ -11,16 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, UnixTimeMs } from './time';
-import { Definition, JsonObject } from './definitions';
-import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
-import { ResourceSelector } from './resource';
+import { AbsoluteTimeRange, Definition, JsonObject, ResourceSelector, UnixTimeMs } from '@perses-dev/core';
+import { usePlugin } from '../components/PluginLoadingBoundary';
 
-export interface GraphQueryDefinition<Options extends JsonObject> extends Definition<Options> {
+/**
+ * Options that are common to all Graph Queries.
+ */
+export interface GraphQueryDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
   datasource?: ResourceSelector;
 }
 
-export interface GraphQueryPlugin<Options extends JsonObject> {
+/**
+ * A plugin for running graph queries.
+ */
+export interface GraphQueryPlugin<Options extends JsonObject = JsonObject> {
   useGraphQuery: UseGraphQueryHook<Options>;
 }
 
@@ -43,6 +47,14 @@ export interface GraphSeries {
 
 export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
-export type AnyGraphQueryDefinition = AnyPluginDefinition<'GraphQuery'>;
-
-export type AnyGraphQueryPlugin = AnyPluginImplementation<'GraphQuery'>;
+/**
+ * Use a Graph Query's results from a graph query plugin at runtime.
+ */
+export const useGraphQuery: GraphQueryPlugin['useGraphQuery'] = (definition) => {
+  const plugin = usePlugin('GraphQuery', definition);
+  if (plugin === undefined) {
+    // Provide default values while the plugin is being loaded
+    return { loading: true };
+  }
+  return plugin.useGraphQuery(definition);
+};

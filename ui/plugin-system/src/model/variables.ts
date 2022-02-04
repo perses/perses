@@ -11,10 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, JsonObject } from './definitions';
-import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
+import { JsonObject, Definition } from '@perses-dev/core';
+import { usePlugin } from '../components/PluginLoadingBoundary';
 
-export interface VariableDefinition<Options extends JsonObject> extends Definition<Options> {
+// Extend the core DashboardSpec to support variable definitions from variable plugins
+declare module '@perses-dev/core' {
+  export interface DashboardSpec {
+    variables: Record<string, VariableDefinition>;
+  }
+}
+
+/**
+ * Variable definition options that are common to all variables.
+ */
+export interface VariableDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
   display: VariableDisplayOptions;
   selection: VariableSelectionOptions;
   capturing_regexp?: string;
@@ -41,7 +51,7 @@ export const DEFAULT_ALL_VALUE = '$__all' as const;
 /**
  * Plugin for handling custom VariableDefinitions.
  */
-export interface VariablePlugin<Options extends JsonObject> {
+export interface VariablePlugin<Options extends JsonObject = JsonObject> {
   useVariableOptions: UseVariableOptionsHook<Options>;
 }
 
@@ -55,6 +65,14 @@ export type UseVariableOptionsHook<Options extends JsonObject> = (definition: Va
   error?: Error;
 };
 
-export type AnyVariableDefinition = AnyPluginDefinition<'Variable'>;
-
-export type AnyVariablePlugin = AnyPluginImplementation<'Variable'>;
+/**
+ * Use the variable options from a variable plugin at runtime.
+ */
+export const useVariableOptions: VariablePlugin['useVariableOptions'] = (definition) => {
+  const plugin = usePlugin('Variable', definition);
+  if (plugin === undefined) {
+    // Provide default values while the plugin is being loaded
+    return { data: [], loading: true };
+  }
+  return plugin.useVariableOptions(definition);
+};
