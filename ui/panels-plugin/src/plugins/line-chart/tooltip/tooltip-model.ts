@@ -15,6 +15,7 @@ import { FocusedSeriesArray } from '../utils/focused-series';
 
 export const TOOLTIP_MAX_WIDTH = 700;
 export const TOOLTIP_MAX_HEIGHT = 600;
+export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 
 export const TOOLTIP_MAX_ITEMS = 50;
 
@@ -46,7 +47,7 @@ export const defaultCursorData = {
 
 export const emptyTooltipData = {
   cursor: defaultCursorData,
-  focusedSeries: null, //[{ seriesIdx: null, datumIdx: null, date: '', seriesName: '', x: 0, y: 0, markerColor: '' }],
+  focusedSeries: null,
 };
 
 export interface Coordinate {

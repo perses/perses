@@ -48,14 +48,6 @@ function TooltipContent(props: { focusedSeries: FocusedSeriesArray | null }) {
             if (datumIdx === null || seriesIdx === null) return null;
             const key = seriesIdx.toString() + datumIdx.toString();
 
-            // if (index === 0 || date !== lastDate) {
-            //   lastDate = date;
-            //   return (
-            //     <SeriesInfo key={key} seriesName={seriesName} y={y} markerColor={markerColor} totalSeries={focusedSeries.length} />
-            //   );
-            // }
-
-            // lastDate = date;
             return (
               <SeriesInfo
                 key={key}
