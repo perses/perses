@@ -14,7 +14,7 @@
 import { Paper, Typography } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
 import { useDashboardSpec } from '@perses-dev/core';
-import { PluginBoundary } from '../../context/plugin-registry';
+import { PluginBoundary } from '@perses-dev/plugin-system';
 import VariableAutocomplete from './VariableAutocomplete';
 
 const DRAWER_WIDTH = 296;

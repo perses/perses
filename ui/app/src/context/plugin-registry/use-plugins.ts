@@ -20,8 +20,7 @@ import {
   AnyPluginDefinition,
   AnyPluginImplementation,
 } from '@perses-dev/core';
-import { usePluginLoadingBoundary } from './PluginLoadingBoundary';
-import { usePluginRegistry } from './PluginRegistry';
+import { usePluginLoadingBoundary, usePluginRegistry } from '@perses-dev/plugin-system';
 
 /**
  * Gets variable options supplied from a variable plugin.

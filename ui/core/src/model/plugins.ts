@@ -25,8 +25,6 @@ export interface PluginResource {
 
 export interface PluginSpec {
   supported_kinds: Record<string, PluginType>;
-  // TODO: Is this how we should load 3rd party plugins from the Perses server?
-  plugin_module_path: string;
 }
 
 /**

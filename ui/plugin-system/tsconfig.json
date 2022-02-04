@@ -4,6 +4,16 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "tsBuildInfoFile": "../.build-cache/components.tsbuildinfo"
-  }
+    "tsBuildInfoFile": "../.build-cache/plugin-system.tsbuildinfo"
+  },
+  "references": [
+    {
+      "path": "../components",
+      "prepend": false
+    },
+    {
+      "path": "../core",
+      "prepend": false
+    }
+  ]
 }

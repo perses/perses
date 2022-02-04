@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ReactNode } from 'react';
-import { ErrorBoundary, ErrorBoundaryProps } from 'react-error-boundary';
-import { PluginLoadingBoundary, PluginLoadingBoundaryProps } from './PluginLoadingBoundary';
+import { ErrorBoundary, ErrorBoundaryProps } from '@perses-dev/components';
+import { PluginLoadingBoundary, PluginLoadingBoundaryProps } from '../PluginLoadingBoundary';
 
 export interface PluginBoundaryProps {
   loadingFallback: PluginLoadingBoundaryProps['fallback'];

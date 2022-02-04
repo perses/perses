@@ -16,21 +16,40 @@ import { PluginModule, PluginResource } from '@perses-dev/core';
 // Eagerly load the metadata for the bundled plugins, but lazy-load the plugins
 import prometheusPackage from '@perses-dev/prometheus-plugin/package.json';
 import panelsPackage from '@perses-dev/panels-plugin/package.json';
+import { PluginRegistryProps } from '@perses-dev/plugin-system';
+import { useCallback } from 'react';
 
-export interface BundledPlugin {
-  cacheKey: string;
+interface BundledPlugin {
   importPluginModule: () => Promise<PluginModule>;
 }
 
 /**
  * Plugins that are bundled with the app via code-splitting.
  */
-export const BUNDLED_PLUGINS = new Map<PluginResource, BundledPlugin>();
+const BUNDLED_PLUGINS = new Map<PluginResource, BundledPlugin>();
 BUNDLED_PLUGINS.set(prometheusPackage.perses as PluginResource, {
-  cacheKey: 'prometheus-plugin',
   importPluginModule: () => import('@perses-dev/prometheus-plugin'),
 });
 BUNDLED_PLUGINS.set(panelsPackage.perses as PluginResource, {
-  cacheKey: 'panels-plugin',
   importPluginModule: () => import('@perses-dev/panels-plugin'),
 });
+
+/**
+ * Returns props for the PluginRegistry allowing it to load plugins that are bundled with the app.
+ */
+export function useBundledPlugins(): Pick<PluginRegistryProps, 'getInstalledPlugins' | 'importPluginModule'> {
+  const getInstalledPlugins: PluginRegistryProps['getInstalledPlugins'] = useCallback(
+    () => Promise.resolve(Array.from(BUNDLED_PLUGINS.keys())),
+    []
+  );
+
+  const importPluginModule: PluginRegistryProps['importPluginModule'] = useCallback((resource) => {
+    const bundled = BUNDLED_PLUGINS.get(resource);
+    if (bundled === undefined) {
+      throw new Error('Plugin not found');
+    }
+    return bundled.importPluginModule();
+  }, []);
+
+  return { getInstalledPlugins, importPluginModule };
+}

@@ -22,6 +22,10 @@
       "prepend": false
     },
     {
+      "path": "../plugin-system",
+      "prepend": false
+    },
+    {
       "path": "../prometheus-plugin",
       "prepend": false
     }

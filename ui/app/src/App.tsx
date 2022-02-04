@@ -15,12 +15,13 @@ import { DashboardResource } from '@perses-dev/core';
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { ErrorAlert } from '@perses-dev/components';
-import { PluginRegistry } from './context/plugin-registry';
+import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/dashboard/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import { useSampleData } from './utils/temp-sample-data';
 import Header from './components/Header';
 import { pluginRuntime } from './model/plugin-runtime';
+import { useBundledPlugins } from './model/bundled-plugins';
 
 const appStyle: SxProps<Theme> = {
   display: 'flex',
@@ -32,6 +33,8 @@ function App() {
   const dashboard = useSampleData<DashboardResource>(
     new URLSearchParams(window.location.search).get('dashboard') || 'node-exporter-full'
   );
+  const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
+
   if (dashboard === undefined) {
     return null;
   }
@@ -45,10 +48,16 @@ function App() {
           overflow: 'hidden',
         }}
       >
-        <PluginRegistry loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert} runtime={pluginRuntime}>
-          <DataSourceRegistry>
-            <ViewDashboard resource={dashboard} />
-          </DataSourceRegistry>
+        <PluginRegistry
+          getInstalledPlugins={getInstalledPlugins}
+          importPluginModule={importPluginModule}
+          runtime={pluginRuntime}
+        >
+          <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
+            <DataSourceRegistry>
+              <ViewDashboard resource={dashboard} />
+            </DataSourceRegistry>
+          </PluginBoundary>
         </PluginRegistry>
       </Box>
     </Box>

@@ -23,7 +23,6 @@ import {
   JsonObject,
   ALL_PLUGIN_TYPES,
 } from '@perses-dev/core';
-import { BUNDLED_PLUGINS } from './bundled-plugins';
 import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from './create-plugin';
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
@@ -40,7 +39,7 @@ export type LoadedPluginsByTypeAndKind = {
  * Hook for setting up plugin registry state. Returns the state, plus a function
  * for registering plugins with that state.
  */
-export function useRegistryState(installedPlugins: PluginResource[]) {
+export function useRegistryState(installedPlugins?: PluginResource[]) {
   // Go through all installed plugins and bundled plugins and build an index of
   // those resources by type and kind
   const loadablePlugins = useMemo(() => {
@@ -48,6 +47,9 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
     for (const pluginType of ALL_PLUGIN_TYPES) {
       loadableProps[pluginType] = new Map();
     }
+
+    // If no plugins installed or waiting on that data, nothing else to do
+    if (installedPlugins === undefined) return loadableProps;
 
     const addToLoadable = (resource: PluginResource) => {
       const supportedKinds = resource.spec.supported_kinds;
@@ -65,10 +67,6 @@ export function useRegistryState(installedPlugins: PluginResource[]) {
     };
 
     for (const resource of installedPlugins) {
-      addToLoadable(resource);
-    }
-
-    for (const [resource] of BUNDLED_PLUGINS) {
       addToLoadable(resource);
     }
 

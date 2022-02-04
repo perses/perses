@@ -15,7 +15,8 @@ import { useState } from 'react';
 import { Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
 import { AnyPanelDefinition } from '@perses-dev/core';
 import { ErrorAlert } from '@perses-dev/components';
-import { PluginBoundary, usePanelComponent } from '../../context/plugin-registry';
+import { PluginBoundary } from '@perses-dev/plugin-system';
+import { usePanelComponent } from '../../context/plugin-registry';
 import { PanelContextProvider } from './PanelContextProvider';
 
 export interface PanelProps extends CardProps {
