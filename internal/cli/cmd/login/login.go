@@ -16,6 +16,7 @@ package login
 import (
 	"fmt"
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
 	"net/url"
 )
@@ -42,8 +43,10 @@ func (o *option) validate() error {
 
 func (o *option) execute() error {
 	return cmdUtils.WriteConfig(&cmdUtils.CLIConfig{
-		URL:         o.url,
-		InsecureTLS: o.insecureTLS,
+		RestClientConfig: perseshttp.RestConfigClient{
+			URL:         o.url,
+			InsecureTLS: o.insecureTLS,
+		},
 	})
 }
 

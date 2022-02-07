@@ -16,6 +16,9 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -27,10 +30,43 @@ const (
 	configFileName = "config"
 )
 
+var GlobalConfig *CLIConfig
+
+func init() {
+	var err error
+	GlobalConfig, err = readConfig()
+	if err != nil {
+		logrus.WithError(err).Debug("unable to read the config")
+		GlobalConfig = &CLIConfig{}
+	} else {
+		err = GlobalConfig.init()
+		if err != nil {
+			logrus.WithError(err).Errorf("unable to initialize the CLI from the config")
+		}
+	}
+}
+
 type CLIConfig struct {
-	URL         string `json:"url"`
-	InsecureTLS bool   `json:"insecure_tls"`
-	Project     string `json:"project"`
+	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
+	Project          string                      `json:"project"`
+	apiClient        api.ClientInterface
+}
+
+func (c *CLIConfig) init() error {
+	restClient, err := perseshttp.NewFromConfig(c.RestClientConfig)
+	if err != nil {
+		return err
+	}
+	c.apiClient = api.NewWithClient(restClient)
+	return nil
+}
+
+func (c *CLIConfig) GetAPIClient() (api.ClientInterface, error) {
+	if c.apiClient != nil {
+		return c.apiClient, nil
+	} else {
+		return nil, fmt.Errorf("you are not connected to any API")
+	}
 }
 
 // getRootFolder will return a root folder that will or that contains the Perses' config in a sub dir.
@@ -61,6 +97,12 @@ func readConfig() (*CLIConfig, error) {
 	return result, json.Unmarshal(data, result)
 }
 
+func SetProject(project string) error {
+	return WriteConfig(&CLIConfig{
+		Project: project,
+	})
+}
+
 // WriteConfig writes the configuration file in the path {USER_HOME}/.perses/config
 // if the directory doesn't exist, the function will create it
 func WriteConfig(config *CLIConfig) error {
@@ -77,9 +119,9 @@ func WriteConfig(config *CLIConfig) error {
 	if err == nil {
 		// the config already exists, so we should update it with the one provided in the parameter.
 		if config != nil {
-			previousConf.InsecureTLS = config.InsecureTLS
-			if len(config.URL) > 0 {
-				previousConf.URL = config.URL
+			previousConf.RestClientConfig.InsecureTLS = config.RestClientConfig.InsecureTLS
+			if len(config.RestClientConfig.URL) > 0 {
+				previousConf.RestClientConfig.URL = config.RestClientConfig.URL
 			}
 			if len(config.Project) > 0 {
 				previousConf.Project = config.Project
