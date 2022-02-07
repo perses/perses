@@ -24,6 +24,7 @@ type ClientInterface interface {
 	Dashboard(project string) DashboardInterface
 	Datasource(project string) DatasourceInterface
 	GlobalDatasource() GlobalDatasourceInterface
+	Health() HealthInterface
 	Project() ProjectInterface
 	User() UserInterface
 }
@@ -53,6 +54,10 @@ func (c *client) Datasource(project string) DatasourceInterface {
 
 func (c *client) GlobalDatasource() GlobalDatasourceInterface {
 	return newGlobalDatasource(c.restClient)
+}
+
+func (c *client) Health() HealthInterface {
+	return newHealth(c.restClient)
 }
 
 func (c *client) Project() ProjectInterface {

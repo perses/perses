@@ -15,9 +15,15 @@ package version
 
 import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	v1 "github.com/perses/perses/pkg/client/api/v1"
 	"github.com/prometheus/common/version"
 	"github.com/spf13/cobra"
 )
+
+type fullOutputVersion struct {
+	Client *outputVersion `json:"client"`
+	Server *outputVersion `json:"server,omitempty"`
+}
 
 type outputVersion struct {
 	BuildTime string `json:"buildTime,omitempty" yaml:"buildTime,omitempty"`
@@ -26,8 +32,17 @@ type outputVersion struct {
 }
 
 type option struct {
-	short  bool
-	output string
+	short     bool
+	output    string
+	apiClient v1.HealthInterface
+}
+
+func (o *option) complete() {
+	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
+	if err != nil {
+		return
+	}
+	o.apiClient = apiClient.V1().Health()
 }
 
 func (o *option) validate() error {
@@ -40,12 +55,26 @@ func (o *option) validate() error {
 }
 
 func (o *option) execute() error {
-	v := &outputVersion{
+	clientVersion := &outputVersion{
 		Version: version.Version,
 	}
+	v := &fullOutputVersion{
+		Client: clientVersion,
+	}
 	if !o.short {
-		v.BuildTime = version.BuildDate
-		v.Commit = version.Revision
+		clientVersion.BuildTime = version.BuildDate
+		clientVersion.Commit = version.Revision
+	}
+	if o.apiClient != nil {
+		health, err := o.apiClient.Check()
+		if err != nil {
+			return err
+		}
+		v.Server = &outputVersion{
+			BuildTime: health.BuildTime,
+			Version:   health.Version,
+			Commit:    health.Commit,
+		}
 	}
 	return cmdUtils.HandleOutput(o.output, v)
 }
@@ -56,6 +85,7 @@ func NewCMD() *cobra.Command {
 		Use:   "version",
 		Short: "Display client version",
 		Run: func(cmd *cobra.Command, args []string) {
+			o.complete()
 			cmdUtils.HandleError(o.validate())
 			cmdUtils.HandleError(o.execute())
 		},

@@ -45,7 +45,7 @@ func (o *option) complete(args []string) error {
 func (o *option) execute() error {
 	if len(o.projectName) == 0 {
 		// In that case we simply print the current project used.
-		fmt.Printf("Using project %q on server %q", cmdUtils.GlobalConfig.Project, cmdUtils.GlobalConfig.RestClientConfig.URL)
+		fmt.Printf("Using project %q on server %q\n", cmdUtils.GlobalConfig.Project, cmdUtils.GlobalConfig.RestClientConfig.URL)
 		return nil
 	} else {
 		// in case the project is provided we should verify if it exists first
