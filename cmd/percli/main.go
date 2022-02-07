@@ -15,12 +15,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/perses/perses/internal/cli/cmd/login"
 	"github.com/perses/perses/internal/cli/cmd/project"
 	"github.com/perses/perses/internal/cli/cmd/version"
 	"github.com/sirupsen/logrus"
-	"os"
-
 	"github.com/spf13/cobra"
 )
 

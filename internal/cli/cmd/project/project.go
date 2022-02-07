@@ -16,6 +16,7 @@ package project
 import (
 	"errors"
 	"fmt"
+
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"

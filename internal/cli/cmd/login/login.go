@@ -15,10 +15,11 @@ package login
 
 import (
 	"fmt"
+	"net/url"
+
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
-	"net/url"
 )
 
 type option struct {

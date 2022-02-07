@@ -16,13 +16,14 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/perses/perses/pkg/client/api"
-	"github.com/perses/perses/pkg/client/perseshttp"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
+	"github.com/sirupsen/logrus"
 )
 
 const (
