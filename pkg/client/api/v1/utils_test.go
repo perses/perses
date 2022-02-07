@@ -24,7 +24,7 @@ import (
 )
 
 func createClient(t *testing.T, server *httptest.Server) ClientInterface {
-	restClient, err := perseshttp.NewFromConfig(&perseshttp.RestConfigClient{
+	restClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
 		URL: server.URL,
 	})
 	if err != nil {

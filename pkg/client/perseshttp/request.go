@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 )
 
@@ -288,14 +287,14 @@ func (re *RequestError) Error() string {
 	err := "something wrong happened with the request to the API."
 
 	if re.Err != nil {
-		err = err + " Error: " + re.Err.Error()
+		err = fmt.Sprintf("%s Error: %s", err, re.Err.Error())
 	}
 	if len(re.Message) > 0 {
-		err = err + " Message: " + re.Message
+		err = fmt.Sprintf("%s  Message: %s", err, re.Message)
 	}
 
 	if re.StatusCode > 0 {
-		err = err + " StatusCode: " + strconv.Itoa(re.StatusCode)
+		err = fmt.Sprintf("%s StatusCode: %d", err, re.StatusCode)
 	}
 
 	return err
@@ -304,6 +303,11 @@ func (re *RequestError) Error() string {
 func (re *RequestError) Unwrap() error {
 	return re.Err
 }
+
+var (
+	RequestInternalError = &RequestError{Message: "internal server error", StatusCode: http.StatusInternalServerError}
+	RequestNotFoundError = &RequestError{Message: "document not found", StatusCode: http.StatusNotFound}
+)
 
 // Response contains the result of calling #Request.Do()
 type Response struct {
@@ -321,6 +325,12 @@ func (r *Response) Error() error {
 	e := &RequestError{Err: r.err}
 	// check code result
 	if r.statusCode < http.StatusOK || r.statusCode > http.StatusPartialContent {
+		if r.statusCode == http.StatusInternalServerError {
+			return RequestInternalError
+		}
+		if r.statusCode == http.StatusNotFound {
+			return RequestNotFoundError
+		}
 		// check error message contains in the body
 		if r.body != nil {
 			response := &errorResponse{}
