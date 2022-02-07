@@ -13,8 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+docker_cmd=docker
+
+if podman -v; then
+  echo "use podman instead of docker binary"
+  docker_cmd=podman
+fi
+
 container=dev_etcd_1
-if [ "$( docker ps -a | grep -c dev-etcd-1 )" -gt 0 ]; then
+if [ "$( ${docker_cmd} ps -a | grep -c dev-etcd-1 )" -gt 0 ]; then
   container=dev-etcd-1
 fi
 
@@ -46,7 +54,7 @@ function insertResourceData() {
       fi
       id=${id}$(_jq '.metadata.name')
       echo "injected document at with the key $id"
-      MSYS_NO_PATHCONV=1 docker exec ${container} etcdctl put "${id}" "${entity}"
+      MSYS_NO_PATHCONV=1 ${docker_cmd} exec ${container} etcdctl put "${id}" "${entity}"
   done
 }
 
