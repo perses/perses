@@ -16,6 +16,7 @@ package main
 import (
 	"fmt"
 	"github.com/perses/perses/internal/cli/cmd/login"
+	"github.com/perses/perses/internal/cli/cmd/project"
 	"github.com/perses/perses/internal/cli/cmd/version"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -31,6 +32,7 @@ func newRootCommand() *cobra.Command {
 
 	cmd.AddCommand(version.NewCMD())
 	cmd.AddCommand(login.NewCMD())
+	cmd.AddCommand(project.NewCMD())
 	return cmd
 }
 
