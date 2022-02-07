@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { useState, useLayoutEffect } from 'react';
-import { isFunction, isString } from 'lodash-es';
 import debounce from 'lodash/debounce';
 import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
@@ -52,7 +51,7 @@ export function EChartsWrapper(props: EChartsWrapper) {
   // Validate event config and bind custom events
   function bindEvents(instance: ECharts, events: onEventsType) {
     function bindEvent(eventName: string, onEventFunction: unknown) {
-      if (isString(eventName) && isFunction(onEventFunction)) {
+      if (typeof eventName === 'string' && typeof onEventFunction === 'function') {
         instance.on(eventName, (param) => {
           onEventFunction(param, instance);
         });
@@ -86,7 +85,7 @@ export function EChartsWrapper(props: EChartsWrapper) {
     const echartsInstance = chart;
     bindEvents(echartsInstance, onEvents ?? {});
 
-    if (isFunction(onChartReady)) onChartReady(echartsInstance);
+    if (typeof onChartReady === 'function') onChartReady(echartsInstance);
   }, [chart, option, onEvents, onChartReady]);
 
   useLayoutEffect(() => {
