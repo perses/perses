@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, Divider, Stack, Typography } from '@mui/material';
 import SeriesMarker from './SeriesMarker';
+import { TOOLTIP_LABELS_MAX_WIDTH } from './tooltip-model';
 
 interface SeriesInfoProps {
   seriesName: string;
@@ -23,14 +24,15 @@ interface SeriesInfoProps {
 
 function SeriesInfo(props: SeriesInfoProps) {
   const { seriesName, y, markerColor, totalSeries } = props;
-  // TODO (sjcobb): regex to remove __name__ and quotes, replace = with :
+  // TODO (sjcobb): regex to remove __name__ and quotes, replace = with :`
+  const formattedSeriesLabels = seriesName.replaceAll('"', '');
+
   if (totalSeries === 1) {
     return (
-      <Box sx={{ margin: '0 0 4px' }}>
+      <Stack spacing={0.5}>
         <Box
           sx={{
             height: '16px',
-            margin: '0 0 2px',
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
@@ -38,32 +40,87 @@ function SeriesInfo(props: SeriesInfoProps) {
           }}
         >
           <SeriesMarker markerColor={markerColor} />
-          <Box component="span">value: {y}</Box>
+          <Box component="span" color="grey.300">
+            value:
+            <Box
+              component="span"
+              sx={{
+                color: 'white',
+                fontWeight: 700,
+                paddingLeft: '2px',
+              }}
+            >
+              {y}
+            </Box>
+          </Box>
         </Box>
-        <Box>{seriesName}</Box>
-      </Box>
+        <Divider sx={{ borderColor: 'grey.800', fontSize: 'body2' }} />
+        <Box>
+          {formattedSeriesLabels.split(',').map((name) => {
+            const [key, value] = name.split('=');
+
+            return (
+              <Box key={name} sx={{ display: 'flex', gap: '4px' }}>
+                <Typography fontSize="11px" color="grey.300">
+                  {key}:
+                </Typography>
+                <Typography
+                  sx={{
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                  }}
+                >
+                  {value}
+                </Typography>
+              </Box>
+            );
+          })}
+        </Box>
+      </Stack>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '16px', margin: '0 0 2px', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-      <SeriesMarker markerColor={markerColor} />
+    <Box
+      sx={{
+        display: 'table-row',
+        paddingTop: 0.5,
+      }}
+    >
       <Box
-        component="span"
         sx={{
-          marginRight: '4px',
-          textOverflow: 'ellipsis',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          '&:hover': {
-            overflow: 'visible',
-            whiteSpace: 'normal',
-          },
+          display: 'table-cell',
+          maxWidth: '520px',
         }}
       >
-        {seriesName}
+        <SeriesMarker markerColor={markerColor} />
+        <Box
+          component="span"
+          sx={{
+            color: 'grey.300',
+            display: 'inline-block',
+            maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            width: 'calc(100% - 20px)',
+          }}
+        >
+          {seriesName}
+        </Box>
       </Box>
-      <Box>{y}</Box>
+      <Box
+        sx={{
+          display: 'table-cell',
+          fontWeight: '700',
+          paddingLeft: 1.5,
+          textAlign: 'right',
+          verticalAlign: 'top',
+        }}
+      >
+        {y}
+      </Box>
     </Box>
   );
 }

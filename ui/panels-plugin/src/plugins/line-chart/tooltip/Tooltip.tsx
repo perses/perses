@@ -13,7 +13,7 @@
 
 import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Coordinate, TooltipData, TOOLTIP_MIN_WIDTH } from './tooltip-model';
+import { Coordinate, TooltipData, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 import TooltipContent from './TooltipContent';
 
 function assembleTransform(coords: Coordinate, chartWidth: number) {
@@ -32,10 +32,9 @@ interface TooltipProps {
 
 function Tooltip(props: TooltipProps) {
   const { focusedSeries, cursor } = props.tooltipData;
-  const [isTooltipVisible, setTooltipVisibility] = useState<boolean>(true);
+  const [isTooltipVisible, setTooltipVisibility] = useState<boolean>(false);
   const cursorTransform = assembleTransform(cursor.coords.plotCanvas, cursor.chartWidth);
-  const focusedSeriesNum = focusedSeries.length;
-  const resizeDir = focusedSeriesNum > 5 ? 'vertical' : 'none';
+  const focusedSeriesNum = focusedSeries ? focusedSeries.length : 0;
 
   function handleHoverOff() {
     // TODO (sjcobb): partially fixes lingering tooltip but still needs adjustments
@@ -54,12 +53,13 @@ function Tooltip(props: TooltipProps) {
     <>
       <Box
         sx={{
-          width: TOOLTIP_MIN_WIDTH,
-          height: resizeDir === 'vertical' ? '180px' : 'auto',
+          borderRadius: '6px',
+          maxWidth: TOOLTIP_MAX_WIDTH,
+          maxHeight: TOOLTIP_MAX_HEIGHT,
           position: 'absolute',
           top: 0,
           left: 0,
-          overflow: 'scroll',
+          overflow: 'hidden',
           backgroundColor: '#000',
           color: '#fff',
           fontSize: '11px',
@@ -67,7 +67,6 @@ function Tooltip(props: TooltipProps) {
           opacity: isTooltipVisible ? 1 : 0,
           transform: cursorTransform,
           transition: 'all 0.1s ease-out',
-          resize: resizeDir,
           zIndex: 1,
         }}
         onMouseLeave={handleHoverOff}

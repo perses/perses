@@ -22,19 +22,16 @@ function SeriesMarker(props: SeriesMarkerProps) {
   return (
     <Box
       sx={{
-        display: 'flex',
-        alignItems: 'center',
-        margin: '0 6px 0 0',
+        borderRadius: '2px',
+        display: 'inline-block',
+        height: '12px',
+        marginRight: 1,
+        marginTop: 0.25,
+        verticalAlign: 'top',
+        width: '12px',
       }}
-    >
-      <Box
-        sx={{
-          width: '10px',
-          height: '10px',
-          backgroundColor: markerColor,
-        }}
-      ></Box>
-    </Box>
+      style={{ backgroundColor: markerColor }}
+    ></Box>
   );
 }
 
