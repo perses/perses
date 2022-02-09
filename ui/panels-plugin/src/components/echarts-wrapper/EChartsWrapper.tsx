@@ -48,27 +48,6 @@ export function EChartsWrapper(props: EChartsWrapper) {
     };
   }, [containerRef, theme]);
 
-  // Validate event config and bind custom events
-  function bindEvents(instance: ECharts, events: onEventsType) {
-    function bindEvent(eventName: string, onEventFunction: unknown) {
-      if (typeof eventName === 'string' && typeof onEventFunction === 'function') {
-        instance.on(eventName, (param) => {
-          onEventFunction(param, instance);
-        });
-      }
-    }
-
-    for (const eventName in events) {
-      if (Object.prototype.hasOwnProperty.call(events, eventName)) {
-        const customEvent = events[eventName] ?? null;
-        if (customEvent) {
-          bindEvent(eventName, customEvent);
-        }
-      }
-    }
-    // TODO (sjcobb): unbind events
-  }
-
   // Sync options with chart instance
   useLayoutEffect(() => {
     if (chart === undefined) return;
@@ -98,4 +77,25 @@ export function EChartsWrapper(props: EChartsWrapper) {
   }, [chart]);
 
   return <Box ref={setContainerRef} sx={sx}></Box>;
+}
+
+// Validate event config and bind custom events
+function bindEvents(instance: ECharts, events: onEventsType) {
+  function bindEvent(eventName: string, onEventFunction: unknown) {
+    if (typeof eventName === 'string' && typeof onEventFunction === 'function') {
+      instance.on(eventName, (param) => {
+        onEventFunction(param, instance);
+      });
+    }
+  }
+
+  for (const eventName in events) {
+    if (Object.prototype.hasOwnProperty.call(events, eventName)) {
+      const customEvent = events[eventName] ?? null;
+      if (customEvent) {
+        bindEvent(eventName, customEvent);
+      }
+    }
+  }
+  // TODO (sjcobb): unbind events
 }
