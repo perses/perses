@@ -32,7 +32,6 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 interface StatChartOptions extends JsonObject {
   name: string;
-  show_panel_header: string;
   query: AnyGraphQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
@@ -49,12 +48,12 @@ export function StatChartPanel(props: StatChartPanelProps) {
       options: { query, calculation, unit, sparkline },
     },
   } = props;
-  const showName = props.definition.display.show_panel_header === true ? false : true;
+
   const showSparkline = sparkline && sparkline.show === true ? true : false;
   const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
   const { contentDimensions } = usePanelState();
   const { data, loading, error } = useGraphQuery(query);
-  const chartData = useChartData(data, calculation, name, showName);
+  const chartData = useChartData(data, calculation, name);
 
   if (error) throw error;
 
@@ -84,12 +83,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   );
 }
 
-const useChartData = (
-  data: GraphData | undefined,
-  calculation: CalculationType,
-  name: string,
-  showName: boolean
-): StatChartData => {
+const useChartData = (data: GraphData | undefined, calculation: CalculationType, name: string): StatChartData => {
   return useMemo(() => {
     const loadingData = {
       calculatedValue: undefined,
@@ -105,7 +99,6 @@ const useChartData = (
       calculatedValue,
       seriesData,
       name,
-      showName,
     };
-  }, [data, calculation, name, showName]);
+  }, [data, calculation, name]);
 };

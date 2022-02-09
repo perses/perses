@@ -228,7 +228,6 @@ const nodeExporterDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'CPU Cores',
-          show_panel_header: false,
         },
         options: {
           query: {
@@ -245,7 +244,6 @@ const nodeExporterDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'System Uptime',
-          show_panel_header: false,
         },
         options: {
           query: {
@@ -263,7 +261,6 @@ const nodeExporterDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'RAM Total',
-          show_panel_header: false,
         },
         options: {
           query: {

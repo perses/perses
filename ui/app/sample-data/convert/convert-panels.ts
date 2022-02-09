@@ -127,7 +127,6 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
     kind: 'StatChart',
     display: {
       name: statPanel.title,
-      show_panel_header: false,
     },
     options: {
       query: convertQueryTarget(target),

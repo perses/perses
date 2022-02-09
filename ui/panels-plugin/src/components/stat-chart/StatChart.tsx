@@ -59,7 +59,6 @@ export interface StatChartData {
   calculatedValue: number | null | undefined;
   seriesData: GraphSeries | null | undefined;
   name?: string;
-  showName?: boolean;
 }
 
 interface StatChartProps {
@@ -88,12 +87,12 @@ export function StatChart(props: StatChartProps) {
     if (data.seriesData === undefined) return {};
     if (data.seriesData === null || data.calculatedValue === undefined) return noDataOption;
 
-    const name = data.showName === true ? data.name : '';
-    const showName = data.showName ?? true;
     const series = data.seriesData;
     const calculatedValue = data.calculatedValue ?? 0;
     const isLargePanel = width > 250 ? true : false;
-    const nameFontSize = isLargePanel === true ? 30 : 12;
+    const nameFontSize = isLargePanel ? 30 : 12;
+    const showName = isLargePanel;
+    const name = showName === true ? data.name : '';
 
     const statSeries: Array<GaugeSeriesOption | LineSeriesOption> = [
       {
@@ -106,7 +105,7 @@ export function StatChart(props: StatChartProps) {
         ],
         detail: {
           show: true,
-          offsetCenter: ['0%', showSparkline === true ? '-55%' : '-15%'],
+          offsetCenter: ['0%', '-55%'],
           formatter: [`{name|${name}}`, `{value|${formatValue(calculatedValue, unit)}}`].join('\n'),
           rich: {
             name: {

@@ -156,7 +156,6 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Sm',
-          show_panel_header: false,
         },
         options: {
           query: {
@@ -184,7 +183,6 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'RAM Used',
-          show_panel_header: false,
         },
         options: {
           query: {
@@ -202,7 +200,6 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'RAM Total',
-          show_panel_header: false,
         },
         options: {
           query: {
@@ -222,7 +219,6 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Md',
-          show_panel_header: false,
         },
         options: {
           query: {
@@ -245,7 +241,6 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Lg',
-          show_panel_header: false,
         },
         options: {
           query: {

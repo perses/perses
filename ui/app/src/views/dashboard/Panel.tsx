@@ -29,8 +29,7 @@ export interface PanelProps extends CardProps {
 function Panel(props: PanelProps) {
   const { definition, ...others } = props;
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
-  const showPanelHeader = definition.display.show_panel_header ?? true;
-  const loadingText = showPanelHeader === true ? 'Loading...' : '';
+
   return (
     <Card
       sx={{
@@ -44,26 +43,24 @@ function Panel(props: PanelProps) {
       variant="outlined"
       {...others}
     >
-      {showPanelHeader === true && (
-        <CardHeader
-          title={
-            <Typography
-              component="h2"
-              variant="body2"
-              fontWeight={(theme) => theme.typography.fontWeightBold}
-              whiteSpace="nowrap"
-              overflow="hidden"
-              textOverflow="ellipsis"
-            >
-              {definition.display.name}
-            </Typography>
-          }
-          sx={{
-            display: 'block',
-            padding: (theme) => theme.spacing(1, 2),
-          }}
-        />
-      )}
+      <CardHeader
+        title={
+          <Typography
+            component="h2"
+            variant="body2"
+            fontWeight={(theme) => theme.typography.fontWeightBold}
+            whiteSpace="nowrap"
+            overflow="hidden"
+            textOverflow="ellipsis"
+          >
+            {definition.display.name}
+          </Typography>
+        }
+        sx={{
+          display: 'block',
+          padding: (theme) => theme.spacing(1, 2),
+        }}
+      />
       <CardContent
         sx={{
           position: 'relative',
@@ -71,16 +68,14 @@ function Panel(props: PanelProps) {
           padding: (theme) => theme.spacing(1, 2),
           // Override MUI default style for last-child
           ':last-child': {
-            padding: (theme) => {
-              return showPanelHeader === true ? theme.spacing(1, 2) : '0';
-            },
+            padding: (theme) => theme.spacing(1, 2),
           },
         }}
         ref={setContentElement}
       >
         {/* Actually render plugin with PanelContent component so we can wrap with a loading/error boundary */}
         <PanelContextProvider contentElement={contentElement}>
-          <PluginBoundary loadingFallback={loadingText} ErrorFallbackComponent={AlertErrorFallback}>
+          <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={AlertErrorFallback}>
             <PanelContent definition={definition} />
           </PluginBoundary>
         </PanelContextProvider>

@@ -17,7 +17,6 @@ import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 export interface PanelDefinition<Options extends JsonObject> extends Definition<Options> {
   display: {
     name: string;
-    show_panel_header?: boolean;
   };
 }
 
