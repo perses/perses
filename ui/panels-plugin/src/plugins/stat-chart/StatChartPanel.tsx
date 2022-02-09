@@ -58,7 +58,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
 
   if (error) throw error;
 
-  if (contentDimensions === undefined) return <></>;
+  if (contentDimensions === undefined) return null;
 
   if (loading === true) {
     return (

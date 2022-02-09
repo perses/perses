@@ -56,7 +56,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
 
   if (error) throw error;
 
-  if (contentDimensions === undefined) return <></>;
+  if (contentDimensions === undefined) return null;
 
   if (loading === true) {
     return (
