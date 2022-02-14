@@ -20,6 +20,7 @@ import {
   usePanelState,
 } from '@perses-ui/core';
 import { Box, Skeleton } from '@mui/material';
+import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
@@ -30,15 +31,21 @@ export const StatChartKind = 'StatChart' as const;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
+export interface SparklineOptions extends JsonObject {
+  line_color?: string;
+  line_width?: number;
+  line_opacity?: number;
+  area_color?: string;
+  area_opacity?: number;
+}
+
 interface StatChartOptions extends JsonObject {
   name: string;
   query: AnyGraphQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
-  sparkline?: {
-    show: boolean;
-  };
+  sparkline?: SparklineOptions;
 }
 
 export function StatChartPanel(props: StatChartPanelProps) {
@@ -48,8 +55,6 @@ export function StatChartPanel(props: StatChartPanelProps) {
       options: { query, calculation, unit, sparkline },
     },
   } = props;
-
-  const showSparkline = sparkline && sparkline.show === true ? true : false;
   const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
   const { contentDimensions } = usePanelState();
   const { data, loading, error } = useGraphQuery(query);
@@ -78,7 +83,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       data={chartData}
       unit={unit}
       thresholds={thresholds}
-      showSparkline={showSparkline}
+      sparkline={convertSparkline(sparkline)}
     />
   );
 }
@@ -102,3 +107,20 @@ const useChartData = (data: GraphData | undefined, calculation: CalculationType,
     };
   }, [data, calculation, name]);
 };
+
+export function convertSparkline(sparkline?: SparklineOptions): LineSeriesOption | undefined {
+  if (sparkline === undefined) return;
+
+  // TODO (sjcobb): define long-term approach for perses format conversion, add unit test
+  return {
+    lineStyle: {
+      width: sparkline.line_width ?? 2,
+      color: sparkline.line_color ?? '#FFFFFF',
+      opacity: sparkline.line_opacity ?? 0.6,
+    },
+    areaStyle: {
+      color: sparkline.area_color ?? '#FFFFFF',
+      opacity: sparkline.area_opacity ?? 0.3,
+    },
+  };
+}

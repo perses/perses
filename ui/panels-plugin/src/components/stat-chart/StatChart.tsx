@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import { merge } from 'lodash-es';
 import { useTheme } from '@mui/material';
 import type { EChartsOption } from 'echarts';
 import { use } from 'echarts/core';
@@ -67,15 +68,15 @@ interface StatChartProps {
   data: StatChartData;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
-  showSparkline?: boolean;
+  sparkline?: LineSeriesOption;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, showSparkline } = props;
+  const { width, height, data, unit, sparkline } = props;
   const thresholds = props.thresholds ?? defaultThresholdInput;
   const theme = useTheme();
 
-  // TODO (sjcobb): improve sparkline color override, theme integration
+  const showSparkline = sparkline !== undefined ? true : false;
   let backgroundColor = 'transparent';
   if (thresholds.default_color) {
     backgroundColor = thresholds.default_color;
@@ -131,7 +132,7 @@ export function StatChart(props: StatChartProps) {
       },
     ];
 
-    if (showSparkline === true) {
+    if (sparkline !== undefined) {
       const lineSeries: LineSeriesOption = {
         type: 'line',
         data: [...series.values],
@@ -148,7 +149,8 @@ export function StatChart(props: StatChartProps) {
         },
         silent: true,
       };
-      statSeries.push(lineSeries);
+      const mergedSeries = merge(lineSeries, sparkline);
+      statSeries.push(mergedSeries);
     }
 
     const option = {
@@ -212,7 +214,7 @@ export function StatChart(props: StatChartProps) {
     };
 
     return option;
-  }, [data, unit, width, showSparkline, backgroundColor]);
+  }, [data, unit, width, sparkline, backgroundColor]);
 
   return (
     <EChartsWrapper

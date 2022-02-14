@@ -171,12 +171,10 @@ const benchmarkDashboard: DashboardResource = {
             decimal_places: 2,
             suffix: 'kilogram', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
-          sparkline: {
-            show: true,
-          },
-          thresholds: {
-            default_color: '#EA4747', // red
-          },
+          // sparkline: {},
+          // thresholds: {
+          //   default_color: '#EA4747', // red
+          // },
         },
       },
       statRAM: {
@@ -235,6 +233,16 @@ const benchmarkDashboard: DashboardResource = {
             decimal_places: 3,
             suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
+          thresholds: {
+            default_color: '#555',
+          },
+          sparkline: {
+            line_color: '#FFFF00', // yellow
+            line_width: 3,
+            line_opacity: 1,
+            area_color: '#FFA500', // orange
+            area_opacity: 1,
+          },
         },
       },
       statLg: {
@@ -256,9 +264,7 @@ const benchmarkDashboard: DashboardResource = {
             // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#unit_formatting
             suffix: 'gigabyte',
           },
-          sparkline: {
-            show: true,
-          },
+          sparkline: {},
           thresholds: {
             default_color: '#1473E6', // blue
             steps: [
