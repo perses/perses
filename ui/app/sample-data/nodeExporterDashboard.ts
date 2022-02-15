@@ -224,6 +224,59 @@ const nodeExporterDashboard: DashboardResource = {
           },
         },
       },
+      statCores: {
+        kind: 'StatChart',
+        display: {
+          name: 'CPU Cores',
+        },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query: 'count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Decimal' },
+        },
+      },
+      statTest: {
+        kind: 'StatChart',
+        display: {
+          name: 'System Uptime',
+        },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: { kind: 'Decimal' },
+        },
+      },
+      statRAM: {
+        kind: 'StatChart',
+        display: {
+          name: 'RAM Total',
+        },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query: 'node_memory_MemTotal_bytes{job="node",instance="$instance"}',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: {
+            kind: 'Decimal',
+            decimal_places: 1,
+            suffx: 'gigabyte',
+          },
+        },
+      },
       emptyExample: {
         kind: 'EmptyChart',
         display: { name: 'Empty Example 1' },
@@ -371,9 +424,23 @@ const nodeExporterDashboard: DashboardResource = {
           {
             x: 18,
             y: 0,
-            width: 6,
+            width: 3,
+            height: 2,
+            content: { $ref: '#/panels/statCores' },
+          },
+          {
+            x: 18,
+            y: 2,
+            width: 3,
+            height: 2,
+            content: { $ref: '#/panels/statTest' },
+          },
+          {
+            x: 21,
+            y: 0,
+            width: 3,
             height: 4,
-            content: { $ref: '#/panels/emptyExample' },
+            content: { $ref: '#/panels/statRAM' },
           },
         ],
       },

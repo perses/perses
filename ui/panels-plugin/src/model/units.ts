@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { IsSanctionedSimpleUnitIdentifier } from '@formatjs/ecma402-abstract';
 import { Duration, milliseconds } from 'date-fns';
 
-export type UnitOptions = TimeUnitOptions | PercentUnitOptions;
+export type UnitOptions = TimeUnitOptions | PercentUnitOptions | DecimalUnitOptions;
 
 export function formatValue(value: number, unitOptions?: UnitOptions): string {
   if (unitOptions === undefined) {
@@ -26,6 +27,10 @@ export function formatValue(value: number, unitOptions?: UnitOptions): string {
 
   if (isPercentUnit(unitOptions)) {
     return formatPercent(value, unitOptions);
+  }
+
+  if (isDecimalUnit(unitOptions)) {
+    return formatDecimal(value, unitOptions);
   }
 
   const exhaustive: never = unitOptions;
@@ -129,4 +134,44 @@ function formatPercent(value: number, unitOptions: PercentUnitOptions): string {
   }
 
   return value.toFixed(unitOptions.decimal_places) + '%';
+}
+
+const decimalUnitKinds = ['Decimal'] as const;
+const decimalUnitKindsSet = new Set<string>(decimalUnitKinds);
+
+type DecimalUnitOptions = {
+  kind: typeof decimalUnitKinds[number];
+  decimal_places: number;
+  suffix?: 'string';
+  unitDisplay?: 'short' | 'long' | 'narrow'; // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+};
+
+function isDecimalUnit(unitOptions: UnitOptions): unitOptions is DecimalUnitOptions {
+  return decimalUnitKindsSet.has(unitOptions.kind);
+}
+
+function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
+  const maximumFractionDigits = unitOptions.decimal_places ?? 2;
+  if (unitOptions.suffix !== undefined) {
+    if (IsSanctionedSimpleUnitIdentifier(unitOptions.suffix)) {
+      const formatParams: Intl.NumberFormatOptions = {
+        style: 'unit',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: maximumFractionDigits,
+        useGrouping: true,
+        unit: unitOptions.suffix,
+        unitDisplay: unitOptions.unitDisplay ?? 'narrow',
+      };
+      const unitFormatter = new Intl.NumberFormat('en-US', formatParams);
+      return unitFormatter.format(value);
+    }
+  }
+  const formatParams: Intl.NumberFormatOptions = {
+    style: 'decimal',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maximumFractionDigits,
+    useGrouping: true,
+  };
+  const decimalFormatter = new Intl.NumberFormat('en-US', formatParams);
+  return decimalFormatter.format(value);
 }

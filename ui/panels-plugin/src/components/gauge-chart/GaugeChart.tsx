@@ -11,35 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, useGraphQuery } from '@perses-ui/core';
-import * as echarts from 'echarts/core';
+import { useMemo } from 'react';
 import type { EChartsOption } from 'echarts';
+import { use } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart } from 'echarts/charts';
-import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useMemo, useState, useLayoutEffect, useRef } from 'react';
-import { Box } from '@mui/material';
-import { CalculationsMap, CalculationType } from '../../model/calculations';
+import { JsonObject } from '@perses-ui/core';
 import { formatValue, UnitOptions } from '../../model/units';
-import { convertThresholds, defaultThresholdInput, ThresholdOptions } from './thresholds';
+import { convertThresholds, defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
+import { EChartsWrapper } from '../../components/echarts-wrapper/EChartsWrapper';
 
-echarts.use([EChartsGaugeChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
-
-export interface GaugeChartProps {
-  query: AnyGraphQueryDefinition;
-  width: number;
-  height: number;
-  calculation: CalculationType;
-  unit: UnitOptions;
-  thresholds?: ThresholdOptions;
-}
+use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 const noDataOption = {
   title: {
     show: true,
     textStyle: {
       color: 'grey',
-      fontSize: 20,
+      fontSize: 16,
+      fontWeight: 400,
     },
     text: 'No data',
     left: 'center',
@@ -54,23 +45,25 @@ const noDataOption = {
   series: [],
 };
 
-function GaugeChart(props: GaugeChartProps) {
-  const { query, width, height, calculation, unit } = props;
+export type GaugeChartData = number | null | undefined;
+
+interface GaugeChartProps extends JsonObject {
+  width: number;
+  height: number;
+  data: GaugeChartData;
+  unit: UnitOptions;
+  thresholds?: ThresholdOptions;
+}
+
+export function GaugeChart(props: GaugeChartProps) {
+  const { width, height, data, unit } = props;
   const thresholds = props.thresholds ?? defaultThresholdInput;
-  const { data } = useGraphQuery(query);
 
   const option: EChartsOption = useMemo(() => {
-    // TODO (sjcobb): add loading spinner, share noDataOption with other charts
-    if (data === undefined) return {};
+    if (data === null || data === undefined) return noDataOption;
 
-    const series = Array.from(data.series)[0];
-    if (series === undefined) return noDataOption;
-
-    const calculate = CalculationsMap[calculation];
-    const calculatedValue = calculate(Array.from(series.values)) ?? 0;
-
+    const calculatedValue = data;
     const axisLineColors = convertThresholds(thresholds);
-
     return {
       title: {
         show: false,
@@ -198,48 +191,15 @@ function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, calculation, unit, thresholds]);
+  }, [data, unit, thresholds]);
 
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const [chart, setChart] = useState<echarts.ECharts | undefined>(undefined);
-
-  // Create a chart instance in the container
-  useLayoutEffect(() => {
-    if (containerRef === null) return;
-
-    // TODO (sjcobb): add echarts wrapper, common way to init echarts
-    const chart = echarts.init(containerRef);
-    setChart(chart);
-
-    return () => {
-      chart.dispose();
-    };
-  }, [containerRef]);
-
-  // Sync options with chart instance
-  useLayoutEffect(() => {
-    // Can't set options if no chart yet
-    if (chart === undefined) return;
-
-    chart.setOption(option);
-  }, [chart, option]);
-
-  // Resize the chart to match as width/height changes
-  const prevSize = useRef({ width, height });
-  useLayoutEffect(() => {
-    // No need to resize initially
-    if (prevSize.current.width === width && prevSize.current.height === height) {
-      return;
-    }
-
-    // Can't resize if no chart yet
-    if (chart === undefined) return;
-
-    chart.resize({ width, height });
-    prevSize.current = { width, height };
-  }, [chart, width, height]);
-
-  return <Box ref={setContainerRef} sx={{ width, height }} />;
+  return (
+    <EChartsWrapper
+      sx={{
+        width: width,
+        height: height,
+      }}
+      option={option}
+    />
+  );
 }
-
-export default GaugeChart;

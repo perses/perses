@@ -33,7 +33,8 @@ const noDataOption = {
     show: true,
     textStyle: {
       color: 'grey',
-      fontSize: 20,
+      fontSize: 16,
+      fontWeight: 400,
     },
     text: 'No data',
     left: 'center',

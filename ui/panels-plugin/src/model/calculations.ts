@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { GraphSeriesValueTuple } from '@perses-ui/core';
-import { findLast, meanBy } from 'lodash-es';
+import { findLast, meanBy, sumBy } from 'lodash-es';
 
 export const CalculationsMap = {
   First: first,
   Last: last,
   LastNumber: lastNumber,
   Mean: mean,
+  Sum: sum,
 };
 
 export type CalculationType = keyof typeof CalculationsMap;
@@ -43,6 +44,11 @@ function lastNumber(values: GraphSeriesValueTuple[]): number | undefined {
 function mean(values: GraphSeriesValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
   return meanBy(values, getValue);
+}
+
+function sum(values: GraphSeriesValueTuple[]): number | undefined {
+  if (values.length <= 0) return undefined;
+  return sumBy(values, getValue);
 }
 
 function getValue(valueTuple: GraphSeriesValueTuple) {
