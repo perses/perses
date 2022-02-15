@@ -106,7 +106,7 @@ export function StatChart(props: StatChartProps) {
         ],
         detail: {
           show: true,
-          offsetCenter: ['0%', '-55%'],
+          offsetCenter: ['0%', '-65%'],
           formatter: [`{name|${name}}`, `{value|${formatValue(calculatedValue, unit)}}`].join('\n'),
           rich: {
             name: {
@@ -205,8 +205,8 @@ export function StatChart(props: StatChartProps) {
           },
           option: {
             textStyle: {
-              fontSize: 12,
-              lineHeight: 12,
+              fontSize: 10,
+              lineHeight: 10,
             },
           },
         },
