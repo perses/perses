@@ -123,7 +123,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
   const { format } = statPanel;
   const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
   // TODO (sjcobb): convert sparkline color / backgroundColor and remaining formats, use migrateFromAngularSinglestat
-  return {
+  const convertedPanel = {
     kind: 'StatChart',
     display: {
       name: statPanel.title,
@@ -136,9 +136,12 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
         suffix: convertedFormat,
         decimal_places: statPanel.decimals ?? 2,
       },
-      sparkline: statPanel.sparkline,
     },
   };
+  if (statPanel.sparkline.show === true) {
+    convertedPanel.options['sparkline'] = {};
+  }
+  return convertedPanel;
 }
 
 function convertQueryTarget(target?: PromQueryTarget): AnyGraphQueryDefinition {

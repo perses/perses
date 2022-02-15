@@ -230,18 +230,18 @@ const benchmarkDashboard: DashboardResource = {
           calculation: 'Mean',
           unit: {
             kind: 'Decimal',
-            decimal_places: 3,
-            suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
+            decimal_places: 4,
+            // suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
           thresholds: {
-            default_color: '#555',
+            default_color: '#EA4747',
           },
           sparkline: {
-            line_color: '#FFFF00', // yellow
-            line_width: 3,
-            line_opacity: 1,
-            area_color: '#FFA500', // orange
-            area_opacity: 1,
+            line_color: '#FFE3E3',
+            line_width: 1.5,
+            line_opacity: 0.6,
+            area_color: '#FFBABA',
+            area_opacity: 0.4,
           },
         },
       },
