@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, JsonObject, useDashboardSpec, useMemoized } from '@perses-dev/core';
+import { DurationString, JsonObject, useMemoized } from '@perses-dev/core';
+import { useDashboardContext } from '@perses-dev/dashboards';
 import { GraphData, GraphQueryDefinition, UseGraphQueryHook } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
@@ -34,7 +35,7 @@ interface GraphQueryOptions extends JsonObject {
 export function usePrometheusGraphQuery(
   definition: PrometheusGraphQuery
 ): ReturnType<UseGraphQueryHook<GraphQueryOptions>> {
-  const spec = useDashboardSpec();
+  const { spec } = useDashboardContext();
 
   const minStep = getDurationStringSeconds(definition.options.min_step);
   const timeRange = useDashboardPrometheusTimeRange();

@@ -13,7 +13,7 @@
 
 import { Paper, Typography } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
-import { useDashboardSpec } from '@perses-dev/core';
+import { useDashboardContext } from '@perses-dev/dashboards';
 import { PluginBoundary } from '@perses-dev/plugin-system';
 import VariableAutocomplete from './VariableAutocomplete';
 
@@ -23,7 +23,7 @@ const DRAWER_WIDTH = 296;
  * Dashboard options drawer that includes variable inputs.
  */
 function OptionsDrawer() {
-  const spec = useDashboardSpec();
+  const { spec } = useDashboardContext();
 
   return (
     <Paper

@@ -11,13 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DurationString,
-  parseDurationString,
-  useMemoized,
-  usePanelState,
-  useDashboardTimeRange,
-} from '@perses-dev/core';
+import { DurationString, parseDurationString, useMemoized } from '@perses-dev/core';
+import { useDashboardContext, usePanelContext } from '@perses-dev/dashboards';
 import { milliseconds, getUnixTime } from 'date-fns';
 import { useRef } from 'react';
 import { UnixTimestampSeconds } from './api-types';
@@ -31,7 +26,9 @@ export interface PrometheusTimeRange {
  * Get the time range for the current dashboard, converted to Prometheus time.
  */
 export function useDashboardPrometheusTimeRange() {
-  const { start, end } = useDashboardTimeRange();
+  const {
+    timeRange: { start, end },
+  } = useDashboardContext();
 
   // Only recalculate the time range if the value on the dashboard changes
   return useMemoized(() => {
@@ -54,7 +51,7 @@ const MAX_PROM_DATA_POINTS = 10000;
  */
 export function usePanelRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15, resolution = 1) {
   // Keep track of the latest panel width in a ref
-  const { contentDimensions } = usePanelState();
+  const { contentDimensions } = usePanelContext();
   const panelWidth = useRef(contentDimensions?.width);
   panelWidth.current = contentDimensions?.width;
 

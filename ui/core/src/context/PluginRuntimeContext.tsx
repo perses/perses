@@ -12,9 +12,7 @@
 // limitations under the License.
 
 import { createContext, useContext, useRef } from 'react';
-import { useDashboardSpec, useDashboardTimeRange, useDashboardVariables } from '../hooks/dashboard';
 import { useDataSources } from '../hooks/datasource';
-import { usePanelState } from '../hooks/panel';
 
 /**
  * Hooks exposed to plugins at runtime. This is so we don't have to put
@@ -22,11 +20,7 @@ import { usePanelState } from '../hooks/panel';
  * about whether these are using Context, Redux, etc).
  */
 export interface PluginRuntime {
-  useDashboardSpec: typeof useDashboardSpec;
-  useDashboardVariables: typeof useDashboardVariables;
-  useDashboardTimeRange: typeof useDashboardTimeRange;
   useDataSources: typeof useDataSources;
-  usePanelState: typeof usePanelState;
 }
 
 export const PluginRuntimeContext = createContext<PluginRuntime | undefined>(undefined);

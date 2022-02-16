@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, usePanelState } from '@perses-dev/core';
+import { JsonObject } from '@perses-dev/core';
 import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { GraphQueryDefinition, GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
+import { usePanelContext } from '@perses-dev/dashboards';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
 import { ThresholdOptions, defaultThresholdInput } from '../../model/thresholds';
@@ -50,7 +51,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
     },
   } = props;
   const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
-  const { contentDimensions } = usePanelState();
+  const { contentDimensions } = usePanelContext();
   const { data, loading, error } = useGraphQuery(query);
   const chartData = useChartData(data, calculation, name);
 

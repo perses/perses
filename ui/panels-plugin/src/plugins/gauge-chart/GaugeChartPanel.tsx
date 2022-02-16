@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, usePanelState } from '@perses-dev/core';
+import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
 import { Skeleton } from '@mui/material';
 import { useMemo } from 'react';
+import { usePanelContext } from '@perses-dev/dashboards';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
 import { GaugeChart, GaugeChartData } from '../../components/gauge-chart/GaugeChart';
@@ -39,7 +40,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   } = props;
   const unit = props.definition.options.unit ?? { kind: 'Percent', decimal_places: 1 };
   const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
-  const { contentDimensions } = usePanelState();
+  const { contentDimensions } = usePanelContext();
   const { data, loading, error } = useGraphQuery(query);
 
   const chartData: GaugeChartData = useMemo(() => {

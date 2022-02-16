@@ -12,5 +12,4 @@
 // limitations under the License.
 
 export * from './Panel';
-export type { PanelContextType } from './PanelContext';
-export { usePanelContext } from './PanelContext';
+export * from './PanelContext';

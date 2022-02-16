@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Duration, parser, StringLiteral } from 'lezer-promql';
-import { useMemoized, useDashboardVariables, VariableState } from '@perses-dev/core';
+import { useMemoized } from '@perses-dev/core';
 import { DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
+import { useDashboardContext, VariableState } from '@perses-dev/dashboards';
 
 const REPLACE_IN_NODE_TYPES = new Set([StringLiteral, Duration]);
 
@@ -29,7 +30,7 @@ export type TemplateString = string;
  * if the templateStrings or variable values change.
  */
 export function useReplaceTemplateStrings(templateStrings?: TemplateString[]) {
-  const variablesState = useDashboardVariables();
+  const { variables } = useDashboardContext();
 
   // Replace template string placeholders with variable values
   return useMemoized(() => {
@@ -37,7 +38,7 @@ export function useReplaceTemplateStrings(templateStrings?: TemplateString[]) {
     const needsVariableValuesFor = new Set<string>();
 
     for (const templateString of templateStrings ?? []) {
-      const replaced = replaceTemplateVariables(templateString, variablesState);
+      const replaced = replaceTemplateVariables(templateString, variables);
       result.push(replaced.result);
 
       for (const varName of replaced.needsVariableValuesFor) {
@@ -45,7 +46,7 @@ export function useReplaceTemplateStrings(templateStrings?: TemplateString[]) {
       }
     }
     return { result, needsVariableValuesFor };
-  }, [templateStrings, variablesState]);
+  }, [templateStrings, variables]);
 }
 
 /**
@@ -55,7 +56,7 @@ export function useReplaceTemplateStrings(templateStrings?: TemplateString[]) {
  * if the templateString or variable values change.
  */
 export function useReplaceTemplateString(templateString?: TemplateString) {
-  const variablesState = useDashboardVariables();
+  const { variables } = useDashboardContext();
 
   // Replace template string placeholders with variable values
   return useMemoized(() => {
@@ -63,8 +64,8 @@ export function useReplaceTemplateString(templateString?: TemplateString) {
       return { result: '', needsVariableValuesFor: new Set<string>() };
     }
 
-    return replaceTemplateVariables(templateString, variablesState);
-  }, [templateString, variablesState]);
+    return replaceTemplateVariables(templateString, variables);
+  }, [templateString, variables]);
 }
 
 interface ReplaceVariablesResult {

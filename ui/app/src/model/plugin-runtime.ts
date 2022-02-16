@@ -12,17 +12,11 @@
 // limitations under the License.
 
 import { PluginRuntime } from '@perses-dev/core';
-import { useDashboardContext } from '../views/dashboard/DashboardContextProvider';
 import { useDataSources } from '../context/DataSourceRegistry';
-import { usePanelContext } from '../views/dashboard/PanelContextProvider';
 
 /**
  * The runtime implementations exposed to plugins.
  */
 export const pluginRuntime: PluginRuntime = {
-  useDashboardSpec: () => useDashboardContext().resource.spec,
-  useDashboardVariables: () => useDashboardContext().variables.state,
-  useDashboardTimeRange: () => useDashboardContext().timeRange,
   useDataSources: useDataSources,
-  usePanelState: usePanelContext,
 };

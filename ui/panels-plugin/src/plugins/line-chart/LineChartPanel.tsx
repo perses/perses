@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, usePanelState } from '@perses-dev/core';
+import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
+import { usePanelContext } from '@perses-dev/dashboards';
 import LineChart from './LineChart';
 import GraphQueryRunner from './GraphQueryRunner';
 import UPlotChart from './uplot/UPlotChart';
@@ -33,7 +34,7 @@ export function LineChartPanel(props: LineChartProps) {
       options: { queries },
     },
   } = props;
-  const { contentDimensions } = usePanelState();
+  const { contentDimensions } = usePanelContext();
 
   const isUPlot = useMemo(() => {
     const params = new URLSearchParams(window.location.search);

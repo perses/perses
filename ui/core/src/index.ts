@@ -12,10 +12,8 @@
 // limitations under the License.
 
 export * from './context/PluginRuntimeContext';
-export * from './hooks/dashboard';
 export * from './hooks/datasource';
 export * from './hooks/memo';
-export * from './hooks/panel';
 export * from './model/definitions';
 export type { DatasourceSelector, DashboardResource, DashboardSpec } from './model/dashboard';
 export * from './model/datasource';
