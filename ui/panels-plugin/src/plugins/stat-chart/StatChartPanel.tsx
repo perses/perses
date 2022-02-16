@@ -11,17 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyGraphQueryDefinition,
-  GraphData,
-  useGraphQuery,
-  JsonObject,
-  PanelProps,
-  usePanelState,
-} from '@perses-dev/core';
+import { JsonObject, usePanelState } from '@perses-dev/core';
 import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
+import { GraphQueryDefinition, GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
 import { ThresholdOptions, defaultThresholdInput } from '../../model/thresholds';

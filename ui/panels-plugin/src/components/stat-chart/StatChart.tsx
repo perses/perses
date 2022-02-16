@@ -20,7 +20,7 @@ import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/char
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { GraphSeries } from '@perses-ui/core';
+import { GraphSeries } from '@perses-dev/plugin-system';
 import { formatValue, UnitOptions } from '../../model/units'; // TODO (sjcobb): add back formatValue
 import { defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
 import { EChartsWrapper } from '../../components/echarts-wrapper/EChartsWrapper';
