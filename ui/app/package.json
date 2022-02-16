@@ -19,6 +19,7 @@
     "@mui/material": "^5.4.0",
     "@perses-dev/components": "^0.1.0",
     "@perses-dev/core": "^0.1.0",
+    "@perses-dev/dashboards": "^0.1.0",
     "@perses-dev/panels-plugin": "^0.1.0",
     "@perses-dev/plugin-system": "^0.1.0",
     "@perses-dev/prometheus-plugin": "^0.1.0",

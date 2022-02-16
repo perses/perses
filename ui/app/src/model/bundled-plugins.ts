@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginModule, PluginResource } from '@perses-dev/core';
-
 // Eagerly load the metadata for the bundled plugins, but lazy-load the plugins
 import prometheusPackage from '@perses-dev/prometheus-plugin/package.json';
 import panelsPackage from '@perses-dev/panels-plugin/package.json';
-import { PluginRegistryProps } from '@perses-dev/plugin-system';
+import { PluginRegistryProps, PluginResource, PluginModule } from '@perses-dev/plugin-system';
 import { useCallback } from 'react';
 
 interface BundledPlugin {

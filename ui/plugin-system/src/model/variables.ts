@@ -16,7 +16,7 @@ import { usePlugin } from '../components/PluginLoadingBoundary';
 
 // Extend the core DashboardSpec to support variable definitions from variable plugins
 declare module '@perses-dev/core' {
-  export interface DashboardSpec {
+  interface DashboardSpec {
     variables: Record<string, VariableDefinition>;
   }
 }

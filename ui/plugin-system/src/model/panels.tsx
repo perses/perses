@@ -16,12 +16,12 @@ import { usePlugin } from '../components/PluginLoadingBoundary';
 
 declare module '@perses-dev/core' {
   // Extend the core DashboardSpec to support panel definitions from panel plugins
-  export interface DashboardSpec {
+  interface DashboardSpec {
     panels: Record<string, PanelDefinition>;
   }
 
   // Extend the core GridItem layout spec to support panels from plugins as content
-  export interface GridItemDefinition {
+  interface GridItemDefinition {
     content: PanelRef;
   }
 }

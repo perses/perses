@@ -12,11 +12,13 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, toAbsoluteTimeRange } from '@perses-dev/core';
+import { Dashboard } from '@perses-dev/dashboards';
+import { useState } from 'react';
 import Footer from '../../components/Footer';
 import { DashboardContextProvider } from './DashboardContextProvider';
-import Dashboard from './Dashboard';
 import OptionsDrawer from './OptionsDrawer';
+import { useVariablesState } from './variables';
 
 export interface DashboardViewProps {
   resource: DashboardResource;
@@ -27,6 +29,10 @@ export interface DashboardViewProps {
  */
 function ViewDashboard(props: DashboardViewProps) {
   const { resource } = props;
+
+  const variables = useVariablesState(resource);
+  const [timeRange] = useState(toAbsoluteTimeRange({ pastDuration: resource.spec.duration }));
+
   return (
     <DashboardContextProvider resource={resource}>
       <Box
@@ -46,7 +52,7 @@ function ViewDashboard(props: DashboardViewProps) {
             overflowY: 'auto',
           }}
         >
-          <Dashboard />
+          <Dashboard spec={resource.spec} variables={variables.state} timeRange={timeRange} />
           <Footer />
         </Box>
 

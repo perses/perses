@@ -18,6 +18,10 @@
       "prepend": false
     },
     {
+      "path": "../dashboards",
+      "prepend": false
+    },
+    {
       "path": "../panels-plugin",
       "prepend": false
     },

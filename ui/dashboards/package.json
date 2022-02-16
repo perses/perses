@@ -11,6 +11,16 @@
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
+  "dependencies": {
+    "@mui/material": "^5.4.0",
+    "@perses-dev/components": "^0.1.0",
+    "@perses-dev/core": "^0.1.0",
+    "@perses-dev/plugin-system": "^0.1.0",
+    "use-resize-observer": "^8.0.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
+  },
   "license": "Apache-2.0",
   "files": [
     "dist"
