@@ -27,3 +27,7 @@ export function useDashboardContext() {
   }
   return ctx;
 }
+
+export function useDashboardVariables() {
+  return useDashboardContext().variables;
+}

@@ -13,8 +13,9 @@
 
 import { Paper, Typography } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
-import { useDashboardContext } from '@perses-dev/dashboards';
+//import { useDashboardContext } from '@perses-dev/dashboards';
 import { PluginBoundary } from '@perses-dev/plugin-system';
+import { useDashboardContext } from './DashboardContextProvider';
 import VariableAutocomplete from './VariableAutocomplete';
 
 const DRAWER_WIDTH = 296;
@@ -23,7 +24,7 @@ const DRAWER_WIDTH = 296;
  * Dashboard options drawer that includes variable inputs.
  */
 function OptionsDrawer() {
-  const { spec } = useDashboardContext();
+  const { resource } = useDashboardContext();
 
   return (
     <Paper
@@ -39,7 +40,7 @@ function OptionsDrawer() {
       <Typography component="h2" variant="h6">
         Variables
       </Typography>
-      {Object.entries(spec.variables).map(([key, variableDef]) => {
+      {Object.entries(resource.spec.variables).map(([key, variableDef]) => {
         if (variableDef.display.hide === true) return null;
 
         return (
