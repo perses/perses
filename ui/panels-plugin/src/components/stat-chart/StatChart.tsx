@@ -94,7 +94,9 @@ export function StatChart(props: StatChartProps) {
     //  const nameFontSize = isLargePanel ? 30 : 12;
     const showName = isLargePanel;
     const name = showName === true ? data.name : '';
-    const smallestSide = Math.min(width, height);
+    const smallestSide = Math.min(width, height * 1.2);
+    const baseFontSize = Math.min((smallestSide / 4) * 0.65, 72);
+    const nameFontSize = baseFontSize * 0.5;
 
     const statSeries: Array<GaugeSeriesOption | LineSeriesOption> = [
       {
@@ -112,8 +114,9 @@ export function StatChart(props: StatChartProps) {
           rich: {
             name: {
               padding: showName === true ? [0, 0, 5, 0] : 0,
-              fontSize: `clamp(0.625rem, ${(smallestSide / 5) * 0.5}px, 1.875rem)`,
-              lineHeight: showName === true ? 36 : 0,
+              fontSize: nameFontSize,
+              lineHeight: nameFontSize * 2.5,
+              fontWeight: 500,
             },
             value: {},
           },
@@ -217,8 +220,9 @@ export function StatChart(props: StatChartProps) {
           },
           option: {
             textStyle: {
-              fontSize: `clamp(0.625rem, ${smallestSide / 5}px, 4.5rem)`,
-              lineHeight: '1.2',
+              fontSize: `max(14px, ${baseFontSize}px)`,
+              lineHeight: Math.min(16, baseFontSize * 1.2),
+              fontWeight: 'bold',
             },
           },
         },
