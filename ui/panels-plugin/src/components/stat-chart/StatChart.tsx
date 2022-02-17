@@ -91,9 +91,10 @@ export function StatChart(props: StatChartProps) {
     const series = data.seriesData;
     const calculatedValue = data.calculatedValue ?? 0;
     const isLargePanel = width > 250 ? true : false;
-    const nameFontSize = isLargePanel ? 30 : 12;
+    //  const nameFontSize = isLargePanel ? 30 : 12;
     const showName = isLargePanel;
     const name = showName === true ? data.name : '';
+    const smallestSide = Math.min(width, height);
 
     const statSeries: Array<GaugeSeriesOption | LineSeriesOption> = [
       {
@@ -111,8 +112,8 @@ export function StatChart(props: StatChartProps) {
           rich: {
             name: {
               padding: showName === true ? [0, 0, 5, 0] : 0,
-              fontSize: nameFontSize,
-              lineHeight: nameFontSize,
+              fontSize: `clamp(0.625rem, ${(smallestSide / 5) * 0.5}px, 1.875rem)`,
+              lineHeight: showName === true ? 36 : 0,
             },
             value: {},
           },
@@ -194,19 +195,30 @@ export function StatChart(props: StatChartProps) {
       series: statSeries,
       textStyle: {
         color: backgroundColor === 'transparent' ? '#000000' : '#FFFFFF',
-        fontSize: 18,
+        fontSize: 25,
         lineHeight: 18,
         fontFamily: '"Lato", sans-serif',
       },
       media: [
+        // {
+        //   query: {
+        //     maxWidth: 180,
+        //   },
+        //   option: {
+        //     textStyle: {
+        //       fontSize: 10,
+        //       lineHeight: 12,
+        //     },
+        //   },
+        // },
         {
           query: {
-            maxWidth: 180,
+            minWidth: 0,
           },
           option: {
             textStyle: {
-              fontSize: 10,
-              lineHeight: 10,
+              fontSize: `clamp(0.625rem, ${smallestSide / 5}px, 4.5rem)`,
+              lineHeight: '1.2',
             },
           },
         },
@@ -214,7 +226,7 @@ export function StatChart(props: StatChartProps) {
     };
 
     return option;
-  }, [data, unit, width, sparkline, backgroundColor]);
+  }, [data, height, unit, width, sparkline, backgroundColor]);
 
   return (
     <EChartsWrapper
