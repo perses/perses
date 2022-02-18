@@ -201,17 +201,27 @@ export function StatChart(props: StatChartProps) {
         fontSize: 25,
         lineHeight: 18,
         fontFamily: '"Lato", sans-serif',
+        fontWeight: 'bold',
       },
       media: [
         {
           query: {
-            minWidth: 0,
+            maxWidth: 150,
+          },
+          option: {
+            textStyle: {
+              fontSize: 12,
+            },
+          },
+        },
+        {
+          query: {
+            minWidth: 150,
           },
           option: {
             textStyle: {
               fontSize: `max(14px, ${baseFontSize}px)`,
               lineHeight: Math.min(16, baseFontSize * 1.2),
-              fontWeight: 'bold',
             },
           },
         },
