@@ -203,17 +203,6 @@ export function StatChart(props: StatChartProps) {
         fontFamily: '"Lato", sans-serif',
       },
       media: [
-        // {
-        //   query: {
-        //     maxWidth: 180,
-        //   },
-        //   option: {
-        //     textStyle: {
-        //       fontSize: 10,
-        //       lineHeight: 12,
-        //     },
-        //   },
-        // },
         {
           query: {
             minWidth: 0,
