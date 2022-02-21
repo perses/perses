@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,24 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-// +build integration
-
 package v1
 
 import (
-	"net/http/httptest"
-	"testing"
-
 	"github.com/perses/perses/pkg/client/perseshttp"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-func createClient(t *testing.T, server *httptest.Server) ClientInterface {
-	restClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
-		URL: server.URL,
-	})
-	if err != nil {
-		t.Fatal(err)
+const healthResource = "health"
+
+type HealthInterface interface {
+	Check() (*v1.Health, error)
+}
+
+type health struct {
+	HealthInterface
+	client *perseshttp.RESTClient
+}
+
+func newHealth(client *perseshttp.RESTClient) HealthInterface {
+	return &health{
+		client: client,
 	}
-	return NewWithClient(restClient)
+}
+
+func (c *health) Check() (*v1.Health, error) {
+	result := &v1.Health{}
+	err := c.client.Get().
+		Resource(healthResource).
+		Do().
+		Object(result)
+	return result, err
 }

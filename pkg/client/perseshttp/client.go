@@ -15,7 +15,6 @@ package perseshttp
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -28,10 +27,10 @@ import (
 const connectionTimeout = 30 * time.Second
 
 type BasicAuth struct {
-	User     string `yaml:"user"`
-	Password string `yaml:"password,omitempty"`
+	User     string `json:"user" yaml:"user"`
+	Password string `json:"password" yaml:"password,omitempty"`
 	// PasswordFile is a path to a file that contains a password
-	PasswordFile string `yaml:"password_file,omitempty"`
+	PasswordFile string `json:"password_file,omitempty" yaml:"password_file,omitempty"`
 }
 
 func (b *BasicAuth) Verify() error {
@@ -51,18 +50,15 @@ func (b *BasicAuth) Verify() error {
 
 // RestConfigClient defines all parameter that can be set to customize the RESTClient
 type RestConfigClient struct {
-	URL         string            `yaml:"url"`
-	InsecureTLS bool              `yaml:"insecure_tls,omitempty"`
-	Token       string            `yaml:"token,omitempty"`
-	BasicAuth   *BasicAuth        `yaml:"basic_auth,omitempty"`
-	Headers     map[string]string `yaml:"headers,omitempty"`
+	URL         string            `json:"url" yaml:"url"`
+	InsecureTLS bool              `json:"insecure_tls,omitempty" yaml:"insecure_tls,omitempty"`
+	Token       string            `json:"token,omitempty" yaml:"token,omitempty"`
+	BasicAuth   *BasicAuth        `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
+	Headers     map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 }
 
 // NewFromConfig create an instance of RESTClient using the config passed as parameter
-func NewFromConfig(config *RestConfigClient) (*RESTClient, error) {
-	if config == nil {
-		return nil, errors.New("configuration cannot be empty")
-	}
+func NewFromConfig(config RestConfigClient) (*RESTClient, error) {
 	roundTripper := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -90,14 +86,13 @@ func NewFromConfig(config *RestConfigClient) (*RESTClient, error) {
 		headers:   config.Headers,
 		basicAuth: config.BasicAuth,
 	}, nil
-
 }
 
 // RESTClient defines an HTTP client designed for the HTTP request to a REST API.
 type RESTClient struct {
 	tokenMutex sync.Mutex
 	// Default token used to be authenticated in all client requests.
-	// It can be override using the method SetToken
+	// It can be overridden using the method SetToken
 	token string
 	// basicAuth to be used for each request (not editable)
 	// Using a basicAuth has the priority other the token
