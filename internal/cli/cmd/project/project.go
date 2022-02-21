@@ -30,7 +30,7 @@ type option struct {
 
 func (o *option) complete(args []string) error {
 	if len(args) > 1 {
-		return fmt.Errorf("only the project's can be specified as an argument")
+		return fmt.Errorf("only the project can be specified as an argument")
 	}
 	if len(args) == 1 {
 		o.projectName = args[0]
@@ -70,9 +70,9 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "project [NAME]",
-		Short: "Select the project used by default",
+		Short: "Select the project used by default.",
 		Long: `Select a project as a default project to use for later. 
-The project to be used is stored in the configuration file located at ${USERHOME}/.perses/config
+The project to be used is stored in the configuration file located at ${USERHOME}/.perses/config.
 
 If no project is specified in the command line, it will instead display the current project used.`,
 		Example: `

@@ -54,8 +54,8 @@ func (o *option) execute() error {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "login URL",
-		Short: "Lo in to the Perses' API",
+		Use:   "login [URL]",
+		Short: "Log in to the Perses API",
 		Example: `
 # Log in to the given server
 percli login https://perses.dev
@@ -66,6 +66,6 @@ percli login https://perses.dev
 			cmdUtils.HandleError(o.execute())
 		},
 	}
-	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "if true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure")
+	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "If true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")
 	return cmd
 }

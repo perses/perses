@@ -83,7 +83,7 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Display client version",
+		Short: "Display client version.",
 		Run: func(cmd *cobra.Command, args []string) {
 			o.complete()
 			cmdUtils.HandleError(o.validate())
@@ -91,6 +91,6 @@ func NewCMD() *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVar(&o.short, "short", o.short, "If true, just print the version number.")
-	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "One of 'yaml' or 'json'. Default is 'yaml'")
+	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "One of 'yaml' or 'json'. Default is 'yaml'.")
 	return cmd
 }

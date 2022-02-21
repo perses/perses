@@ -110,10 +110,12 @@ func WriteConfig(config *CLIConfig) error {
 	path := filepath.Join(getRootFolder(), pathConfig)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err := os.Mkdir(path, 0700)
-		if err != nil {
+		mkdirError := os.Mkdir(path, 0700)
+		if mkdirError != nil {
 			return err
 		}
+	} else if err != nil {
+		return err
 	}
 
 	previousConf, err := readConfig()

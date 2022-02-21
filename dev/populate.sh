@@ -17,7 +17,7 @@
 docker_cmd=docker
 
 if podman -v; then
-  echo "use podman instead of docker binary"
+  echo "using podman instead of docker binary"
   docker_cmd=podman
 fi
 
