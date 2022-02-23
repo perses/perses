@@ -18,14 +18,14 @@ import (
 	"fmt"
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	v1 "github.com/perses/perses/pkg/client/api/v1"
+	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
 	projectName string
-	apiClient   v1.ProjectInterface
+	apiClient   api.ClientInterface
 }
 
 func (o *option) complete(args []string) error {
@@ -39,7 +39,7 @@ func (o *option) complete(args []string) error {
 	if err != nil {
 		return err
 	}
-	o.apiClient = apiClient.V1().Project()
+	o.apiClient = apiClient
 	return nil
 }
 
@@ -50,7 +50,7 @@ func (o *option) execute() error {
 		return nil
 	} else {
 		// in case the project is provided we should verify if it exists first
-		_, err := o.apiClient.Get(o.projectName)
+		_, err := o.apiClient.V1().Project().Get(o.projectName)
 		if err != nil {
 			if errors.Is(err, perseshttp.RequestNotFoundError) {
 				return fmt.Errorf("project %q doesn't exist", o.projectName)

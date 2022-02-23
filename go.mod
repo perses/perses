@@ -6,6 +6,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/labstack/echo/v4 v4.6.3
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/onsi/ginkgo v1.11.0 // indirect
 	github.com/perses/common v0.9.1
 	github.com/prometheus/common v0.32.1
