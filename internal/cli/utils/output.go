@@ -17,7 +17,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -56,13 +55,6 @@ func HandleOutput(writer io.Writer, output string, obj interface{}) error {
 	}
 	_, err = fmt.Fprintln(writer, string(data))
 	return err
-}
-
-func HandleError(writer io.Writer, err error) {
-	if err != nil {
-		fmt.Fprintln(writer, "ERR: ", err)
-		os.Exit(1)
-	}
 }
 
 func HandleString(writer io.Writer, msg string) error {

@@ -14,7 +14,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/perses/perses/internal/cli/cmd/describe"
@@ -41,8 +40,10 @@ func newRootCommand() *cobra.Command {
 
 func main() {
 	rootCmd := newRootCommand()
+	rootCmd.SilenceUsage = true
+	rootCmd.SetOut(os.Stdout)
+	rootCmd.SetErr(os.Stderr)
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }

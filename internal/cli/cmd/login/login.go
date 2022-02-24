@@ -67,8 +67,8 @@ func NewCMD() *cobra.Command {
 # Log in to the given server
 percli login https://perses.dev
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.RunCMD(o, cmd, args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "If true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")

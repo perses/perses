@@ -96,8 +96,8 @@ percli describe dashboard nodeExporter
 ## Describe a particular dashboards in a json.
 percli describe dashboard nodeExporter -ojson
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.RunCMD(o, cmd, args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")

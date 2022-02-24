@@ -92,8 +92,8 @@ percli project myapp
 # display the project currently used
 percli project
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.RunCMD(o, cmd, args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	return cmd

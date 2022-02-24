@@ -29,10 +29,13 @@ type CMDOption interface {
 	SetWriter(writer io.Writer)
 }
 
-func RunCMD(o CMDOption, cmd *cobra.Command, args []string) {
-	writer := cmd.OutOrStdout()
-	o.SetWriter(writer)
-	HandleError(writer, o.Complete(args))
-	HandleError(writer, o.Validate())
-	HandleError(writer, o.Execute())
+func RunCMD(o CMDOption, cmd *cobra.Command, args []string) error {
+	o.SetWriter(cmd.OutOrStdout())
+	if err := o.Complete(args); err != nil {
+		return err
+	}
+	if err := o.Validate(); err != nil {
+		return err
+	}
+	return o.Execute()
 }

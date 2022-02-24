@@ -122,8 +122,8 @@ percli get dashboards -p my_project
 percli get dashboards -a -ojson
 
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.RunCMD(o, cmd, args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVarP(&o.allProject, "all", "a", o.allProject, "If present, list the request object(s) across all projects. Project in current context is ignored even if specified with --project.")

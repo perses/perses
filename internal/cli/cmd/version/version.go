@@ -88,8 +88,8 @@ func NewCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Display client version.",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.RunCMD(o, cmd, args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVar(&o.short, "short", o.short, "If true, just print the version number.")
