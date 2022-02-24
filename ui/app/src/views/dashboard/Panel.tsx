@@ -29,6 +29,8 @@ export interface PanelProps extends CardProps {
 function Panel(props: PanelProps) {
   const { definition, ...others } = props;
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
+  const isStatsChart = definition.kind === 'StatChart';
+  const panelPadding = isStatsChart ? 0 : 2;
 
   return (
     <Card
@@ -38,7 +40,8 @@ function Panel(props: PanelProps) {
         height: '100%',
         display: 'flex',
         flexFlow: 'column nowrap',
-        overflow: 'visible',
+        // Hide overflow if StatChart, otherwise set to visible so tooltip is not hidden
+        overflow: isStatsChart ? 'hidden' : 'visible',
       }}
       variant="outlined"
       {...others}
@@ -48,7 +51,7 @@ function Panel(props: PanelProps) {
           <Typography
             component="h2"
             variant="body2"
-            fontWeight={(theme) => theme.typography.fontWeightBold}
+            fontWeight={(theme) => theme.typography.fontWeightMedium}
             whiteSpace="nowrap"
             overflow="hidden"
             textOverflow="ellipsis"
@@ -65,10 +68,10 @@ function Panel(props: PanelProps) {
         sx={{
           position: 'relative',
           flexGrow: 1,
-          padding: (theme) => theme.spacing(1, 2),
+          padding: (theme) => theme.spacing(panelPadding),
           // Override MUI default style for last-child
           ':last-child': {
-            padding: (theme) => theme.spacing(1, 2),
+            padding: (theme) => theme.spacing(panelPadding),
           },
         }}
         ref={setContentElement}
