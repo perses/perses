@@ -15,8 +15,13 @@ import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FocusedSeriesArray } from '../utils/focused-series';
 import SeriesInfo from './SeriesInfo';
 
-function TooltipContent(props: { focusedSeries: FocusedSeriesArray | null }) {
-  const { focusedSeries } = props;
+interface TooltipContentProps {
+  focusedSeries: FocusedSeriesArray | null;
+  wrapLabels?: boolean;
+}
+
+function TooltipContent(props: TooltipContentProps) {
+  const { focusedSeries, wrapLabels } = props;
   // let lastDate = focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : '';
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : false;
 
@@ -55,6 +60,7 @@ function TooltipContent(props: { focusedSeries: FocusedSeriesArray | null }) {
                 y={y}
                 markerColor={markerColor}
                 totalSeries={focusedSeries.length}
+                wrapLabels={wrapLabels}
               />
             );
           })}

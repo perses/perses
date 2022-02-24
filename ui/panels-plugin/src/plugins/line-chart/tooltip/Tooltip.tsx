@@ -28,6 +28,7 @@ function assembleTransform(coords: Coordinate, chartWidth: number) {
 
 interface TooltipProps {
   tooltipData: TooltipData;
+  wrapLabels?: boolean;
 }
 
 function Tooltip(props: TooltipProps) {
@@ -71,7 +72,7 @@ function Tooltip(props: TooltipProps) {
         }}
         onMouseLeave={handleHoverOff}
       >
-        <TooltipContent focusedSeries={focusedSeries} />
+        <TooltipContent focusedSeries={focusedSeries} wrapLabels={props.wrapLabels} />
       </Box>
     </>
   );

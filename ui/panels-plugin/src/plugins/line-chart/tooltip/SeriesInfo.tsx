@@ -20,10 +20,11 @@ interface SeriesInfoProps {
   y: number;
   markerColor: string;
   totalSeries: number;
+  wrapLabels?: boolean;
 }
 
 function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, y, markerColor, totalSeries } = props;
+  const { seriesName, y, markerColor, totalSeries, wrapLabels } = props;
   // TODO (sjcobb): regex to remove __name__ and quotes, replace = with :`
   const formattedSeriesLabels = seriesName.replaceAll('"', '');
 
@@ -103,7 +104,7 @@ function SeriesInfo(props: SeriesInfoProps) {
             maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            whiteSpace: wrapLabels ? 'normal' : 'nowrap',
             width: 'calc(100% - 20px)',
           }}
         >
