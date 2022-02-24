@@ -16,13 +16,13 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -43,7 +43,7 @@ func ValidateAndSetOutput(o *string) error {
 	return nil
 }
 
-func HandleOutput(output string, obj interface{}) error {
+func HandleOutput(writer io.Writer, output string, obj interface{}) error {
 	var data []byte
 	var err error
 	if output == JSONOutput {
@@ -54,19 +54,24 @@ func HandleOutput(output string, obj interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(data))
-	return nil
+	_, err = fmt.Fprintln(writer, string(data))
+	return err
 }
 
-func HandleError(err error) {
+func HandleError(writer io.Writer, err error) {
 	if err != nil {
-		logrus.Error(err)
+		fmt.Fprintln(writer, "ERR: ", err)
 		os.Exit(1)
 	}
 }
 
-func HandlerTable(column []string, data [][]string) {
-	table := tablewriter.NewWriter(os.Stdout)
+func HandleString(writer io.Writer, msg string) error {
+	_, err := fmt.Fprintln(writer, msg)
+	return err
+}
+
+func HandlerTable(writer io.Writer, column []string, data [][]string) {
+	table := tablewriter.NewWriter(writer)
 	table.SetHeader(column)
 	table.SetBorder(false)
 	table.AppendBulk(data)

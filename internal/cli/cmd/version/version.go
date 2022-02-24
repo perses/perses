@@ -14,6 +14,8 @@
 package version
 
 import (
+	"io"
+
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/prometheus/common/version"
@@ -32,24 +34,27 @@ type outputVersion struct {
 }
 
 type option struct {
+	cmdUtils.CMDOption
+	writer    io.Writer
 	short     bool
 	output    string
 	apiClient api.ClientInterface
 }
 
-func (o *option) complete() {
+func (o *option) Complete(_ []string) error {
 	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
 	if err != nil {
-		return
+		return err
 	}
 	o.apiClient = apiClient
+	return nil
 }
 
-func (o *option) validate() error {
+func (o *option) Validate() error {
 	return cmdUtils.ValidateAndSetOutput(&o.output)
 }
 
-func (o *option) execute() error {
+func (o *option) Execute() error {
 	clientVersion := &outputVersion{
 		Version: version.Version,
 	}
@@ -71,7 +76,11 @@ func (o *option) execute() error {
 			Commit:    health.Commit,
 		}
 	}
-	return cmdUtils.HandleOutput(o.output, v)
+	return cmdUtils.HandleOutput(o.writer, o.output, v)
+}
+
+func (o *option) SetWriter(writer io.Writer) {
+	o.writer = writer
 }
 
 func NewCMD() *cobra.Command {
@@ -80,9 +89,7 @@ func NewCMD() *cobra.Command {
 		Use:   "version",
 		Short: "Display client version.",
 		Run: func(cmd *cobra.Command, args []string) {
-			o.complete()
-			cmdUtils.HandleError(o.validate())
-			cmdUtils.HandleError(o.execute())
+			cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVar(&o.short, "short", o.short, "If true, just print the version number.")

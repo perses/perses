@@ -15,6 +15,7 @@ package describe
 
 import (
 	"fmt"
+	"io"
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	cmdUtilsService "github.com/perses/perses/internal/cli/utils/service"
@@ -23,6 +24,8 @@ import (
 )
 
 type option struct {
+	cmdUtils.CMDOption
+	writer          io.Writer
 	kind            modelV1.Kind
 	project         string
 	name            string
@@ -30,7 +33,7 @@ type option struct {
 	resourceService cmdUtilsService.Service
 }
 
-func (o *option) complete(args []string) error {
+func (o *option) Complete(args []string) error {
 	if len(args) < 1 {
 		return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
 	} else if len(args) < 2 {
@@ -65,16 +68,20 @@ func (o *option) complete(args []string) error {
 	return nil
 }
 
-func (o *option) validate() error {
+func (o *option) Validate() error {
 	return cmdUtils.ValidateAndSetOutput(&o.output)
 }
 
-func (o *option) execute() error {
+func (o *option) Execute() error {
 	entity, err := o.resourceService.GetResource(o.name)
 	if err != nil {
 		return err
 	}
-	return cmdUtils.HandleOutput(o.output, entity)
+	return cmdUtils.HandleOutput(o.writer, o.output, entity)
+}
+
+func (o *option) SetWriter(writer io.Writer) {
+	o.writer = writer
 }
 
 func NewCMD() *cobra.Command {
@@ -90,9 +97,7 @@ percli describe dashboard nodeExporter
 percli describe dashboard nodeExporter -ojson
 `,
 		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.HandleError(o.complete(args))
-			cmdUtils.HandleError(o.validate())
-			cmdUtils.HandleError(o.execute())
+			cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")
