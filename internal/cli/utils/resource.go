@@ -137,7 +137,7 @@ func reverseResourceAliases() map[string]modelV1.Kind {
 }
 
 // FormatAvailableResourcesMessage formats the available resources that the user can use
-func FormatAvailableResourcesMessage(message string) string {
+func FormatAvailableResourcesMessage() string {
 	var result []string
 	for _, r := range resources {
 		var res string
@@ -148,5 +148,5 @@ func FormatAvailableResourcesMessage(message string) string {
 		}
 		result = append(result, res)
 	}
-	return FormatArrayMessage(message, result)
+	return FormatArrayMessage("you have to specify the resource type that you want to retrieve. Valid resource type include:", result)
 }

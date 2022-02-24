@@ -20,22 +20,27 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type globalDatasource struct {
+type folder struct {
 	Service
+	project   string
 	apiClient api.ClientInterface
 }
 
-func (d *globalDatasource) ListResource(prefix string) (interface{}, error) {
-	return d.apiClient.V1().GlobalDatasource().List(prefix)
+func (f *folder) ListResource(prefix string) (interface{}, error) {
+	return f.apiClient.V1().Folder(f.project).List(prefix)
 }
 
-func (d *globalDatasource) BuildMatrix(hits []modelAPI.Entity) [][]string {
+func (f *folder) GetResource(name string) (modelAPI.Entity, error) {
+	return f.apiClient.V1().Folder(f.project).Get(name)
+}
+
+func (f *folder) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.GlobalDatasource)
+		entity := hit.(*modelV1.Folder)
 		line := []string{
 			entity.Metadata.Name,
-			string(entity.Spec.GetKind()),
+			entity.Metadata.Project,
 			cmdUtils.FormatTime(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)
@@ -43,10 +48,10 @@ func (d *globalDatasource) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	return data
 }
 
-func (d *globalDatasource) GetColumHeader() []string {
+func (f *folder) GetColumHeader() []string {
 	return []string{
 		"NAME",
-		"DATASOURCE_TYPE",
+		"PROJECT",
 		"AGE",
 	}
 }

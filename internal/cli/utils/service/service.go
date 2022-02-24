@@ -23,6 +23,7 @@ import (
 
 type Service interface {
 	ListResource(prefix string) (interface{}, error)
+	GetResource(name string) (modelAPI.Entity, error)
 	BuildMatrix(hits []modelAPI.Entity) [][]string
 	GetColumHeader() []string
 }

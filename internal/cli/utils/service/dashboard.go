@@ -30,6 +30,10 @@ func (d *dashboard) ListResource(prefix string) (interface{}, error) {
 	return d.apiClient.V1().Dashboard(d.project).List(prefix)
 }
 
+func (d *dashboard) GetResource(name string) (modelAPI.Entity, error) {
+	return d.apiClient.V1().Dashboard(d.project).Get(name)
+}
+
 func (d *dashboard) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {

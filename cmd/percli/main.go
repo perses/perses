@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/perses/perses/internal/cli/cmd/describe"
 	"github.com/perses/perses/internal/cli/cmd/get"
 	"github.com/perses/perses/internal/cli/cmd/login"
 	"github.com/perses/perses/internal/cli/cmd/project"
@@ -31,6 +32,7 @@ func newRootCommand() *cobra.Command {
 		Short: "Command line interface to interact with the Perses API",
 	}
 
+	cmd.AddCommand(describe.NewCMD())
 	cmd.AddCommand(get.NewCMD())
 	cmd.AddCommand(login.NewCMD())
 	cmd.AddCommand(project.NewCMD())

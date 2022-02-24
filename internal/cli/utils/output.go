@@ -76,7 +76,7 @@ func HandlerTable(column []string, data [][]string) {
 // FormatArrayMessage format an array to a list
 func FormatArrayMessage(message string, list []string) string {
 	var builder strings.Builder
-	builder.WriteString(message)
+	builder.WriteString(message + "\n")
 	for _, e := range list {
 		builder.WriteString(fmt.Sprintf("  * %s\n", e))
 	}

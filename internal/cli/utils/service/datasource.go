@@ -20,21 +20,28 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type project struct {
+type datasource struct {
 	Service
+	project   string
 	apiClient api.ClientInterface
 }
 
-func (p *project) ListResource(prefix string) (interface{}, error) {
-	return p.apiClient.V1().Project().List(prefix)
+func (d *datasource) ListResource(prefix string) (interface{}, error) {
+	return d.apiClient.V1().Datasource(d.project).List(prefix)
 }
 
-func (p *project) BuildMatrix(hits []modelAPI.Entity) [][]string {
+func (d *datasource) GetResource(name string) (modelAPI.Entity, error) {
+	return d.apiClient.V1().Datasource(d.project).Get(name)
+}
+
+func (d *datasource) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.Project)
+		entity := hit.(*modelV1.Datasource)
 		line := []string{
 			entity.Metadata.Name,
+			entity.Metadata.Project,
+			string(entity.Spec.GetKind()),
 			cmdUtils.FormatTime(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)
@@ -42,9 +49,11 @@ func (p *project) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	return data
 }
 
-func (p *project) GetColumHeader() []string {
+func (d *datasource) GetColumHeader() []string {
 	return []string{
 		"NAME",
+		"PROJECT",
+		"DATASOURCE_TYPE",
 		"AGE",
 	}
 }

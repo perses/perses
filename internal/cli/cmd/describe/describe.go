@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package get
+package describe
 
 import (
 	"fmt"
@@ -24,23 +24,21 @@ import (
 
 type option struct {
 	kind            modelV1.Kind
-	allProject      bool
 	project         string
+	name            string
 	output          string
-	prefix          string
 	resourceService cmdUtilsService.Service
 }
 
 func (o *option) complete(args []string) error {
-	// first let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
-	if len(args) <= 0 {
+	if len(args) < 1 {
 		return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
-	} else if len(args) == 2 {
-		// In second position in the arguments, you can have a prefix that will be used to filter the resources.
-		o.prefix = args[1]
+	} else if len(args) < 2 {
+		return fmt.Errorf("you have to specify the name of the resource you have to describe")
 	} else if len(args) > 2 {
-		return fmt.Errorf("you cannot have more than two arguments for the command 'get'")
+		return fmt.Errorf("you cannot have more than two arguments for the command 'describe'")
 	}
+	o.name = args[1]
 
 	var err error
 	o.kind, err = cmdUtils.GetKind(args[0])
@@ -49,7 +47,7 @@ func (o *option) complete(args []string) error {
 	}
 
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
-	if len(o.project) == 0 && !o.allProject {
+	if len(o.project) == 0 {
 		o.project = cmdUtils.GlobalConfig.Project
 	}
 
@@ -68,52 +66,28 @@ func (o *option) complete(args []string) error {
 }
 
 func (o *option) validate() error {
-	// check if project should be defined (through the config or through the flag) for the given resource.
-	if !o.allProject && len(o.project) == 0 && !cmdUtils.IsGlobalResource(o.kind) {
-		return fmt.Errorf("no project has been defined for the scope of this command. If you intended to get all resources across the different project, please use the flag --all")
-	}
-	if len(o.output) > 0 {
-		// In this particular command, the default display is a matrix.
-		return cmdUtils.ValidateAndSetOutput(&o.output)
-	}
-	return nil
+	return cmdUtils.ValidateAndSetOutput(&o.output)
 }
 
 func (o *option) execute() error {
-	resourceList, err := o.resourceService.ListResource(o.prefix)
+	entity, err := o.resourceService.GetResource(o.name)
 	if err != nil {
 		return err
 	}
-	if len(o.output) > 0 {
-		return cmdUtils.HandleOutput(o.output, resourceList)
-	}
-	entities, err := cmdUtils.ConvertToEntity(resourceList)
-	if err != nil {
-		return err
-	}
-	data := o.resourceService.BuildMatrix(entities)
-	cmdUtils.HandlerTable(o.resourceService.GetColumHeader(), data)
-	return nil
+	return cmdUtils.HandleOutput(o.output, entity)
 }
 
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "get [SUBTYPE] [PREFIX]",
-		Short: "Retrieve any kind of resource from the API.",
+		Use:   "describe [SUBTYPE] [NAME]",
+		Short: "Show details of a specific resource",
 		Example: `
-# List all dashboards in the current project selected.
-percli get dashboards 
+## Describe a particular dashboards.
+percli describe dashboard nodeExporter
 
-# List all dashboards that begin with a given name in the current project selected.
-percli get dashboards node
-
-# List all dashboards in a specific project.
-percli get dashboards -p my_project
-
-#List all dashboards as a json object.
-percli get dashboards -a -ojson
-
+## Describe a particular dashboards in a json.
+percli describe dashboard nodeExporter -ojson
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdUtils.HandleError(o.complete(args))
@@ -121,8 +95,7 @@ percli get dashboards -a -ojson
 			cmdUtils.HandleError(o.execute())
 		},
 	}
-	cmd.Flags().BoolVarP(&o.allProject, "all", "a", o.allProject, "If present, list the request object(s) across all projects. Project in current context is ignored even if specified with --project.")
 	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")
-	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "Kind of display: 'yaml' or 'json'.")
+	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "One of 'yaml' or 'json'. Default is 'yaml'.")
 	return cmd
 }
