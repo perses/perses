@@ -30,6 +30,16 @@ func (c *client) RESTClient() *perseshttp.RESTClient {
 	return nil
 }
 
+func (c *client) Folder(project string) v1.FolderInterface {
+	return &folder{
+		project: project,
+	}
+}
+
+func (c *client) GlobalDatasource() v1.GlobalDatasourceInterface {
+	return &globalDatasource{}
+}
+
 func (c *client) Project() v1.ProjectInterface {
 	return &project{}
 }

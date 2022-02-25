@@ -38,6 +38,7 @@ func TestGetCMD(t *testing.T) {
 		title           string
 		args            []string
 		apiClient       api.ClientInterface
+		project         string
 		expectedMessage string
 		isErrorExpected bool
 	}{
@@ -73,6 +74,35 @@ func TestGetCMD(t *testing.T) {
 			isErrorExpected: false,
 			expectedMessage: string(JSONMarshalStrict(fake_v1.ProjectList("per"))) + "\n",
 		},
+		{
+			title:           "get globaldatasource in json format",
+			args:            []string{"gdts", "-ojson"},
+			apiClient:       fake_api.New(),
+			isErrorExpected: false,
+			expectedMessage: string(JSONMarshalStrict(fake_v1.GlobalDatasourceList(""))) + "\n",
+		},
+		{
+			title:           "get all folder in json format",
+			args:            []string{"folder", "-ojson", "--all"},
+			apiClient:       fake_api.New(),
+			isErrorExpected: false,
+			expectedMessage: string(JSONMarshalStrict(fake_v1.FolderList("", ""))) + "\n",
+		},
+		{
+			title:           "get folder in a specific project in json format",
+			args:            []string{"folder", "-ojson", "-p", "perses"},
+			apiClient:       fake_api.New(),
+			isErrorExpected: false,
+			expectedMessage: string(JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
+		},
+		{
+			title:           "get folder with default project in json format",
+			args:            []string{"folder", "-ojson"},
+			project:         "perses",
+			apiClient:       fake_api.New(),
+			isErrorExpected: false,
+			expectedMessage: string(JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
+		},
 	}
 
 	for _, test := range testSuite {
@@ -83,6 +113,7 @@ func TestGetCMD(t *testing.T) {
 			cmd.SetErr(buffer)
 			cmd.SetArgs(test.args)
 			cmdUtils.GlobalConfig.SetAPIClient(test.apiClient)
+			cmdUtils.GlobalConfig.Project = test.project
 
 			err := cmd.Execute()
 			if test.isErrorExpected {
