@@ -25,88 +25,48 @@ import {
 } from './api-types';
 import { usePrometheusConfig } from './datasource';
 
-export type QueryOptions = Pick<UseQueryOptions, 'enabled'>;
+export type QueryOptions = Pick<UseQueryOptions, 'enabled'> & {
+  datasource?: DatasourceSelector;
+};
 
 /**
  * Calls the `/api/v1/query` endpoint to get metrics data.
  */
-export function useInstantQuery(
-  datasource: DatasourceSelector,
-  params: InstantQueryRequestParameters,
-  queryOptions?: QueryOptions
-) {
-  return useQueryWithPost<InstantQueryRequestParameters, InstantQueryResponse>(
-    datasource,
-    '/api/v1/query',
-    params,
-    undefined,
-    queryOptions
-  );
+export function useInstantQuery(params: InstantQueryRequestParameters, queryOptions?: QueryOptions) {
+  return useQueryWithPost<InstantQueryRequestParameters, InstantQueryResponse>('/api/v1/query', params, queryOptions);
 }
 
 /**
  * Calls the `/api/v1/query_range` endpoint to get metrics data.
  */
-export function useRangeQuery(
-  datasource: DatasourceSelector,
-  params: RangeQueryRequestParameters,
-  queryOptions?: QueryOptions
-) {
-  return useQueryWithPost<RangeQueryRequestParameters, RangeQueryResponse>(
-    datasource,
-    '/api/v1/query_range',
-    params,
-    undefined,
-    queryOptions
-  );
+export function useRangeQuery(params: RangeQueryRequestParameters, queryOptions?: QueryOptions) {
+  return useQueryWithPost<RangeQueryRequestParameters, RangeQueryResponse>('/api/v1/query_range', params, queryOptions);
 }
 
 /**
  * Calls the `/api/v1/labels` endpoint to get a list of label names.
  */
-export function useLabelNames(
-  datasource: DatasourceSelector,
-  params: LabelNamesRequestParameters,
-  queryOptions?: QueryOptions
-) {
-  return useQueryWithPost<LabelNamesRequestParameters, LabelNamesResponse>(
-    datasource,
-    '/api/v1/labels',
-    params,
-    { match: 'match[]' },
-    queryOptions
-  );
+export function useLabelNames(params: LabelNamesRequestParameters, queryOptions?: QueryOptions) {
+  return useQueryWithPost<LabelNamesRequestParameters, LabelNamesResponse>('/api/v1/labels', params, queryOptions);
 }
 
 /**
  * Calls the `/api/v1/label/{labelName}/values` endpoint to get a list of
  * values for a label.
  */
-export function useLabelValues(
-  datasource: DatasourceSelector,
-  params: LabelValuesRequestParameters,
-  queryOptions?: QueryOptions
-) {
+export function useLabelValues(params: LabelValuesRequestParameters, queryOptions?: QueryOptions) {
   const { labelName, ...searchParams } = params;
   const apiURI = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
-  return useQueryWithGet<typeof searchParams, LabelValuesResponse>(
-    datasource,
-    apiURI,
-    searchParams,
-    { match: 'match[]' },
-    queryOptions
-  );
+  return useQueryWithGet<typeof searchParams, LabelValuesResponse>(apiURI, searchParams, queryOptions);
 }
 
 function useQueryWithGet<T extends RequestParams<T>, TResponse>(
-  datasourceSelector: DatasourceSelector,
   apiURI: string,
   params: T,
-  rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const httpConfig = usePrometheusConfig(datasourceSelector).http;
-  const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
+  const config = usePrometheusConfig(queryOptions?.datasource);
+  const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
   const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
@@ -114,7 +74,7 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
     () => {
       let url = `${datasourceURL}${apiURI}`;
 
-      const urlParams = createSearchParams(params, rename).toString();
+      const urlParams = createSearchParams(params).toString();
       if (urlParams !== '') {
         url += `?${urlParams}`;
       }
@@ -126,14 +86,12 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
 }
 
 function useQueryWithPost<T extends RequestParams<T>, TResponse>(
-  datasourceSelector: DatasourceSelector,
   apiURI: string,
   params: T,
-  rename?: KeyNameMap<T>,
   queryOptions?: QueryOptions
 ) {
-  const httpConfig = usePrometheusConfig(datasourceSelector).http;
-  const datasourceURL = buildDatasourceURL(datasourceSelector.name, httpConfig);
+  const config = usePrometheusConfig(queryOptions?.datasource);
+  const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
   const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
@@ -145,7 +103,7 @@ function useQueryWithPost<T extends RequestParams<T>, TResponse>(
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: createSearchParams(params, rename),
+        body: createSearchParams(params),
       };
       return fetchJson<TResponse>(url, init);
     },
@@ -162,36 +120,27 @@ type RequestParams<T> = {
   [K in keyof T]: ParamValue;
 };
 
-// Allow keys in params to be renamed when mapping to URL
-type KeyNameMap<T> = {
-  [K in keyof T]?: string | undefined;
-};
-
 /**
  * Creates URLSearchParams from a request params object.
  */
-function createSearchParams<T extends RequestParams<T>>(params: T, rename?: KeyNameMap<T>) {
+function createSearchParams<T extends RequestParams<T>>(params: T) {
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value: ParamValue = params[key];
     if (value === undefined) continue;
 
-    // Allow keys to be renamed when mapping to parameters
-    const renamed: string | undefined = rename?.[key];
-    const name: string = renamed !== undefined ? renamed : key;
-
     if (typeof value === 'string') {
-      searchParams.append(name, value);
+      searchParams.append(key, value);
       continue;
     }
 
     if (typeof value === 'number') {
-      searchParams.append(name, value.toString());
+      searchParams.append(key, value.toString());
       continue;
     }
 
     for (const val of value) {
-      searchParams.append(name, val);
+      searchParams.append(key, val);
     }
   }
   return searchParams;

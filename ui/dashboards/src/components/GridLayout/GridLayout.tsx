@@ -11,19 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Box, BoxProps, Collapse } from '@mui/material';
 import { GridDefinition, GridItemDefinition } from '@perses-dev/core';
-import { resolvePanelRef } from '@perses-dev/plugin-system';
-import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { Panel } from '../Panel';
-import { useDashboardContext } from '../Dashboard';
 import { GridTitle } from './GridTitle';
 
 const COLUMNS = 24;
 
 export interface GridLayoutProps extends BoxProps {
   definition: GridDefinition;
+  renderGridItemContent: (definition: GridItemDefinition) => React.ReactNode;
 }
 
 /**
@@ -32,44 +29,40 @@ export interface GridLayoutProps extends BoxProps {
 export function GridLayout(props: GridLayoutProps) {
   const {
     definition: { display, items },
+    renderGridItemContent,
     ...others
   } = props;
 
   const [isOpen, setIsOpen] = useState(display?.collapse?.open ?? true);
 
-  const gridItems = useMemo(() => {
-    const gridItems: React.ReactNode[] = [];
-    let mobileRowStart = 1;
+  const gridItems: React.ReactNode[] = [];
+  let mobileRowStart = 1;
 
-    items.forEach((item, idx) => {
-      // Try to maintain the chart's aspect ratio on mobile
-      const widthScale = COLUMNS / item.width;
-      const mobileRows = Math.floor(item.height * widthScale);
+  items.forEach((item, idx) => {
+    // Try to maintain the chart's aspect ratio on mobile
+    const widthScale = COLUMNS / item.width;
+    const mobileRows = Math.floor(item.height * widthScale);
 
-      gridItems.push(
-        <Box
-          key={idx}
-          sx={{
-            gridColumn: {
-              xs: `1 / span ${COLUMNS}`,
-              sm: `${item.x + 1} / span ${item.width}`,
-            },
-            gridRow: {
-              xs: `${mobileRowStart} / span ${mobileRows}`,
-              sm: `${item.y + 1} / span ${item.height}`,
-            },
-          }}
-        >
-          <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <GridItemContent content={item.content} />
-          </ErrorBoundary>
-        </Box>
-      );
+    gridItems.push(
+      <Box
+        key={idx}
+        sx={{
+          gridColumn: {
+            xs: `1 / span ${COLUMNS}`,
+            sm: `${item.x + 1} / span ${item.width}`,
+          },
+          gridRow: {
+            xs: `${mobileRowStart} / span ${mobileRows}`,
+            sm: `${item.y + 1} / span ${item.height}`,
+          },
+        }}
+      >
+        {renderGridItemContent(item)}
+      </Box>
+    );
 
-      mobileRowStart += mobileRows;
-    });
-    return gridItems;
-  }, [items]);
+    mobileRowStart += mobileRows;
+  });
 
   return (
     <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
@@ -101,18 +94,4 @@ export function GridLayout(props: GridLayoutProps) {
       </Collapse>
     </Box>
   );
-}
-
-interface GridItemContentProps {
-  content: GridItemDefinition['content'];
-}
-
-/**
- * Resolves the reference to panel content and renders the panel.
- */
-function GridItemContent(props: GridItemContentProps) {
-  const { content } = props;
-  const { spec } = useDashboardContext();
-  const definition = resolvePanelRef(spec, content);
-  return <Panel definition={definition} />;
 }

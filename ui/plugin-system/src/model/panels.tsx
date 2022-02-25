@@ -62,8 +62,15 @@ export interface PanelPlugin<Options extends JsonObject = JsonObject> {
   PanelComponent: React.ComponentType<PanelProps<Options>>;
 }
 
+/**
+ * The props provided by Perses to a panel plugin's PanelComponent.
+ */
 export interface PanelProps<Options extends JsonObject> {
   definition: PanelDefinition<Options>;
+  contentDimensions?: {
+    width: number;
+    height: number;
+  };
 }
 
 /**

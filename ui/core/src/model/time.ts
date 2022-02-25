@@ -83,3 +83,13 @@ export function isDurationString(maybeDuration: string): maybeDuration is Durati
   if (maybeDuration === '') return false;
   return DURATION_REGEX.test(maybeDuration);
 }
+
+/**
+ * Gets a suggested step/interval size for a time range based on the width of a visual component.
+ */
+export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) {
+  // TODO: Should we try to suggest more "rounded" step values based around
+  // time increments that make sense (e.g. 15s, 30s, 1m, 5m, etc.)
+  const queryRangeMs = timeRange.end.valueOf() - timeRange.start.valueOf();
+  return Math.floor(queryRangeMs / width);
+}

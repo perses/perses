@@ -12,29 +12,21 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
+import { AbsoluteTimeRange } from '../model/time';
 
-/**
- * Context for the current Panel.
- */
-export interface PanelContextType {
-  contentDimensions?: {
-    width: number;
-    height: number;
-  };
+export interface TimeRange {
+  timeRange: AbsoluteTimeRange;
 }
 
-/**
- * React context provided by the Panel component to its children.
- */
-export const PanelContext = createContext<PanelContextType | undefined>(undefined);
+export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);
 
 /**
- * Gets the context for the current Panel and throws if the Provider is missing.
+ * Gets the current TimeRangeState at runtime.
  */
-export function usePanelContext() {
-  const context = useContext(PanelContext);
-  if (context === undefined) {
-    throw new Error(`No Panel context found. Did you forget a Provider?`);
+export function useTimeRange(): TimeRange {
+  const ctx = useContext(TimeRangeContext);
+  if (ctx === undefined) {
+    throw new Error('No TimeRangeContext found. Did you forget a Provider?');
   }
-  return context;
+  return ctx;
 }

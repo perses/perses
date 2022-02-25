@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, useMemoized } from '@perses-dev/core';
-import { UseVariableOptionsHook, VariableDefinition } from '@perses-dev/plugin-system';
-import { useDashboardContext } from '@perses-dev/dashboards';
+import { JsonObject, useMemoized, VariableDefinition } from '@perses-dev/core';
+import { UseVariableOptionsHook } from '@perses-dev/plugin-system';
 import { LabelValuesRequestParameters } from '../model/api-types';
 import { useDashboardPrometheusTimeRange } from '../model/time';
 import { TemplateString, useReplaceTemplateStrings } from '../model/templating';
@@ -34,8 +33,6 @@ interface LabelValuesOptions extends JsonObject {
 export function usePrometheusLabelValues(
   definition: PrometheusLabelValues
 ): ReturnType<UseVariableOptionsHook<LabelValuesOptions>> {
-  const { spec } = useDashboardContext();
-
   const { start, end } = useDashboardPrometheusTimeRange();
   const { result: match, needsVariableValuesFor } = useReplaceTemplateStrings(definition.options.match);
 
@@ -43,7 +40,7 @@ export function usePrometheusLabelValues(
   // values to be filled in/selected
   const request: LabelValuesRequestParameters = {
     labelName: definition.options.label_name,
-    match,
+    'match[]': match,
     start,
     end,
   };
@@ -51,7 +48,7 @@ export function usePrometheusLabelValues(
     data: response,
     isLoading: loading,
     error,
-  } = useLabelValues(spec.datasource, request, {
+  } = useLabelValues(request, {
     enabled: needsVariableValuesFor.size === 0,
   });
 

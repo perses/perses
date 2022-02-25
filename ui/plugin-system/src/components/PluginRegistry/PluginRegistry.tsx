@@ -12,14 +12,12 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo, useCallback } from 'react';
-import { PluginRuntime, PluginRuntimeProvider } from '@perses-dev/core';
 import { useQuery } from 'react-query';
 import { PluginModule, PluginResource, PluginType } from '../../model';
 import { LoadedPluginsByTypeAndKind, useRegistryState } from './registry-state';
 
 export interface PluginRegistryProps {
   children?: React.ReactNode;
-  runtime: PluginRuntime;
   getInstalledPlugins: () => Promise<PluginResource[]>;
   importPluginModule: (resource: PluginResource) => Promise<PluginModule>;
 }
@@ -29,7 +27,7 @@ export interface PluginRegistryProps {
  * their implementations once they've been loaded.
  */
 export function PluginRegistry(props: PluginRegistryProps) {
-  const { children, runtime, getInstalledPlugins, importPluginModule } = props;
+  const { children, getInstalledPlugins, importPluginModule } = props;
 
   const installedPlugins = useQuery('installed-plugins', getInstalledPlugins);
   const { loadablePlugins, plugins, register } = useRegistryState(installedPlugins.data);
@@ -58,11 +56,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
   // TODO: Fix this so loadPlugin takes into account list still loading
   if (installedPlugins.isLoading) return null;
 
-  return (
-    <PluginRegistryContext.Provider value={registry}>
-      <PluginRuntimeProvider value={runtime}>{children}</PluginRuntimeProvider>
-    </PluginRegistryContext.Provider>
-  );
+  return <PluginRegistryContext.Provider value={registry}>{children}</PluginRegistryContext.Provider>;
 }
 
 const PluginRegistryContext = createContext<PluginRegistryContextType | undefined>(undefined);

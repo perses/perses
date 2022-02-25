@@ -11,31 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { GridLayout } from '../GridLayout';
-import { DashboardContext, DashboardContextType } from './DashboardContext';
+import { DashboardSpec } from '@perses-dev/core';
+import { GridLayout, GridItemContent } from '../GridLayout';
 
-export interface DashboardProps extends BoxProps, DashboardContextType {}
+export interface DashboardProps extends BoxProps {
+  spec: DashboardSpec;
+}
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
  */
 export function Dashboard(props: DashboardProps) {
-  const { spec, timeRange, variables, ...others } = props;
-
-  const context = useMemo(() => ({ spec, timeRange, variables }), [spec, timeRange, variables]);
+  const { spec, ...others } = props;
 
   return (
-    <DashboardContext.Provider value={context}>
-      <Box {...others}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          {spec.layouts.map((layout, idx) => (
-            <GridLayout key={idx} definition={layout} />
-          ))}
-        </ErrorBoundary>
-      </Box>
-    </DashboardContext.Provider>
+    <Box {...others}>
+      <ErrorBoundary FallbackComponent={ErrorAlert}>
+        {spec.layouts.map((layout, idx) => (
+          <GridLayout
+            key={idx}
+            definition={layout}
+            renderGridItemContent={(definition) => <GridItemContent content={definition.content} spec={spec} />}
+          />
+        ))}
+      </ErrorBoundary>
+    </Box>
   );
 }

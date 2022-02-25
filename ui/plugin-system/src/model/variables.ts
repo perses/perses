@@ -11,42 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, Definition } from '@perses-dev/core';
+import { JsonObject, VariableDefinition } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
-
-// Extend the core DashboardSpec to support variable definitions from variable plugins
-declare module '@perses-dev/core' {
-  interface DashboardSpec {
-    variables: Record<string, VariableDefinition>;
-  }
-}
-
-/**
- * Variable definition options that are common to all variables.
- */
-export interface VariableDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
-  display: VariableDisplayOptions;
-  selection: VariableSelectionOptions;
-  capturing_regexp?: string;
-}
-
-export interface VariableDisplayOptions extends JsonObject {
-  hide?: boolean;
-  label: string;
-}
-
-export type VariableSelectionOptions = SingleSelectOptions | MultiSelectOptions;
-
-export type SingleSelectOptions = {
-  default_value: string;
-};
-
-export type MultiSelectOptions = {
-  default_value: string[];
-  all_value?: string | typeof DEFAULT_ALL_VALUE;
-};
-
-export const DEFAULT_ALL_VALUE = '$__all' as const;
 
 /**
  * Plugin for handling custom VariableDefinitions.

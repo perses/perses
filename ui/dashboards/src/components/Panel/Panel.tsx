@@ -17,7 +17,6 @@ import { PanelDefinition, PanelComponent } from '@perses-dev/plugin-system';
 import { ErrorAlert } from '@perses-dev/components';
 import { PluginBoundary } from '@perses-dev/plugin-system';
 import useResizeObserver from 'use-resize-observer';
-import { PanelContext, PanelContextType } from './PanelContext';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
@@ -32,10 +31,9 @@ export function Panel(props: PanelProps) {
 
   const { width, height } = useResizeObserver({ ref: contentElement });
 
-  // Context provided by the Panel component
-  const context: PanelContextType = useMemo(() => {
-    const contentDimensions = width !== undefined && height !== undefined ? { width, height } : undefined;
-    return { contentDimensions };
+  const contentDimensions = useMemo(() => {
+    if (width === undefined || height === undefined) return undefined;
+    return { width, height };
   }, [width, height]);
 
   return (
@@ -81,12 +79,9 @@ export function Panel(props: PanelProps) {
         }}
         ref={setContentElement}
       >
-        {/* Actually render plugin with PanelContent component so we can wrap with a loading/error boundary */}
-        <PanelContext.Provider value={context}>
-          <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-            <PanelComponent definition={definition} />
-          </PluginBoundary>
-        </PanelContext.Provider>
+        <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
+          <PanelComponent definition={definition} contentDimensions={contentDimensions} />
+        </PluginBoundary>
       </CardContent>
     </Card>
   );

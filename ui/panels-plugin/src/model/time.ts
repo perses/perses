@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginRuntime } from '@perses-dev/core';
-import { useDataSources } from '../context/DataSourceRegistry';
+import { getSuggestedStepMs, useTimeRange } from '@perses-dev/core';
 
 /**
- * The runtime implementations exposed to plugins.
+ * Gets the suggested step for a graph query in ms for the currently selected time range.
  */
-export const pluginRuntime: PluginRuntime = {
-  useDataSources: useDataSources,
-};
+export function useSuggestedStepMs(width?: number) {
+  const { timeRange } = useTimeRange();
+  if (width === undefined) return 0;
+  return getSuggestedStepMs(timeRange, width);
+}

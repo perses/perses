@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './context/PluginRuntimeContext';
-export * from './hooks/datasource';
-export * from './hooks/memo';
 export * from './model/definitions';
 export type { DatasourceSelector, DashboardResource, DashboardSpec } from './model/dashboard';
 export * from './model/datasource';
@@ -21,4 +18,9 @@ export type { LayoutDefinition, GridDefinition, GridItemDefinition } from './mod
 export * from './model/resource';
 export * from './model/time';
 export * from './model/http';
+export * from './model/variables';
+export * from './runtime/datasources';
+export * from './runtime/template-variables';
+export * from './runtime/time-range';
 export * from './utils/fetch';
+export * from './utils/memo';

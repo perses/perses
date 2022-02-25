@@ -24,6 +24,7 @@ const GraphQueryContext = createContext<QueryState[] | undefined>(undefined);
 
 export interface GraphQueryRunnerProps {
   queries: GraphQueryDefinition[];
+  suggestedStepMs: number;
   children: React.ReactNode;
 }
 
@@ -32,14 +33,14 @@ export interface GraphQueryRunnerProps {
  * list of results to children via context.
  */
 function GraphQueryRunner(props: GraphQueryRunnerProps) {
-  const { queries, children } = props;
+  const { queries, suggestedStepMs, children } = props;
 
   if (queries.length === 0) {
     return <GraphQueryContext.Provider value={EMPTY_RESULTS}>{children}</GraphQueryContext.Provider>;
   }
 
   return (
-    <RunGraphQuery queries={queries} index={0} previousResults={EMPTY_RESULTS}>
+    <RunGraphQuery queries={queries} index={0} suggestedStepMs={suggestedStepMs} previousResults={EMPTY_RESULTS}>
       {children}
     </RunGraphQuery>
   );
@@ -50,6 +51,7 @@ export default GraphQueryRunner;
 interface RunGraphQueryProps {
   queries: GraphQueryDefinition[];
   index: number;
+  suggestedStepMs: number;
   previousResults: QueryState[];
   children: React.ReactNode;
 }
@@ -57,14 +59,14 @@ interface RunGraphQueryProps {
 // Internal component that actually runs a query in the array and adds the
 // results of that query to the previous ones
 function RunGraphQuery(props: RunGraphQueryProps) {
-  const { queries, index, previousResults, children } = props;
+  const { queries, index, suggestedStepMs, previousResults, children } = props;
 
   const query = queries[index];
   if (query === undefined) {
     throw new Error(`No query to run at index ${index}`);
   }
 
-  const { data, loading, error } = useGraphQuery(query);
+  const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
   const results = useMemoized(() => {
     return [...previousResults, { data, loading, error }];
   }, [previousResults, data, loading, error]);
@@ -77,7 +79,7 @@ function RunGraphQuery(props: RunGraphQueryProps) {
 
   // Otherwise, recursively render to keep unrolling the array
   return (
-    <RunGraphQuery queries={queries} index={index + 1} previousResults={results}>
+    <RunGraphQuery queries={queries} index={index + 1} suggestedStepMs={suggestedStepMs} previousResults={results}>
       {children}
     </RunGraphQuery>
   );

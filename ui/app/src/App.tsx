@@ -20,7 +20,6 @@ import ViewDashboard from './views/dashboard/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import { useSampleData } from './utils/temp-sample-data';
 import Header from './components/Header';
-import { pluginRuntime } from './model/plugin-runtime';
 import { useBundledPlugins } from './model/bundled-plugins';
 
 const appStyle: SxProps<Theme> = {
@@ -48,11 +47,7 @@ function App() {
           overflow: 'hidden',
         }}
       >
-        <PluginRegistry
-          getInstalledPlugins={getInstalledPlugins}
-          importPluginModule={importPluginModule}
-          runtime={pluginRuntime}
-        >
+        <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
           <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
             <DataSourceRegistry>
               <ViewDashboard resource={dashboard} />

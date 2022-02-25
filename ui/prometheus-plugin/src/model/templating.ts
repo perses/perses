@@ -12,9 +12,7 @@
 // limitations under the License.
 
 import { Duration, parser, StringLiteral } from 'lezer-promql';
-import { useMemoized } from '@perses-dev/core';
-import { DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
-import { useDashboardContext, VariableState } from '@perses-dev/dashboards';
+import { useMemoized, DEFAULT_ALL_VALUE, useTemplateVariables, VariableState } from '@perses-dev/core';
 
 const REPLACE_IN_NODE_TYPES = new Set([StringLiteral, Duration]);
 
@@ -30,7 +28,7 @@ export type TemplateString = string;
  * if the templateStrings or variable values change.
  */
 export function useReplaceTemplateStrings(templateStrings?: TemplateString[]) {
-  const { variables } = useDashboardContext();
+  const { variables } = useTemplateVariables();
 
   // Replace template string placeholders with variable values
   return useMemoized(() => {
@@ -56,7 +54,7 @@ export function useReplaceTemplateStrings(templateStrings?: TemplateString[]) {
  * if the templateString or variable values change.
  */
 export function useReplaceTemplateString(templateString?: TemplateString) {
-  const { variables } = useDashboardContext();
+  const { variables } = useTemplateVariables();
 
   // Replace template string placeholders with variable values
   return useMemoized(() => {

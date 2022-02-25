@@ -12,4 +12,3 @@
 // limitations under the License.
 
 export * from './Panel';
-export * from './PanelContext';

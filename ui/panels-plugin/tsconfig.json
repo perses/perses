@@ -12,10 +12,6 @@
       "prepend": false
     },
     {
-      "path": "../dashboards",
-      "prepend": false
-    },
-    {
       "path": "../plugin-system",
       "prepend": false
     }

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useRef } from 'react';
-import { JsonObject } from '@perses-dev/core';
+import { JsonObject, VariableDefinition } from '@perses-dev/core';
 import {
   PanelProps,
   PanelPlugin,
@@ -20,7 +20,6 @@ import {
   PluginDefinition,
   PluginType,
   VariablePlugin,
-  VariableDefinition,
   GraphQueryPlugin,
   GraphQueryDefinition,
 } from '../../model';

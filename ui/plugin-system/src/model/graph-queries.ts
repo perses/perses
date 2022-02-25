@@ -28,11 +28,18 @@ export interface GraphQueryPlugin<Options extends JsonObject = JsonObject> {
   useGraphQuery: UseGraphQueryHook<Options>;
 }
 
-export type UseGraphQueryHook<Options extends JsonObject> = (definition: GraphQueryDefinition<Options>) => {
+export type UseGraphQueryHook<Options extends JsonObject> = (
+  definition: GraphQueryDefinition<Options>,
+  hookOptions?: UseGraphQueryHookOptions
+) => {
   data?: GraphData;
   loading: boolean;
   error?: Error;
 };
+
+export interface UseGraphQueryHookOptions {
+  suggestedStepMs?: number;
+}
 
 export interface GraphData {
   timeRange: AbsoluteTimeRange;

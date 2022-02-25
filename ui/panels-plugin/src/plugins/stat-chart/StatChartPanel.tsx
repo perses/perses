@@ -16,11 +16,11 @@ import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { GraphQueryDefinition, GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
-import { usePanelContext } from '@perses-dev/dashboards';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
 import { ThresholdOptions, defaultThresholdInput } from '../../model/thresholds';
 import { StatChartData, StatChart } from '../../components/stat-chart/StatChart';
+import { useSuggestedStepMs } from '../../model/time';
 
 export const StatChartKind = 'StatChart' as const;
 
@@ -49,10 +49,11 @@ export function StatChartPanel(props: StatChartPanelProps) {
       display: { name },
       options: { query, calculation, unit, sparkline },
     },
+    contentDimensions,
   } = props;
   const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
-  const { contentDimensions } = usePanelContext();
-  const { data, loading, error } = useGraphQuery(query);
+  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
+  const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
   const chartData = useChartData(data, calculation, name);
 
   if (error) throw error;
