@@ -15,16 +15,29 @@ package get
 
 import (
 	"bytes"
+	"encoding/json"
 	"testing"
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/fake_api"
+	"github.com/perses/perses/pkg/client/fake_api/fake_v1"
 	"github.com/stretchr/testify/assert"
 )
+
+func JSONMarshalStrict(obj interface{}) []byte {
+	if data, err := json.Marshal(obj); err != nil {
+		panic(err)
+	} else {
+		return data
+	}
+}
 
 func TestGetCMD(t *testing.T) {
 	testSuite := []struct {
 		title           string
 		args            []string
+		apiClient       api.ClientInterface
 		expectedMessage string
 		isErrorExpected bool
 	}{
@@ -33,6 +46,32 @@ func TestGetCMD(t *testing.T) {
 			args:            []string{},
 			isErrorExpected: true,
 			expectedMessage: cmdUtils.FormatAvailableResourcesMessage(),
+		},
+		{
+			title:           "kind not managed",
+			args:            []string{"whatever"},
+			isErrorExpected: true,
+			expectedMessage: "resource \"whatever\" not managed",
+		},
+		{
+			title:           "not connected to anyAPI",
+			args:            []string{"project", "-ojson"},
+			isErrorExpected: true,
+			expectedMessage: "you are not connected to any API",
+		},
+		{
+			title:           "get project in json format",
+			args:            []string{"project", "-ojson"},
+			apiClient:       fake_api.New(),
+			isErrorExpected: false,
+			expectedMessage: string(JSONMarshalStrict(fake_v1.ProjectList(""))) + "\n",
+		},
+		{
+			title:           "get project with prefix in json format",
+			args:            []string{"project", "per", "-ojson"},
+			apiClient:       fake_api.New(),
+			isErrorExpected: false,
+			expectedMessage: string(JSONMarshalStrict(fake_v1.ProjectList("per"))) + "\n",
 		},
 	}
 
@@ -43,6 +82,7 @@ func TestGetCMD(t *testing.T) {
 			cmd.SetOut(buffer)
 			cmd.SetErr(buffer)
 			cmd.SetArgs(test.args)
+			cmdUtils.GlobalConfig.SetAPIClient(test.apiClient)
 
 			err := cmd.Execute()
 			if test.isErrorExpected {

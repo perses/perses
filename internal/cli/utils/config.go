@@ -70,6 +70,10 @@ func (c *CLIConfig) GetAPIClient() (api.ClientInterface, error) {
 	}
 }
 
+func (c *CLIConfig) SetAPIClient(apiClient api.ClientInterface) {
+	c.apiClient = apiClient
+}
+
 // getRootFolder will return a root folder that will or that contains the Perses' config in a sub dir.
 func getRootFolder() string {
 	usr, err := user.Current()

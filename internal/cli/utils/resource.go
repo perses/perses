@@ -114,7 +114,7 @@ func ConvertToEntity(entities interface{}) ([]modelAPI.Entity, error) {
 func GetKind(res string) (modelV1.Kind, error) {
 	alias := reverseResourceAliases()[strings.ToLower(res)]
 	if len(alias) <= 0 {
-		return "", fmt.Errorf("resource %s not managed", res)
+		return "", fmt.Errorf("resource %q not managed", res)
 	}
 	return alias, nil
 }
