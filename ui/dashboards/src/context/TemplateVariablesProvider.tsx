@@ -11,18 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, createContext, useContext } from 'react';
 import { useImmer } from 'use-immer';
 import { DashboardSpec, TemplateVariablesContext, TemplateVariables, VariableState } from '@perses-dev/core';
 
 export interface TemplateVariablesProviderProps {
   children?: React.ReactNode;
   variableDefinitions: DashboardSpec['variables'];
-}
-
-export interface TemplateVariablesSetters {
-  setValue: (name: string, value: string | string[]) => void;
-  setOptions: (name: string, options: string[]) => void;
 }
 
 /**
@@ -149,7 +144,33 @@ export function TemplateVariablesProvider(props: TemplateVariablesProviderProps)
   );
 
   // Memo since it's being passed via context
-  const ctx = useMemo(() => ({ variables: state, setValue, setOptions }), [state, setValue, setOptions]);
+  const ctx = useMemo(() => ({ variables: state }), [state]);
+  const setters = useMemo(() => ({ setValue, setOptions }), [setValue, setOptions]);
 
-  return <TemplateVariablesContext.Provider value={ctx}>{children}</TemplateVariablesContext.Provider>;
+  return (
+    <TemplateVariablesSettersContext.Provider value={setters}>
+      <TemplateVariablesContext.Provider value={ctx}>{children}</TemplateVariablesContext.Provider>
+    </TemplateVariablesSettersContext.Provider>
+  );
+}
+
+/**
+ * Setters for manipulating Template Variable state.
+ */
+export interface TemplateVariablesSetters {
+  setValue: (name: string, value: string | string[]) => void;
+  setOptions: (name: string, options: string[]) => void;
+}
+
+export const TemplateVariablesSettersContext = createContext<TemplateVariablesSetters | undefined>(undefined);
+
+/**
+ * Gets the setters for Template Variables provided by the TemplateVariablesProvider at runtime.
+ */
+export function useTemplateVariablesSetters() {
+  const ctx = useContext(TemplateVariablesSettersContext);
+  if (ctx === undefined) {
+    throw new Error('No TemplateVariablesSettersContext found. Did you forget a Provider?');
+  }
+  return ctx;
 }

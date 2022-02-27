@@ -11,55 +11,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
-import { DashboardResource /*toAbsoluteTimeRange*/ } from '@perses-dev/core';
-import { Dashboard, VariableOptionsDrawer } from '@perses-dev/dashboards';
-// import { useState } from 'react';
+import { Box, BoxProps } from '@mui/material';
+import { combineSx } from '@perses-dev/components';
+import { DashboardResource } from '@perses-dev/core';
+import {
+  Dashboard,
+  TimeRangeStateProvider,
+  TemplateVariablesProvider,
+  VariableOptionsDrawer,
+} from '@perses-dev/dashboards';
 import Footer from '../../components/Footer';
-import { useVariablesState } from './variables';
 
-export interface DashboardViewProps {
-  resource: DashboardResource;
+export interface DashboardViewProps extends BoxProps {
+  dashboardResource: DashboardResource;
 }
 
 /**
  * The View for viewing a Dashboard.
  */
 function ViewDashboard(props: DashboardViewProps) {
-  const { resource } = props;
-
-  const variables = useVariablesState(resource);
-  // const [timeRange] = useState(toAbsoluteTimeRange({ pastDuration: resource.spec.duration }));
+  const { dashboardResource, sx, ...others } = props;
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <Box
-        sx={{
-          padding: (theme) => theme.spacing(1, 2),
-          flexGrow: 1,
-          overflowX: 'hidden',
-          overflowY: 'auto',
-        }}
-      >
-        <Dashboard spec={resource.spec} />
-        <Footer />
-      </Box>
+    <TimeRangeStateProvider initialValue={{ pastDuration: dashboardResource.spec.duration }}>
+      <TemplateVariablesProvider variableDefinitions={dashboardResource.spec.variables}>
+        <Box
+          sx={combineSx(
+            {
+              display: 'flex',
+              width: '100%',
+              height: '100%',
+              position: 'relative',
+              overflow: 'hidden',
+            },
+            sx
+          )}
+          {...others}
+        >
+          <Box
+            sx={{
+              padding: (theme) => theme.spacing(1, 2),
+              flexGrow: 1,
+              overflowX: 'hidden',
+              overflowY: 'auto',
+            }}
+          >
+            <Dashboard spec={dashboardResource.spec} />
+            <Footer />
+          </Box>
 
-      <VariableOptionsDrawer
-        variables={resource.spec.variables}
-        variablesState={variables.state}
-        onVariableValueChange={variables.setValue}
-        onVariableOptionsChange={variables.setOptions}
-      />
-    </Box>
+          <VariableOptionsDrawer variables={dashboardResource.spec.variables} />
+        </Box>
+      </TemplateVariablesProvider>
+    </TimeRangeStateProvider>
   );
 }
 

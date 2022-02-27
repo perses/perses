@@ -13,24 +13,25 @@
 
 import { Paper, Typography, PaperProps } from '@mui/material';
 import { ErrorAlert, combineSx } from '@perses-dev/components';
-import { DashboardSpec, VariableState } from '@perses-dev/core';
+import { DashboardSpec, useTemplateVariables } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
+import { useTemplateVariablesSetters } from '../context';
 import { VariableAutocomplete } from './VariableAutocomplete';
 
 const DRAWER_WIDTH = 296;
 
 export interface VariableOptionsDrawerProps extends PaperProps {
   variables: DashboardSpec['variables'];
-  variablesState: Record<string, VariableState>;
-  onVariableValueChange: (variableName: string, value: string | string[]) => void;
-  onVariableOptionsChange: (variableName: string, values: string[]) => void;
 }
 
 /**
  * Dashboard options drawer that includes variable inputs.
  */
 export function VariableOptionsDrawer(props: VariableOptionsDrawerProps) {
-  const { variables, variablesState, onVariableValueChange, onVariableOptionsChange, sx, ...others } = props;
+  const { variables, sx, ...others } = props;
+
+  const { variables: variablesState } = useTemplateVariables();
+  const { setValue, setOptions } = useTemplateVariablesSetters();
 
   return (
     <Paper
@@ -64,8 +65,8 @@ export function VariableOptionsDrawer(props: VariableOptionsDrawerProps) {
             <VariableAutocomplete
               definition={variableDef}
               state={variableState}
-              onChange={(value) => onVariableValueChange(variableName, value)}
-              onOptionsChange={(options) => onVariableOptionsChange(variableName, options)}
+              onChange={(value) => setValue(variableName, value)}
+              onOptionsChange={(options) => setOptions(variableName, options)}
             />
           </PluginBoundary>
         );

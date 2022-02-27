@@ -50,7 +50,7 @@ function App() {
         <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
           <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
             <DataSourceRegistry>
-              <ViewDashboard resource={dashboard} />
+              <ViewDashboard dashboardResource={dashboard} />
             </DataSourceRegistry>
           </PluginBoundary>
         </PluginRegistry>
