@@ -82,5 +82,5 @@ export const PanelComponent: PanelPlugin['PanelComponent'] = (props) => {
     return null;
   }
   const { PanelComponent: PluginComponent } = plugin;
-  return <PluginComponent definition={props.definition} />;
+  return <PluginComponent {...props} />;
 };
