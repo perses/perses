@@ -12,12 +12,10 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { DashboardResource, toAbsoluteTimeRange } from '@perses-dev/core';
-import { Dashboard } from '@perses-dev/dashboards';
-import { useState } from 'react';
+import { DashboardResource /*toAbsoluteTimeRange*/ } from '@perses-dev/core';
+import { Dashboard, VariableOptionsDrawer } from '@perses-dev/dashboards';
+// import { useState } from 'react';
 import Footer from '../../components/Footer';
-import { DashboardContextProvider } from './DashboardContextProvider';
-import OptionsDrawer from './OptionsDrawer';
 import { useVariablesState } from './variables';
 
 export interface DashboardViewProps {
@@ -31,34 +29,37 @@ function ViewDashboard(props: DashboardViewProps) {
   const { resource } = props;
 
   const variables = useVariablesState(resource);
-  const [timeRange] = useState(toAbsoluteTimeRange({ pastDuration: resource.spec.duration }));
+  // const [timeRange] = useState(toAbsoluteTimeRange({ pastDuration: resource.spec.duration }));
 
   return (
-    <DashboardContextProvider resource={resource}>
+    <Box
+      sx={{
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       <Box
         sx={{
-          display: 'flex',
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-          overflow: 'hidden',
+          padding: (theme) => theme.spacing(1, 2),
+          flexGrow: 1,
+          overflowX: 'hidden',
+          overflowY: 'auto',
         }}
       >
-        <Box
-          sx={{
-            padding: (theme) => theme.spacing(1, 2),
-            flexGrow: 1,
-            overflowX: 'hidden',
-            overflowY: 'auto',
-          }}
-        >
-          <Dashboard spec={resource.spec} variables={variables.state} timeRange={timeRange} />
-          <Footer />
-        </Box>
-
-        <OptionsDrawer />
+        <Dashboard spec={resource.spec} />
+        <Footer />
       </Box>
-    </DashboardContextProvider>
+
+      <VariableOptionsDrawer
+        variables={resource.spec.variables}
+        variablesState={variables.state}
+        onVariableValueChange={variables.setValue}
+        onVariableOptionsChange={variables.setOptions}
+      />
+    </Box>
   );
 }
 

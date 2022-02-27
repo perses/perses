@@ -13,8 +13,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useImmer } from 'use-immer';
-import { DashboardResource } from '@perses-dev/core';
-import { VariableState } from '@perses-dev/dashboards';
+import { DashboardResource, VariableState } from '@perses-dev/core';
 
 export interface VariablesState {
   state: Record<string, VariableState>;

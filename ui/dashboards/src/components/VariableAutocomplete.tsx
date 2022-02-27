@@ -13,15 +13,17 @@
 
 import { useEffect, useMemo } from 'react';
 import { Autocomplete, AutocompleteProps as MuiAutocompleteProps, TextField, TextFieldProps } from '@mui/material';
-import { VariableDefinition, useVariableOptions } from '@perses-dev/plugin-system';
-import { useDashboardContext } from './DashboardContextProvider';
+import { VariableDefinition, VariableState } from '@perses-dev/core';
+import { useVariableOptions } from '@perses-dev/plugin-system';
 
 // What kind of AutocompleteProps we're using internally here
 type AutocompleteProps = MuiAutocompleteProps<string, boolean, true, false>;
 
 export interface VariableAutocompleteProps {
-  variableName: string;
   definition: VariableDefinition;
+  state: VariableState;
+  onChange: (value: string | string[]) => void;
+  onOptionsChange: (options: string[]) => void;
   TextFieldProps?: TextFieldProps;
 }
 
@@ -29,17 +31,9 @@ export interface VariableAutocompleteProps {
  * A MUI Autocomplete that displays variable options, loaded from the
  * appropriate plugin.
  */
-function VariableAutocomplete(props: VariableAutocompleteProps) {
-  const { variableName, definition, TextFieldProps } = props;
-  const {
-    variables: { state: values, setValue, setOptions },
-  } = useDashboardContext();
-
-  const variableState = values[variableName];
-  if (variableState === undefined) {
-    throw new Error(`Unknown variable '${variableName}'`);
-  }
-  const { value, options } = variableState;
+export function VariableAutocomplete(props: VariableAutocompleteProps) {
+  const { definition, state, onChange, onOptionsChange, TextFieldProps } = props;
+  const { value, options } = state;
 
   const allValue = 'all_value' in definition.selection ? definition.selection.all_value : undefined;
 
@@ -66,11 +60,13 @@ function VariableAutocomplete(props: VariableAutocompleteProps) {
   const { data, loading, error } = useVariableOptions(definition);
   useEffect(() => {
     if (loading) return;
-    setOptions(variableName, data);
-  }, [data, loading, variableName, setOptions]);
+    onOptionsChange(data);
+    // We don't want to fire this event every time we render if the user doesn't wrap onOptionsChange with useCallback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, loading]);
 
   const handleChange: AutocompleteProps['onChange'] = (e, nextValue) => {
-    setValue(variableName, nextValue);
+    onChange(nextValue);
   };
 
   return (
@@ -100,5 +96,3 @@ function VariableAutocomplete(props: VariableAutocompleteProps) {
     />
   );
 }
-
-export default VariableAutocomplete;

@@ -14,7 +14,7 @@
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/core';
-import { GridLayout, GridItemContent } from '../GridLayout';
+import { GridLayout, GridItemContent } from './GridLayout';
 
 export interface DashboardProps extends BoxProps {
   spec: DashboardSpec;

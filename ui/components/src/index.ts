@@ -13,3 +13,4 @@
 
 export * from './ErrorAlert';
 export * from './ErrorBoundary';
+export * from './utils/combine-sx';
