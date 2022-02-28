@@ -11,19 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ErrorBoundary } from 'react-error-boundary';
-import { ErrorAlert } from '@perses-dev/components';
-
-export interface AlertErrorBoundaryProps {
-  children?: React.ReactNode;
-}
+import { DashboardSpec, PanelRef } from '../model';
 
 /**
- * ErrorBoundary that shows the AlertErrorFallback when it catches an Error.
+ * Resolve a PanelRef (JSON reference) against the provided DashboardSpec to
+ * a PanelDefinition.
  */
-function AlertErrorBoundary(props: AlertErrorBoundaryProps) {
-  const { children } = props;
-  return <ErrorBoundary FallbackComponent={ErrorAlert}>{children}</ErrorBoundary>;
+export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
+  const panelsKey = panelRef.$ref.substring(9);
+  const panelDefinition = spec.panels[panelsKey];
+  if (panelDefinition === undefined) {
+    throw new Error(`Could not resolve panels reference ${panelRef.$ref}`);
+  }
+  return panelDefinition;
 }
-
-export default AlertErrorBoundary;

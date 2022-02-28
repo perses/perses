@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ResourceMetadata, VariableDefinition } from '@perses-dev/core';
+import { JsonObject, ResourceMetadata, VariableDefinition, PanelDefinition } from '@perses-dev/core';
 import { GraphQueryDefinition, GraphQueryPlugin } from './graph-queries';
-import { PanelDefinition, PanelPlugin } from './panels';
+import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
 
 export interface PluginResource {

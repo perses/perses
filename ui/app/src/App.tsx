@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Theme } from '@mui/material';
-import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import { Box } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
@@ -20,17 +19,17 @@ import { DataSourceRegistry } from './context/DataSourceRegistry';
 import Header from './components/Header';
 import { useBundledPlugins } from './model/bundled-plugins';
 
-const appStyle: SxProps<Theme> = {
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100vh',
-};
-
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
   return (
-    <Box sx={appStyle}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+      }}
+    >
       <Header />
       <Box
         sx={{

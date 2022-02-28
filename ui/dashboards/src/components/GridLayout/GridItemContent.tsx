@@ -10,9 +10,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { resolvePanelRef } from '@perses-dev/plugin-system';
+
 import { ErrorAlert } from '@perses-dev/components';
-import { DashboardSpec, GridItemDefinition } from '@perses-dev/core';
+import { DashboardSpec, GridItemDefinition, resolvePanelRef } from '@perses-dev/core';
 import { Panel } from '../Panel';
 
 export interface GridItemContentProps {

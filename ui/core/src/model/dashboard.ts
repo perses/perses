@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LayoutDefinition } from './layout';
+import { PanelDefinition } from './panels';
 import { ProjectMetadata } from './resource';
 import { DurationString } from './time';
 import { VariableDefinition } from './variables';
@@ -33,4 +34,5 @@ export interface DashboardSpec {
   duration: DurationString;
   variables: Record<string, VariableDefinition>;
   layouts: LayoutDefinition[];
+  panels: Record<string, PanelDefinition>;
 }

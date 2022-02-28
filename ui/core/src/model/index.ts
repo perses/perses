@@ -11,8 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './model';
-export * from './runtime/datasources';
-export * from './runtime/template-variables';
-export * from './runtime/time-range';
-export * from './utils';
+export * from './dashboard';
+export * from './datasource';
+export * from './definitions';
+export * from './http';
+export * from './layout';
+export * from './panels';
+export * from './resource';
+export * from './time';
+export * from './variables';

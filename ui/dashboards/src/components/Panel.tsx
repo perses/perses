@@ -13,10 +13,10 @@
 
 import { useState, useMemo } from 'react';
 import { Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
-import { PanelDefinition, PanelComponent } from '@perses-dev/plugin-system';
+import { PluginBoundary, PanelComponent } from '@perses-dev/plugin-system';
 import { ErrorAlert } from '@perses-dev/components';
-import { PluginBoundary } from '@perses-dev/plugin-system';
 import useResizeObserver from 'use-resize-observer';
+import { PanelDefinition } from '@perses-dev/core';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;

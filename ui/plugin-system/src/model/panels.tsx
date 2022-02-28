@@ -11,49 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, Definition, DashboardSpec } from '@perses-dev/core';
+import { JsonObject, PanelDefinition } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
-
-declare module '@perses-dev/core' {
-  // Extend the core DashboardSpec to support panel definitions from panel plugins
-  interface DashboardSpec {
-    panels: Record<string, PanelDefinition>;
-  }
-
-  // Extend the core GridItem layout spec to support panels from plugins as content
-  interface GridItemDefinition {
-    content: PanelRef;
-  }
-}
-
-/**
- * Panel definition options that are common to all panels.
- */
-export interface PanelDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
-  display: {
-    name: string;
-  };
-}
-
-/**
- * A reference to a panel defined in the DashboardSpec.
- */
-export interface PanelRef {
-  $ref: `#/panels/${string}`;
-}
-
-/**
- * Resolve a PanelRef (JSON reference) against the provided DashboardSpec to
- * a PanelDefinition.
- */
-export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
-  const panelsKey = panelRef.$ref.substring(9);
-  const panelDefinition = spec.panels[panelsKey];
-  if (panelDefinition === undefined) {
-    throw new Error(`Could not resolve panels reference ${panelRef.$ref}`);
-  }
-  return panelDefinition;
-}
 
 /**
  * Plugin the provides custom visualizations inside of a Panel.

@@ -11,8 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './model';
-export * from './runtime/datasources';
-export * from './runtime/template-variables';
-export * from './runtime/time-range';
-export * from './utils';
+import { Definition, JsonObject } from './definitions';
+
+/**
+ * Panel definition options that are common to all panels.
+ */
+export interface PanelDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
+  display: {
+    name: string;
+  };
+}
+
+/**
+ * A reference to a panel defined in the DashboardSpec.
+ */
+export interface PanelRef {
+  $ref: `#/panels/${string}`;
+}
