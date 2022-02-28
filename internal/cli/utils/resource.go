@@ -113,7 +113,7 @@ func ConvertToEntity(entities interface{}) ([]modelAPI.Entity, error) {
 // This method is designed to be called in the cmds improving the readability of the kind arguments parsing.
 func GetKind(res string) (modelV1.Kind, error) {
 	alias := reverseResourceAliases()[strings.ToLower(res)]
-	if len(alias) <= 0 {
+	if len(alias) == 0 {
 		return "", fmt.Errorf("resource %s not managed", res)
 	}
 	return alias, nil
@@ -141,7 +141,7 @@ func FormatAvailableResourcesMessage() string {
 	var result []string
 	for _, r := range resources {
 		var res string
-		if len(r.shortTerm) <= 0 {
+		if len(r.shortTerm) == 0 {
 			res = string(r.kind)
 		} else {
 			res = fmt.Sprintf("%s (aka '%s')", r.kind, r.shortTerm)
