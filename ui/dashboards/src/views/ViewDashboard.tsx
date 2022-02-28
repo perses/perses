@@ -14,23 +14,18 @@
 import { Box, BoxProps } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import {
-  Dashboard,
-  TimeRangeStateProvider,
-  TemplateVariablesProvider,
-  VariableOptionsDrawer,
-} from '@perses-dev/dashboards';
-import Footer from '../../components/Footer';
+import { TimeRangeStateProvider, TemplateVariablesProvider } from '../context';
+import { Dashboard, VariableOptionsDrawer } from '../components';
 
-export interface DashboardViewProps extends BoxProps {
+export interface ViewDashboardProps extends BoxProps {
   dashboardResource: DashboardResource;
 }
 
 /**
- * The View for viewing a Dashboard.
+ * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
-function ViewDashboard(props: DashboardViewProps) {
-  const { dashboardResource, sx, ...others } = props;
+export function ViewDashboard(props: ViewDashboardProps) {
+  const { dashboardResource, sx, children, ...others } = props;
 
   return (
     <TimeRangeStateProvider initialValue={{ pastDuration: dashboardResource.spec.duration }}>
@@ -57,7 +52,7 @@ function ViewDashboard(props: DashboardViewProps) {
             }}
           >
             <Dashboard spec={dashboardResource.spec} />
-            <Footer />
+            {children}
           </Box>
 
           <VariableOptionsDrawer variables={dashboardResource.spec.variables} />
@@ -66,5 +61,3 @@ function ViewDashboard(props: DashboardViewProps) {
     </TimeRangeStateProvider>
   );
 }
-
-export default ViewDashboard;

@@ -11,14 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-dev/core';
 import { Box, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { ErrorAlert } from '@perses-dev/components';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
-import ViewDashboard from './views/dashboard/ViewDashboard';
+import ViewDashboard from './views/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
-import { useSampleData } from './utils/temp-sample-data';
 import Header from './components/Header';
 import { useBundledPlugins } from './model/bundled-plugins';
 
@@ -29,14 +27,7 @@ const appStyle: SxProps<Theme> = {
 };
 
 function App() {
-  const dashboard = useSampleData<DashboardResource>(
-    new URLSearchParams(window.location.search).get('dashboard') || 'node-exporter-full'
-  );
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
-
-  if (dashboard === undefined) {
-    return null;
-  }
 
   return (
     <Box sx={appStyle}>
@@ -50,7 +41,7 @@ function App() {
         <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
           <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
             <DataSourceRegistry>
-              <ViewDashboard dashboardResource={dashboard} />
+              <ViewDashboard />
             </DataSourceRegistry>
           </PluginBoundary>
         </PluginRegistry>
