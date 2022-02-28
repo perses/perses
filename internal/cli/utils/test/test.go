@@ -50,10 +50,11 @@ type Suite struct {
 	IsErrorExpected bool
 }
 
-func ExecuteSuiteTest(t *testing.T, cmd *cobra.Command, suites []Suite) {
+func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite) {
 	for _, test := range suites {
 		t.Run(test.Title, func(t *testing.T) {
 			buffer := bytes.NewBufferString("")
+			cmd := newCMD()
 			cmd.SetOut(buffer)
 			cmd.SetErr(buffer)
 			cmd.SetArgs(test.Args)

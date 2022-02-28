@@ -113,5 +113,5 @@ func TestDescribeCMD(t *testing.T) {
 		},
 	}
 
-	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD(), testSuite)
+	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }
