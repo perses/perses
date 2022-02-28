@@ -18,7 +18,6 @@ import (
 	"strings"
 
 	v1 "github.com/perses/perses/pkg/client/api/v1"
-	"github.com/perses/perses/pkg/client/perseshttp"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 )
@@ -87,13 +86,6 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 
 type globalDatasource struct {
 	v1.GlobalDatasourceInterface
-	client *perseshttp.RESTClient
-}
-
-func newGlobalDatasource(client *perseshttp.RESTClient) v1.GlobalDatasourceInterface {
-	return &globalDatasource{
-		client: client,
-	}
 }
 
 func (c *globalDatasource) Create(entity *modelV1.GlobalDatasource) (*modelV1.GlobalDatasource, error) {
