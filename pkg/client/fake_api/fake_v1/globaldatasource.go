@@ -16,7 +16,6 @@ package fake_v1
 import (
 	"net/url"
 	"strings"
-	"time"
 
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
@@ -113,9 +112,7 @@ func (c *globalDatasource) Get(name string) (*modelV1.GlobalDatasource, error) {
 	return &modelV1.GlobalDatasource{
 		Kind: modelV1.KindGlobalDatasource,
 		Metadata: modelV1.Metadata{
-			Name:      name,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			Name: name,
 		},
 		Spec: nil,
 	}, nil

@@ -15,7 +15,6 @@ package fake_v1
 
 import (
 	"strings"
-	"time"
 
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -71,9 +70,7 @@ func (c *project) Get(name string) (*modelV1.Project, error) {
 	return &modelV1.Project{
 		Kind: modelV1.KindProject,
 		Metadata: modelV1.Metadata{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Name:      name,
+			Name: name,
 		},
 	}, nil
 }

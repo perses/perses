@@ -36,18 +36,20 @@ type option struct {
 func (o *option) Complete(args []string) error {
 	if len(args) < 1 {
 		return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
-	} else if len(args) < 2 {
-		return fmt.Errorf("you have to specify the name of the resource you have to describe")
-	} else if len(args) > 2 {
-		return fmt.Errorf("you cannot have more than two arguments for the command 'describe'")
 	}
-	o.name = args[1]
 
 	var err error
 	o.kind, err = cmdUtils.GetKind(args[0])
 	if err != nil {
 		return err
 	}
+
+	if len(args) < 2 {
+		return fmt.Errorf("you have to specify the name of the resource you have to describe")
+	} else if len(args) > 2 {
+		return fmt.Errorf("you cannot have more than two arguments for the command 'describe'")
+	}
+	o.name = args[1]
 
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
 	if len(o.project) == 0 {

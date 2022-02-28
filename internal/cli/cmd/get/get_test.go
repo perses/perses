@@ -14,115 +14,78 @@
 package get
 
 import (
-	"bytes"
-	"encoding/json"
 	"testing"
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/pkg/client/api"
+	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
 	"github.com/perses/perses/pkg/client/fake_api"
 	"github.com/perses/perses/pkg/client/fake_api/fake_v1"
-	"github.com/stretchr/testify/assert"
 )
 
-func JSONMarshalStrict(obj interface{}) []byte {
-	if data, err := json.Marshal(obj); err != nil {
-		panic(err)
-	} else {
-		return data
-	}
-}
-
 func TestGetCMD(t *testing.T) {
-	testSuite := []struct {
-		title           string
-		args            []string
-		apiClient       api.ClientInterface
-		project         string
-		expectedMessage string
-		isErrorExpected bool
-	}{
+	testSuite := []cmdUtilsTest.Suite{
 		{
-			title:           "empty args",
-			args:            []string{},
-			isErrorExpected: true,
-			expectedMessage: cmdUtils.FormatAvailableResourcesMessage(),
+			Title:           "empty args",
+			Args:            []string{},
+			IsErrorExpected: true,
+			ExpectedMessage: cmdUtils.FormatAvailableResourcesMessage(),
 		},
 		{
-			title:           "kind not managed",
-			args:            []string{"whatever"},
-			isErrorExpected: true,
-			expectedMessage: "resource \"whatever\" not managed",
+			Title:           "kind not managed",
+			Args:            []string{"whatever"},
+			IsErrorExpected: true,
+			ExpectedMessage: "resource \"whatever\" not managed",
 		},
 		{
-			title:           "not connected to anyAPI",
-			args:            []string{"project", "-ojson"},
-			isErrorExpected: true,
-			expectedMessage: "you are not connected to any API",
+			Title:           "not connected to anyAPI",
+			Args:            []string{"project", "-ojson"},
+			IsErrorExpected: true,
+			ExpectedMessage: "you are not connected to any API",
 		},
 		{
-			title:           "get project in json format",
-			args:            []string{"project", "-ojson"},
-			apiClient:       fake_api.New(),
-			isErrorExpected: false,
-			expectedMessage: string(JSONMarshalStrict(fake_v1.ProjectList(""))) + "\n",
+			Title:           "get project in json format",
+			Args:            []string{"project", "-ojson"},
+			APIClient:       fake_api.New(),
+			IsErrorExpected: false,
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.ProjectList(""))) + "\n",
 		},
 		{
-			title:           "get project with prefix in json format",
-			args:            []string{"project", "per", "-ojson"},
-			apiClient:       fake_api.New(),
-			isErrorExpected: false,
-			expectedMessage: string(JSONMarshalStrict(fake_v1.ProjectList("per"))) + "\n",
+			Title:           "get project with prefix in json format",
+			Args:            []string{"project", "per", "-ojson"},
+			APIClient:       fake_api.New(),
+			IsErrorExpected: false,
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.ProjectList("per"))) + "\n",
 		},
 		{
-			title:           "get globaldatasource in json format",
-			args:            []string{"gdts", "-ojson"},
-			apiClient:       fake_api.New(),
-			isErrorExpected: false,
-			expectedMessage: string(JSONMarshalStrict(fake_v1.GlobalDatasourceList(""))) + "\n",
+			Title:           "get globaldatasource in json format",
+			Args:            []string{"gdts", "-ojson"},
+			APIClient:       fake_api.New(),
+			IsErrorExpected: false,
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.GlobalDatasourceList(""))) + "\n",
 		},
 		{
-			title:           "get all folder in json format",
-			args:            []string{"folder", "-ojson", "--all"},
-			apiClient:       fake_api.New(),
-			isErrorExpected: false,
-			expectedMessage: string(JSONMarshalStrict(fake_v1.FolderList("", ""))) + "\n",
+			Title:           "get all folder in json format",
+			Args:            []string{"folder", "-ojson", "--all"},
+			APIClient:       fake_api.New(),
+			IsErrorExpected: false,
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.FolderList("", ""))) + "\n",
 		},
 		{
-			title:           "get folder in a specific project in json format",
-			args:            []string{"folder", "-ojson", "-p", "perses"},
-			apiClient:       fake_api.New(),
-			isErrorExpected: false,
-			expectedMessage: string(JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
+			Title:           "get folder in a specific project in json format",
+			Args:            []string{"folder", "-ojson", "-p", "perses"},
+			APIClient:       fake_api.New(),
+			IsErrorExpected: false,
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
 		},
 		{
-			title:           "get folder with default project in json format",
-			args:            []string{"folder", "-ojson"},
-			project:         "perses",
-			apiClient:       fake_api.New(),
-			isErrorExpected: false,
-			expectedMessage: string(JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
+			Title:           "get folder with default project in json format",
+			Args:            []string{"folder", "-ojson"},
+			Project:         "perses",
+			APIClient:       fake_api.New(),
+			IsErrorExpected: false,
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
 		},
 	}
 
-	for _, test := range testSuite {
-		t.Run(test.title, func(t *testing.T) {
-			cmd := NewCMD()
-			buffer := bytes.NewBufferString("")
-			cmd.SetOut(buffer)
-			cmd.SetErr(buffer)
-			cmd.SetArgs(test.args)
-			cmdUtils.GlobalConfig.SetAPIClient(test.apiClient)
-			cmdUtils.GlobalConfig.Project = test.project
-
-			err := cmd.Execute()
-			if test.isErrorExpected {
-				if assert.NotNil(t, err) {
-					assert.Equal(t, test.expectedMessage, err.Error())
-				}
-			} else if assert.Nil(t, err) {
-				assert.Equal(t, test.expectedMessage, buffer.String())
-			}
-		})
-	}
+	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD(), testSuite)
 }
