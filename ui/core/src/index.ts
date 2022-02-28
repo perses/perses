@@ -12,7 +12,4 @@
 // limitations under the License.
 
 export * from './model';
-export * from './runtime/datasources';
-export * from './runtime/template-variables';
-export * from './runtime/time-range';
 export * from './utils';

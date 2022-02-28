@@ -13,7 +13,8 @@
 
 import { useMemo, useCallback, createContext, useContext } from 'react';
 import { useImmer } from 'use-immer';
-import { DashboardSpec, TemplateVariablesContext, TemplateVariables, VariableState } from '@perses-dev/core';
+import { DashboardSpec } from '@perses-dev/core';
+import { TemplateVariablesContext, TemplateVariables, VariableState } from '@perses-dev/plugin-system';
 
 export interface TemplateVariablesProviderProps {
   children?: React.ReactNode;

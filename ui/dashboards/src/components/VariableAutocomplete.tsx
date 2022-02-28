@@ -13,8 +13,8 @@
 
 import { useEffect, useMemo } from 'react';
 import { Autocomplete, AutocompleteProps as MuiAutocompleteProps, TextField, TextFieldProps } from '@mui/material';
-import { VariableDefinition, VariableState } from '@perses-dev/core';
-import { useVariableOptions } from '@perses-dev/plugin-system';
+import { VariableDefinition } from '@perses-dev/core';
+import { useVariableOptions, VariableState } from '@perses-dev/plugin-system';
 
 // What kind of AutocompleteProps we're using internally here
 type AutocompleteProps = MuiAutocompleteProps<string, boolean, true, false>;

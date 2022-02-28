@@ -13,8 +13,8 @@
 
 import { Paper, Typography, PaperProps } from '@mui/material';
 import { ErrorAlert, combineSx } from '@perses-dev/components';
-import { DashboardSpec, useTemplateVariables } from '@perses-dev/core';
-import { PluginBoundary } from '@perses-dev/plugin-system';
+import { DashboardSpec } from '@perses-dev/core';
+import { PluginBoundary, useTemplateVariables } from '@perses-dev/plugin-system';
 import { useTemplateVariablesSetters } from '../context';
 import { VariableAutocomplete } from './VariableAutocomplete';
 

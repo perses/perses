@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { useState, useMemo } from 'react';
-import { AbsoluteTimeRange, RelativeTimeRange, toAbsoluteTimeRange, TimeRangeContext } from '@perses-dev/core';
+import { AbsoluteTimeRange, RelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
+import { TimeRangeContext } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
   initialValue: AbsoluteTimeRange | RelativeTimeRange;

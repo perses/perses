@@ -11,14 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getSuggestedStepMs } from '@perses-dev/core';
-import { useTimeRange } from '@perses-dev/plugin-system';
-
-/**
- * Gets the suggested step for a graph query in ms for the currently selected time range.
- */
-export function useSuggestedStepMs(width?: number) {
-  const { timeRange } = useTimeRange();
-  if (width === undefined) return 0;
-  return getSuggestedStepMs(timeRange, width);
-}
+export * from './datasources';
+export * from './template-variables';
+export * from './time-range';

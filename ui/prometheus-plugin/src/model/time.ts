@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, parseDurationString, useMemoized, useTimeRange } from '@perses-dev/core';
+import { DurationString, parseDurationString, useMemoized } from '@perses-dev/core';
+import { useTimeRange } from '@perses-dev/plugin-system';
 import { milliseconds, getUnixTime } from 'date-fns';
 import { useRef } from 'react';
 import { UnixTimestampSeconds } from './api-types';

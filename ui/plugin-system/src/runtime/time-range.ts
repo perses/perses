@@ -12,23 +12,21 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { DatasourceSelector } from '../model/dashboard';
-import { GlobalDatasourceModel } from '../model/datasource';
+import { AbsoluteTimeRange } from '@perses-dev/core';
 
-export interface Datasources {
-  defaultDatasource: GlobalDatasourceModel;
-  getDatasources(selector: DatasourceSelector): GlobalDatasourceModel[];
+export interface TimeRange {
+  timeRange: AbsoluteTimeRange;
 }
 
-export const DatasourcesContext = createContext<Datasources | undefined>(undefined);
+export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);
 
 /**
- * Gets the Datasources at runtime.
+ * Gets the current TimeRange at runtime.
  */
-export function useDatasources(): Datasources {
-  const ctx = useContext(DatasourcesContext);
+export function useTimeRange(): TimeRange {
+  const ctx = useContext(TimeRangeContext);
   if (ctx === undefined) {
-    throw new Error('No DatasourcesContext found. Did you forget a Provider?');
+    throw new Error('No TimeRangeContext found. Did you forget a Provider?');
   }
   return ctx;
 }
