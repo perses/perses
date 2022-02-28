@@ -17,7 +17,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -27,10 +31,15 @@ const (
 	YAMLOutput = "yaml"
 )
 
-func ValidateOutput(o string) error {
-	if o != YAMLOutput && o != JSONOutput {
+// ValidateAndSetOutput will validate the given output and if it's empty will set it with the default value "yaml"
+func ValidateAndSetOutput(o *string) error {
+	if *o == "" {
+		*o = YAMLOutput
+		return nil
+	} else if *o != YAMLOutput && *o != JSONOutput {
 		return fmt.Errorf("--ouput must be %q or %q", JSONOutput, YAMLOutput)
 	}
+
 	return nil
 }
 
@@ -54,4 +63,40 @@ func HandleError(err error) {
 		logrus.Error(err)
 		os.Exit(1)
 	}
+}
+
+func HandlerTable(column []string, data [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(column)
+	table.SetBorder(false)
+	table.AppendBulk(data)
+	table.Render()
+}
+
+// FormatArrayMessage format an array to a list
+func FormatArrayMessage(message string, list []string) string {
+	var builder strings.Builder
+	builder.WriteString(message + "\n")
+	for _, e := range list {
+		builder.WriteString(fmt.Sprintf("  * %s\n", e))
+	}
+	return builder.String()
+}
+
+// FormatTime formats a time with human readable format
+func FormatTime(t time.Time) string {
+	var age string
+
+	delay := time.Since(t)
+
+	if day := int(delay.Hours() / 24); day > 1 {
+		age = strconv.Itoa(day) + "d"
+	} else if hours := int(delay.Hours()); hours > 0 {
+		age = strconv.Itoa(hours) + "h"
+	} else if minutes := int(delay.Minutes()); minutes > 0 {
+		age = strconv.Itoa(minutes) + "m"
+	} else {
+		age = strconv.Itoa(int(delay.Seconds())) + "s"
+	}
+	return age
 }

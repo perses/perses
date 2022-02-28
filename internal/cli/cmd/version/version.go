@@ -15,7 +15,7 @@ package version
 
 import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	v1 "github.com/perses/perses/pkg/client/api/v1"
+	"github.com/perses/perses/pkg/client/api"
 	"github.com/prometheus/common/version"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +34,7 @@ type outputVersion struct {
 type option struct {
 	short     bool
 	output    string
-	apiClient v1.HealthInterface
+	apiClient api.ClientInterface
 }
 
 func (o *option) complete() {
@@ -42,16 +42,11 @@ func (o *option) complete() {
 	if err != nil {
 		return
 	}
-	o.apiClient = apiClient.V1().Health()
+	o.apiClient = apiClient
 }
 
 func (o *option) validate() error {
-	if o.output != "" {
-		return cmdUtils.ValidateOutput(o.output)
-	} else {
-		o.output = "yaml"
-		return nil
-	}
+	return cmdUtils.ValidateAndSetOutput(&o.output)
 }
 
 func (o *option) execute() error {
@@ -66,7 +61,7 @@ func (o *option) execute() error {
 		clientVersion.Commit = version.Revision
 	}
 	if o.apiClient != nil {
-		health, err := o.apiClient.Check()
+		health, err := o.apiClient.V1().Health().Check()
 		if err != nil {
 			return err
 		}
