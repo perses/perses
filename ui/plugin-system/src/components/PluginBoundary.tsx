@@ -13,7 +13,7 @@
 
 import { ReactNode } from 'react';
 import { ErrorBoundary, ErrorBoundaryProps } from '@perses-dev/components';
-import { PluginLoadingBoundary, PluginLoadingBoundaryProps } from '../PluginLoadingBoundary';
+import { PluginLoadingBoundary, PluginLoadingBoundaryProps } from './PluginLoadingBoundary';
 
 export interface PluginBoundaryProps {
   loadingFallback: PluginLoadingBoundaryProps['fallback'];
