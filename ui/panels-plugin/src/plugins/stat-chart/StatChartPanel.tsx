@@ -116,11 +116,11 @@ export function convertSparkline(sparkline?: SparklineOptions): LineSeriesOption
     lineStyle: {
       width: sparkline.line_width ?? 2,
       color: sparkline.line_color ?? '#FFFFFF',
-      opacity: sparkline.line_opacity ?? 0.6,
+      opacity: sparkline.line_opacity ?? 0.35,
     },
     areaStyle: {
       color: sparkline.area_color ?? '#FFFFFF',
-      opacity: sparkline.area_opacity ?? 0.3,
+      opacity: sparkline.area_opacity ?? 0.25,
     },
   };
 }

@@ -36,7 +36,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	// first let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
-	if len(args) <= 0 {
+	if len(args) == 0 {
 		return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
 	} else if len(args) == 2 {
 		// In second position in the arguments, you can have a prefix that will be used to filter the resources.
@@ -73,7 +73,7 @@ func (o *option) Complete(args []string) error {
 func (o *option) Validate() error {
 	// check if project should be defined (through the config or through the flag) for the given resource.
 	if !o.allProject && len(o.project) == 0 && !cmdUtils.IsGlobalResource(o.kind) {
-		return fmt.Errorf("no project has been defined for the scope of this command. If you intended to get all resources across the different project, please use the flag --all")
+		return fmt.Errorf("no project has been defined for the scope of this command. If you intended to get all resources across projects, please use the flag --all")
 	}
 	if len(o.output) > 0 {
 		// In this particular command, the default display is a matrix.
@@ -106,7 +106,7 @@ func (o *option) SetWriter(writer io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "get [SUBTYPE] [PREFIX]",
+		Use:   "get [RESOURCE_TYPE] [PREFIX]",
 		Short: "Retrieve any kind of resource from the API.",
 		Example: `
 # List all dashboards in the current project selected.
@@ -118,7 +118,7 @@ percli get dashboards node
 # List all dashboards in a specific project.
 percli get dashboards -p my_project
 
-#List all dashboards as a json object.
+#List all dashboards as a JSON object.
 percli get dashboards -a -ojson
 
 `,
@@ -126,7 +126,7 @@ percli get dashboards -a -ojson
 			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
-	cmd.Flags().BoolVarP(&o.allProject, "all", "a", o.allProject, "If present, list the request object(s) across all projects. Project in current context is ignored even if specified with --project.")
+	cmd.Flags().BoolVarP(&o.allProject, "all", "a", o.allProject, "If present, list the requested object(s) across all projects. The project in the current context is ignored even if specified with --project.")
 	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")
 	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "Kind of display: 'yaml' or 'json'.")
 	return cmd

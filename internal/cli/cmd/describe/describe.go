@@ -45,7 +45,7 @@ func (o *option) Complete(args []string) error {
 	}
 
 	if len(args) < 2 {
-		return fmt.Errorf("you have to specify the name of the resource you have to describe")
+		return fmt.Errorf("please specify the name of the resource you want to describe")
 	} else if len(args) > 2 {
 		return fmt.Errorf("you cannot have more than two arguments for the command 'describe'")
 	}
@@ -89,13 +89,13 @@ func (o *option) SetWriter(writer io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "describe [SUBTYPE] [NAME]",
+		Use:   "describe [RESOURCE_TYPE] [NAME]",
 		Short: "Show details of a specific resource",
 		Example: `
-## Describe a particular dashboards.
+## Describe a particular dashboard.
 percli describe dashboard nodeExporter
 
-## Describe a particular dashboards in a json.
+## Describe a particular dashboard as a JSON object.
 percli describe dashboard nodeExporter -ojson
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {

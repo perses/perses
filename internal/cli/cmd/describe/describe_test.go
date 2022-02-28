@@ -40,7 +40,7 @@ func TestDescribeCMD(t *testing.T) {
 			Title:           "resource name is missing",
 			Args:            []string{"project"},
 			IsErrorExpected: true,
-			ExpectedMessage: "you have to specify the name of the resource you have to describe",
+			ExpectedMessage: "please specify the name of the resource you want to describe",
 		},
 		{
 			Title:           "too many args",
