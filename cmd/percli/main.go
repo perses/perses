@@ -21,8 +21,14 @@ import (
 	"github.com/perses/perses/internal/cli/cmd/login"
 	"github.com/perses/perses/internal/cli/cmd/project"
 	"github.com/perses/perses/internal/cli/cmd/version"
+	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+)
+
+var (
+	configPath string
+	logLevel   string
 )
 
 func newRootCommand() *cobra.Command {
@@ -31,11 +37,21 @@ func newRootCommand() *cobra.Command {
 		Short: "Command line interface to interact with the Perses API",
 	}
 
+	// The list of the commands supported
 	cmd.AddCommand(describe.NewCMD())
 	cmd.AddCommand(get.NewCMD())
 	cmd.AddCommand(login.NewCMD())
 	cmd.AddCommand(project.NewCMD())
 	cmd.AddCommand(version.NewCMD())
+
+	// the list of the global flags supported
+	cmd.PersistentFlags().StringVar(&configPath, "percliconfig", cmdUtils.GetDefaultConfigPath(), "Path to the percliconfig file to use for CLI requests.")
+	cmd.PersistentFlags().StringVar(&logLevel, "log.level", "info", "Set the level of the log. Possible value: panic, fatal, error, warning, info, debug, trace")
+
+	// Some custom settings about the percli itself
+	cmd.SilenceUsage = true
+	cmd.SetOut(os.Stdout)
+	cmd.SetErr(os.Stderr)
 	return cmd
 }
 
@@ -46,14 +62,22 @@ func initLogrus() {
 		// https://github.com/sirupsen/logrus/issues/896
 		FullTimestamp: true,
 	})
+	level, err := logrus.ParseLevel(logLevel)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to set the log.level")
+	}
+	logrus.SetLevel(level)
+}
+
+func initializeCLI() {
+	initLogrus()
+	cmdUtils.InitGlobalConfig(configPath)
 }
 
 func main() {
-	initLogrus()
+	cobra.OnInitialize(initializeCLI)
 	rootCmd := newRootCommand()
-	rootCmd.SilenceUsage = true
-	rootCmd.SetOut(os.Stdout)
-	rootCmd.SetErr(os.Stderr)
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
