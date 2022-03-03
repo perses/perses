@@ -16,6 +16,7 @@ package project
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/perses/perses/pkg/client/api"
@@ -24,11 +25,13 @@ import (
 )
 
 type option struct {
+	cmdUtils.CMDOption
+	writer      io.Writer
 	projectName string
 	apiClient   api.ClientInterface
 }
 
-func (o *option) complete(args []string) error {
+func (o *option) Complete(args []string) error {
 	if len(args) > 1 {
 		return fmt.Errorf("only the project can be specified as an argument")
 	}
@@ -43,7 +46,11 @@ func (o *option) complete(args []string) error {
 	return nil
 }
 
-func (o *option) execute() error {
+func (o *option) Validate() error {
+	return nil
+}
+
+func (o *option) Execute() error {
 	if len(o.projectName) == 0 {
 		// In that case we simply print the current project used.
 		fmt.Printf("Using project %q on server %q\n", cmdUtils.GlobalConfig.Project, cmdUtils.GlobalConfig.RestClientConfig.URL)
@@ -61,9 +68,12 @@ func (o *option) execute() error {
 		if configError := cmdUtils.SetProject(o.projectName); configError != nil {
 			return configError
 		}
-		fmt.Printf("project %s selected", o.projectName)
-		return nil
+		return cmdUtils.HandleString(o.writer, fmt.Sprintf("project %s selected", o.projectName))
 	}
+}
+
+func (o *option) SetWriter(writer io.Writer) {
+	o.writer = writer
 }
 
 func NewCMD() *cobra.Command {
@@ -82,9 +92,8 @@ percli project myapp
 # display the project currently used
 percli project
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.HandleError(o.complete(args))
-			cmdUtils.HandleError(o.execute())
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	return cmd

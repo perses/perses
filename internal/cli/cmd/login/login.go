@@ -15,6 +15,7 @@ package login
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
@@ -23,11 +24,13 @@ import (
 )
 
 type option struct {
+	cmdUtils.CMDOption
+	writer      io.Writer
 	url         string
 	insecureTLS bool
 }
 
-func (o *option) complete(args []string) error {
+func (o *option) Complete(args []string) error {
 	if len(args) == 0 || len(args) > 1 {
 		return fmt.Errorf("only the server URL should be specified as an argument")
 	}
@@ -35,20 +38,24 @@ func (o *option) complete(args []string) error {
 	return nil
 }
 
-func (o *option) validate() error {
+func (o *option) Validate() error {
 	if _, err := url.Parse(o.url); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (o *option) execute() error {
+func (o *option) Execute() error {
 	return cmdUtils.WriteConfig(&cmdUtils.CLIConfig{
 		RestClientConfig: perseshttp.RestConfigClient{
 			URL:         o.url,
 			InsecureTLS: o.insecureTLS,
 		},
 	})
+}
+
+func (o *option) SetWriter(writer io.Writer) {
+	o.writer = writer
 }
 
 func NewCMD() *cobra.Command {
@@ -60,10 +67,8 @@ func NewCMD() *cobra.Command {
 # Log in to the given server
 percli login https://perses.dev
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.HandleError(o.complete(args))
-			cmdUtils.HandleError(o.validate())
-			cmdUtils.HandleError(o.execute())
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "If true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")

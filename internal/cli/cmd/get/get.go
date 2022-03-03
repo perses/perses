@@ -15,6 +15,7 @@ package get
 
 import (
 	"fmt"
+	"io"
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	cmdUtilsService "github.com/perses/perses/internal/cli/utils/service"
@@ -23,6 +24,8 @@ import (
 )
 
 type option struct {
+	cmdUtils.CMDOption
+	writer          io.Writer
 	kind            modelV1.Kind
 	allProject      bool
 	project         string
@@ -31,7 +34,7 @@ type option struct {
 	resourceService cmdUtilsService.Service
 }
 
-func (o *option) complete(args []string) error {
+func (o *option) Complete(args []string) error {
 	// first let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
 	if len(args) == 0 {
 		return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
@@ -67,7 +70,7 @@ func (o *option) complete(args []string) error {
 	return nil
 }
 
-func (o *option) validate() error {
+func (o *option) Validate() error {
 	// check if project should be defined (through the config or through the flag) for the given resource.
 	if !o.allProject && len(o.project) == 0 && !cmdUtils.IsGlobalResource(o.kind) {
 		return fmt.Errorf("no project has been defined for the scope of this command. If you intended to get all resources across projects, please use the flag --all")
@@ -79,21 +82,25 @@ func (o *option) validate() error {
 	return nil
 }
 
-func (o *option) execute() error {
+func (o *option) Execute() error {
 	resourceList, err := o.resourceService.ListResource(o.prefix)
 	if err != nil {
 		return err
 	}
 	if len(o.output) > 0 {
-		return cmdUtils.HandleOutput(o.output, resourceList)
+		return cmdUtils.HandleOutput(o.writer, o.output, resourceList)
 	}
 	entities, err := cmdUtils.ConvertToEntity(resourceList)
 	if err != nil {
 		return err
 	}
 	data := o.resourceService.BuildMatrix(entities)
-	cmdUtils.HandlerTable(o.resourceService.GetColumHeader(), data)
+	cmdUtils.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
 	return nil
+}
+
+func (o *option) SetWriter(writer io.Writer) {
+	o.writer = writer
 }
 
 func NewCMD() *cobra.Command {
@@ -115,10 +122,8 @@ percli get dashboards -p my_project
 percli get dashboards -a -ojson
 
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdUtils.HandleError(o.complete(args))
-			cmdUtils.HandleError(o.validate())
-			cmdUtils.HandleError(o.execute())
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVarP(&o.allProject, "all", "a", o.allProject, "If present, list the requested object(s) across all projects. The project in the current context is ignored even if specified with --project.")
