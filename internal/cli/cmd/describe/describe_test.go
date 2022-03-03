@@ -72,7 +72,7 @@ func TestDescribeCMD(t *testing.T) {
 			Args:            []string{"project", "perses", "-oyaml"},
 			APIClient:       fake_api.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.YamlMarshalStrict(
+			ExpectedMessage: string(cmdUtilsTest.YAMLMarshalStrict(
 				&modelV1.Project{
 					Kind: modelV1.KindProject,
 					Metadata: modelV1.Metadata{

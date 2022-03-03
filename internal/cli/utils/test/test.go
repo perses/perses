@@ -26,19 +26,19 @@ import (
 )
 
 func JSONMarshalStrict(obj interface{}) []byte {
-	if data, err := json.Marshal(obj); err != nil {
+	data, err := json.Marshal(obj)
+	if err != nil {
 		panic(err)
-	} else {
-		return data
 	}
+	return data
 }
 
-func YamlMarshalStrict(obj interface{}) []byte {
-	if data, err := yaml.Marshal(obj); err != nil {
+func YAMLMarshalStrict(obj interface{}) []byte {
+	data, err := yaml.Marshal(obj)
+	if err != nil {
 		panic(err)
-	} else {
-		return data
 	}
+	return data
 }
 
 type Suite struct {
