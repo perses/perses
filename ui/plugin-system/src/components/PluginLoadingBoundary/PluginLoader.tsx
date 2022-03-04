@@ -29,7 +29,18 @@ export function PluginLoader(props: PluginLoaderProps) {
 
   // Load the plugin and throw any loading/not found errors
   const { loadPlugin } = usePluginRegistry();
-  const { error } = useQuery(`PluginLoader:${pluginType}_${kind}`, () => loadPlugin(pluginType, kind));
+  const { error } = useQuery(
+    `PluginLoader:${pluginType}_${kind}`,
+    () => {
+      // The enabled option below should prevent this from being run until loadPlugin is available, but check here to
+      // make Typescript happy
+      if (loadPlugin === undefined) {
+        throw new Error('PluginRegistry loadPlugin not available');
+      }
+      return loadPlugin(pluginType, kind);
+    },
+    { enabled: loadPlugin !== undefined }
+  );
   if (error !== undefined && error !== null) {
     throw error;
   }

@@ -38,7 +38,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
       const plugin = plugins[pluginType].get(kind);
       if (plugin !== undefined) return;
 
-      // Is it a valid plugin we know about? (TODO: What about when plugin list is loading?)
+      // Is it a valid plugin we know about?
       const resource = loadablePlugins[pluginType].get(kind);
       if (resource === undefined) {
         throw new Error(`No ${pluginType} plugin is available for kind ${kind}`);
@@ -51,19 +51,27 @@ export function PluginRegistry(props: PluginRegistryProps) {
     [plugins, loadablePlugins, importPluginModule, register]
   );
 
-  const registry: PluginRegistryContextType = useMemo(() => ({ plugins, loadPlugin }), [plugins, loadPlugin]);
-
-  // TODO: Fix this so loadPlugin takes into account list still loading
-  if (installedPlugins.isLoading) return null;
+  const registry: PluginRegistryContextType = useMemo(
+    () => ({ plugins, loadPlugin: installedPlugins.isLoading ? undefined : loadPlugin }),
+    [installedPlugins.isLoading, plugins, loadPlugin]
+  );
 
   return <PluginRegistryContext.Provider value={registry}>{children}</PluginRegistryContext.Provider>;
 }
 
 const PluginRegistryContext = createContext<PluginRegistryContextType | undefined>(undefined);
 
-interface PluginRegistryContextType {
+export interface PluginRegistryContextType {
+  /**
+   * Plugins that have already been loaded and are available for use.
+   */
   plugins: LoadedPluginsByTypeAndKind;
-  loadPlugin: (pluginType: PluginType, kind: string) => Promise<void>;
+
+  /**
+   * Asks the plugin registry to load the specified plugin. This will be undefined until the list of available plugins
+   * has finished loading.
+   */
+  loadPlugin?: (pluginType: PluginType, kind: string) => Promise<void>;
 }
 
 /**
