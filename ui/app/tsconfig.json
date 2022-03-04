@@ -1,10 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": [
-    "src",
-    "../dashboards/src/components/OptionsDrawer.tsx",
-    "../dashboards/src/components/VariableAutocomplete.tsx"
-  ],
+  "include": ["src"],
   "compilerOptions": {
     "sourceMap": true,
     "tsBuildInfoFile": "../.build-cache/app.tsbuildinfo",
