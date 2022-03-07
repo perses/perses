@@ -14,46 +14,58 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/perses/perses/pkg/client/api"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"gopkg.in/yaml.v2"
 )
 
+func unmarshalEntity(isJSON bool, data []byte, entity modelAPI.Entity) error {
+	var unmarshalErr error
+	if isJSON {
+		unmarshalErr = json.Unmarshal(data, entity)
+	} else {
+		unmarshalErr = yaml.Unmarshal(data, entity)
+	}
+	return unmarshalErr
+}
+
 type Service interface {
+	CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
+	UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
 	ListResource(prefix string) (interface{}, error)
 	GetResource(name string) (modelAPI.Entity, error)
 	BuildMatrix(hits []modelAPI.Entity) [][]string
 	GetColumHeader() []string
+	Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error)
 }
 
 func NewService(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (Service, error) {
 	switch kind {
 	case modelV1.KindDashboard:
 		return &dashboard{
-			project:   projectName,
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Dashboard(projectName),
 		}, nil
 	case modelV1.KindDatasource:
 		return &datasource{
-			project:   projectName,
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Datasource(projectName),
 		}, nil
 	case modelV1.KindFolder:
 		return &folder{
-			project:   projectName,
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Folder(projectName),
 		}, nil
 	case modelV1.KindGlobalDatasource:
 		return &globalDatasource{
-			apiClient: apiClient,
+			apiClient: apiClient.V1().GlobalDatasource(),
 		}, nil
 	case modelV1.KindProject:
 		return &project{
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Project(),
 		}, nil
 	default:
-		return nil, fmt.Errorf("resource %q not supported by get command", kind)
+		return nil, fmt.Errorf("resource %q not supported by the command", kind)
 	}
 }

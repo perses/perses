@@ -15,23 +15,30 @@ package service
 
 import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/pkg/client/api"
+	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type dashboard struct {
 	Service
-	project   string
-	apiClient api.ClientInterface
+	apiClient v1.DashboardInterface
+}
+
+func (d *dashboard) CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Create(entity.(*modelV1.Dashboard))
+}
+
+func (d *dashboard) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Update(entity.(*modelV1.Dashboard))
 }
 
 func (d *dashboard) ListResource(prefix string) (interface{}, error) {
-	return d.apiClient.V1().Dashboard(d.project).List(prefix)
+	return d.apiClient.List(prefix)
 }
 
 func (d *dashboard) GetResource(name string) (modelAPI.Entity, error) {
-	return d.apiClient.V1().Dashboard(d.project).Get(name)
+	return d.apiClient.Get(name)
 }
 
 func (d *dashboard) BuildMatrix(hits []modelAPI.Entity) [][]string {
@@ -54,4 +61,9 @@ func (d *dashboard) GetColumHeader() []string {
 		"PROJECT",
 		"AGE",
 	}
+}
+
+func (d *dashboard) Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error) {
+	entity := &modelV1.Dashboard{}
+	return entity, unmarshalEntity(isJSON, data, entity)
 }

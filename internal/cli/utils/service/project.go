@@ -15,22 +15,30 @@ package service
 
 import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/pkg/client/api"
+	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type project struct {
 	Service
-	apiClient api.ClientInterface
+	apiClient v1.ProjectInterface
+}
+
+func (p *project) CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return p.apiClient.Create(entity.(*modelV1.Project))
+}
+
+func (p *project) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return p.apiClient.Update(entity.(*modelV1.Project))
 }
 
 func (p *project) ListResource(prefix string) (interface{}, error) {
-	return p.apiClient.V1().Project().List(prefix)
+	return p.apiClient.List(prefix)
 }
 
 func (p *project) GetResource(name string) (modelAPI.Entity, error) {
-	return p.apiClient.V1().Project().Get(name)
+	return p.apiClient.Get(name)
 }
 
 func (p *project) BuildMatrix(hits []modelAPI.Entity) [][]string {
@@ -51,4 +59,9 @@ func (p *project) GetColumHeader() []string {
 		"NAME",
 		"AGE",
 	}
+}
+
+func (p *project) Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error) {
+	entity := &modelV1.Project{}
+	return entity, unmarshalEntity(isJSON, data, entity)
 }
