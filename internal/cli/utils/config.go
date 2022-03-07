@@ -28,14 +28,14 @@ import (
 
 const (
 	pathConfig     = ".perses"
-	configFileName = "config"
+	configFileName = "config.json"
 )
 
 var GlobalConfig *CLIConfig
 
-func init() {
+func InitGlobalConfig(configPath string) {
 	var err error
-	GlobalConfig, err = readConfig()
+	GlobalConfig, err = readConfig(configPath)
 	if err != nil {
 		logrus.WithError(err).Debug("unable to read the config")
 		GlobalConfig = &CLIConfig{}
@@ -45,11 +45,13 @@ func init() {
 			logrus.WithError(err).Errorf("unable to initialize the CLI from the config")
 		}
 	}
+	GlobalConfig.filePath = configPath
 }
 
 type CLIConfig struct {
 	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
 	Project          string                      `json:"project"`
+	filePath         string
 	apiClient        api.ClientInterface
 }
 
@@ -74,6 +76,10 @@ func (c *CLIConfig) SetAPIClient(apiClient api.ClientInterface) {
 	c.apiClient = apiClient
 }
 
+func GetDefaultConfigPath() string {
+	return filepath.Join(getRootFolder(), pathConfig, configFileName)
+}
+
 // getRootFolder will return a root folder that will or that contains the Perses' config in a sub dir.
 func getRootFolder() string {
 	usr, err := user.Current()
@@ -87,13 +93,14 @@ func getRootFolder() string {
 
 // ReadConfig reads the configuration file stored in the path {USER_HOME}/.argos/config
 // If there is no error during the read, it returns the result in the struct ArgosCLIConfig
-func readConfig() (*CLIConfig, error) {
-	path := filepath.Join(getRootFolder(), pathConfig, configFileName)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("file %s doesn't exist", path)
+func readConfig(filePath string) (*CLIConfig, error) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("file %q doesn't exist", filePath)
+	} else if err != nil {
+		return nil, err
 	}
 
-	data, err := ioutil.ReadFile(path)
+	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -111,10 +118,12 @@ func SetProject(project string) error {
 // WriteConfig writes the configuration file in the path {USER_HOME}/.perses/config
 // if the directory doesn't exist, the function will create it
 func WriteConfig(config *CLIConfig) error {
-	path := filepath.Join(getRootFolder(), pathConfig)
+	// this value has been set by the root command and that will be the path where the config must be saved
+	filePath := GlobalConfig.filePath
+	directory := filepath.Dir(filePath)
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		mkdirError := os.Mkdir(path, 0700)
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		mkdirError := os.Mkdir(directory, 0700)
 		if mkdirError != nil {
 			return err
 		}
@@ -122,7 +131,7 @@ func WriteConfig(config *CLIConfig) error {
 		return err
 	}
 
-	previousConf, err := readConfig()
+	previousConf, err := readConfig(filePath)
 	if err == nil {
 		// the config already exists, so we should update it with the one provided in the parameter.
 		if config != nil {
@@ -144,5 +153,5 @@ func WriteConfig(config *CLIConfig) error {
 		return err
 	}
 
-	return ioutil.WriteFile(filepath.Join(path, configFileName), data, 0600)
+	return ioutil.WriteFile(filePath, data, 0600)
 }
