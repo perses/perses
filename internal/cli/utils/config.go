@@ -95,7 +95,7 @@ func getRootFolder() string {
 // If there is no error during the read, it returns the result in the struct ArgosCLIConfig
 func readConfig(filePath string) (*CLIConfig, error) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("file %s doesn't exist", filePath)
+		return nil, fmt.Errorf("file %q doesn't exist", filePath)
 	} else if err != nil {
 		return nil, err
 	}

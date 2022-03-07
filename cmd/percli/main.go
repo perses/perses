@@ -46,7 +46,7 @@ func newRootCommand() *cobra.Command {
 
 	// the list of the global flags supported
 	cmd.PersistentFlags().StringVar(&configPath, "percliconfig", cmdUtils.GetDefaultConfigPath(), "Path to the percliconfig file to use for CLI requests.")
-	cmd.PersistentFlags().StringVar(&logLevel, "log.level", "info", "Set the level of the log. Possible value: panic, fatal, error, warning, info, debug, trace")
+	cmd.PersistentFlags().StringVar(&logLevel, "log.level", "info", "Set the log verbosity level. Possible values: panic, fatal, error, warning, info, debug, trace")
 
 	// Some custom settings about the percli itself
 	cmd.SilenceUsage = true
@@ -64,7 +64,7 @@ func initLogrus() {
 	})
 	level, err := logrus.ParseLevel(logLevel)
 	if err != nil {
-		logrus.WithError(err).Fatal("unable to set the log.level")
+		logrus.WithError(err).Fatal("unable to set the log level")
 	}
 	logrus.SetLevel(level)
 }
