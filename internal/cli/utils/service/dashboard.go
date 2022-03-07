@@ -62,8 +62,3 @@ func (d *dashboard) GetColumHeader() []string {
 		"AGE",
 	}
 }
-
-func (d *dashboard) Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error) {
-	entity := &modelV1.Dashboard{}
-	return entity, unmarshalEntity(isJSON, data, entity)
-}

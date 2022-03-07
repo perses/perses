@@ -62,8 +62,3 @@ func (f *folder) GetColumHeader() []string {
 		"AGE",
 	}
 }
-
-func (f *folder) Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error) {
-	entity := &modelV1.Folder{}
-	return entity, unmarshalEntity(isJSON, data, entity)
-}

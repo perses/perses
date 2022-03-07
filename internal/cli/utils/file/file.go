@@ -17,9 +17,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	cmdUtilsService "github.com/perses/perses/internal/cli/utils/service"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -33,7 +33,7 @@ func (u *Unmarshaller) Unmarshal(file string) ([]modelAPI.Entity, error) {
 		return nil, err
 	}
 
-	return u.unmarshalEntity()
+	return u.unmarshalEntities()
 }
 
 func (u *Unmarshaller) read(file string) error {
@@ -65,7 +65,7 @@ func (u *Unmarshaller) read(file string) error {
 	return nil
 }
 
-func (u *Unmarshaller) unmarshalEntity() ([]modelAPI.Entity, error) {
+func (u *Unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
 	if len(u.objects) == 0 {
 		return nil, fmt.Errorf("unable to unmarshall data, data is empty")
 	}
@@ -76,9 +76,10 @@ func (u *Unmarshaller) unmarshalEntity() ([]modelAPI.Entity, error) {
 		}
 		kind := modelV1.Kind(fmt.Sprintf("%v", object["kind"]))
 		// we create the service associated to the current resource. It will be used to unmarshal the resource with the accurate struct.
-		svc, err := cmdUtilsService.NewService(kind, "", nil)
+		entity, err := modelV1.GetStruct(kind)
 		if err != nil {
-			return nil, err
+			logrus.WithError(err).Debugf("unable to get the struct")
+			return nil, fmt.Errorf("resource %q not supported by the command", kind)
 		}
 		// Let's marshal the resource, so we can finally unmarshal it with the accurate struct.
 		var data []byte
@@ -92,11 +93,21 @@ func (u *Unmarshaller) unmarshalEntity() ([]modelAPI.Entity, error) {
 			return nil, fmt.Errorf("cannot extract %s, marshalling error: %s", kind, marshalErr)
 		}
 		// Then let's use the service to unmarshal the resource.
-		entity, unmarshalErr := svc.Unmarshal(u.isJSON, data)
+		unmarshalErr := u.unmarshalEntity(data, entity)
 		if unmarshalErr != nil {
 			return nil, fmt.Errorf("cannot extract %s, unmarshalling error: %s", kind, unmarshalErr)
 		}
 		result = append(result, entity)
 	}
 	return result, nil
+}
+
+func (u *Unmarshaller) unmarshalEntity(data []byte, entity modelAPI.Entity) error {
+	var unmarshalErr error
+	if u.isJSON {
+		unmarshalErr = json.Unmarshal(data, entity)
+	} else {
+		unmarshalErr = yaml.Unmarshal(data, entity)
+	}
+	return unmarshalErr
 }

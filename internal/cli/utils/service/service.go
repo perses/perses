@@ -14,24 +14,12 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/perses/perses/pkg/client/api"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"gopkg.in/yaml.v2"
 )
-
-func unmarshalEntity(isJSON bool, data []byte, entity modelAPI.Entity) error {
-	var unmarshalErr error
-	if isJSON {
-		unmarshalErr = json.Unmarshal(data, entity)
-	} else {
-		unmarshalErr = yaml.Unmarshal(data, entity)
-	}
-	return unmarshalErr
-}
 
 type Service interface {
 	CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
@@ -40,7 +28,6 @@ type Service interface {
 	GetResource(name string) (modelAPI.Entity, error)
 	BuildMatrix(hits []modelAPI.Entity) [][]string
 	GetColumHeader() []string
-	Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error)
 }
 
 func NewService(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (Service, error) {

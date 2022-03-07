@@ -64,8 +64,3 @@ func (d *datasource) GetColumHeader() []string {
 		"AGE",
 	}
 }
-
-func (d *datasource) Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error) {
-	entity := &modelV1.Datasource{}
-	return entity, unmarshalEntity(isJSON, data, entity)
-}

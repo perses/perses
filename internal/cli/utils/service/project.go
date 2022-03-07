@@ -60,8 +60,3 @@ func (p *project) GetColumHeader() []string {
 		"AGE",
 	}
 }
-
-func (p *project) Unmarshal(isJSON bool, data []byte) (modelAPI.Entity, error) {
-	entity := &modelV1.Project{}
-	return entity, unmarshalEntity(isJSON, data, entity)
-}
