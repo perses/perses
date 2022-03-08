@@ -21,6 +21,7 @@ import (
 	"github.com/perses/perses/internal/cli/cmd/get"
 	"github.com/perses/perses/internal/cli/cmd/login"
 	"github.com/perses/perses/internal/cli/cmd/project"
+	"github.com/perses/perses/internal/cli/cmd/remove"
 	"github.com/perses/perses/internal/cli/cmd/version"
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/sirupsen/logrus"
@@ -44,6 +45,7 @@ func newRootCommand() *cobra.Command {
 	cmd.AddCommand(get.NewCMD())
 	cmd.AddCommand(login.NewCMD())
 	cmd.AddCommand(project.NewCMD())
+	cmd.AddCommand(remove.NewCMD())
 	cmd.AddCommand(version.NewCMD())
 
 	// the list of the global flags supported
