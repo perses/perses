@@ -26,6 +26,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// keyCombination is a struct that contains a combination of the project name and the name of the resource.
+// These two information are used to delete an unique resource.
+type keyCombination struct {
+	project string
+	name    string
+}
+
 type option struct {
 	cmdUtils.CMDOption
 	writer    io.Writer
@@ -33,26 +40,34 @@ type option struct {
 	all       bool
 	file      string
 	project   string
-	names     map[modelV1.Kind][]string
+	names     map[modelV1.Kind][]keyCombination
 	apiClient api.ClientInterface
 }
 
 func (o *option) Complete(args []string) error {
-	o.names = make(map[modelV1.Kind][]string)
+	o.names = make(map[modelV1.Kind][]keyCombination)
 	if len(o.file) == 0 {
 		// Then the user need to specify the resource type and the name of the resource to delete
 		if len(args) == 0 {
 			return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
 		}
-		if !o.all && len(args) <= 1 {
-			return fmt.Errorf("you have to specify the resource name you would like to delete")
-		}
+
 		var err error
 		o.kind, err = cmdUtils.GetKind(args[0])
 		if err != nil {
 			return err
 		}
-		o.names[o.kind] = args[1:]
+
+		if !o.all && len(args) <= 1 {
+			return fmt.Errorf("you have to specify the resource name you would like to delete")
+		}
+
+		for _, name := range args[1:] {
+			o.names[o.kind] = append(o.names[o.kind], keyCombination{
+				name:    name,
+				project: o.project,
+			})
+		}
 	}
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
 	if len(o.project) == 0 {
@@ -77,17 +92,19 @@ func (o *option) Execute() error {
 			return err
 		}
 	}
-	for kind, names := range o.names {
-		svc, svcErr := cmdUtilsService.NewService(kind, o.project, o.apiClient)
-		if svcErr != nil {
-			return svcErr
-		}
-		for _, name := range names {
+	for kind, keys := range o.names {
+		for _, key := range keys {
+			name := key.name
+			project := key.project
+			svc, svcErr := cmdUtilsService.NewService(kind, project, o.apiClient)
+			if svcErr != nil {
+				return svcErr
+			}
 			if err := svc.DeleteResource(name); err != nil {
 				return err
 			}
-			if err := cmdUtils.HandleString(o.writer, fmt.Sprintf("%q %q has been deleted", kind, name)); err != nil {
-				return err
+			if outputError := cmdUtils.HandleSuccessResourceMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been deleted", kind, name)); outputError != nil {
+				return outputError
 			}
 		}
 	}
@@ -124,8 +141,11 @@ func (o *option) setNamesFromFile() error {
 func (o *option) setNames(entities []modelAPI.Entity) {
 	for _, entity := range entities {
 		kind := modelV1.Kind(entity.GetKind())
-		name := entity.GetMetadata().GetName()
-		o.names[kind] = append(o.names[kind], name)
+		metadata := entity.GetMetadata()
+		o.names[kind] = append(o.names[kind], keyCombination{
+			name:    metadata.GetName(),
+			project: cmdUtils.GetProject(metadata, o.project),
+		})
 	}
 }
 
