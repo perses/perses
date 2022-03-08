@@ -55,6 +55,7 @@ func TestApplyCMD(t *testing.T) {
 			APIClient:       fake_api.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been applied in the project "perses"
+object "Folder" "aoe4" has been applied in the project "game"
 object "Project" "perses" has been applied
 `,
 		},
