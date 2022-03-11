@@ -19,6 +19,7 @@ import (
 	"github.com/perses/perses/internal/cli/cmd/apply"
 	"github.com/perses/perses/internal/cli/cmd/describe"
 	"github.com/perses/perses/internal/cli/cmd/get"
+	"github.com/perses/perses/internal/cli/cmd/linter"
 	"github.com/perses/perses/internal/cli/cmd/login"
 	"github.com/perses/perses/internal/cli/cmd/project"
 	"github.com/perses/perses/internal/cli/cmd/remove"
@@ -43,6 +44,7 @@ func newRootCommand() *cobra.Command {
 	cmd.AddCommand(apply.NewCMD())
 	cmd.AddCommand(describe.NewCMD())
 	cmd.AddCommand(get.NewCMD())
+	cmd.AddCommand(linter.NewCMD())
 	cmd.AddCommand(login.NewCMD())
 	cmd.AddCommand(project.NewCMD())
 	cmd.AddCommand(remove.NewCMD())

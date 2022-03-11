@@ -1,0 +1,58 @@
+// Copyright 2022 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package linter
+
+import (
+	"testing"
+
+	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
+)
+
+func TestLinterCMD(t *testing.T) {
+	testSuite := []cmdUtilsTest.Suite{
+		{
+			Title:           "empty args",
+			Args:            []string{},
+			IsErrorExpected: true,
+			ExpectedMessage: `required flag(s) "file" not set`,
+		},
+		{
+			Title:           "use args",
+			Args:            []string{"whatever", "-f", "file.json"},
+			IsErrorExpected: true,
+			ExpectedMessage: "no args are supported by the command 'linter'",
+		},
+		{
+			Title:           "linter unknown document",
+			Args:            []string{"-f", "../../utils/test/sample_resources/unknown_resource.json"},
+			IsErrorExpected: true,
+			ExpectedMessage: `resource "game" not supported by the command`,
+		},
+		{
+			Title:           "linter a single resource",
+			Args:            []string{"-f", "../../utils/test/sample_resources/single_resource.json"},
+			IsErrorExpected: false,
+			ExpectedMessage: `your resources look good
+`,
+		},
+		{
+			Title:           "linter multiples different resources",
+			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json"},
+			IsErrorExpected: false,
+			ExpectedMessage: `your resources look good
+`,
+		},
+	}
+	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+}
