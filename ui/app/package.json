@@ -16,7 +16,7 @@
     "@emotion/styled": "^11.6.0",
     "@fontsource/lato": "^4.5.1",
     "@loadable/component": "^5.15.2",
-    "@mui/material": "^5.4.0",
+    "@mui/material": "^5.5.1",
     "@perses-dev/components": "^0.1.0",
     "@perses-dev/core": "^0.1.0",
     "@perses-dev/dashboards": "^0.1.0",

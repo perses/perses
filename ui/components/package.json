@@ -12,7 +12,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@mui/material": "^5.2.8",
+    "@mui/material": "^5.5.1",
     "react-error-boundary": "^3.1.4"
   },
   "peerDependencies": {
