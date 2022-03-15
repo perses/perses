@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginSetupFunction } from '@perses-ui/core';
+import { PluginSetupFunction } from '@perses-dev/plugin-system';
 import { EmptyChart, EmptyChartKind } from './plugins/empty-chart/EmptyChart';
 import { GaugeChartPanel, GaugeChartKind } from './plugins/gauge-chart/GaugeChartPanel';
 import { LineChartPanel, LineChartKind } from './plugins/line-chart/LineChartPanel';

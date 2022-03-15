@@ -11,33 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-ui/core';
-import { Box, Theme } from '@mui/material';
-import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
-import { PluginRegistry } from './context/plugin-registry';
-import ViewDashboard from './views/dashboard/ViewDashboard';
-import AlertErrorFallback from './components/AlertErrorFallback';
+import { Box } from '@mui/material';
+import { ErrorAlert } from '@perses-dev/components';
+import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
+import ViewDashboard from './views/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
-import { useSampleData } from './utils/temp-sample-data';
 import Header from './components/Header';
-import { pluginRuntime } from './model/plugin-runtime';
-
-const appStyle: SxProps<Theme> = {
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100vh',
-};
+import { useBundledPlugins } from './model/bundled-plugins';
 
 function App() {
-  const dashboard = useSampleData<DashboardResource>(
-    new URLSearchParams(window.location.search).get('dashboard') || 'node-exporter-full'
-  );
-  if (dashboard === undefined) {
-    return null;
-  }
+  const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
   return (
-    <Box sx={appStyle}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+      }}
+    >
       <Header />
       <Box
         sx={{
@@ -45,14 +37,12 @@ function App() {
           overflow: 'hidden',
         }}
       >
-        <PluginRegistry
-          loadingFallback="Loading..."
-          ErrorFallbackComponent={AlertErrorFallback}
-          runtime={pluginRuntime}
-        >
-          <DataSourceRegistry>
-            <ViewDashboard resource={dashboard} />
-          </DataSourceRegistry>
+        <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+          <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
+            <DataSourceRegistry>
+              <ViewDashboard />
+            </DataSourceRegistry>
+          </PluginBoundary>
         </PluginRegistry>
       </Box>
     </Box>

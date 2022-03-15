@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { EChartsOption } from 'echarts';
-import { GraphSeriesValueTuple } from '@perses-ui/core';
+import { GraphSeriesValueTuple } from '@perses-dev/plugin-system';
 import { TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from '../tooltip/tooltip-model';
 
 export interface FocusedSeriesInfo {

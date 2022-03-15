@@ -13,7 +13,13 @@
 
 // Base eslint configuration for typescript projects
 module.exports = {
-  extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
+  extends: [
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:jsx-a11y/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+  ],
 
   plugins: ['import'],
 
@@ -22,6 +28,7 @@ module.exports = {
     es6: true,
     jest: true,
     node: true,
+    browser: true,
   },
 
   parser: '@typescript-eslint/parser',
@@ -29,6 +36,15 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
+
+  settings: {
+    react: {
+      version: 'detect',
+    },
   },
 
   rules: {
@@ -45,5 +61,10 @@ module.exports = {
     // you must disable the base rule as it can report incorrect errors
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
+
+    'react/prop-types': 'off',
+    'react-hooks/exhaustive-deps': 'warn',
+    // Not necessary in React 17
+    'react/react-in-jsx-scope': 'off',
   },
 };

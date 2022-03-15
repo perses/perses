@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginSetupFunction } from '@perses-ui/core';
+import { PluginSetupFunction } from '@perses-dev/plugin-system';
 import { PrometheusGraphQueryKind, usePrometheusGraphQuery } from './plugins/graph-query';
 import { IntervalKind, useIntervalValues } from './plugins/interval-variable';
 import { PrometheusLabelNamesKind, usePrometheusLabelNames } from './plugins/label-names-variable';

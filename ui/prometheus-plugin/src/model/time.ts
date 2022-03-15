@@ -11,13 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DurationString,
-  parseDurationString,
-  useMemoized,
-  usePanelState,
-  useDashboardTimeRange,
-} from '@perses-ui/core';
+import { DurationString, parseDurationString, useMemoized } from '@perses-dev/core';
+import { useTimeRange } from '@perses-dev/plugin-system';
 import { milliseconds, getUnixTime } from 'date-fns';
 import { useRef } from 'react';
 import { UnixTimestampSeconds } from './api-types';
@@ -31,7 +26,9 @@ export interface PrometheusTimeRange {
  * Get the time range for the current dashboard, converted to Prometheus time.
  */
 export function useDashboardPrometheusTimeRange() {
-  const { start, end } = useDashboardTimeRange();
+  const {
+    timeRange: { start, end },
+  } = useTimeRange();
 
   // Only recalculate the time range if the value on the dashboard changes
   return useMemoized(() => {
@@ -52,29 +49,26 @@ const MAX_PROM_DATA_POINTS = 10000;
  * a "safe" step based on the max data points we want to allow returning from
  * a Prom query.
  */
-export function usePanelRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15, resolution = 1) {
-  // Keep track of the latest panel width in a ref
-  const { contentDimensions } = usePanelState();
-  const panelWidth = useRef(contentDimensions?.width);
-  panelWidth.current = contentDimensions?.width;
+export function usePanelRangeStep(
+  timeRange: PrometheusTimeRange,
+  minStepSeconds = 15,
+  resolution = 1,
+  suggestedStepMs = 0
+) {
+  // Keep track of the latest suggested step so we don't re-run the query if it changes
+  const latestSuggestedStep = useRef(suggestedStepMs * 1000);
+  latestSuggestedStep.current = suggestedStepMs * 1000;
 
   // Whenever the time range changes, recalculate the appropriate step
   return useMemoized(() => {
     const queryRangeSeconds = timeRange.end - timeRange.start;
-
-    // TODO: Should we try to suggest more "rounded" step values based around
-    // time increments that make sense (e.g. 15s, 30s, 1m, 5m, etc.)
-    let suggestedStep = 0;
-    if (panelWidth.current !== undefined) {
-      suggestedStep = Math.floor(queryRangeSeconds / panelWidth.current);
-    }
 
     let safeStep = queryRangeSeconds / MAX_PROM_DATA_POINTS;
     if (safeStep > 1) {
       safeStep = Math.ceil(safeStep);
     }
 
-    return Math.max(suggestedStep * resolution, minStepSeconds, safeStep);
+    return Math.max(latestSuggestedStep.current * resolution, minStepSeconds, safeStep);
   }, [timeRange, minStepSeconds, resolution]);
 }
 

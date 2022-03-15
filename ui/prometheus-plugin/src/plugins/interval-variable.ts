@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, DurationString, UseVariableOptionsHook, VariableDefinition } from '@perses-ui/core';
+import { JsonObject, DurationString, VariableDefinition } from '@perses-dev/core';
+import { UseVariableOptionsHook } from '@perses-dev/plugin-system';
 
 export const IntervalKind = 'Inverval' as const;
 

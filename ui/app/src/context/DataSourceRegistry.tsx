@@ -11,16 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useCallback, useContext, useMemo } from 'react';
-import { DatasourceSelector, GlobalDatasourceModel } from '@perses-ui/core';
+import { useCallback, useMemo } from 'react';
+import { DatasourceSelector, GlobalDatasourceModel } from '@perses-dev/core';
+import { DatasourcesContext, Datasources } from '@perses-dev/plugin-system';
 import { useGlobalDatasourceQuery } from '../model/datasource-client';
 import { useSnackbar } from './SnackbarProvider';
-
-export interface DataSourceRegistryContextType {
-  getDataSources(selector: DatasourceSelector): GlobalDatasourceModel[];
-}
-
-export const DataSourceRegistryContext = createContext<DataSourceRegistryContextType | undefined>(undefined);
 
 export interface DataSourceRegistryProps {
   children: React.ReactNode;
@@ -42,7 +37,7 @@ export function DataSourceRegistry(props: DataSourceRegistryProps) {
     return data;
   }, [isLoading, data]);
 
-  const getDataSources = useCallback(
+  const getDatasources: Datasources['getDatasources'] = useCallback(
     (selector: DatasourceSelector) => {
       return datasourceList.filter((ds: GlobalDatasourceModel) => {
         return selector.global && selector.kind === ds.spec.kind && selector.name === ds.metadata.name;
@@ -51,19 +46,13 @@ export function DataSourceRegistry(props: DataSourceRegistryProps) {
     [datasourceList]
   );
 
-  const context: DataSourceRegistryContextType = useMemo(() => ({ getDataSources }), [getDataSources]);
+  const context = useMemo(() => {
+    const defaultDatasource = datasourceList.find((ds) => ds.spec.default);
+    if (defaultDatasource === undefined) return undefined;
+    return { defaultDatasource, getDatasources };
+  }, [getDatasources, datasourceList]);
 
-  return <DataSourceRegistryContext.Provider value={context}>{children}</DataSourceRegistryContext.Provider>;
-}
-
-export function useDataSourceRegistry() {
-  const context = useContext(DataSourceRegistryContext);
-  if (context === undefined) {
-    throw new Error('No DataSourceRegistry context found. Did you forget a Provider?');
-  }
-  return context;
-}
-
-export function useDataSources(selector: DatasourceSelector) {
-  return useDataSourceRegistry().getDataSources(selector);
+  // TODO: Show a loading indicator? Change up the API to be async?
+  if (context === undefined) return null;
+  return <DatasourcesContext.Provider value={context}>{children}</DatasourcesContext.Provider>;
 }

@@ -12,27 +12,19 @@
 // limitations under the License.
 
 import { Definition, JsonObject } from './definitions';
-import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 
-export interface PanelDefinition<Options extends JsonObject> extends Definition<Options> {
+/**
+ * Panel definition options that are common to all panels.
+ */
+export interface PanelDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
   display: {
     name: string;
   };
 }
 
 /**
- * Plugin the provides custom visualizations inside of a Panel.
+ * A reference to a panel defined in the DashboardSpec.
  */
-export interface PanelPlugin<Options extends JsonObject> {
-  PanelComponent: PanelComponent<Options>;
+export interface PanelRef {
+  $ref: `#/panels/${string}`;
 }
-
-export type PanelComponent<Options extends JsonObject> = React.ComponentType<PanelProps<Options>>;
-
-export interface PanelProps<Options extends JsonObject> {
-  definition: PanelDefinition<Options>;
-}
-
-export type AnyPanelDefinition = AnyPluginDefinition<'Panel'>;
-
-export type AnyPanelPlugin = AnyPluginImplementation<'Panel'>;

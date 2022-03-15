@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-ui/core';
+import { JsonObject } from '@perses-dev/core';
 import { zip } from 'lodash-es';
 
 export const ThresholdColors = {

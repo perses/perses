@@ -1,6 +1,6 @@
 {
-  "name": "@perses-ui/core",
-  "version": "1.0.0",
+  "name": "@perses-dev/core",
+  "version": "0.1.0",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",

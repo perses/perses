@@ -11,15 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DurationString, JsonObject, useMemoized } from '@perses-dev/core';
 import {
-  DurationString,
   GraphData,
   GraphQueryDefinition,
-  JsonObject,
-  useDashboardSpec,
   UseGraphQueryHook,
-  useMemoized,
-} from '@perses-ui/core';
+  UseGraphQueryHookOptions,
+} from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';
@@ -39,13 +37,12 @@ interface GraphQueryOptions extends JsonObject {
 }
 
 export function usePrometheusGraphQuery(
-  definition: PrometheusGraphQuery
+  definition: PrometheusGraphQuery,
+  hookOptions?: UseGraphQueryHookOptions
 ): ReturnType<UseGraphQueryHook<GraphQueryOptions>> {
-  const spec = useDashboardSpec();
-
   const minStep = getDurationStringSeconds(definition.options.min_step);
   const timeRange = useDashboardPrometheusTimeRange();
-  const step = usePanelRangeStep(timeRange, minStep);
+  const step = usePanelRangeStep(timeRange, minStep, undefined, hookOptions?.suggestedStepMs);
 
   // Align the time range so that it's a multiple of the step (TODO: we may
   // ultimately want to return this from the hook so that charts will know what
@@ -76,7 +73,7 @@ export function usePrometheusGraphQuery(
     data: response,
     isLoading: loading,
     error,
-  } = useRangeQuery(spec.datasource, request, {
+  } = useRangeQuery(request, {
     enabled: needsVariableValuesFor.size === 0,
   });
 

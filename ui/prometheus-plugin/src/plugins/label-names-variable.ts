@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, useDashboardSpec, UseVariableOptionsHook, VariableDefinition } from '@perses-ui/core';
+import { JsonObject, VariableDefinition } from '@perses-dev/core';
+import { UseVariableOptionsHook } from '@perses-dev/plugin-system';
 import { TemplateString, useReplaceTemplateStrings } from '../model/templating';
 import { useDashboardPrometheusTimeRange } from '../model/time';
 import { LabelNamesRequestParameters } from '../model/api-types';
@@ -31,15 +32,13 @@ interface LabelNamesOptions extends JsonObject {
 export function usePrometheusLabelNames(
   definition: PrometheusLabelNames
 ): ReturnType<UseVariableOptionsHook<LabelNamesOptions>> {
-  const spec = useDashboardSpec();
-
   const { start, end } = useDashboardPrometheusTimeRange();
   const { result: match, needsVariableValuesFor } = useReplaceTemplateStrings(definition.options.match);
 
   // Make the request, pausing any requests that are still waiting on variable
   // values to be filled in/selected
   const request: LabelNamesRequestParameters = {
-    match,
+    'match[]': match,
     start,
     end,
   };
@@ -47,7 +46,7 @@ export function usePrometheusLabelNames(
     data: response,
     isLoading: loading,
     error,
-  } = useLabelNames(spec.datasource, request, {
+  } = useLabelNames(request, {
     enabled: needsVariableValuesFor.size === 0,
   });
 

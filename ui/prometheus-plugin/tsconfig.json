@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.web.json",
+  "extends": "../tsconfig.base.json",
   "include": ["src"],
   "compilerOptions": {
     "outDir": "./dist",
@@ -9,6 +9,10 @@
   "references": [
     {
       "path": "../core",
+      "prepend": false
+    },
+    {
+      "path": "../plugin-system",
       "prepend": false
     }
   ]

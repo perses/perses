@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, JsonObject, PanelProps, usePanelState } from '@perses-ui/core';
+import { JsonObject } from '@perses-dev/core';
+import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
+import { useSuggestedStepMs } from '../../model/time';
 import LineChart from './LineChart';
 import GraphQueryRunner from './GraphQueryRunner';
 import UPlotChart from './uplot/UPlotChart';
@@ -22,7 +24,7 @@ export const LineChartKind = 'LineChart' as const;
 export type LineChartProps = PanelProps<LineChartOptions>;
 
 interface LineChartOptions extends JsonObject {
-  queries: AnyGraphQueryDefinition[];
+  queries: GraphQueryDefinition[];
   show_legend?: boolean;
 }
 
@@ -31,8 +33,10 @@ export function LineChartPanel(props: LineChartProps) {
     definition: {
       options: { queries },
     },
+    contentDimensions,
   } = props;
-  const { contentDimensions } = usePanelState();
+
+  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
 
   const isUPlot = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -42,7 +46,7 @@ export function LineChartPanel(props: LineChartProps) {
   const Chart = isUPlot ? UPlotChart : LineChart;
 
   return (
-    <GraphQueryRunner queries={queries}>
+    <GraphQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
       {contentDimensions !== undefined && <Chart width={contentDimensions.width} height={contentDimensions.height} />}
     </GraphQueryRunner>
   );

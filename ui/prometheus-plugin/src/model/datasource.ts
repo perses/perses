@@ -16,8 +16,8 @@ import {
   DatasourceSelector,
   DatasourceSpecDefinition,
   HTTPConfig,
-  useDataSourceConfig,
-} from '@perses-ui/core';
+} from '@perses-dev/core';
+import { useDatasources } from '@perses-dev/plugin-system';
 
 export interface PrometheusSpecDatasource extends DatasourceSpecDefinition {
   kind: 'Prometheus';
@@ -28,6 +28,23 @@ function isPrometheusDatasource(def: AnyDatasourceSpecDefinition): def is Promet
   return def.kind === 'Prometheus';
 }
 
-export function usePrometheusConfig(selector: DatasourceSelector) {
-  return useDataSourceConfig(selector, isPrometheusDatasource);
+export function usePrometheusConfig(selector?: DatasourceSelector) {
+  const datasources = useDatasources();
+
+  const models = selector === undefined ? [datasources.defaultDatasource] : datasources.getDatasources(selector);
+  if (models.length > 1) {
+    throw new Error('More than one Datasource found');
+  }
+
+  const model = models[0];
+  if (model === undefined) {
+    throw new Error('Datasource not found');
+  }
+
+  const spec = model.spec;
+  if (isPrometheusDatasource(spec)) {
+    return { ...model, spec };
+  }
+
+  throw new Error('Datasource is not a valid Prometheus Datasource');
 }

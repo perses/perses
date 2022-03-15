@@ -1,6 +1,6 @@
 {
-  "name": "@perses-ui/panels-plugin",
-  "version": "1.0.0",
+  "name": "@perses-dev/panels-plugin",
+  "version": "0.1.0",
   "description": "Core panels plugin for Perses",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,13 +14,19 @@
   "dependencies": {
     "@formatjs/intl-numberformat": "^7.4.1",
     "@mui/material": "^5.4.0",
-    "@perses-ui/core": "^1.0.0",
+    "@perses-dev/core": "^0.1.0",
+    "@perses-dev/plugin-system": "^0.1.0",
     "date-fns": "^2.28.0",
     "echarts": "^5.3.0",
     "lodash-es": "^4.17.21",
     "mathjs": "^10.1.1",
-    "react": "^17.0.2",
     "uplot": "^1.6.18"
+  },
+  "devDependencies": {
+    "react": "^17.0.2"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
   },
   "perses": {
     "kind": "Plugin",

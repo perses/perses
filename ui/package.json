@@ -1,6 +1,7 @@
 {
-  "name": "perses-ui",
-  "version": "1.0.0",
+  "name": "perses-dev",
+  "description": "Monorepo for the Perses UI",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "npm run build -w app",
@@ -12,9 +13,12 @@
   },
   "workspaces": [
     "app",
+    "components",
     "core",
-    "prometheus-plugin",
-    "panels-plugin"
+    "dashboards",
+    "panels-plugin",
+    "plugin-system",
+    "prometheus-plugin"
   ],
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.1",

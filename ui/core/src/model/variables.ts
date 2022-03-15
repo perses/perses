@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { Definition, JsonObject } from './definitions';
-import { AnyPluginDefinition, AnyPluginImplementation } from './plugins';
 
-export interface VariableDefinition<Options extends JsonObject> extends Definition<Options> {
+/**
+ * Variable definition options that are common to all variables.
+ */
+export interface VariableDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
   display: VariableDisplayOptions;
   selection: VariableSelectionOptions;
   capturing_regexp?: string;
@@ -37,24 +39,3 @@ export type MultiSelectOptions = {
 };
 
 export const DEFAULT_ALL_VALUE = '$__all' as const;
-
-/**
- * Plugin for handling custom VariableDefinitions.
- */
-export interface VariablePlugin<Options extends JsonObject> {
-  useVariableOptions: UseVariableOptionsHook<Options>;
-}
-
-/**
- * Plugin hook responsible for getting the options of a custom variable
- * definition.
- */
-export type UseVariableOptionsHook<Options extends JsonObject> = (definition: VariableDefinition<Options>) => {
-  data: string[];
-  loading: boolean;
-  error?: Error;
-};
-
-export type AnyVariableDefinition = AnyPluginDefinition<'Variable'>;
-
-export type AnyVariablePlugin = AnyPluginImplementation<'Variable'>;

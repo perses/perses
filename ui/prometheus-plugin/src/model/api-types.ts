@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString } from '@perses-ui/core';
+import { DurationString } from '@perses-dev/core';
 
 // Just reuse dashboard model's type and re-export
 export type { DurationString };
@@ -79,7 +79,7 @@ export interface RangeQueryRequestParameters {
 export type RangeQueryResponse = ApiResponse<MatrixData>;
 
 export interface SeriesRequestParameters {
-  match: string[];
+  'match[]': string[];
   start: UnixTimestampSeconds;
   end: UnixTimestampSeconds;
 }
@@ -89,7 +89,7 @@ export type SeriesResponse = ApiResponse<Metric[]>;
 export interface LabelNamesRequestParameters {
   start?: UnixTimestampSeconds;
   end?: UnixTimestampSeconds;
-  match?: string[];
+  'match[]'?: string[];
 }
 
 export type LabelNamesResponse = ApiResponse<string[]>;
@@ -98,7 +98,7 @@ export interface LabelValuesRequestParameters {
   labelName: string;
   start?: UnixTimestampSeconds;
   end?: UnixTimestampSeconds;
-  match?: string[];
+  'match[]'?: string[];
 }
 
 export type LabelValuesResponse = ApiResponse<string[]>;

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from 'react-query';
-import { fetchJson, GlobalDatasourceModel } from '@perses-ui/core';
+import { fetchJson, GlobalDatasourceModel } from '@perses-dev/core';
 import buildURL from './url-builder';
 
 const resource = 'globaldatasources';

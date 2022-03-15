@@ -1,0 +1,30 @@
+{
+  "name": "@perses-dev/dashboards",
+  "version": "0.1.0",
+  "description": "The dashboards feature in Perses",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "tsc",
+    "test": "echo 'no test to run' && exit 0",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint --fix src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "@mui/material": "^5.4.0",
+    "@perses-dev/components": "^0.1.0",
+    "@perses-dev/core": "^0.1.0",
+    "@perses-dev/plugin-system": "^0.1.0",
+    "immer": "^9.0.12",
+    "use-immer": "^0.6.0",
+    "use-resize-observer": "^8.0.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ]
+}
