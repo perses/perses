@@ -26,12 +26,19 @@ In case you would like to update manually the dependencies :
 ```bash
 make update-go-deps
 git add go.mod go.sum
-git commit -m "Update dependencies"
+git commit -m "Update Go dependencies"
 ```
 
 ### Updating npm dependencies
 
-TBD
+```bash
+make update-npm-deps
+git add ./ui/package-lock.json ./**/package.json
+git commit -m "Update npm dependencies"
+```
+
+Note: in case you feel it, you can also upgrade the npm dependencies to their latest release (major or minor)
+with `make upgrade-npm-deps`
 
 ### 1. Prepare your release
 
