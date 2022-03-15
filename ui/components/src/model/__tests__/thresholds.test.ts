@@ -11,9 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './EChartsWrapper';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './StatChart';
-export * from './utils/combine-sx';
+import { convertThresholds } from '../thresholds';
+
+describe('convertThresholds', () => {
+  const thresholdInput = {
+    default_color: '#000',
+    steps: [
+      {
+        value: 85,
+        color: '#FFA500',
+      },
+      {
+        value: 95,
+        color: '#ff0000',
+      },
+    ],
+  };
+
+  const thresholdOutput = [
+    [0.85, '#000'],
+    [0.95, '#FFA500'],
+    [1, '#ff0000'],
+  ];
+
+  it('should convert gauge thresholds to valid echarts option colors', () => {
+    expect(convertThresholds(thresholdInput)).toEqual(thresholdOutput);
+  });
+});

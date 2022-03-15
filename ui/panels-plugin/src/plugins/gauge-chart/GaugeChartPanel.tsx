@@ -13,11 +13,11 @@
 
 import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
+import { GaugeChart, GaugeChartData } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
-import { GaugeChart, GaugeChartData } from '../../components/gauge-chart/GaugeChart';
 import { defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
 import { useSuggestedStepMs } from '../../model/time';
 
