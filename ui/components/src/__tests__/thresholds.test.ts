@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { convertThresholds } from '../thresholds';
+import { convertThresholds } from '../model/thresholds';
 
 describe('convertThresholds', () => {
   const thresholdInput = {
