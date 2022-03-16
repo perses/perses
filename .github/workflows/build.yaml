@@ -28,8 +28,10 @@ jobs:
       - name: store react production build
         uses: actions/upload-artifact@v2
         with:
-          name: react-build
-          path: ui/app/dist
+          name: ui-libs
+          path: |
+            ui/**
+            !ui/node_modules
   build-backend:
     name: "build backend"
     needs: build-frontend
@@ -50,7 +52,7 @@ jobs:
       - name: Download react build
         uses: actions/download-artifact@v2
         with:
-          name: react-build
+          name: ui-libs
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:

@@ -4,11 +4,9 @@ on:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
-  release:
-    name: "release"
+  prepare_release:
+    name: "prepare_release"
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -16,16 +14,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: "ui/.nvmrc"
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17.x
-      - uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
       - uses: actions/cache@v2
         with:
           path: ~/.npm
@@ -38,15 +26,66 @@ jobs:
         run: cd ./ui && npm run build
       - name: Copy files before publishing libs
         run: ./ui_release.sh --copy
+      - name : Check libraries version
+        run: ./ui_release.sh --check "${{ github.ref_name }}"
+      - name: store react production build
+        uses: actions/upload-artifact@v2
+        with:
+          name: ui-libs
+          path: |
+            ui/**
+            !ui/node_modules
+
+  libs-release:
+    name: "prepare_release"
+    needs: build-frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: "ui/.nvmrc"
+      - name: Download react build
+        uses: actions/download-artifact@v2
+        with:
+          name: ui-libs
       - name: Login to npm registry
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+      - name: Publish libraries
+        run: ./ui_release.sh --publish
+
+  go-release:
+    name: "go and github release"
+    needs: "prepare_release"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Download react build
+        uses: actions/download-artifact@v2
+        with:
+          name: ui-libs
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Publish libraries
-        run: ./ui_release.sh --publish
       - name: Publish Release and binaries
         uses: goreleaser/goreleaser-action@v2
         with:
