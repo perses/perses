@@ -33,7 +33,7 @@ jobs:
         with:
           name: ui-libs
           path: |
-            ui/**
+            ui/**/dist
             !ui/node_modules
 
   libs-release:
@@ -53,6 +53,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: ui-libs
+      - name: Copy files before publishing libs
+        run: ./ui_release.sh --copy
       - name: Login to npm registry
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: Publish libraries

@@ -25,12 +25,14 @@ jobs:
         run: cd ./ui && npm install
       - name: build the app
         run: cd ./ui && npm run build
+      - name: Copy files used for the libs publication
+        run: ./ui_release.sh --copy
       - name: store react production build
         uses: actions/upload-artifact@v2
         with:
           name: ui-libs
           path: |
-            ui/**
+            ui/**/dist
             !ui/node_modules
   build-backend:
     name: "build backend"
