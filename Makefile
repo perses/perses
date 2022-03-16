@@ -83,6 +83,7 @@ generate:
 .PHONY: clean
 clean:
 	rm -rf ./bin
+	./ui_release.sh --clean
 	cd ./ui && npm run clean
 
 .PHONY: update-go-deps
