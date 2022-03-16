@@ -44,8 +44,15 @@ with `make upgrade-npm-deps`
 
 You should start to create a branch that follows the pattern `release/v<X.Y.Z>`
 
-Update the file `Changelog.md` and the different `package.json` with the corresponding version. Once you updated
-every `package.json`, you need to run `npm install` at the UI root folder `ui/`.
+Update the file `Changelog.md` and the different `package.json` with the corresponding version:
+
+```bash
+version=v0.2.0
+./ui_release.sh --release "${version}"
+cd ui/
+npm install
+git add ./ui/package-lock.json ./**/package.json
+```
 
 Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release in
 general and on the addition to the changelog in particular.
@@ -77,4 +84,5 @@ the `-s` flag by `-a` flag of the git tag command to only annotate the tag witho
 
 Once a tag is created, the release process through the Github Actions will be triggered for this tag.
 
-You should then create the Github release associated to the tag and put the content of the `Changelog.md` there.
+The Github releases will be created automatically by the Github Action triggered. Probably you will have to edit it to
+put the accurate Changelog.
