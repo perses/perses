@@ -4,41 +4,19 @@ on:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
-  build-frontend:
-    name: "build frontend"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-      - name: install nodejs
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: "ui/.nvmrc"
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: install deps
-        run: cd ./ui && npm install
-      - name: build the app
-        run: cd ./ui && npm run build
-      - name: store react production build
-        uses: actions/upload-artifact@v2
-        with:
-          name: react-build
-          path: ui/app/dist
   release:
     name: "release"
-    needs: build-frontend
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: install Go
+      - name: Install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: "ui/.nvmrc"
+      - name: Install Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.17.x
@@ -48,16 +26,28 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Download react build
-        uses: actions/download-artifact@v2
+      - uses: actions/cache@v2
         with:
-          name: react-build
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install UI deps
+        run: cd ./ui && npm install
+      - name: Build the app
+        run: cd ./ui && npm run build
+      - name: Copy files before publishing libs
+        run: ./ui_release.sh --copy
+      - name: Login to npm registry
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Run GoReleaser
+      - name: Publish libraries
+        run: ./ui_release.sh --publish
+      - name: Publish Release and binaries
         uses: goreleaser/goreleaser-action@v2
         with:
           distribution: goreleaser
