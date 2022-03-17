@@ -2,7 +2,7 @@ name: release
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+*"
 jobs:
   prepare_release:
     name: "prepare_release"
@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Check Tag
+        run: ./ui_release.sh --check-version "${{ github.ref_name }}"
       - name: Install nodejs
         uses: actions/setup-node@v3
         with:

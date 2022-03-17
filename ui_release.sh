@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 cd ui/
 
 files=("../LICENSE" "../CHANGELOG" ".npmignore")
@@ -15,6 +17,16 @@ function copy() {
 
 function publish() {
   npm publish --workspaces
+}
+
+function checkVersion() {
+  version=${1}
+  if [[ "${version}" =~ ^v[0-9]+(\.[0-9]+){2}(-.+)?$ ]]; then
+    echo "version ${version} follows the semver"
+  else
+    echo "version ${version} doesn't follow the semver"
+    exit 1
+  fi
 }
 
 function checkPackage() {
@@ -65,6 +77,10 @@ fi
 
 if [[ $1 == "--check" ]]; then
   checkPackage "${@:2}"
+fi
+
+if [[ $1 == "--check-version" ]]; then
+  checkVersion "${@:2}"
 fi
 
 if [[ $1 == "--release" ]]; then
