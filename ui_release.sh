@@ -10,7 +10,9 @@ workspaces=$(npm ls --production --depth 1 -json | jq -r '.dependencies[].resolv
 function copy() {
   for file in "${files[@]}"; do
     for workspace in ${workspaces}; do
-      cp "${file}" "${workspace}"/"$(basename "${file}")"
+      if [ -f "${file}" ]; then
+        cp "${file}" "${workspace}"/"$(basename "${file}")"
+      fi
     done
   done
 }
