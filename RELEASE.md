@@ -64,7 +64,7 @@ Entries in the `Changelog.md` are meant to be in this order:
 * `[BUGFIX]`
 * `[BREAKINGCHANGE]`
 
-As we have many libraries we aime to expose, it's better if you also put a clear indication about what lib is concerning
+As we have many libraries we publish, it's better if you also put a clear indication about what library is affected
 by these changes.
 
 ### 2. Draft the new release
