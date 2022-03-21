@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { JsonObject } from '@perses-dev/core';
-import { StatChart, StatChartData } from '@perses-dev/components';
+import { StatChart, StatChartData, UnitOptions } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
 import { useTheme } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
@@ -20,7 +20,6 @@ import { useMemo } from 'react';
 import { GraphQueryDefinition, GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
 import { defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
-import { UnitOptions } from '../../model/units';
 import { useSuggestedStepMs } from '../../model/time';
 
 export const StatChartKind = 'StatChart' as const;
