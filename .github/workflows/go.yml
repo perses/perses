@@ -23,7 +23,7 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.17.x
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -41,7 +41,7 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.17.x
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
