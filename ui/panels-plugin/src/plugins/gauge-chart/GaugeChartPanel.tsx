@@ -13,9 +13,10 @@
 
 import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
-import { GaugeChart, GaugeChartData, defaultThresholdInput, ThresholdOptions } from '@perses-dev/components';
+import { GaugeChart, GaugeChartData } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
 import { useMemo } from 'react';
+import { convertThresholds, defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { UnitOptions } from '../../model/units';
 import { useSuggestedStepMs } from '../../model/time';
@@ -39,9 +40,18 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     contentDimensions,
   } = props;
   const unit = props.definition.options.unit ?? { kind: 'Percent', decimal_places: 1 };
-  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
+
+  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
+  const axisLineColors = convertThresholds(thresholds);
+  const axisLine = {
+    show: true,
+    lineStyle: {
+      width: 5,
+      color: axisLineColors,
+    },
+  };
 
   const chartData: GaugeChartData = useMemo(() => {
     if (data === undefined) return undefined;
@@ -78,7 +88,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
       data={chartData}
       calculation={calculation}
       unit={unit}
-      thresholds={thresholds}
+      axisLine={axisLine}
     />
   );
 }

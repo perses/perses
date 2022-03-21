@@ -14,12 +14,11 @@
 import { useMemo } from 'react';
 import type { EChartsOption } from 'echarts';
 import { use } from 'echarts/core';
-import { GaugeChart as EChartsGaugeChart } from 'echarts/charts';
+import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { JsonObject } from '@perses-dev/core';
 import { formatValue, UnitOptions } from './model/units';
-import { convertThresholds, defaultThresholdInput, ThresholdOptions } from './model/thresholds';
 import { EChartsWrapper } from './EChartsWrapper';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
@@ -52,18 +51,16 @@ interface GaugeChartProps extends JsonObject {
   height: number;
   data: GaugeChartData;
   unit: UnitOptions;
-  thresholds?: ThresholdOptions;
+  axisLine: GaugeSeriesOption['axisLine'];
 }
 
 export function GaugeChart(props: GaugeChartProps) {
-  const { width, height, data, unit } = props;
-  const thresholds = props.thresholds ?? defaultThresholdInput;
+  const { width, height, data, unit, axisLine } = props;
 
   const option: EChartsOption = useMemo(() => {
     if (data === null || data === undefined) return noDataOption;
 
     const calculatedValue = data;
-    const axisLineColors = convertThresholds(thresholds);
     return {
       title: {
         show: false,
@@ -151,13 +148,7 @@ export function GaugeChart(props: GaugeChartProps) {
               color: 'auto',
             },
           },
-          axisLine: {
-            show: true,
-            lineStyle: {
-              width: 5,
-              color: axisLineColors,
-            },
-          },
+          axisLine,
           axisTick: {
             show: false,
           },
@@ -191,7 +182,7 @@ export function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, unit, thresholds]);
+  }, [data, unit, axisLine]);
 
   return (
     <EChartsWrapper
