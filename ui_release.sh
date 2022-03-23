@@ -61,12 +61,17 @@ function clean() {
   done
 }
 
-function prepareRelease() {
+function release() {
   version=${1}
   if [[ "${version}" == v* ]]; then
     version="${version:1}"
   fi
+  # increase the version on all packages
   npm version "${version}" --workspaces
+  # upgrade the @perses-dev/* dependencies on all packages
+  for workspace in ${workspaces}; do
+    sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"\^${version}\"|" "${workspace}"/package.json
+  done
 }
 
 if [[ "$1" == "--copy" ]]; then
@@ -86,7 +91,7 @@ if [[ $1 == "--check-version" ]]; then
 fi
 
 if [[ $1 == "--release" ]]; then
-  prepareRelease "${@:2}"
+  release "${@:2}"
 fi
 
 if [[ $1 == "--clean" ]]; then

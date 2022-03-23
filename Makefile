@@ -23,6 +23,12 @@ LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS
 
 all: clean build
 
+.PHONY: release
+release:
+	./ui_release.sh --release $(version)
+	cd ui/ && rm package-lock.json && npm install && cd ../
+	git add "./ui/package-lock.json" "./**/package.json"
+
 .PHONY: checkformat
 checkformat:
 	@echo ">> checking code format"
