@@ -18,7 +18,15 @@ function copy() {
 }
 
 function publish() {
-  npm publish --workspaces
+  for workspace in ${workspaces}; do
+    # package "app" is private so we shouldn't try to publish it.
+    if [[ "${workspace}" != "app" ]]; then
+      cd "${workspace}"
+      npm publish --access public
+      cd ../
+    fi
+  done
+
 }
 
 function checkVersion() {
