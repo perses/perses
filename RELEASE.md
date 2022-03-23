@@ -48,10 +48,7 @@ Update the file `CHANGELOG.md` and the different `package.json` with the corresp
 
 ```bash
 version=v0.2.0
-./ui_release.sh --release "${version}"
-cd ui/
-npm install
-git add ./ui/package-lock.json ./**/package.json
+make release version="${version}"
 ```
 
 Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release in
