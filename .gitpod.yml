@@ -2,7 +2,7 @@ image:
   file: .gitpod.Dockerfile
 tasks:
   - init: | # runs during prebuild
-      make build
+      make build-api
       make build-cli
     command: |
       cd ./dev

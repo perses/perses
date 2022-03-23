@@ -50,7 +50,7 @@ bash populate.sh
 
 ```bash
 cd ../
-make build
+make build-api
 ```
 
 * Finally, run the built binary by using the simple configuration file from the `dev` folder:
