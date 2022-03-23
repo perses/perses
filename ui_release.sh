@@ -5,7 +5,7 @@ set -e
 cd ui/
 
 files=("../LICENSE" "../CHANGELOG.md")
-workspaces=$(npm ls --production --depth 1 -json | jq -r '.dependencies[].resolved[11:]')
+workspaces=$(cat package.json | jq -r '.workspaces[]')
 
 function copy() {
   for file in "${files[@]}"; do
