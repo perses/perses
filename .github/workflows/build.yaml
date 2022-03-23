@@ -25,11 +25,15 @@ jobs:
         run: cd ./ui && npm install
       - name: build the app
         run: cd ./ui && npm run build
+      - name: Copy files used for the libs publication
+        run: ./ui_release.sh --copy
       - name: store react production build
         uses: actions/upload-artifact@v2
         with:
-          name: react-build
-          path: ui/app/dist
+          name: ui-libs
+          path: |
+            ui/**/dist
+            !ui/node_modules
   build-backend:
     name: "build backend"
     needs: build-frontend
@@ -37,7 +41,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-      - name: install golang
+      - name: install Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.17.x
@@ -50,7 +54,7 @@ jobs:
       - name: Download react build
         uses: actions/download-artifact@v2
         with:
-          name: react-build
+          name: ui-libs
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:

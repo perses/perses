@@ -23,3 +23,9 @@ yarn-error.log*
 
 # Build output
 dist
+
+# ignore file copied during the release process of the UI
+
+LICENSE
+CHANGELOG.md
+
