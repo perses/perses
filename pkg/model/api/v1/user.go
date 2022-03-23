@@ -16,6 +16,8 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+
+	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
 func GenerateUserID(name string) string {
@@ -74,8 +76,12 @@ func (p *User) GenerateID() string {
 	return GenerateUserID(p.Metadata.Name)
 }
 
-func (p *User) GetMetadata() interface{} {
+func (p *User) GetMetadata() modelAPI.Metadata {
 	return &p.Metadata
+}
+
+func (p *User) GetKind() string {
+	return string(p.Kind)
 }
 
 func (p *User) UnmarshalJSON(data []byte) error {

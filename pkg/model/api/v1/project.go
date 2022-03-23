@@ -16,6 +16,8 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+
+	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
 func GenerateProjectID(name string) string {
@@ -31,8 +33,12 @@ func (p *Project) GenerateID() string {
 	return GenerateProjectID(p.Metadata.Name)
 }
 
-func (p *Project) GetMetadata() interface{} {
+func (p *Project) GetMetadata() modelAPI.Metadata {
 	return &p.Metadata
+}
+
+func (p *Project) GetKind() string {
+	return string(p.Kind)
 }
 
 func (p *Project) UnmarshalJSON(data []byte) error {

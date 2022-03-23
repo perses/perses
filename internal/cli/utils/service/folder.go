@@ -15,23 +15,30 @@ package service
 
 import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/pkg/client/api"
+	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type folder struct {
 	Service
-	project   string
-	apiClient api.ClientInterface
+	apiClient v1.FolderInterface
+}
+
+func (f *folder) CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return f.apiClient.Create(entity.(*modelV1.Folder))
+}
+
+func (f *folder) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return f.apiClient.Update(entity.(*modelV1.Folder))
 }
 
 func (f *folder) ListResource(prefix string) (interface{}, error) {
-	return f.apiClient.V1().Folder(f.project).List(prefix)
+	return f.apiClient.List(prefix)
 }
 
 func (f *folder) GetResource(name string) (modelAPI.Entity, error) {
-	return f.apiClient.V1().Folder(f.project).Get(name)
+	return f.apiClient.Get(name)
 }
 
 func (f *folder) BuildMatrix(hits []modelAPI.Entity) [][]string {

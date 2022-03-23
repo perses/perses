@@ -13,7 +13,12 @@
 
 package api
 
+type Metadata interface {
+	GetName() string
+}
+
 type Entity interface {
+	GetKind() string
 	GenerateID() string
-	GetMetadata() interface{}
+	GetMetadata() Metadata
 }

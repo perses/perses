@@ -38,8 +38,16 @@ func (m *Metadata) CreateNow() {
 	m.UpdatedAt = m.CreatedAt
 }
 
+func (m *Metadata) GetName() string {
+	return m.Name
+}
+
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
 type ProjectMetadata struct {
 	Metadata `json:",inline" yaml:",inline"`
 	Project  string `json:"project" yaml:"project"`
+}
+
+func (m *ProjectMetadata) GetName() string {
+	return m.Name
 }

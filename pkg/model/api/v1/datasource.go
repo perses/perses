@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"gopkg.in/yaml.v2"
 )
@@ -71,8 +72,12 @@ func (d *GlobalDatasource) GenerateID() string {
 	return GenerateGlobalDatasourceID(d.Metadata.Name)
 }
 
-func (d *GlobalDatasource) GetMetadata() interface{} {
+func (d *GlobalDatasource) GetMetadata() modelAPI.Metadata {
 	return &d.Metadata
+}
+
+func (d *GlobalDatasource) GetKind() string {
+	return string(d.Kind)
 }
 
 func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
@@ -123,8 +128,12 @@ func (d *Datasource) GenerateID() string {
 	return GenerateDatasourceID(d.Metadata.Project, d.Metadata.Name)
 }
 
-func (d *Datasource) GetMetadata() interface{} {
+func (d *Datasource) GetMetadata() modelAPI.Metadata {
 	return &d.Metadata
+}
+
+func (d *Datasource) GetKind() string {
+	return string(d.Kind)
 }
 
 func (d *Datasource) UnmarshalJSON(data []byte) error {

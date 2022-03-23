@@ -71,6 +71,10 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
+	// check if project should be defined (through the config or through the flag) for the given resource.
+	if len(o.project) == 0 && !cmdUtils.IsGlobalResource(o.kind) {
+		return fmt.Errorf("no project has been defined for the scope of this command")
+	}
 	return cmdUtils.ValidateAndSetOutput(&o.output)
 }
 

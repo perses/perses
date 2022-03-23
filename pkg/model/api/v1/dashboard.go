@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"regexp"
 
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
@@ -97,8 +98,12 @@ func (d *Dashboard) GenerateID() string {
 	return GenerateDashboardID(d.Metadata.Project, d.Metadata.Name)
 }
 
-func (d *Dashboard) GetMetadata() interface{} {
+func (d *Dashboard) GetMetadata() modelAPI.Metadata {
 	return &d.Metadata
+}
+
+func (d *Dashboard) GetKind() string {
+	return string(d.Kind)
 }
 
 func (d *Dashboard) UnmarshalJSON(data []byte) error {

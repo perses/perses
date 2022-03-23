@@ -16,6 +16,7 @@ package main
 import (
 	"os"
 
+	"github.com/perses/perses/internal/cli/cmd/apply"
 	"github.com/perses/perses/internal/cli/cmd/describe"
 	"github.com/perses/perses/internal/cli/cmd/get"
 	"github.com/perses/perses/internal/cli/cmd/login"
@@ -38,6 +39,7 @@ func newRootCommand() *cobra.Command {
 	}
 
 	// The list of the commands supported
+	cmd.AddCommand(apply.NewCMD())
 	cmd.AddCommand(describe.NewCMD())
 	cmd.AddCommand(get.NewCMD())
 	cmd.AddCommand(login.NewCMD())
