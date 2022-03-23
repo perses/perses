@@ -15,6 +15,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -67,6 +68,16 @@ var resources = []resource{
 	},
 }
 
+func HandleSuccessResourceMessage(writer io.Writer, kind modelV1.Kind, project string, globalResourceMessage string) error {
+	var outputErr error
+	if IsGlobalResource(kind) {
+		outputErr = HandleString(writer, globalResourceMessage)
+	} else {
+		outputErr = HandleString(writer, fmt.Sprintf("%s in the project %q", globalResourceMessage, project))
+	}
+	return outputErr
+}
+
 // IsGlobalResource returns true if the give resource type doesn't belong to a project.
 // Returns false otherwise.
 func IsGlobalResource(kind modelV1.Kind) bool {
@@ -106,6 +117,21 @@ func ConvertToEntity(entities interface{}) ([]modelAPI.Entity, error) {
 	}
 
 	return result, nil
+}
+
+// GetProject determinate the project we should use to perform an action on the current resource with the following logic:
+// if the value is defined in the metadata, then we use this one.
+// If it's not the case we consider the one given through the flag --project.
+// If the flag is not used, then we use the one defined in the global configuration.
+// These two last cases are usually already handled by the command itself during the `Complete` step.
+func GetProject(metadata modelAPI.Metadata, defaultProject string) string {
+	project := defaultProject
+	if projectMetadata, ok := metadata.(*modelV1.ProjectMetadata); ok {
+		if len(projectMetadata.Project) > 0 {
+			project = projectMetadata.Project
+		}
+	}
+	return project
 }
 
 // GetKind tries to find the kind from the given string. It returns an error if the kind is not managed,

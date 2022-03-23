@@ -41,6 +41,10 @@ func (p *project) GetResource(name string) (modelAPI.Entity, error) {
 	return p.apiClient.Get(name)
 }
 
+func (p *project) DeleteResource(name string) error {
+	return p.apiClient.Delete(name)
+}
+
 func (p *project) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {

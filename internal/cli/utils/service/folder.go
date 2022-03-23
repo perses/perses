@@ -41,6 +41,10 @@ func (f *folder) GetResource(name string) (modelAPI.Entity, error) {
 	return f.apiClient.Get(name)
 }
 
+func (f *folder) DeleteResource(name string) error {
+	return f.apiClient.Delete(name)
+}
+
 func (f *folder) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {

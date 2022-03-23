@@ -71,16 +71,7 @@ func (o *option) Execute() error {
 	for _, entity := range entities {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
-		// We determinate the project we should use to create/update the current resource with the following logic:
-		// if the value is defined in the metadata, then we use this one.
-		// If it's not the case we consider the one given through the flag --project.
-		// If the flag is not used, then we use the one defined in the global configuration.
-		project := o.project
-		if projectMetadata, ok := entity.GetMetadata().(*modelV1.ProjectMetadata); ok {
-			if len(projectMetadata.Project) > 0 {
-				project = projectMetadata.Project
-			}
-		}
+		project := cmdUtils.GetProject(entity.GetMetadata(), o.project)
 		svc, svcErr := cmdUtilsService.NewService(kind, project, o.apiClient)
 		if svcErr != nil {
 			return svcErr
@@ -104,12 +95,8 @@ func (o *option) Execute() error {
 			}
 		}
 
-		if cmdUtils.IsGlobalResource(kind) {
-			if outputErr := cmdUtils.HandleString(o.writer, fmt.Sprintf("object %q %q has been applied", kind, name)); outputErr != nil {
-				return outputErr
-			}
-		} else if outputErr := cmdUtils.HandleString(o.writer, fmt.Sprintf("object %q %q has been applied in the project %q", kind, name, project)); outputErr != nil {
-			return outputErr
+		if outputError := cmdUtils.HandleSuccessResourceMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {
+			return err
 		}
 	}
 	return nil

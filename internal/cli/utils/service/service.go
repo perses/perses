@@ -26,6 +26,7 @@ type Service interface {
 	UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
 	ListResource(prefix string) (interface{}, error)
 	GetResource(name string) (modelAPI.Entity, error)
+	DeleteResource(name string) error
 	BuildMatrix(hits []modelAPI.Entity) [][]string
 	GetColumHeader() []string
 }
