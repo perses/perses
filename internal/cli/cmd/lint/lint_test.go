@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package linter
+package lint
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ import (
 	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
 )
 
-func TestLinterCMD(t *testing.T) {
+func TestLintCMD(t *testing.T) {
 	testSuite := []cmdUtilsTest.Suite{
 		{
 			Title:           "empty args",

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package linter
+package lint
 
 import (
 	"fmt"
@@ -59,20 +59,20 @@ func (o *option) SetWriter(writer io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "linter -f [FILENAME]",
+		Use:   "lint -f [FILENAME]",
 		Short: "Static check of the resources",
 		Long: `
-The linter command will check statically that your resources are valid. 
+The lint command will check statically that your resources are valid. 
 It doesn't necessary mean you won't face any issue when applying them.
 
 JSON and YAML formats are accepted.
 `,
 		Example: `
 # Check resources from a JSON file
-percli linter -f ./resources.json
+percli lint -f ./resources.json
 
 # Check resources from stdin.
-cat resources.json | percli linter -f -
+cat resources.json | percli lint -f -
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmdUtils.RunCMD(o, cmd, args)
