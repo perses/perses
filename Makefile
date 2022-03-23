@@ -21,7 +21,7 @@ COVER_PROFILE := coverage.txt
 PKG_LDFLAGS   := github.com/prometheus/common/version
 LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}"
 
-all: build-ui build-cli build
+all: clean build
 
 .PHONY: checkformat
 checkformat:
@@ -55,7 +55,10 @@ coverage-html: integration-test
 	$(GO) tool cover -html=$(COVER_PROFILE)
 
 .PHONY: build
-build: generate
+build: build-ui build-api build-cli
+
+.PHONY: build-api
+build-api: generate
 	@echo ">> build the perses api"
 	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/perses ./cmd/perses
 
