@@ -74,7 +74,7 @@ Tag the new release via the following commands:
 ```bash
 git checkout release/v<version_to_be_replaced>
 tag="v<version_to_be_replaced>"
-git tag -w "${tag}" -m "${tag}"
+git tag -s "${tag}" -m "${tag}"
 git push origin "${tag}"
 ```
 
