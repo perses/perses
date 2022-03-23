@@ -84,3 +84,20 @@ generate:
 clean:
 	rm -rf ./bin
 	cd ./ui && npm run clean
+
+.PHONY: update-go-deps
+update-go-deps:
+	@echo ">> updating Go dependencies"
+	@for m in $$($(GO) list -mod=readonly -m -f '{{ if and (not .Indirect) (not .Main)}}{{.Path}}{{end}}' all); do \
+		$(GO) get -d $$m; \
+	done
+
+.PHONY: update-npm-deps
+update-npm-deps:
+	@echo ">> updating npm dependencies"
+	./npm-deps.sh "minor"
+
+.PHONY: upgrade-npm-deps
+upgrade-npm-deps:
+	@echo ">> upgrading npm dependencies"
+	./npm-deps.sh "latest"
