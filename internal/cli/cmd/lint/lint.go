@@ -31,7 +31,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'linter'")
+		return fmt.Errorf("no args are supported by the command 'lint'")
 	}
 	return nil
 }
@@ -78,7 +78,7 @@ cat resources.json | percli lint -f -
 			return cmdUtils.RunCMD(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to create/update.")
+	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to check.")
 	if err := cmd.MarkFlagRequired("file"); err != nil {
 		logrus.Fatal(err)
 	}

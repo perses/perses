@@ -31,23 +31,23 @@ func TestLintCMD(t *testing.T) {
 			Title:           "use args",
 			Args:            []string{"whatever", "-f", "file.json"},
 			IsErrorExpected: true,
-			ExpectedMessage: "no args are supported by the command 'linter'",
+			ExpectedMessage: "no args are supported by the command 'lint'",
 		},
 		{
-			Title:           "linter unknown document",
+			Title:           "lint unknown document",
 			Args:            []string{"-f", "../../utils/test/sample_resources/unknown_resource.json"},
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" not supported by the command`,
 		},
 		{
-			Title:           "linter a single resource",
+			Title:           "lint a single resource",
 			Args:            []string{"-f", "../../utils/test/sample_resources/single_resource.json"},
 			IsErrorExpected: false,
 			ExpectedMessage: `your resources look good
 `,
 		},
 		{
-			Title:           "linter multiples different resources",
+			Title:           "lint multiples different resources",
 			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json"},
 			IsErrorExpected: false,
 			ExpectedMessage: `your resources look good
