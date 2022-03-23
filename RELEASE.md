@@ -44,7 +44,7 @@ with `make upgrade-npm-deps`
 
 You should start to create a branch that follows the pattern `release/v<X.Y.Z>`
 
-Update the file `Changelog.md` and the different `package.json` with the corresponding version:
+Update the file `CHANGELOG.md` and the different `package.json` with the corresponding version:
 
 ```bash
 version=v0.2.0
@@ -57,7 +57,7 @@ git add ./ui/package-lock.json ./**/package.json
 Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release in
 general and on the addition to the changelog in particular.
 
-Entries in the `Changelog.md` are meant to be in this order:
+Entries in the `CHANGELOG.md` are meant to be in this order:
 
 * `[FEATURE]`
 * `[ENHANCEMENT]`
@@ -85,4 +85,4 @@ the `-s` flag by `-a` flag of the git tag command to only annotate the tag witho
 Once a tag is created, the release process through the Github Actions will be triggered for this tag.
 
 The Github releases will be created automatically by the Github Action triggered. Probably you will have to edit it to
-put the accurate Changelog.
+put the accurate changelog.
