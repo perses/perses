@@ -27,10 +27,3 @@ coverage.txt
 
 /internal/api/e2e/test/
 /pkg/client/api/v1/test/
-
-# ignore file copied during the release process of the UI
-
-/ui/**/LICENSE
-/ui/**/CHANGELOG
-/ui/**/.npmignore
-!/ui/.npmignore

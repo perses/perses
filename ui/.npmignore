@@ -1,7 +1,0 @@
-## This file is a global one and it is copy to every package when they have to be published.
-src/
-jest.config.ts
-.eslintrc.js
-tsconfig.json
-webpack.**
-.gitignore
