@@ -4,7 +4,7 @@ set -e
 
 cd ui/
 
-files=("../LICENSE" "../CHANGELOG" ".npmignore")
+files=("../LICENSE" "../CHANGELOG.md" ".npmignore")
 workspaces=$(npm ls --production --depth 1 -json | jq -r '.dependencies[].resolved[11:]')
 
 function copy() {
