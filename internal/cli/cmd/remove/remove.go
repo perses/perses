@@ -172,7 +172,7 @@ when you submit a delete, their update will be lost along with the rest of the r
 percli delete -f data.json
 
 # Delete any kind of resources from stdin
-percli data.json | percli delete -f -
+cat data.json | percli delete -f -
 
 # Delete a specific dashboard
 percli delete dashboards node_exporter cadvisor
