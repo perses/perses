@@ -36,13 +36,13 @@ func TestDeleteCMD(t *testing.T) {
 			ExpectedMessage: `resource "whatever" not managed`,
 		},
 		{
-			Title:           "not connected to anyAPI",
+			Title:           "not connected to any API",
 			Args:            []string{"project", "perses"},
 			IsErrorExpected: true,
 			ExpectedMessage: "you are not connected to any API",
 		},
 		{
-			Title:           "delete all project",
+			Title:           "delete all projects",
 			Args:            []string{"project", "--all"},
 			APIClient:       fake_api.New(),
 			IsErrorExpected: false,
@@ -75,7 +75,7 @@ object "Project" "Chronosphere" has been deleted
 `,
 		},
 		{
-			Title:           "delete multiples different resources from a file",
+			Title:           "delete multiples resources from a file",
 			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json", "--project", "perses"},
 			APIClient:       fake_api.New(),
 			IsErrorExpected: false,
