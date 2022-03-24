@@ -25,7 +25,7 @@ all: clean build
 
 .PHONY: release
 release:
-	./ui_release.sh --release $(version)
+	./scripts/ui_release.sh --release $(version)
 	cd ui/ && npm install && cd ../
 	git add "./ui/package-lock.json" "./**/package.json"
 
@@ -37,12 +37,12 @@ checkformat:
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"
-	./check_license.sh --check *.js *.jsx *.ts *.tsx *.go
+	./scripts/check_license.sh --check *.js *.jsx *.ts *.tsx *.go
 
 .PHONY: fixlicense
 fixlicense:
 	@echo ">> adding license header where it's missing"
-	./check_license.sh --add *.js *.jsx *.ts *.tsx *.go
+	./scripts/check_license.sh --add *.js *.jsx *.ts *.tsx *.go
 
 fmt:
 	@echo ">> format code"
@@ -89,7 +89,7 @@ generate:
 .PHONY: clean
 clean:
 	rm -rf ./bin
-	./ui_release.sh --clean
+	./scripts/ui_release.sh --clean
 	cd ./ui && npm run clean
 
 .PHONY: update-go-deps
@@ -102,9 +102,9 @@ update-go-deps:
 .PHONY: update-npm-deps
 update-npm-deps:
 	@echo ">> updating npm dependencies"
-	./npm-deps.sh "minor"
+	./scripts/npm-deps.sh "minor"
 
 .PHONY: upgrade-npm-deps
 upgrade-npm-deps:
 	@echo ">> upgrading npm dependencies"
-	./npm-deps.sh "latest"
+	./scripts/npm-deps.sh "latest"
