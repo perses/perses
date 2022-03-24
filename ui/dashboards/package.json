@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/dashboards",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The dashboards feature in Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -22,9 +22,9 @@
   },
   "dependencies": {
     "@mui/material": "^5.5.1",
-    "@perses-dev/components": "^0.1.0",
-    "@perses-dev/core": "^0.1.0",
-    "@perses-dev/plugin-system": "^0.1.0",
+    "@perses-dev/components": "^0.2.0",
+    "@perses-dev/core": "^0.2.0",
+    "@perses-dev/plugin-system": "^0.2.0",
     "immer": "^9.0.12",
     "use-immer": "^0.6.0",
     "use-resize-observer": "^8.0.0"
