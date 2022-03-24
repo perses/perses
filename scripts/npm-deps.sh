@@ -5,8 +5,8 @@ function ncu() {
     npx npm-check-updates -u --target "${target}"
 }
 
-cd ui
-for workspace in $(npm ls --production --depth 1 -json | jq -r '.dependencies[].resolved[11:]'); do
+cd ui/
+for workspace in $(cat package.json | jq -r '.workspaces[]'); do
   cd ${workspace}
   ncu "$1"
   cd ../

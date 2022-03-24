@@ -26,8 +26,6 @@ jobs:
         run: cd ./ui && npm install
       - name: Build the app
         run: cd ./ui && npm run build
-      - name: Copy files before publishing libs
-        run: ./ui_release.sh --copy
       - name : Check libraries version
         run: ./ui_release.sh --check "${{ github.ref_name }}"
       - name: store react production build
@@ -56,11 +54,11 @@ jobs:
         with:
           name: ui-libs
       - name: Copy files before publishing libs
-        run: ./ui_release.sh --copy
+        run: ./scripts/ui_release.sh --copy
       - name: Login to npm registry
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: Publish libraries
-        run: ./ui_release.sh --publish
+        run: ./scripts/ui_release.sh --publish
 
   go-release:
     name: "go and github release"
