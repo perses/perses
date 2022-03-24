@@ -4,8 +4,8 @@ on:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+*"
 jobs:
-  prepare_release:
-    name: "prepare_release"
+  prepare-release:
+    name: "prepare-release"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,8 +37,8 @@ jobs:
             !ui/node_modules
 
   libs-release:
-    name: "prepare_release"
-    needs: build-frontend
+    name: "libs-release"
+    needs: "prepare-release"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -62,7 +62,7 @@ jobs:
 
   go-release:
     name: "go and github release"
-    needs: "prepare_release"
+    needs: "prepare-release"
     runs-on: ubuntu-latest
     permissions:
       contents: write
