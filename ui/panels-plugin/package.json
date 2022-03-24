@@ -2,6 +2,15 @@
   "name": "@perses-dev/panels-plugin",
   "version": "0.1.0",
   "description": "Core panels plugin for Perses",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/perses/perses/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perses/perses.git"
+  },
+  "bugs": {
+    "url": "https://github.com/perses/perses/issues"
+  },
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -45,6 +54,5 @@
   },
   "files": [
     "dist"
-  ],
-  "license": "Apache-2.0"
+  ]
 }

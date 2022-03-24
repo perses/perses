@@ -2,6 +2,15 @@
   "name": "@perses-dev/components",
   "version": "0.1.0",
   "description": "Common UI components used across Perses features",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/perses/perses/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perses/perses.git"
+  },
+  "bugs": {
+    "url": "https://github.com/perses/perses/issues"
+  },
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -18,7 +27,6 @@
   "peerDependencies": {
     "react": "^17.0.2"
   },
-  "license": "Apache-2.0",
   "files": [
     "dist"
   ]
