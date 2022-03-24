@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/components",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Common UI components used across Perses features",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
