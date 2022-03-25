@@ -49,16 +49,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: "ui/.nvmrc"
+          registry-url: "https://registry.npmjs.org"
       - name: Download react build
         uses: actions/download-artifact@v2
         with:
           name: ui-libs
       - name: Copy files before publishing libs
         run: ./scripts/ui_release.sh --copy
-      - name: Login to npm registry
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: Publish libraries
         run: ./scripts/ui_release.sh --publish
+        env:
+          # The setup-node action writes an .npmrc file with this env variable
+          # as the placeholder for the auth token
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   go-release:
     name: "go and github release"
