@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Check Tag
-        run: ./ui_release.sh --check-version "${{ github.ref_name }}"
+        run: ./scripts/ui_release.sh --check-version "${{ github.ref_name }}"
       - name: Install nodejs
         uses: actions/setup-node@v3
         with:
@@ -26,8 +26,8 @@ jobs:
         run: cd ./ui && npm install
       - name: Build the app
         run: cd ./ui && npm run build
-      - name : Check libraries version
-        run: ./ui_release.sh --check "${{ github.ref_name }}"
+      - name: Check libraries version
+        run: ./scripts/ui_release.sh --check "${{ github.ref_name }}"
       - name: store react production build
         uses: actions/upload-artifact@v2
         with:
