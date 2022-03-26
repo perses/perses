@@ -93,6 +93,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Generate endpoints
+        run: make generate
       - name: Publish Release and binaries
         uses: goreleaser/goreleaser-action@v2
         with:
