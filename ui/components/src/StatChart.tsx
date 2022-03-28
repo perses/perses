@@ -13,17 +13,14 @@
 
 import { useMemo } from 'react';
 import { merge } from 'lodash-es';
-import { useTheme } from '@mui/material';
 import type { EChartsOption } from 'echarts';
 import { use } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { GraphSeries } from '@perses-dev/plugin-system';
-import { formatValue, UnitOptions } from '../../model/units'; // TODO (sjcobb): add back formatValue
-import { defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
-import { EChartsWrapper } from '../../components/echarts-wrapper/EChartsWrapper';
+import { formatValue, UnitOptions } from './model/units'; // TODO (sjcobb): add back formatValue
+import { EChartsWrapper } from './EChartsWrapper';
 
 use([
   EChartsGaugeChart,
@@ -56,6 +53,15 @@ const noDataOption = {
   series: [],
 };
 
+export type UnixTimeMs = number;
+
+export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
+
+export interface GraphSeries {
+  name: string;
+  values: Iterable<GraphSeriesValueTuple>;
+}
+
 export interface StatChartData {
   calculatedValue: number | null | undefined;
   seriesData: GraphSeries | null | undefined;
@@ -67,22 +73,12 @@ interface StatChartProps {
   height: number;
   data: StatChartData;
   unit: UnitOptions;
-  thresholds?: ThresholdOptions;
+  backgroundColor?: string;
   sparkline?: LineSeriesOption;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, sparkline } = props;
-  const thresholds = props.thresholds ?? defaultThresholdInput;
-  const theme = useTheme();
-
-  const showSparkline = sparkline !== undefined ? true : false;
-  let backgroundColor = 'transparent';
-  if (thresholds.default_color) {
-    backgroundColor = thresholds.default_color;
-  } else if (showSparkline === true) {
-    backgroundColor = theme.palette.primary.light;
-  }
+  const { width, height, data, unit, backgroundColor, sparkline } = props;
 
   const option: EChartsOption = useMemo(() => {
     if (data.seriesData === undefined) return {};
@@ -91,7 +87,6 @@ export function StatChart(props: StatChartProps) {
     const series = data.seriesData;
     const calculatedValue = data.calculatedValue ?? 0;
     const isLargePanel = width > 250 ? true : false;
-    //  const nameFontSize = isLargePanel ? 30 : 12;
     const showName = isLargePanel;
     const name = showName === true ? data.name : '';
     const smallestSide = Math.min(width, height * 1.2);
