@@ -1,16 +1,22 @@
-name: release
+name: build_and_release
 on:
+  pull_request:
   push:
+    branches:
+      - main
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+*"
 jobs:
-  prepare-release:
-    name: "prepare-release"
+  build-frontend:
+    name: "build-frontend"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Check Tag
+        ## This step is verifying that the tag follow the semver
+        ## It is only triggered when a tag is created
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         run: ./scripts/ui_release.sh --check-version "${{ github.ref_name }}"
       - name: Install nodejs
         uses: actions/setup-node@v3
@@ -27,7 +33,9 @@ jobs:
       - name: Build the app
         run: cd ./ui && npm run build
       - name: Check libraries version
-        run: ./scripts/ui_release.sh --check "${{ github.ref_name }}"
+        ## This step is verifying that the version of each package is matching the tag
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
+        run: ./scripts/ui_release.sh --check-package "${{ github.ref_name }}"
       - name: store react production build
         uses: actions/upload-artifact@v2
         with:
@@ -38,10 +46,8 @@ jobs:
 
   libs-release:
     name: "libs-release"
-    needs: "prepare-release"
+    needs: "build-frontend"
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -57,16 +63,20 @@ jobs:
           path: ui
       - name: Copy files before publishing libs
         run: ./scripts/ui_release.sh --copy
+      - name: Publish dry-run libraries
+        if: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+        run: ./scripts/ui_release.sh --publish dry-run
       - name: Publish libraries
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         run: ./scripts/ui_release.sh --publish
         env:
           # The setup-node action writes an .npmrc file with this env variable
           # as the placeholder for the auth token
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  go-release:
+  go-build-and-release:
     name: "go and github release"
-    needs: "prepare-release"
+    needs: "build-frontend"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -88,13 +98,30 @@ jobs:
         with:
           name: ui-libs
           path: ui
+      - name: Generate endpoints
+        run: make generate
       - name: Login to Docker Hub
         uses: docker/login-action@v1
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Publish Release and binaries
+      - name: Build Go binaries and docker images
+        ## This step will only run when a pull request is opened or when there is a push on the main branch.
+        ## It will build the Go binaries and the docker images.
         uses: goreleaser/goreleaser-action@v2
+        if: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --snapshot --rm-dist
+      - name: Publish Release and binaries
+        ## This step will only run when a new tag is pushed.
+        ## It will build the Go binaries and the docker images and then publish:
+        ## - the Github release with the archive built
+        ## - docker images on the different docker registry selected
+        uses: goreleaser/goreleaser-action@v2
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         with:
           distribution: goreleaser
           version: latest
