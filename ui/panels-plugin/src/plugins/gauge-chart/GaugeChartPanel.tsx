@@ -85,7 +85,6 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
       width={contentDimensions.width}
       height={contentDimensions.height}
       data={chartData}
-      calculation={calculation}
       unit={unit}
       axisLine={axisLine}
     />
