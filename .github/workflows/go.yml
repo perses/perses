@@ -32,7 +32,7 @@ jobs:
     - name: check format
       run: make checkformat
   test:
-    name: "unit test"
+    name: "unit and integration tests"
     runs-on: ubuntu-latest
     steps:
     - name: checkout
@@ -47,7 +47,7 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-    - name: unit test
+    - name: test
       run: make integration-test
     - uses: codecov/codecov-action@v2
       with:
