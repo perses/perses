@@ -90,7 +90,7 @@ if [[ $1 == "--publish" ]]; then
   publish
 fi
 
-if [[ $1 == "--check" ]]; then
+if [[ $1 == "--check-package" ]]; then
   checkPackage "${@:2}"
 fi
 
