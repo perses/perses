@@ -18,11 +18,16 @@ function copy() {
 }
 
 function publish() {
+  dry_run="${1}"
+  cmd="npm publish --access public"
+  if [[ "${dry_run}" == "dry-run" ]]; then
+    cmd+=" --dry-run"
+  fi
   for workspace in ${workspaces}; do
     # package "app" is private so we shouldn't try to publish it.
     if [[ "${workspace}" != "app" ]]; then
       cd "${workspace}"
-      npm publish --access public
+      eval "${cmd}"
       cd ../
     fi
   done
@@ -87,7 +92,7 @@ if [[ "$1" == "--copy" ]]; then
 fi
 
 if [[ $1 == "--publish" ]]; then
-  publish
+  publish "${@:2}"
 fi
 
 if [[ $1 == "--check-package" ]]; then

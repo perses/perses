@@ -63,7 +63,11 @@ jobs:
           path: ui
       - name: Copy files before publishing libs
         run: ./scripts/ui_release.sh --copy
+      - name: Publish dry-run libraries
+        if: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
+        run: ./scripts/ui_release.sh --publish dry-run
       - name: Publish libraries
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         run: ./scripts/ui_release.sh --publish
         env:
           # The setup-node action writes an .npmrc file with this env variable
