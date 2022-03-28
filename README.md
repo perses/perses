@@ -1,6 +1,5 @@
 Perses
 ======
-[![CircleCI](https://circleci.com/gh/perses/perses.svg?style=shield)](https://circleci.com/gh/perses/perses)
 [![build](https://github.com/perses/perses/workflows/build/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Abuild)
 [![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago)
 [![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3React)

@@ -48,7 +48,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
     - name: unit test
-      run: make test
+      run: make integration-test
+    - uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
   golangci:
     name: lint
     runs-on: ubuntu-latest
