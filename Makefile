@@ -21,7 +21,13 @@ COVER_PROFILE := coverage.txt
 PKG_LDFLAGS   := github.com/prometheus/common/version
 LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}"
 
-all: build-ui build-cli build
+all: clean build
+
+.PHONY: release
+release:
+	./scripts/ui_release.sh --release $(version)
+	cd ui/ && npm install && cd ../
+	git add "./ui/package-lock.json" "./**/package.json"
 
 .PHONY: checkformat
 checkformat:
@@ -31,12 +37,12 @@ checkformat:
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"
-	./check_license.sh --check *.js *.jsx *.ts *.tsx *.go
+	./scripts/check_license.sh --check *.js *.jsx *.ts *.tsx *.go
 
 .PHONY: fixlicense
 fixlicense:
 	@echo ">> adding license header where it's missing"
-	./check_license.sh --add *.js *.jsx *.ts *.tsx *.go
+	./scripts/check_license.sh --add *.js *.jsx *.ts *.tsx *.go
 
 fmt:
 	@echo ">> format code"
@@ -55,7 +61,10 @@ coverage-html: integration-test
 	$(GO) tool cover -html=$(COVER_PROFILE)
 
 .PHONY: build
-build: generate
+build: build-ui build-api build-cli
+
+.PHONY: build-api
+build-api: generate
 	@echo ">> build the perses api"
 	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/perses ./cmd/perses
 
@@ -80,4 +89,22 @@ generate:
 .PHONY: clean
 clean:
 	rm -rf ./bin
+	./scripts/ui_release.sh --clean
 	cd ./ui && npm run clean
+
+.PHONY: update-go-deps
+update-go-deps:
+	@echo ">> updating Go dependencies"
+	@for m in $$($(GO) list -mod=readonly -m -f '{{ if and (not .Indirect) (not .Main)}}{{.Path}}{{end}}' all); do \
+		$(GO) get -d $$m; \
+	done
+
+.PHONY: update-npm-deps
+update-npm-deps:
+	@echo ">> updating npm dependencies"
+	./scripts/npm-deps.sh "minor"
+
+.PHONY: upgrade-npm-deps
+upgrade-npm-deps:
+	@echo ">> upgrading npm dependencies"
+	./scripts/npm-deps.sh "latest"

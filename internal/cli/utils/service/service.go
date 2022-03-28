@@ -22,8 +22,11 @@ import (
 )
 
 type Service interface {
+	CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
+	UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
 	ListResource(prefix string) (interface{}, error)
 	GetResource(name string) (modelAPI.Entity, error)
+	DeleteResource(name string) error
 	BuildMatrix(hits []modelAPI.Entity) [][]string
 	GetColumHeader() []string
 }
@@ -32,28 +35,25 @@ func NewService(kind modelV1.Kind, projectName string, apiClient api.ClientInter
 	switch kind {
 	case modelV1.KindDashboard:
 		return &dashboard{
-			project:   projectName,
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Dashboard(projectName),
 		}, nil
 	case modelV1.KindDatasource:
 		return &datasource{
-			project:   projectName,
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Datasource(projectName),
 		}, nil
 	case modelV1.KindFolder:
 		return &folder{
-			project:   projectName,
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Folder(projectName),
 		}, nil
 	case modelV1.KindGlobalDatasource:
 		return &globalDatasource{
-			apiClient: apiClient,
+			apiClient: apiClient.V1().GlobalDatasource(),
 		}, nil
 	case modelV1.KindProject:
 		return &project{
-			apiClient: apiClient,
+			apiClient: apiClient.V1().Project(),
 		}, nil
 	default:
-		return nil, fmt.Errorf("resource %q not supported by get command", kind)
+		return nil, fmt.Errorf("resource %q not supported by the command", kind)
 	}
 }

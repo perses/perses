@@ -15,23 +15,34 @@ package service
 
 import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/pkg/client/api"
+	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type datasource struct {
 	Service
-	project   string
-	apiClient api.ClientInterface
+	apiClient v1.DatasourceInterface
+}
+
+func (d *datasource) CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Create(entity.(*modelV1.Datasource))
+}
+
+func (d *datasource) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Update(entity.(*modelV1.Datasource))
 }
 
 func (d *datasource) ListResource(prefix string) (interface{}, error) {
-	return d.apiClient.V1().Datasource(d.project).List(prefix)
+	return d.apiClient.List(prefix)
 }
 
 func (d *datasource) GetResource(name string) (modelAPI.Entity, error) {
-	return d.apiClient.V1().Datasource(d.project).Get(name)
+	return d.apiClient.Get(name)
+}
+
+func (d *datasource) DeleteResource(name string) error {
+	return d.apiClient.Delete(name)
 }
 
 func (d *datasource) BuildMatrix(hits []modelAPI.Entity) [][]string {

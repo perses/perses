@@ -49,7 +49,7 @@ func TestDescribeCMD(t *testing.T) {
 			ExpectedMessage: "you cannot have more than two arguments for the command 'describe'",
 		},
 		{
-			Title:           "not connected to anyAPI",
+			Title:           "not connected to any API",
 			Args:            []string{"project", "perses", "-ojson"},
 			IsErrorExpected: true,
 			ExpectedMessage: "you are not connected to any API",

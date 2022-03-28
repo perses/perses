@@ -15,22 +15,34 @@ package service
 
 import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/pkg/client/api"
+	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type globalDatasource struct {
 	Service
-	apiClient api.ClientInterface
+	apiClient v1.GlobalDatasourceInterface
+}
+
+func (d *globalDatasource) CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Create(entity.(*modelV1.GlobalDatasource))
+}
+
+func (d *globalDatasource) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Update(entity.(*modelV1.GlobalDatasource))
 }
 
 func (d *globalDatasource) ListResource(prefix string) (interface{}, error) {
-	return d.apiClient.V1().GlobalDatasource().List(prefix)
+	return d.apiClient.List(prefix)
 }
 
 func (d *globalDatasource) GetResource(name string) (modelAPI.Entity, error) {
-	return d.apiClient.V1().GlobalDatasource().Get(name)
+	return d.apiClient.Get(name)
+}
+
+func (d *globalDatasource) DeleteResource(name string) error {
+	return d.apiClient.Delete(name)
 }
 
 func (d *globalDatasource) BuildMatrix(hits []modelAPI.Entity) [][]string {

@@ -16,10 +16,13 @@ package main
 import (
 	"os"
 
+	"github.com/perses/perses/internal/cli/cmd/apply"
 	"github.com/perses/perses/internal/cli/cmd/describe"
 	"github.com/perses/perses/internal/cli/cmd/get"
+	"github.com/perses/perses/internal/cli/cmd/lint"
 	"github.com/perses/perses/internal/cli/cmd/login"
 	"github.com/perses/perses/internal/cli/cmd/project"
+	"github.com/perses/perses/internal/cli/cmd/remove"
 	"github.com/perses/perses/internal/cli/cmd/version"
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/sirupsen/logrus"
@@ -38,10 +41,13 @@ func newRootCommand() *cobra.Command {
 	}
 
 	// The list of the commands supported
+	cmd.AddCommand(apply.NewCMD())
 	cmd.AddCommand(describe.NewCMD())
 	cmd.AddCommand(get.NewCMD())
+	cmd.AddCommand(lint.NewCMD())
 	cmd.AddCommand(login.NewCMD())
 	cmd.AddCommand(project.NewCMD())
+	cmd.AddCommand(remove.NewCMD())
 	cmd.AddCommand(version.NewCMD())
 
 	// the list of the global flags supported

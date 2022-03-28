@@ -16,6 +16,8 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+
+	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
 type Kind string
@@ -72,4 +74,24 @@ func (k *Kind) validate() error {
 		return fmt.Errorf("unknown kind %q used", *k)
 	}
 	return nil
+}
+
+// GetStruct return a pointer to an empty struct that matches the kind passed as a parameter.
+func GetStruct(kind Kind) (modelAPI.Entity, error) {
+	switch kind {
+	case KindDashboard:
+		return &Dashboard{}, nil
+	case KindDatasource:
+		return &Datasource{}, nil
+	case KindFolder:
+		return &Folder{}, nil
+	case KindGlobalDatasource:
+		return &GlobalDatasource{}, nil
+	case KindProject:
+		return &Project{}, nil
+	case KindUser:
+		return &User{}, nil
+	default:
+		return nil, fmt.Errorf("%q has no associated struct", kind)
+	}
 }

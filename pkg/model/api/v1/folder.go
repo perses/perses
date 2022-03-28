@@ -16,6 +16,8 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+
+	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
 func GenerateFolderID(project string, name string) string {
@@ -81,8 +83,12 @@ func (f *Folder) GenerateID() string {
 	return GenerateDashboardID(f.Metadata.Project, f.Metadata.Name)
 }
 
-func (f *Folder) GetMetadata() interface{} {
+func (f *Folder) GetMetadata() modelAPI.Metadata {
 	return &f.Metadata
+}
+
+func (f *Folder) GetKind() string {
+	return string(f.Kind)
 }
 
 func (f *Folder) UnmarshalJSON(data []byte) error {

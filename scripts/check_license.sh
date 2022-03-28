@@ -2,7 +2,7 @@
 
 set -e
 
-exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" "*/dist/*")
+exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" ".circleci/*" "scripts/*" "*/dist/*")
 year=$(date +'%Y')
 
 license_copyright="The Perses Authors"
