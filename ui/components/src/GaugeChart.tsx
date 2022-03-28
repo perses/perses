@@ -17,7 +17,6 @@ import { use } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { JsonObject } from '@perses-dev/core';
 import { formatValue, UnitOptions } from './model/units';
 import { EChartsWrapper } from './EChartsWrapper';
 
@@ -46,7 +45,7 @@ const noDataOption = {
 
 export type GaugeChartData = number | null | undefined;
 
-interface GaugeChartProps extends JsonObject {
+interface GaugeChartProps {
   width: number;
   height: number;
   data: GaugeChartData;

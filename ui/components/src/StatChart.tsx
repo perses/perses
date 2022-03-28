@@ -19,7 +19,6 @@ import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/char
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { GraphSeries } from '@perses-dev/plugin-system';
 import { formatValue, UnitOptions } from './model/units'; // TODO (sjcobb): add back formatValue
 import { EChartsWrapper } from './EChartsWrapper';
 
@@ -53,6 +52,15 @@ const noDataOption = {
   },
   series: [],
 };
+
+export type UnixTimeMs = number;
+
+export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
+
+export interface GraphSeries {
+  name: string;
+  values: Iterable<GraphSeriesValueTuple>;
+}
 
 export interface StatChartData {
   calculatedValue: number | null | undefined;
