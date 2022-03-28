@@ -19,12 +19,13 @@ import (
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/prometheus/common/version"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 type fullOutputVersion struct {
 	Client *outputVersion `json:"client"`
-	Server *outputVersion `json:"server,omitempty"`
+	Server *outputVersion `json:"server,omitempty" yaml:"server,omitempty"`
 }
 
 type outputVersion struct {
@@ -43,9 +44,8 @@ type option struct {
 
 func (o *option) Complete(_ []string) error {
 	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
-	if err != nil {
-		return err
-	}
+	// In case you are not connected to any API, it is still fine.
+	logrus.WithError(err).Debug("unable to get the api client from config")
 	o.apiClient = apiClient
 	return nil
 }
@@ -68,12 +68,13 @@ func (o *option) Execute() error {
 	if o.apiClient != nil {
 		health, err := o.apiClient.V1().Health().Check()
 		if err != nil {
-			return err
-		}
-		v.Server = &outputVersion{
-			BuildTime: health.BuildTime,
-			Version:   health.Version,
-			Commit:    health.Commit,
+			logrus.WithError(err).Error("unable to get the server version")
+		} else {
+			v.Server = &outputVersion{
+				BuildTime: health.BuildTime,
+				Version:   health.Version,
+				Commit:    health.Commit,
+			}
 		}
 	}
 	return cmdUtils.HandleOutput(o.writer, o.output, v)
