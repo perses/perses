@@ -1,6 +1,6 @@
 Perses
 ======
-[![build](https://github.com/perses/perses/workflows/build/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Abuild)
+[![build](https://github.com/perses/perses/workflows/build_and_release/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Abuild)
 [![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago)
 [![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3React)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/perses/perses)
