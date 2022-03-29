@@ -31,7 +31,7 @@ bump-version:
 
 .PHONY: tag
 tag:
-	version=$$(< VERSION) && ./scripts/ui_release.sh --tag "$${version}"
+	version=$$(< VERSION) && ./scripts/release.sh --tag "$${version}"
 
 .PHONY: checkformat
 checkformat:

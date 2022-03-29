@@ -81,7 +81,7 @@ Signing a tag with a GPG key is appreciated, but in case you can't add a GPG key
 following [procedure](https://docs.github.com/en/authentication/managing-commit-signature-verification), you can replace
 the `-s` flag by `-a` flag of the git tag command to only annotate the tag without signing.
 
-Once a tag is created, the release process through the Github Actions will be triggered for this tag.
+Once a tag is created, the release process through the GitHub Actions will be triggered for this tag.
 
-The Github releases will be created automatically by the Github Action triggered. Probably you will have to edit it to
-put the accurate changelog.
+The Github releases will be created automatically by the GitHub Action triggered. Hopefully you will find the accurate
+changelog there. It won't hurt if you check quickly if it does not miss anything there.

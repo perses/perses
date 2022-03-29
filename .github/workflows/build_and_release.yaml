@@ -13,11 +13,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Check Tag
-        ## This step is verifying that the tag follow the semver
-        ## It is only triggered when a tag is created
-        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
-        run: ./scripts/ui_release.sh --check-version "${{ github.ref_name }}"
       - name: Install nodejs
         uses: actions/setup-node@v3
         with:
@@ -28,14 +23,22 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: Install UI deps
-        run: cd ./ui && npm install
-      - name: Build the app
-        run: cd ./ui && npm run build
+
+      - name: Check Tag
+        ## This step is verifying that the tag follow the semver
+        ## It is only triggered when a tag is created
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
+        run: ./scripts/release.sh --check-version "${{ github.ref_name }}"
+
       - name: Check libraries version
         ## This step is verifying that the version of each package is matching the tag
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         run: ./scripts/ui_release.sh --check-package "${{ github.ref_name }}"
+
+      - name: Install UI deps
+        run: cd ./ui && npm install
+      - name: Build the app
+        run: cd ./ui && npm run build
       - name: store react production build
         uses: actions/upload-artifact@v2
         with:
@@ -100,6 +103,8 @@ jobs:
           path: ui
       - name: Generate endpoints
         run: make generate
+      - name: Extract Changelog
+        run: ./scripts/release.sh --extract-changelog
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
@@ -125,6 +130,6 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --release-notes GENERATED_CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

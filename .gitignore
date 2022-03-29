@@ -27,3 +27,5 @@ coverage.txt
 
 /internal/api/e2e/test/
 /pkg/client/api/v1/test/
+
+GENERATED_CHANGELOG.md
