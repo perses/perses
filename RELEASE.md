@@ -42,13 +42,16 @@ with `make upgrade-npm-deps`
 
 ### 1. Prepare your release
 
-You should start to create a branch that follows the pattern `release/v<X.Y.Z>`
+You should start to create a branch that follows the pattern `release/v<X.Y>`. Release candidates and patch releases
+for any given major or minor release happen in the same release/v<major>.<minor> branch. Do not create release/<version>
+for patch or release candidate releases.
+
+Update the file `VERSION` with the new version to be created.
 
 Update the file `CHANGELOG.md` and the different `package.json` with the corresponding version:
 
 ```bash
-version=v0.2.0
-make release version="${version}"
+make bump-version
 ```
 
 Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release in
@@ -61,8 +64,8 @@ Entries in the `CHANGELOG.md` are meant to be in this order:
 * `[BUGFIX]`
 * `[BREAKINGCHANGE]`
 
-As we have many libraries we publish, it's better if you also put a clear indication about what library is affected
-by these changes.
+As we have many libraries we publish, it's better if you also put a clear indication about what library is affected by
+these changes.
 
 ### 2. Draft the new release
 
@@ -70,9 +73,8 @@ Tag the new release via the following commands:
 
 ```bash
 git checkout release/v<version_to_be_replaced>
-tag="v<version_to_be_replaced>"
-git tag -s "${tag}" -m "${tag}"
-git push origin "${tag}"
+make tag
+git push origin v<version_to_be_replaced>
 ```
 
 Signing a tag with a GPG key is appreciated, but in case you can't add a GPG key to your Github account using the

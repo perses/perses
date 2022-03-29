@@ -23,11 +23,15 @@ LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS
 
 all: clean build
 
-.PHONY: release
-release:
-	./scripts/ui_release.sh --release $(version)
-	cd ui/ && npm install && cd ../
+.PHONY: bump-version
+bump-version:
+	version=$$(< VERSION) && ./scripts/ui_release.sh --bump-version "$${version}"
+	cd ui/ && npm install
 	git add "./ui/package-lock.json" "./**/package.json"
+
+.PHONY: tag
+tag:
+	version=$$(< VERSION) && ./scripts/ui_release.sh --tag "$${version}"
 
 .PHONY: checkformat
 checkformat:
@@ -44,10 +48,12 @@ fixlicense:
 	@echo ">> adding license header where it's missing"
 	./scripts/check_license.sh --add *.js *.jsx *.ts *.tsx *.go
 
+.PHONY: fmt
 fmt:
 	@echo ">> format code"
 	$(GO) fmt ./...
 
+.PHONY: test
 test: generate
 	@echo ">> running all tests"
 	$(GO) test -count=1 -v ./...
