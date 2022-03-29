@@ -37,9 +37,9 @@ function publish() {
 function checkVersion() {
   version=${1}
   if [[ "${version}" =~ ^v[0-9]+(\.[0-9]+){2}(-.+)?$ ]]; then
-    echo "version ${version} follows the semver"
+    echo "version '${version}' follows the semver"
   else
-    echo "version ${version} doesn't follow the semver"
+    echo "version '${version}' doesn't follow the semver"
     exit 1
   fi
 }
@@ -74,8 +74,8 @@ function clean() {
   done
 }
 
-function release() {
-  version=${1}
+function bumpVersion() {
+  version="${1}"
   if [[ "${version}" == v* ]]; then
     version="${version:1}"
   fi
@@ -85,6 +85,22 @@ function release() {
   for workspace in ${workspaces}; do
     sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"\^${version}\"|" "${workspace}"/package.json
   done
+}
+
+function tag() {
+  version="${1}"
+  tag="v${version}"
+  branch=$(git branch --show-current)
+  checkVersion "${tag}"
+  expectedBranch="release/$(echo "${tag}" | sed -E  's/(v[0-9]+\.[0-9]+).*/\1/')"
+
+  if [[ "${branch}" != "${expectedBranch}" ]]; then
+    echo "you are not on the correct release branch (i.e. not on ${expectedBranch}) to create the tag"
+    exit 1
+  fi
+
+  git pull origin "${expectedBranch}"
+  git tag -s "${tag}" -m "${tag}"
 }
 
 if [[ "$1" == "--copy" ]]; then
@@ -103,10 +119,14 @@ if [[ $1 == "--check-version" ]]; then
   checkVersion "${@:2}"
 fi
 
-if [[ $1 == "--release" ]]; then
-  release "${@:2}"
+if [[ $1 == "--bump-version" ]]; then
+  bumpVersion "${@:2}"
 fi
 
 if [[ $1 == "--clean" ]]; then
   clean
+fi
+
+if [[ $1 == "--tag" ]]; then
+  tag "${@:2}"
 fi
