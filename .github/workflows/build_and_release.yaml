@@ -114,7 +114,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --snapshot --rm-dist
+          args: release --snapshot --rm-dist --parallelism 3
       - name: Publish Release and binaries
         ## This step will only run when a new tag is pushed.
         ## It will build the Go binaries and the docker images and then publish:
@@ -125,6 +125,6 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --parallelism 3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
