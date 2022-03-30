@@ -98,8 +98,6 @@ jobs:
         with:
           name: ui-libs
           path: ui
-      - name: Generate endpoints
-        run: make generate
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
@@ -110,6 +108,8 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           install-only: true
+      - name: Download dependencies
+        run: go mod download
       - name: Build Go binaries and docker images
         ## This step will only run when a pull request is opened or when there is a push on the main branch.
         ## It will build the Go binaries and the docker images.

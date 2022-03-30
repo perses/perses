@@ -79,7 +79,7 @@ build-cli:
 
 .PHONY: crossbuild
 crossbuild: generate
-	goreleaser release --snapshot --rm-dist --parallelism 3
+	goreleaser release --snapshot --rm-dist
 
 .PHONY: generate
 generate:
