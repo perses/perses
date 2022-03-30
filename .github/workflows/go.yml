@@ -22,7 +22,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v2
       with:
-        go-version: 1.18.x
+        go-version: 1.17.x
     - uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
@@ -40,7 +40,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v2
       with:
-        go-version: 1.18.x
+        go-version: 1.17.x
     - uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
@@ -61,7 +61,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v2
       with:
-        go-version: 1.18.x
+        go-version: 1.17.x
     - name: generate files
       run: make generate
     - name: golangci-lint

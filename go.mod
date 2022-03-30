@@ -1,6 +1,6 @@
 module github.com/perses/perses
 
-go 1.18
+go 1.17
 
 require (
 	github.com/gavv/httpexpect/v2 v2.3.1
