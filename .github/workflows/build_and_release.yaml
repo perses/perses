@@ -86,7 +86,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18.x
+          go-version: 1.17.x
       - uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
@@ -98,23 +98,23 @@ jobs:
         with:
           name: ui-libs
           path: ui
+      - name: Generate endpoints
+        run: make generate
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          install-only: true
-      - name: Download dependencies
-        run: go mod download
       - name: Build Go binaries and docker images
         ## This step will only run when a pull request is opened or when there is a push on the main branch.
         ## It will build the Go binaries and the docker images.
+        uses: goreleaser/goreleaser-action@v2
         if: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
-        run: make crossbuild
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --snapshot --rm-dist
       - name: Publish Release and binaries
         ## This step will only run when a new tag is pushed.
         ## It will build the Go binaries and the docker images and then publish:
@@ -125,6 +125,6 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist --parallelism 3
+          args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
