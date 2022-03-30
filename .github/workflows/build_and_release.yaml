@@ -106,15 +106,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          install-only: true
       - name: Build Go binaries and docker images
         ## This step will only run when a pull request is opened or when there is a push on the main branch.
         ## It will build the Go binaries and the docker images.
-        uses: goreleaser/goreleaser-action@v2
         if: ${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --snapshot --rm-dist --parallelism 3
+        run: make crossbuild
       - name: Publish Release and binaries
         ## This step will only run when a new tag is pushed.
         ## It will build the Go binaries and the docker images and then publish:

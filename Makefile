@@ -77,6 +77,10 @@ build-cli:
 	@echo ">> build the perses cli"
 	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/percli ./cmd/percli
 
+.PHONY: crossbuild
+crossbuild: generate
+	goreleaser release --snapshot --rm-dist --parallelism 3
+
 .PHONY: generate
 generate:
 	$(GO) generate ./internal/api
