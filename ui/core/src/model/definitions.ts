@@ -30,3 +30,13 @@ export interface Definition<Options extends JsonObject> extends JsonObject {
   kind: string;
   options: Options;
 }
+
+/**
+ * A reference to a value in a JSON document.
+ */
+export interface JsonReference {
+  /**
+   * A JSON Pointer to the value. (See https://datatracker.ietf.org/doc/html/rfc6901)
+   */
+  $ref: string;
+}

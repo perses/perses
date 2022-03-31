@@ -11,17 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DatasourceSelector } from './datasource';
 import { LayoutDefinition } from './layout';
 import { PanelDefinition } from './panels';
 import { ProjectMetadata } from './resource';
 import { DurationString } from './time';
 import { VariableDefinition } from './variables';
-
-export interface DatasourceSelector {
-  name: string;
-  kind: string;
-  global: boolean;
-}
 
 export interface DashboardResource {
   kind: 'Dashboard';

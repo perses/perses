@@ -12,11 +12,15 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { DatasourceSelector, GlobalDatasourceModel } from '@perses-dev/core';
+import { DatasourceSelector, GlobalDatasourceResource, DatasourceResource } from '@perses-dev/core';
+
+export type Datasource = GlobalDatasourceResource | DatasourceResource;
 
 export interface Datasources {
-  defaultDatasource: GlobalDatasourceModel;
-  getDatasources(selector: DatasourceSelector): GlobalDatasourceModel[];
+  /**
+   * Gets the Datasource for the provided selector or if no selector is provided, gets the current default Datasource.
+   */
+  getDatasource(selector?: DatasourceSelector): Promise<Datasource>;
 }
 
 export const DatasourcesContext = createContext<Datasources | undefined>(undefined);

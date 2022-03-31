@@ -11,24 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { JsonReference } from './definitions';
 import { Metadata, ProjectMetadata } from './resource';
 
+export interface DatasourceResource {
+  kind: 'Datasource';
+  metadata: ProjectMetadata;
+  spec: DatasourceSpec;
+}
+
+export interface GlobalDatasourceResource {
+  kind: 'GlobalDatasource';
+  metadata: Metadata;
+  spec: DatasourceSpec;
+}
+
 // TODO: Should use Definition<> and JsonObject?
-export interface DatasourceSpecDefinition {
+export interface DatasourceSpec {
   kind: string;
   default: boolean;
 }
 
-export type AnyDatasourceSpecDefinition = DatasourceSpecDefinition;
-
-export interface DatasourceModel {
-  kind: 'Datasource';
-  metadata: ProjectMetadata;
-  spec: AnyDatasourceSpecDefinition;
-}
-
-export interface GlobalDatasourceModel {
-  kind: 'GlobalDatasource';
-  metadata: Metadata;
-  spec: AnyDatasourceSpecDefinition;
-}
+export type DatasourceSelector = JsonReference;
