@@ -29,10 +29,10 @@
     "react-query": "^3.34.16"
   },
   "devDependencies": {
-    "react": "^17.0.2"
+    "react": "^18.0.0"
   },
   "peerDependencies": {
-    "react": "^17.0.2"
+    "react": "^18.0.0"
   },
   "perses": {
     "kind": "Plugin",
