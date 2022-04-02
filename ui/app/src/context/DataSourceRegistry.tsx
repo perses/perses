@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useMemo } from 'react';
-import { DatasourceSelector } from '@perses-dev/core';
+import { useCallback, useMemo, useRef } from 'react';
+import { fetchJson, GlobalDatasourceResource, DatasourceSelector } from '@perses-dev/core';
 import { DatasourcesContext, Datasources } from '@perses-dev/plugin-system';
-import { useGlobalDatasourceQuery } from '../model/datasource-client';
+import buildURL from '../model/url-builder';
 import { useSnackbar } from './SnackbarProvider';
 
 export interface DataSourceRegistryProps {
@@ -27,32 +27,47 @@ export interface DataSourceRegistryProps {
 export function DataSourceRegistry(props: DataSourceRegistryProps) {
   const { children } = props;
   const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useGlobalDatasourceQuery({
-    onError: exceptionSnackbar,
-  });
-  const datasourceList: GlobalDatasourceModel[] = useMemo(() => {
-    if (isLoading || data === undefined) {
-      return [];
-    }
-    return data;
-  }, [isLoading, data]);
 
-  const getDatasources: Datasources['getDatasources'] = useCallback(
-    (selector: DatasourceSelector) => {
-      return datasourceList.filter((ds: GlobalDatasourceModel) => {
-        return selector.global && selector.kind === ds.spec.kind && selector.name === ds.metadata.name;
-      });
+  const defaultDatasourcePromise = useRef<Promise<GlobalDatasourceResource> | undefined>(undefined);
+
+  // Callback for fetching the list of Global Datasources and selecting the default one in the list
+  const getDefaultDatasource = useCallback(async () => {
+    try {
+      const resource = 'globaldatasources';
+      const url = buildURL({ resource });
+      const datasources = await fetchJson<GlobalDatasourceResource[]>(url);
+      const defaultDatasource = datasources.find((ds) => ds.spec.default);
+      if (defaultDatasource === undefined) {
+        throw new Error('No default Datasource is configured');
+      }
+      return defaultDatasource;
+    } catch (err) {
+      exceptionSnackbar(err);
+      throw err;
+    }
+  }, [exceptionSnackbar]);
+
+  const getDatasource: Datasources['getDatasource'] = useCallback(
+    (selector?: DatasourceSelector) => {
+      if (selector !== undefined) {
+        // TODO: JSON ref resolve
+        return Promise.reject(new Error('Not implemented'));
+      }
+
+      // Kick off the fetch for the default if we haven't yet
+      if (defaultDatasourcePromise.current === undefined) {
+        defaultDatasourcePromise.current = getDefaultDatasource().catch((err) => {
+          // If the fetch errors out, reset to allow it to be retried, but still propagate the error
+          defaultDatasourcePromise.current = undefined;
+          throw err;
+        });
+      }
+
+      return defaultDatasourcePromise.current;
     },
-    [datasourceList]
+    [getDefaultDatasource]
   );
 
-  const context = useMemo(() => {
-    const defaultDatasource = datasourceList.find((ds) => ds.spec.default);
-    if (defaultDatasource === undefined) return undefined;
-    return { defaultDatasource, getDatasources };
-  }, [getDatasources, datasourceList]);
-
-  // TODO: Show a loading indicator? Change up the API to be async?
-  if (context === undefined) return null;
+  const context = useMemo(() => ({ getDatasource }), [getDatasource]);
   return <DatasourcesContext.Provider value={context}>{children}</DatasourcesContext.Provider>;
 }
