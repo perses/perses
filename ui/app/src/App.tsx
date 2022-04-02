@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
-import { DataSourceRegistry } from './context/DataSourceRegistry';
+import { DatasourceRegistry } from './context/DatasourceRegistry';
 import Header from './components/Header';
 import { useBundledPlugins } from './model/bundled-plugins';
 
@@ -39,9 +39,9 @@ function App() {
       >
         <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
           <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-            <DataSourceRegistry>
+            <DatasourceRegistry>
               <ViewDashboard />
-            </DataSourceRegistry>
+            </DatasourceRegistry>
           </PluginBoundary>
         </PluginRegistry>
       </Box>

@@ -17,14 +17,14 @@ import { DatasourcesContext, Datasources } from '@perses-dev/plugin-system';
 import buildURL from '../model/url-builder';
 import { useSnackbar } from './SnackbarProvider';
 
-export interface DataSourceRegistryProps {
+export interface DatasourceRegistryProps {
   children: React.ReactNode;
 }
 
 /**
  * Makes DataSource resources available to children.
  */
-export function DataSourceRegistry(props: DataSourceRegistryProps) {
+export function DatasourceRegistry(props: DatasourceRegistryProps) {
   const { children } = props;
   const { exceptionSnackbar } = useSnackbar();
 
