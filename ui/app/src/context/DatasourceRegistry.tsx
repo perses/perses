@@ -18,6 +18,8 @@ import { parse } from 'jsonref';
 import buildURL from '../model/url-builder';
 import { useSnackbar } from './SnackbarProvider';
 
+const DEFAULT_DATASOURCE_CACHE_KEY = '__DEFAULT_DATASOURCE__';
+
 export interface DatasourceRegistryProps {
   children: React.ReactNode;
 }
@@ -29,58 +31,55 @@ export function DatasourceRegistry(props: DatasourceRegistryProps) {
   const { children } = props;
   const { exceptionSnackbar } = useSnackbar();
 
-  // Callback for fetching the list of Global Datasources and selecting the default one in the list
-  const getDefaultDatasource = useCallback(async () => {
-    try {
-      const resource = 'globaldatasources';
-      const url = buildURL({ resource });
-      const datasources = await fetchJson<GlobalDatasourceResource[]>(url);
-      const defaultDatasource = datasources.find((ds) => ds.spec.default);
-      if (defaultDatasource === undefined) {
-        throw new Error('No default Datasource is configured');
+  const getDatasourceImpl = useCallback(
+    async (selector?: DatasourceSelector): Promise<Datasource> => {
+      try {
+        // For specific datasource refs, use jsonref to resolve/parse the ref
+        if (selector !== undefined) {
+          // Clone selector because jsonref has a side-effect in parse that modifies the provided object
+          selector = { ...selector };
+          const datasource: Datasource = await parse(selector, { retriever: fetchJson, scope: window.location.origin });
+          return datasource;
+        }
+
+        // For the overall global default datasource, fetch the list and find the one marked with "default"
+        const resource = 'globaldatasources';
+        const url = buildURL({ resource });
+        const datasources = await fetchJson<GlobalDatasourceResource[]>(url);
+        const defaultDatasource = datasources.find((ds) => ds.spec.default);
+        if (defaultDatasource === undefined) {
+          throw new Error('No default Datasource is configured');
+        }
+        return defaultDatasource;
+      } catch (err) {
+        exceptionSnackbar(err);
+        throw err;
       }
-      return defaultDatasource;
-    } catch (err) {
-      exceptionSnackbar(err);
-      throw err;
-    }
-  }, [exceptionSnackbar]);
+    },
+    [exceptionSnackbar]
+  );
 
-  // Cached value for the default Datasource calculation
-  const defaultDatasourcePromise = useRef<Promise<GlobalDatasourceResource> | undefined>(undefined);
+  // Cached values for datasources
+  const datasourcePromises = useRef(new Map<string, Promise<Datasource>>());
 
-  // Cached values for other Datasource references
-  const datasourceRefPromises = useRef(new Map<string, Promise<Datasource>>());
-
+  // Use the cache when getting Datasources
   const getDatasource: Datasources['getDatasource'] = useCallback(
     (selector?: DatasourceSelector) => {
-      if (selector !== undefined) {
-        // Kick off fetch for that selector if we haven't yet
-        let promise = datasourceRefPromises.current.get(selector.$ref);
-        if (promise === undefined) {
-          // Use spread (...) on the selector because jsonref has a side-effect that modifies the object you pass to parse
-          promise = parse({ ...selector }, { retriever: fetchJson, scope: window.location.origin }).catch((err) => {
-            // If parse/fetch errors out, reset cache to allow retry but propagate the error
-            datasourceRefPromises.current.delete(selector.$ref);
-            throw err;
-          });
-          datasourceRefPromises.current.set(selector.$ref, promise);
-        }
-        return promise;
-      }
-
-      // Kick off the fetch for the default if we haven't yet
-      if (defaultDatasourcePromise.current === undefined) {
-        defaultDatasourcePromise.current = getDefaultDatasource().catch((err) => {
-          // If the fetch errors out, reset to allow it to be retried, but still propagate the error
-          defaultDatasourcePromise.current = undefined;
+      // Kick off the fetch if we haven't already done it and it's cached
+      const cacheKey = selector?.$ref ?? DEFAULT_DATASOURCE_CACHE_KEY;
+      let promise = datasourcePromises.current.get(cacheKey);
+      if (promise === undefined) {
+        promise = getDatasourceImpl(selector).catch((err) => {
+          // Reset the cache but propagate the error if promise fails
+          datasourcePromises.current.delete(cacheKey);
           throw err;
         });
+        datasourcePromises.current.set(cacheKey, promise);
       }
 
-      return defaultDatasourcePromise.current;
+      return promise;
     },
-    [getDefaultDatasource]
+    [getDatasourceImpl]
   );
 
   const context = useMemo(() => ({ getDatasource }), [getDatasource]);
