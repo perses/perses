@@ -13,7 +13,7 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { fetchJson, GlobalDatasourceResource, DatasourceSelector } from '@perses-dev/core';
-import { DatasourcesContext, Datasources } from '@perses-dev/plugin-system';
+import { DatasourcesContext, Datasources, Datasource } from '@perses-dev/plugin-system';
 import { parse } from 'jsonref';
 import buildURL from '../model/url-builder';
 import { useSnackbar } from './SnackbarProvider';
@@ -28,8 +28,6 @@ export interface DatasourceRegistryProps {
 export function DatasourceRegistry(props: DatasourceRegistryProps) {
   const { children } = props;
   const { exceptionSnackbar } = useSnackbar();
-
-  const defaultDatasourcePromise = useRef<Promise<GlobalDatasourceResource> | undefined>(undefined);
 
   // Callback for fetching the list of Global Datasources and selecting the default one in the list
   const getDefaultDatasource = useCallback(async () => {
@@ -48,13 +46,27 @@ export function DatasourceRegistry(props: DatasourceRegistryProps) {
     }
   }, [exceptionSnackbar]);
 
-  // Registry for jsonref parsing which basically acts like a cache
-  const registry = useRef({});
+  // Cached value for the default Datasource calculation
+  const defaultDatasourcePromise = useRef<Promise<GlobalDatasourceResource> | undefined>(undefined);
+
+  // Cached values for other Datasource references
+  const datasourceRefPromises = useRef(new Map<string, Promise<Datasource>>());
 
   const getDatasource: Datasources['getDatasource'] = useCallback(
     (selector?: DatasourceSelector) => {
       if (selector !== undefined) {
-        return parse(selector, { retriever: fetchJson, scope: window.location.origin, registry: registry.current });
+        // Kick off fetch for that selector if we haven't yet
+        let promise = datasourceRefPromises.current.get(selector.$ref);
+        if (promise === undefined) {
+          // Use spread (...) on the selector because jsonref has a side-effect that modifies the object you pass to parse
+          promise = parse({ ...selector }, { retriever: fetchJson, scope: window.location.origin }).catch((err) => {
+            // If parse/fetch errors out, reset cache to allow retry but propagate the error
+            datasourceRefPromises.current.delete(selector.$ref);
+            throw err;
+          });
+          datasourceRefPromises.current.set(selector.$ref, promise);
+        }
+        return promise;
       }
 
       // Kick off the fetch for the default if we haven't yet
