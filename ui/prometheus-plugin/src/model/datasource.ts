@@ -11,40 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  AnyDatasourceSpecDefinition,
-  DatasourceSelector,
-  DatasourceSpecDefinition,
-  HTTPConfig,
-} from '@perses-dev/core';
+import { DatasourceSelector, DatasourceSpec, HTTPConfig } from '@perses-dev/core';
 import { useDatasources } from '@perses-dev/plugin-system';
 
-export interface PrometheusSpecDatasource extends DatasourceSpecDefinition {
+export interface PrometheusDatasourceSpec extends DatasourceSpec {
   kind: 'Prometheus';
   http: HTTPConfig;
 }
 
-function isPrometheusDatasource(def: AnyDatasourceSpecDefinition): def is PrometheusSpecDatasource {
+function isPrometheusDatasource(def: DatasourceSpec): def is PrometheusDatasourceSpec {
   return def.kind === 'Prometheus';
 }
 
-export function usePrometheusConfig(selector?: DatasourceSelector) {
-  const datasources = useDatasources();
-
-  const models = selector === undefined ? [datasources.defaultDatasource] : datasources.getDatasources(selector);
-  if (models.length > 1) {
-    throw new Error('More than one Datasource found');
-  }
-
-  const model = models[0];
-  if (model === undefined) {
-    throw new Error('Datasource not found');
-  }
-
-  const spec = model.spec;
-  if (isPrometheusDatasource(spec)) {
-    return { ...model, spec };
-  }
-
-  throw new Error('Datasource is not a valid Prometheus Datasource');
+/**
+ * Returns a callback that will get a Prometheus Datasource from the plugin runtime.
+ */
+export function useGetPrometheusConfig() {
+  const { getDatasource } = useDatasources();
+  return async function getPrometheusDatasource(selector?: DatasourceSelector) {
+    const datasource = await getDatasource(selector);
+    const spec = datasource.spec;
+    if (isPrometheusDatasource(spec)) {
+      return { ...datasource, spec };
+    }
+    throw new Error('Datasource is not a valid Prometheus Datasource');
+  };
 }

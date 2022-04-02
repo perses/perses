@@ -23,7 +23,7 @@ import {
   RangeQueryRequestParameters,
   RangeQueryResponse,
 } from './api-types';
-import { usePrometheusConfig } from './datasource';
+import { useGetPrometheusConfig } from './datasource';
 
 export type QueryOptions = Pick<UseQueryOptions, 'enabled'> & {
   datasource?: DatasourceSelector;
@@ -65,13 +65,14 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions?: QueryOptions
 ) {
-  const config = usePrometheusConfig(queryOptions?.datasource);
-  const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
-  const key = [datasourceURL, apiURI, params] as const;
+  const getPrometheusDatasource = useGetPrometheusConfig();
+  const key = [queryOptions?.datasource?.$ref, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
     key,
-    () => {
+    async () => {
+      const config = await getPrometheusDatasource(queryOptions?.datasource);
+      const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
       let url = `${datasourceURL}${apiURI}`;
 
       const urlParams = createSearchParams(params).toString();
@@ -79,7 +80,8 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
         url += `?${urlParams}`;
       }
 
-      return fetchJson<TResponse>(url, { method: 'GET' });
+      const data = await fetchJson<TResponse>(url, { method: 'GET' });
+      return data;
     },
     queryOptions
   );
@@ -90,13 +92,15 @@ function useQueryWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions?: QueryOptions
 ) {
-  const config = usePrometheusConfig(queryOptions?.datasource);
-  const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
-  const key = [datasourceURL, apiURI, params] as const;
+  const getPrometheusDatasource = useGetPrometheusConfig();
+  const key = [queryOptions?.datasource?.$ref, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
     key,
-    () => {
+    async () => {
+      const config = await getPrometheusDatasource(queryOptions?.datasource);
+      const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
+
       const url = `${datasourceURL}${apiURI}`;
       const init = {
         method: 'POST',
@@ -105,7 +109,8 @@ function useQueryWithPost<T extends RequestParams<T>, TResponse>(
         },
         body: createSearchParams(params),
       };
-      return fetchJson<TResponse>(url, init);
+      const data = await fetchJson<TResponse>(url, init);
+      return data;
     },
     queryOptions
   );
