@@ -16,7 +16,6 @@ import { fetchJson, GlobalDatasourceResource, DatasourceSelector } from '@perses
 import { DatasourcesContext, Datasources, Datasource } from '@perses-dev/plugin-system';
 import { parse } from 'jsonref';
 import buildURL from '../model/url-builder';
-import { useSnackbar } from './SnackbarProvider';
 
 const DEFAULT_DATASOURCE_CACHE_KEY = '__DEFAULT_DATASOURCE__';
 
@@ -29,35 +28,26 @@ export interface DatasourceRegistryProps {
  */
 export function DatasourceRegistry(props: DatasourceRegistryProps) {
   const { children } = props;
-  const { exceptionSnackbar } = useSnackbar();
 
-  const getDatasourceImpl = useCallback(
-    async (selector?: DatasourceSelector): Promise<Datasource> => {
-      try {
-        // For specific datasource refs, use jsonref to resolve/parse the ref
-        if (selector !== undefined) {
-          // Clone selector because jsonref has a side-effect in parse that modifies the provided object
-          selector = { ...selector };
-          const datasource: Datasource = await parse(selector, { retriever: fetchJson, scope: window.location.origin });
-          return datasource;
-        }
+  const getDatasourceImpl = useCallback(async (selector?: DatasourceSelector): Promise<Datasource> => {
+    // For specific datasource refs, use jsonref to resolve/parse the ref
+    if (selector !== undefined) {
+      // Clone selector because jsonref has a side-effect in parse that modifies the provided object
+      selector = { ...selector };
+      const datasource: Datasource = await parse(selector, { retriever: fetchJson, scope: window.location.origin });
+      return datasource;
+    }
 
-        // For the overall global default datasource, fetch the list and find the one marked with "default"
-        const resource = 'globaldatasources';
-        const url = buildURL({ resource });
-        const datasources = await fetchJson<GlobalDatasourceResource[]>(url);
-        const defaultDatasource = datasources.find((ds) => ds.spec.default);
-        if (defaultDatasource === undefined) {
-          throw new Error('No default Datasource is configured');
-        }
-        return defaultDatasource;
-      } catch (err) {
-        exceptionSnackbar(err);
-        throw err;
-      }
-    },
-    [exceptionSnackbar]
-  );
+    // For the overall global default datasource, fetch the list and find the one marked with "default"
+    const resource = 'globaldatasources';
+    const url = buildURL({ resource });
+    const datasources = await fetchJson<GlobalDatasourceResource[]>(url);
+    const defaultDatasource = datasources.find((ds) => ds.spec.default);
+    if (defaultDatasource === undefined) {
+      throw new Error('No default Datasource is configured');
+    }
+    return defaultDatasource;
+  }, []);
 
   // Cached values for datasources
   const datasourcePromises = useRef(new Map<string, Promise<Datasource>>());
