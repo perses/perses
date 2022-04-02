@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
+import { VariableDefinition, DashboardResource } from '@perses-dev/core';
 
 const benchmarkDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -22,7 +22,7 @@ const benchmarkDashboard: DashboardResource = {
     updated_at: '2021-11-09',
   },
   spec: {
-    datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
+    datasource: { $ref: '/api/v1/globaldatasources/PrometheusDemoBrowser#' },
     duration: '12h',
     variables: {
       job: {
@@ -37,7 +37,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: 'node',
         },
-      } as AnyVariableDefinition,
+      } as VariableDefinition,
       instance: {
         kind: 'PrometheusLabelValues',
         options: {
@@ -51,7 +51,7 @@ const benchmarkDashboard: DashboardResource = {
           default_value: ['demo.do.prometheus.io:9100'],
           all_value: '$__all',
         },
-      } as AnyVariableDefinition,
+      } as VariableDefinition,
       interval: {
         kind: 'Interval',
         options: {
@@ -67,7 +67,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: '1h',
         },
-      } as AnyVariableDefinition,
+      } as VariableDefinition,
     },
     panels: {
       seriesTest: {

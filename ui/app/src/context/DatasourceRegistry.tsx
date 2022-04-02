@@ -14,6 +14,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { fetchJson, GlobalDatasourceResource, DatasourceSelector } from '@perses-dev/core';
 import { DatasourcesContext, Datasources } from '@perses-dev/plugin-system';
+import { parse } from 'jsonref';
 import buildURL from '../model/url-builder';
 import { useSnackbar } from './SnackbarProvider';
 
@@ -47,11 +48,13 @@ export function DatasourceRegistry(props: DatasourceRegistryProps) {
     }
   }, [exceptionSnackbar]);
 
+  // Registry for jsonref parsing which basically acts like a cache
+  const registry = useRef({});
+
   const getDatasource: Datasources['getDatasource'] = useCallback(
     (selector?: DatasourceSelector) => {
       if (selector !== undefined) {
-        // TODO: JSON ref resolve
-        return Promise.reject(new Error('Not implemented'));
+        return parse(selector, { retriever: fetchJson, scope: window.location.origin, registry: registry.current });
       }
 
       // Kick off the fetch for the default if we haven't yet

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, AnyVariableDefinition } from '@perses-dev/core';
+import { DashboardResource, VariableDefinition } from '@perses-dev/core';
 
 const nodeExporterDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -22,7 +22,7 @@ const nodeExporterDashboard: DashboardResource = {
     updated_at: '2021-11-09',
   },
   spec: {
-    datasource: { name: 'Public Prometheus Demo Server' },
+    datasource: { $ref: '/api/v1/globaldatasources/PrometheusDemoBrowser#' },
     // TODO: Should duration actually be a time range?
     duration: '24h',
     variables: {
@@ -68,7 +68,7 @@ const nodeExporterDashboard: DashboardResource = {
         selection: {
           default_value: '1m',
         },
-      } as AnyVariableDefinition,
+      } as VariableDefinition,
     },
     panels: {
       cpu: {

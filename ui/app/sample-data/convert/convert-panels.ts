@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, AnyPanelDefinition, DashboardSpec } from '@perses-dev/core';
+import { DashboardSpec, PanelDefinition } from '@perses-dev/core';
+import { GraphQueryDefinition } from '@perses-dev/plugin-system';
 import { camelCase } from 'lodash-es';
 import {
   GrafanaGaugePanel,
@@ -62,7 +63,7 @@ export function convertPanels(rowsAndPanels: Array<GrafanaRow | GrafanaPanel>): 
   return { panels, panelKeys };
 }
 
-function convertPanel(grafanaPanel: GrafanaPanel): AnyPanelDefinition {
+function convertPanel(grafanaPanel: GrafanaPanel): PanelDefinition {
   switch (grafanaPanel.type) {
     case 'graph':
       return convertGraphPanel(grafanaPanel);
@@ -74,14 +75,14 @@ function convertPanel(grafanaPanel: GrafanaPanel): AnyPanelDefinition {
       return {
         kind: 'EmptyChart',
         display: {
-          name: grafanaPanel.title,
+          name: 'Unknown Panel',
         },
         options: {},
       };
   }
 }
 
-function convertGraphPanel(graphPanel: GrafanaGraphPanel): AnyPanelDefinition {
+function convertGraphPanel(graphPanel: GrafanaGraphPanel): PanelDefinition {
   return {
     kind: 'LineChart',
     display: {
@@ -93,7 +94,7 @@ function convertGraphPanel(graphPanel: GrafanaGraphPanel): AnyPanelDefinition {
   };
 }
 
-function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
+function convertGaugePanel(gaugePanel: GrafanaGaugePanel): PanelDefinition {
   // TODO: Does a Gauge chart with multiple queries even make sense?
   const target = gaugePanel.targets[0];
 
@@ -118,7 +119,7 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
   };
 }
 
-function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefinition {
+function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): PanelDefinition {
   const target = statPanel.targets[0];
   const { format } = statPanel;
   const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
@@ -144,7 +145,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
   return convertedPanel;
 }
 
-function convertQueryTarget(target?: PromQueryTarget): AnyGraphQueryDefinition {
+function convertQueryTarget(target?: PromQueryTarget): GraphQueryDefinition {
   const query = target.expr ?? '';
   const min_step = target.step === undefined ? undefined : `${target.step}s`;
 
