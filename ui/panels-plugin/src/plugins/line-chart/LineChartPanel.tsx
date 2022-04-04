@@ -11,45 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as echarts from 'echarts/core';
 import type { EChartsOption } from 'echarts';
-import { LineChartPanel as EChartsLineChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
-import { useEffect, useMemo, useState, useLayoutEffect, useRef } from 'react';
+import { useMemo } from 'react';
 import { Box } from '@mui/material';
 import { useRunningGraphQueries } from './GraphQueryRunner';
-import { TooltipData, emptyTooltipData } from './tooltip/tooltip-model';
 import { getRandomColor } from './utils/palette-gen';
 import { getCommonTimeScale } from './utils/data-transform';
-import { getNearbySeries } from './utils/focused-series';
-import Tooltip from './tooltip/Tooltip';
 
-echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
-
-// TODO (sjcobb): move to chart theme, share with GaugeChart
-const noDataOption = {
-  title: {
-    show: true,
-    textStyle: {
-      color: 'grey',
-      fontSize: 16,
-      fontWeight: 400,
-    },
-    text: 'No data',
-    left: 'center',
-    top: 'center',
-  },
-  xAxis: {
-    show: false,
-  },
-  yAxis: {
-    show: false,
-  },
-  series: [],
-};
-
-export interface LineChartProps {
+export interface LineChartPanelProps {
   width: number;
   height: number;
 }
@@ -57,13 +26,12 @@ export interface LineChartProps {
 /**
  * Draws a LineChart with Apache ECharts for the current running time series.
  */
-function LineChartPanel(props: LineChartProps) {
+function LineChartPanel(props: LineChartPanelProps) {
   const { width, height } = props;
   const queries = useRunningGraphQueries();
-  const [tooltipData, setTooltipData] = useState<TooltipData>(emptyTooltipData);
 
-  // Calculate the LineChartPanel options based on the query results
-  const { option, timeScale } = useMemo(() => {
+  // populate series data based on query results
+  const { series, timeScale } = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
     if (timeScale === undefined) {
       return { option: { series: undefined }, timeScale: undefined };
@@ -90,146 +58,20 @@ function LineChartPanel(props: LineChartProps) {
       }
     }
 
-    if (series.length === 0) return { option: noDataOption, timeScale };
-
-    const option: EChartsOption = {
-      title: {
-        show: false,
-      },
-      series,
-      xAxis: {
-        type: 'time',
-        boundaryGap: false,
-      },
-      yAxis: {
-        type: 'value',
-      },
-      grid: {
-        top: 10,
-        right: 10,
-        bottom: 10,
-        left: 0,
-        containLabel: true,
-      },
-      animation: false,
-      tooltip: {
-        show: false,
-      },
-    };
+    if (series.length === 0) return { series: null, timeScale };
 
     return {
-      option,
+      series,
       timeScale,
     };
   }, [queries]);
 
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const [chart, setChart] = useState<echarts.ECharts | undefined>(undefined);
-
-  // Create a chart instance in the container
-  useLayoutEffect(() => {
-    if (containerRef === null) return;
-
-    const chart = echarts.init(containerRef);
-    setChart(chart);
-
-    return () => {
-      chart.dispose();
-    };
-  }, [containerRef]);
-
-  // Sync options with chart instance
-  useLayoutEffect(() => {
-    if (chart === undefined) return;
-
-    if (option.series === undefined) {
-      chart.showLoading();
-    } else {
-      chart.hideLoading();
-    }
-
-    chart.setOption(option);
-  }, [chart, option]);
-
-  // Populate tooltip data from getZr cursor coordinates
-  useEffect(() => {
-    if (chart === undefined || option.series === undefined) return;
-    if (Array.isArray(option.series) && option.series.length === 0) return;
-
-    const chartWidth = chart.getWidth();
-    const xAxisInterval = timeScale ? timeScale.stepMs : 0;
-    const xBuffer = xAxisInterval * 0.5;
-
-    const yAxisInterval = chart['_model'].getComponent('yAxis').axis.scale._interval;
-    const yBuffer = yAxisInterval * 0.5;
-
-    let lastPosX: number | null = null;
-    let lastPosY: number | null = null;
-    const zr = chart.getZr();
-    zr.on('mousemove', (params) => {
-      const mouseEvent = params.event as MouseEvent;
-      const pointInPixel = [params.offsetX, params.offsetY];
-
-      // only trigger tooltip when within chart canvas
-      if (!chart.containPixel('grid', pointInPixel)) {
-        setTooltipData(emptyTooltipData); // resets tooltip content
-        return;
-      }
-
-      // only trigger when cursor has moved
-      if (lastPosX === null || lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
-        const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
-        if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-          setTooltipData({
-            cursor: {
-              coords: {
-                plotCanvas: {
-                  x: params.offsetX,
-                  y: params.offsetY,
-                },
-                viewport: {
-                  x: mouseEvent.pageX,
-                  y: mouseEvent.pageY,
-                },
-              },
-              chartWidth: chartWidth,
-              focusedSeriesIdx: null,
-              focusedPointIdx: null,
-            },
-            focusedSeries: getNearbySeries(option.series, pointInGrid, xBuffer, yBuffer),
-          });
-        }
-      }
-      lastPosX = params.offsetX;
-      lastPosY = params.offsetY;
-    });
-
-    return () => {
-      if (zr.handler !== null) {
-        zr.off('mousemove');
-      }
-    };
-  }, [chart, option, timeScale]);
-
-  // Resize the chart to match as width/height changes
-  const prevSize = useRef({ width, height });
-  useLayoutEffect(() => {
-    // No need to resize initially
-    if (prevSize.current.width === width && prevSize.current.height === height) {
-      return;
-    }
-
-    // Can't resize if no chart yet
-    if (chart === undefined) return;
-
-    chart.resize({ width, height });
-    prevSize.current = { width, height };
-  }, [chart, width, height]);
+  console.log(series);
+  console.log(timeScale);
 
   return (
     <>
       <Box ref={setContainerRef} sx={{ width, height }}></Box>
-      <Tooltip tooltipData={tooltipData}></Tooltip>
     </>
   );
 }
