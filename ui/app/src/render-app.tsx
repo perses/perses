@@ -14,7 +14,6 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { enableMapSet } from 'immer';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
 import { createTheme } from './styles/theme';
@@ -24,8 +23,6 @@ import { SnackbarProvider } from './context/SnackbarProvider';
  * Renders the Perses application in the target container.
  */
 export function renderApp(container: ReactDOM.Container | null) {
-  enableMapSet();
-
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
 
   ReactDOM.render(

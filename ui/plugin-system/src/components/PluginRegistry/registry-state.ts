@@ -27,12 +27,12 @@ import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from 
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
 export type PluginResourcesByTypeAndKind = {
-  [K in PluginType]: Map<string, PluginResource>;
+  [K in PluginType]: Record<string, PluginResource>;
 };
 
 // Once a plugin is registered, it's stored by plugin type and kind
 export type LoadedPluginsByTypeAndKind = {
-  [Type in PluginType]: Map<string, PluginImplementation<Type, JsonObject>>;
+  [Type in PluginType]: Record<string, PluginImplementation<Type, JsonObject>>;
 };
 
 /**
@@ -45,7 +45,7 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
   const loadablePlugins = useMemo(() => {
     const loadableProps = {} as PluginResourcesByTypeAndKind;
     for (const pluginType of ALL_PLUGIN_TYPES) {
-      loadableProps[pluginType] = new Map();
+      loadableProps[pluginType] = {};
     }
 
     // If no plugins installed or waiting on that data, nothing else to do
@@ -58,11 +58,11 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
         if (pluginType === undefined) continue;
 
         const map = loadableProps[pluginType];
-        if (map.has(kind)) {
+        if (map[kind] !== undefined) {
           console.warn(`Got multiple ${pluginType} plugin definitions for kind ${kind}`);
           continue;
         }
-        map.set(kind, resource);
+        map[kind] = resource;
       }
     };
 
@@ -76,7 +76,7 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
   const [plugins, setPlugins] = useImmer<LoadedPluginsByTypeAndKind>(() => {
     const loadedPlugins = {} as LoadedPluginsByTypeAndKind;
     for (const pluginType of ALL_PLUGIN_TYPES) {
-      loadedPlugins[pluginType] = new Map();
+      loadedPlugins[pluginType] = {};
     }
     return loadedPlugins;
   });
@@ -87,17 +87,17 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
       switch (config.pluginType) {
         case 'Variable':
           setPlugins((draft) => {
-            draft.Variable.set(config.kind, createVariablePlugin(config));
+            draft.Variable[config.kind] = createVariablePlugin(config);
           });
           return;
         case 'Panel':
           setPlugins((draft) => {
-            draft.Panel.set(config.kind, createPanelPlugin(config));
+            draft.Panel[config.kind] = createPanelPlugin(config);
           });
           return;
         case 'GraphQuery':
           setPlugins((draft) => {
-            draft.GraphQuery.set(config.kind, createGraphQueryPlugin(config));
+            draft.GraphQuery[config.kind] = createGraphQueryPlugin(config);
           });
           return;
         default:
