@@ -85,7 +85,7 @@ export interface ZoomEventData {
   endIndex: number;
 }
 
-interface EChartsLineChartProps {
+interface LineChartProps {
   height: number;
   data: EChartsDataFormat;
   legend?: LegendComponentOption;
@@ -95,7 +95,7 @@ interface EChartsLineChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export function LineChart(props: EChartsLineChartProps) {
+export function LineChart(props: LineChartProps) {
   const { height, data, legend, toolbox, dataZoom, onDataZoom } = props;
   const theme = useTheme();
   const chartRef = useRef();

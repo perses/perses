@@ -14,6 +14,7 @@
 import type { EChartsOption } from 'echarts';
 import { useMemo } from 'react';
 import { Box } from '@mui/material';
+import { LineChart } from '@perses-dev/components';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getRandomColor } from './utils/palette-gen';
 import { getCommonTimeScale } from './utils/data-transform';
@@ -66,14 +67,15 @@ export function LineChartContainer(props: LineChartContainerProps) {
     };
   }, [queries]);
 
-  console.log(series);
-  console.log(timeScale);
+  console.log('series: ', series);
+  console.log('timeScale: ', timeScale);
+
+  // const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [] };
+  const graphData = { timeSeries: [], xAxis: [] };
 
   return (
-    <>
-      <Box sx={{ width, height }}>
-        <h2>TODO: add LineChart</h2>
-      </Box>
-    </>
+    <Box sx={{ width, height }}>
+      <LineChart height={height} data={graphData} />
+    </Box>
   );
 }

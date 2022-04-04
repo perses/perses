@@ -15,6 +15,7 @@ export * from './ECharts';
 export * from './ErrorAlert';
 export * from './ErrorBoundary';
 export * from './GaugeChart';
+export * from './LineChart';
 export * from './StatChart';
 export * from './utils/combine-sx';
 export * from './model/units';
