@@ -18,7 +18,7 @@ import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/char
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { formatValue, UnitOptions } from './model/units';
-import { EChartsWrapper } from './EChartsWrapper';
+import { ECharts } from './ECharts';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -184,7 +184,7 @@ export function GaugeChart(props: GaugeChartProps) {
   }, [data, unit, axisLine]);
 
   return (
-    <EChartsWrapper
+    <ECharts
       sx={{
         width: width,
         height: height,

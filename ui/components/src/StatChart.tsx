@@ -20,7 +20,7 @@ import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts'
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { formatValue, UnitOptions } from './model/units'; // TODO (sjcobb): add back formatValue
-import { EChartsWrapper } from './EChartsWrapper';
+import { ECharts } from './ECharts';
 
 use([
   EChartsGaugeChart,
@@ -227,7 +227,7 @@ export function StatChart(props: StatChartProps) {
   }, [data, height, unit, width, sparkline, backgroundColor]);
 
   return (
-    <EChartsWrapper
+    <ECharts
       sx={{
         width: width,
         height: height,

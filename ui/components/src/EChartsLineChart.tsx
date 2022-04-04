@@ -23,7 +23,7 @@ import type {
   VisualMapComponentOption,
 } from 'echarts';
 import { use } from 'echarts/core';
-import { LineChart } from 'echarts/charts';
+import { LineChart as EChartsLineChart } from 'echarts/charts';
 import {
   GridComponent,
   DataZoomComponent,
@@ -43,7 +43,7 @@ import { emptyTooltipData } from './tooltip/tooltip-model';
 import { Tooltip } from './tooltip/Tooltip';
 
 use([
-  LineChart,
+  EChartsLineChart,
   GridComponent,
   DataZoomComponent,
   MarkAreaComponent,
@@ -95,7 +95,7 @@ interface EChartsLineChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export function EChartsLineChart(props: EChartsLineChartProps) {
+export function LineChart(props: EChartsLineChartProps) {
   const { height, data, legend, toolbox, dataZoom, onDataZoom } = props;
   const theme = useTheme();
   const chartRef = useRef();

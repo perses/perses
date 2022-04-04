@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './EChartsWrapper';
+export * from './ECharts';
 export * from './ErrorAlert';
 export * from './ErrorBoundary';
 export * from './GaugeChart';
