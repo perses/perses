@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { Box } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, EChartsValues } from '@perses-dev/components';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getRandomColor } from './utils/palette-gen';
@@ -38,9 +38,14 @@ export function LineChartContainer(props: LineChartContainerProps) {
   const queries = useRunningGraphQueries();
 
   // populate series data based on query results
-  const graphData = useMemo(() => {
+  const { graphData, loading } = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
-    if (timeScale === undefined) return EMPTY_GRAPH_DATA;
+    if (timeScale === undefined) {
+      return {
+        graphData: EMPTY_GRAPH_DATA,
+        loading: true,
+      };
+    }
 
     const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [] };
     const xAxisData = [...getXValues(timeScale)];
@@ -49,7 +54,6 @@ export function LineChartContainer(props: LineChartContainerProps) {
       // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
 
-      // https://github.com/perses/perses/pull/227/files#diff-67806350a5015bbdcfc58a2202349c96b8af3d4b3887b15d7725738c1b134145
       for (const dataSeries of query.data.series) {
         const yValues: EChartsValues[] = [];
         for (const valueTuple of dataSeries.values) {
@@ -69,8 +73,22 @@ export function LineChartContainer(props: LineChartContainerProps) {
     }
 
     graphData.xAxis = xAxisData;
-    return graphData;
+    return {
+      graphData,
+      loading: false,
+    };
   }, [queries]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} width={width} height={height}>
+        <Skeleton variant="text" width={width - 20} height={height / 2} />
+      </Box>
+    );
+  }
+
+  // TODO: where to add 'No Data' and error states?
+  // if (graphData.timeSeries.length === 0 || graphData.xAxis.length === 0) {}
 
   return (
     <Box sx={{ width, height }}>
