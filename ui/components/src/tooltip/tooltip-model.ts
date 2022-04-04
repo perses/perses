@@ -66,6 +66,8 @@ export interface CursorCoordinates {
     x?: number;
     y?: number;
   };
+  target?: EventTarget | null;
+  targetParent?: ParentNode | null;
 }
 
 export interface CursorData {
@@ -92,8 +94,13 @@ export const useMousePosition = (): CursorData['coords'] => {
   const [coords, setCoords] = useState<CursorData['coords']>(null);
 
   useEffect(() => {
-    const setFromEvent = (e: ZRRawMouseEvent) => {
+    // TODO (sjcobb): fix types
+    // const setFromEvent = (e: ZRRawMouseEvent) => {
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    const setFromEvent = (e: any) => {
       return setCoords({
+        target: e.target,
+        targetParent: e.target.parentNode,
         viewport: {
           x: e.clientX,
           y: e.clientY,

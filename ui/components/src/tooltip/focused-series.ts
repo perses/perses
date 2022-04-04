@@ -86,6 +86,16 @@ export function getFocusedSeriesData(
 ) {
   if (chart === undefined || mousePosition === null) return [];
 
+  if (mousePosition.targetParent) {
+    const currentGrandparent = mousePosition.targetParent.parentNode as HTMLElement;
+    if (currentGrandparent) {
+      const chartDom = chart.getDom();
+      if (chartDom !== currentGrandparent) {
+        return [];
+      }
+    }
+  }
+
   if (isPinned === true && lastPosition !== null) {
     mousePosition = lastPosition;
   }

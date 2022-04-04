@@ -322,7 +322,8 @@ const benchmarkDashboard: DashboardResource = {
           //   y: 0,
           //   width: 12,
           //   height: 6,
-          //   content: { $ref: '#/panels/seriesTest' },
+          //   content: { $ref: '#/panels/seriesTestAlt' }, // TODO (sjcobb): why are tooltips broken still after parent condition added
+          //   // content: { $ref: '#/panels/seriesTest' },
           // },
           {
             x: 12,
@@ -342,13 +343,14 @@ const benchmarkDashboard: DashboardResource = {
           },
         },
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/seriesTestAlt' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/basicEx' },
+            // content: { $ref: '#/panels/seriesTestAlt' },
+          },
           {
             x: 12,
             y: 0,
