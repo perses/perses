@@ -13,11 +13,9 @@
 
 import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
-import { useMemo } from 'react';
 import { useSuggestedStepMs } from '../../model/time';
 import LineChart from './LineChart';
 import GraphQueryRunner from './GraphQueryRunner';
-import UPlotChart from './uplot/UPlotChart';
 
 export const LineChartKind = 'LineChart' as const;
 
@@ -38,12 +36,7 @@ export function LineChartPanel(props: LineChartProps) {
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
 
-  const isUPlot = useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('uplot') === 'true';
-  }, []);
-
-  const Chart = isUPlot ? UPlotChart : LineChart;
+  const Chart = LineChart;
 
   return (
     <GraphQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
