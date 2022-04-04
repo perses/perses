@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption } from 'echarts';
 import { useMemo } from 'react';
 import { Box } from '@mui/material';
-import { LineChart, EChartsDataFormat } from '@perses-dev/components';
+import { LineChart, EChartsDataFormat, EChartsValues } from '@perses-dev/components';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getRandomColor } from './utils/palette-gen';
 import { getCommonTimeScale, getXValues } from './utils/data-transform';
@@ -39,23 +38,28 @@ export function LineChartContainer(props: LineChartContainerProps) {
   const queries = useRunningGraphQueries();
 
   // populate series data based on query results
-  const graphData: EChartsDataFormat = useMemo(() => {
+  const graphData = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
     if (timeScale === undefined) return EMPTY_GRAPH_DATA;
 
-    const series: EChartsOption['series'] = [];
+    const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [] };
     const xAxisData = [...getXValues(timeScale)];
 
     for (const query of queries) {
       // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
 
+      // https://github.com/perses/perses/pull/227/files#diff-67806350a5015bbdcfc58a2202349c96b8af3d4b3887b15d7725738c1b134145
       for (const dataSeries of query.data.series) {
-        series.push({
+        const yValues: EChartsValues[] = [];
+        for (const valueTuple of dataSeries.values) {
+          yValues.push(valueTuple[1]);
+        }
+        graphData.timeSeries.push({
           type: 'line',
           name: dataSeries.name,
           color: getRandomColor(dataSeries.name),
-          data: [...dataSeries.values],
+          data: yValues,
           showSymbol: false,
           symbol: 'circle',
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
@@ -64,17 +68,9 @@ export function LineChartContainer(props: LineChartContainerProps) {
       }
     }
 
-    if (series.length === 0) return EMPTY_GRAPH_DATA;
-
-    return EMPTY_GRAPH_DATA;
-    // return {
-    //   timeSeries: series,
-    //   xAxis: xAxisData,
-    // };
+    graphData.xAxis = xAxisData;
+    return graphData;
   }, [queries]);
-
-  // const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [] };
-  // const graphData = { timeSeries: [], xAxis: [] };
 
   return (
     <Box sx={{ width, height }}>
