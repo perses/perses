@@ -18,4 +18,5 @@ export * from './GaugeChart';
 export * from './LineChart';
 export * from './StatChart';
 export * from './utils/combine-sx';
+export * from './model/graph-model';
 export * from './model/units';

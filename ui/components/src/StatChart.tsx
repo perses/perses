@@ -21,6 +21,7 @@ import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } fro
 import { CanvasRenderer } from 'echarts/renderers';
 import { formatValue, UnitOptions } from './model/units'; // TODO (sjcobb): add back formatValue
 import { ECharts } from './ECharts';
+import { GraphSeriesValueTuple } from './model/graph-model';
 
 use([
   EChartsGaugeChart,
@@ -52,10 +53,6 @@ const noDataOption = {
   },
   series: [],
 };
-
-export type UnixTimeMs = number;
-
-export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
 export interface GraphSeries {
   name: string;

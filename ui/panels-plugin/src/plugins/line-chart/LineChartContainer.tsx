@@ -14,10 +14,17 @@
 import type { EChartsOption } from 'echarts';
 import { useMemo } from 'react';
 import { Box } from '@mui/material';
-import { LineChart } from '@perses-dev/components';
+import { LineChart, EChartsDataFormat } from '@perses-dev/components';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getRandomColor } from './utils/palette-gen';
-import { getCommonTimeScale } from './utils/data-transform';
+import { getCommonTimeScale, getXValues } from './utils/data-transform';
+
+export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
+
+export const EMPTY_GRAPH_DATA = {
+  timeSeries: [],
+  xAxis: [],
+};
 
 export interface LineChartContainerProps {
   width: number;
@@ -32,13 +39,12 @@ export function LineChartContainer(props: LineChartContainerProps) {
   const queries = useRunningGraphQueries();
 
   // populate series data based on query results
-  const { series, timeScale } = useMemo(() => {
+  const graphData: EChartsDataFormat = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
-    if (timeScale === undefined) {
-      return { option: { series: undefined }, timeScale: undefined };
-    }
+    if (timeScale === undefined) return EMPTY_GRAPH_DATA;
 
     const series: EChartsOption['series'] = [];
+    const xAxisData = [...getXValues(timeScale)];
 
     for (const query of queries) {
       // Skip queries that are still loading and don't have data
@@ -48,30 +54,27 @@ export function LineChartContainer(props: LineChartContainerProps) {
         series.push({
           type: 'line',
           name: dataSeries.name,
-          data: [...dataSeries.values],
           color: getRandomColor(dataSeries.name),
-          symbol: 'none',
-          lineStyle: { width: 1.5 },
-          emphasis: { lineStyle: { width: 2 } },
+          data: [...dataSeries.values],
+          showSymbol: false,
+          symbol: 'circle',
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
-          progressiveThreshold: 100,
+          progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
         });
       }
     }
 
-    if (series.length === 0) return { series: null, timeScale };
+    if (series.length === 0) return EMPTY_GRAPH_DATA;
 
-    return {
-      series,
-      timeScale,
-    };
+    return EMPTY_GRAPH_DATA;
+    // return {
+    //   timeSeries: series,
+    //   xAxis: xAxisData,
+    // };
   }, [queries]);
 
-  console.log('series: ', series);
-  console.log('timeScale: ', timeScale);
-
   // const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [] };
-  const graphData = { timeSeries: [], xAxis: [] };
+  // const graphData = { timeSeries: [], xAxis: [] };
 
   return (
     <Box sx={{ width, height }}>
