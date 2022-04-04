@@ -11,69 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption } from 'echarts';
-import { useMemo } from 'react';
-import { Box } from '@mui/material';
-import { useRunningGraphQueries } from './GraphQueryRunner';
-import { getRandomColor } from './utils/palette-gen';
-import { getCommonTimeScale } from './utils/data-transform';
+import { JsonObject } from '@perses-dev/core';
+import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
+import { useSuggestedStepMs } from '../../model/time';
+import GraphQueryRunner from './GraphQueryRunner';
+import { LineChartContainer } from './LineChartContainer';
 
-export interface LineChartPanelProps {
-  width: number;
-  height: number;
+export const LineChartKind = 'LineChart' as const;
+
+export type LineChartProps = PanelProps<LineChartOptions>;
+
+interface LineChartOptions extends JsonObject {
+  queries: GraphQueryDefinition[];
+  show_legend?: boolean;
 }
 
-/**
- * Draws a LineChart with Apache ECharts for the current running time series.
- */
-function LineChartPanel(props: LineChartPanelProps) {
-  const { width, height } = props;
-  const queries = useRunningGraphQueries();
+export function LineChartPanel(props: LineChartProps) {
+  const {
+    definition: {
+      options: { queries },
+    },
+    contentDimensions,
+  } = props;
 
-  // populate series data based on query results
-  const { series, timeScale } = useMemo(() => {
-    const timeScale = getCommonTimeScale(queries);
-    if (timeScale === undefined) {
-      return { option: { series: undefined }, timeScale: undefined };
-    }
-
-    const series: EChartsOption['series'] = [];
-
-    for (const query of queries) {
-      // Skip queries that are still loading and don't have data
-      if (query.loading || query.data === undefined) continue;
-
-      for (const dataSeries of query.data.series) {
-        series.push({
-          type: 'line',
-          name: dataSeries.name,
-          data: [...dataSeries.values],
-          color: getRandomColor(dataSeries.name),
-          symbol: 'none',
-          lineStyle: { width: 1.5 },
-          emphasis: { lineStyle: { width: 2 } },
-          sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
-          progressiveThreshold: 100,
-        });
-      }
-    }
-
-    if (series.length === 0) return { series: null, timeScale };
-
-    return {
-      series,
-      timeScale,
-    };
-  }, [queries]);
-
-  console.log(series);
-  console.log(timeScale);
+  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
 
   return (
-    <>
-      <Box ref={setContainerRef} sx={{ width, height }}></Box>
-    </>
+    <GraphQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
+      {contentDimensions !== undefined && (
+        <LineChartContainer width={contentDimensions.width} height={contentDimensions.height} />
+      )}
+    </GraphQueryRunner>
   );
 }
-
-export default LineChartPanel;
