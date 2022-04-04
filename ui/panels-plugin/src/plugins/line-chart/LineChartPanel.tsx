@@ -11,36 +11,227 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
-import { useSuggestedStepMs } from '../../model/time';
-import LineChart from './LineChart';
-import GraphQueryRunner from './GraphQueryRunner';
+import * as echarts from 'echarts/core';
+import type { EChartsOption } from 'echarts';
+import { LineChartPanel as EChartsLineChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import { useEffect, useMemo, useState, useLayoutEffect, useRef } from 'react';
+import { Box } from '@mui/material';
+import { useRunningGraphQueries } from './GraphQueryRunner';
+import { TooltipData, emptyTooltipData } from './tooltip/tooltip-model';
+import { getRandomColor } from './utils/palette-gen';
+import { getCommonTimeScale } from './utils/data-transform';
+import { getNearbySeries } from './utils/focused-series';
+import Tooltip from './tooltip/Tooltip';
 
-export const LineChartKind = 'LineChart' as const;
+echarts.use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
-export type LineChartProps = PanelProps<LineChartOptions>;
+// TODO (sjcobb): move to chart theme, share with GaugeChart
+const noDataOption = {
+  title: {
+    show: true,
+    textStyle: {
+      color: 'grey',
+      fontSize: 16,
+      fontWeight: 400,
+    },
+    text: 'No data',
+    left: 'center',
+    top: 'center',
+  },
+  xAxis: {
+    show: false,
+  },
+  yAxis: {
+    show: false,
+  },
+  series: [],
+};
 
-interface LineChartOptions extends JsonObject {
-  queries: GraphQueryDefinition[];
-  show_legend?: boolean;
+export interface LineChartProps {
+  width: number;
+  height: number;
 }
 
-export function LineChartPanel(props: LineChartProps) {
-  const {
-    definition: {
-      options: { queries },
-    },
-    contentDimensions,
-  } = props;
+/**
+ * Draws a LineChart with Apache ECharts for the current running time series.
+ */
+function LineChartPanel(props: LineChartProps) {
+  const { width, height } = props;
+  const queries = useRunningGraphQueries();
+  const [tooltipData, setTooltipData] = useState<TooltipData>(emptyTooltipData);
 
-  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
+  // Calculate the LineChartPanel options based on the query results
+  const { option, timeScale } = useMemo(() => {
+    const timeScale = getCommonTimeScale(queries);
+    if (timeScale === undefined) {
+      return { option: { series: undefined }, timeScale: undefined };
+    }
 
-  const Chart = LineChart;
+    const series: EChartsOption['series'] = [];
+
+    for (const query of queries) {
+      // Skip queries that are still loading and don't have data
+      if (query.loading || query.data === undefined) continue;
+
+      for (const dataSeries of query.data.series) {
+        series.push({
+          type: 'line',
+          name: dataSeries.name,
+          data: [...dataSeries.values],
+          color: getRandomColor(dataSeries.name),
+          symbol: 'none',
+          lineStyle: { width: 1.5 },
+          emphasis: { lineStyle: { width: 2 } },
+          sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
+          progressiveThreshold: 100,
+        });
+      }
+    }
+
+    if (series.length === 0) return { option: noDataOption, timeScale };
+
+    const option: EChartsOption = {
+      title: {
+        show: false,
+      },
+      series,
+      xAxis: {
+        type: 'time',
+        boundaryGap: false,
+      },
+      yAxis: {
+        type: 'value',
+      },
+      grid: {
+        top: 10,
+        right: 10,
+        bottom: 10,
+        left: 0,
+        containLabel: true,
+      },
+      animation: false,
+      tooltip: {
+        show: false,
+      },
+    };
+
+    return {
+      option,
+      timeScale,
+    };
+  }, [queries]);
+
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const [chart, setChart] = useState<echarts.ECharts | undefined>(undefined);
+
+  // Create a chart instance in the container
+  useLayoutEffect(() => {
+    if (containerRef === null) return;
+
+    const chart = echarts.init(containerRef);
+    setChart(chart);
+
+    return () => {
+      chart.dispose();
+    };
+  }, [containerRef]);
+
+  // Sync options with chart instance
+  useLayoutEffect(() => {
+    if (chart === undefined) return;
+
+    if (option.series === undefined) {
+      chart.showLoading();
+    } else {
+      chart.hideLoading();
+    }
+
+    chart.setOption(option);
+  }, [chart, option]);
+
+  // Populate tooltip data from getZr cursor coordinates
+  useEffect(() => {
+    if (chart === undefined || option.series === undefined) return;
+    if (Array.isArray(option.series) && option.series.length === 0) return;
+
+    const chartWidth = chart.getWidth();
+    const xAxisInterval = timeScale ? timeScale.stepMs : 0;
+    const xBuffer = xAxisInterval * 0.5;
+
+    const yAxisInterval = chart['_model'].getComponent('yAxis').axis.scale._interval;
+    const yBuffer = yAxisInterval * 0.5;
+
+    let lastPosX: number | null = null;
+    let lastPosY: number | null = null;
+    const zr = chart.getZr();
+    zr.on('mousemove', (params) => {
+      const mouseEvent = params.event as MouseEvent;
+      const pointInPixel = [params.offsetX, params.offsetY];
+
+      // only trigger tooltip when within chart canvas
+      if (!chart.containPixel('grid', pointInPixel)) {
+        setTooltipData(emptyTooltipData); // resets tooltip content
+        return;
+      }
+
+      // only trigger when cursor has moved
+      if (lastPosX === null || lastPosX !== params.offsetX || lastPosY !== params.offsetY) {
+        const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
+        if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
+          setTooltipData({
+            cursor: {
+              coords: {
+                plotCanvas: {
+                  x: params.offsetX,
+                  y: params.offsetY,
+                },
+                viewport: {
+                  x: mouseEvent.pageX,
+                  y: mouseEvent.pageY,
+                },
+              },
+              chartWidth: chartWidth,
+              focusedSeriesIdx: null,
+              focusedPointIdx: null,
+            },
+            focusedSeries: getNearbySeries(option.series, pointInGrid, xBuffer, yBuffer),
+          });
+        }
+      }
+      lastPosX = params.offsetX;
+      lastPosY = params.offsetY;
+    });
+
+    return () => {
+      if (zr.handler !== null) {
+        zr.off('mousemove');
+      }
+    };
+  }, [chart, option, timeScale]);
+
+  // Resize the chart to match as width/height changes
+  const prevSize = useRef({ width, height });
+  useLayoutEffect(() => {
+    // No need to resize initially
+    if (prevSize.current.width === width && prevSize.current.height === height) {
+      return;
+    }
+
+    // Can't resize if no chart yet
+    if (chart === undefined) return;
+
+    chart.resize({ width, height });
+    prevSize.current = { width, height };
+  }, [chart, width, height]);
 
   return (
-    <GraphQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
-      {contentDimensions !== undefined && <Chart width={contentDimensions.width} height={contentDimensions.height} />}
-    </GraphQueryRunner>
+    <>
+      <Box ref={setContainerRef} sx={{ width, height }}></Box>
+      <Tooltip tooltipData={tooltipData}></Tooltip>
+    </>
   );
 }
+
+export default LineChartPanel;
