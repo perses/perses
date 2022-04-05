@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@formatjs/intl-numberformat": "^7.4.2",
-    "@mui/material": "^5.5.1",
     "@perses-dev/core": "^0.2.1",
     "@perses-dev/plugin-system": "^0.2.1",
     "date-fns": "^2.28.0",
@@ -30,10 +29,8 @@
     "lodash-es": "^4.17.21",
     "mathjs": "^10.4.0"
   },
-  "devDependencies": {
-    "react": "^17.0.2"
-  },
   "peerDependencies": {
+    "@mui/material": "^5.5.1",
     "react": "^17.0.2"
   },
   "perses": {

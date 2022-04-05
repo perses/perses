@@ -35,11 +35,11 @@ export function PluginRegistry(props: PluginRegistryProps) {
   const loadPlugin = useCallback(
     async (pluginType: PluginType, kind: string) => {
       // Is it already loaded?
-      const plugin = plugins[pluginType].get(kind);
+      const plugin = plugins[pluginType][kind];
       if (plugin !== undefined) return;
 
       // Is it a valid plugin we know about?
-      const resource = loadablePlugins[pluginType].get(kind);
+      const resource = loadablePlugins[pluginType][kind];
       if (resource === undefined) {
         throw new Error(`No ${pluginType} plugin is available for kind ${kind}`);
       }

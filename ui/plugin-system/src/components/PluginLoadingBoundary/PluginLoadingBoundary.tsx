@@ -20,7 +20,7 @@ import { PluginLoader } from './PluginLoader';
 
 // Plugin dependencies by PluginType and a Set of the kinds
 type PluginDependencies = {
-  [K in PluginType]: Set<string>;
+  [K in PluginType]: Record<string, true>;
 };
 
 export interface PluginLoadingBoundaryProps {
@@ -42,7 +42,7 @@ export function PluginLoadingBoundary(props: PluginLoadingBoundaryProps) {
   const [dependencies, setDependencies] = useImmer<PluginDependencies>(() => {
     const deps = {} as PluginDependencies;
     for (const pluginType of ALL_PLUGIN_TYPES) {
-      deps[pluginType] = new Set();
+      deps[pluginType] = {};
     }
     return deps;
   });
@@ -52,7 +52,7 @@ export function PluginLoadingBoundary(props: PluginLoadingBoundaryProps) {
   const registerPluginDependency = useCallback(
     (pluginType: PluginType, kind: string) => {
       setDependencies((draft) => {
-        draft[pluginType].add(kind);
+        draft[pluginType][kind] = true;
       });
     },
     [setDependencies]
@@ -69,11 +69,11 @@ export function PluginLoadingBoundary(props: PluginLoadingBoundaryProps) {
       fragmentKey += `_${pluginType}:`;
 
       const kinds = dependencies[pluginType];
-      for (const kind of kinds.values()) {
+      for (const kind in kinds) {
         fragmentKey += kind;
 
         // Is this plugin already loaded?
-        const plugin = plugins[pluginType].get(kind);
+        const plugin = plugins[pluginType][kind];
         if (plugin !== undefined) continue;
 
         // Nope, add it to the loaders list
@@ -132,5 +132,5 @@ export function usePlugin<Type extends PluginType>(
 
   // Get the plugin, which could be undefined if it hasn't loaded yet
   const { plugins } = usePluginRegistry();
-  return plugins[pluginType].get(definition.kind);
+  return plugins[pluginType][definition.kind];
 }
