@@ -19,7 +19,7 @@ import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/char
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { formatValue, UnitOptions } from './model/units'; // TODO (sjcobb): add back formatValue
+import { formatValue, UnitOptions } from './model/units';
 import { ECharts } from './ECharts';
 import { GraphSeriesValueTuple } from './model/graph-model';
 

@@ -36,6 +36,7 @@ interface TooltipProps {
 export function Tooltip(props: TooltipProps) {
   const { chartRef, chartData } = props;
 
+  // TODO (sjcobb): both isPinned and pinnedPos necessary?
   const [isPinned, setTooltipPinned] = useState<boolean>(false);
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
 
@@ -117,6 +118,7 @@ function assembleTransform(
     y = mousePosition.viewport.y * 0.8;
   }
 
+  // TODO (sjcobb): fix so top-left charts do not get cut off
   // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
   const tooltipWidth = seriesNum > 1 ? TOOLTIP_MAX_WIDTH : TOOLTIP_MAX_WIDTH / 2;
   const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;

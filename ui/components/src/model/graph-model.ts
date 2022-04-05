@@ -37,7 +37,7 @@ export interface Coordinate {
  * const name = getUniqueKeyForPrometheusResult(result.metric, true);
  * getRandomColor(name)
  */
-// TODO: update LineChartPanel with formatMetricsForEChartsGraph customizations like abbreviateLargeNumber
+// TODO (sjcobb): update LineChartPanel with formatMetricsForEChartsGraph customizations like abbreviateLargeNumber
 
 // Take a large number and abbreviate
 /**

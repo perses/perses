@@ -94,7 +94,7 @@ export const useMousePosition = (): CursorData['coords'] => {
   const [coords, setCoords] = useState<CursorData['coords']>(null);
 
   useEffect(() => {
-    // TODO (sjcobb): fix types
+    // TODO (sjcobb): fix event types
     // const setFromEvent = (e: ZRRawMouseEvent) => {
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     const setFromEvent = (e: any) => {

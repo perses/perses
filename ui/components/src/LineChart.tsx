@@ -103,6 +103,7 @@ export function LineChart(props: LineChartProps) {
 
   const handleEvents: onEventsType<LineSeriesOption['data']> = useMemo(() => {
     return {
+      // TODO (sjcobb): fix types
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       datazoom: (params: any) => {
         if (onDataZoom === undefined) return;
