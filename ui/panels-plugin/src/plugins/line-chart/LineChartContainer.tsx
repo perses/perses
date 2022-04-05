@@ -79,7 +79,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
     };
   }, [queries]);
 
-  if (loading) {
+  if (loading === true) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} width={width} height={height}>
         <Skeleton variant="text" width={width - 20} height={height / 2} />
@@ -90,9 +90,5 @@ export function LineChartContainer(props: LineChartContainerProps) {
   // TODO: where to add 'No Data' and error states?
   // if (graphData.timeSeries.length === 0 || graphData.xAxis.length === 0) {}
 
-  return (
-    <Box sx={{ width, height }}>
-      <LineChart height={height} data={graphData} />
-    </Box>
-  );
+  return <LineChart height={height} data={graphData} />;
 }

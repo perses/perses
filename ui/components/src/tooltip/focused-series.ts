@@ -86,19 +86,23 @@ export function getFocusedSeriesData(
 ) {
   if (chart === undefined || mousePosition === null) return [];
 
+  let targetActive = false;
   if (mousePosition.targetParent) {
     const currentGrandparent = mousePosition.targetParent.parentNode as HTMLElement;
     if (currentGrandparent) {
       const chartDom = chart.getDom();
-      if (chartDom !== currentGrandparent) {
-        return [];
+      if (chartDom === currentGrandparent) {
+        targetActive = true;
       }
     }
   }
 
   if (isPinned === true && lastPosition !== null) {
     mousePosition = lastPosition;
+    targetActive = true;
   }
+
+  if (targetActive === false) return [];
 
   if (chart['_model'] === undefined) return [];
   const chartModel = chart['_model'];
