@@ -24,7 +24,7 @@
     "@perses-dev/components": "^0.2.1",
     "@perses-dev/core": "^0.2.1",
     "immer": "^9.0.12",
-    "react-query": "^3.34.16",
+    "react-query": "^3.34.19",
     "use-immer": "^0.6.0"
   },
   "peerDependencies": {
