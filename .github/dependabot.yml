@@ -1,3 +1,5 @@
+# Until bug below is sorted we will not allow dependabot to run by itself for npm dependencies
+# https://github.com/dependabot/dependabot-core/issues/1190
 version: 2
 updates:
 - package-ecosystem: "gomod"
@@ -7,7 +9,7 @@ updates:
     interval: "weekly"
 - package-ecosystem: "npm"
   directory: "/ui"
-  open-pull-requests-limit: 10
+  open-pull-requests-limit: 0
   schedule:
     interval: "monthly"
 - package-ecosystem: "github-actions"
