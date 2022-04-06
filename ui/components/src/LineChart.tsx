@@ -127,8 +127,7 @@ export function LineChart(props: LineChartProps) {
   }, [data, onDataZoom]);
 
   const handleOnMouseDown = (event: React.MouseEvent) => {
-    // hide tooltip when user drags to zoom
-    // but allow clicking inside tooltip to copy labels
+    // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
     if (event.target instanceof HTMLCanvasElement) {
       setShowTooltip(false);
     }
@@ -143,6 +142,17 @@ export function LineChart(props: LineChartProps) {
     if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
+
+    const defaultGrid = {
+      show: true,
+      backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.background.paper,
+      borderColor: theme.palette.grey['300'],
+      top: 10,
+      right: 20,
+      bottom: 0,
+      left: 20,
+      containLabel: true,
+    };
 
     const defaultToolbox = {
       show: true,
@@ -165,17 +175,6 @@ export function LineChart(props: LineChartProps) {
           textFill: theme.palette.text.primary,
         },
       },
-    };
-
-    const defaultGrid = {
-      show: true,
-      backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.background.paper,
-      borderColor: theme.palette.grey['300'],
-      top: 10,
-      right: 20,
-      bottom: 0,
-      left: 20,
-      containLabel: true,
     };
 
     const option = {
@@ -223,7 +222,6 @@ export function LineChart(props: LineChartProps) {
         },
       },
       animation: false,
-      legend,
       tooltip: {
         show: showPointsOnHover,
         trigger: 'axis',
@@ -232,6 +230,7 @@ export function LineChart(props: LineChartProps) {
           type: 'none',
         },
       },
+      legend,
       dataZoom,
     };
 

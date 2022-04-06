@@ -13,14 +13,14 @@
 
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FocusedSeriesArray } from './focused-series';
-import SeriesInfo from './SeriesInfo';
+import { SeriesInfo } from './SeriesInfo';
 
 interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
   wrapLabels?: boolean;
 }
 
-function TooltipContent(props: TooltipContentProps) {
+export function TooltipContent(props: TooltipContentProps) {
   const { focusedSeries, wrapLabels } = props;
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
@@ -81,5 +81,3 @@ function TooltipContent(props: TooltipContentProps) {
     return <></>;
   }
 }
-
-export default TooltipContent;

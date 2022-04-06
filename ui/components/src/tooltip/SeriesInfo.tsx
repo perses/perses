@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Divider, Stack, Typography } from '@mui/material';
-import SeriesMarker from './SeriesMarker';
+import { SeriesMarker } from './SeriesMarker';
 import { TOOLTIP_LABELS_MAX_WIDTH } from './tooltip-model';
 
 interface SeriesInfoProps {
@@ -23,9 +23,10 @@ interface SeriesInfoProps {
   wrapLabels?: boolean;
 }
 
-function SeriesInfo(props: SeriesInfoProps) {
+export function SeriesInfo(props: SeriesInfoProps) {
   const { seriesName, y, markerColor, totalSeries, wrapLabels } = props;
 
+  // TODO (sjcobb): regex to remove __name__, improve series labels
   const formattedSeriesLabels = seriesName.replace(/[{}"]/g, '');
 
   if (totalSeries === 1) {
@@ -136,5 +137,3 @@ function SeriesInfo(props: SeriesInfoProps) {
     </Box>
   );
 }
-
-export default SeriesInfo;

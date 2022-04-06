@@ -157,19 +157,6 @@ const benchmarkDashboard: DashboardResource = {
         display: { name: 'Double Queries' },
         options: {
           queries: [
-            // {
-            //   kind: 'PrometheusGraphQuery',
-            //   options: {
-            //     query:
-            //       'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
-            //   },
-            // },
-            // {
-            //   kind: 'PrometheusGraphQuery',
-            //   options: {
-            //     query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
-            //   },
-            // },
             {
               kind: 'PrometheusGraphQuery',
               options: {
@@ -423,27 +410,27 @@ const benchmarkDashboard: DashboardResource = {
           },
         },
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 2,
-          //   height: 2,
-          //   content: { $ref: '#/panels/statSm' },
-          // },
-          // {
-          //   x: 0,
-          //   y: 2,
-          //   width: 2,
-          //   height: 2,
-          //   content: { $ref: '#/panels/statRAM' },
-          // },
-          // {
-          //   x: 0,
-          //   y: 4,
-          //   width: 2,
-          //   height: 2,
-          //   content: { $ref: '#/panels/statTotalRAM' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 2,
+            height: 2,
+            content: { $ref: '#/panels/statSm' },
+          },
+          {
+            x: 0,
+            y: 2,
+            width: 2,
+            height: 2,
+            content: { $ref: '#/panels/statRAM' },
+          },
+          {
+            x: 0,
+            y: 4,
+            width: 2,
+            height: 2,
+            content: { $ref: '#/panels/statTotalRAM' },
+          },
           {
             x: 2,
             y: 0,

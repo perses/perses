@@ -24,7 +24,7 @@ import {
   TOOLTIP_MAX_WIDTH,
   useMousePosition,
 } from './tooltip-model';
-import TooltipContent from './TooltipContent';
+import { TooltipContent } from './TooltipContent';
 
 interface TooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;

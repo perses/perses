@@ -17,7 +17,7 @@ interface SeriesMarkerProps {
   markerColor: string;
 }
 
-function SeriesMarker(props: SeriesMarkerProps) {
+export function SeriesMarker(props: SeriesMarkerProps) {
   const { markerColor } = props;
   return (
     <Box
@@ -34,5 +34,3 @@ function SeriesMarker(props: SeriesMarkerProps) {
     ></Box>
   );
 }
-
-export default SeriesMarker;
