@@ -152,6 +152,56 @@ const benchmarkDashboard: DashboardResource = {
           unit: { kind: 'Bytes' },
         },
       },
+      doubleQueries: {
+        kind: 'LineChart',
+        display: { name: 'Double Queries' },
+        options: {
+          queries: [
+            // {
+            //   kind: 'PrometheusGraphQuery',
+            //   options: {
+            //     query:
+            //       'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
+            //   },
+            // },
+            // {
+            //   kind: 'PrometheusGraphQuery',
+            //   options: {
+            //     query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+            //   },
+            // },
+            {
+              kind: 'PrometheusGraphQuery',
+              options: {
+                query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+              },
+            },
+            {
+              kind: 'PrometheusGraphQuery',
+              options: {
+                query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+              },
+            },
+          ],
+          unit: { kind: 'Bytes' },
+        },
+      },
+      cpu: {
+        kind: 'LineChart',
+        display: { name: 'CPU' },
+        options: {
+          queries: [
+            {
+              kind: 'PrometheusGraphQuery',
+              options: {
+                query:
+                  'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+              },
+            },
+          ],
+          unit: { kind: '%' },
+        },
+      },
       statSm: {
         kind: 'StatChart',
         display: {
@@ -317,14 +367,16 @@ const benchmarkDashboard: DashboardResource = {
           },
         },
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/seriesTestAlt' },
-          //   // content: { $ref: '#/panels/seriesTest' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 6,
+            content: { $ref: '#/panels/multiQueries' },
+            // content: { $ref: '#/panels/cpu' },
+            // content: { $ref: '#/panels/seriesTestAlt' },
+            // content: { $ref: '#/panels/seriesTest' },
+          },
           {
             x: 12,
             y: 0,
@@ -348,7 +400,8 @@ const benchmarkDashboard: DashboardResource = {
             y: 0,
             width: 12,
             height: 6,
-            content: { $ref: '#/panels/basicEx' },
+            content: { $ref: '#/panels/cpu' },
+            // content: { $ref: '#/panels/basicEx' },
             // content: { $ref: '#/panels/seriesTestAlt' },
           },
           {
@@ -356,7 +409,8 @@ const benchmarkDashboard: DashboardResource = {
             y: 0,
             width: 12,
             height: 6,
-            content: { $ref: '#/panels/multiQueries' },
+            // content: { $ref: '#/panels/multiQueries' },
+            content: { $ref: '#/panels/doubleQueries' },
           },
         ],
       },
