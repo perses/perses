@@ -44,6 +44,7 @@ export const defaultCursorData = {
       x: 0,
       y: 0,
     },
+    target: null,
   },
   chartWidth: 0,
 };
@@ -66,8 +67,7 @@ export interface CursorCoordinates {
     x?: number;
     y?: number;
   };
-  target?: EventTarget | null;
-  targetParent?: ParentNode | null;
+  target: EventTarget | null;
 }
 
 export interface CursorData {
@@ -94,13 +94,8 @@ export const useMousePosition = (): CursorData['coords'] => {
   const [coords, setCoords] = useState<CursorData['coords']>(null);
 
   useEffect(() => {
-    // TODO (sjcobb): fix event types
-    // const setFromEvent = (e: ZRRawMouseEvent) => {
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    const setFromEvent = (e: any) => {
+    const setFromEvent = (e: ZRRawMouseEvent) => {
       return setCoords({
-        target: e.target,
-        targetParent: e.target.parentNode,
         viewport: {
           x: e.clientX,
           y: e.clientY,
@@ -110,10 +105,13 @@ export const useMousePosition = (): CursorData['coords'] => {
           y: e.offsetY,
         },
         zrender: {
-          // similar to offsetX but zrX returns undefined when not hovering over a chart canvas
+          // echarts canvas coordinates added automatically by zrender
+          // zrX and zrY are similar to offsetX and offsetY but they return undefined when not hovering over a chart canvas
           x: e.zrX,
           y: e.zrY,
         },
+        // necessary to check whether cursor target matches correct chart canvas (since each chart has its own mousemove listener)
+        target: e.target,
       });
     };
     window.addEventListener('mousemove', setFromEvent);

@@ -86,23 +86,28 @@ export function getFocusedSeriesData(
 ) {
   if (chart === undefined || mousePosition === null) return [];
 
-  let targetActive = false;
-  if (mousePosition.targetParent) {
-    const currentGrandparent = mousePosition.targetParent.parentNode as HTMLElement;
-    if (currentGrandparent) {
-      const chartDom = chart.getDom();
-      if (chartDom === currentGrandparent) {
-        targetActive = true;
+  // prevents multiple tooltips showing from adjacent charts
+  let cursorTargetMatchesChart = false;
+  if (mousePosition.target !== null) {
+    const currentParent = (<HTMLElement>mousePosition.target).parentElement;
+    if (currentParent !== null) {
+      const currentGrandparent = currentParent.parentElement;
+      if (currentGrandparent !== null) {
+        const chartDom = chart.getDom();
+        if (chartDom === currentGrandparent) {
+          cursorTargetMatchesChart = true;
+        }
       }
     }
   }
 
+  // allows moving cursor inside tooltip
   if (isPinned === true && lastPosition !== null) {
     mousePosition = lastPosition;
-    targetActive = true;
+    cursorTargetMatchesChart = true;
   }
 
-  if (targetActive === false) return [];
+  if (cursorTargetMatchesChart === false) return [];
 
   if (chart['_model'] === undefined) return [];
   const chartModel = chart['_model'];
