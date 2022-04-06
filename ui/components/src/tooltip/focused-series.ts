@@ -80,8 +80,7 @@ export function getNearbySeries(data: EChartsDataFormat, pointInGrid: number[], 
 export function getFocusedSeriesData(
   mousePosition: CursorData['coords'],
   chartData: EChartsDataFormat,
-  lastPosition: CursorData['coords'],
-  isPinned?: boolean,
+  pinnedPos: CursorData['coords'],
   chart?: EChartsInstance
 ) {
   if (chart === undefined || mousePosition === null) return [];
@@ -102,8 +101,8 @@ export function getFocusedSeriesData(
   }
 
   // allows moving cursor inside tooltip
-  if (isPinned === true && lastPosition !== null) {
-    mousePosition = lastPosition;
+  if (pinnedPos !== null) {
+    mousePosition = pinnedPos;
     cursorTargetMatchesChart = true;
   }
 

@@ -35,30 +35,25 @@ interface TooltipProps {
 
 export function Tooltip(props: TooltipProps) {
   const { chartRef, chartData } = props;
-
-  // TODO (sjcobb): both isPinned and pinnedPos necessary?
-  const [isPinned, setTooltipPinned] = useState<boolean>(false);
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
-
   const mousePosition = useMousePosition();
   if (mousePosition === null) return null;
 
   const chart = chartRef.current;
-  const focusedSeries = getFocusedSeriesData(mousePosition, chartData, pinnedPos, isPinned, chart);
+  const focusedSeries = getFocusedSeriesData(mousePosition, chartData, pinnedPos, chart);
   const chartWidth = chart?.getWidth() ?? 1000;
   const chartHeight = chart?.getHeight() ?? 250;
-  const cursorTransform = assembleTransform(mousePosition, focusedSeries.length, chartWidth, chartHeight, isPinned);
+  const cursorTransform = assembleTransform(mousePosition, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
 
   function handleMouseEnter() {
-    setTooltipPinned(true);
     if (mousePosition !== null) {
       setPinnedPos(mousePosition);
     }
   }
 
   function handleMouseLeave() {
-    if (isPinned === true) {
-      setTooltipPinned(false);
+    if (pinnedPos !== null) {
+      setPinnedPos(null);
     }
   }
 
@@ -98,10 +93,14 @@ function assembleTransform(
   seriesNum: number,
   chartWidth: number,
   chartHeight: number,
-  isPinned: boolean
+  pinnedPos: CursorCoordinates | null
 ) {
-  if (mousePosition === null || isPinned === true) {
+  if (mousePosition === null) {
     return 'translate3d(0, 0)';
+  }
+
+  if (pinnedPos !== null) {
+    mousePosition = pinnedPos;
   }
 
   const cursorPaddingX = 32;
