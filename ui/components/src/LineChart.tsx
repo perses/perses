@@ -104,10 +104,8 @@ export function LineChart(props: LineChartProps) {
 
   const handleEvents: onEventsType<LineSeriesOption['data']> = useMemo(() => {
     return {
-      // TODO (sjcobb): fix types
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      datazoom: (params: any) => {
-        if (onDataZoom === undefined) return;
+      datazoom: (params) => {
+        if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;
         const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
         const xAxisStartValue = data.xAxis[startIndex];
