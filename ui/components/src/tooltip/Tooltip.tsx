@@ -118,12 +118,12 @@ function assembleTransform(
     y = mousePosition.viewport.y * 0.8;
   }
 
-  // TODO (sjcobb): fix so top-left charts do not get cut off
   // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
   const tooltipWidth = seriesNum > 1 ? TOOLTIP_MAX_WIDTH : TOOLTIP_MAX_WIDTH / 2;
   const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;
 
-  return mousePosition.plotCanvas.x < xPosAdjustThreshold
-    ? `translate3d(${x + cursorPaddingX}px, ${y}px, 0)`
-    : `translate3d(${x - cursorPaddingX}px, ${y}px, 0) translateX(-100%)`;
+  // reposition so tooltip is never too close to right side of chart or left side of browser window
+  return mousePosition.plotCanvas.x > xPosAdjustThreshold && x > TOOLTIP_MAX_WIDTH
+    ? `translate3d(${x - cursorPaddingX}px, ${y}px, 0) translateX(-100%)`
+    : `translate3d(${x + cursorPaddingX}px, ${y}px, 0)`;
 }
