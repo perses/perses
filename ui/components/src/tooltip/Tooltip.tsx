@@ -112,9 +112,9 @@ function assembleTransform(
   const yPosAdjustThreshold = chartHeight * 0.75;
   // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
   if (isCloseToBottom === true) {
-    y = mousePos.viewport.y * 0.7;
+    y = mousePos.viewport.y * 0.75;
   } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
-    y = mousePos.viewport.y * 0.8;
+    y = mousePos.viewport.y * 0.85;
   }
 
   // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
