@@ -16,6 +16,7 @@ import { Box, useTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import type {
   EChartsOption,
+  GridComponentOption,
   LegendComponentOption,
   LineSeriesOption,
   ToolboxComponentOption,
@@ -89,6 +90,7 @@ export interface ZoomEventData {
 interface LineChartProps {
   height: number;
   data: EChartsDataFormat;
+  grid?: GridComponentOption;
   legend?: LegendComponentOption;
   toolbox?: ToolboxComponentOption;
   dataZoom?: DataZoomComponentOption[];
@@ -97,7 +99,7 @@ interface LineChartProps {
 }
 
 export function LineChart(props: LineChartProps) {
-  const { height, data, legend, toolbox, dataZoom, onDataZoom } = props;
+  const { height, data, grid, legend, toolbox, dataZoom, onDataZoom } = props;
   const theme = useTheme();
   const chartRef = useRef();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -140,11 +142,12 @@ export function LineChart(props: LineChartProps) {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null) return noDataOption;
 
-    // TODO: move toolbox controls to chart header
+    const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
+
     const defaultToolbox = {
       show: true,
-      top: 7,
-      right: 20,
+      top: 10,
+      right: 10,
       iconStyle: {
         borderColor: theme.palette.text.primary,
       },
@@ -164,28 +167,23 @@ export function LineChart(props: LineChartProps) {
       },
     };
 
-    const mergedToolbox = merge(defaultToolbox, toolbox);
-
-    // TODO: pass grid as optional prop
-    // const gridBottom = Array.isArray(dataZoom) && dataZoom[0].type === 'slider' ? 60 : 0;
-    const gridBottom = 0;
-
-    const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
+    const defaultGrid = {
+      show: true,
+      backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.background.paper,
+      borderColor: theme.palette.grey['300'],
+      top: 10,
+      right: 20,
+      bottom: 0,
+      left: 20,
+      containLabel: true,
+    };
 
     const option = {
       title: {
         show: false,
       },
-      grid: {
-        show: true,
-        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.background.paper,
-        borderColor: theme.palette.grey['300'],
-        top: 10,
-        right: 20,
-        bottom: gridBottom,
-        left: 20,
-        containLabel: true,
-      },
+      grid: merge(defaultGrid, grid),
+      toolbox: merge(defaultToolbox, toolbox),
       series: data.timeSeries,
       xAxis: {
         type: 'category',
@@ -226,7 +224,6 @@ export function LineChart(props: LineChartProps) {
       },
       animation: false,
       legend,
-      toolbox: mergedToolbox,
       tooltip: {
         show: showPointsOnHover,
         trigger: 'axis',
@@ -239,7 +236,7 @@ export function LineChart(props: LineChartProps) {
     };
 
     return option;
-  }, [data, theme, legend, toolbox, dataZoom]);
+  }, [data, theme, grid, legend, toolbox, dataZoom]);
 
   return (
     <Box

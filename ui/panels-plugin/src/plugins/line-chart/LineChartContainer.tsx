@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import { GridComponentOption, ToolboxComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, EChartsValues } from '@perses-dev/components';
 import { useRunningGraphQueries } from './GraphQueryRunner';
@@ -87,8 +88,17 @@ export function LineChartContainer(props: LineChartContainerProps) {
     );
   }
 
-  // TODO: where to add 'No Data' and error states?
-  // if (graphData.timeSeries.length === 0 || graphData.xAxis.length === 0) {}
+  // TODO: toolbox functionality (ex. zoom, undo icons) will move to chart header
+  const toolboxOverrides: ToolboxComponentOption = {
+    orient: 'vertical',
+    top: 0,
+    right: 0,
+  };
 
-  return <LineChart height={height} data={graphData} />;
+  const gridOverrides: GridComponentOption = {
+    top: 5,
+    right: 40,
+  };
+
+  return <LineChart height={height} data={graphData} grid={gridOverrides} toolbox={toolboxOverrides} />;
 }
