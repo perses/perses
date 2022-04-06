@@ -78,17 +78,17 @@ export function getNearbySeries(data: EChartsDataFormat, pointInGrid: number[], 
  * If yes, convert from pixel values to logical cartesian coordinates and return all focused series
  */
 export function getFocusedSeriesData(
-  mousePosition: CursorData['coords'],
+  mousePos: CursorData['coords'],
   chartData: EChartsDataFormat,
   pinnedPos: CursorData['coords'],
   chart?: EChartsInstance
 ) {
-  if (chart === undefined || mousePosition === null) return [];
+  if (chart === undefined || mousePos === null) return [];
 
   // prevents multiple tooltips showing from adjacent charts
   let cursorTargetMatchesChart = false;
-  if (mousePosition.target !== null) {
-    const currentParent = (<HTMLElement>mousePosition.target).parentElement;
+  if (mousePos.target !== null) {
+    const currentParent = (<HTMLElement>mousePos.target).parentElement;
     if (currentParent !== null) {
       const currentGrandparent = currentParent.parentElement;
       if (currentGrandparent !== null) {
@@ -102,7 +102,7 @@ export function getFocusedSeriesData(
 
   // allows moving cursor inside tooltip
   if (pinnedPos !== null) {
-    mousePosition = pinnedPos;
+    mousePos = pinnedPos;
     cursorTargetMatchesChart = true;
   }
 
@@ -116,7 +116,7 @@ export function getFocusedSeriesData(
   // tooltip trigger area gets smaller with more series
   const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 2;
 
-  const pointInPixel = [mousePosition.plotCanvas.x ?? 0, mousePosition.plotCanvas.y ?? 0];
+  const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {

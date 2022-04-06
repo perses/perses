@@ -36,18 +36,18 @@ interface TooltipProps {
 export function Tooltip(props: TooltipProps) {
   const { chartRef, chartData } = props;
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
-  const mousePosition = useMousePosition();
-  if (mousePosition === null) return null;
+  const mousePos = useMousePosition();
+  if (mousePos === null) return null;
 
   const chart = chartRef.current;
-  const focusedSeries = getFocusedSeriesData(mousePosition, chartData, pinnedPos, chart);
+  const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart);
   const chartWidth = chart?.getWidth() ?? 1000;
   const chartHeight = chart?.getHeight() ?? 250;
-  const cursorTransform = assembleTransform(mousePosition, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
+  const cursorTransform = assembleTransform(mousePos, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
 
   function handleMouseEnter() {
-    if (mousePosition !== null) {
-      setPinnedPos(mousePosition);
+    if (mousePos !== null) {
+      setPinnedPos(mousePos);
     }
   }
 
@@ -89,32 +89,32 @@ export function Tooltip(props: TooltipProps) {
 }
 
 function assembleTransform(
-  mousePosition: CursorData['coords'],
+  mousePos: CursorData['coords'],
   seriesNum: number,
   chartWidth: number,
   chartHeight: number,
   pinnedPos: CursorCoordinates | null
 ) {
-  if (mousePosition === null) {
+  if (mousePos === null) {
     return 'translate3d(0, 0)';
   }
 
   if (pinnedPos !== null) {
-    mousePosition = pinnedPos;
+    mousePos = pinnedPos;
   }
 
   const cursorPaddingX = 32;
   const cursorPaddingY = 16;
-  const x = mousePosition.viewport.x;
-  let y = mousePosition.viewport.y + cursorPaddingY;
+  const x = mousePos.viewport.x;
+  let y = mousePos.viewport.y + cursorPaddingY;
 
-  const isCloseToBottom = mousePosition.viewport.y > window.innerHeight * 0.8;
+  const isCloseToBottom = mousePos.viewport.y > window.innerHeight * 0.8;
   const yPosAdjustThreshold = chartHeight * 0.75;
   // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
   if (isCloseToBottom === true) {
-    y = mousePosition.viewport.y * 0.7;
-  } else if (mousePosition.plotCanvas.y > yPosAdjustThreshold) {
-    y = mousePosition.viewport.y * 0.8;
+    y = mousePos.viewport.y * 0.7;
+  } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
+    y = mousePos.viewport.y * 0.8;
   }
 
   // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
@@ -122,7 +122,7 @@ function assembleTransform(
   const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;
 
   // reposition so tooltip is never too close to right side of chart or left side of browser window
-  return mousePosition.plotCanvas.x > xPosAdjustThreshold && x > TOOLTIP_MAX_WIDTH
+  return mousePos.plotCanvas.x > xPosAdjustThreshold && x > TOOLTIP_MAX_WIDTH
     ? `translate3d(${x - cursorPaddingX}px, ${y}px, 0) translateX(-100%)`
     : `translate3d(${x + cursorPaddingX}px, ${y}px, 0)`;
 }
