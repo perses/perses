@@ -29,6 +29,7 @@ function SeriesInfo(props: SeriesInfoProps) {
   const formattedSeriesLabels = seriesName.replace(/[{}"]/g, '');
 
   if (totalSeries === 1) {
+    const jsonFormattedSeries = seriesName[0] === '{' ? true : false;
     return (
       <Stack spacing={0.5}>
         <Box
@@ -71,7 +72,7 @@ function SeriesInfo(props: SeriesInfoProps) {
         >
           {formattedSeriesLabels.split(',').map((name) => {
             if (name) {
-              const [key, value] = name.split(':');
+              const [key, value] = jsonFormattedSeries ? name.split(':') : name.split('=');
               return (
                 <Box key={name} sx={{ display: 'flex', gap: '4px' }}>
                   <Typography sx={{ fontSize: '11px' }}>{key}:</Typography>
@@ -93,7 +94,7 @@ function SeriesInfo(props: SeriesInfoProps) {
     );
   }
 
-  const inlineSeriesLabels = formattedSeriesLabels.replace(/[,]/g, ', ').replaceAll(':', ': ');
+  const inlineSeriesLabels = formattedSeriesLabels.replace(/[,]/g, ', ').replace(/[:=]/g, ': ');
   return (
     <Box
       sx={{
