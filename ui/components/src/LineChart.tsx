@@ -140,10 +140,11 @@ export function LineChart(props: LineChartProps) {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null) return noDataOption;
 
+    // TODO: move toolbox controls to chart header
     const defaultToolbox = {
       show: true,
-      top: 10,
-      right: 10,
+      top: 7,
+      right: 20,
       iconStyle: {
         borderColor: theme.palette.text.primary,
       },
@@ -165,6 +166,7 @@ export function LineChart(props: LineChartProps) {
 
     const mergedToolbox = merge(defaultToolbox, toolbox);
 
+    // TODO: pass grid as optional prop
     // const gridBottom = Array.isArray(dataZoom) && dataZoom[0].type === 'slider' ? 60 : 0;
     const gridBottom = 0;
 
@@ -178,7 +180,7 @@ export function LineChart(props: LineChartProps) {
         show: true,
         backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.background.paper,
         borderColor: theme.palette.grey['300'],
-        top: 55,
+        top: 10,
         right: 20,
         bottom: gridBottom,
         left: 20,
@@ -207,7 +209,7 @@ export function LineChart(props: LineChartProps) {
       },
       yAxis: {
         type: 'value',
-        boundaryGap: ['5%', '10%'],
+        boundaryGap: ['10%', '10%'],
         axisLabel: {
           showMinLabel: false,
           showMaxLabel: true,
