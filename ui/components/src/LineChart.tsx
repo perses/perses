@@ -140,7 +140,7 @@ export function LineChart(props: LineChartProps) {
 
   const option: EChartsOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
-    if (data.timeSeries === null) return noDataOption;
+    if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
