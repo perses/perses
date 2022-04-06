@@ -175,3 +175,17 @@ function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
   const decimalFormatter = new Intl.NumberFormat('en-US', formatParams);
   return decimalFormatter.format(value);
 }
+
+// Take a large number and abbreviate appropriate suffix
+// ex) 10000 -> 10k, 1000000 -> 1M
+export function abbreviateLargeNumber(num: number) {
+  return num >= 1e12
+    ? num / 1e12 + 'T'
+    : num >= 1e9
+    ? num / 1e9 + 'B'
+    : num >= 1e6
+    ? num / 1e6 + 'M'
+    : num >= 1e3
+    ? num / 1e3 + 'k'
+    : num;
+}

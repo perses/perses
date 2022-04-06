@@ -38,7 +38,8 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { ECharts, onEventsType } from './ECharts';
-import { ECHARTS_OPTIMIZED_MODE_SERIES_LIMIT, EChartsDataFormat, abbreviateLargeNumber } from './model/graph-model';
+import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
+import { abbreviateLargeNumber } from './model/units';
 import { emptyTooltipData } from './tooltip/tooltip-model';
 import { Tooltip } from './tooltip/Tooltip';
 
@@ -169,7 +170,7 @@ export function LineChart(props: LineChartProps) {
     // const gridBottom = Array.isArray(dataZoom) && dataZoom[0].type === 'slider' ? 60 : 0;
     const gridBottom = 0;
 
-    const showPointsOnHover = data.timeSeries.length < ECHARTS_OPTIMIZED_MODE_SERIES_LIMIT;
+    const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
     const option = {
       title: {

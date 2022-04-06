@@ -1,12 +1,23 @@
-import { LineSeriesOption } from 'echarts/charts';
-// import { getUniqueKeyForPrometheusResult } from '../../model/prom-datasource';
-// import { getRandomColor } from '../../styles';
-// import { ModifiedPromQueryResult } from '../../utils';
+// Copyright 2021 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-/**
- * Normalized format for rendering time series in an ECharts graph
- */
-export type GraphSeriesValueTuple = [timestamp: number, value: number];
+import { LineSeriesOption } from 'echarts/charts';
+
+export const PROGRESSIVE_MODE_SERIES_LIMIT = 500;
+
+export type UnixTimeMs = number;
+
+export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
 export type EChartsValues = number | null | '-';
 
@@ -19,40 +30,3 @@ export type EChartsDataFormat = {
   timeSeries: EChartsTimeSeries[];
   xAxis: number[];
 };
-
-export const ECHARTS_OPTIMIZED_MODE_SERIES_LIMIT = 500;
-
-/**
- * Tooltip specific types
- */
-export interface Coordinate {
-  x: number;
-  y: number;
-}
-
-/**
- * Transforms metrics response into format expected by ECharts
- * Notes:
- * function formatMetricsForEChartsGraph(queryResult: ModifiedPromQueryResult, ...)
- * const name = getUniqueKeyForPrometheusResult(result.metric, true);
- * getRandomColor(name)
- */
-// TODO (sjcobb): update LineChartPanel with formatMetricsForEChartsGraph customizations like abbreviateLargeNumber
-
-// Take a large number and abbreviate
-/**
- * Takes large numbers and abbreviates them with the appropriate suffix
- * 10000 -> 10k
- * 1000000 -> 1M
- */
-export function abbreviateLargeNumber(num: number) {
-  return num >= 1e12
-    ? num / 1e12 + 'T'
-    : num >= 1e9
-    ? num / 1e9 + 'B'
-    : num >= 1e6
-    ? num / 1e6 + 'M'
-    : num >= 1e3
-    ? num / 1e3 + 'k'
-    : num;
-}
