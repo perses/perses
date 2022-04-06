@@ -39,7 +39,6 @@ function SeriesInfo(props: SeriesInfoProps) {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'left',
-            // color: theme.palette.text.accent,
             color: theme.palette.grey[300],
             fontSize: '11px',
           })}
@@ -66,7 +65,6 @@ function SeriesInfo(props: SeriesInfoProps) {
         />
         <Box
           sx={(theme) => ({
-            // color: theme.palette.text.accent,
             color: theme.palette.grey[300],
           })}
         >

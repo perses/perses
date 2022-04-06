@@ -32,7 +32,6 @@ function TooltipContent(props: TooltipContentProps) {
         <Typography
           variant="caption"
           sx={(theme) => ({
-            // color: theme.palette.text.accent,
             color: theme.palette.grey[300],
           })}
         >
