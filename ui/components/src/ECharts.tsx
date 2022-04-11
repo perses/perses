@@ -127,7 +127,7 @@ export interface EChartsProps<T> {
   parentContainer?: HTMLDivElement | null;
 }
 
-export function ECharts<T>({ sx, _instance, onChartInitialized, option, onEvents, parentContainer }: EChartsProps<T>) {
+export function ECharts<T>({ sx, _instance, onChartInitialized, option, onEvents }: EChartsProps<T>) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [echart, setChart] = useState<ECharts | undefined>(undefined);
   // Create a chart instance in the container
@@ -158,24 +158,10 @@ export function ECharts<T>({ sx, _instance, onChartInitialized, option, onEvents
     const updateSize = debounce(() => {
       echart?.resize();
     }, 200);
-    let observer: ResizeObserver | undefined;
-    if (parentContainer != null) {
-      observer = new ResizeObserver(() => {
-        updateSize();
-      });
-      observer.observe(parentContainer);
-    } else {
-      window.addEventListener('resize', updateSize);
-    }
+    window.addEventListener('resize', updateSize);
     updateSize();
-    return () => {
-      if (parentContainer != null) {
-        observer?.disconnect();
-      } else {
-        window.removeEventListener('resize', updateSize);
-      }
-    };
-  }, [echart, parentContainer]);
+    return () => window.removeEventListener('resize', updateSize);
+  }, [echart]);
 
   return <Box ref={setContainerRef} sx={sx}></Box>;
 }
