@@ -41,8 +41,8 @@ export function Tooltip(props: TooltipProps) {
 
   const chart = chartRef.current;
   const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart);
-  const chartWidth = chart?.getWidth() ?? 1000;
-  const chartHeight = chart?.getHeight() ?? 250;
+  const chartWidth = chart?.getWidth() ?? 750;
+  const chartHeight = chart?.getHeight() ?? 230;
   const cursorTransform = assembleTransform(mousePos, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
 
   function handleMouseEnter() {
