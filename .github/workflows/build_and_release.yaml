@@ -40,7 +40,7 @@ jobs:
       - name: Build the app
         run: cd ./ui && npm run build
       - name: store react production build
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ui-libs
           path: |
