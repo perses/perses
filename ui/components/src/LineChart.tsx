@@ -38,7 +38,7 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { ECharts, onEventsType } from './ECharts';
+import { ECharts, OnEventsType } from './ECharts';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
 import { abbreviateLargeNumber } from './model/units';
 import { emptyTooltipData } from './tooltip/tooltip-model';
@@ -104,7 +104,7 @@ export function LineChart(props: LineChartProps) {
   const chartRef = useRef();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
-  const handleEvents: onEventsType<LineSeriesOption['data']> = useMemo(() => {
+  const handleEvents: OnEventsType<LineSeriesOption['data']> = useMemo(() => {
     return {
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;

@@ -50,7 +50,7 @@ export interface MouseEventsParameters<T> {
   info: Record<string, unknown>;
 }
 
-type onEventFunction<T> = (
+type OnEventFunction<T> = (
   params: MouseEventsParameters<T>,
   // This is potentially undefined for testing purposes
   // probably a better way to type this that isolates testing scenarios
@@ -99,7 +99,7 @@ export interface BatchEventsParameters {
   batch: DataZoomPayloadBatchItem[] & HighlightPayloadBatchItem[];
 }
 
-type onBatchEventFunction = (params: BatchEventsParameters) => void;
+type OnBatchEventFunction = (params: BatchEventsParameters) => void;
 
 const batchEvents = ['datazoom', 'downplay', 'highlight'] as const;
 
@@ -110,10 +110,10 @@ type ChartEventName = 'finished';
 
 type EventName = MouseEventName | ChartEventName | BatchEventName;
 
-export type onEventsType<T> = {
-  [mouseEventName in MouseEventName]?: onEventFunction<T>;
+export type OnEventsType<T> = {
+  [mouseEventName in MouseEventName]?: OnEventFunction<T>;
 } & {
-  [batchEventName in BatchEventName]?: onBatchEventFunction;
+  [batchEventName in BatchEventName]?: OnBatchEventFunction;
 } & {
   [eventName in ChartEventName]?: () => void;
 };
@@ -122,7 +122,7 @@ export interface EChartsProps<T> {
   option: EChartsCoreOption;
   sx?: SxProps<Theme>;
   onChartInitialized?: (instance: ECharts) => void;
-  onEvents?: onEventsType<T>;
+  onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
   parentContainer?: HTMLDivElement | null;
 }
@@ -181,7 +181,7 @@ export function ECharts<T>({ sx, _instance, onChartInitialized, option, onEvents
 }
 
 // Validate event config and bind custom events
-function bindEvents<T>(instance: ECharts, events?: onEventsType<T>) {
+function bindEvents<T>(instance: ECharts, events?: OnEventsType<T>) {
   if (events === undefined) return;
   function bindEvent(eventName: EventName, onEventFunction: unknown) {
     if (typeof onEventFunction === 'function') {
