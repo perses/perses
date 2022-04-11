@@ -60,7 +60,7 @@ jobs:
           node-version-file: "ui/.nvmrc"
           registry-url: "https://registry.npmjs.org"
       - name: Download react build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: ui-libs
           path: ui
@@ -97,7 +97,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Download react build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: ui-libs
           path: ui
