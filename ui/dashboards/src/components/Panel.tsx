@@ -46,8 +46,6 @@ export function Panel(props: PanelProps) {
         height: '100%',
         display: 'flex',
         flexFlow: 'column nowrap',
-        // Hide overflow if StatChart, otherwise set to visible so tooltip is not hidden
-        overflow: isStatsChart ? 'hidden' : 'visible',
       }}
       variant="outlined"
       {...others}
@@ -73,6 +71,7 @@ export function Panel(props: PanelProps) {
       <CardContent
         sx={{
           position: 'relative',
+          overflow: 'hidden',
           flexGrow: 1,
           padding: (theme) => theme.spacing(panelPadding),
           // Override MUI default style for last-child
