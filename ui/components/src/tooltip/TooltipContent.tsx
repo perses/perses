@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
@@ -44,8 +45,12 @@ export function TooltipContent(props: TooltipContentProps) {
     );
   };
 
-  if (focusedSeries !== null && seriesTime !== null) {
-    const sortedFocusedSeries = focusedSeries.sort((a, b) => (a.y > b.y ? -1 : 1));
+  const sortedFocusedSeries = useMemo(() => {
+    if (focusedSeries === null) return null;
+    return focusedSeries.sort((a, b) => (a.y > b.y ? -1 : 1));
+  }, [focusedSeries]);
+
+  if (sortedFocusedSeries !== null && seriesTime !== null) {
     return (
       <Stack py={1} px={1.5} spacing={0.5}>
         <Typography variant="caption">{formatTimeSeriesHeader(seriesTime)}</Typography>
@@ -69,7 +74,7 @@ export function TooltipContent(props: TooltipContentProps) {
                 seriesName={seriesName}
                 y={y}
                 markerColor={markerColor}
-                totalSeries={focusedSeries.length}
+                totalSeries={sortedFocusedSeries.length}
                 wrapLabels={wrapLabels}
               />
             );
