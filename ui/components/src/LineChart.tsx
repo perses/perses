@@ -20,10 +20,9 @@ import type {
   LegendComponentOption,
   LineSeriesOption,
   ToolboxComponentOption,
-  DataZoomComponentOption,
   VisualMapComponentOption,
 } from 'echarts';
-import { use } from 'echarts/core';
+import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
 import {
   GridComponent,
@@ -93,15 +92,15 @@ interface LineChartProps {
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
   toolbox?: ToolboxComponentOption;
-  dataZoom?: DataZoomComponentOption[];
   visualMap?: VisualMapComponentOption[];
+  dataZoomEnabled?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
 export function LineChart(props: LineChartProps) {
-  const { height, data, grid, legend, toolbox, dataZoom, onDataZoom } = props;
+  const { height, data, grid, legend, toolbox, dataZoomEnabled, onDataZoom } = props;
   const theme = useTheme();
-  const chartRef = useRef();
+  const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
   const handleEvents: OnEventsType<LineSeriesOption['data']> = useMemo(() => {
@@ -125,6 +124,15 @@ export function LineChart(props: LineChartProps) {
       },
     };
   }, [data, onDataZoom]);
+
+  if (chartRef.current !== undefined && dataZoomEnabled === true) {
+    const chart = chartRef.current;
+    chart.dispatchAction({
+      type: 'takeGlobalCursor',
+      key: 'dataZoomSelect',
+      dataZoomSelectActive: true,
+    });
+  }
 
   const handleOnMouseDown = (event: React.MouseEvent) => {
     // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
@@ -171,12 +179,10 @@ export function LineChart(props: LineChartProps) {
       },
       feature: {
         dataZoom: {
-          show: true,
+          icon: dataZoomEnabled ? null : undefined,
           yAxisIndex: 'none',
         },
-        restore: {
-          show: true,
-        },
+        restore: {},
       },
       emphasis: {
         iconStyle: {
@@ -184,6 +190,10 @@ export function LineChart(props: LineChartProps) {
         },
       },
     };
+
+    if (dataZoomEnabled === false) {
+      delete defaultToolbox.feature.dataZoom.icon;
+    }
 
     const option = {
       title: {
@@ -239,11 +249,10 @@ export function LineChart(props: LineChartProps) {
         },
       },
       legend,
-      dataZoom,
     };
 
     return option;
-  }, [data, theme, grid, legend, toolbox, dataZoom]);
+  }, [data, theme, grid, legend, toolbox]);
 
   return (
     <Box

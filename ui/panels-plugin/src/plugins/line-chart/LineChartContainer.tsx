@@ -102,5 +102,16 @@ export function LineChartContainer(props: LineChartContainerProps) {
     right: 40,
   };
 
-  return <LineChart height={height} data={graphData} grid={gridOverrides} toolbox={toolboxOverrides} />;
+  // enables zoom on drag without clicking 'Zoom' icon first
+  const dataZoomEnabled = false;
+
+  return (
+    <LineChart
+      height={height}
+      data={graphData}
+      grid={gridOverrides}
+      toolbox={toolboxOverrides}
+      dataZoomEnabled={dataZoomEnabled}
+    />
+  );
 }
