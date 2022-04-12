@@ -57,6 +57,10 @@ export function Tooltip(props: TooltipProps) {
     }
   }
 
+  if (focusedSeries.length === 0) {
+    return null;
+  }
+
   return (
     <Portal>
       <Box
