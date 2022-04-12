@@ -137,6 +137,14 @@ export function LineChart(props: LineChartProps) {
     setShowTooltip(true);
   };
 
+  const handleOnMouseEnter = () => {
+    setShowTooltip(true);
+  };
+
+  const handleOnMouseLeave = () => {
+    setShowTooltip(false);
+  };
+
   const option: EChartsOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
@@ -244,6 +252,8 @@ export function LineChart(props: LineChartProps) {
       }}
       onMouseDown={handleOnMouseDown}
       onMouseUp={handleOnMouseUp}
+      onMouseLeave={handleOnMouseLeave}
+      onMouseEnter={handleOnMouseEnter}
     >
       {showTooltip === true && (
         <Tooltip chartRef={chartRef} tooltipData={emptyTooltipData} chartData={data} wrapLabels={true}></Tooltip>
