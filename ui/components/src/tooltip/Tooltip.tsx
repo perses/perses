@@ -116,7 +116,11 @@ function assembleTransform(
   const yPosAdjustThreshold = chartHeight * 0.75;
   // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
   if (isCloseToBottom === true) {
-    y = mousePos.viewport.y * 0.75;
+    if (seriesNum > 6) {
+      y = mousePos.viewport.y * 0.65;
+    } else {
+      y = mousePos.viewport.y * 0.75;
+    }
   } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
     y = mousePos.viewport.y * 0.85;
   }
