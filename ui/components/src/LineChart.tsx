@@ -252,7 +252,7 @@ export function LineChart(props: LineChartProps) {
     };
 
     return option;
-  }, [data, theme, grid, legend, toolbox]);
+  }, [data, theme, grid, legend, toolbox, dataZoomEnabled]);
 
   return (
     <Box
