@@ -1,3 +1,11 @@
+## 0.3.0 / 2022-04-12
+
+- [FEATURE] ability to embed LineChart independent of a panel
+- [FEATURE] LineChart visual refinements to tooltips, loading state, yAxis formatting, grid spacing, fonts
+- [FEATURE] LineChart hover state that shows focused series symbols
+- [FEATURE] LineChart additional props for customizing dataZoom and toolbox icons
+- [BUGFIX] tooltips no longer linger after moving cursor out of canvas
+
 ## 0.2.1 / 2022-03-28
 
 - [ENHANCEMENT] Merge GitHub workflow for build and release in a single one. It also fixed the publishing of the docker images.
