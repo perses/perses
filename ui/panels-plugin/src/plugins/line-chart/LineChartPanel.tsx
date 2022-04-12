@@ -14,8 +14,8 @@
 import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
-import LineChart from './LineChart';
 import GraphQueryRunner from './GraphQueryRunner';
+import { LineChartContainer } from './LineChartContainer';
 
 export const LineChartKind = 'LineChart' as const;
 
@@ -39,7 +39,7 @@ export function LineChartPanel(props: LineChartProps) {
   return (
     <GraphQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
       {contentDimensions !== undefined && (
-        <LineChart width={contentDimensions.width} height={contentDimensions.height} />
+        <LineChartContainer width={contentDimensions.width} height={contentDimensions.height} />
       )}
     </GraphQueryRunner>
   );

@@ -11,25 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
-import { FocusedSeriesArray } from '../utils/focused-series';
-import SeriesInfo from './SeriesInfo';
+import { FocusedSeriesArray } from './focused-series';
+import { SeriesInfo } from './SeriesInfo';
 
 interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
   wrapLabels?: boolean;
 }
 
-function TooltipContent(props: TooltipContentProps) {
+export function TooltipContent(props: TooltipContentProps) {
   const { focusedSeries, wrapLabels } = props;
-  // let lastDate = focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : '';
-  const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : false;
+
+  const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
 
   const formatTimeSeriesHeader = (timeString: string) => {
     const [month, year, time] = timeString.split(',');
     return (
       <>
-        <Typography variant="caption" color="grey.300">
+        <Typography
+          variant="caption"
+          sx={(theme) => ({
+            color: theme.palette.grey[300],
+          })}
+        >
           {month}, {year} –
         </Typography>
         <Typography variant="caption">
@@ -39,17 +45,26 @@ function TooltipContent(props: TooltipContentProps) {
     );
   };
 
-  if (focusedSeries && seriesTime) {
+  const sortedFocusedSeries = useMemo(() => {
+    if (focusedSeries === null) return null;
+    return focusedSeries.sort((a, b) => (a.y > b.y ? -1 : 1));
+  }, [focusedSeries]);
+
+  if (sortedFocusedSeries !== null && seriesTime !== null) {
     return (
       <Stack py={1} px={1.5} spacing={0.5}>
         <Typography variant="caption">{formatTimeSeriesHeader(seriesTime)}</Typography>
-        <Divider sx={{ borderColor: 'grey.800' }} />
+        <Divider
+          sx={(theme) => ({
+            borderColor: theme.palette.grey['500'],
+          })}
+        />
         <Box
           sx={{
             display: 'table',
           }}
         >
-          {focusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, markerColor }) => {
+          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, markerColor }) => {
             if (datumIdx === null || seriesIdx === null) return null;
             const key = seriesIdx.toString() + datumIdx.toString();
 
@@ -59,7 +74,7 @@ function TooltipContent(props: TooltipContentProps) {
                 seriesName={seriesName}
                 y={y}
                 markerColor={markerColor}
-                totalSeries={focusedSeries.length}
+                totalSeries={sortedFocusedSeries.length}
                 wrapLabels={wrapLabels}
               />
             );
@@ -71,5 +86,3 @@ function TooltipContent(props: TooltipContentProps) {
     return <></>;
   }
 }
-
-export default TooltipContent;

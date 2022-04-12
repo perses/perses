@@ -11,12 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './ECharts';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './LineChart';
-export * from './StatChart';
-export * from './utils/combine-sx';
-export * from './model/graph-model';
-export * from './model/units';
+import { Box } from '@mui/material';
+
+interface SeriesMarkerProps {
+  markerColor: string;
+}
+
+export function SeriesMarker(props: SeriesMarkerProps) {
+  const { markerColor } = props;
+  return (
+    <Box
+      sx={{
+        display: 'inline-block',
+        width: '12px',
+        borderRadius: '2px',
+        height: '12px',
+        marginTop: 0.25,
+        marginRight: 1,
+        verticalAlign: 'top',
+      }}
+      style={{ backgroundColor: markerColor }}
+    ></Box>
+  );
+}

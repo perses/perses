@@ -11,28 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { LineSeriesOption } from 'echarts/charts';
 
-interface SeriesMarkerProps {
-  markerColor: string;
+export const PROGRESSIVE_MODE_SERIES_LIMIT = 500;
+
+export type UnixTimeMs = number;
+
+export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
+
+export type EChartsValues = number | null | '-';
+
+export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
+  // TODO: support dataset and both category / time xAxis types
+  data: Iterable<GraphSeriesValueTuple> | EChartsValues[];
 }
 
-function SeriesMarker(props: SeriesMarkerProps) {
-  const { markerColor } = props;
-  return (
-    <Box
-      sx={{
-        borderRadius: '2px',
-        display: 'inline-block',
-        height: '12px',
-        marginRight: 1,
-        marginTop: 0.25,
-        verticalAlign: 'top',
-        width: '12px',
-      }}
-      style={{ backgroundColor: markerColor }}
-    ></Box>
-  );
-}
-
-export default SeriesMarker;
+export type EChartsDataFormat = {
+  timeSeries: EChartsTimeSeries[];
+  xAxis: number[];
+};

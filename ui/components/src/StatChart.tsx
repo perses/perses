@@ -19,8 +19,9 @@ import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/char
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { formatValue, UnitOptions } from './model/units'; // TODO (sjcobb): add back formatValue
-import { EChartsWrapper } from './EChartsWrapper';
+import { formatValue, UnitOptions } from './model/units';
+import { ECharts } from './ECharts';
+import { GraphSeriesValueTuple } from './model/graph-model';
 
 use([
   EChartsGaugeChart,
@@ -52,10 +53,6 @@ const noDataOption = {
   },
   series: [],
 };
-
-export type UnixTimeMs = number;
-
-export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
 export interface GraphSeries {
   name: string;
@@ -227,7 +224,7 @@ export function StatChart(props: StatChartProps) {
   }, [data, height, unit, width, sparkline, backgroundColor]);
 
   return (
-    <EChartsWrapper
+    <ECharts
       sx={{
         width: width,
         height: height,
