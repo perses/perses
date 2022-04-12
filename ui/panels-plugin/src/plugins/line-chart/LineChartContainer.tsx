@@ -51,6 +51,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
     const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [] };
     const xAxisData = [...getXValues(timeScale)];
 
+    let queriesFinished = 0;
     for (const query of queries) {
       // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
@@ -71,12 +72,13 @@ export function LineChartContainer(props: LineChartContainerProps) {
           progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
         });
       }
+      queriesFinished++;
     }
 
     graphData.xAxis = xAxisData;
     return {
       graphData,
-      loading: false,
+      loading: queriesFinished !== queries.length,
     };
   }, [queries]);
 
