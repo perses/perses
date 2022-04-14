@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IsSanctionedSimpleUnitIdentifier } from '@formatjs/ecma402-abstract';
 import { Duration, milliseconds } from 'date-fns';
 
 export type UnitOptions = TimeUnitOptions | PercentUnitOptions | DecimalUnitOptions;
@@ -153,7 +152,7 @@ function isDecimalUnit(unitOptions: UnitOptions): unitOptions is DecimalUnitOpti
 function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
   const maximumFractionDigits = unitOptions.decimal_places ?? 2;
   if (unitOptions.suffix !== undefined) {
-    if (IsSanctionedSimpleUnitIdentifier(unitOptions.suffix)) {
+    if (isSanctionedSimpleUnitIdentifier(unitOptions.suffix)) {
       const formatParams: Intl.NumberFormatOptions = {
         style: 'unit',
         minimumFractionDigits: 0,
@@ -189,3 +188,62 @@ export function abbreviateLargeNumber(num: number) {
     ? num / 1e3 + 'k'
     : num;
 }
+
+// Util to check unit name against ECMA standard: https://tc39.es/ecma402/#sec-issanctionedsimpleunitidentifier
+export function isSanctionedSimpleUnitIdentifier(unitIdentifier: string) {
+  return SIMPLE_UNITS.indexOf(unitIdentifier) > -1;
+}
+
+// https://tc39.es/ecma402/#table-sanctioned-simple-unit-identifiers
+export const SANCTIONED_UNITS = [
+  'angle-degree',
+  'area-acre',
+  'area-hectare',
+  'concentr-percent',
+  'digital-bit',
+  'digital-byte',
+  'digital-gigabit',
+  'digital-gigabyte',
+  'digital-kilobit',
+  'digital-kilobyte',
+  'digital-megabit',
+  'digital-megabyte',
+  'digital-petabyte',
+  'digital-terabit',
+  'digital-terabyte',
+  'duration-day',
+  'duration-hour',
+  'duration-millisecond',
+  'duration-minute',
+  'duration-month',
+  'duration-second',
+  'duration-week',
+  'duration-year',
+  'length-centimeter',
+  'length-foot',
+  'length-inch',
+  'length-kilometer',
+  'length-meter',
+  'length-mile-scandinavian',
+  'length-mile',
+  'length-millimeter',
+  'length-yard',
+  'mass-gram',
+  'mass-kilogram',
+  'mass-ounce',
+  'mass-pound',
+  'mass-stone',
+  'temperature-celsius',
+  'temperature-fahrenheit',
+  'volume-fluid-ounce',
+  'volume-gallon',
+  'volume-liter',
+  'volume-milliliter',
+];
+
+// removes the namespace prefix, ex: duration-hour -> hour
+export function removeUnitNamespace(unit: string) {
+  return unit.slice(unit.indexOf('-') + 1);
+}
+
+export const SIMPLE_UNITS = SANCTIONED_UNITS.map(removeUnitNamespace);
