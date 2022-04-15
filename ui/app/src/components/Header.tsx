@@ -96,15 +96,11 @@ const style: SxProps<Theme> = {
 export default function Header(): JSX.Element {
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
-  // const [darkModeLoading, setDarkModeLoading] = useState(false);
   const handleDarkModeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      // setDarkModeLoading(true);
       await setDarkMode(e.target.checked);
     } catch (e) {
       exceptionSnackbar(e);
-    } finally {
-      // setDarkModeLoading(false);
     }
   };
 

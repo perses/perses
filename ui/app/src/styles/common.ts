@@ -21,40 +21,13 @@ export const ROOT_ID = 'root';
  */
 export function getTheme(overrides: ThemeOptions = {}) {
   const palette: ThemeOptions['palette'] = {
-    // primary: {
-    //   main: '#1ED998',
-    //   dark: '#0D8359',
-    //   light: '#D1F5D8',
-    // },
-
-    // secondary: {
-    //   main: BespokeGreys.SANTAS_GRAY,
-    // },
-
-    // background: {
-    //   default: '#f0f2f5',
-    //   paper: '#FFFFFF', // ...
-    // },
-
     background: {
       default: blueGrey[50],
     },
-
     common: {
       white: '#FFFFFF',
       black: '#000000',
     },
-
-    // text: {
-    //   secondary: BespokeGreys.SANTAS_GRAY,
-    // },
-
-    // action: {
-    //   disabledBackground: alpha(BespokeGreys.SANTAS_GRAY, 0.5),
-    //   disabled: alpha(BespokeGreys.COMET, 0.6),
-    //   hover: alpha(BespokeGreys.SANTAS_GRAY, 0.2),
-    //   selected: alpha(BespokeGreys.SANTAS_GRAY, 0.35),
-    // },
   };
 
   const chart: ThemeOptions['chart'] = {};

@@ -38,14 +38,11 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }) {
 
   const [isDarkModeEnabled] = useLocalStorage<boolean>(DARK_MODE_PREFERENCE_KEY, browserPrefersDarkMode);
 
-  /**
-   * To ensure user doesn't see a flash of the wrong state, store the dark mode preference in local storage
-   */
+  // store the dark mode preference in local storage
   const darkModeContext: DarkModeContext = useMemo(
     () => ({
       isDarkModeEnabled,
       setDarkMode: async (preference: boolean) => {
-        console.log('setDarkMode -> preference: ', preference);
         window.localStorage.setItem(DARK_MODE_PREFERENCE_KEY, preference.toString());
         location.reload();
       },
