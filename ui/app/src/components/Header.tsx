@@ -29,6 +29,7 @@ import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
 import { useProjectQuery } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
+import { useDarkMode } from '../context/DarkMode';
 
 function ProjectMenu(): JSX.Element {
   const { exceptionSnackbar } = useSnackbar();
@@ -93,6 +94,20 @@ const style: SxProps<Theme> = {
 };
 
 export default function Header(): JSX.Element {
+  const { exceptionSnackbar } = useSnackbar();
+  const { isDarkModeEnabled, setDarkMode } = useDarkMode();
+  // const [darkModeLoading, setDarkModeLoading] = useState(false);
+  const handleDarkModeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      // setDarkModeLoading(true);
+      await setDarkMode(e.target.checked);
+    } catch (e) {
+      exceptionSnackbar(e);
+    } finally {
+      // setDarkModeLoading(false);
+    }
+  };
+
   return (
     <AppBar position="relative">
       <Toolbar>
@@ -103,7 +118,7 @@ export default function Header(): JSX.Element {
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
-        <Switch />
+        <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
       </Toolbar>
     </AppBar>
   );

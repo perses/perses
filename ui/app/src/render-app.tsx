@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CssBaseline, ThemeProvider } from '@mui/material';
+import { CssBaseline } from '@mui/material';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
-import { createTheme } from './styles/theme';
 import { SnackbarProvider } from './context/SnackbarProvider';
+import { DarkModeContextProvider } from './context/DarkMode';
 
 /**
  * Renders the Perses application in the target container.
@@ -28,12 +28,12 @@ export function renderApp(container: ReactDOM.Container | null) {
   ReactDOM.render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={createTheme()}>
+        <DarkModeContextProvider>
           <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
             <CssBaseline />
             <App />
           </SnackbarProvider>
-        </ThemeProvider>
+        </DarkModeContextProvider>
       </QueryClientProvider>
     </React.StrictMode>,
     container

@@ -56,3 +56,7 @@ export function createTheme() {
     },
   });
 }
+
+// TODO (sjcobb): how to extend MUI theme with ECharts theme (no .ts version exported from theme-builder)
+// https://stackoverflow.com/questions/63180016/how-to-toggle-echarts-theme-color
+// https://echarts.apache.org/en/theme-builder.html
