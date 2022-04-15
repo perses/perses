@@ -1,3 +1,9 @@
+## 0.3.1 / 2022-04-15
+
+- [ENHANCEMENT] Add CommonJS build output to all packages #413
+- [BUGFIX] Make tooltip text readable in LineChart #412
+- [BUGFIX] Remove `@formatjs/intl-numberformat` dependency #411
+
 ## 0.3.0 / 2022-04-12
 
 - [ENHANCEMENT] Ability to embed LineChart independent of a panel
