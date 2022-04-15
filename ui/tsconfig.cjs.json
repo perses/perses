@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "composite": false,
+    // Source maps and type declarations are all emitted as part of the regular (ESM) build output, so no need to do
+    // that again for CJS, we just want the JavaScript files
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false
+  }
+}
