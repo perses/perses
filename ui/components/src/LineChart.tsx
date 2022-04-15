@@ -100,7 +100,6 @@ interface LineChartProps {
 export function LineChart(props: LineChartProps) {
   const { height, data, grid, legend, toolbox, dataZoomEnabled, onDataZoom } = props;
   const theme = useTheme();
-  console.log(theme);
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 

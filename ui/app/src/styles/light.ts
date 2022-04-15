@@ -1,4 +1,3 @@
-import { BespokeColors } from './bespoke-colors';
 import { getTheme } from './common';
 import { EChartsWaldenTheme } from './echarts/theme-echarts-walden';
 
@@ -10,11 +9,7 @@ export const getLightTheme = () => {
   return getTheme({
     components: {
       MuiCssBaseline: {
-        styleOverrides: {
-          a: {
-            color: BespokeColors.MEDIUM_BLUE,
-          },
-        },
+        styleOverrides: {},
       },
       MuiButton: {},
       MuiLink: {},
