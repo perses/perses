@@ -40,7 +40,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'left',
-            color: theme.palette.grey[300],
+            color: theme.palette.common.white,
             fontSize: '11px',
           })}
         >
@@ -66,7 +66,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
         />
         <Box
           sx={(theme) => ({
-            color: theme.palette.grey[300],
+            color: theme.palette.common.white,
           })}
         >
           {formattedSeriesLabels.split(',').map((name) => {
