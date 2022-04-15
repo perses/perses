@@ -8,9 +8,9 @@ import merge from 'lodash/merge';
 
 /**
  * Material UI theme used by all components. For more details, see:
- *   - defaults: https://material-ui.com/customization/default-theme/
- *   - variables: https://material-ui.com/customization/theming/#theme-configuration-variables
- *   - global overrides and default props: https://material-ui.com/customization/globals/#css
+ *   - defaults: https://mui.com/customization/default-theme/
+ *   - variables: https://mui.com/material-ui/customization/theming/#theme-configuration-variables
+ *   - global overrides and default props: https://mui.com/material-ui/customization/theme-components/#css
  */
 export function getTheme(overrides: ThemeOptions = {}) {
   const palette: ThemeOptions['palette'] = {

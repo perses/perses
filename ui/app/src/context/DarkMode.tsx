@@ -13,7 +13,7 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
-import { getDarkTheme, getLightTheme } from '../styles';
+import { getDarkTheme, getLightTheme } from '../theme';
 import { useLocalStorage } from '../utils/browser-storage';
 
 const DARK_MODE_PREFERENCE_KEY = 'PERSES_ENABLE_DARK_MODE';
