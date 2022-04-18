@@ -23,12 +23,8 @@ export function getTheme(overrides: ThemeOptions = {}) {
     },
   };
 
-  const chart: ThemeOptions['chart'] = {};
-
   const theme = createTheme({
     palette: merge(palette, overrides.palette),
-
-    chart: merge(chart, overrides.chart),
 
     typography: {
       fontFamily: '"Lato", sans-serif',
@@ -45,20 +41,7 @@ export function getTheme(overrides: ThemeOptions = {}) {
   });
 
   // Overrides for component default prop values and styles go here
-  const components: ThemeOptions['components'] = {
-    MuiFormControl: {
-      defaultProps: {
-        fullWidth: true,
-        size: 'small',
-      },
-    },
-    MuiTextField: {
-      defaultProps: {
-        fullWidth: true,
-        size: 'small',
-      },
-    },
-  };
+  const components: ThemeOptions['components'] = {};
 
   theme.components = merge(components, overrides.components);
   return theme;

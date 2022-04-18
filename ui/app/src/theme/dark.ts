@@ -1,6 +1,5 @@
 import { grey } from '@mui/material/colors';
 import { getTheme } from './common';
-import { EChartsDarkTheme } from './echarts/theme-echarts-dark';
 
 export const getDarkTheme = () => {
   return getTheme({
@@ -23,6 +22,5 @@ export const getDarkTheme = () => {
         900: grey[100],
       },
     },
-    chart: EChartsDarkTheme,
   });
 };
