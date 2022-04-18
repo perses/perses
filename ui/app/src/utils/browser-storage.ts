@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 type StorageTuple<T> = [T, (next: T) => void];
 
@@ -22,41 +22,6 @@ type StorageTuple<T> = [T, (next: T) => void];
  */
 export function useLocalStorage<T>(key: string, initialValue: T): StorageTuple<T> {
   const { value, setValueAndStore } = useStorage(global.localStorage, key, initialValue);
-  return [value, setValueAndStore];
-}
-
-/**
- * Just like useState, but gets/sets the value in the browser's session storage.
- * 'key' should be a constant string. 'initialValue' is returned when session
- * storage does not have any data yet.
- */
-export function useSessionStorage<T>(key: string, initialValue: T): StorageTuple<T> {
-  const { value, setValueAndStore } = useStorage(global.sessionStorage, key, initialValue);
-  return [value, setValueAndStore];
-}
-
-/**
- * Just like useLocalStorage, but syncs values across browser tabs.
- */
-export function useLocalStorageSynced<T>(key: string, initialValue: T): StorageTuple<T> {
-  const { value, setValue, setValueAndStore } = useStorage<T>(global.localStorage, key, initialValue);
-
-  useEffect(() => {
-    // When local storage changes due to some other tab updating it, just
-    // update our local state value
-    const sync = (e: StorageEvent) => {
-      if (e.key !== key || e.newValue === null) {
-        return;
-      }
-      setValue(JSON.parse(e.newValue));
-    };
-
-    window.addEventListener('storage', sync);
-    return () => {
-      window.removeEventListener('storage', sync);
-    };
-  }, [key, setValue]);
-
   return [value, setValueAndStore];
 }
 
