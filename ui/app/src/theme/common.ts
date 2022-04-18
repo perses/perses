@@ -54,7 +54,20 @@ export function getTheme(overrides: ThemeOptions = {}) {
   });
 
   // Overrides for component default prop values and styles go here
-  const components: ThemeOptions['components'] = {};
+  const components: ThemeOptions['components'] = {
+    MuiFormControl: {
+      defaultProps: {
+        fullWidth: true,
+        size: 'small',
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        fullWidth: true,
+        size: 'small',
+      },
+    },
+  };
 
   theme.components = merge(components, overrides.components);
   return theme;
