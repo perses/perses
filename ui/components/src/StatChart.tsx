@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import { useTheme } from '@mui/material';
 import { merge } from 'lodash-es';
 import type { EChartsOption } from 'echarts';
 import { use } from 'echarts/core';
@@ -76,6 +77,7 @@ interface StatChartProps {
 
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, backgroundColor, sparkline } = props;
+  const theme = useTheme();
 
   const option: EChartsOption = useMemo(() => {
     if (data.seriesData === undefined) return {};
@@ -189,7 +191,7 @@ export function StatChart(props: StatChartProps) {
       },
       series: statSeries,
       textStyle: {
-        color: backgroundColor === 'transparent' ? '#000000' : '#FFFFFF',
+        color: backgroundColor === 'transparent' ? theme.palette.text.primary : '#FFFFFF',
         fontSize: 25,
         lineHeight: 18,
         fontFamily: '"Lato", sans-serif',
