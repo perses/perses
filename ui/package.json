@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "npm run build -w app",
+    "build:cjs": "npm run build:cjs --workspaces --if-present",
     "test": "npm test --workspaces",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",

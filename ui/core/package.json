@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -12,10 +12,12 @@
     "url": "https://github.com/perses/perses/issues"
   },
   "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "tsc",
+    "build": "tsc --build",
+    "build:cjs": "tsc --project ./tsconfig.cjs.json",
     "test": "echo 'no test to run' && exit 0",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"

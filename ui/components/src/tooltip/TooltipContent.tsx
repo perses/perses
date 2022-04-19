@@ -33,7 +33,7 @@ export function TooltipContent(props: TooltipContentProps) {
         <Typography
           variant="caption"
           sx={(theme) => ({
-            color: theme.palette.grey[300],
+            color: theme.palette.common.white,
           })}
         >
           {month}, {year} –
