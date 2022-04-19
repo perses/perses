@@ -90,11 +90,7 @@ func (o *option) Execute() error {
 	if len(o.output) > 0 {
 		return cmdUtils.HandleOutput(o.writer, o.output, resourceList)
 	}
-	entities, err := cmdUtils.ConvertToEntity(resourceList)
-	if err != nil {
-		return err
-	}
-	data := o.resourceService.BuildMatrix(entities)
+	data := o.resourceService.BuildMatrix(resourceList)
 	cmdUtils.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
 	return nil
 }

@@ -33,8 +33,8 @@ func (p *project) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error
 	return p.apiClient.Update(entity.(*modelV1.Project))
 }
 
-func (p *project) ListResource(prefix string) (interface{}, error) {
-	return p.apiClient.List(prefix)
+func (p *project) ListResource(prefix string) ([]modelAPI.Entity, error) {
+	return convertToEntityIfNoError(p.apiClient.List(prefix))
 }
 
 func (p *project) GetResource(name string) (modelAPI.Entity, error) {

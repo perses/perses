@@ -89,36 +89,6 @@ func IsGlobalResource(kind modelV1.Kind) bool {
 	}
 }
 
-func ConvertToEntity(entities interface{}) ([]modelAPI.Entity, error) {
-	var result []modelAPI.Entity
-	switch objects := entities.(type) {
-	case []*modelV1.Dashboard:
-		for _, object := range objects {
-			result = append(result, object)
-		}
-	case []*modelV1.Datasource:
-		for _, object := range objects {
-			result = append(result, object)
-		}
-	case []*modelV1.Folder:
-		for _, object := range objects {
-			result = append(result, object)
-		}
-	case []*modelV1.GlobalDatasource:
-		for _, object := range objects {
-			result = append(result, object)
-		}
-	case []*modelV1.Project:
-		for _, object := range objects {
-			result = append(result, object)
-		}
-	default:
-		return nil, fmt.Errorf("this kind of list '%T' is not supported", objects)
-	}
-
-	return result, nil
-}
-
 // GetProject determinate the project we should use to perform an action on the current resource with the following logic:
 // if the value is defined in the metadata, then we use this one.
 // If it's not the case we consider the one given through the flag --project.

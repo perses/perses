@@ -33,8 +33,8 @@ func (f *folder) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
 	return f.apiClient.Update(entity.(*modelV1.Folder))
 }
 
-func (f *folder) ListResource(prefix string) (interface{}, error) {
-	return f.apiClient.List(prefix)
+func (f *folder) ListResource(prefix string) ([]modelAPI.Entity, error) {
+	return convertToEntityIfNoError(f.apiClient.List(prefix))
 }
 
 func (f *folder) GetResource(name string) (modelAPI.Entity, error) {
