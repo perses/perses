@@ -223,7 +223,7 @@ export function StatChart(props: StatChartProps) {
     };
 
     return option;
-  }, [data, height, unit, width, sparkline, backgroundColor]);
+  }, [data, height, theme, unit, width, sparkline, backgroundColor]);
 
   return (
     <ECharts
