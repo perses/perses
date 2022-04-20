@@ -33,8 +33,8 @@ func (d *datasource) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, er
 	return d.apiClient.Update(entity.(*modelV1.Datasource))
 }
 
-func (d *datasource) ListResource(prefix string) (interface{}, error) {
-	return d.apiClient.List(prefix)
+func (d *datasource) ListResource(prefix string) ([]modelAPI.Entity, error) {
+	return convertToEntityIfNoError(d.apiClient.List(prefix))
 }
 
 func (d *datasource) GetResource(name string) (modelAPI.Entity, error) {
