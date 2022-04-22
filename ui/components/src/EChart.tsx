@@ -135,8 +135,7 @@ export const EChart = React.memo(function ECharts<T>({
     chartElement.current.setOption(option, true);
   }, [initChartDom, chartElement, option]);
 
-  // TODO (sjcobb): add dispose after resize removeEventListener ???
-  
+  // Resize chart, cleanup on unmount
   useLayoutEffect(() => {
     const updateSize = debounce(() => {
       if (chartElement.current === null) return;
@@ -145,6 +144,7 @@ export const EChart = React.memo(function ECharts<T>({
     window.addEventListener('resize', updateSize);
     updateSize();
     return () => {
+      // TODO (sjcobb): is prevValue check or setOption -> lazyUpdate needed?
       // https://github.com/guoliim/react-echarts/blob/master/src/index.tsx#L129
       window.removeEventListener('resize', updateSize);
       if (chartElement.current !== null) {

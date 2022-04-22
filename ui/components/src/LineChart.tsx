@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import React, { useMemo, useRef, useState } from 'react';
+import { useDeepMemo } from '@perses-dev/core';
 import { Box, useTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import type {
@@ -107,11 +108,11 @@ export const LineChart = React.memo(function LineChart({
   dataZoomEnabled,
   onDataZoom,
 }: LineChartProps) {
-  // console.log(data);
   const theme = useTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
+  // TODO (sjcobb): get event types working again
   // const handleEvents: OnEventsType<LineSeriesOption['data']> = useMemo(() => {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   const handleEvents: any = useMemo(() => {
@@ -165,7 +166,7 @@ export const LineChart = React.memo(function LineChart({
     setShowTooltip(false);
   };
 
-  const option: EChartsOption = useMemo(() => {
+  const option: EChartsOption = useDeepMemo(() => {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
 

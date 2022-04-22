@@ -72,7 +72,7 @@ graph TD;
     panels-plugin-->core
     panels-plugin-->components
 
-    %% components-->core
+    components-->core
     %% components-->plugin-system
 
     plugin-system-->components
