@@ -18,7 +18,6 @@ import type {
   EChartsOption,
   GridComponentOption,
   LegendComponentOption,
-  LineSeriesOption,
   ToolboxComponentOption,
   VisualMapComponentOption,
 } from 'echarts';
@@ -37,7 +36,8 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { ECharts, OnEventsType } from './ECharts';
+// import { ECharts, OnEventsType } from './EChart';
+import { EChart } from './EChart';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
 import { abbreviateLargeNumber } from './model/units';
 import { emptyTooltipData } from './tooltip/tooltip-model';
@@ -97,15 +97,27 @@ interface LineChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export function LineChart(props: LineChartProps) {
-  const { height, data, grid, legend, toolbox, dataZoomEnabled, onDataZoom } = props;
+export const LineChart = React.memo(function LineChart({
+  height,
+  data,
+  grid,
+  legend,
+  toolbox,
+  visualMap,
+  dataZoomEnabled,
+  onDataZoom,
+}: LineChartProps) {
+  // console.log(data);
   const theme = useTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
-  const handleEvents: OnEventsType<LineSeriesOption['data']> = useMemo(() => {
+  // const handleEvents: OnEventsType<LineSeriesOption['data']> = useMemo(() => {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  const handleEvents: any = useMemo(() => {
     return {
-      datazoom: (params) => {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      datazoom: (params: any) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;
         const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
@@ -247,10 +259,11 @@ export function LineChart(props: LineChartProps) {
         },
       },
       legend,
+      visualMap,
     };
 
     return option;
-  }, [data, theme, grid, legend, toolbox, dataZoomEnabled]);
+  }, [data, theme, grid, legend, toolbox, dataZoomEnabled, visualMap]);
 
   return (
     <Box
@@ -266,7 +279,7 @@ export function LineChart(props: LineChartProps) {
         <Tooltip chartRef={chartRef} tooltipData={emptyTooltipData} chartData={data} wrapLabels={true}></Tooltip>
       )}
 
-      <ECharts
+      <EChart
         sx={{
           width: '100%',
           height: '100%',
@@ -277,7 +290,7 @@ export function LineChart(props: LineChartProps) {
       />
     </Box>
   );
-}
+});
 
 function getFormattedDate(value: number) {
   const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {

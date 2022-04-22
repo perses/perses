@@ -21,7 +21,7 @@ import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts'
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { formatValue, UnitOptions } from './model/units';
-import { ECharts } from './ECharts';
+import { EChart } from './EChart';
 import { GraphSeriesValueTuple } from './model/graph-model';
 
 use([
@@ -226,7 +226,7 @@ export function StatChart(props: StatChartProps) {
   }, [data, height, theme, unit, width, sparkline, backgroundColor]);
 
   return (
-    <ECharts
+    <EChart
       sx={{
         width: width,
         height: height,
