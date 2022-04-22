@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/dashboards",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "description": "The dashboards feature in Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -12,18 +12,20 @@
     "url": "https://github.com/perses/perses/issues"
   },
   "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "tsc",
+    "build": "tsc --build",
+    "build:cjs": "tsc --project ./tsconfig.cjs.json",
     "test": "echo 'no test to run' && exit 0",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.2.1",
-    "@perses-dev/core": "^0.2.1",
-    "@perses-dev/plugin-system": "^0.2.1",
+    "@perses-dev/components": "^0.3.1",
+    "@perses-dev/core": "^0.3.1",
+    "@perses-dev/plugin-system": "^0.3.1",
     "immer": "^9.0.12",
     "use-immer": "^0.6.0",
     "use-resize-observer": "^8.0.0"

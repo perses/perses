@@ -120,11 +120,7 @@ func (o *option) setNamesFromAll() error {
 	if err != nil {
 		return err
 	}
-	entities, err := cmdUtils.ConvertToEntity(list)
-	if err != nil {
-		return err
-	}
-	o.setNames(entities)
+	o.setNames(list)
 	return nil
 }
 

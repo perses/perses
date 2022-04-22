@@ -20,7 +20,7 @@ import ESLintWebpackPlugin from 'eslint-webpack-plugin';
 export const commonConfig: Configuration = {
   entry: path.resolve(__dirname, './src/bundle.ts'),
   output: {
-    path: path.resolve(__dirname, './dist/bundle'),
+    path: path.resolve(__dirname, './dist'),
     publicPath: '/',
   },
   resolve: {

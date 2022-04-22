@@ -21,10 +21,21 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
+func convertToEntityIfNoError[T modelAPI.Entity](entities []T, err error) ([]modelAPI.Entity, error) {
+	if err != nil {
+		return nil, err
+	}
+	var result []modelAPI.Entity
+	for _, object := range entities {
+		result = append(result, object)
+	}
+	return result, nil
+}
+
 type Service interface {
 	CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
 	UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error)
-	ListResource(prefix string) (interface{}, error)
+	ListResource(prefix string) ([]modelAPI.Entity, error)
 	GetResource(name string) (modelAPI.Entity, error)
 	DeleteResource(name string) error
 	BuildMatrix(hits []modelAPI.Entity) [][]string

@@ -37,8 +37,10 @@ jobs:
 
       - name: Install UI deps
         run: cd ./ui && npm install
-      - name: Build the app
+      - name: Build the app and ESM version of packages
         run: cd ./ui && npm run build
+      - name: Build CommonJS version of packages
+        run: cd ./ui && npm run build:cjs
       - name: store react production build
         uses: actions/upload-artifact@v3
         with:
@@ -89,7 +91,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.17.x
+          go-version: 1.18.x
       - uses: actions/cache@v3.0.2
         with:
           path: ~/go/pkg/mod
@@ -119,7 +121,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --snapshot --rm-dist
+          args: release --snapshot --rm-dist --parallelism 1
       - name: Publish Release and binaries
         ## This step will only run when a new tag is pushed.
         ## It will build the Go binaries and the docker images and then publish:
