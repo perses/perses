@@ -160,12 +160,9 @@ export function LineChart(props: LineChartProps) {
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
     const defaultGrid = {
-      show: true,
-      backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.background.paper,
-      borderColor: theme.palette.grey['300'],
       top: 10,
       right: 20,
-      bottom: 0,
+      bottom: 5,
       left: 20,
       containLabel: true,
     };
@@ -206,15 +203,14 @@ export function LineChart(props: LineChartProps) {
         type: 'category',
         data: data.xAxis,
         axisLabel: {
+          margin: 15,
           color: theme.palette.text.primary,
-          margin: 12,
           formatter: (value: number) => {
             return getFormattedDate(value);
           },
         },
         axisTick: {
-          show: true,
-          length: 6,
+          show: false,
         },
         axisLine: {
           lineStyle: {
@@ -224,18 +220,20 @@ export function LineChart(props: LineChartProps) {
       },
       yAxis: {
         type: 'value',
-        boundaryGap: ['10%', '10%'],
+        boundaryGap: [0, '10%'],
         axisLabel: {
-          showMinLabel: false,
-          showMaxLabel: true,
+          margin: 12,
           color: theme.palette.text.primary,
           formatter: (value: number) => {
             return abbreviateLargeNumber(value);
           },
         },
         splitLine: {
+          show: true,
           lineStyle: {
+            width: 0.5,
             color: theme.palette.grey['300'],
+            opacity: 0.95,
           },
         },
       },

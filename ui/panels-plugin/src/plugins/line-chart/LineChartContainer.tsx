@@ -70,6 +70,14 @@ export function LineChartContainer(props: LineChartContainerProps) {
           symbol: 'circle',
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
           progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
+          lineStyle: {
+            width: 1.5,
+          },
+          emphasis: {
+            lineStyle: {
+              width: 2,
+            },
+          },
         });
       }
       queriesFinished++;
@@ -98,7 +106,6 @@ export function LineChartContainer(props: LineChartContainerProps) {
   };
 
   const gridOverrides: GridComponentOption = {
-    top: 5,
     right: 40,
   };
 
