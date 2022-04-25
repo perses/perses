@@ -98,7 +98,6 @@ interface LineChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-// export const LineChart = React.memo(function LineChart({
 export function LineChart({
   height,
   data,

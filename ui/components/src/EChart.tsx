@@ -75,7 +75,7 @@ const batchEvents = ['datazoom', 'downplay', 'highlight'] as const;
 
 export type BatchEventName = typeof batchEvents[number];
 
-// TODO: add remaining supported events from https://echarts.apache.org/en/api.html#events
+// TODO: add remaining supported echarts events
 type ChartEventName = 'finished';
 
 type EventName = MouseEventName | ChartEventName | BatchEventName;
@@ -91,17 +91,17 @@ export type OnEventsType<T> = {
 export interface EChartsProps<T> {
   option: EChartsCoreOption;
   sx?: SxProps<Theme>;
-  onChartInitialized?: (instance: ECharts) => void;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
+  onChartInitialized?: (instance: ECharts) => void;
 }
 
-export const EChart = React.memo(function ECharts<T>({
+export const EChart = React.memo(function EChart<T>({
   option,
   sx,
-  onChartInitialized,
   onEvents,
   _instance,
+  onChartInitialized,
 }: EChartsProps<T>) {
   const prevOption = useRef<EChartsCoreOption | undefined>();
   const containerRef = useRef<HTMLDivElement | null>(null);
