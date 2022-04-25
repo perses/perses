@@ -23,12 +23,7 @@ interface DarkModeContext {
   setDarkMode: (pref: boolean) => Promise<void>;
 }
 
-export const DarkModeContext = createContext<DarkModeContext>({
-  isDarkModeEnabled: false,
-  setDarkMode: () => {
-    throw new Error('Error: Dark mode not implemented');
-  },
-});
+export const DarkModeContext = createContext<DarkModeContext | undefined>(undefined);
 
 /**
  * Acts as theme provider for MUI and allows switching to dark mode.
@@ -60,6 +55,9 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }) {
 }
 
 export function useDarkMode(): DarkModeContext {
-  const darkModeContext = useContext(DarkModeContext);
-  return darkModeContext;
+  const ctx = useContext(DarkModeContext);
+  if (ctx === undefined) {
+    throw new Error('No DarkModeContext found. Did you forget a Provider?');
+  }
+  return ctx;
 }
