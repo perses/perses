@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import debounce from 'lodash/debounce';
 import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
+import { isEqual } from 'lodash-es';
 // import { useDeepMemo } from '../utils';
 
 // https://echarts.apache.org/en/api.html#events
@@ -96,32 +97,27 @@ export interface EChartsProps<T> {
 }
 
 export const EChart = React.memo(function ECharts<T>({
-  sx,
-  _instance,
-  // TODO (sjcobb): add back, rename onChartReady
-  // https://github.com/guoliim/react-echarts/blob/master/src/index.tsx#L152
-  // onChartInitialized,
   option,
+  sx,
+  onChartInitialized,
   onEvents,
+  _instance,
 }: EChartsProps<T>) {
+  const prevOption = useRef<EChartsCoreOption | undefined>();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartElement = useRef<ECharts | null>(null);
+
   const initChartDom = useCallback(() => {
-    if (chartElement.current !== null) {
-      chartElement.current.dispose();
-    }
-    if (containerRef.current) {
+    if (containerRef.current !== null && chartElement.current === null) {
       chartElement.current = init(containerRef.current);
+      onChartInitialized?.(chartElement.current);
       if (_instance !== undefined) {
         _instance.current = chartElement.current;
       }
     }
-  }, [_instance]);
+  }, [_instance, onChartInitialized]);
 
   useEffect(() => {
-    // TODO (sjcobb): cleanup
-    if (chartElement === undefined) return;
-    if (chartElement.current === undefined) return;
     const chart = chartElement.current;
     if (chart === null || onEvents === undefined) return;
     bindEvents(chart, onEvents);
@@ -129,10 +125,13 @@ export const EChart = React.memo(function ECharts<T>({
 
   // Sync options with chart instance
   useLayoutEffect(() => {
-    initChartDom();
-    if (chartElement.current === null) return;
-    // TODO (sjcobb): add isEqual check to only call setOption when option changes
-    chartElement.current.setOption(option, true);
+    if (!isEqual(prevOption.current, option)) {
+      initChartDom();
+      const chart = chartElement.current;
+      if (chart === null) return;
+      chart.setOption(option, true);
+      prevOption.current = option;
+    }
   }, [initChartDom, chartElement, option]);
 
   // Resize chart, cleanup on unmount
@@ -144,13 +143,10 @@ export const EChart = React.memo(function ECharts<T>({
     window.addEventListener('resize', updateSize);
     updateSize();
     return () => {
-      // TODO (sjcobb): is prevValue check or setOption -> lazyUpdate needed?
-      // https://github.com/guoliim/react-echarts/blob/master/src/index.tsx#L129
       window.removeEventListener('resize', updateSize);
       if (chartElement.current !== null) {
         chartElement.current.dispose();
         chartElement.current = null;
-        // prevValue.current = undefined
       }
     };
   }, [chartElement]);

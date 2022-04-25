@@ -12,7 +12,6 @@
 // limitations under the License.
 
 export * from './EChart';
-export { ECharts } from './ECharts';
 export * from './ErrorAlert';
 export * from './ErrorBoundary';
 export * from './GaugeChart';

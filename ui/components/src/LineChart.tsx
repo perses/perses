@@ -98,7 +98,8 @@ interface LineChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export const LineChart = React.memo(function LineChart({
+// export const LineChart = React.memo(function LineChart({
+export function LineChart({
   height,
   data,
   grid,
@@ -287,7 +288,7 @@ export const LineChart = React.memo(function LineChart({
       />
     </Box>
   );
-});
+}
 
 function getFormattedDate(value: number) {
   const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
