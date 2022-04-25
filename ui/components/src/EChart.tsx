@@ -20,7 +20,7 @@ export interface MouseEventsParameters<T> {
   info: Record<string, unknown>;
 }
 
-type onEventFunction<T> = (
+type OnEventFunction<T> = (
   params: MouseEventsParameters<T>,
   // This is potentially undefined for testing purposes
   instance?: ECharts
@@ -68,7 +68,7 @@ export interface BatchEventsParameters {
   batch: DataZoomPayloadBatchItem[] & HighlightPayloadBatchItem[];
 }
 
-type onBatchEventFunction = (params: BatchEventsParameters) => void;
+type OnBatchEventFunction = (params: BatchEventsParameters) => void;
 
 const batchEvents = ['datazoom', 'downplay', 'highlight'] as const;
 
@@ -79,10 +79,10 @@ type ChartEventName = 'finished';
 
 type EventName = MouseEventName | ChartEventName | BatchEventName;
 
-export type onEventsType<T> = {
-  [mouseEventName in MouseEventName]?: onEventFunction<T>;
+export type OnEventsType<T> = {
+  [mouseEventName in MouseEventName]?: OnEventFunction<T>;
 } & {
-  [batchEventName in BatchEventName]?: onBatchEventFunction;
+  [batchEventName in BatchEventName]?: OnBatchEventFunction;
 } & {
   [eventName in ChartEventName]?: () => void;
 };
@@ -91,7 +91,7 @@ export interface EChartsProps<T> {
   option: EChartsCoreOption;
   sx?: SxProps<Theme>;
   onChartInitialized?: (instance: ECharts) => void;
-  onEvents?: onEventsType<T>;
+  onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
 }
 
@@ -123,7 +123,7 @@ export const EChart = React.memo(function ECharts<T>({
     if (chartElement === undefined) return;
     if (chartElement.current === undefined) return;
     const chart = chartElement.current;
-    if (chart === null) return;
+    if (chart === null || onEvents === undefined) return;
     bindEvents(chart, onEvents);
   }, [chartElement, onEvents]);
 
@@ -159,16 +159,16 @@ export const EChart = React.memo(function ECharts<T>({
 });
 
 // Validate event config and bind custom events
-function bindEvents<T>(instance: ECharts, events?: onEventsType<T>) {
+function bindEvents<T>(instance: ECharts, events?: OnEventsType<T>) {
   if (events === undefined) return;
-  function bindEvent(eventName: EventName, onEventFunction: unknown) {
-    if (typeof onEventFunction === 'function') {
+  function bindEvent(eventName: EventName, OnEventFunction: unknown) {
+    if (typeof OnEventFunction === 'function') {
       if (isMouseEvent(eventName)) {
-        instance.on(eventName, (param) => onEventFunction(param, instance));
+        instance.on(eventName, (params) => OnEventFunction(params, instance));
       } else if (isBatchEvent(eventName)) {
-        instance.on(eventName, (param) => onEventFunction(param));
+        instance.on(eventName, (params) => OnEventFunction(params));
       } else {
-        instance.on(eventName, () => onEventFunction(null, instance));
+        instance.on(eventName, () => OnEventFunction(null, instance));
       }
     }
   }

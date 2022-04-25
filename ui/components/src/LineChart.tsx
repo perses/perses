@@ -18,6 +18,7 @@ import merge from 'lodash/merge';
 import type {
   EChartsOption,
   GridComponentOption,
+  LineSeriesOption,
   LegendComponentOption,
   ToolboxComponentOption,
   VisualMapComponentOption,
@@ -37,8 +38,7 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-// import { ECharts, OnEventsType } from './EChart';
-import { EChart } from './EChart';
+import { EChart, OnEventsType } from './EChart';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
 import { abbreviateLargeNumber } from './model/units';
 import { emptyTooltipData } from './tooltip/tooltip-model';
@@ -112,13 +112,9 @@ export const LineChart = React.memo(function LineChart({
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
-  // TODO (sjcobb): get event types working again
-  // const handleEvents: OnEventsType<LineSeriesOption['data']> = useMemo(() => {
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  const handleEvents: any = useMemo(() => {
+  const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      datazoom: (params: any) => {
+      datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;
         const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
