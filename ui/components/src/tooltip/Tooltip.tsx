@@ -70,7 +70,6 @@ export function Tooltip(props: TooltipProps) {
           position: 'absolute',
           top: 0,
           left: 0,
-          overflowY: 'scroll',
           backgroundColor: '#2E313E', // TODO: use colors from theme, separate styles for dark mode
           borderRadius: '6px',
           color: '#fff',
@@ -79,6 +78,10 @@ export function Tooltip(props: TooltipProps) {
           opacity: 1,
           transition: 'all 0.1s ease-out',
           zIndex: theme.zIndex.tooltip,
+          overflow: 'hidden',
+          '&:hover': {
+            overflowY: 'auto',
+          },
         })}
         style={{
           transform: cursorTransform,
