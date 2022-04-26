@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import debounce from 'lodash/debounce';
 import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
@@ -118,32 +118,23 @@ export const EChart = React.memo(function EChart<T>({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartElement = useRef<ECharts | null>(null);
 
-  const initChartDom = useCallback(() => {
-    if (containerRef.current !== null && chartElement.current === null) {
-      chartElement.current = init(containerRef.current);
-      onChartInitialized?.(chartElement.current);
-      if (_instance !== undefined) {
-        _instance.current = chartElement.current;
-      }
-    }
-  }, [_instance, onChartInitialized]);
-
-  useEffect(() => {
-    const chart = chartElement.current;
-    if (chart === null || onEvents === undefined) return;
-    bindEvents(chart, onEvents);
-  }, [chartElement, onEvents]);
-
-  // Sync options with chart instance
+  // Initialize chart canvas and sync options if they have changed
   useLayoutEffect(() => {
-    if (!isEqual(prevOption.current, option)) {
-      initChartDom();
-      const chart = chartElement.current;
-      if (chart === null) return;
-      chart.setOption(option, true);
-      prevOption.current = option;
+    if (isEqual(prevOption.current, option)) return;
+    if (containerRef.current === null || chartElement.current !== null) return;
+    chartElement.current = init(containerRef.current);
+    chartElement.current.setOption(option, true);
+    prevOption.current = option;
+    onChartInitialized?.(chartElement.current);
+    if (_instance !== undefined) {
+      _instance.current = chartElement.current;
     }
-  }, [initChartDom, chartElement, option]);
+    return () => {
+      if (chartElement.current === null) return;
+      chartElement.current.dispose();
+      chartElement.current = null;
+    };
+  }, [chartElement, option, _instance, onChartInitialized]);
 
   // Resize chart, cleanup on unmount
   useLayoutEffect(() => {
@@ -155,12 +146,19 @@ export const EChart = React.memo(function EChart<T>({
     updateSize();
     return () => {
       window.removeEventListener('resize', updateSize);
-      if (chartElement.current !== null) {
-        chartElement.current.dispose();
-        chartElement.current = null;
-      }
     };
   }, [chartElement]);
+
+  useEffect(() => {
+    const chart = chartElement.current;
+    if (chart === null || onEvents === undefined) return;
+    bindEvents(chart, onEvents);
+    return () => {
+      for (const event in onEvents) {
+        chart.off(event);
+      }
+    };
+  }, [chartElement, onEvents]);
 
   return <Box ref={containerRef} sx={sx}></Box>;
 });
@@ -168,6 +166,7 @@ export const EChart = React.memo(function EChart<T>({
 // Validate event config and bind custom events
 function bindEvents<T>(instance: ECharts, events?: OnEventsType<T>) {
   if (events === undefined) return;
+
   function bindEvent(eventName: EventName, OnEventFunction: unknown) {
     if (typeof OnEventFunction === 'function') {
       if (isMouseEvent(eventName)) {
