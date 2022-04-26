@@ -71,7 +71,7 @@ export function Tooltip(props: TooltipProps) {
           top: 0,
           left: 0,
           overflowY: 'scroll',
-          backgroundColor: '#000',
+          backgroundColor: '#2E313E', // TODO: use colors from theme, separate styles for dark mode
           borderRadius: '6px',
           color: '#fff',
           fontSize: '11px',
