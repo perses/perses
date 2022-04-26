@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import React, { useMemo, useRef, useState } from 'react';
-import { useDeepMemo } from '@perses-dev/core';
 import { Box, useTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import type {
@@ -38,6 +37,7 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { useDeepMemo } from './utils/memo';
 import { EChart, OnEventsType } from './EChart';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
 import { abbreviateLargeNumber } from './model/units';
