@@ -154,6 +154,8 @@ export const EChart = React.memo(function EChart<T>({
     if (chart === null || onEvents === undefined) return;
     bindEvents(chart, onEvents);
     return () => {
+      if (chart === undefined) return;
+      if (chart.isDisposed() === true) return;
       for (const event in onEvents) {
         chart.off(event);
       }
