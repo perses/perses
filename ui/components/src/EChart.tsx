@@ -17,7 +17,7 @@ import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import { isEqual } from 'lodash-es';
 
-// https://echarts.apache.org/en/api.html#events
+// see docs for info about each property: https://echarts.apache.org/en/api.html#events
 export interface MouseEventsParameters<T> {
   componentType: string;
   seriesType: string;
@@ -86,7 +86,6 @@ const batchEvents = ['datazoom', 'downplay', 'highlight'] as const;
 
 export type BatchEventName = typeof batchEvents[number];
 
-// TODO: add remaining supported echarts events
 type ChartEventName = 'finished';
 
 type EventName = MouseEventName | ChartEventName | BatchEventName;
@@ -149,6 +148,7 @@ export const EChart = React.memo(function EChart<T>({
     };
   }, [chartElement]);
 
+  // Bind and unbind chart events passed as prop
   useEffect(() => {
     const chart = chartElement.current;
     if (chart === null || onEvents === undefined) return;
