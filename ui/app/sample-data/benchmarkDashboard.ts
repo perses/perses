@@ -160,17 +160,18 @@ const benchmarkDashboard: DashboardResource = {
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                query: 'node_load15{instance="$instance",job="node"}',
               },
             },
             {
               kind: 'PrometheusGraphQuery',
               options: {
-                query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                query: 'node_load1{instance="$instance",job="node"}',
+                // query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
               },
             },
           ],
-          unit: { kind: 'Bytes' },
+          // unit: { kind: 'Bytes' },
         },
       },
       cpu: {
@@ -388,7 +389,6 @@ const benchmarkDashboard: DashboardResource = {
             width: 12,
             height: 6,
             content: { $ref: '#/panels/cpu' },
-            // content: { $ref: '#/panels/basicEx' },
             // content: { $ref: '#/panels/seriesTestAlt' },
           },
           {
@@ -396,7 +396,6 @@ const benchmarkDashboard: DashboardResource = {
             y: 0,
             width: 12,
             height: 6,
-            // content: { $ref: '#/panels/multiQueries' },
             content: { $ref: '#/panels/doubleQueries' },
           },
         ],
