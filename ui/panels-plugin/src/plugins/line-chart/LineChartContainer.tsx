@@ -86,7 +86,8 @@ export function LineChartContainer(props: LineChartContainerProps) {
     graphData.xAxis = xAxisData;
     return {
       graphData,
-      loading: queriesFinished !== queries.length,
+      loading: queriesFinished === 0,
+      allQueriesLoaded: queriesFinished === queries.length,
     };
   }, [queries]);
 
