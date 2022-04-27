@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import React, { useMemo, useRef, useState } from 'react';
+import { useDeepMemo } from '@perses-dev/core';
 import { Box, useTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import type {
@@ -97,7 +98,7 @@ interface LineChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export const LineChart = React.memo(function LineChart({
+export function LineChart({
   height,
   data,
   grid,
@@ -161,7 +162,7 @@ export const LineChart = React.memo(function LineChart({
     setShowTooltip(false);
   };
 
-  const option: EChartsOption = useMemo(() => {
+  const option: EChartsOption = useDeepMemo(() => {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
 
@@ -286,7 +287,7 @@ export const LineChart = React.memo(function LineChart({
       />
     </Box>
   );
-});
+}
 
 function getFormattedDate(value: number) {
   const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
