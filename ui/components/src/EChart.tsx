@@ -122,7 +122,7 @@ export const EChart = React.memo(function EChart<T>({
   useLayoutEffect(() => {
     if (containerRef.current === null || chartElement.current !== null) return;
     chartElement.current = init(containerRef.current);
-    chartElement.current.setOption(initialOption.current);
+    chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
       _instance.current = chartElement.current;
@@ -138,7 +138,7 @@ export const EChart = React.memo(function EChart<T>({
   useEffect(() => {
     if (prevOption.current === undefined || isEqual(prevOption.current, option)) return;
     if (chartElement.current === null) return;
-    chartElement.current.setOption(option);
+    chartElement.current.setOption(option, true);
     prevOption.current = option;
   }, [option]);
 
