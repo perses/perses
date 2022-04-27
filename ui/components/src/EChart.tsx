@@ -134,6 +134,7 @@ export const EChart = React.memo(function EChart<T>({
     };
   }, [_instance, onChartInitialized]);
 
+  // Update chart data when option changes
   useEffect(() => {
     if (prevOption.current === undefined || isEqual(prevOption.current, option)) return;
     if (chartElement.current === null) return;

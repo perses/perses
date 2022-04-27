@@ -32,7 +32,7 @@ export interface LineChartContainerProps {
 }
 
 /**
- * Draws a LineChart with Apache ECharts for the current running time series.
+ * Passes query data and customization options to LineChart
  */
 export function LineChartContainer(props: LineChartContainerProps) {
   const { width, height } = props;
