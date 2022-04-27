@@ -113,17 +113,16 @@ export const EChart = React.memo(function EChart<T>({
   _instance,
   onChartInitialized,
 }: EChartsProps<T>) {
-  const prevOption = useRef<EChartsCoreOption | undefined>();
+  const initialOption = useRef<EChartsCoreOption>(option);
+  const prevOption = useRef<EChartsCoreOption>(option);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartElement = useRef<ECharts | null>(null);
 
-  // Initialize chart canvas and sync options if they have changed
+  // Initialize chart, dispose on unmount
   useLayoutEffect(() => {
-    if (isEqual(prevOption.current, option)) return;
     if (containerRef.current === null || chartElement.current !== null) return;
     chartElement.current = init(containerRef.current);
-    chartElement.current.setOption(option, true);
-    prevOption.current = option;
+    chartElement.current.setOption(initialOption.current);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
       _instance.current = chartElement.current;
@@ -133,9 +132,16 @@ export const EChart = React.memo(function EChart<T>({
       chartElement.current.dispose();
       chartElement.current = null;
     };
-  }, [chartElement, option, _instance, onChartInitialized]);
+  }, [_instance, onChartInitialized]);
 
-  // Resize chart, cleanup on unmount
+  useEffect(() => {
+    if (prevOption.current === undefined || isEqual(prevOption.current, option)) return;
+    if (chartElement.current === null) return;
+    chartElement.current.setOption(option);
+    prevOption.current = option;
+  }, [option]);
+
+  // Resize chart, cleanup listener on unmount
   useLayoutEffect(() => {
     const updateSize = debounce(() => {
       if (chartElement.current === null) return;
@@ -146,7 +152,7 @@ export const EChart = React.memo(function EChart<T>({
     return () => {
       window.removeEventListener('resize', updateSize);
     };
-  }, [chartElement]);
+  }, []);
 
   // Bind and unbind chart events passed as prop
   useEffect(() => {
@@ -160,7 +166,7 @@ export const EChart = React.memo(function EChart<T>({
         chart.off(event);
       }
     };
-  }, [chartElement, onEvents]);
+  }, [onEvents]);
 
   return <Box ref={containerRef} sx={sx}></Box>;
 });
