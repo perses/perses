@@ -5,5 +5,11 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "tsBuildInfoFile": "../.build-cache/components.tsbuildinfo"
-  }
+  },
+  "references": [
+    {
+      "path": "../core",
+      "prepend": false
+    }
+  ]
 }

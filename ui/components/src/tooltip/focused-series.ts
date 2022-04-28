@@ -53,7 +53,9 @@ export function getNearbySeries(data: EChartsDataFormat, pointInGrid: number[], 
             const yValue = currentSeries.data[datumIdx] ?? 0;
             if (focusedX === datumIdx) {
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-                const formattedDate = TOOLTIP_DATE_FORMAT.format(xValue * 1000);
+                // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+                const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
+                const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
                 currentFocusedData.push({
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,

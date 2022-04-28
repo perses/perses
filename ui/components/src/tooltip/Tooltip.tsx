@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -70,8 +70,7 @@ export function Tooltip(props: TooltipProps) {
           position: 'absolute',
           top: 0,
           left: 0,
-          overflowY: 'scroll',
-          backgroundColor: '#000',
+          backgroundColor: '#2E313E', // TODO: use colors from theme, separate styles for dark mode
           borderRadius: '6px',
           color: '#fff',
           fontSize: '11px',
@@ -79,6 +78,10 @@ export function Tooltip(props: TooltipProps) {
           opacity: 1,
           transition: 'all 0.1s ease-out',
           zIndex: theme.zIndex.tooltip,
+          overflow: 'hidden',
+          '&:hover': {
+            overflowY: 'auto',
+          },
         })}
         style={{
           transform: cursorTransform,

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import React, { useMemo, useRef, useState } from 'react';
+import { useDeepMemo } from '@perses-dev/core';
 import { Box, useTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import type {
   EChartsOption,
   GridComponentOption,
-  LegendComponentOption,
   LineSeriesOption,
+  LegendComponentOption,
   ToolboxComponentOption,
   VisualMapComponentOption,
 } from 'echarts';
@@ -37,7 +38,7 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { ECharts, OnEventsType } from './ECharts';
+import { EChart, OnEventsType } from './EChart';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
 import { abbreviateLargeNumber } from './model/units';
 import { emptyTooltipData } from './tooltip/tooltip-model';
@@ -97,13 +98,21 @@ interface LineChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export function LineChart(props: LineChartProps) {
-  const { height, data, grid, legend, toolbox, dataZoomEnabled, onDataZoom } = props;
+export function LineChart({
+  height,
+  data,
+  grid,
+  legend,
+  toolbox,
+  visualMap,
+  dataZoomEnabled,
+  onDataZoom,
+}: LineChartProps) {
   const theme = useTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
-  const handleEvents: OnEventsType<LineSeriesOption['data']> = useMemo(() => {
+  const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -153,7 +162,7 @@ export function LineChart(props: LineChartProps) {
     setShowTooltip(false);
   };
 
-  const option: EChartsOption = useMemo(() => {
+  const option: EChartsOption = useDeepMemo(() => {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
 
@@ -202,6 +211,7 @@ export function LineChart(props: LineChartProps) {
       xAxis: {
         type: 'category',
         data: data.xAxis,
+        max: (value: { min: number; max: number }) => value.max,
         axisLabel: {
           margin: 15,
           color: theme.palette.text.primary,
@@ -247,10 +257,11 @@ export function LineChart(props: LineChartProps) {
         },
       },
       legend,
+      visualMap,
     };
 
     return option;
-  }, [data, theme, grid, legend, toolbox, dataZoomEnabled]);
+  }, [data, theme, grid, legend, toolbox, dataZoomEnabled, visualMap]);
 
   return (
     <Box
@@ -266,7 +277,7 @@ export function LineChart(props: LineChartProps) {
         <Tooltip chartRef={chartRef} tooltipData={emptyTooltipData} chartData={data} wrapLabels={true}></Tooltip>
       )}
 
-      <ECharts
+      <EChart
         sx={{
           width: '100%',
           height: '100%',

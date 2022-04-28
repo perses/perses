@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/char
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { formatValue, UnitOptions } from './model/units';
-import { ECharts } from './ECharts';
+import { EChart } from './EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -184,7 +184,7 @@ export function GaugeChart(props: GaugeChartProps) {
   }, [data, unit, axisLine]);
 
   return (
-    <ECharts
+    <EChart
       sx={{
         width: width,
         height: height,

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -32,7 +32,7 @@ export interface LineChartContainerProps {
 }
 
 /**
- * Draws a LineChart with Apache ECharts for the current running time series.
+ * Passes query data and customization options to LineChart
  */
 export function LineChartContainer(props: LineChartContainerProps) {
   const { width, height } = props;
@@ -86,7 +86,8 @@ export function LineChartContainer(props: LineChartContainerProps) {
     graphData.xAxis = xAxisData;
     return {
       graphData,
-      loading: queriesFinished !== queries.length,
+      loading: queriesFinished === 0,
+      allQueriesLoaded: queriesFinished === queries.length,
     };
   }, [queries]);
 

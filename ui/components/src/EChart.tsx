@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,49 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import debounce from 'lodash/debounce';
 import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
+import { isEqual } from 'lodash-es';
 
+// see docs for info about each property: https://echarts.apache.org/en/api.html#events
 export interface MouseEventsParameters<T> {
-  // type of the component to which the clicked glyph belongs
-  // i.e., 'series', 'markLine', 'markPoint', 'timeLine'
   componentType: string;
-  // series type (make sense when componentType is 'series')
-  // i.e., 'line', 'bar', 'pie'
   seriesType: string;
-  // series index in incoming option.series (make sense when componentType is 'series')
   seriesIndex: number;
-  // series name (make sense when componentType is 'series')
   seriesName: string;
-  // data name, category name
   name: string;
-  // data index in incoming data array
   dataIndex: number;
-  // incoming raw data item
   data: Record<string, unknown> & T;
-  // Some series, such as sankey or graph, maintains more than
-  // one types of data (nodeData and edgeData), which can be
-  // distinguished from each other by dataType with its value
-  // 'node' and 'edge'.
-  // On the other hand, most series has only one type of data,
-  // where dataType is not needed.
   dataType: string;
-  // incoming data value
   value: number | number[];
-  // color of component (make sense when componentType is 'series')
   color: string;
-  // User info (only available in graphic component
-  // and custom series, if element option has info
-  // property, e.g., {type: 'circle', info: {some: 123}})
   info: Record<string, unknown>;
 }
 
 type OnEventFunction<T> = (
   params: MouseEventsParameters<T>,
   // This is potentially undefined for testing purposes
-  // probably a better way to type this that isolates testing scenarios
   instance?: ECharts
 ) => void;
 
@@ -105,7 +86,6 @@ const batchEvents = ['datazoom', 'downplay', 'highlight'] as const;
 
 export type BatchEventName = typeof batchEvents[number];
 
-// TODO: add remaining supported events from https://echarts.apache.org/en/api.html#events
 type ChartEventName = 'finished';
 
 type EventName = MouseEventName | ChartEventName | BatchEventName;
@@ -121,62 +101,89 @@ export type OnEventsType<T> = {
 export interface EChartsProps<T> {
   option: EChartsCoreOption;
   sx?: SxProps<Theme>;
-  onChartInitialized?: (instance: ECharts) => void;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
-  parentContainer?: HTMLDivElement | null;
+  onChartInitialized?: (instance: ECharts) => void;
 }
 
-export function ECharts<T>({ sx, _instance, onChartInitialized, option, onEvents }: EChartsProps<T>) {
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const [echart, setChart] = useState<ECharts | undefined>(undefined);
-  // Create a chart instance in the container
-  useLayoutEffect(() => {
-    if (containerRef === null) return;
+export const EChart = React.memo(function EChart<T>({
+  option,
+  sx,
+  onEvents,
+  _instance,
+  onChartInitialized,
+}: EChartsProps<T>) {
+  const initialOption = useRef<EChartsCoreOption>(option);
+  const prevOption = useRef<EChartsCoreOption>(option);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const chartElement = useRef<ECharts | null>(null);
 
-    const chart = init(containerRef);
-    setChart(chart);
+  // Initialize chart, dispose on unmount
+  useLayoutEffect(() => {
+    if (containerRef.current === null || chartElement.current !== null) return;
+    chartElement.current = init(containerRef.current);
+    chartElement.current.setOption(initialOption.current, true);
+    onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
-      _instance.current = chart;
+      _instance.current = chartElement.current;
     }
-    bindEvents(chart, onEvents);
-
-    onChartInitialized?.(chart);
-
     return () => {
-      chart.dispose();
+      if (chartElement.current === null) return;
+      chartElement.current.dispose();
+      chartElement.current = null;
     };
-  }, [containerRef, _instance, onChartInitialized, onEvents]);
+  }, [_instance, onChartInitialized]);
 
-  // Sync options with chart instance
-  useLayoutEffect(() => {
-    if (echart === undefined) return;
-    echart.setOption(option);
-  }, [echart, option]);
+  // Update chart data when option changes
+  useEffect(() => {
+    if (prevOption.current === undefined || isEqual(prevOption.current, option)) return;
+    if (chartElement.current === null) return;
+    chartElement.current.setOption(option, true);
+    prevOption.current = option;
+  }, [option]);
 
+  // Resize chart, cleanup listener on unmount
   useLayoutEffect(() => {
     const updateSize = debounce(() => {
-      echart?.resize();
+      if (chartElement.current === null) return;
+      chartElement.current.resize();
     }, 200);
     window.addEventListener('resize', updateSize);
     updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, [echart]);
+    return () => {
+      window.removeEventListener('resize', updateSize);
+    };
+  }, []);
 
-  return <Box ref={setContainerRef} sx={sx}></Box>;
-}
+  // Bind and unbind chart events passed as prop
+  useEffect(() => {
+    const chart = chartElement.current;
+    if (chart === null || onEvents === undefined) return;
+    bindEvents(chart, onEvents);
+    return () => {
+      if (chart === undefined) return;
+      if (chart.isDisposed() === true) return;
+      for (const event in onEvents) {
+        chart.off(event);
+      }
+    };
+  }, [onEvents]);
+
+  return <Box ref={containerRef} sx={sx}></Box>;
+});
 
 // Validate event config and bind custom events
 function bindEvents<T>(instance: ECharts, events?: OnEventsType<T>) {
   if (events === undefined) return;
-  function bindEvent(eventName: EventName, onEventFunction: unknown) {
-    if (typeof onEventFunction === 'function') {
+
+  function bindEvent(eventName: EventName, OnEventFunction: unknown) {
+    if (typeof OnEventFunction === 'function') {
       if (isMouseEvent(eventName)) {
-        instance.on(eventName, (param) => onEventFunction(param, instance));
+        instance.on(eventName, (params) => OnEventFunction(params, instance));
       } else if (isBatchEvent(eventName)) {
-        instance.on(eventName, (param) => onEventFunction(param));
+        instance.on(eventName, (params) => OnEventFunction(params));
       } else {
-        instance.on(eventName, () => onEventFunction(null, instance));
+        instance.on(eventName, () => OnEventFunction(null, instance));
       }
     }
   }

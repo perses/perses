@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,7 +21,7 @@ import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts'
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { formatValue, UnitOptions } from './model/units';
-import { ECharts } from './ECharts';
+import { EChart } from './EChart';
 import { GraphSeriesValueTuple } from './model/graph-model';
 
 use([
@@ -226,7 +226,7 @@ export function StatChart(props: StatChartProps) {
   }, [data, height, theme, unit, width, sparkline, backgroundColor]);
 
   return (
-    <ECharts
+    <EChart
       sx={{
         width: width,
         height: height,
