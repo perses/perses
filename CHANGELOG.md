@@ -3,6 +3,7 @@
 - [FEATURE] add dark mode support, theme toggle in app header #415
 - [ENHANCEMENT] upgrade go to v1.18 #419
 - [ENHANCEMENT] use generics to simplify the way to convert slice in CLI #420
+- [BUGFIX] Switch bundle output directory to fix app build #421
 - [BUGFIX] echarts wrapper disposes canvas too frequently #425
 
 ## 0.3.1 / 2022-04-15
