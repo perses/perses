@@ -211,6 +211,7 @@ export function LineChart({
       xAxis: {
         type: 'category',
         data: data.xAxis,
+        max: (value: { min: number; max: number }) => value.max,
         axisLabel: {
           margin: 15,
           color: theme.palette.text.primary,
