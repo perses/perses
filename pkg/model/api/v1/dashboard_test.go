@@ -49,19 +49,20 @@ func TestMarshalDashboard(t *testing.T) {
 					},
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
-					Panels: map[string]*dashboard.Panel{
-						"MyPanel": {
-							DisplayedName: "simple line chart",
-							Kind:          dashboard.KindLineChart,
-							Chart: &dashboard.LineChart{
-								ShowLegend: false,
-								Lines: []dashboard.Line{
+					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
+						{
+							"displayed_name": "simple line chart",
+							"kind": "LineChart",
+							"chart": {
+								"show_legend": false,
+								"lines": [
 									{
-										Expr: "up",
-									},
-								},
-							},
-						},
+										"expr": "up"
+									}
+								]
+							}
+						}
+					`),
 					},
 					Entrypoint: &common.JSONRef{
 						Ref: "#/spec/layouts/main",
@@ -168,19 +169,20 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Panels: map[string]*dashboard.Panel{
-						"MyPanel": {
-							DisplayedName: "simple line chart",
-							Kind:          dashboard.KindLineChart,
-							Chart: &dashboard.LineChart{
-								ShowLegend: false,
-								Lines: []dashboard.Line{
+					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
+						{
+							"displayed_name": "simple line chart",
+							"kind": "LineChart",
+							"chart": {
+								"show_legend": false,
+								"lines": [
 									{
-										Expr: "up",
-									},
-								},
-							},
-						},
+										"expr": "up"
+									}
+								]
+							}
+						}
+					`),
 					},
 					Entrypoint: &common.JSONRef{
 						Ref: "#/spec/layouts/main",

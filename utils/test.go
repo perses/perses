@@ -187,7 +187,7 @@ func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager)
+	serviceManager := dependency.NewServiceManager(persistenceManager, config.Config{})
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
 	return httptest.NewServer(handler), persistenceManager

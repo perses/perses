@@ -15,6 +15,7 @@ package dashboard
 
 import (
 	"github.com/perses/common/etcd"
+	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/api/shared"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -43,4 +44,5 @@ type DAO interface {
 
 type Service interface {
 	shared.ToolboxService
+	GetValidator() schemas.Validator
 }

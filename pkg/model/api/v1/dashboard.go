@@ -37,7 +37,7 @@ type DashboardSpec struct {
 	// dashboard
 	Duration   model.Duration                 `json:"duration" yaml:"duration"`
 	Variables  map[string]*dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Panels     map[string]*dashboard.Panel    `json:"panels" yaml:"panels"`
+	Panels     map[string]json.RawMessage     `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
 	Layouts    map[string]*dashboard.Layout   `json:"layouts" yaml:"layouts"`
 	Entrypoint *common.JSONRef                `json:"entrypoint" yaml:"entrypoint"`
 }

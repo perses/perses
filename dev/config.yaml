@@ -5,3 +5,7 @@ database:
     connections:
       - host: 0.0.0.0
         port: 2379
+
+schemas:
+  path: "schemas"
+  interval: "1m"
