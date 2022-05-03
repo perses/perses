@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,26 +13,24 @@
 
 package config
 
-import (
-	"github.com/perses/common/config"
+import "time"
+
+const (
+	defaultSchemasPath = "schemas"
+	defaultInterval    = 1 * time.Hour
 )
 
-type Config struct {
-	Database Database `yaml:"database"`
-	Schemas  Schemas  `yaml:"schemas"`
+type Schemas struct {
+	Path     string        `yaml:"path,omitempty"`
+	Interval time.Duration `yaml:"interval,omitempty"`
 }
 
-func Resolve(configFile string, dbFolder string, dbExtension string) (Config, error) {
-	c := Config{}
-	if len(dbFolder) > 0 {
-		c.Database.File = &File{
-			Folder:        dbFolder,
-			FileExtension: FileExtension(dbExtension),
-		}
+func (s *Schemas) Verify() error {
+	if len(s.Path) == 0 {
+		s.Path = defaultSchemasPath
 	}
-	return c, config.NewResolver().
-		SetConfigFile(configFile).
-		SetEnvPrefix("PERSES").
-		Resolve(&c).
-		Verify()
+	if s.Interval <= 0 {
+		s.Interval = defaultInterval
+	}
+	return nil
 }

@@ -18,9 +18,11 @@ import (
 	"time"
 
 	"github.com/perses/common/etcd"
+	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/config"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -28,12 +30,14 @@ import (
 
 type service struct {
 	dashboard.Service
-	dao dashboard.DAO
+	dao       dashboard.DAO
+	validator schemas.Validator
 }
 
-func NewService(dao dashboard.DAO) dashboard.Service {
+func NewService(dao dashboard.DAO, conf config.Config) dashboard.Service {
 	return &service{
-		dao: dao,
+		dao:       dao,
+		validator: schemas.NewValidator(conf.Schemas),
 	}
 }
 
@@ -52,11 +56,18 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	if _, err := variable.BuildOrder(entity.Spec.Variables); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
+
+	// verify this new dashboard passes the validation
+	err := s.validator.Validate(entity.Spec.Panels)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
+
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		if etcd.IsKeyConflict(err) {
-			logrus.Debugf("unable to create the dashboard %q. It already exits", entity.Metadata.Name)
+			logrus.Debugf("unable to create the dashboard %q. It already exists", entity.Metadata.Name)
 			return nil, shared.ConflictError
 		}
 		logrus.WithError(err).Errorf("unable to perform the creation of the prometheuRule %q, something wrong with the database", entity.Metadata.Name)
@@ -85,6 +96,11 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 	}
 	// verify it's possible to calculate the build order for the variable.
 	if _, err := variable.BuildOrder(entity.Spec.Variables); err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
+	// verify the updated version of the dashboard passes the validation
+	err := s.validator.Validate(entity.Spec.Panels)
+	if err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// find the previous version of the dashboard
@@ -131,4 +147,8 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 
 func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
+}
+
+func (s *service) GetValidator() schemas.Validator {
+	return s.validator
 }

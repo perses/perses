@@ -20,6 +20,7 @@ import (
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/front"
+	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/config"
 	"github.com/sirupsen/logrus"
@@ -54,15 +55,20 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager)
+	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesFrontend := front.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
+
+	// register cron task to reload CUE schemas for dashboards validation
+	runner.WithCronTasks(conf.Schemas.Interval, schemas.NewReloader(serviceManager.GetDashboard().GetValidator()))
+
 	// register the API
 	runner.HTTPServerBuilder().
 		APIRegistration(persesAPI).
 		APIRegistration(persesFrontend).
 		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource()))
+
 	// start the application
 	runner.Start()
 }

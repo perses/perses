@@ -30,6 +30,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/config"
 )
 
 type ServiceManager interface {
@@ -53,8 +54,8 @@ type service struct {
 	user             user.Service
 }
 
-func NewServiceManager(dao PersistenceManager) ServiceManager {
-	dashboardService := dashboardImpl.NewService(dao.GetDashboard())
+func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManager {
+	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), conf)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource())
 	folderService := folderImpl.NewService(dao.GetFolder())
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource())
