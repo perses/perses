@@ -23,7 +23,6 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/core": "^0.4.0",
     "date-fns": "^2.28.0",
     "lodash-es": "^4.17.21"
   },
