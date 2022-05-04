@@ -1,7 +1,7 @@
 # Perses Maintainers
 
 More details about our governance and how maintainers are selected can
-be found in [GOVERNANCE.md](GOVERNANCE.MD).
+be found in [GOVERNANCE.md](GOVERNANCE.md).
 
 ## Maintainers
 
