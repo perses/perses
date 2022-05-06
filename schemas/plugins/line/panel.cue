@@ -1,8 +1,10 @@
 package line
 
 #panel: {
-  displayed_name: string
   kind: "LineChart"
+  display: {
+  	name: string
+  }
   chart: {
     show_legend?: bool
     lines: [...#line]

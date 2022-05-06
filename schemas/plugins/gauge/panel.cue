@@ -1,11 +1,22 @@
 package gauge
 
+import "common"
+
 #panel: {
-  displayed_name: string
   kind: "GaugeChart"
-  chart: {
-    expr: string
+  display: {
+  	name: string
   }
+  options: {
+    query: #query
+    calculation: #common.calculation
+    unit?: #common.unit
+    thresholds?: #common.threasholds
+  }
+}
+
+#query: {
+
 }
 
 #panel
