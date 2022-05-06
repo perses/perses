@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -169,7 +168,7 @@ func (r *Request) Do() *Response {
 
 	// Deserialize the json response
 	if resp.Body != nil {
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		return &Response{body: data, err: err, statusCode: resp.StatusCode}
 	}
 

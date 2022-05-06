@@ -16,10 +16,10 @@ package perseshttp
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 	"time"
 )
@@ -39,7 +39,7 @@ func (b *BasicAuth) Verify() error {
 	}
 	if len(b.PasswordFile) > 0 {
 		// Read the file and load the password contained
-		data, err := ioutil.ReadFile(b.PasswordFile)
+		data, err := os.ReadFile(b.PasswordFile)
 		if err != nil {
 			return err
 		}

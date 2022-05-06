@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"text/template"
@@ -431,7 +430,7 @@ func generateFile(folder string, fileName string, tpl *template.Template, ept en
 	if err != nil {
 		log.Fatal("Error while formatting generated code:", err)
 	}
-	if err := ioutil.WriteFile(file, data, 0644); err != nil {
+	if err := os.WriteFile(file, data, 0644); err != nil {
 		log.Fatal("Error writing interface file:", err)
 	}
 }

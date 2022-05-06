@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -117,7 +116,7 @@ func main() {
 				return nil
 			}
 			relativePath := strings.TrimPrefix(filepath.ToSlash(path), distFolder)
-			data, err := ioutil.ReadFile(path)
+			data, err := os.ReadFile(path)
 			if err != nil {
 				// If file not reading
 				log.Printf("Error reading %s: %s", path, err)
@@ -155,7 +154,7 @@ func main() {
 		log.Fatal("Error formatting generated code", err)
 	}
 
-	if err := ioutil.WriteFile(endpointFile, data, os.ModePerm); err != nil {
+	if err := os.WriteFile(endpointFile, data, os.ModePerm); err != nil {
 		log.Fatal("Error writing endpoint file", err)
 	}
 }
