@@ -8,4 +8,4 @@ database:
 
 schemas:
   path: "schemas"
-  interval: "1m"
+  interval: "5m"

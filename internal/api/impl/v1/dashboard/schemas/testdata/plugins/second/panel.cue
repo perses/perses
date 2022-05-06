@@ -1,4 +1,4 @@
-package line
+package second
 
 #panel: {
   a: string,

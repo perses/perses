@@ -1,4 +1,4 @@
-package bar
+package first
 
 #panel: {
   a: string,
