@@ -9,5 +9,3 @@ package common
 	default_color?: string
 	steps?: [...#stepOption]
 }
-
-#threasholds
