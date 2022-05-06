@@ -34,18 +34,18 @@ To become a Maintainer you need to demonstrate the following:
   * understanding of how the team works (policies, processes for testing and code review, etc),
   * understanding of the project's code base and coding and documentation style.
 
-A new Maintainer must be proposed by an existing maintainer by creating a new issue in 
-the [Perses repository](https://github.com/perses/perses/issues). The new maintainer
-will be approved after another maintainer (in addition to the one proposing) has endorsed
-the person.
+A new maintainer must be proposed by an existing maintainer by sending an email to the
+private maintainer mailing list (TODO CREATE ML). A majority of existing maintainers
+must vote to approve a new maintainer. After the new maintainer is approved, they will 
+be added to the private maintainer mailing list.
 
 ## Voting
 
 While most business in Perses is conducted by "lazy consensus", periodically
 the Maintainers may need to vote on specific actions or changes.
-A vote can be taken by creating a new issue in the
-[Perses repository](https://github.com/perses/perses/issues).
-Any Maintainer may demand a vote be taken.
+A vote can be taken by emailing the private maintainer mailing list for sensitive
+matters or by creating an issue to allow for public comment from the broader
+community. Any Maintainer may demand a vote be taken.
 
 Most votes require a simple majority of all Maintainers to succeed. Maintainers
 can be removed by a 2/3 majority vote of all Maintainers, and changes to this
