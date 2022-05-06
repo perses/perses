@@ -27,9 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-/*
- * A Validator can be used to run checks on panels, based on cuelang definitions
- */
+// Validator can be used to run checks on panels, based on cuelang definitions
 type Validator interface {
 	Initialize() error
 	Validate(panels map[string]json.RawMessage) error
@@ -48,9 +46,7 @@ const (
 	pluginsFolderName = "plugins"
 )
 
-/*
- * Instanciate a validator
- */
+// NewValidator instantiate a validator
 func NewValidator(conf config.Schemas) Validator {
 	return &validator{
 		schemasPath: conf.Path,
@@ -60,9 +56,7 @@ func NewValidator(conf config.Schemas) Validator {
 	}
 }
 
-/*
- * Initialize the validator
- */
+// Initialize the validator
 func (v *validator) Initialize() error {
 	// load the base panel definition
 	baseDefPath := filepath.Join(v.schemasPath, baseDefFileName)
@@ -75,11 +69,9 @@ func (v *validator) Initialize() error {
 	return nil
 }
 
-/*
- * Validate a list of panels.
- * The panels are matched against the known list of CUE definitions (schemas).
- * If no schema matches for at least 1 panel, the validation fails.
- */
+// Validate verify a list of panels.
+// The panels are matched against the known list of CUE definitions (schemas).
+// If no schema matches for at least 1 panel, the validation fails.
 func (v *validator) Validate(panels map[string]json.RawMessage) error {
 	logrus.Tracef("Panels to validate: %+v", panels)
 
@@ -136,9 +128,7 @@ func (v *validator) Validate(panels map[string]json.RawMessage) error {
 	return res
 }
 
-/*
- * Load the known list of schemas into the validator
- */
+// LoadSchemas load the known list of schemas into the validator
 func (v *validator) LoadSchemas() {
 	pluginsPath := filepath.Join(v.schemasPath, pluginsFolderName)
 
