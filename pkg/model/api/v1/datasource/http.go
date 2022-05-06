@@ -16,9 +16,9 @@ package datasource
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -154,7 +154,7 @@ func (b *BasicAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (b *BasicAuth) GetPassword() (string, error) {
 	if len(b.PasswordFile) > 0 {
-		data, err := ioutil.ReadFile(b.PasswordFile)
+		data, err := os.ReadFile(b.PasswordFile)
 		if err != nil {
 			return "", err
 		}
@@ -169,7 +169,7 @@ func (b *BasicAuth) validate() error {
 	}
 	if len(b.PasswordFile) > 0 {
 		// Read the file to verify it exists
-		_, err := ioutil.ReadFile(b.PasswordFile)
+		_, err := os.ReadFile(b.PasswordFile)
 		if err != nil {
 			return err
 		}

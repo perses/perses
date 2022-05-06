@@ -16,7 +16,6 @@ package database
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -94,7 +93,7 @@ func (d *fileDAO) Upsert(key string, entity interface{}) error {
 }
 func (d *fileDAO) Get(key string, entity interface{}) error {
 	filePath := d.buildPath(key)
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &etcd.Error{Key: key, Code: etcd.ErrorCodeKeyNotFound}
@@ -161,7 +160,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	}
 	for _, file := range files {
 		// now read all file and append them to the final result
-		data, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", folder, file))
+		data, err := os.ReadFile(fmt.Sprintf("%s/%s", folder, file))
 		if err != nil {
 			return err
 		}

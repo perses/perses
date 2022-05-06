@@ -16,7 +16,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -100,7 +99,7 @@ func readConfig(filePath string) (*CLIConfig, error) {
 		return nil, err
 	}
 
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -153,5 +152,5 @@ func WriteConfig(config *CLIConfig) error {
 		return err
 	}
 
-	return ioutil.WriteFile(filePath, data, 0600)
+	return os.WriteFile(filePath, data, 0600)
 }
