@@ -55,6 +55,11 @@ fmt:
 	$(GO) fmt ./...
 	$(CUE) fmt ./schemas/...
 
+.PHONY: cue-eval
+cue-eval:
+	@echo ">> eval cue schemas"
+	$(CUE) eval ./schemas/...
+
 .PHONY: test
 test: generate
 	@echo ">> running all tests"
