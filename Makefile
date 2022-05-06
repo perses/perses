@@ -12,6 +12,7 @@
 # limitations under the License.
 
 GO            ?= go
+CUE           ?= cue
 GOFMT         ?= $(GO)fmt
 GOARCH        ?= amd64
 COMMIT        := $(shell git rev-parse HEAD)
@@ -52,6 +53,7 @@ fixlicense:
 fmt:
 	@echo ">> format code"
 	$(GO) fmt ./...
+	$(CUE) fmt ./schemas/...
 
 .PHONY: test
 test: generate
