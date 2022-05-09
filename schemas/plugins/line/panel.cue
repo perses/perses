@@ -1,18 +1,18 @@
 package line
 
+import (
+	"github.com/perses/perses/schemas/plugins/common/prometheus"
+)
+
 #panel: {
 	kind: "LineChart"
 	display: {
 		name: string
 	}
-	chart: {
+	options: {
+		queries: [...prometheus.#query]
 		show_legend?: bool
-		lines: [...#line]
 	}
-}
-
-#line: {
-	expr: string
 }
 
 #panel
