@@ -13,7 +13,7 @@ import (
 		query:       #query
 		calculation: common.#calculation
 		unit?:       common.#unit
-		thresholds?: common.#threasholds
+		thresholds?: common.#thresholds
 	}
 }
 

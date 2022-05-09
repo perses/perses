@@ -5,7 +5,7 @@ package common
 	color: string
 }
 
-#threasholds: {
+#thresholds: {
 	default_color?: string
 	steps?: [...#stepOption]
 }
