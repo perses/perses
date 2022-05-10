@@ -1,7 +1,7 @@
 package line
 
 import (
-	"github.com/perses/perses/schemas/plugins/common/prometheus"
+	"github.com/perses/perses/schemas/common/prometheus"
 )
 
 #panel: {

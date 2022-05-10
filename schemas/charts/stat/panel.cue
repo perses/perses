@@ -1,8 +1,8 @@
 package stat
 
 import (
-	"github.com/perses/perses/schemas/plugins/common"
-	"github.com/perses/perses/schemas/plugins/common/prometheus"
+	"github.com/perses/perses/schemas/common"
+	"github.com/perses/perses/schemas/common/prometheus"
 )
 
 #sparkline: {
