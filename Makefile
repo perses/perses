@@ -60,6 +60,11 @@ cue-eval:
 	@echo ">> eval cue schemas"
 	$(CUE) eval ./schemas/...
 
+.PHONY: cue-test
+cue-test:
+	@echo ">> test cue schemas with json data"
+	./scripts/cue_test.sh
+
 .PHONY: test
 test: generate
 	@echo ">> running all tests"

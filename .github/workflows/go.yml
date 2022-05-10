@@ -83,4 +83,6 @@ jobs:
       run: go install cuelang.org/go/cmd/cue@latest
     - name: eval cue schema
       run: make cue-eval
+    - name: test cue schema
+      run: make cue-test
 
