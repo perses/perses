@@ -201,6 +201,13 @@ export function LineChart({
       delete defaultToolbox.feature.dataZoom.icon;
     }
 
+    let xAxisInterval = 15000;
+    if (data.xAxis.length > 1) {
+      if (data.xAxis[0] !== undefined && data.xAxis[1] !== undefined) {
+        xAxisInterval = data.xAxis[1] - data.xAxis[0];
+      }
+    }
+
     const option = {
       title: {
         show: false,
@@ -216,7 +223,7 @@ export function LineChart({
           margin: 15,
           color: theme.palette.text.primary,
           formatter: (value: number) => {
-            return getFormattedDate(value);
+            return getFormattedDate(value, xAxisInterval);
           },
         },
         axisTick: {
@@ -261,6 +268,7 @@ export function LineChart({
     };
 
     return option;
+    // TODO (sjcobb): consolidate option props using echarts theme to reduce num of items in dep array
   }, [data, theme, grid, legend, toolbox, dataZoomEnabled, visualMap]);
 
   return (
@@ -290,11 +298,20 @@ export function LineChart({
   );
 }
 
-function getFormattedDate(value: number) {
-  const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
+function getFormattedDate(value: number, stepMs: number) {
+  const dateFormatOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: 'numeric',
     hour12: false,
-  });
-  return XAXIS_DATE_FORMAT.format(value * 1000);
+  };
+  if (stepMs <= 13000) {
+    dateFormatOptions.second = 'numeric';
+  } else if (stepMs > 15000) {
+    // 15000 corresponds to greater than 1 day
+    dateFormatOptions.month = 'numeric';
+    dateFormatOptions.day = 'numeric';
+  }
+  const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
+  // remove comma when month / day present
+  return DATE_FORMAT.format(value).replace(/, /g, ' ');
 }
