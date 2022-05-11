@@ -201,12 +201,7 @@ export function LineChart({
       delete defaultToolbox.feature.dataZoom.icon;
     }
 
-    let xAxisInterval = 15000;
-    if (data.xAxis.length > 1) {
-      if (data.xAxis[0] !== undefined && data.xAxis[1] !== undefined) {
-        xAxisInterval = data.xAxis[1] - data.xAxis[0];
-      }
-    }
+    const stepMs = data.stepMs ?? getStepInterval(data.xAxis);
 
     const option = {
       title: {
@@ -223,7 +218,7 @@ export function LineChart({
           margin: 15,
           color: theme.palette.text.primary,
           formatter: (value: number) => {
-            return getFormattedDate(value, xAxisInterval);
+            return getFormattedDate(value, stepMs);
           },
         },
         axisTick: {
@@ -296,6 +291,13 @@ export function LineChart({
       />
     </Box>
   );
+}
+
+function getStepInterval(data: number[]) {
+  const defaultInterval = 15000;
+  if (data.length === 0) return defaultInterval;
+  if (data[0] === undefined || data[1] === undefined) return defaultInterval;
+  return data[1] - data[0];
 }
 
 function getFormattedDate(value: number, stepMs: number) {
