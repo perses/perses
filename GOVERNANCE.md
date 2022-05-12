@@ -35,7 +35,7 @@ To become a Maintainer you need to demonstrate the following:
   * understanding of the project's code base and coding and documentation style.
 
 A new maintainer must be proposed by an existing maintainer by sending an email to the
-private maintainer mailing list (TODO CREATE ML). A majority of existing maintainers
+private maintainer mailing list (perses-team@googlegroups.com). A 2/3 majority of existing maintainers
 must vote to approve a new maintainer. After the new maintainer is approved, they will 
 be added to the private maintainer mailing list.
 
