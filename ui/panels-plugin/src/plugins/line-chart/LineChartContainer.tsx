@@ -84,7 +84,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
     }
 
     graphData.xAxis = xAxisData;
-    graphData.stepMs = timeScale.stepMs;
+    graphData.rangeMs = timeScale.endMs - timeScale.startMs;
     return {
       graphData,
       loading: queriesFinished === 0,

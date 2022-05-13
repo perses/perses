@@ -201,7 +201,7 @@ export function LineChart({
       delete defaultToolbox.feature.dataZoom.icon;
     }
 
-    const stepMs = data.stepMs ?? getStepInterval(data.xAxis);
+    const rangeMs = getDateRange(data.xAxis);
 
     const option = {
       title: {
@@ -218,7 +218,7 @@ export function LineChart({
           margin: 15,
           color: theme.palette.text.primary,
           formatter: (value: number) => {
-            return getFormattedDate(value, stepMs);
+            return getFormattedDate(value, rangeMs);
           },
         },
         axisTick: {
@@ -293,23 +293,27 @@ export function LineChart({
   );
 }
 
-function getStepInterval(data: number[]) {
-  const defaultInterval = 15000;
-  if (data.length === 0) return defaultInterval;
-  if (data[0] === undefined || data[1] === undefined) return defaultInterval;
-  return data[1] - data[0];
+// fallback when xAxis time range not passed as prop
+function getDateRange(data: number[]) {
+  const defaultRange = 3600000; // hour in ms
+  if (data.length === 0) return defaultRange;
+  const lastDatum = data[data.length - 1];
+  if (data[0] === undefined || lastDatum === undefined) return defaultRange;
+  return lastDatum - data[0];
 }
 
-function getFormattedDate(value: number, stepMs: number) {
+// determines time granularity for axis labels, defaults to hh:mm
+function getFormattedDate(value: number, rangeMs: number) {
   const dateFormatOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: 'numeric',
     hour12: false,
   };
-  if (stepMs <= 13000) {
+  const fiveMinMs = 300000;
+  const dayMs = 86400000;
+  if (rangeMs <= fiveMinMs) {
     dateFormatOptions.second = 'numeric';
-  } else if (stepMs > 15000) {
-    // 15000 corresponds to greater than 1 day
+  } else if (rangeMs >= dayMs) {
     dateFormatOptions.month = 'numeric';
     dateFormatOptions.day = 'numeric';
   }

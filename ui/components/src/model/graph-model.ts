@@ -29,5 +29,5 @@ export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
 export type EChartsDataFormat = {
   timeSeries: EChartsTimeSeries[];
   xAxis: number[];
-  stepMs?: number;
+  rangeMs?: number;
 };
