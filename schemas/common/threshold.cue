@@ -1,8 +1,8 @@
 package common
 
 #stepOption: {
-	value: number
-	color: string
+	value:  number
+	color?: string
 }
 
 #thresholds: {

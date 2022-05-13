@@ -12,7 +12,8 @@
     },
     "calculation": "LastNumber",
     "unit": {
-      "kind": "Decimal"
+      "kind": "Decimal",
+      "decimal_places": 2
     }
   }
 }

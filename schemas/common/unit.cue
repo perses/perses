@@ -12,8 +12,8 @@ package common
 }
 
 #decimalUnit: {
-	#kind:          "Decimal"
+	kind:           "Decimal"
 	decimal_places: number
 	suffix?:        "string"
-	unitDisplay?:   "short" | "long" | "narrow"
+	display?:       "short" | "long" | "narrow"
 }

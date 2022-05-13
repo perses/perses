@@ -12,7 +12,8 @@
     },
     "calculation": "LastNumber",
     "unit": {
-      "kind": "Percent"
+      "kind": "Percent",
+      "decimal_places": 2
     },
     "thresholds": {
       "steps": [
