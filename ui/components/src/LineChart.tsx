@@ -309,9 +309,9 @@ function getFormattedDate(value: number, rangeMs: number) {
     minute: 'numeric',
     hour12: false,
   };
-  const fiveMinMs = 300000;
+  const thirtyMinMs = 1800000;
   const dayMs = 86400000;
-  if (rangeMs <= fiveMinMs) {
+  if (rangeMs <= thirtyMinMs) {
     dateFormatOptions.second = 'numeric';
   } else if (rangeMs >= dayMs) {
     dateFormatOptions.month = 'numeric';
