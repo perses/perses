@@ -3,8 +3,8 @@
 - [BUGFIX] fix line chart xAxis date formatting #439
 - [BUGFIX] fix tooltip key formatting in line chart #438
 - [BUGFIX] fix package.json so core is dependency of components #430
-- [BUGFIX] update release title template to include the date #428
 - [BUGFIX] fix go build: set parallelism build to 1 #427
+- [ENHANCEMENT] update release title template to include the date #428
 
 ## 0.4.0 / 2022-04-26
 
