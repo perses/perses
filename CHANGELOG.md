@@ -1,8 +1,8 @@
 ## 0.4.1 / 2022-05-13
 
 - [BUGFIX] fix line chart xAxis date formatting #439
-- [BUGFIX] fix tooltip key formatting in line chart #438
-- [BUGFIX] fix package.json so core is dependency of components #430
+- [BUGFIX] adjust tooltip key formatting in line chart #438
+- [BUGFIX] add core as dependency of components #430
 - [BUGFIX] fix go build: set parallelism build to 1 #427
 - [ENHANCEMENT] update release title template to include the date #428
 
