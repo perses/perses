@@ -72,9 +72,10 @@ export function SeriesInfo(props: SeriesInfoProps) {
           {formattedSeriesLabels.split(',').map((name) => {
             if (name) {
               const [key, value] = jsonFormattedSeries ? name.split(':') : name.split('=');
+              const formattedKey = value !== undefined ? `${key}: ` : key;
               return (
                 <Box key={name} sx={{ display: 'flex', gap: '4px' }}>
-                  <Typography sx={{ fontSize: '11px' }}>{key}:</Typography>
+                  <Typography sx={{ fontSize: '11px' }}>{formattedKey}</Typography>
                   <Typography
                     sx={(theme) => ({
                       color: theme.palette.common.white,
