@@ -201,7 +201,7 @@ export function LineChart({
       delete defaultToolbox.feature.dataZoom.icon;
     }
 
-    const rangeMs = getDateRange(data.xAxis);
+    const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
     const option = {
       title: {
