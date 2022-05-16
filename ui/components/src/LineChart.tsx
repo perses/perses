@@ -307,7 +307,7 @@ function getFormattedDate(value: number, rangeMs: number) {
   const dateFormatOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: 'numeric',
-    hour12: false,
+    hourCycle: 'h23',
   };
   const thirtyMinMs = 1800000;
   const dayMs = 86400000;
