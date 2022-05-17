@@ -12,6 +12,7 @@
 # limitations under the License.
 
 GO            ?= go
+CUE           ?= cue
 GOFMT         ?= $(GO)fmt
 GOARCH        ?= amd64
 COMMIT        := $(shell git rev-parse HEAD)
@@ -52,6 +53,17 @@ fixlicense:
 fmt:
 	@echo ">> format code"
 	$(GO) fmt ./...
+	$(CUE) fmt ./schemas/...
+
+.PHONY: cue-eval
+cue-eval:
+	@echo ">> eval cue schemas"
+	$(CUE) eval ./schemas/...
+
+.PHONY: cue-test
+cue-test:
+	@echo ">> test cue schemas with json data"
+	./scripts/cue_test.sh
 
 .PHONY: test
 test: generate

@@ -1,0 +1,16 @@
+{
+  "kind": "LineChart",
+  "display": {
+    "name": "CPU"
+  },
+  "options": {
+    "queries": [
+      {
+        "kind": "PrometheusGraphQuery",
+        "options": {
+          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='node',instance='$instance',mode!='idle'}[$interval]))"
+        }
+      }
+    ]
+  }
+}

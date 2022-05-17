@@ -142,7 +142,7 @@ type DecimalUnitOptions = {
   kind: typeof decimalUnitKinds[number];
   decimal_places: number;
   suffix?: 'string';
-  unitDisplay?: 'short' | 'long' | 'narrow'; // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+  display?: 'short' | 'long' | 'narrow'; // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 };
 
 function isDecimalUnit(unitOptions: UnitOptions): unitOptions is DecimalUnitOptions {
@@ -159,7 +159,7 @@ function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
         maximumFractionDigits: maximumFractionDigits,
         useGrouping: true,
         unit: unitOptions.suffix,
-        unitDisplay: unitOptions.unitDisplay ?? 'narrow',
+        unitDisplay: unitOptions.display ?? 'narrow',
       };
       const unitFormatter = new Intl.NumberFormat('en-US', formatParams);
       return unitFormatter.format(value);

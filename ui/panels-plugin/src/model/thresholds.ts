@@ -30,7 +30,7 @@ export type EChartsAxisLineColors = GaugeColorStop[];
 
 export interface StepOptions extends JsonObject {
   value: number;
-  color: ThresholdColorsType;
+  color?: ThresholdColorsType;
 }
 
 export interface ThresholdOptions extends JsonObject {

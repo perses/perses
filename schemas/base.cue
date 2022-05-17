@@ -1,5 +1,7 @@
 {
-  displayed_name: string
-  kind: string
-  chart: _ // any type
+	kind: string
+	display: {
+		name: string
+	}
+	options: _ // any type
 }

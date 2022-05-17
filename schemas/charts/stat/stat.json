@@ -1,0 +1,19 @@
+{
+  "kind": "StatChart",
+  "display": {
+    "name": "CPU Cores"
+  },
+  "options": {
+    "query": {
+      "kind": "PrometheusGraphQuery",
+      "options": {
+        "query": "count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))"
+      }
+    },
+    "calculation": "LastNumber",
+    "unit": {
+      "kind": "Decimal",
+      "decimal_places": 2
+    }
+  }
+}

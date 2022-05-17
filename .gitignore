@@ -29,3 +29,6 @@ coverage.txt
 /pkg/client/api/v1/test/
 
 GENERATED_CHANGELOG.md
+
+cue.mod/pkg
+cue.mod/usr
