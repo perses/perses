@@ -59,4 +59,4 @@ release:
   ids:
     - "default"
   prerelease: auto
-  name_template: "{{.TAG}}/{{.Date}}"
+  name_template: "{{ .Tag }}/{{ .Date }}"
