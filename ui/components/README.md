@@ -10,6 +10,6 @@ To use the LineChart component, begin by importing as shown:
 import { LineChart } from "@perses-dev/components";
 ```
 
-For a full example of one way to map the query data to an [ECharts-compatible format](https://echarts.apache.org/en/option.html#series-line.type), **see [this CodeSandbox link](https://codesandbox.io/s/perses-line-chart-component-using-echarts-1tg92v?file=/src/App.js)**.
+For a full example of one way to map the query data to an [ECharts-compatible format](https://echarts.apache.org/en/option.html#series-line.type), **see [this CodeSandbox link](https://codesandbox.io/s/perses-line-chart-component-using-echarts-1tg92v?file=/src/App.js)** as well as [these lines in plugins/line-chart](https://github.com/perses/perses/blob/v0.4.1/ui/panels-plugin/src/plugins/line-chart/LineChartContainer.tsx#L64).
 
-*Note: this example uses JS, but see [types defined here](https://github.com/perses/perses/blob/main/ui/components/src/model/graph-model.ts) for additional context.*
+*Note: the [sandbox example](https://codesandbox.io/s/perses-line-chart-component-using-echarts-1tg92v?file=/src/App.js) uses JS, but see [types defined here](https://github.com/perses/perses/blob/main/ui/components/src/model/graph-model.ts) for additional context.*
