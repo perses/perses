@@ -213,7 +213,7 @@ export function LineChart({
       xAxis: {
         type: 'category',
         data: data.xAxis,
-        max: (value: { min: number; max: number }) => value.max,
+        max: data.xAxisMax,
         axisLabel: {
           margin: 15,
           color: theme.palette.text.primary,
@@ -307,7 +307,7 @@ function getFormattedDate(value: number, rangeMs: number) {
   const dateFormatOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: 'numeric',
-    hour12: false,
+    hourCycle: 'h23',
   };
   const thirtyMinMs = 1800000;
   const dayMs = 86400000;
