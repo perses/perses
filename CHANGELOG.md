@@ -1,3 +1,8 @@
+## 0.4.2 / 2022-05-18
+
+- [BUGFIX] fix line chart shows time beyond 24 hours #443
+- [ENHANCEMENT] add optional max prop for customizing xAxis #443
+
 ## 0.4.1 / 2022-05-13
 
 - [BUGFIX] fix line chart xAxis date formatting #439
