@@ -201,6 +201,8 @@ export function LineChart({
       delete defaultToolbox.feature.dataZoom.icon;
     }
 
+    const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
+
     const option = {
       title: {
         show: false,
@@ -211,12 +213,12 @@ export function LineChart({
       xAxis: {
         type: 'category',
         data: data.xAxis,
-        max: (value: { min: number; max: number }) => value.max,
+        max: data.xAxisMax,
         axisLabel: {
           margin: 15,
           color: theme.palette.text.primary,
           formatter: (value: number) => {
-            return getFormattedDate(value);
+            return getFormattedDate(value, rangeMs);
           },
         },
         axisTick: {
@@ -261,6 +263,7 @@ export function LineChart({
     };
 
     return option;
+    // TODO (sjcobb): consolidate option props using echarts theme to reduce num of items in dep array
   }, [data, theme, grid, legend, toolbox, dataZoomEnabled, visualMap]);
 
   return (
@@ -290,11 +293,31 @@ export function LineChart({
   );
 }
 
-function getFormattedDate(value: number) {
-  const XAXIS_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
+// fallback when xAxis time range not passed as prop
+function getDateRange(data: number[]) {
+  const defaultRange = 3600000; // hour in ms
+  if (data.length === 0) return defaultRange;
+  const lastDatum = data[data.length - 1];
+  if (data[0] === undefined || lastDatum === undefined) return defaultRange;
+  return lastDatum - data[0];
+}
+
+// determines time granularity for axis labels, defaults to hh:mm
+function getFormattedDate(value: number, rangeMs: number) {
+  const dateFormatOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: 'numeric',
-    hour12: false,
-  });
-  return XAXIS_DATE_FORMAT.format(value * 1000);
+    hourCycle: 'h23',
+  };
+  const thirtyMinMs = 1800000;
+  const dayMs = 86400000;
+  if (rangeMs <= thirtyMinMs) {
+    dateFormatOptions.second = 'numeric';
+  } else if (rangeMs >= dayMs) {
+    dateFormatOptions.month = 'numeric';
+    dateFormatOptions.day = 'numeric';
+  }
+  const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
+  // remove comma when month / day present
+  return DATE_FORMAT.format(value).replace(/, /g, ' ');
 }

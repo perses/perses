@@ -48,7 +48,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
       };
     }
 
-    const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [] };
+    const graphData: EChartsDataFormat = { timeSeries: [], xAxis: [], rangeMs: timeScale.endMs - timeScale.startMs };
     const xAxisData = [...getXValues(timeScale)];
 
     let queriesFinished = 0;
@@ -82,7 +82,6 @@ export function LineChartContainer(props: LineChartContainerProps) {
       }
       queriesFinished++;
     }
-
     graphData.xAxis = xAxisData;
     return {
       graphData,

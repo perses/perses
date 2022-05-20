@@ -132,6 +132,6 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist --release-notes GENERATED_CHANGELOG.md
+          args: release --rm-dist --parallelism 1 --release-notes GENERATED_CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

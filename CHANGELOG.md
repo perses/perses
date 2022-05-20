@@ -1,3 +1,24 @@
+## 0.4.2 / 2022-05-18
+
+- [BUGFIX] fix line chart shows time beyond 24 hours #443
+- [ENHANCEMENT] add optional max prop for customizing xAxis #443
+
+## 0.4.1 / 2022-05-13
+
+- [BUGFIX] fix line chart xAxis date formatting #439
+- [BUGFIX] adjust tooltip key formatting in line chart #438
+- [BUGFIX] add core as dependency of components #430
+- [BUGFIX] fix go build: set parallelism build to 1 #427
+- [ENHANCEMENT] update release title template to include the date #428
+
+## 0.4.0 / 2022-04-26
+
+- [FEATURE] add dark mode support, theme toggle in app header #415
+- [ENHANCEMENT] upgrade go to v1.18 #419
+- [ENHANCEMENT] use generics to simplify the way to convert slice in CLI #420
+- [BUGFIX] Switch bundle output directory to fix app build #421
+- [BUGFIX] echarts wrapper disposes canvas too frequently #425
+
 ## 0.3.1 / 2022-04-15
 
 - [ENHANCEMENT] Add CommonJS build output to all packages #413
