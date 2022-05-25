@@ -219,7 +219,7 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 }
 
 func (h *httpProxy) prepareTransport() *http.Transport {
-	tlsConfig := &tls.Config{}
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
 	if h.config.Auth != nil {
 		tlsConfig.InsecureSkipVerify = h.config.Auth.InsecureTLS
 		// TODO use the certificate

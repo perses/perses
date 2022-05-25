@@ -35,23 +35,23 @@ type DatasourceSpec interface {
 }
 
 func unmarshalDatasourceSpec(spec map[string]interface{}, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) (DatasourceSpec, error) {
-	if specKind, ok := spec["kind"]; !ok {
+	specKind, ok := spec["kind"]
+	if !ok {
 		return nil, fmt.Errorf("attribute 'kind' not found in 'datasource.spec'")
-	} else {
-		rawSpec, err := staticMarshal(spec)
-		if err != nil {
-			return nil, err
-		}
-		var result DatasourceSpec
-		switch specKind {
-		case string(datasource.PrometheusKind):
-			result = &datasource.Prometheus{}
-		}
-		if err := staticUnmarshal(rawSpec, result); err != nil {
-			return nil, err
-		}
-		return result, nil
 	}
+	rawSpec, err := staticMarshal(spec)
+	if err != nil {
+		return nil, err
+	}
+	var result DatasourceSpec
+	switch specKind {
+	case string(datasource.PrometheusKind):
+		result = &datasource.Prometheus{}
+	}
+	if err := staticUnmarshal(rawSpec, result); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 type tmpGlobalDatasource struct {
@@ -101,11 +101,11 @@ func (d *GlobalDatasource) unmarshal(unmarshal func(interface{}) error, staticMa
 	}
 	d.Kind = tmp.Kind
 	d.Metadata = tmp.Metadata
-	if spec, err := unmarshalDatasourceSpec(tmp.Spec, staticMarshal, staticUnmarshal); err != nil {
+	spec, err := unmarshalDatasourceSpec(tmp.Spec, staticMarshal, staticUnmarshal)
+	if err != nil {
 		return err
-	} else {
-		d.Spec = spec
 	}
+	d.Spec = spec
 	return nil
 }
 
@@ -157,10 +157,10 @@ func (d *Datasource) unmarshal(unmarshal func(interface{}) error, staticMarshal 
 	}
 	d.Kind = tmp.Kind
 	d.Metadata = tmp.Metadata
-	if spec, err := unmarshalDatasourceSpec(tmp.Spec, staticMarshal, staticUnmarshal); err != nil {
+	spec, err := unmarshalDatasourceSpec(tmp.Spec, staticMarshal, staticUnmarshal)
+	if err != nil {
 		return err
-	} else {
-		d.Spec = spec
 	}
+	d.Spec = spec
 	return nil
 }

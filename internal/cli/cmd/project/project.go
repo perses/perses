@@ -55,21 +55,20 @@ func (o *option) Execute() error {
 		// In that case we simply print the current project used.
 		fmt.Printf("Using project %q on server %q\n", cmdUtils.GlobalConfig.Project, cmdUtils.GlobalConfig.RestClientConfig.URL)
 		return nil
-	} else {
-		// in case the project is provided we should verify if it exists first
-		_, err := o.apiClient.V1().Project().Get(o.projectName)
-		if err != nil {
-			if errors.Is(err, perseshttp.RequestNotFoundError) {
-				return fmt.Errorf("project %q doesn't exist", o.projectName)
-			}
-			return err
-		}
-		// Set the project in the config
-		if configError := cmdUtils.SetProject(o.projectName); configError != nil {
-			return configError
-		}
-		return cmdUtils.HandleString(o.writer, fmt.Sprintf("project %s selected", o.projectName))
 	}
+	// in case the project is provided we should verify if it exists first
+	_, err := o.apiClient.V1().Project().Get(o.projectName)
+	if err != nil {
+		if errors.Is(err, perseshttp.RequestNotFoundError) {
+			return fmt.Errorf("project %q doesn't exist", o.projectName)
+		}
+		return err
+	}
+	// Set the project in the config
+	if configError := cmdUtils.SetProject(o.projectName); configError != nil {
+		return configError
+	}
+	return cmdUtils.HandleString(o.writer, fmt.Sprintf("project %s selected", o.projectName))
 }
 
 func (o *option) SetWriter(writer io.Writer) {

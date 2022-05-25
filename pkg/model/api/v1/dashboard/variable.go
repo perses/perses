@@ -64,11 +64,11 @@ func (c *CapturingRegexp) validate(reg string) error {
 	if len(reg) == 0 {
 		return fmt.Errorf("regexp cannot be empty")
 	}
-	if re, err := regexp.Compile(reg); err != nil {
+	re, err := regexp.Compile(reg)
+	if err != nil {
 		return err
-	} else {
-		*c = CapturingRegexp(*re)
 	}
+	*c = CapturingRegexp(*re)
 	return nil
 }
 

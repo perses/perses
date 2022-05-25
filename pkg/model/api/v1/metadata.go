@@ -22,9 +22,8 @@ func generateProjectResourceID(pluralKind string, project string, name string) s
 	if len(project) == 0 {
 		// it's used when we query a list of object. It can happen that the project is empty.
 		return fmt.Sprintf("/%s", pluralKind)
-	} else {
-		return fmt.Sprintf("/%s/%s/%s", pluralKind, project, name)
 	}
+	return fmt.Sprintf("/%s/%s/%s", pluralKind, project, name)
 }
 
 type Metadata struct {

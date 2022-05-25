@@ -300,11 +300,12 @@ func (h *HTTPConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (h *HTTPConfig) validate(conf tmpHTTPConfig) error {
-	if u, err := url.Parse(conf.URL); err != nil {
+	u, err := url.Parse(conf.URL)
+	if err != nil {
 		return err
-	} else {
-		h.URL = u
 	}
+	h.URL = u
+
 	if len(conf.Access) == 0 {
 		conf.Access = ServerHTTPAccess
 	}
