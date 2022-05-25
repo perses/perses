@@ -30,11 +30,22 @@ type Metadata struct {
 	Name      string    `json:"name" yaml:"name"`
 	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
+	Version   uint64    `json:"version,omitempty" yaml:"version,omitempty"`
 }
 
 func (m *Metadata) CreateNow() {
 	m.CreatedAt = time.Now().UTC()
 	m.UpdatedAt = m.CreatedAt
+	m.Version = 0
+}
+
+func (m *Metadata) Update(previous Metadata) {
+	// update the immutable field of the newEntity with the old one
+	m.CreatedAt = previous.CreatedAt
+	// update the field UpdatedAt with the new time
+	m.UpdatedAt = time.Now().UTC()
+	// increase the version number
+	m.Version++
 }
 
 func (m *Metadata) GetName() string {
@@ -49,4 +60,8 @@ type ProjectMetadata struct {
 
 func (m *ProjectMetadata) GetName() string {
 	return m.Name
+}
+
+func (m *ProjectMetadata) Update(previous ProjectMetadata) {
+	m.Metadata.Update(previous.Metadata)
 }

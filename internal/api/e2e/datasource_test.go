@@ -118,6 +118,7 @@ func TestUpdateDatasource(t *testing.T) {
 
 	// for the moment the only thing to test is that the dates are correctly updated
 	assert.True(t, result.Metadata.CreatedAt.UnixNano() < result.Metadata.UpdatedAt.UnixNano())
+	assert.True(t, result.Metadata.Version > 0)
 
 	// check the document exists in the db
 	_, err = persistenceManager.GetDatasource().Get(entity.Metadata.Project, entity.Metadata.Name)

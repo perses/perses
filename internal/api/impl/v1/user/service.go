@@ -15,7 +15,6 @@ package user
 
 import (
 	"fmt"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -94,10 +93,7 @@ func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.Use
 		return nil, err
 	}
 	oldObject := oldEntity.(*v1.User)
-	// update the immutable field of the newEntity with the old one
-	entity.Metadata.CreatedAt = oldObject.Metadata.CreatedAt
-	// update the field UpdatedAt with the new time
-	entity.Metadata.UpdatedAt = time.Now().UTC()
+	entity.Metadata.Update(oldObject.Metadata)
 	// in case the user updated his password, then we should hash it again, otherwise the old password should be kept
 	if len(entity.Spec.Password) > 0 {
 		hash, err := hashAndSalt(entity.Spec.Password)

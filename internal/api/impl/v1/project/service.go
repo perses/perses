@@ -15,7 +15,6 @@ package project
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/project"
@@ -75,10 +74,7 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 		return nil, err
 	}
 	oldObject := oldEntity.(*v1.Project)
-	// update the immutable field of the newEntity with the old one
-	entity.Metadata.CreatedAt = oldObject.Metadata.CreatedAt
-	// update the field UpdatedAt with the new time
-	entity.Metadata.UpdatedAt = time.Now().UTC()
+	entity.Metadata.Update(oldObject.Metadata)
 	if err := s.dao.Update(entity); err != nil {
 		logrus.WithError(err).Errorf("unable to perform the update of the project %q, something wrong with etcd", entity.Metadata.Name)
 		return nil, shared.InternalError
