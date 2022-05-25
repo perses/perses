@@ -1,6 +1,6 @@
 FROM scratch
 
-LABEL maintainer="Augustin Husson <husson.augustin@gmail.com>"
+LABEL maintainer="The Perses Authors <perses-team@googlegroups.com>"
 
 COPY perses /bin/perses
 COPY percli /bin/percli
