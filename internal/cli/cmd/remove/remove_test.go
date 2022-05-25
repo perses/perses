@@ -18,7 +18,7 @@ import (
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
-	"github.com/perses/perses/pkg/client/fake_api"
+	"github.com/perses/perses/pkg/client/fake/api"
 )
 
 func TestDeleteCMD(t *testing.T) {
@@ -44,7 +44,7 @@ func TestDeleteCMD(t *testing.T) {
 		{
 			Title:           "delete all projects",
 			Args:            []string{"project", "--all"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Project" "perses" has been deleted
 object "Project" "Amadeus" has been deleted
@@ -54,7 +54,7 @@ object "Project" "Chronosphere" has been deleted
 		{
 			Title:           "delete a single resource",
 			Args:            []string{"folders", "ff15", "--project", "perses"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
 `,
@@ -62,14 +62,14 @@ object "Project" "Chronosphere" has been deleted
 		{
 			Title:           "delete unknown document from a file",
 			Args:            []string{"-f", "../../utils/test/sample_resources/unknown_resource.json"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" not supported by the command`,
 		},
 		{
 			Title:           "delete a single resource from a file",
 			Args:            []string{"-f", "../../utils/test/sample_resources/single_resource.json", "--project", "perses"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
 `,
@@ -77,7 +77,7 @@ object "Project" "Chronosphere" has been deleted
 		{
 			Title:           "delete multiples resources from a file",
 			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json", "--project", "perses"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
 object "Folder" "aoe4" has been deleted in the project "game"

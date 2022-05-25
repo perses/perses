@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package fake_api is reproducing the package api at the same level.
+// Package fakeapi is reproducing the package api at the same level.
 // This should be used only for the test and for the regular code.
 // It is useful when you want to inject a fake client like you would do with a mock.
 // But in this case a mock would be too painful to inject (too many methods / interfaces to mock)
-package fake_api
+package fakeapi
 
 import (
 	"github.com/perses/perses/pkg/client/api"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
-	"github.com/perses/perses/pkg/client/fake_api/fake_v1"
+	"github.com/perses/perses/pkg/client/fake/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
 )
 
@@ -37,5 +37,5 @@ func (c *client) RESTClient() *perseshttp.RESTClient {
 }
 
 func (c *client) V1() v1.ClientInterface {
-	return fake_v1.New()
+	return fakev1.New()
 }
