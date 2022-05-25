@@ -1,0 +1,8 @@
+linters:
+  enable:
+    - goconst
+    - unconvert
+    - gosec
+    - revive
+    - unparam
+    - gocyclo

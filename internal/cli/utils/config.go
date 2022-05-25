@@ -66,9 +66,8 @@ func (c *CLIConfig) init() error {
 func (c *CLIConfig) GetAPIClient() (api.ClientInterface, error) {
 	if c.apiClient != nil {
 		return c.apiClient, nil
-	} else {
-		return nil, fmt.Errorf("you are not connected to any API")
 	}
+	return nil, fmt.Errorf("you are not connected to any API")
 }
 
 func (c *CLIConfig) SetAPIClient(apiClient api.ClientInterface) {

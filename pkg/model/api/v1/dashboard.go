@@ -175,17 +175,17 @@ func (d *Dashboard) checkAndSetRef(ref *common.JSONRef) error {
 	}
 	switch ref.Path[1] {
 	case "layouts":
-		if obj, ok := d.Spec.Layouts[ref.Path[2]]; !ok {
+		obj, ok := d.Spec.Layouts[ref.Path[2]]
+		if !ok {
 			return fmt.Errorf("there is no existing layout called %q in the current dashboard", ref.Path[2])
-		} else {
-			ref.Object = obj
 		}
+		ref.Object = obj
 	case "panels":
-		if obj, ok := d.Spec.Panels[ref.Path[2]]; !ok {
+		obj, ok := d.Spec.Panels[ref.Path[2]]
+		if !ok {
 			return fmt.Errorf("there is no existing panel called %q in the current dashboard", ref.Path[2])
-		} else {
-			ref.Object = obj
 		}
+		ref.Object = obj
 	default:
 		return fmt.Errorf("%q is not a known object", ref.Path[1])
 	}

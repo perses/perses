@@ -69,6 +69,7 @@ jobs:
       with:
         # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
         version: v1.46.2
+        args: --timeout 5m
   cue-eval:
     name: cue
     runs-on: ubuntu-latest

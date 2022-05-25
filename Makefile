@@ -13,6 +13,7 @@
 
 GO            ?= go
 CUE           ?= cue
+GOCI          ?= golangci-lint
 GOFMT         ?= $(GO)fmt
 GOARCH        ?= amd64
 COMMIT        := $(shell git rev-parse HEAD)
@@ -38,6 +39,11 @@ tag:
 checkformat:
 	@echo ">> checking code format"
 	! $(GOFMT) -d $$(find . -name '*.go' -print) | grep '^' ;\
+
+.PHONY: checkstyle
+checkstyle:
+	@echo ">> checking code style"
+	$(GOCI) run --timeout 5m
 
 .PHONY: checklicense
 checklicense:
