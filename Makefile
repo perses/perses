@@ -42,12 +42,12 @@ checkformat:
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"
-	./scripts/check_license.sh --check *.js *.jsx *.ts *.tsx *.go
+	./scripts/check_license.sh --check *.js *.jsx *.ts *.tsx *.go *.cue
 
 .PHONY: fixlicense
 fixlicense:
 	@echo ">> adding license header where it's missing"
-	./scripts/check_license.sh --add *.js *.jsx *.ts *.tsx *.go
+	./scripts/check_license.sh --add *.js *.jsx *.ts *.tsx *.go *.cue
 
 .PHONY: fmt
 fmt:
