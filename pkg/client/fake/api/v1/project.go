@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fake_v1
+package fakev1
 
 import (
 	"strings"

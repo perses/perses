@@ -11,39 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fake_v1
+package fakev1
 
 import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
-	"github.com/perses/perses/pkg/client/perseshttp"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type client struct {
-	v1.ClientInterface
+type health struct {
+	v1.HealthInterface
 }
 
-func New() v1.ClientInterface {
-	return &client{}
-}
-
-func (c *client) RESTClient() *perseshttp.RESTClient {
-	return nil
-}
-
-func (c *client) Folder(project string) v1.FolderInterface {
-	return &folder{
-		project: project,
-	}
-}
-
-func (c *client) GlobalDatasource() v1.GlobalDatasourceInterface {
-	return &globalDatasource{}
-}
-
-func (c *client) Health() v1.HealthInterface {
-	return &health{}
-}
-
-func (c *client) Project() v1.ProjectInterface {
-	return &project{}
+func (c *health) Check() (*modelV1.Health, error) {
+	return &modelV1.Health{
+		BuildTime: "2022-03-23",
+		Version:   "v0.1.0",
+		Commit:    "ff30323938a15cfa9df3071bb84e3f3ef75153df",
+		Database:  false,
+	}, nil
 }

@@ -18,8 +18,8 @@ import (
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
-	"github.com/perses/perses/pkg/client/fake_api"
-	"github.com/perses/perses/pkg/client/fake_api/fake_v1"
+	"github.com/perses/perses/pkg/client/fake/api"
+	"github.com/perses/perses/pkg/client/fake/api/v1"
 )
 
 func TestGetCMD(t *testing.T) {
@@ -45,45 +45,45 @@ func TestGetCMD(t *testing.T) {
 		{
 			Title:           "get project in json format",
 			Args:            []string{"project", "-ojson"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.ProjectList(""))) + "\n",
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fakev1.ProjectList(""))) + "\n",
 		},
 		{
 			Title:           "get project with prefix in json format",
 			Args:            []string{"project", "per", "-ojson"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.ProjectList("per"))) + "\n",
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fakev1.ProjectList("per"))) + "\n",
 		},
 		{
 			Title:           "get globaldatasource in json format",
 			Args:            []string{"gdts", "-ojson"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.GlobalDatasourceList(""))) + "\n",
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fakev1.GlobalDatasourceList(""))) + "\n",
 		},
 		{
 			Title:           "get all folder in json format",
 			Args:            []string{"folder", "-ojson", "--all"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.FolderList("", ""))) + "\n",
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fakev1.FolderList("", ""))) + "\n",
 		},
 		{
 			Title:           "get folder in a specific project in json format",
 			Args:            []string{"folder", "-ojson", "-p", "perses"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fakev1.FolderList("perses", ""))) + "\n",
 		},
 		{
 			Title:           "get folder with default project in json format",
 			Args:            []string{"folder", "-ojson"},
 			Project:         "perses",
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fake_v1.FolderList("perses", ""))) + "\n",
+			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(fakev1.FolderList("perses", ""))) + "\n",
 		},
 	}
 

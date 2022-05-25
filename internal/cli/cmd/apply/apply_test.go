@@ -17,7 +17,7 @@ import (
 	"testing"
 
 	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
-	"github.com/perses/perses/pkg/client/fake_api"
+	"github.com/perses/perses/pkg/client/fake/api"
 )
 
 func TestApplyCMD(t *testing.T) {
@@ -37,14 +37,14 @@ func TestApplyCMD(t *testing.T) {
 		{
 			Title:           "apply unknown document",
 			Args:            []string{"-f", "../../utils/test/sample_resources/unknown_resource.json"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" not supported by the command`,
 		},
 		{
 			Title:           "apply a single resource",
 			Args:            []string{"-f", "../../utils/test/sample_resources/single_resource.json", "--project", "perses"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been applied in the project "perses"
 `,
@@ -52,7 +52,7 @@ func TestApplyCMD(t *testing.T) {
 		{
 			Title:           "apply multiples different resources",
 			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json", "--project", "perses"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been applied in the project "perses"
 object "Folder" "aoe4" has been applied in the project "game"

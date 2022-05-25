@@ -18,7 +18,7 @@ import (
 
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
-	"github.com/perses/perses/pkg/client/fake_api"
+	"github.com/perses/perses/pkg/client/fake/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -57,7 +57,7 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe project in json format",
 			Args:            []string{"project", "perses", "-ojson"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(
 				&modelV1.Project{
@@ -70,7 +70,7 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe project in yaml format",
 			Args:            []string{"project", "perses", "-oyaml"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: string(cmdUtilsTest.YAMLMarshalStrict(
 				&modelV1.Project{
@@ -83,7 +83,7 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe folder in a specific project in json format",
 			Args:            []string{"folder", "myFolder", "-ojson", "-p", "perses"},
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,
@@ -99,7 +99,7 @@ func TestDescribeCMD(t *testing.T) {
 			Title:           "describe folder with default project in json format",
 			Args:            []string{"folder", "myFolder", "-ojson"},
 			Project:         "perses",
-			APIClient:       fake_api.New(),
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,
