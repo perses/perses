@@ -21,6 +21,7 @@ export type Metadata = {
   name: string;
   created_at: string;
   updated_at: string;
+  version: number;
 };
 
 export type ProjectMetadata = Metadata & { project: string };
