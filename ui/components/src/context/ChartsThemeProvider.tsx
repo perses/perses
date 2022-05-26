@@ -13,21 +13,20 @@
 
 import { createContext, useContext } from 'react';
 import { useTheme } from '@mui/material';
-import { generateChartsTheme } from '@perses-dev/components';
+
 import { registerTheme } from 'echarts';
-import { PersesChartsTheme } from '../model';
+import { generateChartsTheme, EChartsTheme, PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
   children?: React.ReactNode;
   themeName?: string;
+  theme?: EChartsTheme;
 }
 
 export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
-  const { children, themeName } = props;
-
+  const { children, themeName, theme } = props;
   const muiTheme = useTheme();
-  const echartsTheme = {}; // echarts theme overrides go here
-  const persesChartsTheme = generateChartsTheme(echartsTheme, muiTheme);
+  const persesChartsTheme = generateChartsTheme(theme ?? {}, muiTheme);
 
   if (themeName !== undefined) {
     // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
