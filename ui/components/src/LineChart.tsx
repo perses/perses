@@ -14,6 +14,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
+import merge from 'lodash/merge';
 import type {
   EChartsOption,
   GridComponentOption,
@@ -168,12 +169,24 @@ export function LineChart({
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
+    const defaultToolbox = {
+      feature: {
+        dataZoom: {
+          icon: dataZoomEnabled ? null : undefined,
+          yAxisIndex: 'none',
+        },
+        restore: {},
+      },
+    };
+
+    if (dataZoomEnabled === false) {
+      delete defaultToolbox.feature.dataZoom.icon;
+    }
+
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
     const option = {
-      title: {
-        show: false,
-      },
+      toolbox: merge(defaultToolbox, toolbox),
       series: data.timeSeries,
       xAxis: {
         type: 'category',
@@ -204,13 +217,12 @@ export function LineChart({
         },
       },
       grid,
-      toolbox,
       legend,
       visualMap,
     };
 
     return option;
-  }, [data, grid, legend, toolbox, visualMap]);
+  }, [data, grid, legend, toolbox, dataZoomEnabled, visualMap]);
 
   return (
     <Box

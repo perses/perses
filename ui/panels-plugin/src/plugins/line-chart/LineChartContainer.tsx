@@ -100,9 +100,19 @@ export function LineChartContainer(props: LineChartContainerProps) {
 
   // TODO: toolbox functionality (ex. zoom, undo icons) will move to chart header
   const toolboxOverrides: ToolboxComponentOption = {
+    show: true,
     orient: 'vertical',
     top: 0,
     right: 0,
+    feature: {
+      dataZoom: {
+        show: true,
+        yAxisIndex: 'none',
+      },
+      restore: {
+        show: true,
+      },
+    },
   };
 
   const gridOverrides: GridComponentOption = {

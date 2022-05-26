@@ -33,10 +33,10 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
   const mdGrey = muiTheme.palette.grey ? muiTheme.palette.grey['600'] : '#545454';
 
   const defaultChartsTheme = {
+    title: {
+      show: false,
+    },
     grid: {
-      show: true,
-      backgroundColor: muiTheme.palette.background?.paper ?? 'transparent', // canvas excluding axis labels
-      borderColor: 'transparent',
       top: 10,
       right: 20,
       bottom: 0,
