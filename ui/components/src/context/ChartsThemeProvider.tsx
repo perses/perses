@@ -12,27 +12,31 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
+import { useTheme } from '@mui/material';
+import { generateChartsTheme } from '@perses-dev/components';
 import { registerTheme } from 'echarts';
 import { PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
   children?: React.ReactNode;
-  chartsTheme: PersesChartsTheme;
+  themeName?: string;
 }
 
 export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
-  const {
-    children,
-    chartsTheme: { themeName, theme },
-  } = props;
+  const { children, themeName } = props;
+
+  const muiTheme = useTheme();
+  const echartsTheme = {}; // echarts theme overrides go here
+  const persesChartsTheme = generateChartsTheme(echartsTheme, muiTheme);
 
   if (themeName !== undefined) {
-    registerTheme(themeName, theme);
+    // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
+    registerTheme(themeName, persesChartsTheme);
   }
 
   const themeContext = {
     themeName,
-    theme,
+    theme: persesChartsTheme,
   };
   return <ChartsThemeContext.Provider value={themeContext}>{children}</ChartsThemeContext.Provider>;
 }
