@@ -15,6 +15,11 @@ import { ThemeOptions as MaterialThemeOptions } from '@mui/material';
 import type { EChartsOption, BarSeriesOption, LineSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 
+export interface PersesChartsTheme {
+  theme: EChartsTheme;
+  themeName?: string;
+}
+
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207
 export interface EChartsTheme extends EChartsOption {
   bar?: BarSeriesOption;
@@ -28,11 +33,9 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
   const mdGrey = muiTheme.palette.grey ? muiTheme.palette.grey['600'] : '#545454';
 
   const defaultChartsTheme = {
-    // backgroundColor: muiTheme.palette?.background?.default ?? 'transparent', // includes axis labels
     grid: {
       show: true,
-      // backgroundColor: muiTheme.palette.background?.paper ?? 'transparent', // canvas excluding axis labels
-      backgroundColor: 'yellow',
+      backgroundColor: muiTheme.palette.background?.paper ?? 'transparent', // canvas excluding axis labels
       borderColor: 'transparent',
       top: 10,
       right: 20,

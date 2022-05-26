@@ -17,6 +17,6 @@ export * from './ErrorBoundary';
 export * from './GaugeChart';
 export * from './LineChart';
 export * from './StatChart';
-export * from './ChartsThemeProvider';
+export * from './context/ChartsThemeProvider';
 export * from './utils/combine-sx';
 export * from './model';

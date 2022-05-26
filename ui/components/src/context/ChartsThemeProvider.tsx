@@ -13,12 +13,7 @@
 
 import { createContext, useContext } from 'react';
 import { registerTheme } from 'echarts';
-import { EChartsTheme } from './model';
-
-export interface PersesChartsTheme {
-  theme: EChartsTheme;
-  themeName?: string;
-}
+import { PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
   children?: React.ReactNode;

@@ -40,7 +40,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from './EChart';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph';
 import { abbreviateLargeNumber } from './model/units';
-import { useChartsTheme } from './ChartsThemeProvider';
+import { useChartsTheme } from './context/ChartsThemeProvider';
 import { emptyTooltipData } from './tooltip/tooltip-model';
 import { Tooltip } from './tooltip/Tooltip';
 
