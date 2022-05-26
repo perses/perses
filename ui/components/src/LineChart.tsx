@@ -13,8 +13,7 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import { useDeepMemo } from '@perses-dev/core';
-import { Box, useTheme } from '@mui/material';
-import merge from 'lodash/merge';
+import { Box } from '@mui/material';
 import type {
   EChartsOption,
   GridComponentOption,
@@ -39,8 +38,9 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from './EChart';
-import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
+import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph';
 import { abbreviateLargeNumber } from './model/units';
+import { useChartsTheme } from './ChartsThemeProvider';
 import { emptyTooltipData } from './tooltip/tooltip-model';
 import { Tooltip } from './tooltip/Tooltip';
 
@@ -108,7 +108,7 @@ export function LineChart({
   dataZoomEnabled,
   onDataZoom,
 }: LineChartProps) {
-  const theme = useTheme();
+  const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
@@ -168,65 +168,20 @@ export function LineChart({
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
-    const defaultGrid = {
-      top: 10,
-      right: 20,
-      bottom: 5,
-      left: 20,
-      containLabel: true,
-    };
-
-    const defaultToolbox = {
-      show: true,
-      top: 10,
-      right: 10,
-      iconStyle: {
-        borderColor: theme.palette.text.primary,
-      },
-      feature: {
-        dataZoom: {
-          icon: dataZoomEnabled ? null : undefined,
-          yAxisIndex: 'none',
-        },
-        restore: {},
-      },
-      emphasis: {
-        iconStyle: {
-          textFill: theme.palette.text.primary,
-        },
-      },
-    };
-
-    if (dataZoomEnabled === false) {
-      delete defaultToolbox.feature.dataZoom.icon;
-    }
-
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
     const option = {
       title: {
         show: false,
       },
-      grid: merge(defaultGrid, grid),
-      toolbox: merge(defaultToolbox, toolbox),
       series: data.timeSeries,
       xAxis: {
         type: 'category',
         data: data.xAxis,
         max: data.xAxisMax,
         axisLabel: {
-          margin: 15,
-          color: theme.palette.text.primary,
           formatter: (value: number) => {
             return getFormattedDate(value, rangeMs);
-          },
-        },
-        axisTick: {
-          show: false,
-        },
-        axisLine: {
-          lineStyle: {
-            color: theme.palette.grey['600'],
           },
         },
       },
@@ -234,18 +189,8 @@ export function LineChart({
         type: 'value',
         boundaryGap: [0, '10%'],
         axisLabel: {
-          margin: 12,
-          color: theme.palette.text.primary,
           formatter: (value: number) => {
             return abbreviateLargeNumber(value);
-          },
-        },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            width: 0.5,
-            color: theme.palette.grey['300'],
-            opacity: 0.95,
           },
         },
       },
@@ -258,13 +203,14 @@ export function LineChart({
           type: 'none',
         },
       },
+      grid,
+      toolbox,
       legend,
       visualMap,
     };
 
     return option;
-    // TODO (sjcobb): consolidate option props using echarts theme to reduce num of items in dep array
-  }, [data, theme, grid, legend, toolbox, dataZoomEnabled, visualMap]);
+  }, [data, grid, legend, toolbox, visualMap]);
 
   return (
     <Box
@@ -286,6 +232,7 @@ export function LineChart({
           height: '100%',
         }}
         option={option}
+        theme={chartsTheme.themeName}
         onEvents={handleEvents}
         _instance={chartRef}
       />

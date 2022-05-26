@@ -11,12 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './LineChart';
-export * from './StatChart';
-export * from './ChartsThemeProvider';
-export * from './utils/combine-sx';
-export * from './model';
+export * from './graph';
+export * from './theme';
+export * from './units';

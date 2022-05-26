@@ -22,7 +22,7 @@ import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } fro
 import { CanvasRenderer } from 'echarts/renderers';
 import { formatValue, UnitOptions } from './model/units';
 import { EChart } from './EChart';
-import { GraphSeriesValueTuple } from './model/graph-model';
+import { GraphSeriesValueTuple } from './model/graph';
 
 use([
   EChartsGaugeChart,

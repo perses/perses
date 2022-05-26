@@ -16,6 +16,7 @@ import debounce from 'lodash/debounce';
 import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import { isEqual } from 'lodash-es';
+import { EChartsTheme } from './model';
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
 export interface MouseEventsParameters<T> {
@@ -100,6 +101,7 @@ export type OnEventsType<T> = {
 
 export interface EChartsProps<T> {
   option: EChartsCoreOption;
+  theme?: string | EChartsTheme;
   sx?: SxProps<Theme>;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
@@ -108,6 +110,7 @@ export interface EChartsProps<T> {
 
 export const EChart = React.memo(function EChart<T>({
   option,
+  theme,
   sx,
   onEvents,
   _instance,
@@ -121,7 +124,8 @@ export const EChart = React.memo(function EChart<T>({
   // Initialize chart, dispose on unmount
   useLayoutEffect(() => {
     if (containerRef.current === null || chartElement.current !== null) return;
-    chartElement.current = init(containerRef.current);
+    // TODO (sjcobb): support optional svg renderer
+    chartElement.current = init(containerRef.current, theme, { renderer: 'canvas' });
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
@@ -132,7 +136,7 @@ export const EChart = React.memo(function EChart<T>({
       chartElement.current.dispose();
       chartElement.current = null;
     };
-  }, [_instance, onChartInitialized]);
+  }, [_instance, onChartInitialized, theme]);
 
   // Update chart data when option changes
   useEffect(() => {
