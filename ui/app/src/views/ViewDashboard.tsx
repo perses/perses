@@ -11,10 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTheme } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
-import { generateChartsTheme, ChartsThemeProvider } from '@perses-dev/components';
 import Footer from '../components/Footer';
 import { useSampleData } from '../utils/temp-sample-data';
 
@@ -22,8 +20,6 @@ import { useSampleData } from '../utils/temp-sample-data';
  * The View for viewing a Dashboard.
  */
 function ViewDashboard() {
-  const muiTheme = useTheme();
-
   const dashboard = useSampleData<DashboardResource>(
     new URLSearchParams(window.location.search).get('dashboard') || 'node-exporter-full'
   );
@@ -33,19 +29,10 @@ function ViewDashboard() {
     return null;
   }
 
-  // echarts theme overrides go here
-  const echartsTheme = {};
-  const persesChartsTheme = {
-    themeName: 'perses',
-    theme: generateChartsTheme(echartsTheme, muiTheme),
-  };
-
   return (
-    <ChartsThemeProvider chartsTheme={persesChartsTheme}>
-      <DashboardView dashboardResource={dashboard}>
-        <Footer />
-      </DashboardView>
-    </ChartsThemeProvider>
+    <DashboardView dashboardResource={dashboard}>
+      <Footer />
+    </DashboardView>
   );
 }
 
