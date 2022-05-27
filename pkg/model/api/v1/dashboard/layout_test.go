@@ -33,61 +33,48 @@ func TestUnmarshalJSONLayout(t *testing.T) {
 			jason: `
 {
   "kind": "Grid",
-  "parameter": {
-    "children": [
-      [
-        {
-          "width": 1
-        },
-        {
-          "width": 1,
-          "content": {
-            "$ref": "#/panels/cpu"
-          }
-        }
-      ],
-      [
-        {
-          "width": 1,
-          "content": {
-            "$ref": "#/panels/load"
-          }
-        },
-        {
-          "width": 1
-        }
-      ]
+  "spec": {
+    "items": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 4,
+        "content": { "$ref": "#/panels/gaugeCpuBusy" }
+      },
+      {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 4,
+        "content": { "$ref": "#/panels/gaugeSystemLoad" }
+      }
     ]
   }
 }
 `,
 			result: Layout{
 				Kind: KindGridLayout,
-				Parameter: &GridLayoutParameter{
-					Children: [][]GridCell{
+				Spec: &GridLayoutSpec{
+					Items: []GridItem{
 						{
-							{
-								Width:   1,
-								Content: nil,
-							},
-							{
-								Width: 1,
-								Content: &common.JSONRef{
-									Ref:  "#/panels/cpu",
-									Path: []string{"panels", "cpu"},
-								},
+							X:      0,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeCpuBusy",
+								Path: []string{"panels", "gaugeCpuBusy"},
 							},
 						},
 						{
-							{
-								Width: 1,
-								Content: &common.JSONRef{
-									Ref:  "#/panels/load",
-									Path: []string{"panels", "load"},
-								},
-							},
-							{
-								Width: 1,
+							X:      3,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeSystemLoad",
+								Path: []string{"panels", "gaugeSystemLoad"},
 							},
 						},
 					},
@@ -98,26 +85,60 @@ func TestUnmarshalJSONLayout(t *testing.T) {
 			title: "expand layout",
 			jason: `
 {
-  "kind": "Expand",
-  "parameter": {
-    "open": true,
-    "children": [
+  "kind": "Grid",
+  "spec": {
+    "display": {
+      "title": "My Expending Grid",
+      "collapse": {
+        "open": true
+      }
+    },
+    "items": [
       {
-        "$ref": "#/layouts/mainGrid"
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 4,
+        "content": { "$ref": "#/panels/gaugeCpuBusy" }
+      },
+      {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 4,
+        "content": { "$ref": "#/panels/gaugeSystemLoad" }
       }
     ]
   }
 }
 `,
 			result: Layout{
-				Kind: KindExpandLayout,
-				Parameter: &ExpandLayoutParameter{
-					Open: true,
-					Children: []*common.JSONRef{
+				Kind: KindGridLayout,
+				Spec: &GridLayoutSpec{
+					Display: &GridLayoutDisplay{
+						Title:    "My Expending Grid",
+						Collapse: &GridLayoutCollapse{Open: true},
+					},
+					Items: []GridItem{
 						{
-							Ref:    "#/layouts/mainGrid",
-							Path:   []string{"layouts", "mainGrid"},
-							Object: nil,
+							X:      0,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeCpuBusy",
+								Path: []string{"panels", "gaugeCpuBusy"},
+							},
+						},
+						{
+							X:      3,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeSystemLoad",
+								Path: []string{"panels", "gaugeSystemLoad"},
+							},
 						},
 					},
 				},
@@ -143,44 +164,43 @@ func TestUnmarshalYAMLLayout(t *testing.T) {
 			title: "grid layout",
 			yamele: `
 kind: "Grid"
-parameter:
-  children:
-  - - width: 1
-    - width: 1
-      content:
-        $ref: "#/panels/cpu"
-  - - width: 1
-      content:
-        $ref: "#/panels/load"
-    - width: 1
+spec:
+  items:
+  - x: 0
+    y: 0
+    width: 3
+    height: 4
+    content: 
+      $ref: "#/panels/gaugeCpuBusy"
+  - x: 3
+    y: 0
+    width: 3
+    height: 4
+    content: 
+      $ref: "#/panels/gaugeSystemLoad"
 `,
 			result: Layout{
 				Kind: KindGridLayout,
-				Parameter: &GridLayoutParameter{
-					Children: [][]GridCell{
+				Spec: &GridLayoutSpec{
+					Items: []GridItem{
 						{
-							{
-								Width:   1,
-								Content: nil,
-							},
-							{
-								Width: 1,
-								Content: &common.JSONRef{
-									Ref:  "#/panels/cpu",
-									Path: []string{"panels", "cpu"},
-								},
+							X:      0,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeCpuBusy",
+								Path: []string{"panels", "gaugeCpuBusy"},
 							},
 						},
 						{
-							{
-								Width: 1,
-								Content: &common.JSONRef{
-									Ref:  "#/panels/load",
-									Path: []string{"panels", "load"},
-								},
-							},
-							{
-								Width: 1,
+							X:      3,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeSystemLoad",
+								Path: []string{"panels", "gaugeSystemLoad"},
 							},
 						},
 					},
@@ -190,21 +210,53 @@ parameter:
 		{
 			title: "expand layout",
 			yamele: `
-kind: "Expand"
-parameter:
-  open: true
-  children:
-  - "$ref": "#/layouts/mainGrid"
+kind: "Grid"
+spec:
+  display:
+    title: "My Expending Grid"
+    collapse:
+      open: true
+  items:
+  - x: 0
+    y: 0
+    width: 3
+    height: 4
+    content: 
+      $ref: "#/panels/gaugeCpuBusy"
+  - x: 3
+    y: 0
+    width: 3
+    height: 4
+    content: 
+      $ref: "#/panels/gaugeSystemLoad"
 `,
 			result: Layout{
-				Kind: KindExpandLayout,
-				Parameter: &ExpandLayoutParameter{
-					Open: true,
-					Children: []*common.JSONRef{
+				Kind: KindGridLayout,
+				Spec: &GridLayoutSpec{
+					Display: &GridLayoutDisplay{
+						Title:    "My Expending Grid",
+						Collapse: &GridLayoutCollapse{Open: true},
+					},
+					Items: []GridItem{
 						{
-							Ref:    "#/layouts/mainGrid",
-							Path:   []string{"layouts", "mainGrid"},
-							Object: nil,
+							X:      0,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeCpuBusy",
+								Path: []string{"panels", "gaugeCpuBusy"},
+							},
+						},
+						{
+							X:      3,
+							Y:      0,
+							Width:  3,
+							Height: 4,
+							Content: &common.JSONRef{
+								Ref:  "#/panels/gaugeSystemLoad",
+								Path: []string{"panels", "gaugeSystemLoad"},
+							},
 						},
 					},
 				},

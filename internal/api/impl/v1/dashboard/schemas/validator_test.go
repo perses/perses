@@ -80,20 +80,28 @@ func TestValidateDashboard(t *testing.T) {
 							}
 						`),
 					},
-					Entrypoint: &common.JSONRef{
-						Ref: "#/spec/layouts/main",
-					},
-					Layouts: map[string]*dashboard.Layout{
-						"main": {
-							Kind: dashboard.KindExpandLayout,
-							Parameter: dashboard.ExpandLayoutParameter{
-								Open: false,
-								Children: []*common.JSONRef{
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
 									{
-										Ref: "#/spec/panels/MyAveragePanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyAveragePanel",
+										},
 									},
 									{
-										Ref: "#/spec/panels/MyAwesomePanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyAwesomePanel",
+										},
 									},
 								},
 							},
@@ -150,20 +158,28 @@ func TestValidateDashboard(t *testing.T) {
 							}
 						`),
 					},
-					Entrypoint: &common.JSONRef{
-						Ref: "#/spec/layouts/main",
-					},
-					Layouts: map[string]*dashboard.Layout{
-						"main": {
-							Kind: dashboard.KindExpandLayout,
-							Parameter: dashboard.ExpandLayoutParameter{
-								Open: false,
-								Children: []*common.JSONRef{
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
 									{
-										Ref: "#/spec/panels/MyAveragePanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyAveragePanel",
+										},
 									},
 									{
-										Ref: "#/spec/panels/MyAwesomePanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyAwesomePanel",
+										},
 									},
 								},
 							},

@@ -28,6 +28,7 @@ export function convertDashboardJson(json: GrafanaDashboardJson): DashboardResou
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
       project: 'perses',
+      version: 0,
     },
     spec: {
       datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },

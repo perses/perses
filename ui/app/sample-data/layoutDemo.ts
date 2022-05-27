@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, AnyVariableDefinition } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 
 const nodeExporterDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -20,9 +20,10 @@ const nodeExporterDashboard: DashboardResource = {
     project: 'perses',
     created_at: '2021-11-09',
     updated_at: '2021-11-09',
+    version: 0,
   },
   spec: {
-    datasource: { name: 'Public Prometheus Demo Server' },
+    datasource: { kind: 'Prometheus', global: true, name: 'Public Prometheus Demo Server' },
     // TODO: Should duration actually be a time range?
     duration: '24h',
     variables: {
@@ -38,7 +39,7 @@ const nodeExporterDashboard: DashboardResource = {
         selection: {
           default_value: 'node',
         },
-      } as AnyVariableDefinition,
+      },
       instance: {
         kind: 'PrometheusLabelValues',
         options: {
@@ -52,7 +53,7 @@ const nodeExporterDashboard: DashboardResource = {
           default_value: ['demo.do.prometheus.io:9100'],
           all_value: '$__all',
         },
-      } as AnyVariableDefinition,
+      },
       interval: {
         kind: 'Interval',
         options: {
@@ -68,7 +69,7 @@ const nodeExporterDashboard: DashboardResource = {
         selection: {
           default_value: '1m',
         },
-      } as AnyVariableDefinition,
+      },
     },
     panels: {
       cpu: {
@@ -158,58 +159,64 @@ const nodeExporterDashboard: DashboardResource = {
       // Regular Title, no collapse enabled
       {
         kind: 'Grid',
-        display: {
-          title: 'CPU Stats',
-        },
-        items: [
-          // First Row
-          {
-            x: 0,
-            y: 0,
-            width: 12,
-            height: 4,
-            content: { $ref: '#/panels/cpu' },
+        spec: {
+          display: {
+            title: 'CPU Stats',
           },
-        ],
+          items: [
+            // First Row
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 4,
+              content: { $ref: '#/panels/cpu' },
+            },
+          ],
+        },
       },
       // No title,
       {
         kind: 'Grid',
-        items: [
-          {
-            x: 8,
-            y: 0,
-            width: 8,
-            height: 3,
-            content: { $ref: '#/panels/memory' },
-          },
-        ],
+        spec: {
+          items: [
+            {
+              x: 8,
+              y: 0,
+              width: 8,
+              height: 3,
+              content: { $ref: '#/panels/memory' },
+            },
+          ],
+        },
       },
       // Collapsed
       {
         kind: 'Grid',
-        display: {
-          title: 'Disk Stats',
-          collapse: {
-            open: false,
+        spec: {
+          display: {
+            title: 'Disk Stats',
+            collapse: {
+              open: false,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 6,
+              height: 2,
+              content: { $ref: '#/panels/diskIO' },
+            },
+            {
+              x: 18,
+              y: 0,
+              width: 6,
+              height: 2,
+              content: { $ref: '#/panels/filesystemFullness' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 6,
-            height: 2,
-            content: { $ref: '#/panels/diskIO' },
-          },
-          {
-            x: 18,
-            y: 0,
-            width: 6,
-            height: 2,
-            content: { $ref: '#/panels/filesystemFullness' },
-          },
-        ],
       },
     ],
   },

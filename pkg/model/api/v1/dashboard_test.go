@@ -64,17 +64,20 @@ func TestMarshalDashboard(t *testing.T) {
 						}
 					`),
 					},
-					Entrypoint: &common.JSONRef{
-						Ref: "#/spec/layouts/main",
-					},
-					Layouts: map[string]*dashboard.Layout{
-						"main": {
-							Kind: dashboard.KindExpandLayout,
-							Parameter: dashboard.ExpandLayoutParameter{
-								Open: false,
-								Children: []*common.JSONRef{
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
 									{
-										Ref: "#/spec/panels/MyPanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref:  "#/panels/MyPanel",
+											Path: []string{"panels", "MyPanel"},
+										},
 									},
 								},
 							},
@@ -111,22 +114,24 @@ func TestMarshalDashboard(t *testing.T) {
         }
       }
     },
-    "layouts": {
-      "main": {
-        "kind": "Expand",
-        "parameter": {
-          "open": false,
-          "children": [
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
             {
-              "$ref": "#/spec/panels/MyPanel"
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4,
+              "content": {
+                "$ref": "#/panels/MyPanel"
+              }
             }
           ]
         }
       }
-    },
-    "entrypoint": {
-      "$ref": "#/spec/layouts/main"
-    }
+    ]
   }
 }`,
 		},
@@ -184,17 +189,20 @@ func TestMarshalDashboard(t *testing.T) {
 						}
 					`),
 					},
-					Entrypoint: &common.JSONRef{
-						Ref: "#/spec/layouts/main",
-					},
-					Layouts: map[string]*dashboard.Layout{
-						"main": {
-							Kind: dashboard.KindExpandLayout,
-							Parameter: dashboard.ExpandLayoutParameter{
-								Open: false,
-								Children: []*common.JSONRef{
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
 									{
-										Ref: "#/spec/panels/MyPanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref:  "#/panels/MyPanel",
+											Path: []string{"panels", "MyPanel"},
+										},
 									},
 								},
 							},
@@ -254,22 +262,24 @@ func TestMarshalDashboard(t *testing.T) {
         }
       }
     },
-    "layouts": {
-      "main": {
-        "kind": "Expand",
-        "parameter": {
-          "open": false,
-          "children": [
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
             {
-              "$ref": "#/spec/panels/MyPanel"
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4,
+              "content": {
+                "$ref": "#/panels/MyPanel"
+              }
             }
           ]
         }
       }
-    },
-    "entrypoint": {
-      "$ref": "#/spec/layouts/main"
-    }
+    ]
   }
 }`,
 		},
