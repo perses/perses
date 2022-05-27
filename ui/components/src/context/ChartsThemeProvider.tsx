@@ -18,26 +18,20 @@ import { registerTheme } from 'echarts';
 import { generateChartsTheme, EChartsTheme, PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
+  themeName: string;
+  themeOverrides?: EChartsTheme;
   children?: React.ReactNode;
-  themeName?: string;
-  theme?: EChartsTheme;
 }
 
 export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
-  const { children, themeName, theme } = props;
+  const { children, themeName, themeOverrides } = props;
   const muiTheme = useTheme();
-  const persesChartsTheme = generateChartsTheme(theme ?? {}, muiTheme);
+  const persesChartsTheme = generateChartsTheme(themeName, muiTheme, themeOverrides);
 
-  if (themeName !== undefined) {
-    // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-    registerTheme(themeName, persesChartsTheme);
-  }
+  // register ECharts theme to be used in individual charts, see: https://apache.github.io/echarts-handbook/en/concepts/style/#theme
+  registerTheme(themeName, persesChartsTheme.theme);
 
-  const themeContext = {
-    themeName,
-    theme: persesChartsTheme,
-  };
-  return <ChartsThemeContext.Provider value={themeContext}>{children}</ChartsThemeContext.Provider>;
+  return <ChartsThemeContext.Provider value={persesChartsTheme}>{children}</ChartsThemeContext.Provider>;
 }
 
 export const ChartsThemeContext = createContext<PersesChartsTheme | undefined>(undefined);

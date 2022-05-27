@@ -16,8 +16,9 @@ import type { EChartsOption, BarSeriesOption, LineSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 
 export interface PersesChartsTheme {
+  themeName: string;
   theme: EChartsTheme;
-  themeName?: string;
+  noDataOption: EChartsOption;
 }
 
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207
@@ -26,11 +27,14 @@ export interface EChartsTheme extends EChartsOption {
   line?: LineSeriesOption;
 }
 
-export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: MaterialThemeOptions): EChartsTheme {
-  if (muiTheme === undefined || muiTheme.palette === undefined) return echartsTheme;
-
-  const ltGrey = muiTheme.palette.grey ? muiTheme.palette.grey['300'] : '#dee2e6';
-  const mdGrey = muiTheme.palette.grey ? muiTheme.palette.grey['600'] : '#545454';
+export function generateChartsTheme(
+  themeName: string,
+  muiTheme?: MaterialThemeOptions,
+  echartsTheme?: EChartsTheme
+): PersesChartsTheme {
+  const ltGrey = muiTheme?.palette?.grey ? muiTheme.palette.grey[300] : '#dee2e6';
+  const mdGrey = muiTheme?.palette?.grey ? muiTheme.palette.grey[600] : '#545454';
+  const primaryTextColor = muiTheme?.palette?.text?.primary ?? '#222';
 
   const defaultChartsTheme = {
     title: {
@@ -48,7 +52,7 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
       show: true,
       axisLabel: {
         show: true,
-        color: muiTheme.palette.text?.primary,
+        color: primaryTextColor,
         margin: 15,
       },
       axisTick: {
@@ -65,7 +69,7 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
         },
       },
       splitLine: {
-        show: true, // TODO: override in HomeDashboard.tsx with false
+        show: true,
         lineStyle: {
           color: [ltGrey],
         },
@@ -79,9 +83,8 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
     },
     valueAxis: {
       show: true,
-      // boundaryGap: ['5%', '10%'],
       axisLabel: {
-        color: muiTheme.palette.text?.primary,
+        color: primaryTextColor,
         margin: 12,
       },
       axisLine: {
@@ -98,7 +101,7 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
     },
     legend: {
       textStyle: {
-        color: muiTheme.palette.text?.primary,
+        color: primaryTextColor,
       },
     },
     toolbox: {
@@ -106,11 +109,11 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
       top: 10,
       right: 10,
       iconStyle: {
-        borderColor: muiTheme.palette.text?.primary,
+        borderColor: primaryTextColor,
       },
       emphasis: {
         iconStyle: {
-          textFill: muiTheme.palette.text?.primary,
+          textFill: primaryTextColor,
         },
       },
     },
@@ -138,5 +141,28 @@ export function generateChartsTheme(echartsTheme: EChartsTheme, muiTheme?: Mater
     },
   };
 
-  return merge(defaultChartsTheme, echartsTheme);
+  return {
+    themeName,
+    theme: merge(defaultChartsTheme, echartsTheme),
+    noDataOption: {
+      title: {
+        show: true,
+        textStyle: {
+          color: primaryTextColor,
+          fontSize: 16,
+          fontWeight: 400,
+        },
+        text: 'No data',
+        left: 'center',
+        top: 'center',
+      },
+      xAxis: {
+        show: false,
+      },
+      yAxis: {
+        show: false,
+      },
+      // series: [],
+    },
+  };
 }

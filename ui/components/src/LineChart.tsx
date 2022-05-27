@@ -60,27 +60,6 @@ use([
   CanvasRenderer,
 ]);
 
-const noDataOption = {
-  title: {
-    show: true,
-    textStyle: {
-      color: 'grey',
-      fontSize: 16,
-      fontWeight: 400,
-    },
-    text: 'No data',
-    left: 'center',
-    top: 'center',
-  },
-  xAxis: {
-    show: false,
-  },
-  yAxis: {
-    show: false,
-  },
-  series: [],
-};
-
 export interface ZoomEventData {
   start: number;
   end: number;
@@ -165,7 +144,8 @@ export function LineChart({
 
   const option: EChartsOption = useDeepMemo(() => {
     if (data.timeSeries === undefined) return {};
-    if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
+    // if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
+    if (data.timeSeries === null || data.timeSeries.length === 0) return {};
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
