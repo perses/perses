@@ -74,29 +74,17 @@ interface LineChartProps {
   legend?: LegendComponentOption;
   toolbox?: ToolboxComponentOption;
   visualMap?: VisualMapComponentOption[];
-  dataZoomEnabled?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export function LineChart({
-  height,
-  data,
-  grid,
-  legend,
-  toolbox,
-  visualMap,
-  dataZoomEnabled,
-  onDataZoom,
-}: LineChartProps) {
-  const themeOverrides = { grid, legend, toolbox, visualMap };
+export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }: LineChartProps) {
   const chartsTheme = useChartsTheme();
-  const mergedTheme = merge({}, chartsTheme.theme, themeOverrides);
-
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
+      // dblclick: (params) => {},
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;
@@ -117,14 +105,28 @@ export function LineChart({
     };
   }, [data, onDataZoom]);
 
-  if (chartRef.current !== undefined && dataZoomEnabled === true) {
+  if (chartRef.current !== undefined) {
     const chart = chartRef.current;
-    chart.dispatchAction({
-      type: 'takeGlobalCursor',
-      key: 'dataZoomSelect',
-      dataZoomSelectActive: true,
-    });
+    const chartModel = chart['_model'];
+    if (chartModel !== undefined) {
+      if (chart['_model'].option.toolbox[0].feature.dataZoom.iconStatus.zoom === 'normal') {
+        chart.dispatchAction({
+          type: 'takeGlobalCursor',
+          key: 'dataZoomSelect',
+          dataZoomSelectActive: true,
+        });
+      }
+    }
   }
+
+  const handleOnDoubleClick = () => {
+    if (chartRef.current !== undefined) {
+      const chart = chartRef.current;
+      chart.dispatchAction({
+        type: 'restore', // https://echarts.apache.org/en/api.html#events.restore
+      });
+    }
+  };
 
   const handleOnMouseDown = (event: React.MouseEvent) => {
     // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
@@ -151,24 +153,18 @@ export function LineChart({
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
-    const defaultToolbox = {
-      feature: {
-        dataZoom: {
-          icon: dataZoomEnabled ? null : undefined,
-          yAxisIndex: 'none',
-        },
-        restore: {},
-      },
-    };
-
-    if (dataZoomEnabled === false) {
-      delete defaultToolbox.feature.dataZoom.icon;
-    }
-
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
     const option: EChartsCoreOption = {
-      toolbox: merge(defaultToolbox, toolbox),
+      grid,
+      toolbox: {
+        feature: {
+          dataZoom: {
+            icon: null,
+            yAxisIndex: 'none',
+          },
+        },
+      },
       series: data.timeSeries,
       xAxis: {
         type: 'category',
@@ -198,16 +194,19 @@ export function LineChart({
           type: 'none',
         },
       },
+      legend,
+      visualMap,
     };
 
     return option;
-  }, [data, toolbox, dataZoomEnabled]);
+  }, [data, grid, legend, visualMap]);
 
   return (
     <Box
       sx={{
         height,
       }}
+      onDoubleClick={handleOnDoubleClick}
       onMouseDown={handleOnMouseDown}
       onMouseUp={handleOnMouseUp}
       onMouseLeave={handleOnMouseLeave}
@@ -223,7 +222,8 @@ export function LineChart({
           height: '100%',
         }}
         option={option}
-        theme={mergedTheme}
+        theme={chartsTheme.themeName}
+        // theme={mergedTheme}
         onEvents={handleEvents}
         _instance={chartRef}
       />

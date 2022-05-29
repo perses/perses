@@ -115,20 +115,32 @@ export function LineChartContainer(props: LineChartContainerProps) {
     },
   };
 
-  const gridOverrides: GridComponentOption = {
-    right: 40,
+  const legendOverrides = {
+    show: false,
+    type: 'scroll',
+    bottom: 0,
+    // textStyle: {
+    //   color: theme.palette.text.primary,
+    // },
+    // pageTextStyle: {
+    //   color: theme.palette.grey[500],
+    // },
+    // pageIconColor: theme.palette.action.active,
+    // pageIconInactiveColor: theme.palette.action.disabled,
   };
 
-  // enables zoom on drag without clicking 'Zoom' icon first
-  const dataZoomEnabled = false;
+  // TODO (sjcobb): add legend grid bottom override
+  const gridOverrides: GridComponentOption = {
+    // right: 40,
+  };
 
   return (
     <LineChart
       height={height}
       data={graphData}
+      legend={legendOverrides}
       grid={gridOverrides}
       toolbox={toolboxOverrides}
-      dataZoomEnabled={dataZoomEnabled}
     />
   );
 }
