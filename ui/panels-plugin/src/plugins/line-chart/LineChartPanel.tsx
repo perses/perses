@@ -29,7 +29,7 @@ interface LineChartOptions extends JsonObject {
 export function LineChartPanel(props: LineChartProps) {
   const {
     definition: {
-      options: { queries },
+      options: { queries, show_legend },
     },
     contentDimensions,
   } = props;
@@ -39,7 +39,11 @@ export function LineChartPanel(props: LineChartProps) {
   return (
     <GraphQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
       {contentDimensions !== undefined && (
-        <LineChartContainer width={contentDimensions.width} height={contentDimensions.height} />
+        <LineChartContainer
+          width={contentDimensions.width}
+          height={contentDimensions.height}
+          show_legend={show_legend}
+        />
       )}
     </GraphQueryRunner>
   );

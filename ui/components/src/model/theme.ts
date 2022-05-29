@@ -100,9 +100,17 @@ export function generateChartsTheme(
       },
     },
     legend: {
+      show: false,
+      type: 'scroll',
+      bottom: 0,
       textStyle: {
         color: primaryTextColor,
       },
+      pageTextStyle: {
+        color: mdGrey,
+      },
+      pageIconColor: muiTheme?.palette?.action?.active,
+      pageIconInactiveColor: muiTheme?.palette?.action?.disabled,
     },
     toolbox: {
       show: true,

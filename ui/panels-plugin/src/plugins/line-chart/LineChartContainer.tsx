@@ -29,13 +29,14 @@ export const EMPTY_GRAPH_DATA = {
 export interface LineChartContainerProps {
   width: number;
   height: number;
+  show_legend?: boolean;
 }
 
 /**
  * Passes query data and customization options to LineChart
  */
 export function LineChartContainer(props: LineChartContainerProps) {
-  const { width, height } = props;
+  const { width, height, show_legend } = props;
   const queries = useRunningGraphQueries();
 
   // populate series data based on query results
@@ -116,22 +117,13 @@ export function LineChartContainer(props: LineChartContainerProps) {
   };
 
   const legendOverrides = {
-    show: false,
+    show: show_legend === true,
     type: 'scroll',
     bottom: 0,
-    // textStyle: {
-    //   color: theme.palette.text.primary,
-    // },
-    // pageTextStyle: {
-    //   color: theme.palette.grey[500],
-    // },
-    // pageIconColor: theme.palette.action.active,
-    // pageIconInactiveColor: theme.palette.action.disabled,
   };
 
-  // TODO (sjcobb): add legend grid bottom override
   const gridOverrides: GridComponentOption = {
-    // right: 40,
+    bottom: show_legend === true ? 35 : 0,
   };
 
   return (

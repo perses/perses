@@ -149,6 +149,7 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
+          show_legend: true,
           unit: { kind: 'Bytes' },
         },
       },
