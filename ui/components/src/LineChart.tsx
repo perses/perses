@@ -16,7 +16,7 @@ import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import merge from 'lodash/merge';
 import type {
-  EChartsOption,
+  EChartsCoreOption,
   GridComponentOption,
   LineSeriesOption,
   LegendComponentOption,
@@ -88,7 +88,10 @@ export function LineChart({
   dataZoomEnabled,
   onDataZoom,
 }: LineChartProps) {
+  const themeOverrides = { grid, legend, toolbox, visualMap };
   const chartsTheme = useChartsTheme();
+  const mergedTheme = merge({}, chartsTheme.theme, themeOverrides);
+
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
@@ -142,10 +145,9 @@ export function LineChart({
     setShowTooltip(false);
   };
 
-  const option: EChartsOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useDeepMemo(() => {
     if (data.timeSeries === undefined) return {};
-    // if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
-    if (data.timeSeries === null || data.timeSeries.length === 0) return {};
+    if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
@@ -165,7 +167,7 @@ export function LineChart({
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
-    const option = {
+    const option: EChartsCoreOption = {
       toolbox: merge(defaultToolbox, toolbox),
       series: data.timeSeries,
       xAxis: {
@@ -196,13 +198,10 @@ export function LineChart({
           type: 'none',
         },
       },
-      grid,
-      legend,
-      visualMap,
     };
 
     return option;
-  }, [data, grid, legend, toolbox, dataZoomEnabled, visualMap]);
+  }, [data, toolbox, dataZoomEnabled]);
 
   return (
     <Box
@@ -224,7 +223,7 @@ export function LineChart({
           height: '100%',
         }}
         option={option}
-        theme={chartsTheme.themeName}
+        theme={mergedTheme}
         onEvents={handleEvents}
         _instance={chartRef}
       />

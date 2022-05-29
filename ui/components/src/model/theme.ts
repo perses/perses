@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { ThemeOptions as MaterialThemeOptions } from '@mui/material';
-import type { EChartsOption, BarSeriesOption, LineSeriesOption } from 'echarts';
+import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 
 export interface PersesChartsTheme {
   themeName: string;
   theme: EChartsTheme;
-  noDataOption: EChartsOption;
+  noDataOption: EChartsCoreOption;
 }
 
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207
