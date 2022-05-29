@@ -84,7 +84,7 @@ export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }:
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
-      // dblclick: (params) => {},
+      // TODO (sjcobb): use legendselectchanged event to fix tooltip when legend selected
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;

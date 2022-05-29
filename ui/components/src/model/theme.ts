@@ -41,7 +41,7 @@ export function generateChartsTheme(
       show: false,
     },
     grid: {
-      top: 10,
+      top: 5,
       right: 20,
       bottom: 0,
       left: 20,
