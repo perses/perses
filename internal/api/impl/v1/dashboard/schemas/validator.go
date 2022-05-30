@@ -29,7 +29,6 @@ import (
 
 // Validator can be used to run checks on panels, based on cuelang definitions
 type Validator interface {
-	Initialize() error
 	Validate(panels map[string]json.RawMessage) error
 	LoadSchemas()
 }
@@ -54,20 +53,17 @@ const baseChartDef = `
 
 // NewValidator instantiate a validator
 func NewValidator(conf config.Schemas) Validator {
+	ctx := cuecontext.New()
+
+	// compile the base chart definition
+	baseDef := ctx.CompileString(baseChartDef)
+
 	return &validator{
 		schemasConf: conf,
-		context:     cuecontext.New(),
-		baseDef:     cue.Value{},
+		context:     ctx,
+		baseDef:     baseDef,
 		schemas:     &sync.Map{},
 	}
-}
-
-// Initialize the validator
-func (v *validator) Initialize() error {
-	// compile the base chart definition
-	v.baseDef = v.context.CompileString(baseChartDef)
-	logrus.Tracef("Base def succesfully loaded")
-	return nil
 }
 
 // Validate verify a list of panels.

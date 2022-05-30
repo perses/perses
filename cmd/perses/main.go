@@ -60,16 +60,10 @@ func main() {
 	persesFrontend := front.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
-	validator := serviceManager.GetDashboard().GetValidator()
-	err = validator.Initialize()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to initialize the validator")
-	}
-
 	// enable hot reload of CUE schemas for dashboards validation:
 	// - watch for changes on the schemas folder
 	// - register a cron task to reload schemas every <interval>
-	watcher, reloader, err := schemas.NewHotReloaders(conf.Schemas.Path, validator)
+	watcher, reloader, err := schemas.NewHotReloaders(conf.Schemas.Path, serviceManager.GetDashboard().GetValidator())
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the tasks for hot reload of schemas")
 	}
