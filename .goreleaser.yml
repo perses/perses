@@ -33,6 +33,13 @@ archives:
       - "perses"
       - "percli"
     format: "tar.gz"
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - schemas/
+      - src: "docs/examples/config.yaml"
+        dst: "./config.yaml"
 dockers:
   - goos: linux
     goarch: amd64
