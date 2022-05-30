@@ -177,7 +177,8 @@ func TestValidateDashboard(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			validator := NewValidator(config.Schemas{
-				Path: "testdata",
+				Path:         "testdata",
+				ChartsFolder: "charts",
 			})
 			validator.LoadSchemas()
 

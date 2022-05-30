@@ -35,21 +35,20 @@ type Validator interface {
 }
 
 type validator struct {
-	schemasPath string
+	schemasConf config.Schemas
 	context     *cue.Context
 	baseDef     cue.Value
 	schemas     *sync.Map
 }
 
 const (
-	baseDefFileName   = "base.cue"
-	pluginsFolderName = "charts"
+	baseDefFileName = "base.cue"
 )
 
 // NewValidator instantiate a validator
 func NewValidator(conf config.Schemas) Validator {
 	return &validator{
-		schemasPath: conf.Path,
+		schemasConf: conf,
 		context:     cuecontext.New(),
 		baseDef:     cue.Value{},
 		schemas:     &sync.Map{},
@@ -59,7 +58,7 @@ func NewValidator(conf config.Schemas) Validator {
 // Initialize the validator
 func (v *validator) Initialize() error {
 	// load the base panel definition
-	baseDefPath := filepath.Join(v.schemasPath, baseDefFileName)
+	baseDefPath := filepath.Join(v.schemasConf.Path, baseDefFileName)
 	data, err := os.ReadFile(baseDefPath)
 	if err != nil {
 		return err
@@ -130,7 +129,7 @@ func (v *validator) Validate(panels map[string]json.RawMessage) error {
 
 // LoadSchemas load the known list of schemas into the validator
 func (v *validator) LoadSchemas() {
-	pluginsPath := filepath.Join(v.schemasPath, pluginsFolderName)
+	pluginsPath := filepath.Join(v.schemasConf.Path, v.schemasConf.ChartsFolder)
 
 	files, err := os.ReadDir(pluginsPath)
 	if err != nil {
