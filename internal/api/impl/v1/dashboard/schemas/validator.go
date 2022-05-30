@@ -43,7 +43,7 @@ type validator struct {
 
 const (
 	baseDefFileName   = "base.cue"
-	pluginsFolderName = "plugins"
+	pluginsFolderName = "charts"
 )
 
 // NewValidator instantiate a validator
