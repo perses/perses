@@ -44,6 +44,7 @@ dockers:
       - "docker.io/persesdev/perses:{{ .Tag }}"
       - "docker.io/persesdev/perses:v{{ .Major }}.{{ .Minor }}"
     build_flag_templates:
+      - "--label=org.opencontainers.image.authors=The Perses Authors <perses-team@googlegroups.com>"
       - "--label=org.opencontainers.image.title={{ .ProjectName }}"
       - "--label=org.opencontainers.image.description={{ .ProjectName }}"
       - "--label=org.opencontainers.image.url=https://github.com/perses/perses"
@@ -52,6 +53,10 @@ dockers:
       - "--label=org.opencontainers.image.created={{ .Date }}"
       - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
+    extra_files:
+      - LICENSE
+      - schemas/
+      - docs/examples/config.yaml
 release:
   github:
     owner: "perses"
