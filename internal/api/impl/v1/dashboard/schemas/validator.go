@@ -41,9 +41,16 @@ type validator struct {
 	schemas     *sync.Map
 }
 
-const (
-	baseDefFileName = "base.cue"
-)
+// base CUE definition that all charts & panels should meet
+const baseChartDef = `
+{
+	kind: string
+	display: {
+		name: string
+	}
+	options: _
+}
+`
 
 // NewValidator instantiate a validator
 func NewValidator(conf config.Schemas) Validator {
@@ -57,13 +64,8 @@ func NewValidator(conf config.Schemas) Validator {
 
 // Initialize the validator
 func (v *validator) Initialize() error {
-	// load the base panel definition
-	baseDefPath := filepath.Join(v.schemasConf.Path, baseDefFileName)
-	data, err := os.ReadFile(baseDefPath)
-	if err != nil {
-		return err
-	}
-	v.baseDef = v.context.CompileBytes(data)
+	// compile the base chart definition
+	v.baseDef = v.context.CompileString(baseChartDef)
 	logrus.Tracef("Base def succesfully loaded")
 	return nil
 }
