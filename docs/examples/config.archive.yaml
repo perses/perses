@@ -1,0 +1,8 @@
+database:
+  file:
+    folder: "./perses"
+    file_extension: "json"
+
+schemas:
+  path: "./schemas"
+  interval: "5m"

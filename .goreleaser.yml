@@ -38,7 +38,8 @@ archives:
       - README.md
       - CHANGELOG.md
       - schemas/
-      - src: "docs/examples/config.yaml"
+      - cue.mod/
+      - src: "docs/examples/config.archive.yaml"
         dst: "./config.yaml"
 dockers:
   - goos: linux
@@ -63,7 +64,8 @@ dockers:
     extra_files:
       - LICENSE
       - schemas/
-      - docs/examples/config.yaml
+      - cue.mod/
+      - docs/examples/config.docker.yaml
 release:
   github:
     owner: "perses"
