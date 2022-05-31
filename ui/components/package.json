@@ -28,6 +28,11 @@
     "lodash-es": "^4.17.21",
     "react-error-boundary": "^3.1.4"
   },
+  "devDependencies": {
+    "@swc/core": "^1.2.171",
+    "@swc/jest": "^0.2.20",
+    "jest-canvas-mock": "^2.3.1"
+  },
   "peerDependencies": {
     "@mui/material": "^5.5.1",
     "react": "^17.0.2"

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import shared from '../jest.shared';
+import sharedConfig from '../jest.shared';
 
-// Just use shared config as-is for now
-export default shared;
+module.exports = {
+  ...sharedConfig,
+  setupFilesAfterEnv: ['./src/test/setup-tests.ts', 'jest-canvas-mock'],
+  // prettier-ignore
+  transformIgnorePatterns: ['../node_modules/(?!(echarts|zrender)/)'],
+  transform: {
+    // This does not do type-checking and assumes that's happening elsewhere for TS test files
+    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest'],
+  },
+};

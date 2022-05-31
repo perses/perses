@@ -1,4 +1,6 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
 import { UnitOptions } from '../model';
 import { StatChart, StatChartData } from './StatChart';
 
@@ -28,12 +30,19 @@ describe('StatChart', () => {
     },
   };
 
-  describe('Render with basic options', () => {
+  describe('Render default options (no sparkline)', () => {
     it('should render', () => {
       render(
-        <StatChart width={contentDimensions.width} height={contentDimensions.height} data={mockStatData} unit={unit} />
+        <ChartsThemeProvider themeName="perses">
+          <StatChart
+            width={contentDimensions.width}
+            height={contentDimensions.height}
+            data={mockStatData}
+            unit={unit}
+          />
+        </ChartsThemeProvider>
       );
-      expect(screen.getByText('7.70')).toBeInTheDocument();
+      expect(screen.getByText('7.73')).toBeInTheDocument();
     });
   });
 });

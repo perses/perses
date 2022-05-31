@@ -126,7 +126,6 @@ export const EChart = React.memo(function EChart<T>({
   // Initialize chart, dispose on unmount
   useLayoutEffect(() => {
     if (containerRef.current === null || chartElement.current !== null) return;
-    // TODO (sjcobb): support optional svg renderer
     chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);

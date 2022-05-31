@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import { merge } from 'lodash-es';
 import { use, EChartsCoreOption } from 'echarts/core';
@@ -242,15 +242,17 @@ export function StatChart(props: StatChartProps) {
       >
         {formatValue(calculatedValue, unit)}
       </Typography>
-      <EChart
-        sx={{
-          width: width,
-          height: height,
-        }}
-        option={option}
-        theme={chartsTheme.themeName}
-        renderer="svg"
-      />
+      {sparkline !== undefined && (
+        <EChart
+          sx={{
+            width: width,
+            height: height,
+          }}
+          option={option}
+          theme={chartsTheme.themeName}
+          renderer="svg"
+        />
+      )}
     </Box>
   );
 }

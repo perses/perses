@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,22 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
+import '@testing-library/jest-dom/extend-expect';
+// import { configure } from '@testing-library/react';
 
-// Common Jest configuration shared across packages
-const config: Config.InitialOptions = {
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  roots: ['<rootDir>/src'],
-  moduleNameMapper: {
-    // Jest currently doesn't natively support ES Modules, so use the non ES Modules version instead
-    '^lodash-es$': 'lodash',
-  },
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/../tsconfig.test.json',
-    },
-  },
-};
+jest.mock('echarts/core');
 
-export default config;
+// Increase the default timeout on findBy/waitFor from 1000 -> 3000 ms
+// configure({ asyncUtilTimeout: 3000 });
