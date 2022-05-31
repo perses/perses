@@ -102,6 +102,7 @@ export type OnEventsType<T> = {
 export interface EChartsProps<T> {
   option: EChartsCoreOption;
   theme?: string | EChartsTheme;
+  renderer?: 'canvas' | 'svg';
   sx?: SxProps<Theme>;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
@@ -111,6 +112,7 @@ export interface EChartsProps<T> {
 export const EChart = React.memo(function EChart<T>({
   option,
   theme,
+  renderer,
   sx,
   onEvents,
   _instance,
@@ -125,7 +127,7 @@ export const EChart = React.memo(function EChart<T>({
   useLayoutEffect(() => {
     if (containerRef.current === null || chartElement.current !== null) return;
     // TODO (sjcobb): support optional svg renderer
-    chartElement.current = init(containerRef.current, theme, { renderer: 'canvas' });
+    chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
@@ -136,7 +138,7 @@ export const EChart = React.memo(function EChart<T>({
       chartElement.current.dispose();
       chartElement.current = null;
     };
-  }, [_instance, onChartInitialized, theme]);
+  }, [_instance, onChartInitialized, theme, renderer]);
 
   // Update chart data when option changes
   useEffect(() => {

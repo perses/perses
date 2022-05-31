@@ -226,7 +226,6 @@ export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }:
         }}
         option={option}
         theme={chartsTheme.themeName}
-        // theme={mergedTheme}
         onEvents={handleEvents}
         _instance={chartRef}
       />

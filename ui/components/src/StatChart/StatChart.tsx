@@ -57,6 +57,7 @@ interface StatChartProps {
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, backgroundColor, sparkline } = props;
   const chartsTheme = useChartsTheme();
+  console.log(data);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return {};
@@ -193,7 +194,7 @@ export function StatChart(props: StatChartProps) {
           },
           option: {
             textStyle: {
-              fontSize: `max(14px, ${baseFontSize}px)`,
+              fontSize: Math.max(14, baseFontSize),
               lineHeight: Math.min(16, baseFontSize * 1.2),
             },
           },
@@ -211,6 +212,8 @@ export function StatChart(props: StatChartProps) {
         height: height,
       }}
       option={option}
+      theme={chartsTheme.themeName}
+      renderer="svg"
     />
   );
 }
