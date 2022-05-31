@@ -23,7 +23,8 @@ const benchmarkDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '12h',
+    // duration: '12h',
+    duration: '1m',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',
@@ -270,18 +271,20 @@ const benchmarkDashboard: DashboardResource = {
           calculation: 'Mean',
           unit: {
             kind: 'Decimal',
-            decimal_places: 4,
+            decimal_places: 2,
             // suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
           thresholds: {
             default_color: '#EA4747',
           },
           sparkline: {
-            line_color: '#FFE3E3',
-            line_width: 1.5,
-            line_opacity: 0.6,
-            area_color: '#FFBABA',
-            area_opacity: 0.4,
+            line_color: '#FF0000',
+            area_color: '#FF0000',
+            // line_color: '#FFE3E3',
+            // line_width: 1.5,
+            // line_opacity: 0.6,
+            // area_color: '#FFBABA',
+            // area_opacity: 0.4,
           },
         },
       },
@@ -425,13 +428,13 @@ const benchmarkDashboard: DashboardResource = {
           //   height: 2,
           //   content: { $ref: '#/panels/statRAM' },
           // },
-          // {
-          //   x: 0,
-          //   y: 4,
-          //   width: 2,
-          //   height: 2,
-          //   content: { $ref: '#/panels/statTotalRAM' },
-          // },
+          {
+            x: 0,
+            y: 4,
+            width: 2,
+            height: 2,
+            content: { $ref: '#/panels/statTotalRAM' },
+          },
           {
             x: 2,
             y: 0,

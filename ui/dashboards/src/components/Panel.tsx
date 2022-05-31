@@ -28,8 +28,6 @@ export interface PanelProps extends CardProps {
 export function Panel(props: PanelProps) {
   const { definition, ...others } = props;
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
-  const isStatsChart = definition.kind === 'StatChart';
-  const panelPadding = isStatsChart ? 0 : 2;
 
   const { width, height } = useResizeObserver({ ref: contentElement });
 
@@ -73,7 +71,7 @@ export function Panel(props: PanelProps) {
           position: 'relative',
           overflow: 'hidden',
           flexGrow: 1,
-          padding: (theme) => theme.spacing(panelPadding),
+          padding: (theme) => theme.spacing(2),
           // Override MUI default style for last-child
           ':last-child': {
             padding: (theme) => theme.spacing(panelPadding),
