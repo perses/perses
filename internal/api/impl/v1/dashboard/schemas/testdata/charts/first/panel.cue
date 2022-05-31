@@ -14,14 +14,19 @@
 package first
 
 #panel: {
-  a: string,
   kind: "AwesomeChart",
-  c: {
-    d: [...#bar]
+	display: {
+		name: string
+	}
+	options: {
+    a: string,
+    b: {
+      c: [...#d]
+    }
   }
 }
 
-#bar: {
+#d: {
   e: string
   f?: string
 }

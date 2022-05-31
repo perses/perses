@@ -16,18 +16,23 @@ package config
 import "time"
 
 const (
-	defaultSchemasPath = "schemas"
-	defaultInterval    = 1 * time.Hour
+	defaultPath         = "schemas"
+	defaultChartsFolder = "charts"
+	defaultInterval     = 1 * time.Hour
 )
 
 type Schemas struct {
-	Path     string        `yaml:"path,omitempty"`
-	Interval time.Duration `yaml:"interval,omitempty"`
+	Path         string        `yaml:"path,omitempty"`
+	ChartsFolder string        `yaml:"charts_folder,omitempty"`
+	Interval     time.Duration `yaml:"interval,omitempty"`
 }
 
 func (s *Schemas) Verify() error {
 	if len(s.Path) == 0 {
-		s.Path = defaultSchemasPath
+		s.Path = defaultPath
+	}
+	if len(s.ChartsFolder) == 0 {
+		s.Path = defaultChartsFolder
 	}
 	if s.Interval <= 0 {
 		s.Interval = defaultInterval

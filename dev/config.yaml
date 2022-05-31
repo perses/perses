@@ -8,4 +8,5 @@ database:
 
 schemas:
   path: "schemas"
+  charts_folder: "charts"
   interval: "5m"

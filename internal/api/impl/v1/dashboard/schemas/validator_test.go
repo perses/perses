@@ -53,29 +53,39 @@ func TestValidateDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{
 						"MyLinePanel": []byte(`
 							{
-								"a": "simple average chart",
 								"kind": "AverageChart",
-								"c": {
-									"d": false,
-									"e": [
-										{
-											"f": 66
-										}
-									]
+								"display": {
+									"name": "simple average chart",
+								},
+								"options": {
+									"a": "yes",
+									"b": {
+										"c": false,
+										"d": [
+											{
+												"f": 66
+											}
+										]
+									}
 								}
 							}
 						`),
 						"MyBarPanel": []byte(`
 							{
-								"a": "simple awesome chart",
 								"kind": "AwesomeChart",
-								"c": {
-									"d": [
-										{
-											"e": "up",
-											"f": "the up metric"
-										}
-									]
+								"display": {
+									"name": "simple awesome chart",
+								},
+								"options": {
+									"a": "yes",
+									"b": {
+										"c": [
+											{
+												"e": "up",
+												"f": "the up metric"
+											}
+										]
+									}
 								}
 							}
 						`),
@@ -123,29 +133,39 @@ func TestValidateDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{
 						"MyAveragePanel": []byte(`
 							{
-								"a": "simple average chart",
 								"kind": "AverageChart",
-								"c": {
-									"d": false,
-									"e": [
-										{
-											"f": 66
-										}
-									]
+								"display": {
+									"name": "simple average chart",
+								},
+								"options": {
+									"a": "yes",
+									"b": {
+										"c": false,
+										"d": [
+											{
+												"f": 66
+											}
+										]
+									}
 								}
 							}
 						`),
 						"MyAwesomePanel": []byte(`
 							{
-								"aaaaaa": "simple awesome chart",
 								"kind": "AwesomeChart",
-								"c": {
-									"d": [
-										{
-											"e": "up",
-											"f": "the up metric"
-										}
-									]
+								"display": {
+									"aaaaaa": "simple awesome chart",
+								},
+								"options": {
+									"a": "no",
+									"b": {
+										"c": [
+											{
+												"e": "up",
+												"f": "the up metric"
+											}
+										]
+									}
 								}
 							}
 						`),
@@ -171,13 +191,14 @@ func TestValidateDashboard(t *testing.T) {
 					},
 				},
 			},
-			result: "invalid panel MyAwesomePanel: AwesomeChart schema conditions not met: field not allowed: aaaaaa",
+			result: "invalid panel MyAwesomePanel: AwesomeChart schema conditions not met: display: field not allowed: aaaaaa",
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			validator := NewValidator(config.Schemas{
-				Path: "testdata",
+				Path:         "testdata",
+				ChartsFolder: "charts",
 			})
 			validator.LoadSchemas()
 
