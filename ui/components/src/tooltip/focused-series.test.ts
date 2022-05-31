@@ -11,81 +11,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { EChartsDataFormat } from '../model';
 import { getNearbySeries } from './focused-series';
-console.log(getNearbySeries);
 
-// describe('getNearbySeries', () => {
-//   const seriesDataInput = [
-//     {
-//       name: 'device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"',
-//       color: 'hsla(-141599372,50%,50%,0.8)',
-//       data: [
-//         [1640802142000, 0.27379628778100884],
-//         [1640802173000, 0.2738012031572572],
-//         [1640802204000, 0.27380611853350545],
-//         [1640802235000, 0.27381087534922954],
-//         [1640802266000, 0.2738157907254778],
-//         [1640802297000, 0.273820547541202],
-//         [1640802328000, 0.2738253043569261],
-//         [1640802359000, 0.27383259814103644],
-//         [1640802390000, 0.27383735495676054],
-//         [1640802421000, 0.2738422703330088],
-//         [1640802452000, 0.273847027148733],
-//         [1640802483000, 0.27385194252498124],
-//         [1640802514000, 0.27385669934070533],
-//         [1640802545000, 0.27386145615642943],
-//         [1640802576000, 0.2738663715326778],
-//         [1640802607000, 0.2738711283484019],
-//         [1640802638000, 0.274038251140843],
-//         [1640802669000, 0.2740430079565671],
-//       ],
-//     },
-//     {
-//       name: 'device="/dev/vda15", env="demo", fstype="vfat", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/boot/efi"',
-//       color: 'hsla(569657620,50%,50%,0.8)',
-//       data: [
-//         [1640802142000, 0.08486496097624885],
-//         [1640802173000, 0.08486496097624885],
-//         [1640802204000, 0.08486496097624885],
-//         [1640802235000, 0.08486496097624885],
-//         [1640802266000, 0.08486496097624885],
-//         [1640802297000, 0.08486496097624885],
-//         [1640802328000, 0.08486496097624885],
-//         [1640802359000, 0.08486496097624885],
-//         [1640802390000, 0.08486496097624885],
-//         [1640802421000, 0.08486496097624885],
-//         [1640802452000, 0.08486496097624885],
-//         [1640802483000, 0.08486496097624885],
-//         [1640802514000, 0.08486496097624885],
-//         [1640802545000, 0.08486496097624885],
-//         [1640802576000, 0.08486496097624885],
-//         [1640802607000, 0.08486496097624885],
-//         [1640802638000, 0.08486496097624885],
-//         [1640802669000, 0.08486496097624885],
-//       ],
-//     },
-//   ];
+describe('getNearbySeries', () => {
+  const chartData: EChartsDataFormat = {
+    timeSeries: [
+      {
+        type: 'line',
+        name: 'env="demo", instance="demo.do.prometheus", job="node", mode="test"',
+        color: 'hsla(-1365438424,50%,50%,0.8)',
+        data: [
+          0.0002315202231525094, 0.00022873082287300112, 0.00023152022315149463, 0.00023152022315149463,
+          0.00022873082287300112,
+        ],
+        symbol: 'circle',
+      },
+      {
+        type: 'line',
+        name: 'env="demo", instance="demo.do.prometheus", job="node", mode="test alt"',
+        color: 'hsla(286664040,50%,50%,0.8)',
+        data: [0.05245188284519867, 0.0524463040446356, 0.0524463040446356, 0.05247140864723438, 0.052482566248230646],
+        symbol: 'circle',
+      },
+    ],
+    xAxis: [1654007865000, 1654007880000, 1654007895000, 1654007910000, 1654007925000],
+    rangeMs: 60000,
+  };
 
-//   // https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
-//   const pointInGrid = [1640802452000.2622, 0.09444444444444444]; // converted from chart.getZr() mousemove coordinates
+  // https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
+  const pointInGrid = [2, 0.0560655737704918]; // converted from chart.getZr() mousemove coordinates
 
-//   const xBuffer = 15500; // milliseconds
-//   const yBuffer = 0.05; // calculated from y axis interval
+  const yBuffer = 0.02; // calculated from y axis interval
 
-//   const focusedSeriesOutput = [
-//     {
-//       date: '12/29/2021, 6:27:32 PM',
-//       datumIdx: 10,
-//       markerColor: 'hsla(569657620,50%,50%,0.8)',
-//       seriesIdx: 1,
-//       seriesName:
-//         'device="/dev/vda15", env="demo", fstype="vfat", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/boot/efi"',
-//       x: 1640802452000,
-//       y: 0.08486496097624885,
-//     },
-//   ];
+  const focusedSeriesOutput = [
+    {
+      date: 'May 31, 2022, 2:38:15 PM',
+      datumIdx: 2,
+      markerColor: 'hsla(286664040,50%,50%,0.8)',
+      seriesName: 'env="demo", instance="demo.do.prometheus", job="node", mode="test alt"',
+      seriesIdx: 1,
+      x: 1654007895000,
+      y: 0.0524463040446356,
+    },
+  ];
 
-//   it('should return focused series data for points nearby the cursor', () => {
-//     expect(getNearbySeries(seriesDataInput, pointInGrid, xBuffer, yBuffer)).toEqual(focusedSeriesOutput);
-//   });
-// });
+  it('should return focused series data for points nearby the cursor', () => {
+    expect(getNearbySeries(chartData, pointInGrid, yBuffer)).toEqual(focusedSeriesOutput);
+  });
+});
