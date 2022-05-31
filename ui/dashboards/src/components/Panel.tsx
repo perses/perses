@@ -74,7 +74,7 @@ export function Panel(props: PanelProps) {
           padding: (theme) => theme.spacing(2),
           // Override MUI default style for last-child
           ':last-child': {
-            padding: (theme) => theme.spacing(panelPadding),
+            padding: (theme) => theme.spacing(2),
           },
         }}
         ref={setContentElement}

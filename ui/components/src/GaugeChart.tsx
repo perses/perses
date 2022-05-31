@@ -96,20 +96,15 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           axisTick: {
             show: false,
-            distance: -28,
-            splitNumber: 5,
-            lineStyle: {
-              width: 2,
-              color: '#999',
-            },
+            distance: 0,
           },
           splitLine: {
             show: false,
-            distance: -32,
-            length: 6,
+            splitNumber: 2,
+            distance: 0,
+            length: 12,
             lineStyle: {
-              width: 2,
-              color: '#999',
+              width: 1,
             },
           },
           axisLabel: {

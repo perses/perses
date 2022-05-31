@@ -23,8 +23,7 @@ const benchmarkDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    // duration: '12h',
-    duration: '1m',
+    duration: '6h',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',
@@ -414,20 +413,20 @@ const benchmarkDashboard: DashboardResource = {
           },
         },
         items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 2,
-          //   height: 2,
-          //   content: { $ref: '#/panels/statSm' },
-          // },
-          // {
-          //   x: 0,
-          //   y: 2,
-          //   width: 2,
-          //   height: 2,
-          //   content: { $ref: '#/panels/statRAM' },
-          // },
+          {
+            x: 0,
+            y: 0,
+            width: 2,
+            height: 2,
+            content: { $ref: '#/panels/statSm' },
+          },
+          {
+            x: 0,
+            y: 2,
+            width: 2,
+            height: 2,
+            content: { $ref: '#/panels/statRAM' },
+          },
           {
             x: 0,
             y: 4,
