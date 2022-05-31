@@ -75,6 +75,7 @@ dockers:
       - "percli"
     dockerfile: distroless-debug.Dockerfile
     image_templates:
+      - "docker.io/persesdev/perses:latest-debug"
       - "docker.io/persesdev/perses:{{ .Tag }}-distroless-debug"
       - "docker.io/persesdev/perses:{{ .Tag }}-debug"
       - "docker.io/persesdev/perses:v{{ .Major }}.{{ .Minor }}-distroless-debug"
