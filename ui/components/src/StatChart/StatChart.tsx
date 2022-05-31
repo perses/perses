@@ -57,7 +57,6 @@ interface StatChartProps {
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, backgroundColor, sparkline } = props;
   const chartsTheme = useChartsTheme();
-  console.log(data);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return {};
