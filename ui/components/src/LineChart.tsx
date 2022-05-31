@@ -14,7 +14,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
-import merge from 'lodash/merge';
+// import merge from 'lodash/merge';
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -105,10 +105,13 @@ export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }:
     };
   }, [data, onDataZoom]);
 
+  // TODO (sjcobb): refactor to separate function
+  // enable data zoom by default w/o clicking toolbox icon
   if (chartRef.current !== undefined) {
     const chart = chartRef.current;
     const chartModel = chart['_model'];
     if (chartModel !== undefined) {
+      // check if hidden data zoom icon is unselected (if selected it would be 'emphasis' instead of 'normal')
       if (chart['_model'].option.toolbox[0].feature.dataZoom.iconStatus.zoom === 'normal') {
         chart.dispatchAction({
           type: 'takeGlobalCursor',
@@ -160,7 +163,7 @@ export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }:
       toolbox: {
         feature: {
           dataZoom: {
-            icon: null,
+            icon: null, // https://stackoverflow.com/a/67684076/17575201
             yAxisIndex: 'none',
           },
         },

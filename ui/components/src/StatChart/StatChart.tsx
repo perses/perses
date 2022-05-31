@@ -12,17 +12,17 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { useTheme } from '@mui/material';
 import { merge } from 'lodash-es';
-import type { EChartsOption } from 'echarts';
+import type { EChartsCoreOption } from 'echarts';
 import { use } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { formatValue, UnitOptions } from './model/units';
-import { EChart } from './EChart';
-import { GraphSeriesValueTuple } from './model/graph';
+import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { formatValue, UnitOptions } from '../model/units';
+import { EChart } from '../EChart';
+import { GraphSeriesValueTuple } from '../model/graph';
 
 use([
   EChartsGaugeChart,
@@ -33,27 +33,6 @@ use([
   TooltipComponent,
   CanvasRenderer,
 ]);
-
-const noDataOption = {
-  title: {
-    show: true,
-    textStyle: {
-      color: 'grey',
-      fontSize: 16,
-      fontWeight: 400,
-    },
-    text: 'No data',
-    left: 'center',
-    top: 'center',
-  },
-  xAxis: {
-    show: false,
-  },
-  yAxis: {
-    show: false,
-  },
-  series: [],
-};
 
 export interface GraphSeries {
   name: string;
@@ -77,11 +56,11 @@ interface StatChartProps {
 
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, backgroundColor, sparkline } = props;
-  const theme = useTheme();
+  const chartsTheme = useChartsTheme();
 
-  const option: EChartsOption = useMemo(() => {
+  const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return {};
-    if (data.seriesData === null || data.calculatedValue === undefined) return noDataOption;
+    if (data.seriesData === null || data.calculatedValue === undefined) return chartsTheme.noDataOption;
 
     const series = data.seriesData;
     const calculatedValue = data.calculatedValue ?? 0;
@@ -191,11 +170,11 @@ export function StatChart(props: StatChartProps) {
       },
       series: statSeries,
       textStyle: {
-        color: backgroundColor === 'transparent' ? theme.palette.text.primary : '#FFFFFF',
+        color: backgroundColor === 'transparent' ? chartsTheme.theme.textStyle?.color : '#FFFFFF',
         fontSize: 25,
         lineHeight: 18,
         fontFamily: '"Lato", sans-serif',
-        fontWeight: 'bold',
+        fontWeight: 600,
       },
       media: [
         {
@@ -223,7 +202,7 @@ export function StatChart(props: StatChartProps) {
     };
 
     return option;
-  }, [data, height, theme, unit, width, sparkline, backgroundColor]);
+  }, [data, height, chartsTheme, unit, width, sparkline, backgroundColor]);
 
   return (
     <EChart

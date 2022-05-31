@@ -40,6 +40,14 @@ export function generateChartsTheme(
     title: {
       show: false,
     },
+    textStyle: {
+      color: primaryTextColor,
+      fontFamily: '"Lato", sans-serif',
+      fontSize: 14,
+      // fontSize: muiTheme?.typography?.fontSize ?? 14, // TODO (sjcobb): why type incorrect from theme common.ts
+      // lineHeight: 18,
+      // fontWeight: 600,
+    },
     grid: {
       top: 5,
       right: 20,

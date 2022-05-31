@@ -18,6 +18,7 @@ import '@fontsource/lato/900.css';
 import { createTheme, ThemeOptions } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
 import merge from 'lodash/merge';
+import { typography } from './typography';
 
 /**
  * Material UI theme used by all components. For more details, see:
@@ -38,18 +39,7 @@ export function getTheme(overrides: ThemeOptions = {}) {
 
   const theme = createTheme({
     palette: merge(palette, overrides.palette),
-
-    typography: {
-      fontFamily: '"Lato", sans-serif',
-
-      // Font weights need to correspond with the imports at the top of the file
-      // (Lato supports 100, 300, 400, 700, 900)
-      fontWeightLight: 300,
-      fontWeightRegular: 400,
-      fontWeightMedium: 700,
-      fontWeightBold: 900,
-    },
-
+    typography,
     mixins: {},
   });
 
