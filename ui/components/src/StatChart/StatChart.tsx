@@ -58,25 +58,13 @@ export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, backgroundColor, sparkline } = props;
   const chartsTheme = useChartsTheme();
 
-  const [valueSize, setValueSize] = useState<number>(14);
-  const [labelSize, setLabelSize] = useState<number>(22);
-
-  // TODO (sjcobb): fix noData condition, pass alternate label as data.name
-  const calculatedValue = data.calculatedValue ?? 0;
-  const isLargePanel = width > 250 ? true : false;
-  const showName = isLargePanel;
-  const name = showName === true ? data.name : '';
-
-  useEffect(() => {
-    // https://codesandbox.io/s/eager-bell-828f2?file=/src/App.js
-    const maxFontSize = 30;
-    const dimension = Math.min(width, height * 1.5);
-    const spaceForText = dimension / 3;
-    const valueFontSize = Math.min(spaceForText, maxFontSize) * 1.8;
-    const labelFontSize = Math.min(valueFontSize * 0.333, 30);
-    setValueSize(valueFontSize);
-    setLabelSize(labelFontSize);
-  }, [width, height]);
+  // TODO: pass alternate label as data.name, adjust fontSize depending on num of characters
+  const isLargePanel = width > 250 || height > 180 ? true : false;
+  const valueSize = isLargePanel === true ? 40 : 16;
+  const formattedValue =
+    data.calculatedValue === undefined || data.calculatedValue === null
+      ? 'No data'
+      : formatValue(data.calculatedValue, unit);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return {};
@@ -140,27 +128,18 @@ export function StatChart(props: StatChartProps) {
   return (
     <Box>
       <Typography
-        variant="h4"
-        sx={(theme) => ({
-          color: theme.palette.text.primary,
-          fontSize: labelSize,
-        })}
-      >
-        {name}
-      </Typography>
-      <Typography
         variant="h3"
         sx={(theme) => ({
           color: theme.palette.text.primary,
           fontSize: valueSize,
         })}
       >
-        {formatValue(calculatedValue, unit)}
+        {formattedValue}
       </Typography>
       {sparkline !== undefined && (
         <EChart
           sx={{
-            width: width + 32,
+            width: width + 32, // allows sparkline to extend to edge of panel
             height: height,
             position: 'absolute',
             bottom: 0,
