@@ -15,7 +15,7 @@ import { CssBaseline } from '@mui/material';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ChartsThemeProvider } from '@perses-dev/components';
+import { PersesThemeProvider } from '@perses-dev/components';
 import App from './App';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import { DarkModeContextProvider } from './context/DarkMode';
@@ -30,12 +30,12 @@ export function renderApp(container: ReactDOM.Container | null) {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <DarkModeContextProvider>
-          <ChartsThemeProvider themeName="perses">
+          <PersesThemeProvider themeName="perses">
             <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
               <CssBaseline />
               <App />
             </SnackbarProvider>
-          </ChartsThemeProvider>
+          </PersesThemeProvider>
         </DarkModeContextProvider>
       </QueryClientProvider>
     </React.StrictMode>,

@@ -105,14 +105,13 @@ export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }:
     };
   }, [data, onDataZoom]);
 
-  // TODO (sjcobb): refactor to separate function
   // enable data zoom by default w/o clicking toolbox icon
   if (chartRef.current !== undefined) {
     const chart = chartRef.current;
     const chartModel = chart['_model'];
-    if (chartModel !== undefined) {
+    if (chartModel !== undefined && chartModel.option.toolbox.length > 0) {
       // check if hidden data zoom icon is unselected (if selected it would be 'emphasis' instead of 'normal')
-      if (chart['_model'].option.toolbox[0].feature.dataZoom.iconStatus.zoom === 'normal') {
+      if (chartModel.option.toolbox[0].feature.dataZoom.iconStatus.zoom === 'normal') {
         chart.dispatchAction({
           type: 'takeGlobalCursor',
           key: 'dataZoomSelect',

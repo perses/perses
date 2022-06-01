@@ -11,27 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { createContext, useContext } from 'react';
-import { useTheme } from '@mui/material';
+import React, { createContext, useContext } from 'react';
 import { registerTheme } from 'echarts';
-import { generateChartsTheme, EChartsTheme, PersesChartsTheme } from '../model';
+import { PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
   themeName: string;
-  themeOverrides?: EChartsTheme;
+  persesTheme: PersesChartsTheme;
   children?: React.ReactNode;
 }
 
 export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
-  const { children, themeName, themeOverrides } = props;
-  const muiTheme = useTheme();
-  const persesChartsTheme = generateChartsTheme(themeName, muiTheme, themeOverrides);
+  const { children, themeName, persesTheme } = props;
 
   // register ECharts theme to be used in individual charts, see: https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-  registerTheme(themeName, persesChartsTheme.theme);
+  registerTheme(themeName, persesTheme.theme);
 
-  return <ChartsThemeContext.Provider value={persesChartsTheme}>{children}</ChartsThemeContext.Provider>;
+  return <ChartsThemeContext.Provider value={persesTheme}>{children}</ChartsThemeContext.Provider>;
 }
 
 export const ChartsThemeContext = createContext<PersesChartsTheme | undefined>(undefined);
