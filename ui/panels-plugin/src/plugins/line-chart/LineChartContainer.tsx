@@ -12,14 +12,11 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { GridComponentOption, ToolboxComponentOption } from 'echarts';
+import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, EChartsValues } from '@perses-dev/components';
+import { LineChart, EChartsDataFormat } from '@perses-dev/components';
 import { useRunningGraphQueries } from './GraphQueryRunner';
-import { getRandomColor } from './utils/palette-gen';
 import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
-
-// export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
 export const EMPTY_GRAPH_DATA = {
   timeSeries: [],
@@ -57,22 +54,10 @@ export function LineChartContainer(props: LineChartContainerProps) {
       // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
 
-      for (const dataSeries of query.data.series) {
-        // TODO (sjcobb): call getYValues from data-transform.ts to fill in missing values as null
-        const yValues: EChartsValues[] = [];
-        for (const valueTuple of dataSeries.values) {
-          yValues.push(valueTuple[1]);
-        }
-
-        // TODO (sjcobb): call getLineSeries with optional threshold
-        graphData.timeSeries.push({
-          type: 'line',
-          name: dataSeries.name,
-          color: getRandomColor(dataSeries.name),
-          data: yValues,
-          sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
-          // progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
-        });
+      for (const timeSeries of query.data.series) {
+        const yValues = getYValues(timeSeries, timeScale);
+        const lineSeries = getLineSeries(timeSeries.name, yValues);
+        graphData.timeSeries.push(lineSeries);
       }
       queriesFinished++;
     }
@@ -92,23 +77,6 @@ export function LineChartContainer(props: LineChartContainerProps) {
     );
   }
 
-  // TODO: toolbox functionality (ex. zoom, undo icons) will move to chart header
-  const toolboxOverrides: ToolboxComponentOption = {
-    show: true,
-    orient: 'vertical',
-    top: 0,
-    right: 0,
-    feature: {
-      dataZoom: {
-        show: true,
-        yAxisIndex: 'none',
-      },
-      restore: {
-        show: true,
-      },
-    },
-  };
-
   const legendOverrides = {
     show: show_legend === true,
     type: 'scroll',
@@ -119,13 +87,5 @@ export function LineChartContainer(props: LineChartContainerProps) {
     bottom: show_legend === true ? 35 : 0,
   };
 
-  return (
-    <LineChart
-      height={height}
-      data={graphData}
-      legend={legendOverrides}
-      grid={gridOverrides}
-      toolbox={toolboxOverrides}
-    />
-  );
+  return <LineChart height={height} data={graphData} legend={legendOverrides} grid={gridOverrides} />;
 }

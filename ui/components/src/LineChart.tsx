@@ -72,7 +72,6 @@ interface LineChartProps {
   data: EChartsDataFormat;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
-  toolbox?: ToolboxComponentOption;
   visualMap?: VisualMapComponentOption[];
   onDataZoom?: (e: ZoomEventData) => void;
 }

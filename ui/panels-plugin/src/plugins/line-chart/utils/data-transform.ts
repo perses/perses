@@ -125,7 +125,6 @@ export function getYValues(series: GraphSeries, timeScale: TimeScale): Array<num
 export function getLineSeries(
   name: string,
   data: EChartsTimeSeries['data'],
-  // datasource?: DatasourceType,
   threshold?: ThresholdOption
 ): EChartsTimeSeries {
   if (threshold !== undefined) {
@@ -134,8 +133,6 @@ export function getLineSeries(
       name: name,
       data: data,
       color: threshold.color,
-      // showSymbol: false,
-      // symbol: 'circle',
       label: {
         show: false,
       },
@@ -156,18 +153,7 @@ export function getLineSeries(
     name: name,
     data: data,
     color: getRandomColor(name),
-    // showSymbol: datasource === DatasourceType.GRAPHITE,
-    // symbol: 'circle',
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
-    // lineStyle: {
-    //   width: 1,
-    // },
-    // emphasis: {
-    //   lineStyle: {
-    //     width: 1.5,
-    //   },
-    // },
-    // markLine: {},
   };
 }
