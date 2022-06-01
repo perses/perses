@@ -14,6 +14,7 @@
 import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
+import { ThresholdOptions } from '../../model/thresholds';
 import GraphQueryRunner from './GraphQueryRunner';
 import { LineChartContainer } from './LineChartContainer';
 
@@ -24,12 +25,14 @@ export type LineChartProps = PanelProps<LineChartOptions>;
 interface LineChartOptions extends JsonObject {
   queries: GraphQueryDefinition[];
   show_legend?: boolean;
+  // unit?: UnitOptions;
+  thresholds?: ThresholdOptions;
 }
 
 export function LineChartPanel(props: LineChartProps) {
   const {
     definition: {
-      options: { queries, show_legend },
+      options: { queries, show_legend, thresholds },
     },
     contentDimensions,
   } = props;
@@ -43,6 +46,7 @@ export function LineChartPanel(props: LineChartProps) {
           width={contentDimensions.width}
           height={contentDimensions.height}
           show_legend={show_legend}
+          thresholds={thresholds}
         />
       )}
     </GraphQueryRunner>

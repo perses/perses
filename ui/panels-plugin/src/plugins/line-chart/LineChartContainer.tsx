@@ -15,6 +15,7 @@ import { useMemo } from 'react';
 import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat } from '@perses-dev/components';
+import { StepOptions, ThresholdOptions } from '../../model/thresholds';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
 
@@ -27,13 +28,14 @@ export interface LineChartContainerProps {
   width: number;
   height: number;
   show_legend?: boolean;
+  thresholds?: ThresholdOptions;
 }
 
 /**
  * Passes query data and customization options to LineChart
  */
 export function LineChartContainer(props: LineChartContainerProps) {
-  const { width, height, show_legend } = props;
+  const { width, height, show_legend, thresholds } = props;
   const queries = useRunningGraphQueries();
 
   // populate series data based on query results
@@ -62,12 +64,26 @@ export function LineChartContainer(props: LineChartContainerProps) {
       queriesFinished++;
     }
     graphData.xAxis = xAxisData;
+
+    if (thresholds !== undefined && thresholds.steps !== undefined) {
+      thresholds.steps.forEach((step: StepOptions) => {
+        // TODO (sjcobb): set color defaults similar to GaugeChartPanel
+        const stepOption: StepOptions = {
+          color: 'red',
+          value: step.value,
+        };
+        const conditionLineData = Array(xAxisData.length).fill(step.value);
+        const conditionLineSeries = getLineSeries('', conditionLineData, stepOption);
+        graphData.timeSeries.push(conditionLineSeries);
+      });
+    }
+
     return {
       graphData,
       loading: queriesFinished === 0,
       allQueriesLoaded: queriesFinished === queries.length,
     };
-  }, [queries]);
+  }, [queries, thresholds]);
 
   if (loading === true) {
     return (

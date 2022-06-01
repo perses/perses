@@ -172,6 +172,20 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
+          show_legend: false,
+          thresholds: {
+            // default_color: '#000', // optional
+            steps: [
+              {
+                value: 0.1,
+                // color: '#800080',
+              },
+              {
+                value: 0.5,
+                // color: '#0000FF',
+              },
+            ],
+          },
           // unit: { kind: 'Bytes' },
         },
       },

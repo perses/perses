@@ -17,7 +17,7 @@ import { GraphSeries } from '@perses-dev/plugin-system';
 import { gcd } from 'mathjs';
 import { QueryState } from '../GraphQueryRunner';
 import { getRandomColor } from '../utils/palette-gen';
-import { ThresholdOption } from '../../../model/thresholds';
+import { StepOptions } from '../../../model/thresholds';
 
 export interface TimeScale {
   startMs: number;
@@ -125,7 +125,7 @@ export function getYValues(series: GraphSeries, timeScale: TimeScale): Array<num
 export function getLineSeries(
   name: string,
   data: EChartsTimeSeries['data'],
-  threshold?: ThresholdOption
+  threshold?: StepOptions
 ): EChartsTimeSeries {
   if (threshold !== undefined) {
     return {
