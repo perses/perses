@@ -178,12 +178,18 @@ const benchmarkDashboard: DashboardResource = {
             steps: [
               {
                 value: 0.1,
-                // color: '#800080',
+                name: 'Alert: Warning condition example',
+                // color: '#FFFFFF',
               },
               {
                 value: 0.5,
-                // color: '#0000FF',
+                name: 'Alert: Critical condition example',
+                // color: '#0000FF', // blue
               },
+              // {
+              //   value: 0.9,
+              //   name: 'Default Color Test',
+              // },
             ],
           },
           // unit: { kind: 'Bytes' },

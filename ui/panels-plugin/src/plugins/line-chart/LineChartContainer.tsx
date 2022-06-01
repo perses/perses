@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, UnitOptions } from '@perses-dev/components';
-import { StepOptions, ThresholdOptions } from '../../model/thresholds';
+import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
 
@@ -67,15 +67,18 @@ export function LineChartContainer(props: LineChartContainerProps) {
     graphData.xAxis = xAxisData;
 
     if (thresholds !== undefined && thresholds.steps !== undefined) {
-      thresholds.steps.forEach((step: StepOptions) => {
-        // TODO (sjcobb): set color defaults similar to GaugeChartPanel
+      const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.RED;
+      thresholds.steps.forEach((step: StepOptions, index: number) => {
+        const stepPaletteColor = ThresholdColorsPalette[index] ?? defaultThresholdColor;
+        const thresholdLineColor = step.color ?? stepPaletteColor;
         const stepOption: StepOptions = {
-          color: 'red',
+          color: thresholdLineColor,
           value: step.value,
         };
-        const conditionLineData = Array(xAxisData.length).fill(step.value);
-        const conditionLineSeries = getLineSeries('', conditionLineData, stepOption);
-        graphData.timeSeries.push(conditionLineSeries);
+        const thresholdName = step.name ?? `Threshold ${index + 1} `;
+        const thresholdData = Array(xAxisData.length).fill(step.value);
+        const thresholdLineSeries = getLineSeries(thresholdName, thresholdData, stepOption);
+        graphData.timeSeries.push(thresholdLineSeries);
       });
     }
 
