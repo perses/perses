@@ -120,8 +120,6 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
 
 function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefinition {
   const target = statPanel.targets[0];
-  const { format } = statPanel;
-  const convertedFormat = format[format.length - 1] === 's' ? format.slice(0, -1) : format;
   // TODO (sjcobb): convert sparkline color / backgroundColor and remaining formats, use migrateFromAngularSinglestat
   const convertedPanel = {
     kind: 'StatChart',
@@ -133,7 +131,6 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
       calculation: convertTransformation(statPanel.valueName),
       unit: {
         kind: 'Decimal',
-        suffix: convertedFormat,
         decimal_places: statPanel.decimals ?? 2,
       },
     },

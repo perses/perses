@@ -14,7 +14,7 @@
 import { useMemo } from 'react';
 import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat } from '@perses-dev/components';
+import { LineChart, EChartsDataFormat, UnitOptions } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions } from '../../model/thresholds';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
@@ -28,6 +28,7 @@ export interface LineChartContainerProps {
   width: number;
   height: number;
   show_legend?: boolean;
+  unit?: UnitOptions;
   thresholds?: ThresholdOptions;
 }
 
@@ -93,6 +94,11 @@ export function LineChartContainer(props: LineChartContainerProps) {
     );
   }
 
+  const unit = props.unit ?? {
+    kind: 'Decimal',
+    decimal_places: 2,
+  };
+
   const legendOverrides = {
     show: show_legend === true,
     type: 'scroll',
@@ -103,5 +109,5 @@ export function LineChartContainer(props: LineChartContainerProps) {
     bottom: show_legend === true ? 35 : 0,
   };
 
-  return <LineChart height={height} data={graphData} legend={legendOverrides} grid={gridOverrides} />;
+  return <LineChart height={height} data={graphData} unit={unit} legend={legendOverrides} grid={gridOverrides} />;
 }

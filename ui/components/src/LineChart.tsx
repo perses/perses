@@ -14,13 +14,11 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
-// import merge from 'lodash/merge';
 import type {
   EChartsCoreOption,
   GridComponentOption,
   LineSeriesOption,
   LegendComponentOption,
-  ToolboxComponentOption,
   VisualMapComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
@@ -40,7 +38,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from './EChart';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph';
-import { abbreviateLargeNumber } from './model/units';
+import { formatValue, UnitOptions } from './model/units';
 import { useChartsTheme } from './context/ChartsThemeProvider';
 import { emptyTooltipData } from './Tooltip/tooltip-model';
 import { Tooltip } from './Tooltip/Tooltip';
@@ -70,20 +68,21 @@ export interface ZoomEventData {
 interface LineChartProps {
   height: number;
   data: EChartsDataFormat;
+  unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
   visualMap?: VisualMapComponentOption[];
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }: LineChartProps) {
+export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZoom }: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
-      // TODO (sjcobb): use legendselectchanged event to fix tooltip when legend selected
+      // TODO: use legendselectchanged event to fix tooltip when legend selected
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;
@@ -123,6 +122,7 @@ export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }:
   const handleOnDoubleClick = () => {
     if (chartRef.current !== undefined) {
       const chart = chartRef.current;
+      // TODO: support incremental unzoom instead of restore to original state
       chart.dispatchAction({
         type: 'restore', // https://echarts.apache.org/en/api.html#events.restore
       });
@@ -182,7 +182,7 @@ export function LineChart({ height, data, grid, legend, visualMap, onDataZoom }:
         boundaryGap: [0, '10%'],
         axisLabel: {
           formatter: (value: number) => {
-            return abbreviateLargeNumber(value);
+            return formatValue(value, unit);
           },
         },
       },

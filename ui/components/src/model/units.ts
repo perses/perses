@@ -12,12 +12,19 @@
 // limitations under the License.
 
 import { Duration, milliseconds } from 'date-fns';
+import { round } from 'mathjs';
 
-export type UnitOptions = TimeUnitOptions | PercentUnitOptions | DecimalUnitOptions;
+export const DEFAULT_DECIMAL_PLACES = 2;
+
+export type UnitOptions = TimeUnitOptions | PercentUnitOptions | DecimalUnitOptions | BytesUnitOptions;
 
 export function formatValue(value: number, unitOptions?: UnitOptions): string {
   if (unitOptions === undefined) {
     return value.toString();
+  }
+
+  if (isDecimalUnit(unitOptions)) {
+    return formatDecimal(value, unitOptions);
   }
 
   if (isTimeUnit(unitOptions)) {
@@ -28,14 +35,16 @@ export function formatValue(value: number, unitOptions?: UnitOptions): string {
     return formatPercent(value, unitOptions);
   }
 
-  if (isDecimalUnit(unitOptions)) {
-    return formatDecimal(value, unitOptions);
+  if (isBytesUnit(unitOptions)) {
+    const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+    return formatBytes(value, decimals);
   }
 
   const exhaustive: never = unitOptions;
   throw new Error(`Unknown unit options ${exhaustive}`);
 }
 
+/* Time Unit Conversion */
 const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'] as const;
 const timeUnitKindsSet = new Set<string>(timeUnitKinds);
 
@@ -115,12 +124,13 @@ function formatTime(value: number, unitOptions: TimeUnitOptions): string {
   return `${years.toFixed()} years`;
 }
 
-const percentUnitKinds = ['Percent', 'PercentDecimal'] as const;
+/* Percent Unit Conversion */
+const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
 const percentUnitKindsSet = new Set<string>(percentUnitKinds);
 
 type PercentUnitOptions = {
   kind: typeof percentUnitKinds[number];
-  decimal_places: number;
+  decimal_places?: number;
 };
 
 function isPercentUnit(unitOptions: UnitOptions): unitOptions is PercentUnitOptions {
@@ -128,21 +138,23 @@ function isPercentUnit(unitOptions: UnitOptions): unitOptions is PercentUnitOpti
 }
 
 function formatPercent(value: number, unitOptions: PercentUnitOptions): string {
+  const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+
   if (unitOptions.kind === 'PercentDecimal') {
     value = value * 100;
   }
 
-  return value.toFixed(unitOptions.decimal_places) + '%';
+  return value.toFixed(decimals) + '%';
 }
 
+/* Decimal Unit Conversion */
 const decimalUnitKinds = ['Decimal'] as const;
 const decimalUnitKindsSet = new Set<string>(decimalUnitKinds);
 
 type DecimalUnitOptions = {
   kind: typeof decimalUnitKinds[number];
-  decimal_places: number;
-  suffix?: 'string';
-  display?: 'short' | 'long' | 'narrow'; // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+  decimal_places?: number;
+  abbreviate?: boolean;
 };
 
 function isDecimalUnit(unitOptions: UnitOptions): unitOptions is DecimalUnitOptions {
@@ -150,100 +162,72 @@ function isDecimalUnit(unitOptions: UnitOptions): unitOptions is DecimalUnitOpti
 }
 
 function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
-  const maximumFractionDigits = unitOptions.decimal_places ?? 2;
-  if (unitOptions.suffix !== undefined) {
-    if (isSanctionedSimpleUnitIdentifier(unitOptions.suffix)) {
-      const formatParams: Intl.NumberFormatOptions = {
-        style: 'unit',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: maximumFractionDigits,
-        useGrouping: true,
-        unit: unitOptions.suffix,
-        unitDisplay: unitOptions.display ?? 'narrow',
-      };
-      const unitFormatter = new Intl.NumberFormat('en-US', formatParams);
-      return unitFormatter.format(value);
-    }
+  const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+
+  if (unitOptions.abbreviate === true) {
+    return abbreviateLargeNumber(value, decimals);
   }
+
   const formatParams: Intl.NumberFormatOptions = {
     style: 'decimal',
     minimumFractionDigits: 0,
-    maximumFractionDigits: maximumFractionDigits,
+    maximumFractionDigits: decimals,
     useGrouping: true,
   };
   const decimalFormatter = new Intl.NumberFormat('en-US', formatParams);
   return decimalFormatter.format(value);
 }
 
-// Take a large number and abbreviate appropriate suffix
-// ex) 10000 -> 10k, 1000000 -> 1M
-export function abbreviateLargeNumber(num: number) {
+/**
+ * Takes large numbers and abbreviates them with the appropriate suffix
+ * 10123 -> 10.123k
+ * 1000000 -> 1M
+ */
+export function abbreviateLargeNumber(num: number, decimals = 2) {
+  const modifier = (n: number) => round(n, decimals);
+  return formatNumber(num, modifier);
+}
+
+/**
+ * Takes large numbers, rounds and abbreviates them with the appropriate suffix
+ * Add modifier to run on output value prior to unit being added (defaults to rounding)
+ */
+export function formatNumber(num: number, modifier?: (n: number) => number): string {
+  const fn = modifier ?? Math.round;
+
   return num >= 1e12
-    ? num / 1e12 + 'T'
+    ? fn(num / 1e12) + 'T'
     : num >= 1e9
-    ? num / 1e9 + 'B'
+    ? fn(num / 1e9) + 'B'
     : num >= 1e6
-    ? num / 1e6 + 'M'
+    ? fn(num / 1e6) + 'M'
     : num >= 1e3
-    ? num / 1e3 + 'k'
-    : num;
+    ? fn(num / 1e3) + 'K'
+    : num.toString();
 }
 
-// Util to check unit name against ECMA standard: https://tc39.es/ecma402/#sec-issanctionedsimpleunitidentifier
-export function isSanctionedSimpleUnitIdentifier(unitIdentifier: string) {
-  return SIMPLE_UNITS.indexOf(unitIdentifier) > -1;
+/* Bytes Unit Conversion */
+const bytesUnitKinds = ['Bytes'] as const;
+const bytesUnitKindsSet = new Set<string>(bytesUnitKinds);
+
+type BytesUnitOptions = {
+  kind: typeof bytesUnitKinds[number];
+  decimal_places?: number;
+};
+
+function isBytesUnit(unitOptions: UnitOptions): unitOptions is BytesUnitOptions {
+  return bytesUnitKindsSet.has(unitOptions.kind);
 }
 
-// https://tc39.es/ecma402/#table-sanctioned-simple-unit-identifiers
-export const SANCTIONED_UNITS = [
-  'angle-degree',
-  'area-acre',
-  'area-hectare',
-  'concentr-percent',
-  'digital-bit',
-  'digital-byte',
-  'digital-gigabit',
-  'digital-gigabyte',
-  'digital-kilobit',
-  'digital-kilobyte',
-  'digital-megabit',
-  'digital-megabyte',
-  'digital-petabyte',
-  'digital-terabit',
-  'digital-terabyte',
-  'duration-day',
-  'duration-hour',
-  'duration-millisecond',
-  'duration-minute',
-  'duration-month',
-  'duration-second',
-  'duration-week',
-  'duration-year',
-  'length-centimeter',
-  'length-foot',
-  'length-inch',
-  'length-kilometer',
-  'length-meter',
-  'length-mile-scandinavian',
-  'length-mile',
-  'length-millimeter',
-  'length-yard',
-  'mass-gram',
-  'mass-kilogram',
-  'mass-ounce',
-  'mass-pound',
-  'mass-stone',
-  'temperature-celsius',
-  'temperature-fahrenheit',
-  'volume-fluid-ounce',
-  'volume-gallon',
-  'volume-liter',
-  'volume-milliliter',
-];
+// https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript/18650828#18650828
+function formatBytes(bytes: number, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
 
-// removes the namespace prefix, ex: duration-hour -> hour
-export function removeUnitNamespace(unit: string) {
-  return unit.slice(unit.indexOf('-') + 1);
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
-
-export const SIMPLE_UNITS = SANCTIONED_UNITS.map(removeUnitNamespace);

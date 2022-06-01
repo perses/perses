@@ -273,7 +273,6 @@ const nodeExporterDashboard: DashboardResource = {
           unit: {
             kind: 'Decimal',
             decimal_places: 1,
-            suffx: 'gigabyte',
           },
         },
       },

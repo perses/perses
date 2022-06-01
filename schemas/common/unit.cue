@@ -13,7 +13,7 @@
 
 package common
 
-#unit: #timeUnit | #percentUnit | #decimalUnit
+#unit: #timeUnit | #percentUnit | #decimalUnit | bytesUnit
 
 #timeUnit: {
 	kind: "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
@@ -21,12 +21,16 @@ package common
 
 #percentUnit: {
 	kind:           "Percent" | "PercentDecimal"
-	decimal_places: number
+	decimal_places?: number
 }
 
 #decimalUnit: {
 	kind:           "Decimal"
-	decimal_places: number
-	suffix?:        "string"
-	display?:       "short" | "long" | "narrow"
+	decimal_places?: number
+	abbreviate?:     bool
+}
+
+#bytesUnit: {
+	kind:           "Bytes"
+	decimal_places?: number
 }

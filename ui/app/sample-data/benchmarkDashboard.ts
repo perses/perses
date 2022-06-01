@@ -202,7 +202,11 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          unit: { kind: '%' },
+          // unit: { kind: '%' },
+          unit: {
+            kind: 'Decimal',
+            decimal_places: 2,
+          },
           show_legend: true,
         },
       },
@@ -223,7 +227,7 @@ const benchmarkDashboard: DashboardResource = {
           unit: {
             kind: 'Decimal',
             decimal_places: 2,
-            suffix: 'kilogram', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
+            abbreviate: true,
           },
           // sparkline: {},
           // thresholds: {
@@ -262,8 +266,8 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: {
-            kind: 'Decimal',
-            suffix: 'byte',
+            kind: 'Bytes',
+            decimal_places: 1,
           },
         },
       },
@@ -285,7 +289,6 @@ const benchmarkDashboard: DashboardResource = {
           unit: {
             kind: 'Decimal',
             decimal_places: 2,
-            // suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
           thresholds: {
             default_color: '#EA4747',
@@ -316,9 +319,7 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'Mean', // 'First', 'Last', 'LastNumber'
           unit: {
-            kind: 'Decimal', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'
-            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#unit_formatting
-            suffix: 'gigabyte',
+            kind: 'Decimal', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years',
           },
           sparkline: {},
           thresholds: {
