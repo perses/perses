@@ -17,9 +17,9 @@ import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, EChartsValues } from '@perses-dev/components';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getRandomColor } from './utils/palette-gen';
-import { getCommonTimeScale, getXValues } from './utils/data-transform';
+import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
 
-export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
+// export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
 export const EMPTY_GRAPH_DATA = {
   timeSeries: [],
@@ -58,27 +58,20 @@ export function LineChartContainer(props: LineChartContainerProps) {
       if (query.loading || query.data === undefined) continue;
 
       for (const dataSeries of query.data.series) {
+        // TODO (sjcobb): call getYValues from data-transform.ts to fill in missing values as null
         const yValues: EChartsValues[] = [];
         for (const valueTuple of dataSeries.values) {
           yValues.push(valueTuple[1]);
         }
+
+        // TODO (sjcobb): call getLineSeries with optional threshold
         graphData.timeSeries.push({
           type: 'line',
           name: dataSeries.name,
           color: getRandomColor(dataSeries.name),
           data: yValues,
-          showSymbol: false,
-          symbol: 'circle',
           sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
-          progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
-          lineStyle: {
-            width: 1.5,
-          },
-          emphasis: {
-            lineStyle: {
-              width: 2,
-            },
-          },
+          // progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
         });
       }
       queriesFinished++;

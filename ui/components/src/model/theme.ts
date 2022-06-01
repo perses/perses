@@ -140,11 +140,11 @@ export function generateChartsTheme(
       symbolSize: 4,
       smooth: false,
       lineStyle: {
-        width: 1.5,
+        width: 1,
       },
       emphasis: {
         lineStyle: {
-          width: 2,
+          width: 1.5,
         },
       },
     },

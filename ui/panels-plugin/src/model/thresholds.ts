@@ -28,6 +28,13 @@ export type GaugeColorStop = [number, string];
 
 export type EChartsAxisLineColors = GaugeColorStop[];
 
+// TODO (sjcobb): consolidate either ThresholdOption or StepOptions
+export interface ThresholdOption {
+  value: number;
+  color: string;
+  icon?: string;
+}
+
 export interface StepOptions extends JsonObject {
   value: number;
   color?: ThresholdColorsType;
