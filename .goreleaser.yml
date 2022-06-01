@@ -33,6 +33,14 @@ archives:
       - "perses"
       - "percli"
     format: "tar.gz"
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - schemas/
+      - cue.mod/
+      - src: "docs/examples/config.archive.yaml"
+        dst: "./config.yaml"
 dockers:
   - goos: linux
     goarch: amd64
@@ -42,8 +50,11 @@ dockers:
     image_templates:
       - "docker.io/persesdev/perses:latest"
       - "docker.io/persesdev/perses:{{ .Tag }}"
+      - "docker.io/persesdev/perses:{{ .Tag }}-distroless"
       - "docker.io/persesdev/perses:v{{ .Major }}.{{ .Minor }}"
+      - "docker.io/persesdev/perses:v{{ .Major }}.{{ .Minor }}-distroless"
     build_flag_templates:
+      - "--label=org.opencontainers.image.authors=The Perses Authors <perses-team@googlegroups.com>"
       - "--label=org.opencontainers.image.title={{ .ProjectName }}"
       - "--label=org.opencontainers.image.description={{ .ProjectName }}"
       - "--label=org.opencontainers.image.url=https://github.com/perses/perses"
@@ -52,6 +63,38 @@ dockers:
       - "--label=org.opencontainers.image.created={{ .Date }}"
       - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
+    extra_files:
+      - LICENSE
+      - schemas/
+      - cue.mod/
+      - docs/examples/config.docker.yaml
+  - goos: linux
+    goarch: amd64
+    ids:
+      - "perses"
+      - "percli"
+    dockerfile: distroless-debug.Dockerfile
+    image_templates:
+      - "docker.io/persesdev/perses:latest-debug"
+      - "docker.io/persesdev/perses:{{ .Tag }}-distroless-debug"
+      - "docker.io/persesdev/perses:{{ .Tag }}-debug"
+      - "docker.io/persesdev/perses:v{{ .Major }}.{{ .Minor }}-distroless-debug"
+      - "docker.io/persesdev/perses:v{{ .Major }}.{{ .Minor }}-debug"
+    build_flag_templates:
+      - "--label=org.opencontainers.image.authors=The Perses Authors <perses-team@googlegroups.com>"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.description={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.url=https://github.com/perses/perses"
+      - "--label=org.opencontainers.image.source=https://github.com/perses/perses"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+    extra_files:
+      - LICENSE
+      - schemas/
+      - cue.mod/
+      - docs/examples/config.docker.yaml
 release:
   github:
     owner: "perses"
