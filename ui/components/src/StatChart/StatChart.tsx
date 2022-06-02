@@ -81,14 +81,6 @@ export function StatChart(props: StatChartProps) {
         zlevel: 1,
         symbol: 'none',
         animation: false,
-        lineStyle: {
-          color: backgroundColor,
-          opacity: 0.9,
-        },
-        areaStyle: {
-          color: backgroundColor,
-          opacity: 0.8,
-        },
         silent: true,
       };
       const mergedSeries = merge(lineSeries, sparkline);

@@ -121,7 +121,7 @@ export function convertSparkline(sparkline?: SparklineOptions): LineSeriesOption
     lineStyle: {
       width: sparkline.line_width ?? 2,
       color: sparkline.line_color ?? '#1976d2',
-      opacity: sparkline.line_opacity ?? 0.9,
+      opacity: sparkline.line_opacity ?? 1,
     },
     areaStyle: {
       color: sparkline.area_color ?? '#1976d2',

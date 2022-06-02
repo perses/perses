@@ -80,10 +80,10 @@ export function GaugeChart(props: GaugeChartProps) {
             distance: 0,
           },
           splitLine: {
-            show: false,
+            show: true,
             splitNumber: 2,
             distance: 0,
-            length: 12,
+            length: 4,
             lineStyle: {
               width: 1,
             },

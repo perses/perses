@@ -36,7 +36,6 @@ export function Panel(props: PanelProps) {
     return { width, height };
   }, [width, height]);
 
-  console.log(width);
   const panelPadding = width !== undefined && width > 100 ? 2 : 1;
 
   return (

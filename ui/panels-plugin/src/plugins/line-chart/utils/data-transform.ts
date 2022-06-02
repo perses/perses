@@ -138,11 +138,11 @@ export function getLineSeries(
       },
       lineStyle: {
         type: 'dashed',
-        width: 1.5,
+        width: 2,
       },
       emphasis: {
         lineStyle: {
-          width: 2,
+          width: 2.5,
         },
       },
     };

@@ -120,7 +120,8 @@ const benchmarkDashboard: DashboardResource = {
       },
       multiQueries: {
         kind: 'LineChart',
-        display: { name: 'Multi Queries' },
+        // display: { name: 'Multi Queries' },
+        display: { name: 'Legend Example' },
         options: {
           queries: [
             {
@@ -155,7 +156,8 @@ const benchmarkDashboard: DashboardResource = {
       },
       doubleQueries: {
         kind: 'LineChart',
-        display: { name: 'Double Queries' },
+        // display: { name: 'Double Queries' },
+        display: { name: 'Thresholds Example' },
         options: {
           queries: [
             {
@@ -173,16 +175,20 @@ const benchmarkDashboard: DashboardResource = {
             },
           ],
           show_legend: false,
+          unit: {
+            kind: 'PercentDecimal',
+            decimal_places: 1,
+          },
           thresholds: {
             // default_color: '#000', // optional
             steps: [
               {
-                value: 0.1,
+                value: 0.4,
                 name: 'Alert: Warning condition example',
                 // color: '#FFFFFF',
               },
               {
-                value: 0.5,
+                value: 0.75,
                 name: 'Alert: Critical condition example',
                 // color: '#0000FF', // blue
               },
@@ -192,7 +198,6 @@ const benchmarkDashboard: DashboardResource = {
               // },
             ],
           },
-          // unit: { kind: 'Bytes' },
         },
       },
       cpu: {
@@ -226,13 +231,13 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+                'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
             },
           },
-          calculation: 'Sum',
+          calculation: 'Mean',
           unit: {
             kind: 'Decimal',
-            decimal_places: 2,
+            decimal_places: 1,
             abbreviate: true,
           },
           // sparkline: {},
@@ -287,21 +292,21 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
-              // '((node_memory_SwapTotal_bytes{job="node",instance="$instance"} - node_memory_SwapFree_bytes{job="node",instance="$instance"}) / (node_memory_SwapTotal_bytes{job="node",instance="$instance"} )) * 100',
+                'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
             },
           },
-          calculation: 'Mean',
+          calculation: 'Sum',
           unit: {
             kind: 'Decimal',
             decimal_places: 2,
+            abbreviate: true,
           },
-          thresholds: {
-            default_color: '#EA4747',
-          },
+          // thresholds: {
+          //   default_color: '#e65013',
+          // },
           sparkline: {
-            line_color: '#FF0000',
-            area_color: '#FF0000',
+            line_color: '#e65013',
+            area_color: '#a3390f',
             // line_color: '#FFE3E3',
             // line_width: 1.5,
             // line_opacity: 0.6,
@@ -325,19 +330,10 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'Mean', // 'First', 'Last', 'LastNumber'
           unit: {
-            kind: 'Decimal', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years',
+            kind: 'Percent', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years',
           },
-          sparkline: {},
-          thresholds: {
-            default_color: '#1473E6', // blue
-            steps: [
-              {
-                value: 85,
-              },
-              {
-                value: 95,
-              },
-            ],
+          sparkline: {
+            area_opacity: 0.2,
           },
         },
       },
@@ -376,7 +372,7 @@ const benchmarkDashboard: DashboardResource = {
         display: {
           title: 'Row 1',
           collapse: {
-            open: true,
+            open: false,
           },
         },
         items: [
@@ -385,8 +381,7 @@ const benchmarkDashboard: DashboardResource = {
           //   y: 0,
           //   width: 12,
           //   height: 6,
-          //   content: { $ref: '#/panels/multiQueries' },
-          //   // content: { $ref: '#/panels/cpu' },
+          //   content: { $ref: '#/panels/cpu' },
           //   // content: { $ref: '#/panels/seriesTestAlt' },
           //   // content: { $ref: '#/panels/seriesTest' },
           // },
@@ -413,7 +408,7 @@ const benchmarkDashboard: DashboardResource = {
             y: 0,
             width: 12,
             height: 6,
-            content: { $ref: '#/panels/cpu' },
+            content: { $ref: '#/panels/multiQueries' },
             // content: { $ref: '#/panels/seriesTestAlt' },
           },
           {
