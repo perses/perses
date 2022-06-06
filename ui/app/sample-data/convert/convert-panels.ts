@@ -120,7 +120,6 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
 
 function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefinition {
   const target = statPanel.targets[0];
-  // TODO (sjcobb): convert sparkline color / backgroundColor and remaining formats, use migrateFromAngularSinglestat
   const convertedPanel = {
     kind: 'StatChart',
     display: {

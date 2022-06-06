@@ -50,12 +50,11 @@ interface StatChartProps {
   height: number;
   data: StatChartData;
   unit: UnitOptions;
-  backgroundColor?: string;
   sparkline?: LineSeriesOption;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, backgroundColor, sparkline } = props;
+  const { width, height, data, unit, sparkline } = props;
   const chartsTheme = useChartsTheme();
 
   // TODO: pass alternate label as data.name, adjust fontSize depending on num of characters
@@ -115,7 +114,7 @@ export function StatChart(props: StatChartProps) {
     };
 
     return option;
-  }, [data, chartsTheme, sparkline, backgroundColor]);
+  }, [data, chartsTheme, sparkline]);
 
   return (
     <Box>

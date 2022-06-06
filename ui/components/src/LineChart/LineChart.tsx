@@ -36,12 +36,12 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { EChart, OnEventsType } from './EChart';
-import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph';
-import { formatValue, UnitOptions } from './model/units';
-import { useChartsTheme } from './context/ChartsThemeProvider';
-import { emptyTooltipData } from './Tooltip/tooltip-model';
-import { Tooltip } from './Tooltip/Tooltip';
+import { EChart, OnEventsType } from '../EChart';
+import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from '../model/graph';
+import { formatValue, UnitOptions } from '../model/units';
+import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { emptyTooltipData } from '../Tooltip/tooltip-model';
+import { Tooltip } from '../Tooltip/Tooltip';
 
 use([
   EChartsLineChart,

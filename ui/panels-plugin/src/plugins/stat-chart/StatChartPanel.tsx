@@ -14,11 +14,10 @@
 import { JsonObject } from '@perses-dev/core';
 import { StatChart, StatChartData, UnitOptions } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
-import { useTheme } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { GraphQueryDefinition, GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
-import { defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
+import { ThresholdOptions } from '../../model/thresholds';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { useSuggestedStepMs } from '../../model/time';
 
@@ -54,16 +53,6 @@ export function StatChartPanel(props: StatChartPanelProps) {
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
   const chartData = useChartData(data, calculation, name);
-  const theme = useTheme();
-
-  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
-  const showSparkline = sparkline !== undefined ? true : false;
-  let backgroundColor = 'transparent';
-  if (thresholds.default_color) {
-    backgroundColor = thresholds.default_color;
-  } else if (showSparkline === true) {
-    backgroundColor = theme.palette.primary.light;
-  }
 
   if (error) throw error;
 
@@ -87,7 +76,6 @@ export function StatChartPanel(props: StatChartPanelProps) {
       height={contentDimensions.height}
       data={chartData}
       unit={unit}
-      backgroundColor={backgroundColor}
       sparkline={convertSparkline(sparkline)}
     />
   );

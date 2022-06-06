@@ -15,7 +15,7 @@ import sharedConfig from '../jest.shared';
 
 module.exports = {
   ...sharedConfig,
-  setupFilesAfterEnv: ['./src/test/setup-tests.ts', 'jest-canvas-mock'],
+  setupFilesAfterEnv: ['./setup-tests.ts', 'jest-canvas-mock'],
   // prettier-ignore
   transformIgnorePatterns: ['../node_modules/(?!(echarts|zrender)/)'],
   transform: {
