@@ -49,11 +49,6 @@ func (o *option) Validate() error {
 	if len(o.file) == 0 {
 		return fmt.Errorf("file must be provided")
 	}
-	if o.validator != nil {
-		if err := o.validator.Initialize(); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 

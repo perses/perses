@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/static-debian11
+FROM gcr.io/distroless/static-debian11:debug
 
 LABEL maintainer="The Perses Authors <perses-team@googlegroups.com>"
 

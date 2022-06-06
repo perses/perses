@@ -29,44 +29,41 @@ import (
 
 // Validator can be used to run checks on panels, based on cuelang definitions
 type Validator interface {
-	Initialize() error
 	Validate(panels map[string]json.RawMessage) error
 	LoadSchemas()
 }
 
 type validator struct {
-	schemasPath string
+	schemasConf config.Schemas
 	context     *cue.Context
 	baseDef     cue.Value
 	schemas     *sync.Map
 }
 
-const (
-	baseDefFileName   = "base.cue"
-	pluginsFolderName = "plugins"
-)
+// base CUE definition that all charts & panels should meet
+const baseChartDef = `
+{
+	kind: string
+	display: {
+		name: string
+	}
+	options: _
+}
+`
 
 // NewValidator instantiate a validator
 func NewValidator(conf config.Schemas) Validator {
+	ctx := cuecontext.New()
+
+	// compile the base chart definition
+	baseDef := ctx.CompileString(baseChartDef)
+
 	return &validator{
-		schemasPath: conf.Path,
-		context:     cuecontext.New(),
-		baseDef:     cue.Value{},
+		schemasConf: conf,
+		context:     ctx,
+		baseDef:     baseDef,
 		schemas:     &sync.Map{},
 	}
-}
-
-// Initialize the validator
-func (v *validator) Initialize() error {
-	// load the base panel definition
-	baseDefPath := filepath.Join(v.schemasPath, baseDefFileName)
-	data, err := os.ReadFile(baseDefPath)
-	if err != nil {
-		return err
-	}
-	v.baseDef = v.context.CompileBytes(data)
-	logrus.Tracef("Base def succesfully loaded")
-	return nil
 }
 
 // Validate verify a list of panels.
@@ -130,7 +127,7 @@ func (v *validator) Validate(panels map[string]json.RawMessage) error {
 
 // LoadSchemas load the known list of schemas into the validator
 func (v *validator) LoadSchemas() {
-	pluginsPath := filepath.Join(v.schemasPath, pluginsFolderName)
+	pluginsPath := filepath.Join(v.schemasConf.Path, v.schemasConf.ChartsFolder)
 
 	files, err := os.ReadDir(pluginsPath)
 	if err != nil {
