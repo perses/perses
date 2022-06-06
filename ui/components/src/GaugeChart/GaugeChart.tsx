@@ -81,12 +81,6 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           splitLine: {
             show: true,
-            splitNumber: 2,
-            distance: 0,
-            length: 4,
-            lineStyle: {
-              width: 1,
-            },
           },
           axisLabel: {
             show: false,
@@ -135,12 +129,9 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           detail: {
             show: true,
-            valueAnimation: false,
             width: '60%',
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
-            fontSize: 20,
-            fontWeight: 'bolder',
             color: 'inherit',
             formatter: (value: number) => {
               return formatValue(value, {
@@ -166,6 +157,7 @@ export function GaugeChart(props: GaugeChartProps) {
         height: height,
       }}
       option={option}
+      theme={chartsTheme.themeName}
     />
   );
 }

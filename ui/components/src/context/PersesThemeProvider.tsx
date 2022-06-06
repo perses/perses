@@ -146,6 +146,21 @@ export function PersesThemeProvider(props: PersesThemeProviderProps) {
         borderColor: ltGrey,
       },
     },
+    gauge: {
+      detail: {
+        fontSize: 18,
+        fontWeight: 600,
+        valueAnimation: false,
+      },
+      splitLine: {
+        splitNumber: 2,
+        distance: 0,
+        length: 4,
+        lineStyle: {
+          width: 1,
+        },
+      },
+    },
   };
 
   const persesTheme: PersesChartsTheme = {
