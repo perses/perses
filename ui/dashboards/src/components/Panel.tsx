@@ -36,8 +36,6 @@ export function Panel(props: PanelProps) {
     return { width, height };
   }, [width, height]);
 
-  const panelPadding = width !== undefined && width > 100 ? 2 : 1;
-
   return (
     <Card
       sx={{
@@ -65,7 +63,7 @@ export function Panel(props: PanelProps) {
         }
         sx={{
           display: 'block',
-          padding: (theme) => theme.spacing(1, panelPadding),
+          padding: (theme) => theme.spacing(1, 2),
         }}
       />
       <CardContent
@@ -73,10 +71,10 @@ export function Panel(props: PanelProps) {
           position: 'relative',
           overflow: 'hidden',
           flexGrow: 1,
-          padding: (theme) => theme.spacing(panelPadding),
+          padding: (theme) => theme.spacing(2),
           // Override MUI default style for last-child
           ':last-child': {
-            padding: (theme) => theme.spacing(panelPadding),
+            padding: (theme) => theme.spacing(2),
           },
         }}
         ref={setContentElement}
