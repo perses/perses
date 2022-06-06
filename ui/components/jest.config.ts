@@ -15,8 +15,7 @@ import sharedConfig from '../jest.shared';
 
 module.exports = {
   ...sharedConfig,
-  setupFilesAfterEnv: ['./setup-tests.ts', 'jest-canvas-mock'],
-  // prettier-ignore
+  setupFilesAfterEnv: ['./setup-tests.ts'],
   transformIgnorePatterns: ['../node_modules/(?!(echarts|zrender)/)'],
   transform: {
     // This does not do type-checking and assumes that's happening elsewhere for TS test files
