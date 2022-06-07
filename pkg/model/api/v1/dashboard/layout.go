@@ -24,13 +24,11 @@ import (
 type LayoutKind string
 
 const (
-	KindExpandLayout LayoutKind = "Expand"
-	KindGridLayout   LayoutKind = "Grid"
+	KindGridLayout LayoutKind = "Grid"
 )
 
 var layoutKindMap = map[LayoutKind]bool{
-	KindExpandLayout: true,
-	KindGridLayout:   true,
+	KindGridLayout: true,
 }
 
 func (k *LayoutKind) UnmarshalJSON(data []byte) error {
@@ -69,33 +67,39 @@ func (k *LayoutKind) validate() error {
 	return nil
 }
 
-type LayoutParameter interface {
+type GridItem struct {
+	X       int             `json:"x" yaml:"x"`
+	Y       int             `json:"y" yaml:"y"`
+	Width   int             `json:"width" yaml:"width"`
+	Height  int             `json:"height" yaml:"height"`
+	Content *common.JSONRef `json:"content" yaml:"content"`
 }
 
-type ExpandLayoutParameter struct {
-	LayoutParameter `json:"-" yaml:"-"`
-	Open            bool              `json:"open" yaml:"open"`
-	Children        []*common.JSONRef `json:"children" yaml:"children"`
+type GridLayoutCollapse struct {
+	Open bool `json:"open" yaml:"open"`
 }
 
-type GridCell struct {
-	Width   uint            `json:"width" yaml:"width"`
-	Content *common.JSONRef `json:"content,omitempty" yaml:"content,omitempty"`
+type GridLayoutDisplay struct {
+	Title    string              `json:"title" yaml:"title"`
+	Collapse *GridLayoutCollapse `json:"collapse,omitempty" yaml:"collapse,omitempty"`
 }
 
-type GridLayoutParameter struct {
-	LayoutParameter `json:"-" yaml:"-"`
-	Children        [][]GridCell `json:"children" yaml:"children"`
+type GridLayoutSpec struct {
+	Display *GridLayoutDisplay `json:"display,omitempty" yaml:"display,omitempty"`
+	Items   []GridItem         `json:"items" yaml:"items"`
+}
+
+type LayoutSpec interface {
 }
 
 type tmpDashboardLayout struct {
-	Kind      LayoutKind             `json:"kind" yaml:"kind"`
-	Parameter map[string]interface{} `json:"parameter" yaml:"parameter"`
+	Kind LayoutKind             `json:"kind" yaml:"kind"`
+	Spec map[string]interface{} `json:"spec" yaml:"spec"`
 }
 
 type Layout struct {
-	Kind      LayoutKind      `json:"kind" yaml:"kind"`
-	Parameter LayoutParameter `json:"parameter" yaml:"parameter"`
+	Kind LayoutKind `json:"kind" yaml:"kind"`
+	Spec LayoutSpec `json:"spec" yaml:"spec"`
 }
 
 func (d *Layout) UnmarshalJSON(data []byte) error {
@@ -120,20 +124,18 @@ func (d *Layout) unmarshal(unmarshal func(interface{}) error, staticMarshal func
 		return fmt.Errorf("variable.kind cannot be empty")
 	}
 
-	rawParameter, err := staticMarshal(tmpLayout.Parameter)
+	rawParameter, err := staticMarshal(tmpLayout.Spec)
 	if err != nil {
 		return err
 	}
-	var parameter interface{}
+	var spec interface{}
 	switch tmpLayout.Kind {
 	case KindGridLayout:
-		parameter = &GridLayoutParameter{}
-	case KindExpandLayout:
-		parameter = &ExpandLayoutParameter{}
+		spec = &GridLayoutSpec{}
 	}
-	if err := staticUnmarshal(rawParameter, parameter); err != nil {
+	if err := staticUnmarshal(rawParameter, spec); err != nil {
 		return err
 	}
-	d.Parameter = parameter
+	d.Spec = spec
 	return nil
 }

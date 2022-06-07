@@ -80,11 +80,13 @@ function createGridDefinition(group: PanelGroup, panelKeys: Map<number, string>)
 
   const definition: GridDefinition = {
     kind: 'Grid',
-    items: [],
+    spec: {
+      items: [],
+    },
   };
 
   if (group.row !== undefined) {
-    definition.display = {
+    definition.spec.display = {
       title: group.row.title,
       collapse: {
         open: !group.row.collapsed,
@@ -104,7 +106,7 @@ function createGridDefinition(group: PanelGroup, panelKeys: Map<number, string>)
     if (panelKey === undefined) {
       throw new Error(`Could not find panel key for id ${panel.id}`);
     }
-    definition.items.push({
+    definition.spec.items.push({
       x: panel.gridPos.x,
       y: panel.gridPos.y - adjustY,
       width: panel.gridPos.w,

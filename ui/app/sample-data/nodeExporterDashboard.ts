@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 
 const nodeExporterDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -20,6 +20,7 @@ const nodeExporterDashboard: DashboardResource = {
     project: 'perses',
     created_at: '2021-11-09',
     updated_at: '2021-11-09',
+    version: 0,
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
@@ -38,7 +39,7 @@ const nodeExporterDashboard: DashboardResource = {
         selection: {
           default_value: 'node',
         },
-      } as AnyVariableDefinition,
+      },
       instance: {
         kind: 'PrometheusLabelValues',
         options: {
@@ -52,7 +53,7 @@ const nodeExporterDashboard: DashboardResource = {
           default_value: ['demo.do.prometheus.io:9100'],
           all_value: '$__all',
         },
-      } as AnyVariableDefinition,
+      },
       interval: {
         kind: 'Interval',
         options: {
@@ -68,7 +69,7 @@ const nodeExporterDashboard: DashboardResource = {
         selection: {
           default_value: '1m',
         },
-      } as AnyVariableDefinition,
+      },
     },
     panels: {
       gaugeCpuBusy: {
@@ -378,106 +379,110 @@ const nodeExporterDashboard: DashboardResource = {
     layouts: [
       {
         kind: 'Grid',
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 3,
-            height: 4,
-            content: { $ref: '#/panels/gaugeCpuBusy' },
-          },
-          {
-            x: 3,
-            y: 0,
-            width: 3,
-            height: 4,
-            content: { $ref: '#/panels/gaugeSystemLoad' },
-          },
-          {
-            x: 6,
-            y: 0,
-            width: 3,
-            height: 4,
-            content: { $ref: '#/panels/gaugeSystemLoadAlt' },
-          },
-          {
-            x: 9,
-            y: 0,
-            width: 3,
-            height: 4,
-            content: { $ref: '#/panels/gaugeRam' },
-          },
-          {
-            x: 12,
-            y: 0,
-            width: 3,
-            height: 4,
-            content: { $ref: '#/panels/gaugeSwap' },
-          },
-          {
-            x: 15,
-            y: 0,
-            width: 3,
-            height: 4,
-            content: { $ref: '#/panels/gaugeRoot' },
-          },
-          {
-            x: 18,
-            y: 0,
-            width: 3,
-            height: 2,
-            content: { $ref: '#/panels/statCores' },
-          },
-          {
-            x: 18,
-            y: 2,
-            width: 3,
-            height: 2,
-            content: { $ref: '#/panels/statTest' },
-          },
-          {
-            x: 21,
-            y: 0,
-            width: 3,
-            height: 4,
-            content: { $ref: '#/panels/statRAM' },
-          },
-        ],
+        spec: {
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 3,
+              height: 4,
+              content: { $ref: '#/panels/gaugeCpuBusy' },
+            },
+            {
+              x: 3,
+              y: 0,
+              width: 3,
+              height: 4,
+              content: { $ref: '#/panels/gaugeSystemLoad' },
+            },
+            {
+              x: 6,
+              y: 0,
+              width: 3,
+              height: 4,
+              content: { $ref: '#/panels/gaugeSystemLoadAlt' },
+            },
+            {
+              x: 9,
+              y: 0,
+              width: 3,
+              height: 4,
+              content: { $ref: '#/panels/gaugeRam' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 3,
+              height: 4,
+              content: { $ref: '#/panels/gaugeSwap' },
+            },
+            {
+              x: 15,
+              y: 0,
+              width: 3,
+              height: 4,
+              content: { $ref: '#/panels/gaugeRoot' },
+            },
+            {
+              x: 18,
+              y: 0,
+              width: 3,
+              height: 2,
+              content: { $ref: '#/panels/statCores' },
+            },
+            {
+              x: 18,
+              y: 2,
+              width: 3,
+              height: 2,
+              content: { $ref: '#/panels/statTest' },
+            },
+            {
+              x: 21,
+              y: 0,
+              width: 3,
+              height: 4,
+              content: { $ref: '#/panels/statRAM' },
+            },
+          ],
+        },
       },
       {
         kind: 'Grid',
-        items: [
-          // First Row
-          {
-            x: 0,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/cpu' },
-          },
-          {
-            x: 12,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/memory' },
-          },
-          // Second Row
-          {
-            x: 0,
-            y: 6,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/diskIO' },
-          },
-          {
-            x: 12,
-            y: 6,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/filesystemFullness' },
-          },
-        ],
+        spec: {
+          items: [
+            // First Row
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/cpu' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/memory' },
+            },
+            // Second Row
+            {
+              x: 0,
+              y: 6,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/diskIO' },
+            },
+            {
+              x: 12,
+              y: 6,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/filesystemFullness' },
+            },
+          ],
+        },
       },
     ],
   },

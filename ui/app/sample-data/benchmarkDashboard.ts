@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 
 const benchmarkDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -20,6 +20,7 @@ const benchmarkDashboard: DashboardResource = {
     project: 'perses',
     created_at: '2021-11-09',
     updated_at: '2021-11-09',
+    version: 0,
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
@@ -37,7 +38,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: 'node',
         },
-      } as AnyVariableDefinition,
+      },
       instance: {
         kind: 'PrometheusLabelValues',
         options: {
@@ -51,7 +52,7 @@ const benchmarkDashboard: DashboardResource = {
           default_value: ['demo.do.prometheus.io:9100'],
           all_value: '$__all',
         },
-      } as AnyVariableDefinition,
+      },
       interval: {
         kind: 'Interval',
         options: {
@@ -67,7 +68,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: '1h',
         },
-      } as AnyVariableDefinition,
+      },
     },
     panels: {
       seriesTest: {
@@ -348,110 +349,116 @@ const benchmarkDashboard: DashboardResource = {
     layouts: [
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 1',
-          collapse: {
-            open: true,
+        spec: {
+          display: {
+            title: 'Row 1',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/multiQueries' },
+              // content: { $ref: '#/panels/cpu' },
+              // content: { $ref: '#/panels/seriesTestAlt' },
+              // content: { $ref: '#/panels/seriesTest' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/basicEx' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/multiQueries' },
-            // content: { $ref: '#/panels/cpu' },
-            // content: { $ref: '#/panels/seriesTestAlt' },
-            // content: { $ref: '#/panels/seriesTest' },
-          },
-          {
-            x: 12,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/basicEx' },
-          },
-        ],
       },
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 2',
-          collapse: {
-            open: true,
+        spec: {
+          display: {
+            title: 'Row 2',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/cpu' },
+              // content: { $ref: '#/panels/seriesTestAlt' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/panels/doubleQueries' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/cpu' },
-            // content: { $ref: '#/panels/seriesTestAlt' },
-          },
-          {
-            x: 12,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/doubleQueries' },
-          },
-        ],
       },
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 3',
-          collapse: {
-            open: true,
+        spec: {
+          display: {
+            title: 'Row 3',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/panels/statSm' },
+            },
+            {
+              x: 0,
+              y: 2,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/panels/statRAM' },
+            },
+            {
+              x: 0,
+              y: 4,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/panels/statTotalRAM' },
+            },
+            {
+              x: 2,
+              y: 0,
+              width: 4,
+              height: 6,
+              content: { $ref: '#/panels/statMd' },
+            },
+            {
+              x: 6,
+              y: 0,
+              width: 10,
+              height: 6,
+              content: { $ref: '#/panels/statLg' },
+            },
+            {
+              x: 16,
+              y: 0,
+              width: 8,
+              height: 6,
+              content: { $ref: '#/panels/gaugeEx' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statSm' },
-          },
-          {
-            x: 0,
-            y: 2,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statRAM' },
-          },
-          {
-            x: 0,
-            y: 4,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statTotalRAM' },
-          },
-          {
-            x: 2,
-            y: 0,
-            width: 4,
-            height: 6,
-            content: { $ref: '#/panels/statMd' },
-          },
-          {
-            x: 6,
-            y: 0,
-            width: 10,
-            height: 6,
-            content: { $ref: '#/panels/statLg' },
-          },
-          {
-            x: 16,
-            y: 0,
-            width: 8,
-            height: 6,
-            content: { $ref: '#/panels/gaugeEx' },
-          },
-        ],
       },
     ],
   },

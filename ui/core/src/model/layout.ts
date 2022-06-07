@@ -17,13 +17,15 @@ export type LayoutDefinition = GridDefinition;
 
 export interface GridDefinition {
   kind: 'Grid';
-  display?: {
-    title: string;
-    collapse?: {
-      open: boolean;
+  spec: {
+    display?: {
+      title: string;
+      collapse?: {
+        open: boolean;
+      };
     };
+    items: GridItemDefinition[];
   };
-  items: GridItemDefinition[];
 }
 
 export interface GridItemDefinition {

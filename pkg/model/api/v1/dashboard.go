@@ -35,11 +35,10 @@ type DashboardSpec struct {
 	Datasource dashboard.Datasource `json:"datasource" yaml:"datasource"`
 	// Duration is the default time you would like to use to looking in the past when getting data to fill the
 	// dashboard
-	Duration   model.Duration                 `json:"duration" yaml:"duration"`
-	Variables  map[string]*dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Panels     map[string]json.RawMessage     `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
-	Layouts    map[string]*dashboard.Layout   `json:"layouts" yaml:"layouts"`
-	Entrypoint *common.JSONRef                `json:"entrypoint" yaml:"entrypoint"`
+	Duration  model.Duration                 `json:"duration" yaml:"duration"`
+	Variables map[string]*dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Panels    map[string]json.RawMessage     `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
+	Layouts   []dashboard.Layout             `json:"layouts" yaml:"layouts"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
@@ -81,9 +80,6 @@ func (d *DashboardSpec) validate() error {
 		if len(keyRegexp.FindAllString(panelKey, -1)) <= 0 {
 			return fmt.Errorf("panel reference %q is containing spaces or special characters", panelKey)
 		}
-	}
-	if d.Entrypoint == nil {
-		return fmt.Errorf("dashboard.entrypoint cannot be empty")
 	}
 	return nil
 }
@@ -142,30 +138,21 @@ func (d *Dashboard) validate() error {
 // verifyAndSetJSONRef will check that each JSON Reference are pointing to an existing object and will set the related pointer in the JSONRef.Object
 func (d *Dashboard) verifyAndSetJSONReferences() error {
 	for _, layout := range d.Spec.Layouts {
-		switch parameter := layout.Parameter.(type) {
-		case *dashboard.GridLayoutParameter:
-			for _, line := range parameter.Children {
-				for _, cell := range line {
-					if cell.Content != nil {
-						if err := d.checkAndSetRef(cell.Content); err != nil {
-							return err
-						}
-					}
-				}
-			}
-		case *dashboard.ExpandLayoutParameter:
-			for _, ref := range parameter.Children {
-				if err := d.checkAndSetRef(ref); err != nil {
+		switch spec := layout.Spec.(type) {
+		case *dashboard.GridLayoutSpec:
+			for _, item := range spec.Items {
+				if err := d.checkAndSetRef(item.Content); err != nil {
 					return err
 				}
 			}
+
 		}
 	}
-	return d.checkAndSetRef(d.Spec.Entrypoint)
+	return nil
 }
 
 func (d *Dashboard) checkAndSetRef(ref *common.JSONRef) error {
-	// ref.Path should like that [ "spec", "layouts" | "panels", <name> ].
+	// ref.Path should like that [ "spec", "panels", <name> ].
 	// So if the array is not equal to three then the reference is wrong.
 	if len(ref.Path) != 3 {
 		return fmt.Errorf("reference %q is pointing to the void", ref.Ref)
@@ -174,12 +161,6 @@ func (d *Dashboard) checkAndSetRef(ref *common.JSONRef) error {
 		return fmt.Errorf("reference %q doesn't start by 'spec'", ref.Ref)
 	}
 	switch ref.Path[1] {
-	case "layouts":
-		obj, ok := d.Spec.Layouts[ref.Path[2]]
-		if !ok {
-			return fmt.Errorf("there is no existing layout called %q in the current dashboard", ref.Path[2])
-		}
-		ref.Object = obj
 	case "panels":
 		obj, ok := d.Spec.Panels[ref.Path[2]]
 		if !ok {
