@@ -14,6 +14,7 @@
 package line
 
 import (
+	"github.com/perses/perses/schemas/common"
 	"github.com/perses/perses/schemas/common/prometheus"
 )
 
@@ -25,6 +26,8 @@ import (
 	options: {
 		queries: [...prometheus.#query]
 		show_legend?: bool
+		unit?:       common.#unit
+		thresholds?: common.#thresholds
 	}
 }
 
