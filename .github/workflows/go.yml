@@ -23,6 +23,8 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.18.x
+    - name: install cue
+      run: go install cuelang.org/go/cmd/cue@latest
     - uses: actions/cache@v3.0.3
       with:
         path: ~/go/pkg/mod
@@ -31,6 +33,8 @@ jobs:
           ${{ runner.os }}-go-
     - name: check format
       run: make checkformat
+    - name: check go.mod
+      run: make checkunused
   test:
     name: "unit and integration tests"
     runs-on: ubuntu-latest
