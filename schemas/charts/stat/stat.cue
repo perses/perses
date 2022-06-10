@@ -28,9 +28,7 @@ import (
 
 #panel: {
 	kind: "StatChart"
-	display: {
-		name: string
-	}
+	display: common.#display
 	options: {
 		query:       prometheus.#query
 		calculation: common.#calculation

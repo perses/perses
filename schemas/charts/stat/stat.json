@@ -1,7 +1,8 @@
 {
   "kind": "StatChart",
   "display": {
-    "name": "CPU Cores"
+    "name": "CPU Cores",
+    "description": "This is a stat chart"
   },
   "options": {
     "query": {
