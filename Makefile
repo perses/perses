@@ -37,8 +37,17 @@ tag:
 
 .PHONY: checkformat
 checkformat:
-	@echo ">> checking code format"
-	! $(GOFMT) -d $$(find . -name '*.go' -print) | grep '^' ;\
+	@echo ">> checking go code format"
+	! $(GOFMT) -d $$(find . -name '*.go' -not -path "./ui/*" -print) | grep '^'
+	@echo ">> running check for cue file format"
+	$(CUE) fmt ./schemas/...
+	@git diff --exit-code -- ./schemas
+
+.PHONY: checkunused
+checkunused:
+	@echo ">> running check for unused/missing packages in go.mod"
+	$(GO) mod tidy
+	@git diff --exit-code -- go.sum go.mod
 
 .PHONY: checkstyle
 checkstyle:
