@@ -14,6 +14,6 @@
 package common
 
 #display: {
-    name: string
-    description?: string
+	name:         string
+	description?: string
 }

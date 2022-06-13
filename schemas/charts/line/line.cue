@@ -18,9 +18,8 @@ import (
 	"github.com/perses/perses/schemas/common/prometheus"
 )
 
-
 #panel: {
-	kind: "LineChart"
+	kind:    "LineChart"
 	display: common.#display
 	options: {
 		queries: [...prometheus.#query]
