@@ -12,11 +12,13 @@
 // limitations under the License.
 
 import { useState, useMemo } from 'react';
-import { Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
 import { PluginBoundary, PanelComponent } from '@perses-dev/plugin-system';
 import { ErrorAlert } from '@perses-dev/components';
-import useResizeObserver from 'use-resize-observer';
 import { PanelDefinition } from '@perses-dev/core';
+import { Box, Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
+import useResizeObserver from 'use-resize-observer';
+import Tooltip, { TooltipPlacement } from './Tooltip';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
@@ -52,20 +54,37 @@ export function Panel(props: PanelProps) {
     >
       <CardHeader
         title={
-          <Typography
-            component="h2"
-            variant="body2"
-            fontWeight={(theme) => theme.typography.fontWeightMedium}
-            whiteSpace="nowrap"
-            overflow="hidden"
-            textOverflow="ellipsis"
-          >
-            {definition.display.name}
-          </Typography>
+          <>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                component="h2"
+                variant="body2"
+                fontWeight={(theme) => theme.typography.fontWeightMedium}
+                whiteSpace="nowrap"
+                overflow="hidden"
+                textOverflow="ellipsis"
+              >
+                {definition.display.name}
+              </Typography>
+              {definition.display.description && (
+                <Tooltip description={definition.display.description} placement={TooltipPlacement.Right}>
+                  <InformationOutlineIcon
+                    sx={{ width: '16px', height: '16px', position: 'relative', left: '4px', cursor: 'pointer' }}
+                  />
+                </Tooltip>
+              )}
+            </Box>
+          </>
         }
         sx={{
           display: 'block',
           padding: (theme) => theme.spacing(1, 2),
+          borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
         }}
       />
       <CardContent

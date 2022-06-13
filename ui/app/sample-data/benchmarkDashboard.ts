@@ -73,7 +73,7 @@ const benchmarkDashboard: DashboardResource = {
     panels: {
       seriesTest: {
         kind: 'LineChart',
-        display: { name: '1500+ Series' },
+        display: { name: '1500+ Series', description: 'This is a line chart' },
         options: {
           queries: [
             {
@@ -89,7 +89,7 @@ const benchmarkDashboard: DashboardResource = {
       },
       seriesTestAlt: {
         kind: 'LineChart',
-        display: { name: '~130 Series' },
+        display: { name: '~130 Series', description: 'This is a line chart' },
         options: {
           queries: [
             {
@@ -155,7 +155,7 @@ const benchmarkDashboard: DashboardResource = {
       },
       doubleQueries: {
         kind: 'LineChart',
-        display: { name: 'Double Queries' },
+        display: { name: 'Double Queries', description: 'This is a line chart!!!' },
         options: {
           queries: [
             {
@@ -177,7 +177,7 @@ const benchmarkDashboard: DashboardResource = {
       },
       cpu: {
         kind: 'LineChart',
-        display: { name: 'CPU' },
+        display: { name: 'CPU', description: 'This is a line chart' },
         options: {
           queries: [
             {
@@ -195,6 +195,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Sm',
+          description: 'This is a stat chart'
         },
         options: {
           query: {
@@ -220,6 +221,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'RAM Used',
+          description: 'This is a stat chart'
         },
         options: {
           query: {
@@ -237,6 +239,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'RAM Total',
+          description: 'This is a stat chart',
         },
         options: {
           query: {
@@ -256,6 +259,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Md',
+          description: 'This is a stat chart',
         },
         options: {
           query: {
@@ -288,6 +292,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Lg',
+          description: 'This is a stat chart',
         },
         options: {
           query: {
@@ -319,7 +324,7 @@ const benchmarkDashboard: DashboardResource = {
       },
       gaugeEx: {
         kind: 'GaugeChart',
-        display: { name: 'Gauge Ex' },
+        display: { name: 'Gauge Ex', description: 'This is a gauge chart' },
         options: {
           query: {
             kind: 'PrometheusGraphQuery',
