@@ -47,22 +47,21 @@ const TooltipContent = ({ title, description }: Pick<TooltipProps, 'title' | 'de
     <>
       {title && (
         <Typography
-          variant="h6"
+          variant="body2"
           sx={(theme) => ({
-            color: theme.palette.mode === 'dark' ? theme.palette.common.white : '#2A2E42',
-            fontWeight: '700',
-            fontSize: '14px',
-            lineHeight: '20px',
+            color: theme.palette.text.primary,
+            fontWeight: theme.typography.fontWeightMedium,
+            lineHeight: '1.25rem',
           })}
         >
           {title}
         </Typography>
       )}
       <Typography
+        variant="caption"
         sx={(theme) => ({
-          color: theme.palette.mode === 'dark' ? theme.palette.common.white : '#2A2E42',
-          fontSize: '12px',
-          lineHeight: '14.4px',
+          color: theme.palette.text.primary,
+          lineHeight: '1.38rem',
         })}
       >
         {description}
@@ -75,7 +74,7 @@ const StyledTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
   <MuiTooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.mode === 'dark' ? '#3E4662' : '#F0F1F6',
+    backgroundColor: theme.palette.secondary.main,
     color: theme.palette.grey[900],
     maxWidth: '300px',
     padding: theme.spacing(1),
@@ -84,9 +83,10 @@ const StyledTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
   [`& .${tooltipClasses.arrow}`]: {
     color: theme.palette.background.paper,
     '&::before': {
-      backgroundColor: theme.palette.mode === 'dark' ? '#3E4662' : '#F0F1F6',
+      backgroundColor: theme.palette.secondary.main,
     },
   },
 }));
 
+//'#3E4662'
 export default Tooltip;

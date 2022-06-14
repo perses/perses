@@ -74,7 +74,7 @@ export function Panel(props: PanelProps) {
               {definition.display.description && (
                 <Tooltip description={definition.display.description} placement={TooltipPlacement.Right}>
                   <InformationOutlineIcon
-                    sx={{ width: '16px', height: '16px', position: 'relative', left: '4px', cursor: 'pointer' }}
+                    sx={{ fontSize: '1rem', position: 'relative', left: '4px', cursor: 'pointer' }}
                   />
                 </Tooltip>
               )}
