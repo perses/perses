@@ -16,10 +16,18 @@ import type { Config } from '@jest/types';
 // Common Jest configuration shared across packages
 const config: Config.InitialOptions = {
   preset: 'ts-jest',
+  testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],
   moduleNameMapper: {
-    // Jest currently doesn't natively support ES Modules, so use the non ES Modules version instead
+    // Jest currently doesn't natively support ES Modules, so use the non ES Modules versions instead
     '^lodash-es$': 'lodash',
+    '^echarts/(.*)$': 'echarts',
+
+    // Use polyfill for jsdom environment
+    '^use-resize-observer$': 'use-resize-observer/polyfilled',
+
+    // Tell Jest where other Perses packages live since it doesn't know about project references
+    '^@perses-dev/(.*)$': '<rootDir>/../$1/src',
   },
   globals: {
     'ts-jest': {
