@@ -54,32 +54,30 @@ export function Panel(props: PanelProps) {
     >
       <CardHeader
         title={
-          <>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-              }}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              component="h2"
+              variant="body2"
+              fontWeight={(theme) => theme.typography.fontWeightMedium}
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
             >
-              <Typography
-                component="h2"
-                variant="body2"
-                fontWeight={(theme) => theme.typography.fontWeightMedium}
-                whiteSpace="nowrap"
-                overflow="hidden"
-                textOverflow="ellipsis"
-              >
-                {definition.display.name}
-              </Typography>
-              {definition.display.description && (
-                <InfoTooltip description={definition.display.description} placement={TooltipPlacement.Right}>
-                  <InformationOutlineIcon
-                    sx={{ fontSize: '1rem', position: 'relative', left: '4px', cursor: 'pointer' }}
-                  />
-                </InfoTooltip>
-              )}
-            </Box>
-          </>
+              {definition.display.name}
+            </Typography>
+            {definition.display.description && (
+              <InfoTooltip description={definition.display.description} placement={TooltipPlacement.Right}>
+                <InformationOutlineIcon
+                  sx={{ fontSize: '1rem', position: 'relative', left: '4px', cursor: 'pointer' }}
+                />
+              </InfoTooltip>
+            )}
+          </Box>
         }
         sx={{
           display: 'block',
