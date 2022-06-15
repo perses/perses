@@ -11,20 +11,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
-import { PanelDefinition } from '@perses-dev/core';
+import { JsonObject, PanelDefinition } from '@perses-dev/core';
+import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
+import { screen } from '@testing-library/react';
+import { renderWithContext, mockPluginRegistryProps } from '../test';
 import { Panel } from './Panel';
 
 const TEST_DEFINITION: PanelDefinition = {
-  kind: '',
+  kind: 'FakePanel',
   display: {
     name: 'My test panel',
   },
   options: {},
 };
 
+const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
+  pluginType: 'Panel',
+  kind: 'FakePanel',
+  plugin: {
+    PanelComponent: () => {
+      return <div role="figure">FakePanel chart</div>;
+    },
+  },
+};
+
 describe('Panel', () => {
-  it('should render Panel', () => {
-    render(<Panel definition={TEST_DEFINITION} />);
+  // Helper to render the panel with some context set
+  const renderPanel = () => {
+    const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
+    addMockPlugin(FAKE_PANEL_PLUGIN);
+
+    renderWithContext(
+      <PluginRegistry {...pluginRegistryProps}>
+        <Panel definition={TEST_DEFINITION} />
+      </PluginRegistry>
+    );
+  };
+
+  it('should render Panel', async () => {
+    renderPanel();
+
+    const chart = await screen.findByRole('figure');
+    expect(chart).toBeInTheDocument();
+    expect(chart).toHaveTextContent('FakePanel chart');
   });
 });
