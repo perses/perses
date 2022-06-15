@@ -19,8 +19,9 @@ import {
 } from '@perses-dev/plugin-system';
 
 /**
- * Helper for mocking PluginRegistry data during tests. Returns props that can be spread on the PluginRegistry component
- * so that it will load the mock plugins provided. If no plugins are provided, some default mock data is used.
+ * Helper for mocking `PluginRegistry` data during tests. Returns props that can be spread on the `PluginRegistry`
+ * component so that it will load the mock plugins you setup. You can use the `addMockPlugin` function that's returned
+ * to add mock plugins before rendering components that use them.
  */
 export function mockPluginRegistryProps() {
   const mockPluginResource: PluginResource = {
