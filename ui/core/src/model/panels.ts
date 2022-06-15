@@ -26,5 +26,5 @@ export interface PanelDefinition<Options extends JsonObject = JsonObject> extend
  * A reference to a panel defined in the DashboardSpec.
  */
 export interface PanelRef {
-  $ref: `#/panels/${string}`;
+  $ref: `#/spec/panels/${string}`;
 }

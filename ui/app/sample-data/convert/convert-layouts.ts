@@ -111,7 +111,7 @@ function createGridDefinition(group: PanelGroup, panelKeys: Map<number, string>)
       y: panel.gridPos.y - adjustY,
       width: panel.gridPos.w,
       height: panel.gridPos.h,
-      content: { $ref: `#/panels/${panelKey}` },
+      content: { $ref: `#/spec/panels/${panelKey}` },
     });
   }
   return definition;
