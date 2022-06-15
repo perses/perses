@@ -15,10 +15,10 @@ import { useState, useMemo } from 'react';
 import { PluginBoundary, PanelComponent } from '@perses-dev/plugin-system';
 import { ErrorAlert } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
+import InfoTooltip, { TooltipPlacement } from '@perses-dev/components/src/InfoTooltip';
 import { Box, Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import useResizeObserver from 'use-resize-observer';
-import Tooltip, { TooltipPlacement } from './Tooltip';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
@@ -72,11 +72,11 @@ export function Panel(props: PanelProps) {
                 {definition.display.name}
               </Typography>
               {definition.display.description && (
-                <Tooltip description={definition.display.description} placement={TooltipPlacement.Right}>
+                <InfoTooltip description={definition.display.description} placement={TooltipPlacement.Right}>
                   <InformationOutlineIcon
                     sx={{ fontSize: '1rem', position: 'relative', left: '4px', cursor: 'pointer' }}
                   />
-                </Tooltip>
+                </InfoTooltip>
               )}
             </Box>
           </>

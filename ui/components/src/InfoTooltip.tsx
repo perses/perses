@@ -27,14 +27,14 @@ export enum TooltipPlacement {
   Bottom = 'bottom',
 }
 
-interface TooltipProps {
+interface InfoTooltipProps {
   description: string;
   children: React.ReactNode;
   title?: string;
   placement?: TooltipPlacement;
 }
 
-const Tooltip = ({ title, description, placement, children }: TooltipProps) => {
+const InfoTooltip = ({ title, description, placement, children }: InfoTooltipProps) => {
   return (
     <StyledTooltip arrow placement={placement} title={<TooltipContent title={title} description={description} />}>
       <div>{children}</div>
@@ -42,7 +42,7 @@ const Tooltip = ({ title, description, placement, children }: TooltipProps) => {
   );
 };
 
-const TooltipContent = ({ title, description }: Pick<TooltipProps, 'title' | 'description'>) => {
+const TooltipContent = ({ title, description }: Pick<InfoTooltipProps, 'title' | 'description'>) => {
   return (
     <>
       {title && (
@@ -88,5 +88,4 @@ const StyledTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
   },
 }));
 
-//'#3E4662'
-export default Tooltip;
+export default InfoTooltip;
