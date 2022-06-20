@@ -40,8 +40,7 @@ checkformat:
 	@echo ">> checking go code format"
 	! $(GOFMT) -d $$(find . -name '*.go' -not -path "./ui/*" -print) | grep '^'
 	@echo ">> running check for cue file format"
-	$(CUE) fmt ./schemas/...
-	@git diff --exit-code -- ./schemas
+	./scripts/cue.sh --checkformat
 
 .PHONY: checkunused
 checkunused:
@@ -67,8 +66,8 @@ fixlicense:
 .PHONY: fmt
 fmt:
 	@echo ">> format code"
-	$(GO) fmt ./...
-	$(CUE) fmt ./schemas/...
+	$(GOFMT) -w -l $$(find . -name '*.go' -not -path "./ui/*" -print)
+	./scripts/cue.sh --fmt
 
 .PHONY: cue-eval
 cue-eval:
@@ -78,7 +77,7 @@ cue-eval:
 .PHONY: cue-test
 cue-test:
 	@echo ">> test cue schemas with json data"
-	./scripts/cue_test.sh
+	./scripts/cue.sh --test
 
 .PHONY: test
 test: generate
