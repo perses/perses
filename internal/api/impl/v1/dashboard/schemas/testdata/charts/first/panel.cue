@@ -14,21 +14,21 @@
 package first
 
 #panel: {
-  kind: "AwesomeChart",
+	kind: "AwesomeChart"
 	display: {
 		name: string
 	}
 	options: {
-    a: string,
-    b: {
-      c: [...#d]
-    }
-  }
+		a: string
+		b: {
+			c: [...#d]
+		}
+	}
 }
 
 #d: {
-  e: string
-  f?: string
+	e:  string
+	f?: string
 }
 
 #panel
