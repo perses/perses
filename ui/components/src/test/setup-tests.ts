@@ -11,14 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
+// Add testing library assertions
 import '@testing-library/jest-dom/extend-expect';
-// import { configure } from '@testing-library/react';
 
+// Always mock e-charts during tests since we don't have a proper canvas in jsdom
 jest.mock('echarts/core');
-
-// Increase the default timeout on findBy/waitFor from 1000 -> 3000 ms
-// configure({ asyncUtilTimeout: 3000 });
