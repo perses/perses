@@ -13,9 +13,8 @@
 
 import { useState, useMemo } from 'react';
 import { PluginBoundary, PanelComponent } from '@perses-dev/plugin-system';
-import { ErrorAlert } from '@perses-dev/components';
+import { ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
-import InfoTooltip, { TooltipPlacement } from '@perses-dev/components/src/InfoTooltip';
 import { Box, Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import useResizeObserver from 'use-resize-observer';

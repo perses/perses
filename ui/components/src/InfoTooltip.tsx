@@ -34,7 +34,7 @@ interface InfoTooltipProps {
   placement?: TooltipPlacement;
 }
 
-const InfoTooltip = ({ title, description, placement, children }: InfoTooltipProps) => {
+export const InfoTooltip = ({ title, description, placement, children }: InfoTooltipProps) => {
   return (
     <StyledTooltip arrow placement={placement} title={<TooltipContent title={title} description={description} />}>
       <div>{children}</div>
@@ -87,5 +87,3 @@ const StyledTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
     },
   },
 }));
-
-export default InfoTooltip;
