@@ -13,7 +13,7 @@
 
 package common
 
-#unit: #timeUnit | #percentUnit | #decimalUnit | bytesUnit
+#unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit
 
 #timeUnit: {
 	kind: "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
