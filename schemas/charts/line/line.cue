@@ -26,8 +26,8 @@ import (
 	options: {
 		queries: [...prometheus.#query]
 		show_legend?: bool
-		unit?:       common.#unit
-		thresholds?: common.#thresholds
+		unit?:        common.#unit
+		thresholds?:  common.#thresholds
 	}
 }
 

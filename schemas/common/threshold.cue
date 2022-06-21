@@ -16,7 +16,7 @@ package common
 #stepOption: {
 	value:  number
 	color?: string
-	name?: string
+	name?:  string
 }
 
 #thresholds: {

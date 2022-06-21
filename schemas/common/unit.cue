@@ -20,17 +20,17 @@ package common
 }
 
 #percentUnit: {
-	kind:           "Percent" | "PercentDecimal"
+	kind:            "Percent" | "PercentDecimal"
 	decimal_places?: number
 }
 
 #decimalUnit: {
-	kind:           "Decimal"
+	kind:            "Decimal"
 	decimal_places?: number
 	abbreviate?:     bool
 }
 
 #bytesUnit: {
-	kind:           "Bytes"
+	kind:            "Bytes"
 	decimal_places?: number
 }
