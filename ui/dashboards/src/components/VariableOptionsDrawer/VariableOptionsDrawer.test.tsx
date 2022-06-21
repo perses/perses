@@ -1,10 +1,10 @@
 import { fireEvent, screen } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import { JsonObject, VariableDefinition } from '@perses-dev/core';
 import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
 import { mockPluginRegistryProps, renderWithContext } from '../../test';
 import { TemplateVariablesProvider } from '../../context';
-import { VariableOptionsDrawer, VariableOptionsDrawerProps } from '../VariableOptionsDrawer';
-import { act } from 'react-dom/test-utils';
+import { VariableOptionsDrawer } from './VariableOptionsDrawer';
 
 describe('VariableOptionsDrawer', () => {
   const variables: Record<string, VariableDefinition> = {

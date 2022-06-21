@@ -15,7 +15,7 @@ export * from './EChart';
 export * from './ErrorAlert';
 export * from './ErrorBoundary';
 export * from './GaugeChart';
-export * from './InfoTooltip';
+export * from './InfoTooltip/InfoTooltip';
 export * from './LineChart';
 export * from './StatChart';
 export * from './utils/combine-sx';

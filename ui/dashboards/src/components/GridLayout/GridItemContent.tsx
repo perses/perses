@@ -13,7 +13,7 @@
 
 import { ErrorAlert } from '@perses-dev/components';
 import { DashboardSpec, GridItemDefinition, resolvePanelRef } from '@perses-dev/core';
-import { Panel } from '../Panel';
+import { Panel } from '../Panel/Panel';
 
 export interface GridItemContentProps {
   spec: DashboardSpec;

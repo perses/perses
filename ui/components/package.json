@@ -19,6 +19,7 @@
     "build": "tsc --build",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
     "test": "TZ=UTC jest",
+    "test:watch": "TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
