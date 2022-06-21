@@ -58,7 +58,7 @@ export function StatChart(props: StatChartProps) {
   const chartsTheme = useChartsTheme();
 
   // TODO: pass alternate label as data.name, adjust fontSize depending on num of characters
-  const isLargePanel = width > 250 || height > 180 ? true : false;
+  const isLargePanel = width > 250 || height > 180;
   const valueSize = isLargePanel === true ? 40 : 16;
   const formattedValue =
     data.calculatedValue === undefined || data.calculatedValue === null
