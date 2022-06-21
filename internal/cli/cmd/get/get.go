@@ -125,5 +125,6 @@ percli get dashboards -a -ojson
 	cmd.Flags().BoolVarP(&o.allProject, "all", "a", o.allProject, "If present, list the requested object(s) across all projects. The project in the current context is ignored even if specified with --project.")
 	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")
 	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "Kind of display: 'yaml' or 'json'.")
+	cmd.MarkFlagsMutuallyExclusive("project", "all")
 	return cmd
 }
