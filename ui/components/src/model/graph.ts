@@ -19,6 +19,11 @@ export type UnixTimeMs = number;
 
 export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
+export interface GraphSeries {
+  name: string;
+  values: Iterable<GraphSeriesValueTuple>;
+}
+
 export type EChartsValues = number | null | '-';
 
 export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {

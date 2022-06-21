@@ -22,7 +22,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { formatValue, UnitOptions } from '../model/units';
 import { EChart } from '../EChart';
-import { GraphSeriesValueTuple } from '../model/graph';
+import { GraphSeries } from '../model/graph';
 
 use([
   EChartsGaugeChart,
@@ -33,11 +33,6 @@ use([
   TooltipComponent,
   CanvasRenderer,
 ]);
-
-export interface GraphSeries {
-  name: string;
-  values: Iterable<GraphSeriesValueTuple>;
-}
 
 export interface StatChartData {
   calculatedValue: number | null | undefined;
