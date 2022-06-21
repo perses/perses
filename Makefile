@@ -37,8 +37,16 @@ tag:
 
 .PHONY: checkformat
 checkformat:
-	@echo ">> checking code format"
-	! $(GOFMT) -d $$(find . -name '*.go' -print) | grep '^' ;\
+	@echo ">> checking go code format"
+	! $(GOFMT) -d $$(find . -name '*.go' -not -path "./ui/*" -print) | grep '^'
+	@echo ">> running check for cue file format"
+	./scripts/cue.sh --checkformat
+
+.PHONY: checkunused
+checkunused:
+	@echo ">> running check for unused/missing packages in go.mod"
+	$(GO) mod tidy
+	@git diff --exit-code -- go.sum go.mod
 
 .PHONY: checkstyle
 checkstyle:
@@ -58,8 +66,8 @@ fixlicense:
 .PHONY: fmt
 fmt:
 	@echo ">> format code"
-	$(GO) fmt ./...
-	$(CUE) fmt ./schemas/...
+	$(GOFMT) -w -l $$(find . -name '*.go' -not -path "./ui/*" -print)
+	./scripts/cue.sh --fmt
 
 .PHONY: cue-eval
 cue-eval:
@@ -69,7 +77,7 @@ cue-eval:
 .PHONY: cue-test
 cue-test:
 	@echo ">> test cue schemas with json data"
-	./scripts/cue_test.sh
+	./scripts/cue.sh --test
 
 .PHONY: test
 test: generate

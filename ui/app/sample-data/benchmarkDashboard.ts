@@ -369,109 +369,116 @@ const benchmarkDashboard: DashboardResource = {
     layouts: [
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 1',
-          collapse: {
-            open: false,
+        spec: {
+          display: {
+            title: 'Row 1',
+            collapse: {
+              open: false,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/multiQueries' },
+              // content: { $ref: '#/spec/panels/cpu' },
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+              // content: { $ref: '#/spec/panels/seriesTest' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+          ],
         },
-        items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/cpu' },
-          //   // content: { $ref: '#/panels/seriesTestAlt' },
-          //   // content: { $ref: '#/panels/seriesTest' },
-          // },
-          // {
-          //   x: 12,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/basicEx' },
-          // },
-        ],
       },
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 2',
-          collapse: {
-            open: true,
+        spec: {
+          display: {
+            title: 'Row 2',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/cpu' },
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/doubleQueries' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/multiQueries' },
-            // content: { $ref: '#/panels/seriesTestAlt' },
-          },
-          {
-            x: 12,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/doubleQueries' },
-          },
-        ],
       },
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 3',
-          collapse: {
-            open: true,
+        spec: {
+          display: {
+            title: 'Row 3',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/spec/panels/statSm' },
+            },
+            {
+              x: 0,
+              y: 2,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/spec/panels/statRAM' },
+            },
+            {
+              x: 0,
+              y: 4,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/spec/panels/statTotalRAM' },
+            },
+            {
+              x: 2,
+              y: 0,
+              width: 4,
+              height: 6,
+              content: { $ref: '#/spec/panels/statMd' },
+            },
+            {
+              x: 6,
+              y: 0,
+              width: 10,
+              height: 6,
+              content: { $ref: '#/spec/panels/statLg' },
+            },
+            {
+              x: 16,
+              y: 0,
+              width: 8,
+              height: 6,
+              content: { $ref: '#/spec/panels/gaugeEx' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statSm' },
-          },
-          {
-            x: 0,
-            y: 2,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statRAM' },
-          },
-          {
-            x: 0,
-            y: 4,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statTotalRAM' },
-          },
-          {
-            x: 2,
-            y: 0,
-            width: 4,
-            height: 6,
-            content: { $ref: '#/panels/statMd' },
-          },
-          {
-            x: 6,
-            y: 0,
-            width: 10,
-            height: 6,
-            content: { $ref: '#/panels/statLg' },
-          },
-          {
-            x: 16,
-            y: 0,
-            width: 8,
-            height: 6,
-            content: { $ref: '#/panels/gaugeEx' },
-          },
-        ],
       },
     ],
   },

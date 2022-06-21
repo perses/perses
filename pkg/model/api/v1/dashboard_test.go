@@ -64,17 +64,20 @@ func TestMarshalDashboard(t *testing.T) {
 						}
 					`),
 					},
-					Entrypoint: &common.JSONRef{
-						Ref: "#/spec/layouts/main",
-					},
-					Layouts: map[string]*dashboard.Layout{
-						"main": {
-							Kind: dashboard.KindExpandLayout,
-							Parameter: dashboard.ExpandLayoutParameter{
-								Open: false,
-								Children: []*common.JSONRef{
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
 									{
-										Ref: "#/spec/panels/MyPanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref:  "#/spec/panels/MyPanel",
+											Path: []string{"spec", "panels", "MyPanel"},
+										},
 									},
 								},
 							},
@@ -111,22 +114,24 @@ func TestMarshalDashboard(t *testing.T) {
         }
       }
     },
-    "layouts": {
-      "main": {
-        "kind": "Expand",
-        "parameter": {
-          "open": false,
-          "children": [
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
             {
-              "$ref": "#/spec/panels/MyPanel"
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4,
+              "content": {
+                "$ref": "#/spec/panels/MyPanel"
+              }
             }
           ]
         }
       }
-    },
-    "entrypoint": {
-      "$ref": "#/spec/layouts/main"
-    }
+    ]
   }
 }`,
 		},
@@ -184,17 +189,20 @@ func TestMarshalDashboard(t *testing.T) {
 						}
 					`),
 					},
-					Entrypoint: &common.JSONRef{
-						Ref: "#/spec/layouts/main",
-					},
-					Layouts: map[string]*dashboard.Layout{
-						"main": {
-							Kind: dashboard.KindExpandLayout,
-							Parameter: dashboard.ExpandLayoutParameter{
-								Open: false,
-								Children: []*common.JSONRef{
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
 									{
-										Ref: "#/spec/panels/MyPanel",
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref:  "#/spec/panels/MyPanel",
+											Path: []string{"spec", "panels", "MyPanel"},
+										},
 									},
 								},
 							},
@@ -254,22 +262,24 @@ func TestMarshalDashboard(t *testing.T) {
         }
       }
     },
-    "layouts": {
-      "main": {
-        "kind": "Expand",
-        "parameter": {
-          "open": false,
-          "children": [
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
             {
-              "$ref": "#/spec/panels/MyPanel"
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4,
+              "content": {
+                "$ref": "#/spec/panels/MyPanel"
+              }
             }
           ]
         }
       }
-    },
-    "entrypoint": {
-      "$ref": "#/spec/layouts/main"
-    }
+    ]
   }
 }`,
 		},
@@ -281,4 +291,156 @@ func TestMarshalDashboard(t *testing.T) {
 			assert.Equal(t, test.result, string(data))
 		})
 	}
+}
+
+func TestUnmarshallDashboard(t *testing.T) {
+	jsonDashboard := `{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "SimpleDashboard",
+    "created_at": "0001-01-01T00:00:00Z",
+    "updated_at": "0001-01-01T00:00:00Z",
+    "project": "perses"
+  },
+  "spec": {
+    "datasource": {
+      "name": "PrometheusDemo",
+      "kind": "Prometheus",
+      "global": false
+    },
+    "duration": "6h",
+    "variables": {
+      "labelName": {
+        "kind": "LabelNamesQuery",
+        "hide": true,
+        "parameter": {
+          "matchers": [
+            "up"
+          ],
+          "capturing_regexp": "(.*)"
+        }
+      },
+      "labelValue": {
+        "kind": "LabelValuesQuery",
+        "hide": true,
+        "parameter": {
+          "label_name": "$labelName",
+          "matchers": [
+            "up"
+          ],
+          "capturing_regexp": "(.*)"
+        }
+      }
+    },
+    "panels": {
+      "MyPanel": {
+        "displayed_name": "simple line chart",
+        "kind": "LineChart",
+        "chart": {
+          "show_legend": false,
+          "lines": [
+            {
+              "expr": "up"
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4,
+              "content": {
+                "$ref": "#/spec/panels/MyPanel"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}`
+
+	panel := json.RawMessage(`{
+        "displayed_name": "simple line chart",
+        "kind": "LineChart",
+        "chart": {
+          "show_legend": false,
+          "lines": [
+            {
+              "expr": "up"
+            }
+          ]
+        }
+      }`)
+	expected := &Dashboard{
+		Kind: KindDashboard,
+		Metadata: ProjectMetadata{
+			Metadata: Metadata{
+				Name: "SimpleDashboard",
+			},
+			Project: "perses",
+		},
+		Spec: DashboardSpec{
+			Datasource: dashboard.Datasource{
+				Name: "PrometheusDemo",
+				Kind: datasource.PrometheusKind,
+			},
+			Duration: model.Duration(6 * time.Hour),
+			Variables: map[string]*dashboard.Variable{
+				"labelName": {
+					Kind: dashboard.KindLabelNamesQueryVariable,
+					Hide: true,
+					Parameter: &dashboard.LabelNamesQueryVariableParameter{
+						Matchers: []string{
+							"up",
+						},
+						CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
+					},
+				},
+				"labelValue": {
+					Kind: dashboard.KindLabelValuesQueryVariable,
+					Hide: true,
+					Parameter: &dashboard.LabelValuesQueryVariableParameter{
+						LabelName: "$labelName",
+						Matchers: []string{
+							"up",
+						},
+						CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
+					},
+				},
+			},
+			Panels: map[string]json.RawMessage{"MyPanel": panel},
+			Layouts: []dashboard.Layout{
+				{
+					Kind: dashboard.KindGridLayout,
+					Spec: &dashboard.GridLayoutSpec{
+						Items: []dashboard.GridItem{
+							{
+								X:      0,
+								Y:      0,
+								Width:  3,
+								Height: 4,
+								Content: &common.JSONRef{
+									Ref:    "#/spec/panels/MyPanel",
+									Path:   []string{"spec", "panels", "MyPanel"},
+									Object: panel,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	result := &Dashboard{}
+	err := json.Unmarshal([]byte(jsonDashboard), result)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, result)
 }

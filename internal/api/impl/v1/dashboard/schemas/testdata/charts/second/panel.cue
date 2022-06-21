@@ -14,21 +14,21 @@
 package second
 
 #panel: {
-  kind: "AverageChart",
+	kind: "AverageChart"
 	display: {
 		name: string
 	}
 	options: {
-    a: string,
-    b: {
-      c?: bool
-      d: [...#e]
-    }
-  }
+		a: string
+		b: {
+			c?: bool
+			d: [...#e]
+		}
+	}
 }
 
 #e: {
-  f: number
+	f: number
 }
 
 #panel

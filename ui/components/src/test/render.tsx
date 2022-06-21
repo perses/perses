@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
-import shared from '../jest.shared';
+import { render, RenderOptions } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
+const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
 
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
-};
-
-export default jestConfig;
+/**
+ * Test helper to render a React component with some common app-level providers wrapped around it.
+ */
+export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
+}

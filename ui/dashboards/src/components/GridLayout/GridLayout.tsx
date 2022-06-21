@@ -28,17 +28,17 @@ export interface GridLayoutProps extends BoxProps {
  */
 export function GridLayout(props: GridLayoutProps) {
   const {
-    definition: { display, items },
+    definition: { spec },
     renderGridItemContent,
     ...others
   } = props;
 
-  const [isOpen, setIsOpen] = useState(display?.collapse?.open ?? true);
+  const [isOpen, setIsOpen] = useState(spec.display?.collapse?.open ?? true);
 
   const gridItems: React.ReactNode[] = [];
   let mobileRowStart = 1;
 
-  items.forEach((item, idx) => {
+  spec.items.forEach((item, idx) => {
     // Try to maintain the chart's aspect ratio on mobile
     const widthScale = COLUMNS / item.width;
     const mobileRows = Math.floor(item.height * widthScale);
@@ -66,11 +66,11 @@ export function GridLayout(props: GridLayoutProps) {
 
   return (
     <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
-      {display !== undefined && (
+      {spec.display !== undefined && (
         <GridTitle
-          title={display.title}
+          title={spec.display.title}
           collapse={
-            display.collapse === undefined
+            spec.display.collapse === undefined
               ? undefined
               : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
           }
