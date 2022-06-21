@@ -17,9 +17,9 @@ import { zip } from 'lodash-es';
 // TODO (sjcobb): pull threshold colors from perses charts theme
 export const ThresholdColors = {
   GREEN: 'rgba(115, 191, 105, 1)',
-  YELLOW: '#ffc107',
+  YELLOW: 'rgba(255, 193, 7, 1)',
   ORANGE: 'rgba(253, 126, 20, 0.9)',
-  RED: '#dc3545',
+  RED: 'rgba(220, 53, 69, 1)',
 };
 
 export const ThresholdColorsPalette = [ThresholdColors.ORANGE, ThresholdColors.RED];
