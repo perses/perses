@@ -42,6 +42,7 @@ import { formatValue, UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { emptyTooltipData } from '../Tooltip/tooltip-model';
 import { Tooltip } from '../Tooltip/Tooltip';
+import { enableDataZoom, getDateRange, getFormattedDate, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -57,13 +58,6 @@ use([
   VisualMapComponent,
   CanvasRenderer,
 ]);
-
-export interface ZoomEventData {
-  start: number;
-  end: number;
-  startIndex: number;
-  endIndex: number;
-}
 
 interface LineChartProps {
   height: number;
@@ -103,20 +97,8 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
     };
   }, [data, onDataZoom]);
 
-  // enable data zoom by default w/o clicking toolbox icon
   if (chartRef.current !== undefined) {
-    const chart = chartRef.current;
-    const chartModel = chart['_model'];
-    if (chartModel !== undefined && chartModel.option.toolbox.length > 0) {
-      // check if hidden data zoom icon is unselected (if selected it would be 'emphasis' instead of 'normal')
-      if (chartModel.option.toolbox[0].feature.dataZoom.iconStatus.zoom === 'normal') {
-        chart.dispatchAction({
-          type: 'takeGlobalCursor',
-          key: 'dataZoomSelect',
-          dataZoomSelectActive: true,
-        });
-      }
-    }
+    enableDataZoom(chartRef.current);
   }
 
   const handleOnDoubleClick = () => {
@@ -229,33 +211,4 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
       />
     </Box>
   );
-}
-
-// fallback when xAxis time range not passed as prop
-function getDateRange(data: number[]) {
-  const defaultRange = 3600000; // hour in ms
-  if (data.length === 0) return defaultRange;
-  const lastDatum = data[data.length - 1];
-  if (data[0] === undefined || lastDatum === undefined) return defaultRange;
-  return lastDatum - data[0];
-}
-
-// determines time granularity for axis labels, defaults to hh:mm
-function getFormattedDate(value: number, rangeMs: number) {
-  const dateFormatOptions: Intl.DateTimeFormatOptions = {
-    hour: 'numeric',
-    minute: 'numeric',
-    hourCycle: 'h23',
-  };
-  const thirtyMinMs = 1800000;
-  const dayMs = 86400000;
-  if (rangeMs <= thirtyMinMs) {
-    dateFormatOptions.second = 'numeric';
-  } else if (rangeMs >= dayMs) {
-    dateFormatOptions.month = 'numeric';
-    dateFormatOptions.day = 'numeric';
-  }
-  const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
-  // remove comma when month / day present
-  return DATE_FORMAT.format(value).replace(/, /g, ' ');
 }
