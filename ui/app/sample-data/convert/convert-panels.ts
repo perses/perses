@@ -131,6 +131,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefi
       unit: {
         kind: 'Decimal',
         decimal_places: statPanel.decimals ?? 2,
+        abbreviate: true,
       },
     },
   };
