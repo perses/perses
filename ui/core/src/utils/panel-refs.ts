@@ -18,7 +18,7 @@ import { DashboardSpec, PanelRef } from '../model';
  * a PanelDefinition.
  */
 export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
-  const panelsKey = panelRef.$ref.substring(9);
+  const panelsKey = panelRef.$ref.substring(14);
   const panelDefinition = spec.panels[panelsKey];
   if (panelDefinition === undefined) {
     throw new Error(`Could not resolve panels reference ${panelRef.$ref}`);

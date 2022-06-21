@@ -11,24 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package first
+import { render, RenderOptions } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-#panel: {
-	kind: "AwesomeChart"
-	display: {
-		name: string
-	}
-	options: {
-		a: string
-		b: {
-			c: [...#d]
-		}
-	}
+const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
+
+/**
+ * Test helper to render a React component with some common app-level providers wrapped around it.
+ */
+export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
 }
-
-#d: {
-	e:  string
-	f?: string
-}
-
-#panel

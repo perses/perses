@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 
 const benchmarkDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -20,10 +20,11 @@ const benchmarkDashboard: DashboardResource = {
     project: 'perses',
     created_at: '2021-11-09',
     updated_at: '2021-11-09',
+    version: 0,
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '6h',
+    duration: '12h',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',
@@ -37,7 +38,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: 'node',
         },
-      } as AnyVariableDefinition,
+      },
       instance: {
         kind: 'PrometheusLabelValues',
         options: {
@@ -51,7 +52,7 @@ const benchmarkDashboard: DashboardResource = {
           default_value: ['demo.do.prometheus.io:9100'],
           all_value: '$__all',
         },
-      } as AnyVariableDefinition,
+      },
       interval: {
         kind: 'Interval',
         options: {
@@ -67,7 +68,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: '1h',
         },
-      } as AnyVariableDefinition,
+      },
     },
     panels: {
       seriesTest: {
@@ -120,8 +121,7 @@ const benchmarkDashboard: DashboardResource = {
       },
       multiQueries: {
         kind: 'LineChart',
-        // display: { name: 'Multi Queries' },
-        display: { name: 'Legend Example' },
+        display: { name: 'Multi Queries' },
         options: {
           queries: [
             {
@@ -150,14 +150,12 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          show_legend: true,
           unit: { kind: 'Bytes' },
         },
       },
       doubleQueries: {
         kind: 'LineChart',
-        // display: { name: 'Double Queries' },
-        display: { name: 'Thresholds Example' },
+        display: { name: 'Double Queries' },
         options: {
           queries: [
             {
@@ -174,30 +172,7 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          show_legend: false,
-          unit: {
-            kind: 'PercentDecimal',
-            decimal_places: 1,
-          },
-          thresholds: {
-            // default_color: '#000', // optional
-            steps: [
-              {
-                value: 0.4,
-                name: 'Alert: Warning condition example',
-                // color: '#FFFFFF',
-              },
-              {
-                value: 0.75,
-                name: 'Alert: Critical condition example',
-                // color: '#0000FF', // blue
-              },
-              // {
-              //   value: 0.9,
-              //   name: 'Default Color Test',
-              // },
-            ],
-          },
+          // unit: { kind: 'Bytes' },
         },
       },
       cpu: {
@@ -213,12 +188,7 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          // unit: { kind: '%' },
-          unit: {
-            kind: 'Decimal',
-            decimal_places: 2,
-          },
-          show_legend: true,
+          unit: { kind: '%' },
         },
       },
       statSm: {
@@ -231,14 +201,14 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
             },
           },
-          calculation: 'Mean',
+          calculation: 'Sum',
           unit: {
             kind: 'Decimal',
-            decimal_places: 1,
-            abbreviate: true,
+            decimal_places: 2,
+            suffix: 'kilogram', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
           // sparkline: {},
           // thresholds: {
@@ -277,8 +247,8 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: {
-            kind: 'Bytes',
-            decimal_places: 1,
+            kind: 'Decimal',
+            suffix: 'byte',
           },
         },
       },
@@ -292,26 +262,25 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
+                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+              // '((node_memory_SwapTotal_bytes{job="node",instance="$instance"} - node_memory_SwapFree_bytes{job="node",instance="$instance"}) / (node_memory_SwapTotal_bytes{job="node",instance="$instance"} )) * 100',
             },
           },
-          calculation: 'Sum',
+          calculation: 'Mean',
           unit: {
             kind: 'Decimal',
-            decimal_places: 2,
-            abbreviate: true,
+            decimal_places: 4,
+            // suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
           },
-          // thresholds: {
-          //   default_color: '#e65013',
-          // },
+          thresholds: {
+            default_color: '#EA4747',
+          },
           sparkline: {
-            line_color: '#e65013',
-            area_color: '#a3390f',
-            // line_color: '#FFE3E3',
-            // line_width: 1.5,
-            // line_opacity: 0.6,
-            // area_color: '#FFBABA',
-            // area_opacity: 0.4,
+            line_color: '#FFE3E3',
+            line_width: 1.5,
+            line_opacity: 0.6,
+            area_color: '#FFBABA',
+            area_opacity: 0.4,
           },
         },
       },
@@ -330,10 +299,21 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'Mean', // 'First', 'Last', 'LastNumber'
           unit: {
-            kind: 'Percent', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years',
+            kind: 'Decimal', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#unit_formatting
+            suffix: 'gigabyte',
           },
-          sparkline: {
-            area_opacity: 0.2,
+          sparkline: {},
+          thresholds: {
+            default_color: '#1473E6', // blue
+            steps: [
+              {
+                value: 85,
+              },
+              {
+                value: 95,
+              },
+            ],
           },
         },
       },
@@ -369,109 +349,116 @@ const benchmarkDashboard: DashboardResource = {
     layouts: [
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 1',
-          collapse: {
-            open: false,
+        spec: {
+          display: {
+            title: 'Row 1',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/multiQueries' },
+              // content: { $ref: '#/spec/panels/cpu' },
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+              // content: { $ref: '#/spec/panels/seriesTest' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+          ],
         },
-        items: [
-          // {
-          //   x: 0,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/cpu' },
-          //   // content: { $ref: '#/panels/seriesTestAlt' },
-          //   // content: { $ref: '#/panels/seriesTest' },
-          // },
-          // {
-          //   x: 12,
-          //   y: 0,
-          //   width: 12,
-          //   height: 6,
-          //   content: { $ref: '#/panels/basicEx' },
-          // },
-        ],
       },
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 2',
-          collapse: {
-            open: true,
+        spec: {
+          display: {
+            title: 'Row 2',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/cpu' },
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/doubleQueries' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/multiQueries' },
-            // content: { $ref: '#/panels/seriesTestAlt' },
-          },
-          {
-            x: 12,
-            y: 0,
-            width: 12,
-            height: 6,
-            content: { $ref: '#/panels/doubleQueries' },
-          },
-        ],
       },
       {
         kind: 'Grid',
-        display: {
-          title: 'Row 3',
-          collapse: {
-            open: true,
+        spec: {
+          display: {
+            title: 'Row 3',
+            collapse: {
+              open: true,
+            },
           },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/spec/panels/statSm' },
+            },
+            {
+              x: 0,
+              y: 2,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/spec/panels/statRAM' },
+            },
+            {
+              x: 0,
+              y: 4,
+              width: 2,
+              height: 2,
+              content: { $ref: '#/spec/panels/statTotalRAM' },
+            },
+            {
+              x: 2,
+              y: 0,
+              width: 4,
+              height: 6,
+              content: { $ref: '#/spec/panels/statMd' },
+            },
+            {
+              x: 6,
+              y: 0,
+              width: 10,
+              height: 6,
+              content: { $ref: '#/spec/panels/statLg' },
+            },
+            {
+              x: 16,
+              y: 0,
+              width: 8,
+              height: 6,
+              content: { $ref: '#/spec/panels/gaugeEx' },
+            },
+          ],
         },
-        items: [
-          {
-            x: 0,
-            y: 0,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statSm' },
-          },
-          {
-            x: 0,
-            y: 2,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statRAM' },
-          },
-          {
-            x: 0,
-            y: 4,
-            width: 2,
-            height: 2,
-            content: { $ref: '#/panels/statTotalRAM' },
-          },
-          {
-            x: 2,
-            y: 0,
-            width: 4,
-            height: 6,
-            content: { $ref: '#/panels/statMd' },
-          },
-          {
-            x: 6,
-            y: 0,
-            width: 10,
-            height: 6,
-            content: { $ref: '#/panels/statLg' },
-          },
-          {
-            x: 16,
-            y: 0,
-            width: 8,
-            height: 6,
-            content: { $ref: '#/panels/gaugeEx' },
-          },
-        ],
       },
     ],
   },

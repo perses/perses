@@ -29,10 +29,12 @@ import (
 
 var (
 	mimeType = map[string]string{
+		".cjs":   "text/javascript",
 		".js":    "text/javascript",
 		".css":   "text/css",
 		".html":  "text/html; charset=UTF-8",
-		".ico":   "image/vnd.microsoft.icon",
+		".txt":   "text/plain",
+		".ico":   "image/x-icon",
 		".png":   "image/png",
 		".svg":   "image/svg+xml",
 		".otf":   "font/otf",
@@ -40,7 +42,6 @@ var (
 		".woff2": "font/woff2",
 		".ttf":   "font/ttf",
 		".eot":   "font/eot",
-		".txt":   "text/plain",
 	}
 	conv             = map[string]interface{}{"conv": fmtByteSlice}
 	endpointTemplate = template.Must(
