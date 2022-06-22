@@ -36,6 +36,14 @@ export function enableDataZoom(chart: EChartsInstance) {
   }
 }
 
+// restore chart to original state before zoom or other actions were dispatched
+// TODO: support incremental unzoom instead of restore to original state
+export function restoreChart(chart: EChartsInstance) {
+  chart.dispatchAction({
+    type: 'restore', // https://echarts.apache.org/en/api.html#events.restore
+  });
+}
+
 // fallback when xAxis time range not passed as prop
 export function getDateRange(data: number[]) {
   const defaultRange = 3600000; // hour in ms

@@ -42,7 +42,7 @@ import { formatValue, UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { emptyTooltipData } from '../Tooltip/tooltip-model';
 import { Tooltip } from '../Tooltip/Tooltip';
-import { enableDataZoom, getDateRange, getFormattedDate, ZoomEventData } from './utils';
+import { enableDataZoom, restoreChart, getDateRange, getFormattedDate, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -103,11 +103,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleOnDoubleClick = () => {
     if (chartRef.current !== undefined) {
-      const chart = chartRef.current;
-      // TODO: support incremental unzoom instead of restore to original state
-      chart.dispatchAction({
-        type: 'restore', // https://echarts.apache.org/en/api.html#events.restore
-      });
+      restoreChart(chartRef.current);
     }
   };
 
