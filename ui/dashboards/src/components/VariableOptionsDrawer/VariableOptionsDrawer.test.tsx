@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fireEvent, screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { JsonObject, VariableDefinition } from '@perses-dev/core';
 import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
 import { mockPluginRegistryProps, renderWithContext } from '../../test';
@@ -83,16 +83,9 @@ describe('VariableOptionsDrawer', () => {
     it('should display correct options', async () => {
       renderVariableOptionsDrawer();
       const openButton = await screen.findByRole('button', { name: 'Open' });
-      act(() => {
-        fireEvent(
-          openButton,
-          new MouseEvent('click', {
-            bubbles: true,
-          })
-        );
-      });
+      userEvent.click(openButton);
       await screen.findByText('all');
-      await screen.findByText('node');
+      screen.getByText('node');
     });
   });
 });

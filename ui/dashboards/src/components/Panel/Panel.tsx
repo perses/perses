@@ -70,8 +70,14 @@ export function Panel(props: PanelProps) {
               {definition.display.name}
             </Typography>
             {definition.display.description && (
-              <InfoTooltip description={definition.display.description} placement={TooltipPlacement.Right}>
+              <InfoTooltip
+                id="info-tooltip"
+                description={definition.display.description}
+                placement={TooltipPlacement.Right}
+              >
                 <InformationOutlineIcon
+                  aria-describedby="info-tooltip"
+                  aria-hidden={false}
                   sx={{ fontSize: '1rem', position: 'relative', left: '4px', cursor: 'pointer' }}
                 />
               </InfoTooltip>

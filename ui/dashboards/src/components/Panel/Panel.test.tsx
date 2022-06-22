@@ -57,6 +57,6 @@ describe('Panel', () => {
   it('should render name and info icon', async () => {
     renderPanel();
     await screen.findByText('Fake Panel');
-    await screen.findByTestId('InformationOutlineIcon');
+    screen.queryByLabelText('info-tooltip');
   });
 });

@@ -30,13 +30,19 @@ export enum TooltipPlacement {
 interface InfoTooltipProps {
   description: string;
   children: React.ReactNode;
+  id?: string;
   title?: string;
   placement?: TooltipPlacement;
 }
 
-export const InfoTooltip = ({ title, description, placement, children }: InfoTooltipProps) => {
+export const InfoTooltip = ({ id, title, description, placement, children }: InfoTooltipProps) => {
   return (
-    <StyledTooltip arrow placement={placement} title={<TooltipContent title={title} description={description} />}>
+    <StyledTooltip
+      arrow
+      id={id}
+      placement={placement}
+      title={<TooltipContent title={title} description={description} />}
+    >
       <div>{children}</div>
     </StyledTooltip>
   );
@@ -51,7 +57,6 @@ const TooltipContent = ({ title, description }: Pick<InfoTooltipProps, 'title' |
           sx={(theme) => ({
             color: theme.palette.text.primary,
             fontWeight: theme.typography.fontWeightMedium,
-            lineHeight: '1.25rem',
           })}
         >
           {title}
@@ -61,7 +66,6 @@ const TooltipContent = ({ title, description }: Pick<InfoTooltipProps, 'title' |
         variant="caption"
         sx={(theme) => ({
           color: theme.palette.text.primary,
-          lineHeight: '1.38rem',
         })}
       >
         {description}
@@ -78,7 +82,7 @@ const StyledTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
     color: theme.palette.grey[900],
     maxWidth: '300px',
     padding: theme.spacing(1),
-    boxShadow: '0px 1px 1px 0px #00000033',
+    boxShadow: theme.shadows[1],
   },
   [`& .${tooltipClasses.arrow}`]: {
     color: theme.palette.background.paper,

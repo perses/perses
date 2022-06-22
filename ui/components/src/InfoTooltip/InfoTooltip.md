@@ -12,9 +12,10 @@ Info tooltip displays informative text when users hover over, focus on, or tap a
 
 ## Props
 
-| Name        |                                                        |
-| ----------- | ------------------------------------------------------ |
-| description | informative text in the tooltip                        |
-| children    | the element with the tooltip                           |
-| title       | [optional] title of the tooltip content                |
-| placement   | [optional] placement of the tooltip. default is bottom |
+| Name        |                                                                                               |
+| ----------- | --------------------------------------------------------------------------------------------- | --- |
+| description | informative text in the tooltip                                                               |
+| children    | the element with the tooltip                                                                  |
+| id          | [optional] used to help implement the accessibility logic. default is a randomly generated id |     |
+| title       | [optional] title of the tooltip content                                                       |
+| placement   | [optional] placement of the tooltip. default is bottom                                        |

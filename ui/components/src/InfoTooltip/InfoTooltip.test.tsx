@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { act, render } from '@testing-library/react';
-import { fireEvent, screen } from '@testing-library/dom';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/dom';
 import { InfoTooltip } from './InfoTooltip';
 
 describe('InfoTooltip', () => {
@@ -26,15 +26,8 @@ describe('InfoTooltip', () => {
       </InfoTooltip>
     );
     const tooltipAnchor = screen.getByText('tooltipAnchor');
-    act(() => {
-      fireEvent(
-        tooltipAnchor,
-        new MouseEvent('mouseover', {
-          bubbles: true,
-        })
-      );
-    });
+    userEvent.hover(tooltipAnchor);
     await screen.findByText(title);
-    await screen.findByText(description);
+    screen.findByText(description);
   });
 });
