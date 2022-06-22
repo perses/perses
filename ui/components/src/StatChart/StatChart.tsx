@@ -111,6 +111,8 @@ export function StatChart(props: StatChartProps) {
     return option;
   }, [data, chartsTheme, sparkline]);
 
+  const PANEL_PADDING = 32;
+
   return (
     <Box>
       <Typography
@@ -125,7 +127,7 @@ export function StatChart(props: StatChartProps) {
       {sparkline !== undefined && (
         <EChart
           sx={{
-            width: width + 32, // allows sparkline to extend to edge of panel
+            width: width + PANEL_PADDING, // allows sparkline to extend to edge of panel
             height: height,
             position: 'absolute',
             bottom: 0,

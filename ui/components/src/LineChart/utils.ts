@@ -23,16 +23,15 @@ export interface ZoomEventData {
 // enable dataZoom without requring user to click toolbox icon
 export function enableDataZoom(chart: EChartsInstance) {
   const chartModel = chart['_model'];
-  if (chartModel !== undefined) {
-    if (chartModel.option.toolbox !== undefined && chartModel.option.toolbox.length > 0) {
-      // check if hidden data zoom icon is unselected (if selected it would be 'emphasis' instead of 'normal')
-      if (chartModel.option.toolbox[0].feature.dataZoom.iconStatus.zoom === 'normal') {
-        chart.dispatchAction({
-          type: 'takeGlobalCursor',
-          key: 'dataZoomSelect',
-          dataZoomSelectActive: true,
-        });
-      }
+  if (chartModel !== undefined) return;
+  if (chartModel.option.toolbox !== undefined && chartModel.option.toolbox.length > 0) {
+    // check if hidden data zoom icon is unselected (if selected it would be 'emphasis' instead of 'normal')
+    if (chartModel.option.toolbox[0].feature.dataZoom.iconStatus.zoom === 'normal') {
+      chart.dispatchAction({
+        type: 'takeGlobalCursor',
+        key: 'dataZoomSelect',
+        dataZoomSelectActive: true,
+      });
     }
   }
 }
