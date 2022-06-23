@@ -11,31 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stat
+import { render, RenderOptions } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-import (
-	"github.com/perses/perses/schemas/common"
-	"github.com/perses/perses/schemas/common/prometheus"
-)
+const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
 
-#sparkline: {
-	line_color?:   string
-	line_width?:   number
-	line_opacity?: number
-	area_color?:   string
-	area_opacity?: number
+/**
+ * Test helper to render a React component with some common app-level providers wrapped around it.
+ */
+export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
 }
-
-#panel: {
-	kind:    "StatChart"
-	display: common.#display
-	options: {
-		query:       prometheus.#query
-		calculation: common.#calculation
-		unit:        common.#unit
-		thresholds?: common.#thresholds
-		sparkline?:  #sparkline
-	}
-}
-
-#panel

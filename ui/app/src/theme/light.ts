@@ -21,5 +21,13 @@ export const getLightTheme = () => {
       },
       MuiButton: {},
     },
+    palette: {
+      secondary: {
+        main: '#F0F1F6',
+      },
+      text: {
+        primary: '#2A2E42',
+      },
+    },
   });
 };

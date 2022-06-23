@@ -1,7 +1,8 @@
 {
   "kind": "GaugeChart",
   "display": {
-    "name": "CPU Busy"
+    "name": "CPU Busy",
+    "description": "This is a gauge chart"
   },
   "options": {
     "query": {

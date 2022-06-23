@@ -15,8 +15,8 @@ import { Paper, Typography, PaperProps } from '@mui/material';
 import { ErrorAlert, combineSx } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/core';
 import { PluginBoundary, useTemplateVariables } from '@perses-dev/plugin-system';
-import { useTemplateVariablesSetters } from '../context';
-import { VariableAutocomplete } from './VariableAutocomplete';
+import { useTemplateVariablesSetters } from '../../context';
+import { VariableAutocomplete } from '../VariableAutocomplete';
 
 const DRAWER_WIDTH = 296;
 

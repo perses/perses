@@ -22,6 +22,9 @@ export const getDarkTheme = () => {
         default: '#121212', // mui default
         paper: '#191d21', // prom dkgrey
       },
+      secondary: {
+        main: '#3E4662',
+      },
       // Reverse greys from darkest to lightest for Dark mode
       grey: {
         100: grey[900],
@@ -33,6 +36,9 @@ export const getDarkTheme = () => {
         700: grey[300],
         800: grey[200],
         900: grey[100],
+      },
+      text: {
+        primary: '#fff',
       },
     },
   });

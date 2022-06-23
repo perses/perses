@@ -19,10 +19,8 @@ import (
 )
 
 #panel: {
-	kind: "GaugeChart"
-	display: {
-		name: string
-	}
+	kind:    "GaugeChart"
+	display: common.#display
 	options: {
 		query:       prometheus.#query
 		calculation: common.#calculation

@@ -1,7 +1,8 @@
 {
   "kind": "LineChart",
   "display": {
-    "name": "CPU"
+    "name": "CPU",
+    "description": "This is a line" 
   },
   "options": {
     "queries": [
