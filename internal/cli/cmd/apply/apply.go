@@ -96,7 +96,7 @@ func (o *option) Execute() error {
 		}
 
 		if outputError := cmdUtils.HandleSuccessResourceMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {
-			return err
+			return outputError
 		}
 	}
 	return nil
