@@ -37,8 +37,8 @@ export function Panel(props: PanelProps) {
     return { width, height };
   }, [width, height]);
 
-  // TODO: consistent way to determine isLargePanel here and in StatChart
-  const panelPadding = width !== undefined && width < 150 ? 1 : 2;
+  // TODO: adjust padding for small panels, consistent way to determine isLargePanel here and in StatChart
+  const panelPadding = 1.5;
 
   return (
     <Card
