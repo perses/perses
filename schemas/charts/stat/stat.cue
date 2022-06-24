@@ -19,8 +19,8 @@ import (
 )
 
 #sparkline: {
-	color?:   string
-	width?:   number
+	color?: string
+	width?: number
 }
 
 #panel: {
