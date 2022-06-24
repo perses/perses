@@ -11,19 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, PanelDefinition } from '@perses-dev/core';
+import { JsonObject } from '@perses-dev/core';
 import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
 import { screen } from '@testing-library/react';
-import { renderWithContext, mockPluginRegistryProps } from '../test';
-import { Panel } from './Panel';
-
-const TEST_DEFINITION: PanelDefinition = {
-  kind: 'FakePanel',
-  display: {
-    name: 'My test panel',
-  },
-  options: {},
-};
+import { renderWithContext, mockPluginRegistryProps } from '../../test';
+import { Panel, PanelProps } from './Panel';
 
 const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
   pluginType: 'Panel',
@@ -36,6 +28,20 @@ const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
 };
 
 describe('Panel', () => {
+  let props: PanelProps;
+  beforeEach(() => {
+    props = {
+      definition: {
+        display: {
+          name: 'Fake Panel',
+          description: 'This is a fake panel',
+        },
+        kind: 'FakePanel',
+        options: {},
+      },
+    };
+  });
+
   // Helper to render the panel with some context set
   const renderPanel = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
@@ -43,16 +49,14 @@ describe('Panel', () => {
 
     renderWithContext(
       <PluginRegistry {...pluginRegistryProps}>
-        <Panel definition={TEST_DEFINITION} />
+        <Panel {...props} />
       </PluginRegistry>
     );
   };
 
-  it('should render Panel', async () => {
+  it('should render name and info icon', async () => {
     renderPanel();
-
-    const chart = await screen.findByRole('figure');
-    expect(chart).toBeInTheDocument();
-    expect(chart).toHaveTextContent('FakePanel chart');
+    await screen.findByText('Fake Panel');
+    screen.queryByLabelText('info-tooltip');
   });
 });

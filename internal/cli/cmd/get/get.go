@@ -64,7 +64,7 @@ func (o *option) Complete(args []string) error {
 
 	svc, svcErr := cmdUtilsService.NewService(o.kind, o.project, apiClient)
 	if svcErr != nil {
-		return err
+		return svcErr
 	}
 	o.resourceService = svc
 	return nil

@@ -19,6 +19,7 @@ import { Definition, JsonObject } from './definitions';
 export interface PanelDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
   display: {
     name: string;
+    description?: string;
   };
 }
 

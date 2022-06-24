@@ -19,10 +19,8 @@ import (
 )
 
 #panel: {
-	kind: "LineChart"
-	display: {
-		name: string
-	}
+	kind:    "LineChart"
+	display: common.#display
 	options: {
 		queries: [...prometheus.#query]
 		show_legend?: bool

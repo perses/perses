@@ -13,6 +13,6 @@
 
 export * from './Dashboard';
 export * from './GridLayout';
-export * from './Panel';
+export * from './Panel/Panel';
 export * from './VariableAutocomplete';
-export * from './VariableOptionsDrawer';
+export * from './VariableOptionsDrawer/VariableOptionsDrawer';
