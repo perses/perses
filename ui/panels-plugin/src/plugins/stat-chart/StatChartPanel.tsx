@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { JsonObject } from '@perses-dev/core';
-import { StatChart, StatChartData, UnitOptions } from '@perses-dev/components';
+import { StatChart, StatChartData, UnitOptions, useChartsTheme, PersesChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
@@ -26,11 +26,8 @@ export const StatChartKind = 'StatChart' as const;
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export interface SparklineOptions extends JsonObject {
-  line_color?: string;
-  line_width?: number;
-  line_opacity?: number;
-  area_color?: string;
-  area_opacity?: number;
+  color?: string;
+  width?: number;
 }
 
 interface StatChartOptions extends JsonObject {
@@ -53,6 +50,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
   const chartData = useChartData(data, calculation, name);
+  const chartsTheme = useChartsTheme();
 
   if (error) throw error;
 
@@ -76,7 +74,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       height={contentDimensions.height}
       data={chartData}
       unit={unit}
-      sparkline={convertSparkline(sparkline)}
+      sparkline={convertSparkline(chartsTheme, sparkline)}
     />
   );
 }
@@ -101,19 +99,21 @@ const useChartData = (data: GraphData | undefined, calculation: CalculationType,
   }, [data, calculation, name]);
 };
 
-export function convertSparkline(sparkline?: SparklineOptions): LineSeriesOption | undefined {
+export function convertSparkline(
+  chartsTheme: PersesChartsTheme,
+  sparkline?: SparklineOptions
+): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
 
-  // TODO (sjcobb): define long-term approach for perses format conversion, add unit test
   return {
     lineStyle: {
-      width: sparkline.line_width ?? 2,
-      color: sparkline.line_color ?? '#1976d2',
-      opacity: sparkline.line_opacity ?? 1,
+      width: sparkline.width ?? chartsTheme.sparkline.width,
+      color: sparkline.color ?? chartsTheme.sparkline.color,
+      opacity: 1,
     },
     areaStyle: {
-      color: sparkline.area_color ?? '#1976d2',
-      opacity: sparkline.area_opacity ?? 0.6,
+      color: sparkline.color ?? chartsTheme.sparkline.color,
+      opacity: 0.4,
     },
   };
 }

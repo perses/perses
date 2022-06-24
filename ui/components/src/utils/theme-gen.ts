@@ -17,15 +17,14 @@ import { EChartsTheme, PersesChartsTheme } from '../model';
 
 const DEFAULT_TEXT_COLOR = '#222';
 
-export function useGenerateChartsTheme(themeName: string, echartsThemeOverrides: EChartsTheme): PersesChartsTheme {
+export function useGenerateChartsTheme(
+  themeName: string,
+  echartsThemeOverrides: EChartsTheme
+): PersesChartsTheme | undefined {
   const muiTheme = useTheme();
 
   if (muiTheme.typography === undefined || muiTheme.palette === undefined || muiTheme.palette.grey === undefined) {
-    return {
-      themeName,
-      echartsTheme: echartsThemeOverrides,
-      noDataOption: {},
-    };
+    return;
   }
 
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
@@ -180,7 +179,7 @@ export function useGenerateChartsTheme(themeName: string, echartsThemeOverrides:
         show: false,
       },
     },
-    // TODO: should non-echarts specific theme overrides match panel definition?
+    // TODO: add colors to MUI theme?
     sparkline: {
       width: 2,
       color: '#1976d2',

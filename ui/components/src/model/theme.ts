@@ -17,11 +17,11 @@ export interface PersesChartsTheme {
   themeName: string;
   echartsTheme: EChartsTheme;
   noDataOption: EChartsCoreOption;
-  sparkline?: {
+  sparkline: {
     width: number;
     color: string;
   };
-  thresholdColors?: {
+  thresholdColors: {
     green: string;
     yellow: string;
     orange: string;

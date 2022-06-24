@@ -224,7 +224,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Sm',
-          description: 'This is a stat chart'
+          // description: 'This is a stat chart',
         },
         options: {
           query: {
@@ -250,7 +250,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'RAM Used',
-          description: 'This is a stat chart'
+          description: 'This is a stat chart',
         },
         options: {
           query: {
@@ -288,7 +288,7 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Md',
-          description: 'This is a stat chart',
+          // description: 'This is a stat chart',
         },
         options: {
           query: {
@@ -304,17 +304,9 @@ const benchmarkDashboard: DashboardResource = {
             decimal_places: 2,
             abbreviate: true,
           },
-          // thresholds: {
-          //   default_color: '#e65013',
-          // },
           sparkline: {
-            line_color: '#e65013',
-            area_color: '#a3390f',
-            // line_color: '#FFE3E3',
-            // line_width: 1.5,
-            // line_opacity: 0.6,
-            // area_color: '#FFBABA',
-            // area_opacity: 0.4,
+            color: '#e65013', // red
+            width: 1.5,
           },
         },
       },

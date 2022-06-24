@@ -19,11 +19,8 @@ import (
 )
 
 #sparkline: {
-	line_color?:   string
-	line_width?:   number
-	line_opacity?: number
-	area_color?:   string
-	area_opacity?: number
+	color?:   string
+	width?:   number
 }
 
 #panel: {
