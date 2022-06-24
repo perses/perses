@@ -11,12 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './LineChart';
-export * from './GaugeChart';
-export * from './StatChart';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
+export * from './Tooltip';
+export * from './TooltipContent';
+export * from './tooltip-model';
+export * from './SeriesMarker';
+export * from './SeriesInfo';
+export * from './focused-series';

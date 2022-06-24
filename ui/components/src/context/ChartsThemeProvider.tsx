@@ -17,17 +17,17 @@ import { PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
   themeName: string;
-  persesTheme: PersesChartsTheme;
+  chartsTheme: PersesChartsTheme;
   children?: React.ReactNode;
 }
 
 export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
-  const { children, themeName, persesTheme } = props;
+  const { children, themeName, chartsTheme } = props;
 
   // register ECharts theme to be used in individual charts, see: https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-  registerTheme(themeName, persesTheme.theme);
+  registerTheme(themeName, chartsTheme.echartsTheme);
 
-  return <ChartsThemeContext.Provider value={persesTheme}>{children}</ChartsThemeContext.Provider>;
+  return <ChartsThemeContext.Provider value={chartsTheme}>{children}</ChartsThemeContext.Provider>;
 }
 
 export const ChartsThemeContext = createContext<PersesChartsTheme | undefined>(undefined);

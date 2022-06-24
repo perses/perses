@@ -15,8 +15,18 @@ import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOptio
 
 export interface PersesChartsTheme {
   themeName: string;
-  theme: EChartsTheme;
+  echartsTheme: EChartsTheme;
   noDataOption: EChartsCoreOption;
+  sparkline?: {
+    width: number;
+    color: string;
+  };
+  thresholdColors?: {
+    green: string;
+    yellow: string;
+    orange: string;
+    red: string;
+  };
 }
 
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207

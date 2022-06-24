@@ -11,35 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { useTheme, ThemeOptions as MaterialThemeOptions } from '@mui/material';
+import { useTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import { EChartsTheme, PersesChartsTheme } from '../model';
-import { ChartsThemeProvider } from './ChartsThemeProvider';
 
-export interface PersesThemeProviderProps {
-  themeName: string;
-  muiTheme?: MaterialThemeOptions;
-  themeOverrides?: EChartsTheme;
-  children?: React.ReactNode;
-}
+const DEFAULT_TEXT_COLOR = '#222';
 
-export function PersesThemeProvider(props: PersesThemeProviderProps) {
-  const { children, themeName, themeOverrides } = props;
+export function useGenerateChartsTheme(themeName: string, echartsThemeOverrides: EChartsTheme): PersesChartsTheme {
   const muiTheme = useTheme();
 
-  const ltGrey = muiTheme.palette.grey[300] ?? '#dee2e6';
-  const mdGrey = muiTheme.palette.grey[600] ?? '#545454';
-  const primaryTextColor = muiTheme.palette.text.primary ?? '#222';
-  const primaryFontFamily = muiTheme.typography.fontFamily ?? '"Lato", sans-serif';
+  if (muiTheme.typography === undefined || muiTheme.palette === undefined || muiTheme.palette.grey === undefined) {
+    return {
+      themeName,
+      echartsTheme: echartsThemeOverrides,
+      noDataOption: {},
+    };
+  }
 
-  const echartsTheme: EChartsTheme = {
+  const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
+
+  const muiConvertedTheme: EChartsTheme = {
     title: {
       show: false,
     },
     textStyle: {
       color: primaryTextColor,
-      fontFamily: primaryFontFamily,
+      fontFamily: muiTheme.typography.fontFamily,
       fontSize: 12,
     },
     grid: {
@@ -61,27 +58,27 @@ export function PersesThemeProvider(props: PersesThemeProviderProps) {
         show: false,
         length: 6,
         lineStyle: {
-          color: mdGrey,
+          color: muiTheme.palette.grey[600],
         },
       },
       axisLine: {
         show: true,
         lineStyle: {
-          color: mdGrey,
+          color: muiTheme.palette.grey[600],
         },
       },
       splitLine: {
         show: true,
         lineStyle: {
           width: 0.5,
-          color: ltGrey,
+          color: muiTheme.palette.grey[300],
           opacity: 0.6,
         },
       },
       splitArea: {
         show: false,
         areaStyle: {
-          color: [ltGrey],
+          color: [muiTheme.palette.grey[300]],
         },
       },
     },
@@ -98,7 +95,7 @@ export function PersesThemeProvider(props: PersesThemeProviderProps) {
         show: true,
         lineStyle: {
           width: 0.5,
-          color: ltGrey,
+          color: muiTheme.palette.grey[300],
           opacity: 0.6,
         },
       },
@@ -111,7 +108,7 @@ export function PersesThemeProvider(props: PersesThemeProviderProps) {
         color: primaryTextColor,
       },
       pageTextStyle: {
-        color: mdGrey,
+        color: muiTheme.palette.grey[600],
       },
       pageIconColor: muiTheme?.palette?.action?.active,
       pageIconInactiveColor: muiTheme?.palette?.action?.disabled,
@@ -143,7 +140,7 @@ export function PersesThemeProvider(props: PersesThemeProviderProps) {
       barMaxWidth: 150,
       itemStyle: {
         borderWidth: 0,
-        borderColor: ltGrey,
+        borderColor: muiTheme.palette.grey[300],
       },
     },
     gauge: {
@@ -163,9 +160,9 @@ export function PersesThemeProvider(props: PersesThemeProviderProps) {
     },
   };
 
-  const persesTheme: PersesChartsTheme = {
+  return {
     themeName,
-    theme: merge(echartsTheme, themeOverrides),
+    echartsTheme: merge(muiConvertedTheme, echartsThemeOverrides),
     noDataOption: {
       title: {
         show: true,
@@ -185,11 +182,16 @@ export function PersesThemeProvider(props: PersesThemeProviderProps) {
         show: false,
       },
     },
+    // TODO: should non-echarts specific theme overrides match panel definition?
+    sparkline: {
+      width: 2,
+      color: '#1976d2',
+    },
+    thresholdColors: {
+      green: 'rgba(115, 191, 105, 1)',
+      yellow: 'rgba(255, 193, 7, 1)',
+      orange: 'rgba(253, 126, 20, 0.9)',
+      red: 'rgba(220, 53, 69, 1)',
+    },
   };
-
-  return (
-    <ChartsThemeProvider themeName={themeName} persesTheme={persesTheme}>
-      {children}
-    </ChartsThemeProvider>
-  );
 }

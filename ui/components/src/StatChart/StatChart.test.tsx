@@ -13,7 +13,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { PersesThemeProvider } from '../context/PersesThemeProvider';
+import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
 import { UnitOptions } from '../model';
 import { StatChart, StatChartData } from './StatChart';
 
@@ -43,17 +43,23 @@ describe('StatChart', () => {
     },
   };
 
+  const exampleChartsTheme = {
+    themeName: 'perses',
+    echartsTheme: {},
+    noDataOption: {},
+  };
+
   describe('Render default options (no sparkline)', () => {
     it('should render', () => {
       render(
-        <PersesThemeProvider themeName="perses">
+        <ChartsThemeProvider themeName="perses" chartsTheme={exampleChartsTheme}>
           <StatChart
             width={contentDimensions.width}
             height={contentDimensions.height}
             data={mockStatData}
             unit={unit}
           />
-        </PersesThemeProvider>
+        </ChartsThemeProvider>
       );
       expect(screen.getByText('7.73')).toBeInTheDocument();
     });
