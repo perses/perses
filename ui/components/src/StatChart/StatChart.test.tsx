@@ -51,12 +51,6 @@ describe('StatChart', () => {
       width: 1,
       color: '#000000',
     },
-    thresholdColors: {
-      green: 'rgba(115, 191, 105, 1)',
-      yellow: 'rgba(255, 193, 7, 1)',
-      orange: 'rgba(253, 126, 20, 0.9)',
-      red: 'rgba(220, 53, 69, 1)',
-    },
   };
 
   describe('Render default options (no sparkline)', () => {

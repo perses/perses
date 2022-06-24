@@ -179,16 +179,10 @@ export function useGenerateChartsTheme(
         show: false,
       },
     },
-    // TODO: add colors to MUI theme?
     sparkline: {
       width: 2,
       color: '#1976d2',
     },
-    thresholdColors: {
-      green: 'rgba(115, 191, 105, 1)',
-      yellow: 'rgba(255, 193, 7, 1)',
-      orange: 'rgba(253, 126, 20, 0.9)',
-      red: 'rgba(220, 53, 69, 1)',
-    },
+    // TODO: add thresholdColors to theme
   };
 }

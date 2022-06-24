@@ -240,10 +240,6 @@ const benchmarkDashboard: DashboardResource = {
             decimal_places: 1,
             abbreviate: true,
           },
-          // sparkline: {},
-          // thresholds: {
-          //   default_color: '#EA4747', // red
-          // },
         },
       },
       statRAM: {
