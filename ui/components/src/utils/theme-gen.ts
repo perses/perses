@@ -101,9 +101,7 @@ export function useGenerateChartsTheme(themeName: string, echartsThemeOverrides:
       },
     },
     legend: {
-      show: false,
-      type: 'scroll',
-      bottom: 0,
+      orient: 'horizontal',
       textStyle: {
         color: primaryTextColor,
       },

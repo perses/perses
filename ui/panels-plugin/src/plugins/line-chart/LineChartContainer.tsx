@@ -104,6 +104,8 @@ export function LineChartContainer(props: LineChartContainerProps) {
 
   const legendOverrides = {
     show: show_legend === true,
+    type: 'scroll',
+    bottom: 0,
   };
 
   const gridOverrides: GridComponentOption = {

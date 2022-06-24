@@ -135,15 +135,6 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
     const option: EChartsCoreOption = {
-      grid,
-      toolbox: {
-        feature: {
-          dataZoom: {
-            icon: null, // https://stackoverflow.com/a/67684076/17575201
-            yAxisIndex: 'none',
-          },
-        },
-      },
       series: data.timeSeries,
       xAxis: {
         type: 'category',
@@ -173,6 +164,15 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
           type: 'none',
         },
       },
+      toolbox: {
+        feature: {
+          dataZoom: {
+            icon: null, // https://stackoverflow.com/a/67684076/17575201
+            yAxisIndex: 'none',
+          },
+        },
+      },
+      grid,
       legend,
       visualMap,
     };
