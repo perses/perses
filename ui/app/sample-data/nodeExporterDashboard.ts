@@ -272,8 +272,9 @@ const nodeExporterDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: {
-            kind: 'Decimal',
+            kind: 'Bytes',
             decimal_places: 1,
+            abbreviate: true,
           },
         },
       },
