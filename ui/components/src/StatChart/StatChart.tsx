@@ -34,6 +34,10 @@ use([
   CanvasRenderer,
 ]);
 
+const PANEL_PADDING = 32;
+const MIN_VALUE_SIZE = 12;
+const MAX_VALUE_SIZE = 36;
+
 export interface StatChartData {
   calculatedValue: number | null | undefined;
   seriesData: GraphSeries | null | undefined;
@@ -52,9 +56,6 @@ export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, sparkline } = props;
   const chartsTheme = useChartsTheme();
 
-  // TODO: pass alternate label as data.name, adjust fontSize depending on num of characters
-  const isLargePanel = width > 250 || height > 180;
-  const valueSize = isLargePanel === true ? 40 : 16;
   const formattedValue =
     data.calculatedValue === undefined || data.calculatedValue === null
       ? 'No data'
@@ -111,7 +112,9 @@ export function StatChart(props: StatChartProps) {
     return option;
   }, [data, chartsTheme, sparkline]);
 
-  const PANEL_PADDING = 32;
+  const isLargePanel = width > 250 && height > 180;
+  // TODO: adjust fontSize depending on number of characters
+  const valueSize = isLargePanel === true ? MAX_VALUE_SIZE : Math.min(width, height); // clamp also used in fontSize attribute below
 
   return (
     <Box>
@@ -119,7 +122,7 @@ export function StatChart(props: StatChartProps) {
         variant="h3"
         sx={(theme) => ({
           color: theme.palette.text.primary,
-          fontSize: valueSize,
+          fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
         })}
       >
         {formattedValue}
