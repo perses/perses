@@ -113,8 +113,9 @@ export function StatChart(props: StatChartProps) {
   }, [data, chartsTheme, sparkline]);
 
   const isLargePanel = width > 250 && height > 180;
-  // TODO: adjust fontSize depending on number of characters
-  const valueSize = isLargePanel === true ? MAX_VALUE_SIZE : Math.min(width, height); // clamp also used in fontSize attribute below
+  // adjusts fontSize depending on number of characters, clamp also used in fontSize attribute
+  const charactersAdjust = formattedValue.length;
+  const valueSize = isLargePanel === true ? MAX_VALUE_SIZE : Math.min(width, height) / charactersAdjust;
 
   return (
     <Box>
