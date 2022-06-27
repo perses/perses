@@ -74,11 +74,6 @@ export const typography: ThemeOptions['typography'] = {
     fontSize: '1rem',
     fontWeight: fontWeightMedium,
   },
-  subtitle2: {
-    // 14px
-    fontSize: '0.875rem',
-    fontWeight: fontWeightMedium,
-  },
   button: {
     textTransform: 'none',
   },

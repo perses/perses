@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,6 +20,7 @@ const benchmarkDashboard: DashboardResource = {
     project: 'perses',
     created_at: '2021-11-09',
     updated_at: '2021-11-09',
+    version: 0,
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
@@ -118,9 +119,8 @@ const benchmarkDashboard: DashboardResource = {
           unit: { kind: 'Percent' },
         },
       },
-      multiQueries: {
+      legendEx: {
         kind: 'LineChart',
-        // display: { name: 'Multi Queries' },
         display: { name: 'Legend Example' },
         options: {
           queries: [
@@ -169,7 +169,6 @@ const benchmarkDashboard: DashboardResource = {
               kind: 'PrometheusGraphQuery',
               options: {
                 query: 'node_load1{instance="$instance",job="node"}',
-                // query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
               },
             },
           ],
@@ -191,10 +190,6 @@ const benchmarkDashboard: DashboardResource = {
                 name: 'Alert: Critical condition example',
                 // color: '#0000FF', // blue
               },
-              // {
-              //   value: 0.9,
-              //   name: 'Default Color Test',
-              // },
             ],
           },
         },
@@ -212,7 +207,6 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          // unit: { kind: '%' },
           unit: {
             kind: 'Decimal',
             decimal_places: 2,
@@ -374,8 +368,7 @@ const benchmarkDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/multiQueries' },
-              // content: { $ref: '#/spec/panels/cpu' },
+              content: { $ref: '#/spec/panels/legendEx' },
               // content: { $ref: '#/spec/panels/seriesTestAlt' },
               // content: { $ref: '#/spec/panels/seriesTest' },
             },
@@ -405,7 +398,6 @@ const benchmarkDashboard: DashboardResource = {
               width: 12,
               height: 6,
               content: { $ref: '#/spec/panels/cpu' },
-              // content: { $ref: '#/spec/panels/seriesTestAlt' },
             },
             {
               x: 12,
