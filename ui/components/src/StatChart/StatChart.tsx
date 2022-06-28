@@ -39,8 +39,8 @@ const MIN_VALUE_SIZE = 12;
 const MAX_VALUE_SIZE = 36;
 
 export interface StatChartData {
-  calculatedValue: number | null | undefined;
-  seriesData: GraphSeries | null | undefined;
+  calculatedValue?: number;
+  seriesData?: GraphSeries;
   name?: string;
 }
 
@@ -56,14 +56,10 @@ export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, sparkline } = props;
   const chartsTheme = useChartsTheme();
 
-  const formattedValue =
-    data.calculatedValue === undefined || data.calculatedValue === null
-      ? 'No data'
-      : formatValue(data.calculatedValue, unit);
+  const formattedValue = data.calculatedValue === undefined ? 'No data' : formatValue(data.calculatedValue, unit);
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data.seriesData === undefined) return {};
-    if (data.seriesData === null) return chartsTheme.noDataOption;
+    if (data.seriesData === undefined) return chartsTheme.noDataOption;
 
     const series = data.seriesData;
 

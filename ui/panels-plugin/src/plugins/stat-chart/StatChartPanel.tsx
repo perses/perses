@@ -87,9 +87,9 @@ const useChartData = (data: GraphData | undefined, calculation: CalculationType,
     };
     if (data === undefined) return loadingData;
 
-    const seriesData = Array.from(data.series)[0] ?? null;
+    const seriesData = Array.from(data.series)[0];
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = seriesData !== null ? calculate(Array.from(seriesData.values)) : null;
+    const calculatedValue = seriesData !== undefined ? calculate(Array.from(seriesData.values)) : undefined;
 
     return {
       calculatedValue,
