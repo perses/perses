@@ -12,4 +12,4 @@
 // limitations under the License.
 
 export * from './LineChart';
-export * from './utils';
+export type { ZoomEventData } from './utils';

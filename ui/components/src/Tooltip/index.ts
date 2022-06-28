@@ -12,8 +12,4 @@
 // limitations under the License.
 
 export * from './Tooltip';
-export * from './TooltipContent';
-export * from './tooltip-model';
 export * from './SeriesMarker';
-export * from './SeriesInfo';
-export * from './focused-series';
