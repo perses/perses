@@ -29,8 +29,6 @@ export interface PanelProps extends CardProps {
 export function Panel(props: PanelProps) {
   const { definition, ...others } = props;
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
-  const isStatsChart = definition.kind === 'StatChart';
-  const panelPadding = isStatsChart ? 0 : 2;
 
   const { width, height } = useResizeObserver({ ref: contentElement });
 
@@ -38,6 +36,9 @@ export function Panel(props: PanelProps) {
     if (width === undefined || height === undefined) return undefined;
     return { width, height };
   }, [width, height]);
+
+  // TODO: adjust padding for small panels, consistent way to determine isLargePanel here and in StatChart
+  const panelPadding = 1.5;
 
   return (
     <Card
@@ -86,7 +87,7 @@ export function Panel(props: PanelProps) {
         }
         sx={{
           display: 'block',
-          padding: (theme) => theme.spacing(1, 2),
+          padding: (theme) => theme.spacing(1, panelPadding),
           borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
         }}
       />

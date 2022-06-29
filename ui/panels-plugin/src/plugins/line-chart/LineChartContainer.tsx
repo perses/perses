@@ -12,14 +12,12 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { GridComponentOption, ToolboxComponentOption } from 'echarts';
+import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, EChartsValues } from '@perses-dev/components';
+import { LineChart, EChartsDataFormat, UnitOptions } from '@perses-dev/components';
+import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { useRunningGraphQueries } from './GraphQueryRunner';
-import { getRandomColor } from './utils/palette-gen';
-import { getCommonTimeScale, getXValues } from './utils/data-transform';
-
-export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
+import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
 
 export const EMPTY_GRAPH_DATA = {
   timeSeries: [],
@@ -29,13 +27,16 @@ export const EMPTY_GRAPH_DATA = {
 export interface LineChartContainerProps {
   width: number;
   height: number;
+  show_legend?: boolean;
+  unit?: UnitOptions;
+  thresholds?: ThresholdOptions;
 }
 
 /**
  * Passes query data and customization options to LineChart
  */
 export function LineChartContainer(props: LineChartContainerProps) {
-  const { width, height } = props;
+  const { width, height, show_legend, thresholds } = props;
   const queries = useRunningGraphQueries();
 
   // populate series data based on query results
@@ -56,39 +57,37 @@ export function LineChartContainer(props: LineChartContainerProps) {
       // Skip queries that are still loading and don't have data
       if (query.loading || query.data === undefined) continue;
 
-      for (const dataSeries of query.data.series) {
-        const yValues: EChartsValues[] = [];
-        for (const valueTuple of dataSeries.values) {
-          yValues.push(valueTuple[1]);
-        }
-        graphData.timeSeries.push({
-          type: 'line',
-          name: dataSeries.name,
-          color: getRandomColor(dataSeries.name),
-          data: yValues,
-          showSymbol: false,
-          symbol: 'circle',
-          sampling: 'lttb', // use Largest-Triangle-Three-Bucket algorithm to filter points
-          progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
-          lineStyle: {
-            width: 1.5,
-          },
-          emphasis: {
-            lineStyle: {
-              width: 2,
-            },
-          },
-        });
+      for (const timeSeries of query.data.series) {
+        const yValues = getYValues(timeSeries, timeScale);
+        const lineSeries = getLineSeries(timeSeries.name, yValues);
+        graphData.timeSeries.push(lineSeries);
       }
       queriesFinished++;
     }
     graphData.xAxis = xAxisData;
+
+    if (thresholds !== undefined && thresholds.steps !== undefined) {
+      const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.RED;
+      thresholds.steps.forEach((step: StepOptions, index: number) => {
+        const stepPaletteColor = ThresholdColorsPalette[index] ?? defaultThresholdColor;
+        const thresholdLineColor = step.color ?? stepPaletteColor;
+        const stepOption: StepOptions = {
+          color: thresholdLineColor,
+          value: step.value,
+        };
+        const thresholdName = step.name ?? `Threshold ${index + 1} `;
+        const thresholdData = Array(xAxisData.length).fill(step.value);
+        const thresholdLineSeries = getLineSeries(thresholdName, thresholdData, stepOption);
+        graphData.timeSeries.push(thresholdLineSeries);
+      });
+    }
+
     return {
       graphData,
       loading: queriesFinished === 0,
       allQueriesLoaded: queriesFinished === queries.length,
     };
-  }, [queries]);
+  }, [queries, thresholds]);
 
   if (loading === true) {
     return (
@@ -98,27 +97,20 @@ export function LineChartContainer(props: LineChartContainerProps) {
     );
   }
 
-  // TODO: toolbox functionality (ex. zoom, undo icons) will move to chart header
-  const toolboxOverrides: ToolboxComponentOption = {
-    orient: 'vertical',
-    top: 0,
-    right: 0,
+  const unit = props.unit ?? {
+    kind: 'Decimal',
+    decimal_places: 2,
+  };
+
+  const legendOverrides = {
+    show: show_legend === true,
+    type: 'scroll',
+    bottom: 0,
   };
 
   const gridOverrides: GridComponentOption = {
-    right: 40,
+    bottom: show_legend === true ? 35 : 0,
   };
 
-  // enables zoom on drag without clicking 'Zoom' icon first
-  const dataZoomEnabled = false;
-
-  return (
-    <LineChart
-      height={height}
-      data={graphData}
-      grid={gridOverrides}
-      toolbox={toolboxOverrides}
-      dataZoomEnabled={dataZoomEnabled}
-    />
-  );
+  return <LineChart height={height} data={graphData} unit={unit} legend={legendOverrides} grid={gridOverrides} />;
 }

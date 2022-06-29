@@ -19,6 +19,11 @@ export type UnixTimeMs = number;
 
 export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
+export interface GraphSeries {
+  name: string;
+  values: Iterable<GraphSeriesValueTuple>;
+}
+
 export type EChartsValues = number | null | '-';
 
 export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
@@ -29,6 +34,6 @@ export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
 export type EChartsDataFormat = {
   timeSeries: EChartsTimeSeries[];
   xAxis: number[];
-  xAxisMax?: number | 'dataMax';
+  xAxisMax?: number | string;
   rangeMs?: number;
 };

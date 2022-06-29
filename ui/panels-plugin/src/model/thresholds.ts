@@ -14,10 +14,12 @@
 import { JsonObject } from '@perses-dev/core';
 import { zip } from 'lodash-es';
 
+// TODO (sjcobb): pull threshold colors from perses charts theme
 export const ThresholdColors = {
   GREEN: 'rgba(115, 191, 105, 1)',
-  ORANGE: 'rgba(237, 129, 40, 0.9)',
-  RED: 'rgba(245, 54, 54, 0.9)',
+  YELLOW: 'rgba(255, 193, 7, 1)',
+  ORANGE: 'rgba(253, 126, 20, 0.9)',
+  RED: 'rgba(220, 53, 69, 1)',
 };
 
 export const ThresholdColorsPalette = [ThresholdColors.ORANGE, ThresholdColors.RED];
@@ -31,6 +33,7 @@ export type EChartsAxisLineColors = GaugeColorStop[];
 export interface StepOptions extends JsonObject {
   value: number;
   color?: ThresholdColorsType;
+  name?: string;
 }
 
 export interface ThresholdOptions extends JsonObject {

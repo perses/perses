@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-dev/core';
+import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
 
 const benchmarkDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -24,7 +24,7 @@ const benchmarkDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '12h',
+    duration: '6h',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',
@@ -38,7 +38,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: 'node',
         },
-      },
+      } as AnyVariableDefinition,
       instance: {
         kind: 'PrometheusLabelValues',
         options: {
@@ -52,7 +52,7 @@ const benchmarkDashboard: DashboardResource = {
           default_value: ['demo.do.prometheus.io:9100'],
           all_value: '$__all',
         },
-      },
+      } as AnyVariableDefinition,
       interval: {
         kind: 'Interval',
         options: {
@@ -68,7 +68,7 @@ const benchmarkDashboard: DashboardResource = {
         selection: {
           default_value: '1h',
         },
-      },
+      } as AnyVariableDefinition,
     },
     panels: {
       seriesTest: {
@@ -119,9 +119,9 @@ const benchmarkDashboard: DashboardResource = {
           unit: { kind: 'Percent' },
         },
       },
-      multiQueries: {
+      legendEx: {
         kind: 'LineChart',
-        display: { name: 'Multi Queries' },
+        display: { name: 'Legend Example' },
         options: {
           queries: [
             {
@@ -150,12 +150,13 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
+          show_legend: true,
           unit: { kind: 'Bytes' },
         },
       },
       doubleQueries: {
         kind: 'LineChart',
-        display: { name: 'Double Queries', description: 'This is a line chart!!!' },
+        display: { name: 'Thresholds Example', description: 'Description text' },
         options: {
           queries: [
             {
@@ -168,11 +169,29 @@ const benchmarkDashboard: DashboardResource = {
               kind: 'PrometheusGraphQuery',
               options: {
                 query: 'node_load1{instance="$instance",job="node"}',
-                // query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
               },
             },
           ],
-          // unit: { kind: 'Bytes' },
+          show_legend: false,
+          unit: {
+            kind: 'PercentDecimal',
+            decimal_places: 1,
+          },
+          thresholds: {
+            // default_color: '#000', // optional
+            steps: [
+              {
+                value: 0.4,
+                name: 'Alert: Warning condition example',
+                // color: '#FFFFFF',
+              },
+              {
+                value: 0.75,
+                name: 'Alert: Critical condition example',
+                // color: '#0000FF', // blue
+              },
+            ],
+          },
         },
       },
       cpu: {
@@ -188,40 +207,40 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          unit: { kind: '%' },
+          unit: {
+            kind: 'Decimal',
+            decimal_places: 2,
+          },
+          show_legend: true,
         },
       },
       statSm: {
         kind: 'StatChart',
         display: {
           name: 'Stat Sm',
-          description: 'This is a stat chart'
+          // description: 'This is a stat chart',
         },
         options: {
           query: {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+                'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
             },
           },
-          calculation: 'Sum',
+          calculation: 'Mean',
           unit: {
             kind: 'Decimal',
-            decimal_places: 2,
-            suffix: 'kilogram', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
+            decimal_places: 1,
+            abbreviate: true,
           },
-          // sparkline: {},
-          // thresholds: {
-          //   default_color: '#EA4747', // red
-          // },
         },
       },
       statRAM: {
         kind: 'StatChart',
         display: {
           name: 'RAM Used',
-          description: 'This is a stat chart'
+          description: 'This is a stat chart',
         },
         options: {
           query: {
@@ -250,8 +269,8 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: {
-            kind: 'Decimal',
-            suffix: 'byte',
+            kind: 'Bytes',
+            decimal_places: 1,
           },
         },
       },
@@ -259,32 +278,25 @@ const benchmarkDashboard: DashboardResource = {
         kind: 'StatChart',
         display: {
           name: 'Stat Md',
-          description: 'This is a stat chart',
+          // description: 'This is a stat chart',
         },
         options: {
           query: {
             kind: 'PrometheusGraphQuery',
             options: {
               query:
-                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
-              // '((node_memory_SwapTotal_bytes{job="node",instance="$instance"} - node_memory_SwapFree_bytes{job="node",instance="$instance"}) / (node_memory_SwapTotal_bytes{job="node",instance="$instance"} )) * 100',
+                'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
             },
           },
-          calculation: 'Mean',
+          calculation: 'Sum',
           unit: {
             kind: 'Decimal',
-            decimal_places: 4,
-            // suffix: 'celsius', // https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
-          },
-          thresholds: {
-            default_color: '#EA4747',
+            decimal_places: 2,
+            abbreviate: true,
           },
           sparkline: {
-            line_color: '#FFE3E3',
-            line_width: 1.5,
-            line_opacity: 0.6,
-            area_color: '#FFBABA',
-            area_opacity: 0.4,
+            color: '#e65013', // red
+            width: 1.5,
           },
         },
       },
@@ -304,21 +316,10 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'Mean', // 'First', 'Last', 'LastNumber'
           unit: {
-            kind: 'Decimal', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'
-            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#unit_formatting
-            suffix: 'gigabyte',
+            kind: 'Percent', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years',
           },
-          sparkline: {},
-          thresholds: {
-            default_color: '#1473E6', // blue
-            steps: [
-              {
-                value: 85,
-              },
-              {
-                value: 95,
-              },
-            ],
+          sparkline: {
+            area_opacity: 0.2,
           },
         },
       },
@@ -358,7 +359,7 @@ const benchmarkDashboard: DashboardResource = {
           display: {
             title: 'Row 1',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [
@@ -367,8 +368,7 @@ const benchmarkDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/multiQueries' },
-              // content: { $ref: '#/spec/panels/cpu' },
+              content: { $ref: '#/spec/panels/legendEx' },
               // content: { $ref: '#/spec/panels/seriesTestAlt' },
               // content: { $ref: '#/spec/panels/seriesTest' },
             },
@@ -398,7 +398,6 @@ const benchmarkDashboard: DashboardResource = {
               width: 12,
               height: 6,
               content: { $ref: '#/spec/panels/cpu' },
-              // content: { $ref: '#/spec/panels/seriesTestAlt' },
             },
             {
               x: 12,

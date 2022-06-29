@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { ErrorAlert } from '@perses-dev/components';
+import { ErrorAlert, ChartsThemeProvider, useGenerateChartsTheme } from '@perses-dev/components';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
@@ -21,6 +21,11 @@ import { useBundledPlugins } from './model/bundled-plugins';
 
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
+
+  // app specific echarts option overrides, empty since perses uses default
+  // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
+  const echartsThemeOverrides = {};
+  const chartsTheme = useGenerateChartsTheme('perses', echartsThemeOverrides);
 
   return (
     <Box
@@ -37,13 +42,15 @@ function App() {
           overflow: 'hidden',
         }}
       >
-        <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-          <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-            <DataSourceRegistry>
-              <ViewDashboard />
-            </DataSourceRegistry>
-          </PluginBoundary>
-        </PluginRegistry>
+        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+            <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
+              <DataSourceRegistry>
+                <ViewDashboard />
+              </DataSourceRegistry>
+            </PluginBoundary>
+          </PluginRegistry>
+        </ChartsThemeProvider>
       </Box>
     </Box>
   );

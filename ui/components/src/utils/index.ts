@@ -11,26 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
-
-#unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit
-
-#timeUnit: {
-	kind: "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
-}
-
-#percentUnit: {
-	kind:            "Percent" | "PercentDecimal"
-	decimal_places?: number
-}
-
-#decimalUnit: {
-	kind:            "Decimal"
-	decimal_places?: number
-	abbreviate?:     bool
-}
-
-#bytesUnit: {
-	kind:            "Bytes"
-	decimal_places?: number
-}
+export * from './combine-sx';
+export * from './theme-gen';

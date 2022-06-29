@@ -12,13 +12,12 @@
 // limitations under the License.
 
 import { JsonObject } from '@perses-dev/core';
-import { StatChart, StatChartData, UnitOptions } from '@perses-dev/components';
+import { StatChart, StatChartData, UnitOptions, useChartsTheme, PersesChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
-import { useTheme } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { GraphQueryDefinition, GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
-import { defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
+import { ThresholdOptions } from '../../model/thresholds';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { useSuggestedStepMs } from '../../model/time';
 
@@ -27,11 +26,8 @@ export const StatChartKind = 'StatChart' as const;
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export interface SparklineOptions extends JsonObject {
-  line_color?: string;
-  line_width?: number;
-  line_opacity?: number;
-  area_color?: string;
-  area_opacity?: number;
+  color?: string;
+  width?: number;
 }
 
 interface StatChartOptions extends JsonObject {
@@ -54,16 +50,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
   const chartData = useChartData(data, calculation, name);
-  const theme = useTheme();
-
-  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
-  const showSparkline = sparkline !== undefined ? true : false;
-  let backgroundColor = 'transparent';
-  if (thresholds.default_color) {
-    backgroundColor = thresholds.default_color;
-  } else if (showSparkline === true) {
-    backgroundColor = theme.palette.primary.light;
-  }
+  const chartsTheme = useChartsTheme();
 
   if (error) throw error;
 
@@ -87,8 +74,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       height={contentDimensions.height}
       data={chartData}
       unit={unit}
-      backgroundColor={backgroundColor}
-      sparkline={convertSparkline(sparkline)}
+      sparkline={convertSparkline(chartsTheme, sparkline)}
     />
   );
 }
@@ -101,9 +87,9 @@ const useChartData = (data: GraphData | undefined, calculation: CalculationType,
     };
     if (data === undefined) return loadingData;
 
-    const seriesData = Array.from(data.series)[0] ?? null;
+    const seriesData = Array.from(data.series)[0];
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = seriesData !== null ? calculate(Array.from(seriesData.values)) : null;
+    const calculatedValue = seriesData !== undefined ? calculate(Array.from(seriesData.values)) : undefined;
 
     return {
       calculatedValue,
@@ -113,19 +99,21 @@ const useChartData = (data: GraphData | undefined, calculation: CalculationType,
   }, [data, calculation, name]);
 };
 
-export function convertSparkline(sparkline?: SparklineOptions): LineSeriesOption | undefined {
+export function convertSparkline(
+  chartsTheme: PersesChartsTheme,
+  sparkline?: SparklineOptions
+): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
 
-  // TODO (sjcobb): define long-term approach for perses format conversion, add unit test
   return {
     lineStyle: {
-      width: sparkline.line_width ?? 2,
-      color: sparkline.line_color ?? '#FFFFFF',
-      opacity: sparkline.line_opacity ?? 0.35,
+      width: sparkline.width ?? chartsTheme.sparkline.width,
+      color: sparkline.color ?? chartsTheme.sparkline.color,
+      opacity: 1,
     },
     areaStyle: {
-      color: sparkline.area_color ?? '#FFFFFF',
-      opacity: sparkline.area_opacity ?? 0.25,
+      color: sparkline.color ?? chartsTheme.sparkline.color,
+      opacity: 0.4,
     },
   };
 }

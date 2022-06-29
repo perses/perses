@@ -12,36 +12,15 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import type { EChartsOption } from 'echarts';
-import { use } from 'echarts/core';
+import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { formatValue, UnitOptions } from './model/units';
-import { EChart } from './EChart';
+import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { formatValue, UnitOptions } from '../model/units';
+import { EChart } from '../EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
-
-const noDataOption = {
-  title: {
-    show: true,
-    textStyle: {
-      color: 'grey',
-      fontSize: 16,
-      fontWeight: 400,
-    },
-    text: 'No data',
-    left: 'center',
-    top: 'center',
-  },
-  xAxis: {
-    show: false,
-  },
-  yAxis: {
-    show: false,
-  },
-  series: [],
-};
 
 export type GaugeChartData = number | null | undefined;
 
@@ -56,8 +35,10 @@ interface GaugeChartProps {
 export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine } = props;
 
-  const option: EChartsOption = useMemo(() => {
-    if (data === null || data === undefined) return noDataOption;
+  const chartsTheme = useChartsTheme();
+
+  const option: EChartsCoreOption = useMemo(() => {
+    if (data === null || data === undefined) return chartsTheme.noDataOption;
 
     const calculatedValue = data;
     return {
@@ -96,21 +77,10 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           axisTick: {
             show: false,
-            distance: -28,
-            splitNumber: 5,
-            lineStyle: {
-              width: 2,
-              color: '#999',
-            },
+            distance: 0,
           },
           splitLine: {
-            show: false,
-            distance: -32,
-            length: 6,
-            lineStyle: {
-              width: 2,
-              color: '#999',
-            },
+            show: true,
           },
           axisLabel: {
             show: false,
@@ -159,12 +129,9 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           detail: {
             show: true,
-            valueAnimation: false,
             width: '60%',
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
-            fontSize: 20,
-            fontWeight: 'bolder',
             color: 'inherit',
             formatter: (value: number) => {
               return formatValue(value, {
@@ -181,7 +148,7 @@ export function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, unit, axisLine]);
+  }, [data, chartsTheme, unit, axisLine]);
 
   return (
     <EChart
@@ -190,6 +157,7 @@ export function GaugeChart(props: GaugeChartProps) {
         height: height,
       }}
       option={option}
+      theme={chartsTheme.themeName}
     />
   );
 }

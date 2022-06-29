@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { EChartsDataFormat } from '../model/graph-model';
+import { EChartsDataFormat } from '../model/graph';
 import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
 export interface FocusedSeriesInfo {

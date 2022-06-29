@@ -13,14 +13,12 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import { useDeepMemo } from '@perses-dev/core';
-import { Box, useTheme } from '@mui/material';
-import merge from 'lodash/merge';
+import { Box } from '@mui/material';
 import type {
-  EChartsOption,
+  EChartsCoreOption,
   GridComponentOption,
   LineSeriesOption,
   LegendComponentOption,
-  ToolboxComponentOption,
   VisualMapComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
@@ -38,11 +36,13 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { EChart, OnEventsType } from './EChart';
-import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from './model/graph-model';
-import { abbreviateLargeNumber } from './model/units';
-import { emptyTooltipData } from './tooltip/tooltip-model';
-import { Tooltip } from './tooltip/Tooltip';
+import { EChart, OnEventsType } from '../EChart';
+import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from '../model/graph';
+import { formatValue, UnitOptions } from '../model/units';
+import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { emptyTooltipData } from '../Tooltip/tooltip-model';
+import { Tooltip } from '../Tooltip/Tooltip';
+import { enableDataZoom, restoreChart, getDateRange, getFormattedDate, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -59,61 +59,24 @@ use([
   CanvasRenderer,
 ]);
 
-const noDataOption = {
-  title: {
-    show: true,
-    textStyle: {
-      color: 'grey',
-      fontSize: 16,
-      fontWeight: 400,
-    },
-    text: 'No data',
-    left: 'center',
-    top: 'center',
-  },
-  xAxis: {
-    show: false,
-  },
-  yAxis: {
-    show: false,
-  },
-  series: [],
-};
-
-export interface ZoomEventData {
-  start: number;
-  end: number;
-  startIndex: number;
-  endIndex: number;
-}
-
 interface LineChartProps {
   height: number;
   data: EChartsDataFormat;
+  unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
-  toolbox?: ToolboxComponentOption;
   visualMap?: VisualMapComponentOption[];
-  dataZoomEnabled?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
 }
 
-export function LineChart({
-  height,
-  data,
-  grid,
-  legend,
-  toolbox,
-  visualMap,
-  dataZoomEnabled,
-  onDataZoom,
-}: LineChartProps) {
-  const theme = useTheme();
+export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZoom }: LineChartProps) {
+  const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
+      // TODO: use legendselectchanged event to fix tooltip when legend selected
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;
@@ -134,14 +97,15 @@ export function LineChart({
     };
   }, [data, onDataZoom]);
 
-  if (chartRef.current !== undefined && dataZoomEnabled === true) {
-    const chart = chartRef.current;
-    chart.dispatchAction({
-      type: 'takeGlobalCursor',
-      key: 'dataZoomSelect',
-      dataZoomSelectActive: true,
-    });
+  if (chartRef.current !== undefined) {
+    enableDataZoom(chartRef.current);
   }
+
+  const handleOnDoubleClick = () => {
+    if (chartRef.current !== undefined) {
+      restoreChart(chartRef.current);
+    }
+  };
 
   const handleOnMouseDown = (event: React.MouseEvent) => {
     // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
@@ -162,71 +126,23 @@ export function LineChart({
     setShowTooltip(false);
   };
 
-  const option: EChartsOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useDeepMemo(() => {
     if (data.timeSeries === undefined) return {};
-    if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
+    if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
 
     const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
-    const defaultGrid = {
-      top: 10,
-      right: 20,
-      bottom: 5,
-      left: 20,
-      containLabel: true,
-    };
-
-    const defaultToolbox = {
-      show: true,
-      top: 10,
-      right: 10,
-      iconStyle: {
-        borderColor: theme.palette.text.primary,
-      },
-      feature: {
-        dataZoom: {
-          icon: dataZoomEnabled ? null : undefined,
-          yAxisIndex: 'none',
-        },
-        restore: {},
-      },
-      emphasis: {
-        iconStyle: {
-          textFill: theme.palette.text.primary,
-        },
-      },
-    };
-
-    if (dataZoomEnabled === false) {
-      delete defaultToolbox.feature.dataZoom.icon;
-    }
-
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
-    const option = {
-      title: {
-        show: false,
-      },
-      grid: merge(defaultGrid, grid),
-      toolbox: merge(defaultToolbox, toolbox),
+    const option: EChartsCoreOption = {
       series: data.timeSeries,
       xAxis: {
         type: 'category',
         data: data.xAxis,
         max: data.xAxisMax,
         axisLabel: {
-          margin: 15,
-          color: theme.palette.text.primary,
           formatter: (value: number) => {
             return getFormattedDate(value, rangeMs);
-          },
-        },
-        axisTick: {
-          show: false,
-        },
-        axisLine: {
-          lineStyle: {
-            color: theme.palette.grey['600'],
           },
         },
       },
@@ -234,18 +150,8 @@ export function LineChart({
         type: 'value',
         boundaryGap: [0, '10%'],
         axisLabel: {
-          margin: 12,
-          color: theme.palette.text.primary,
           formatter: (value: number) => {
-            return abbreviateLargeNumber(value);
-          },
-        },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            width: 0.5,
-            color: theme.palette.grey['300'],
-            opacity: 0.95,
+            return formatValue(value, unit);
           },
         },
       },
@@ -258,19 +164,28 @@ export function LineChart({
           type: 'none',
         },
       },
+      toolbox: {
+        feature: {
+          dataZoom: {
+            icon: null, // https://stackoverflow.com/a/67684076/17575201
+            yAxisIndex: 'none',
+          },
+        },
+      },
+      grid,
       legend,
       visualMap,
     };
 
     return option;
-    // TODO (sjcobb): consolidate option props using echarts theme to reduce num of items in dep array
-  }, [data, theme, grid, legend, toolbox, dataZoomEnabled, visualMap]);
+  }, [data, grid, legend, visualMap]);
 
   return (
     <Box
       sx={{
         height,
       }}
+      onDoubleClick={handleOnDoubleClick}
       onMouseDown={handleOnMouseDown}
       onMouseUp={handleOnMouseUp}
       onMouseLeave={handleOnMouseLeave}
@@ -286,38 +201,10 @@ export function LineChart({
           height: '100%',
         }}
         option={option}
+        theme={chartsTheme.themeName}
         onEvents={handleEvents}
         _instance={chartRef}
       />
     </Box>
   );
-}
-
-// fallback when xAxis time range not passed as prop
-function getDateRange(data: number[]) {
-  const defaultRange = 3600000; // hour in ms
-  if (data.length === 0) return defaultRange;
-  const lastDatum = data[data.length - 1];
-  if (data[0] === undefined || lastDatum === undefined) return defaultRange;
-  return lastDatum - data[0];
-}
-
-// determines time granularity for axis labels, defaults to hh:mm
-function getFormattedDate(value: number, rangeMs: number) {
-  const dateFormatOptions: Intl.DateTimeFormatOptions = {
-    hour: 'numeric',
-    minute: 'numeric',
-    hourCycle: 'h23',
-  };
-  const thirtyMinMs = 1800000;
-  const dayMs = 86400000;
-  if (rangeMs <= thirtyMinMs) {
-    dateFormatOptions.second = 'numeric';
-  } else if (rangeMs >= dayMs) {
-    dateFormatOptions.month = 'numeric';
-    dateFormatOptions.day = 'numeric';
-  }
-  const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
-  // remove comma when month / day present
-  return DATE_FORMAT.format(value).replace(/, /g, ' ');
 }

@@ -12,6 +12,23 @@
           "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='node',instance='$instance',mode!='idle'}[$interval]))"
         }
       }
-    ]
+    ],
+    "unit": {
+      "kind": "Decimal",
+      "decimal_places": 2
+    },
+    "show_legend": true,
+    "thresholds": {
+      "steps": [
+        {
+          "value": 0.6,
+          "name": "Alert: Warning condition example"
+        },
+        {
+          "value": 0.80,
+          "name": "Alert: Critical condition example"
+        }
+      ]
+    }
   }
 }

@@ -11,26 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOption } from 'echarts';
 
-#unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit
-
-#timeUnit: {
-	kind: "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
+export interface PersesChartsTheme {
+  themeName: string;
+  echartsTheme: EChartsTheme;
+  noDataOption: EChartsCoreOption;
+  sparkline: {
+    width: number;
+    color: string;
+  };
 }
 
-#percentUnit: {
-	kind:            "Percent" | "PercentDecimal"
-	decimal_places?: number
-}
-
-#decimalUnit: {
-	kind:            "Decimal"
-	decimal_places?: number
-	abbreviate?:     bool
-}
-
-#bytesUnit: {
-	kind:            "Bytes"
-	decimal_places?: number
+// https://github.com/apache/echarts/issues/12489#issuecomment-643185207
+export interface EChartsTheme extends EChartsOption {
+  bar?: BarSeriesOption;
+  line?: LineSeriesOption;
 }

@@ -12,15 +12,20 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange } from '@perses-dev/core';
+import { EChartsTimeSeries } from '@perses-dev/components';
 import { GraphSeries } from '@perses-dev/plugin-system';
 import { gcd } from 'mathjs';
 import { QueryState } from '../GraphQueryRunner';
+import { getRandomColor } from '../utils/palette-gen';
+import { StepOptions } from '../../../model/thresholds';
 
 export interface TimeScale {
   startMs: number;
   endMs: number;
   stepMs: number;
 }
+
+export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -111,4 +116,44 @@ export function getYValues(series: GraphSeries, timeScale: TimeScale): Array<num
   }
 
   return yValues;
+}
+
+/**
+ * Gets default ECharts line series option properties or returns threshold-specific styles
+ * Note: markLine cannot be used since it does not update yAxis max / min
+ */
+export function getLineSeries(
+  name: string,
+  data: EChartsTimeSeries['data'],
+  threshold?: StepOptions
+): EChartsTimeSeries {
+  if (threshold !== undefined) {
+    return {
+      type: 'line',
+      name: name,
+      data: data,
+      color: threshold.color,
+      label: {
+        show: false,
+      },
+      lineStyle: {
+        type: 'dashed',
+        width: 2,
+      },
+      emphasis: {
+        lineStyle: {
+          width: 2.5,
+        },
+      },
+    };
+  }
+
+  return {
+    type: 'line',
+    name: name,
+    data: data,
+    color: getRandomColor(name),
+    sampling: 'lttb',
+    progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
+  };
 }

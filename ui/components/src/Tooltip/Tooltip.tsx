@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { Box, Portal } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { EChartsDataFormat } from '../model/graph-model';
+import { EChartsDataFormat } from '../model/graph';
 import { getFocusedSeriesData } from './focused-series';
 import {
   CursorCoordinates,
