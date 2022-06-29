@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@perses-dev/core": "^0.4.2",
-    "echarts": "^5.3.2",
+    "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",
     "react-error-boundary": "^3.1.4"
   },
