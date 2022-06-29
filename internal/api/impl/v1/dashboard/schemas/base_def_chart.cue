@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package first
+package base
 
-#panel: {
-	kind: "AwesomeChart"
-	options: {
-		a: string
-		b: {
-			c: [...#d]
-		}
-		queries: [...#query]
-	}
+#panel: close({
+	kind:       string
+	display:    #display
+	datasource: #datasource
+	options:    _
+})
+
+#display: {
+	name:         string
+	description?: string
 }
 
-#d: {
-	e:  string
-	f?: string
+#datasource: {
+	kind: string
+	key?: string
 }
 
-#query: _ // needed for make cue-test only
+#query: _

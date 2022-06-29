@@ -11,22 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package first
+package prometheus
 
-#panel: {
-	kind: "AwesomeChart"
+#datasource: {
+	kind: "PrometheusDatasource"
+}
+
+#query: {
+	kind: "PrometheusGraphQuery"
 	options: {
-		a: string
-		b: {
-			c: [...#d]
-		}
-		queries: [...#query]
+		query:       string
+		min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+		resolution?: number
 	}
 }
-
-#d: {
-	e:  string
-	f?: string
-}
-
-#query: _ // needed for make cue-test only

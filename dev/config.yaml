@@ -7,6 +7,6 @@ database:
         port: 2379
 
 schemas:
-  path: "schemas"
-  charts_folder: "charts"
+  charts_path: "schemas/charts"
+  queries_path: "schemas/queries"
   interval: "5m"

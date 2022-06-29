@@ -15,15 +15,13 @@ package second
 
 #panel: {
 	kind: "AverageChart"
-	display: {
-		name: string
-	}
 	options: {
 		a: string
 		b: {
 			c?: bool
 			d: [...#e]
 		}
+		query: #query
 	}
 }
 
@@ -31,4 +29,4 @@ package second
 	f: number
 }
 
-#panel
+#query: _ // needed for make cue-test only

@@ -51,30 +51,15 @@ func TestValidateDashboard(t *testing.T) {
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]json.RawMessage{
-						"MyLinePanel": []byte(`
-							{
-								"kind": "AverageChart",
-								"display": {
-									"name": "simple average chart",
-								},
-								"options": {
-									"a": "yes",
-									"b": {
-										"c": false,
-										"d": [
-											{
-												"f": 66
-											}
-										]
-									}
-								}
-							}
-						`),
-						"MyBarPanel": []byte(`
+						"MyAwesomePanel": []byte(`
 							{
 								"kind": "AwesomeChart",
 								"display": {
 									"name": "simple awesome chart",
+								},
+								"datasource": {
+									"kind": "CustomDatasource",
+									"key": "MyCustomDatasource"
 								},
 								"options": {
 									"a": "yes",
@@ -85,6 +70,50 @@ func TestValidateDashboard(t *testing.T) {
 												"f": "the up metric"
 											}
 										]
+									},
+									queries: [
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": true
+											}
+										},
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": false
+											}
+										}
+									]
+								}
+							}
+						`),
+						"MyAveragePanel": []byte(`
+							{
+								"kind": "AverageChart",
+								"display": {
+									"name": "simple average chart",
+								},
+								"datasource": {
+									"kind": "SQLDatasource",
+								},
+								"options": {
+									"a": "yes",
+									"b": {
+										"c": false,
+										"d": [
+											{
+												"f": 66
+											}
+										]
+									},
+									query: {
+										"kind": "SQLGraphQuery",
+										"options": {
+											"select": "*"
+											"from": "TABLE"
+											"where": "ID > 0"
+										}
 									}
 								}
 							}
@@ -122,7 +151,7 @@ func TestValidateDashboard(t *testing.T) {
 			result: "",
 		},
 		{
-			title: "dashboard containing an invalid panel",
+			title: "dashboard containing an invalid panel (unknown panel kind)",
 			dashboard: &v1.Dashboard{
 				Kind: v1.KindDashboard,
 				Metadata: v1.ProjectMetadata{
@@ -139,30 +168,15 @@ func TestValidateDashboard(t *testing.T) {
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]json.RawMessage{
-						"MyAveragePanel": []byte(`
+						"MyInvalidPanel": []byte(`
 							{
-								"kind": "AverageChart",
+								"kind": "UnknownChart",
 								"display": {
-									"name": "simple average chart",
+									"name": "simple unknown chart",
 								},
-								"options": {
-									"a": "yes",
-									"b": {
-										"c": false,
-										"d": [
-											{
-												"f": 66
-											}
-										]
-									}
-								}
-							}
-						`),
-						"MyAwesomePanel": []byte(`
-							{
-								"kind": "AwesomeChart",
-								"display": {
-									"aaaaaa": "simple awesome chart",
+								"datasource": {
+									"kind": "CustomDatasource",
+									"key": "CustomGraphQuery"
 								},
 								"options": {
 									"a": "no",
@@ -173,7 +187,21 @@ func TestValidateDashboard(t *testing.T) {
 												"f": "the up metric"
 											}
 										]
-									}
+									},
+									queries: [
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": true
+											}
+										},
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": false
+											}
+										}
+									]
 								}
 							}
 						`),
@@ -189,16 +217,7 @@ func TestValidateDashboard(t *testing.T) {
 										Width:  3,
 										Height: 4,
 										Content: &common.JSONRef{
-											Ref: "#/spec/panels/MyAveragePanel",
-										},
-									},
-									{
-										X:      0,
-										Y:      0,
-										Width:  3,
-										Height: 4,
-										Content: &common.JSONRef{
-											Ref: "#/spec/panels/MyAwesomePanel",
+											Ref: "#/spec/panels/MyInvalidPanel",
 										},
 									},
 								},
@@ -207,16 +226,397 @@ func TestValidateDashboard(t *testing.T) {
 					},
 				},
 			},
-			result: "invalid panel MyAwesomePanel: AwesomeChart schema conditions not met: display: field not allowed: aaaaaa",
+			result: "invalid panel MyInvalidPanel: Unknown kind UnknownChart",
+		},
+		{
+			title: "dashboard containing an invalid panel (unknown datasource kind)",
+			dashboard: &v1.Dashboard{
+				Kind: v1.KindDashboard,
+				Metadata: v1.ProjectMetadata{
+					Metadata: v1.Metadata{
+						Name: "SimpleDashboard",
+					},
+					Project: "perses",
+				},
+				Spec: v1.DashboardSpec{
+					Datasource: dashboard.Datasource{
+						Name: "PrometheusDemo",
+						Kind: datasource.PrometheusKind,
+					},
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
+					Panels: map[string]json.RawMessage{
+						"MyInvalidPanel": []byte(`
+							{
+								"kind": "AwesomeChart",
+								"display": {
+									"name": "simple awesome chart",
+								},
+								"datasource": {
+									"kind": "UnknownDatasource",
+									"key": "UnknownGraphQuery"
+								},
+								"options": {
+									"a": "no",
+									"b": {
+										"c": [
+											{
+												"e": "up",
+												"f": "the up metric"
+											}
+										]
+									},
+									queries: [
+										{
+											"kind": "UnknownGraphQuery",
+											"options": {
+												"custom": false
+											}
+										}
+									]
+								}
+							}
+						`),
+					},
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
+									{
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyInvalidPanel",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			result: "invalid panel MyInvalidPanel: Unknown datasource.kind UnknownDatasource",
+		},
+		{
+			title: "dashboard containing an invalid panel (missing mandatory attribute)",
+			dashboard: &v1.Dashboard{
+				Kind: v1.KindDashboard,
+				Metadata: v1.ProjectMetadata{
+					Metadata: v1.Metadata{
+						Name: "SimpleDashboard",
+					},
+					Project: "perses",
+				},
+				Spec: v1.DashboardSpec{
+					Datasource: dashboard.Datasource{
+						Name: "PrometheusDemo",
+						Kind: datasource.PrometheusKind,
+					},
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
+					Panels: map[string]json.RawMessage{
+						"MyInvalidPanel": []byte(`
+							{
+								"display": {
+									"name": "simple awesome chart",
+								},
+								"datasource": {
+									"kind": "CustomDatasource",
+									"key": "CustomGraphQuery"
+								},
+								"options": {
+									"a": "no",
+									"b": {
+										"c": [
+											{
+												"e": "up",
+												"f": "the up metric"
+											}
+										]
+									},
+									queries: [
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": true
+											}
+										},
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": false
+											}
+										}
+									]
+								}
+							}
+						`),
+					},
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
+									{
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyInvalidPanel",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			result: "invalid panel MyInvalidPanel: field \"kind\" not found",
+		},
+		{
+			title: "dashboard containing an invalid panel (chart field not allowed)",
+			dashboard: &v1.Dashboard{
+				Kind: v1.KindDashboard,
+				Metadata: v1.ProjectMetadata{
+					Metadata: v1.Metadata{
+						Name: "SimpleDashboard",
+					},
+					Project: "perses",
+				},
+				Spec: v1.DashboardSpec{
+					Datasource: dashboard.Datasource{
+						Name: "PrometheusDemo",
+						Kind: datasource.PrometheusKind,
+					},
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
+					Panels: map[string]json.RawMessage{
+						"MyInvalidPanel": []byte(`
+							{
+								"kind": "AwesomeChart",
+								"display": {
+									"aaaaaa": "simple awesome chart",
+								},
+								"datasource": {
+									"kind": "CustomDatasource",
+									"key": "CustomGraphQuery"
+								},
+								"options": {
+									"a": "no",
+									"b": {
+										"c": [
+											{
+												"e": "up",
+												"f": "the up metric"
+											}
+										]
+									},
+									queries: [
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": true
+											}
+										},
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": false
+											}
+										}
+									]
+								}
+							}
+						`),
+					},
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
+									{
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyInvalidPanel",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			result: "invalid panel MyInvalidPanel: display: field not allowed: aaaaaa",
+		},
+		{
+			title: "dashboard containing an invalid panel (query field not allowed)",
+			dashboard: &v1.Dashboard{
+				Kind: v1.KindDashboard,
+				Metadata: v1.ProjectMetadata{
+					Metadata: v1.Metadata{
+						Name: "SimpleDashboard",
+					},
+					Project: "perses",
+				},
+				Spec: v1.DashboardSpec{
+					Datasource: dashboard.Datasource{
+						Name: "PrometheusDemo",
+						Kind: datasource.PrometheusKind,
+					},
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
+					Panels: map[string]json.RawMessage{
+						"MyInvalidPanel": []byte(`
+							{
+								"kind": "AwesomeChart",
+								"display": {
+									"name": "simple awesome chart",
+								},
+								"datasource": {
+									"kind": "CustomDatasource",
+									"key": "CustomGraphQuery"
+								},
+								"options": {
+									"a": "no",
+									"b": {
+										"c": [
+											{
+												"e": "up",
+												"f": "the up metric"
+											}
+										]
+									},
+									queries: [
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": true
+											},
+											"unwanted": true
+										},
+									]
+								}
+							}
+						`),
+					},
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
+									{
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyInvalidPanel",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			result: "invalid panel MyInvalidPanel: options.queries.0: field not allowed: unwanted",
+		},
+		{
+			title: "dashboard containing an invalid panel (query not matching datasource type)",
+			dashboard: &v1.Dashboard{
+				Kind: v1.KindDashboard,
+				Metadata: v1.ProjectMetadata{
+					Metadata: v1.Metadata{
+						Name: "SimpleDashboard",
+					},
+					Project: "perses",
+				},
+				Spec: v1.DashboardSpec{
+					Datasource: dashboard.Datasource{
+						Name: "PrometheusDemo",
+						Kind: datasource.PrometheusKind,
+					},
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
+					Panels: map[string]json.RawMessage{
+						"MyInvalidPanel": []byte(`
+							{
+								"kind": "AwesomeChart",
+								"display": {
+									"name": "simple awesome chart",
+								},
+								"datasource": {
+									"kind": "CustomDatasource",
+									"key": "CustomGraphQuery"
+								},
+								"options": {
+									"a": "no",
+									"b": {
+										"c": [
+											{
+												"e": "up",
+												"f": "the up metric"
+											}
+										]
+									},
+									queries: [
+										{
+											"kind": "CustomGraphQuery",
+											"options": {
+												"custom": true
+											}
+										},
+										{
+											"kind": "SQLGraphQuery",
+											"options": {
+												"select": "*"
+												"from": "TABLE"
+												"where": "ID > 0"
+											}
+										}
+									]
+								}
+							}
+						`),
+					},
+					Layouts: []dashboard.Layout{
+						{
+							Kind: dashboard.KindGridLayout,
+							Spec: &dashboard.GridLayoutSpec{
+								Items: []dashboard.GridItem{
+									{
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyInvalidPanel",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			result: "invalid panel MyInvalidPanel: options.queries.1.kind: conflicting values \"CustomGraphQuery\" and \"SQLGraphQuery\"",
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			validator := NewValidator(config.Schemas{
-				Path:         "testdata",
-				ChartsFolder: "charts",
+				ChartsPath:  "testdata/charts",
+				QueriesPath: "testdata/queries",
 			})
-			validator.LoadSchemas()
+			validator.LoadCharts()
+			validator.LoadQueries()
 
 			err := validator.Validate(test.dashboard.Spec.Panels)
 			errString := ""
