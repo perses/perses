@@ -61,9 +61,10 @@ func main() {
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
 	// enable hot reload of CUE schemas for dashboards validation:
-	// - watch for changes on the schemas folder
-	// - register a cron task to reload schemas every <interval>
-	watcher, reloader, err := schemas.NewHotReloaders(conf.Schemas.Path, serviceManager.GetDashboard().GetValidator())
+	// - watch for changes on the schemas folders
+	// - register a cron task to reload all the schemas every <interval>
+	watcher, reloader, err := schemas.NewHotReloaders(conf.Schemas, serviceManager.GetDashboard().GetValidator())
+
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the tasks for hot reload of schemas")
 	}

@@ -11,9 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package base
 
-#display: {
-	name:         string
-	description?: string
+#datasource: {
+	kind: string
+}
+
+#query: {
+	kind: string
+	options: {...}
 }

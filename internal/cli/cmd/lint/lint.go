@@ -29,18 +29,22 @@ import (
 
 type option struct {
 	cmdUtils.CMDOption
-	writer    io.Writer
-	file      string
-	schemas   string
-	validator schemas.Validator
+	writer         io.Writer
+	file           string
+	chartsSchemas  string
+	queriesSchemas string
+	validator      schemas.Validator
 }
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'lint'")
 	}
-	if len(o.schemas) > 0 {
-		o.validator = schemas.NewValidator(config.Schemas{Path: o.schemas})
+	if len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0 {
+		o.validator = schemas.NewValidator(config.Schemas{
+			ChartsPath:  o.chartsSchemas,
+			QueriesPath: o.queriesSchemas,
+		})
 	}
 	return nil
 }
@@ -106,9 +110,11 @@ cat resources.json | percli lint -f -
 		},
 	}
 	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to check.")
-	cmd.Flags().StringVar(&o.schemas, "schemas", "", "Path to the CUE schemas.")
+	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for charts.")
+	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for queries.")
 	if err := cmd.MarkFlagRequired("file"); err != nil {
 		logrus.Fatal(err)
 	}
+	cmd.MarkFlagsRequiredTogether("schemas.charts", "schemas.queries")
 	return cmd
 }

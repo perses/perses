@@ -14,6 +14,7 @@
 package schemas
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -27,42 +28,78 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	kindField         = "kind"
+	datasourceField   = "datasource"
+	panelDefPath      = "#panel"
+	datasourceDefPath = "#" + datasourceField
+	queryDefPath      = "#query"
+)
+
+//go:embed base_def_chart.cue
+var baseChartDef []byte
+
+//go:embed base_def_query.cue
+var baseQueryDef []byte
+
+// retrieveSchemaForKind returns the schema corresponding to the provided kind
+func retrieveSchemaForKind(panelName string, panelVal cue.Value, kindPath string, schemasMap *sync.Map) (cue.Value, error) {
+	// retrieve the value of the Kind field
+	kind, err := panelVal.LookupPath(cue.ParsePath(kindPath)).String()
+	if err != nil {
+		err = fmt.Errorf("invalid panel %s: %s", panelName, err) // enrich the error message returned by cue lib
+		logrus.Debug(err)
+		return cue.Value{}, err
+	}
+
+	// retrieve the corresponding schema
+	schema, ok := schemasMap.Load(kind)
+	if !ok {
+		err := fmt.Errorf("invalid panel %s: Unknown %s %s", panelName, kindPath, kind)
+		logrus.Debug(err)
+		return cue.Value{}, err
+	}
+
+	return schema.(cue.Value), nil
+}
+
 // Validator can be used to run checks on panels, based on cuelang definitions
 type Validator interface {
 	Validate(panels map[string]json.RawMessage) error
-	LoadSchemas()
+	LoadCharts()
+	LoadQueries()
 }
 
 type validator struct {
-	schemasConf config.Schemas
-	context     *cue.Context
-	baseDef     cue.Value
-	schemas     *sync.Map
+	context *cue.Context
+	charts  cueDefs
+	queries cueDefs
 }
-
-// base CUE definition that all charts & panels should meet
-const baseChartDef = `
-{
-	kind: string
-	display: {
-		name: string
-	}
-	options: _
-}
-`
 
 // NewValidator instantiate a validator
 func NewValidator(conf config.Schemas) Validator {
 	ctx := cuecontext.New()
 
-	// compile the base chart definition
-	baseDef := ctx.CompileString(baseChartDef)
+	// compile the base definitions
+	baseChartDefVal := ctx.CompileBytes(baseChartDef)
+	baseQueryDefVal := ctx.CompileBytes(baseQueryDef)
 
 	return &validator{
-		schemasConf: conf,
-		context:     ctx,
-		baseDef:     baseDef,
-		schemas:     &sync.Map{},
+		context: ctx,
+		charts: cueDefs{
+			context:     ctx,
+			baseDef:     baseChartDefVal,
+			schemas:     &sync.Map{},
+			schemasPath: conf.ChartsPath,
+			kindCuePath: fmt.Sprintf("%s.%s", panelDefPath, kindField),
+		},
+		queries: cueDefs{
+			context:     ctx,
+			baseDef:     baseQueryDefVal,
+			schemas:     &sync.Map{},
+			schemasPath: conf.QueriesPath,
+			kindCuePath: fmt.Sprintf("%s.%s", datasourceDefPath, kindField),
+		},
 	}
 }
 
@@ -70,39 +107,39 @@ func NewValidator(conf config.Schemas) Validator {
 // The panels are matched against the known list of CUE definitions (schemas).
 // If no schema matches for at least 1 panel, the validation fails.
 func (v *validator) Validate(panels map[string]json.RawMessage) error {
-	logrus.Tracef("Panels to validate: %+v", panels)
-
 	var res error
 
 	// go through the panels list
 	// the processing stops as soon as it detects an invalid panel -> TODO: improve this to return a list of all the errors encountered ?
-	for k, panel := range panels {
-		logrus.Tracef("Panel to validate: %s", string(panel))
+	for panelName, panelJSON := range panels {
+		logrus.Tracef("Panel to validate: %s", string(panelJSON))
 
 		// compile the JSON panel into a CUE Value
-		value := v.context.CompileBytes(panel)
+		value := v.context.CompileBytes(panelJSON)
 
-		// retrieve panel's kind
-		kind, err := value.LookupPath(cue.ParsePath("kind")).String()
+		chartSchema, err := retrieveSchemaForKind(panelName, value, kindField, v.charts.schemas)
 		if err != nil {
-			err = fmt.Errorf("invalid panel %s: %s", k, err) // enrich the error message returned by cue lib
-			logrus.Warning(err)
 			res = err
 			break
 		}
+		logrus.Tracef("Chart schema to use: %+v", chartSchema.LookupPath(cue.ParsePath(panelDefPath)))
 
-		// retrieve the corresponding schema
-		schema, ok := v.schemas.Load(kind)
-		if !ok {
-			err := fmt.Errorf("invalid panel %s: Unknown kind %s", k, kind)
-			logrus.Debug(err)
+		querySchema, err := retrieveSchemaForKind(panelName, value, fmt.Sprintf("%s.%s", datasourceField, kindField), v.queries.schemas)
+		if err != nil {
 			res = err
 			break
 		}
-		logrus.Tracef("Matching panel %s against schema: %+v", k, schema)
+		logrus.Tracef("Query schema to use: %+v", querySchema.LookupPath(cue.ParsePath(queryDefPath)))
 
-		// do the validation
-		unified := value.Unify(schema.(cue.Value))
+		// unify panel and query schemas
+		finalSchema := chartSchema.Unify(querySchema)
+		if finalSchema.Err() != nil {
+			logrus.WithError(finalSchema.Err()).Errorf("Error unifying chart and query schemas to validate panel %s", panelName)
+			continue
+		}
+
+		// do the validation using the main #panel def of the schema
+		unified := value.Unify(finalSchema.LookupPath(cue.ParsePath(panelDefPath)))
 		opts := []cue.Option{
 			cue.Concrete(true),
 			cue.Attributes(true),
@@ -111,7 +148,7 @@ func (v *validator) Validate(panels map[string]json.RawMessage) error {
 		}
 		err = unified.Validate(opts...)
 		if err != nil {
-			err = fmt.Errorf("invalid panel %s: %s schema conditions not met: %s", k, kind, err)
+			err = fmt.Errorf("invalid panel %s: %s", panelName, err) // enrich the error message returned by cue lib
 			logrus.Debug(err)
 			res = err
 			break
@@ -125,35 +162,47 @@ func (v *validator) Validate(panels map[string]json.RawMessage) error {
 	return res
 }
 
-// LoadSchemas load the known list of schemas into the validator
-func (v *validator) LoadSchemas() {
-	pluginsPath := filepath.Join(v.schemasConf.Path, v.schemasConf.ChartsFolder)
+// LoadCharts loads the list of available charts plugins as CUE schemas
+func (v *validator) LoadCharts() {
+	v.charts.load()
+}
 
-	files, err := os.ReadDir(pluginsPath)
+// LoadQueries loads the list of available queries plugins as CUE schemas
+func (v *validator) LoadQueries() {
+	v.queries.load()
+}
+
+type cueDefs struct {
+	context     *cue.Context
+	baseDef     cue.Value
+	schemas     *sync.Map
+	schemasPath string
+	kindCuePath string
+}
+
+// load the list of available plugins as CUE schemas
+func (c *cueDefs) load() {
+	files, err := os.ReadDir(c.schemasPath)
 	if err != nil {
-		logrus.WithError(err).Errorf("Not able to read from schemas dir %s", pluginsPath)
+		logrus.WithError(err).Errorf("Not able to read from schemas dir %s", c.schemasPath)
 		return
 	}
 
-	// remove any previous item before proceeding
-	v.schemas.Range(func(key interface{}, value interface{}) bool {
-		v.schemas.Delete(key)
-		return true
-	})
+	// newSchemas is used for double buffering, to avoid any issue when there are panels to validate at the same time load() is triggered
+	newSchemas := make(map[string]cue.Value)
 
 	// process each schema plugin to convert it into a CUE Value
-	// for each schema we check that it meets the default specs we expect for any panel, otherwise we dont include it
 	for _, file := range files {
 		if !file.IsDir() {
 			logrus.Warningf("Plugin %s is not a folder", file.Name())
 			continue
 		}
 
-		schemaPath := filepath.Join(pluginsPath, file.Name())
+		schemaPath := filepath.Join(c.schemasPath, file.Name())
 
 		// load the cue files into build.Instances slice
 		buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath})
-		// we strongly assume that only 1 buildInstance should be returned (corresponding to the main definition like #panel), otherwise we skip it
+		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 		// TODO can probably be improved
 		if len(buildInstances) != 1 {
 			logrus.Errorf("The number of build instances for %s is != 1, skipping this schema", schemaPath)
@@ -168,29 +217,40 @@ func (v *validator) LoadSchemas() {
 		}
 
 		// build Value from the Instance
-		schema := v.context.BuildInstance(buildInstance)
+		schema := c.context.BuildInstance(buildInstance)
 		if schema.Err() != nil {
 			logrus.WithError(schema.Err()).Errorf("Error during build for %s, skipping this schema", schemaPath)
 			continue
 		}
 
-		// check if the schema fulfils the base panel requirements
-		unified := v.baseDef.Unify(schema)
-		if unified.Err() != nil {
-			logrus.WithError(unified.Err()).Errorf("Error during schema validation for %s, skipping this schema", schemaPath)
+		// unify with the base def to complete defaults + check if the plugin fulfils the base requirements
+		finalSchema := c.baseDef.Unify(schema)
+		if finalSchema.Err() != nil {
+			logrus.WithError(finalSchema.Err()).Errorf("Error during schema validation for %s, skipping this schema", schemaPath)
 			continue
 		}
 
 		// check if another schema for the same Kind was already registered
-		kind, _ := schema.LookupPath(cue.ParsePath("kind")).String()
-		if _, ok := v.schemas.Load(kind); ok {
+		kind, _ := finalSchema.LookupPath(cue.ParsePath(c.kindCuePath)).String()
+		if _, ok := newSchemas[kind]; ok {
 			logrus.Errorf("Conflict caused by %s: a schema already exists for kind %s, skipping this schema", schemaPath, kind)
 			continue
 		}
 
-		v.schemas.Store(kind, schema)
-		logrus.Debugf("Loaded schema %s from file %s: %+v", kind, schemaPath, schema)
+		newSchemas[kind] = finalSchema
+		logrus.Debugf("Loaded schema %s from file %s", kind, schemaPath)
 	}
 
-	logrus.Info("Schemas list (re)loaded")
+	// make c.schemas equal to newSchemas: deep copy newSchemas to c.schemas, then remove any value of c.schemas not existing in newSchemas
+	for key, value := range newSchemas {
+		c.schemas.Store(key, value)
+	}
+	c.schemas.Range(func(key interface{}, value interface{}) bool {
+		if _, ok := newSchemas[key.(string)]; !ok {
+			c.schemas.Delete(key)
+		}
+		return true
+	})
+
+	logrus.Infof("Schemas at %s (re)loaded", c.schemasPath)
 }

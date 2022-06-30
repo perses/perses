@@ -11,13 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prometheus
+package sql
+
+#datasource: {
+	kind: "SQLDatasource"
+}
 
 #query: {
-	kind: "PrometheusGraphQuery"
+	kind: "SQLGraphQuery"
 	options: {
-		query:       string
-		min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-		resolution?: number
+		select: string
+		from:   string
+		where?: string
 	}
 }

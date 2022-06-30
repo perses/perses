@@ -16,8 +16,11 @@ package schemas
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/perses/common/async"
+	"github.com/perses/perses/internal/config"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/fsnotify.v1"
@@ -26,7 +29,8 @@ import (
 type watcher struct {
 	async.Task
 	fsWatcher   *fsnotify.Watcher
-	schemasPath string
+	chartsPath  string
+	queriesPath string
 	validator   Validator
 }
 
@@ -35,7 +39,7 @@ type reloader struct {
 	validator Validator
 }
 
-func NewHotReloaders(schemasPath string, v Validator) (async.SimpleTask, async.SimpleTask, error) {
+func NewHotReloaders(conf config.Schemas, v Validator) (async.SimpleTask, async.SimpleTask, error) {
 	fsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, nil, err
@@ -43,7 +47,8 @@ func NewHotReloaders(schemasPath string, v Validator) (async.SimpleTask, async.S
 
 	return &watcher{
 			fsWatcher:   fsWatcher,
-			schemasPath: schemasPath,
+			chartsPath:  conf.ChartsPath,
+			queriesPath: conf.QueriesPath,
 			validator:   v,
 		}, &reloader{
 			validator: v,
@@ -53,7 +58,20 @@ func NewHotReloaders(schemasPath string, v Validator) (async.SimpleTask, async.S
 
 // Initialize implements async.Task.Initialize
 func (w *watcher) Initialize() error {
-	return w.fsWatcher.Add(w.schemasPath)
+	var err error
+	err = w.fsWatcher.Add(w.chartsPath)
+	if err != nil {
+		return err
+	}
+	logrus.Tracef("Started watching %s", w.chartsPath)
+
+	err = w.fsWatcher.Add(w.queriesPath)
+	if err != nil {
+		return err
+	}
+	logrus.Tracef("Started watching %s", w.queriesPath)
+
+	return nil
 }
 
 // String implements fmt.Stringer
@@ -63,11 +81,6 @@ func (w *watcher) String() string {
 
 // Execute implements cron.Executor.Execute
 func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error {
-	err := w.fsWatcher.Add(w.schemasPath)
-	if err != nil {
-		return err
-	}
-
 	for {
 		select {
 		case event, ok := <-w.fsWatcher.Events:
@@ -78,7 +91,13 @@ func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 			// NB room for improvement: the event fsnotify.Remove could be used to actually remove the CUE schema from the map
 			if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Remove == fsnotify.Remove {
 				logrus.Tracef("%s event on %s", event.Op, event.Name)
-				w.validator.LoadSchemas()
+				if strings.HasPrefix(event.Name, filepath.FromSlash(w.chartsPath)) {
+					w.validator.LoadCharts()
+				} else if strings.HasPrefix(event.Name, filepath.FromSlash(w.queriesPath)) {
+					w.validator.LoadQueries()
+				} else {
+					logrus.Debugf("no match for %s or %s", w.chartsPath, w.queriesPath)
+				}
 			}
 		case err, ok := <-w.fsWatcher.Errors:
 			if !ok {
@@ -110,7 +129,8 @@ func (r *reloader) Execute(ctx context.Context, _ context.CancelFunc) error {
 		log.Infof("canceled %s", r.String())
 		break
 	default:
-		r.validator.LoadSchemas()
+		r.validator.LoadCharts()
+		r.validator.LoadQueries()
 	}
 	return nil
 }

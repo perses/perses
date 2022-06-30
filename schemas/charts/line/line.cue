@@ -15,18 +15,16 @@ package line
 
 import (
 	"github.com/perses/perses/schemas/common"
-	"github.com/perses/perses/schemas/common/prometheus"
 )
 
 #panel: {
-	kind:    "LineChart"
-	display: common.#display
+	kind: "LineChart"
 	options: {
-		queries: [...prometheus.#query]
+		queries: [...#query]
 		show_legend?: bool
 		unit?:        common.#unit
 		thresholds?:  common.#thresholds
 	}
 }
 
-#panel
+#query: _ // needed for make cue-test only

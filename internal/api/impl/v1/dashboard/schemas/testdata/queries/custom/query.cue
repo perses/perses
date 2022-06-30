@@ -11,22 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package first
+package custom
 
-#panel: {
-	kind: "AwesomeChart"
+#datasource: {
+	kind: "CustomDatasource"
+}
+
+#query: {
+	kind: "CustomGraphQuery"
 	options: {
-		a: string
-		b: {
-			c: [...#d]
-		}
-		queries: [...#query]
+		custom: bool
 	}
 }
-
-#d: {
-	e:  string
-	f?: string
-}
-
-#query: _ // needed for make cue-test only

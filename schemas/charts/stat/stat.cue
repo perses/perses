@@ -15,19 +15,12 @@ package stat
 
 import (
 	"github.com/perses/perses/schemas/common"
-	"github.com/perses/perses/schemas/common/prometheus"
 )
 
-#sparkline: {
-	color?: string
-	width?: number
-}
-
 #panel: {
-	kind:    "StatChart"
-	display: common.#display
+	kind: "StatChart"
 	options: {
-		query:       prometheus.#query
+		query:       #query
 		calculation: common.#calculation
 		unit:        common.#unit
 		thresholds?: common.#thresholds
@@ -35,4 +28,9 @@ import (
 	}
 }
 
-#panel
+#sparkline: {
+	color?: string
+	width?: number
+}
+
+#query: _ // needed for make cue-test only
