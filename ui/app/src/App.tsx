@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
-import { ErrorAlert, ChartsThemeProvider, useGenerateChartsTheme } from '@perses-dev/components';
+import { Box, useTheme } from '@mui/material';
+import { ErrorAlert, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/components';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
@@ -22,10 +22,12 @@ import { useBundledPlugins } from './model/bundled-plugins';
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
+  const muiTheme = useTheme();
+
   // app specific echarts option overrides, empty since perses uses default
   // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
   const echartsThemeOverrides = {};
-  const chartsTheme = useGenerateChartsTheme('perses', echartsThemeOverrides);
+  const chartsTheme = generateChartsTheme('perses', muiTheme, echartsThemeOverrides);
 
   return (
     <Box

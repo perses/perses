@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTheme } from '@mui/material';
+import { Theme as MuiTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import { EChartsTheme, PersesChartsTheme } from '../model';
 
 const DEFAULT_TEXT_COLOR = '#222';
 
-export function useGenerateChartsTheme(
+export function generateChartsTheme(
   themeName: string,
-  echartsThemeOverrides: EChartsTheme
+  muiTheme: MuiTheme,
+  echartsTheme: EChartsTheme
 ): PersesChartsTheme | undefined {
-  const muiTheme = useTheme();
 
   if (muiTheme.typography === undefined || muiTheme.palette === undefined || muiTheme.palette.grey === undefined) {
     return;
@@ -159,7 +159,7 @@ export function useGenerateChartsTheme(
 
   return {
     themeName,
-    echartsTheme: merge(muiConvertedTheme, echartsThemeOverrides),
+    echartsTheme: merge(muiConvertedTheme, echartsTheme),
     noDataOption: {
       title: {
         show: true,
