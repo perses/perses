@@ -57,7 +57,6 @@ export function GaugeChart(props: GaugeChartProps) {
           endAngle: -20,
           min: 0,
           max: 100,
-          splitNumber: 12,
           silent: true,
           progress: {
             show: true,

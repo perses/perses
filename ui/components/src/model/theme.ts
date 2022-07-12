@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOption } from 'echarts';
+import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOption, GaugeSeriesOption } from 'echarts';
 
 export interface PersesChartsTheme {
   themeName: string;
@@ -27,4 +27,5 @@ export interface PersesChartsTheme {
 export interface EChartsTheme extends EChartsOption {
   bar?: BarSeriesOption;
   line?: LineSeriesOption;
+  gauge?: GaugeSeriesOption;
 }

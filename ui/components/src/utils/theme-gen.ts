@@ -21,12 +21,7 @@ export function generateChartsTheme(
   themeName: string,
   muiTheme: MuiTheme,
   echartsTheme: EChartsTheme
-): PersesChartsTheme | undefined {
-
-  if (muiTheme.typography === undefined || muiTheme.palette === undefined || muiTheme.palette.grey === undefined) {
-    return;
-  }
-
+): PersesChartsTheme {
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
   const muiConvertedTheme: EChartsTheme = {
@@ -147,13 +142,13 @@ export function generateChartsTheme(
         valueAnimation: false,
       },
       splitLine: {
-        splitNumber: 2,
         distance: 0,
         length: 4,
         lineStyle: {
           width: 1,
         },
       },
+      splitNumber: 12,
     },
   };
 
