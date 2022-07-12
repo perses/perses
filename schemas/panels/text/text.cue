@@ -11,22 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package first
+package text
 
 #panel: {
-	kind: "AwesomeChart"
+	kind: "TextPanel"
 	options: {
-		a: string
-		b: {
-			c: [...#d]
-		}
-		queries: [...#query]
+		mode:    "html" | "markdown"
+		content: string
 	}
 }
-
-#d: {
-	e:  string
-	f?: string
-}
-
-#query: _ // needed for make cue-test only

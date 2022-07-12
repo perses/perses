@@ -11,23 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package base
+package line
 
-#panel: close({
-	kind:       string
-	display:    #display
+import (
+	"github.com/perses/perses/schemas/common"
+)
+
+#panel: {
+	kind:       "LineChart"
 	datasource: #datasource
-	options:    _
-})
-
-#display: {
-	name:         string
-	description?: string
+	options: {
+		queries: [...#query]
+		show_legend?: bool
+		unit?:        common.#unit
+		thresholds?:  common.#thresholds
+	}
 }
 
-#datasource: {
-	kind: string
-	key?: string
-}
-
-#query: _
+#datasource: _
+#query:      _

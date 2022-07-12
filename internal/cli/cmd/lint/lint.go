@@ -42,7 +42,7 @@ func (o *option) Complete(args []string) error {
 	}
 	if len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0 {
 		o.validator = schemas.NewValidator(config.Schemas{
-			ChartsPath:  o.chartsSchemas,
+			PanelsPath:  o.chartsSchemas,
 			QueriesPath: o.queriesSchemas,
 		})
 	}

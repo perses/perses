@@ -11,31 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package config
+package second
 
-import "time"
-
-const (
-	defaultPanelsPath  = "schemas/panels"
-	defaultQueriesPath = "schemas/queries"
-	defaultInterval    = 1 * time.Hour
-)
-
-type Schemas struct {
-	PanelsPath  string        `yaml:"panels_path,omitempty"`
-	QueriesPath string        `yaml:"queries_path,omitempty"`
-	Interval    time.Duration `yaml:"interval,omitempty"`
+#panel: {
+	kind:       "SecondChart"
+	datasource: #datasource
+	options: {
+		a: string
+		b: {
+			c?: bool
+			d: [...#e]
+		}
+		query: #query
+	}
 }
 
-func (s *Schemas) Verify() error {
-	if len(s.PanelsPath) == 0 {
-		s.PanelsPath = defaultPanelsPath
-	}
-	if len(s.QueriesPath) == 0 {
-		s.QueriesPath = defaultQueriesPath
-	}
-	if s.Interval <= 0 {
-		s.Interval = defaultInterval
-	}
-	return nil
+#e: {
+	f: number
 }
+
+#datasource: _
+#query:      _

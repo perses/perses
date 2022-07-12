@@ -11,26 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stat
+package gauge
 
 import (
 	"github.com/perses/perses/schemas/common"
 )
 
 #panel: {
-	kind: "StatChart"
+	kind:       "GaugeChart"
+	datasource: #datasource
 	options: {
 		query:       #query
 		calculation: common.#calculation
-		unit:        common.#unit
+		unit?:       common.#unit
 		thresholds?: common.#thresholds
-		sparkline?:  #sparkline
 	}
 }
 
-#sparkline: {
-	color?: string
-	width?: number
-}
-
-#query: _ // needed for make cue-test only
+#datasource: _
+#query:      _

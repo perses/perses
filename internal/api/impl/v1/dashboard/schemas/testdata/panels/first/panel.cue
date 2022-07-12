@@ -11,22 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package second
+package first
 
 #panel: {
-	kind: "AverageChart"
+	kind:       "FirstChart"
+	datasource: #datasource
 	options: {
 		a: string
 		b: {
-			c?: bool
-			d: [...#e]
+			c: [...#d]
 		}
-		query: #query
+		queries: [...#query]
 	}
 }
 
-#e: {
-	f: number
+#d: {
+	e:  string
+	f?: string
 }
 
-#query: _ // needed for make cue-test only
+#datasource: _
+#query:      _
