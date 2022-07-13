@@ -29,7 +29,7 @@ import (
 type watcher struct {
 	async.Task
 	fsWatcher   *fsnotify.Watcher
-	chartsPath  string
+	panelsPath  string
 	queriesPath string
 	validator   Validator
 }
@@ -47,7 +47,7 @@ func NewHotReloaders(conf config.Schemas, v Validator) (async.SimpleTask, async.
 
 	return &watcher{
 			fsWatcher:   fsWatcher,
-			chartsPath:  conf.ChartsPath,
+			panelsPath:  conf.PanelsPath,
 			queriesPath: conf.QueriesPath,
 			validator:   v,
 		}, &reloader{
@@ -59,11 +59,11 @@ func NewHotReloaders(conf config.Schemas, v Validator) (async.SimpleTask, async.
 // Initialize implements async.Task.Initialize
 func (w *watcher) Initialize() error {
 	var err error
-	err = w.fsWatcher.Add(w.chartsPath)
+	err = w.fsWatcher.Add(w.panelsPath)
 	if err != nil {
 		return err
 	}
-	logrus.Tracef("Started watching %s", w.chartsPath)
+	logrus.Tracef("Started watching %s", w.panelsPath)
 
 	err = w.fsWatcher.Add(w.queriesPath)
 	if err != nil {
@@ -91,12 +91,12 @@ func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 			// NB room for improvement: the event fsnotify.Remove could be used to actually remove the CUE schema from the map
 			if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Remove == fsnotify.Remove {
 				logrus.Tracef("%s event on %s", event.Op, event.Name)
-				if strings.HasPrefix(event.Name, filepath.FromSlash(w.chartsPath)) {
-					w.validator.LoadCharts()
+				if strings.HasPrefix(event.Name, filepath.FromSlash(w.panelsPath)) {
+					w.validator.LoadPanels()
 				} else if strings.HasPrefix(event.Name, filepath.FromSlash(w.queriesPath)) {
 					w.validator.LoadQueries()
 				} else {
-					logrus.Debugf("no match for %s or %s", w.chartsPath, w.queriesPath)
+					logrus.Debugf("no match for %s or %s", w.panelsPath, w.queriesPath)
 				}
 			}
 		case err, ok := <-w.fsWatcher.Errors:
@@ -129,7 +129,7 @@ func (r *reloader) Execute(ctx context.Context, _ context.CancelFunc) error {
 		log.Infof("canceled %s", r.String())
 		break
 	default:
-		r.validator.LoadCharts()
+		r.validator.LoadPanels()
 		r.validator.LoadQueries()
 	}
 	return nil

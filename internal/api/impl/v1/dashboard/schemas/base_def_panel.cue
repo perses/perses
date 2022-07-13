@@ -11,31 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package config
+package base
 
-import "time"
+#panel: close({
+	kind:        string
+	display:     #display
+	datasource?: #datasource
+	options:     _
+})
 
-const (
-	defaultPanelsPath  = "schemas/panels"
-	defaultQueriesPath = "schemas/queries"
-	defaultInterval    = 1 * time.Hour
-)
-
-type Schemas struct {
-	PanelsPath  string        `yaml:"panels_path,omitempty"`
-	QueriesPath string        `yaml:"queries_path,omitempty"`
-	Interval    time.Duration `yaml:"interval,omitempty"`
+#display: {
+	name:         string
+	description?: string
 }
 
-func (s *Schemas) Verify() error {
-	if len(s.PanelsPath) == 0 {
-		s.PanelsPath = defaultPanelsPath
-	}
-	if len(s.QueriesPath) == 0 {
-		s.QueriesPath = defaultQueriesPath
-	}
-	if s.Interval <= 0 {
-		s.Interval = defaultInterval
-	}
-	return nil
+#datasource: {
+	kind: string
+	key?: string
 }
+
+#query: _

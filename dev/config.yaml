@@ -7,6 +7,6 @@ database:
         port: 2379
 
 schemas:
-  charts_path: "schemas/charts"
+  panels_path: "schemas/panels"
   queries_path: "schemas/queries"
   interval: "5m"

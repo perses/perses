@@ -51,11 +51,11 @@ func TestValidateDashboard(t *testing.T) {
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]json.RawMessage{
-						"MyAwesomePanel": []byte(`
+						"MyFirstPanel": []byte(`
 							{
-								"kind": "AwesomeChart",
+								"kind": "FirstChart",
 								"display": {
-									"name": "simple awesome chart",
+									"name": "simple first chart",
 								},
 								"datasource": {
 									"kind": "CustomDatasource",
@@ -88,11 +88,11 @@ func TestValidateDashboard(t *testing.T) {
 								}
 							}
 						`),
-						"MyAveragePanel": []byte(`
+						"MySecondPanel": []byte(`
 							{
-								"kind": "AverageChart",
+								"kind": "SecondChart",
 								"display": {
-									"name": "simple average chart",
+									"name": "simple second chart",
 								},
 								"datasource": {
 									"kind": "SQLDatasource",
@@ -118,6 +118,18 @@ func TestValidateDashboard(t *testing.T) {
 								}
 							}
 						`),
+						"MyThirdPanel": []byte(`
+							{
+								"kind": "ThirdPanel",
+								"display": {
+									"name": "simple third panel",
+								},
+								"options": {
+									"a": "yes",
+									"b": "no"
+								}
+							}
+						`),
 					},
 					Layouts: []dashboard.Layout{
 						{
@@ -130,7 +142,7 @@ func TestValidateDashboard(t *testing.T) {
 										Width:  3,
 										Height: 4,
 										Content: &common.JSONRef{
-											Ref: "#/spec/panels/MyAveragePanel",
+											Ref: "#/spec/panels/MyFirstPanel",
 										},
 									},
 									{
@@ -139,7 +151,16 @@ func TestValidateDashboard(t *testing.T) {
 										Width:  3,
 										Height: 4,
 										Content: &common.JSONRef{
-											Ref: "#/spec/panels/MyAwesomePanel",
+											Ref: "#/spec/panels/MySecondPanel",
+										},
+									},
+									{
+										X:      0,
+										Y:      0,
+										Width:  3,
+										Height: 4,
+										Content: &common.JSONRef{
+											Ref: "#/spec/panels/MyThirdPanel",
 										},
 									},
 								},
@@ -248,9 +269,9 @@ func TestValidateDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{
 						"MyInvalidPanel": []byte(`
 							{
-								"kind": "AwesomeChart",
+								"kind": "FirstChart",
 								"display": {
-									"name": "simple awesome chart",
+									"name": "simple first chart",
 								},
 								"datasource": {
 									"kind": "UnknownDatasource",
@@ -321,7 +342,7 @@ func TestValidateDashboard(t *testing.T) {
 						"MyInvalidPanel": []byte(`
 							{
 								"display": {
-									"name": "simple awesome chart",
+									"name": "simple invalid panel",
 								},
 								"datasource": {
 									"kind": "CustomDatasource",
@@ -378,7 +399,7 @@ func TestValidateDashboard(t *testing.T) {
 			result: "invalid panel MyInvalidPanel: field \"kind\" not found",
 		},
 		{
-			title: "dashboard containing an invalid panel (chart field not allowed)",
+			title: "dashboard containing an invalid panel (panel field not allowed)",
 			dashboard: &v1.Dashboard{
 				Kind: v1.KindDashboard,
 				Metadata: v1.ProjectMetadata{
@@ -397,9 +418,9 @@ func TestValidateDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{
 						"MyInvalidPanel": []byte(`
 							{
-								"kind": "AwesomeChart",
+								"kind": "FirstChart",
 								"display": {
-									"aaaaaa": "simple awesome chart",
+									"aaaaaa": "simple first chart",
 								},
 								"datasource": {
 									"kind": "CustomDatasource",
@@ -475,9 +496,9 @@ func TestValidateDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{
 						"MyInvalidPanel": []byte(`
 							{
-								"kind": "AwesomeChart",
+								"kind": "FirstChart",
 								"display": {
-									"name": "simple awesome chart",
+									"name": "simple first chart",
 								},
 								"datasource": {
 									"kind": "CustomDatasource",
@@ -548,9 +569,9 @@ func TestValidateDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{
 						"MyInvalidPanel": []byte(`
 							{
-								"kind": "AwesomeChart",
+								"kind": "FirstChart",
 								"display": {
-									"name": "simple awesome chart",
+									"name": "simple first chart",
 								},
 								"datasource": {
 									"kind": "CustomDatasource",
@@ -612,10 +633,10 @@ func TestValidateDashboard(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			validator := NewValidator(config.Schemas{
-				ChartsPath:  "testdata/charts",
+				PanelsPath:  "testdata/panels",
 				QueriesPath: "testdata/queries",
 			})
-			validator.LoadCharts()
+			validator.LoadPanels()
 			validator.LoadQueries()
 
 			err := validator.Validate(test.dashboard.Spec.Panels)

@@ -7,35 +7,36 @@ Perses comes with validation capabilities based on [CUE](https://cuelang.org/), 
 
 This section explains about the format any plugin should follow to be accepted & registered by Perses at runtime.
 
-## Chart
+## Panel
 
-A chart plugin looks like the following:
+A panel plugin looks like the following:
 
 ```cue
-package <chart type> // e.g package line
+package <panel type> // e.g package line
 
 #panel: {
-	kind: "<Chart name>" // e.g kind: "LineChart"
-  display: {
-    name:         string
-    description?: string
-  }
-  datasource: {
-    kind: string
-    key?: string
-  }
+	kind:       "<Panel name>" // e.g kind: "LineChart"
+	datasource: #datasource
 	options: {
 		queries:      [...#query]
 		show_legend?: bool
 	}
 }
+
+#datasource: _
+#query:      _
 ```
 it should contain:
-- a package name (free text).
+- a package name.
 - a `#panel` definition that holds:
-  - the chart's `kind`.
-  - optionally, a `display` and a `datasource` to define additional constraints on those 2 fields inherited from the base model. In the example above they could actually be removed, since they are not changing anything to the base constraints for those 2 fields.
-  - an `options` map containing any attribute you want for this plugin.
+  - the panel's `kind`.
+  - \* `datasource: #datasource`
+  - an `options` map containing
+    - \* a field that maps to the `#query` definition (like `queries: [...#query]`,  `query: #query` etc.)
+    - any other field you want for this plugin.
+- \* a placeholder value `_` for `#datasource` and `#query`. _This is mandatory to pass the initial "compilation" of the plugin, then when it will be used to validate a panel the relevant definitions will be injected at runtime._
+
+_* guidelines that apply if your panel defines a query & a datasource (e.g LineChart), otherwise don't apply (e.g TextPanel)_
 
 ## Query
 
@@ -58,8 +59,8 @@ package <query type> // e.g package prometheus
 }
 ```
 it should contain:
-- a package name (free text).
+- a package name.
 - a `#datasource` definition that holds the `kind` of datasource corresponding to this query type.
 - a `#query` definition that holds:
   - the query's `kind`.
-  - an `options` map containing any attribute you want for this plugin.
+  - an `options` map containing any field you want for this plugin.

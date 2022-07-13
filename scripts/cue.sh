@@ -5,7 +5,7 @@
 set -e
 
 function test() {
-  cd schemas/charts
+  cd schemas/panels
   for d in *; do
     if [ -d "${d}" ]; then
       echo "testing charts ${d}"

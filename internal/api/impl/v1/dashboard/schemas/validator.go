@@ -29,15 +29,16 @@ import (
 )
 
 const (
-	kindField         = "kind"
-	datasourceField   = "datasource"
-	panelDefPath      = "#panel"
-	datasourceDefPath = "#" + datasourceField
-	queryDefPath      = "#query"
+	kindField           = "kind"
+	datasourceField     = "datasource"
+	panelDefPath        = "#panel"
+	panelDatasourcePath = panelDefPath + "." + datasourceField
+	datasourceDefPath   = "#" + datasourceField
+	queryDefPath        = "#query"
 )
 
-//go:embed base_def_chart.cue
-var baseChartDef []byte
+//go:embed base_def_panel.cue
+var basePanelDef []byte
 
 //go:embed base_def_query.cue
 var baseQueryDef []byte
@@ -66,13 +67,13 @@ func retrieveSchemaForKind(panelName string, panelVal cue.Value, kindPath string
 // Validator can be used to run checks on panels, based on cuelang definitions
 type Validator interface {
 	Validate(panels map[string]json.RawMessage) error
-	LoadCharts()
+	LoadPanels()
 	LoadQueries()
 }
 
 type validator struct {
 	context *cue.Context
-	charts  cueDefs
+	panels  cueDefs
 	queries cueDefs
 }
 
@@ -81,16 +82,16 @@ func NewValidator(conf config.Schemas) Validator {
 	ctx := cuecontext.New()
 
 	// compile the base definitions
-	baseChartDefVal := ctx.CompileBytes(baseChartDef)
+	basePanelDefVal := ctx.CompileBytes(basePanelDef)
 	baseQueryDefVal := ctx.CompileBytes(baseQueryDef)
 
 	return &validator{
 		context: ctx,
-		charts: cueDefs{
+		panels: cueDefs{
 			context:     ctx,
-			baseDef:     baseChartDefVal,
+			baseDef:     basePanelDefVal,
 			schemas:     &sync.Map{},
-			schemasPath: conf.ChartsPath,
+			schemasPath: conf.PanelsPath,
 			kindCuePath: fmt.Sprintf("%s.%s", panelDefPath, kindField),
 		},
 		queries: cueDefs{
@@ -117,25 +118,31 @@ func (v *validator) Validate(panels map[string]json.RawMessage) error {
 		// compile the JSON panel into a CUE Value
 		value := v.context.CompileBytes(panelJSON)
 
-		chartSchema, err := retrieveSchemaForKind(panelName, value, kindField, v.charts.schemas)
+		// retrieve the corresponding panel schema
+		panelSchema, err := retrieveSchemaForKind(panelName, value, kindField, v.panels.schemas)
 		if err != nil {
 			res = err
 			break
 		}
-		logrus.Tracef("Chart schema to use: %+v", chartSchema.LookupPath(cue.ParsePath(panelDefPath)))
+		logrus.Tracef("Panel schema to use: %+v", panelSchema.LookupPath(cue.ParsePath(panelDefPath)))
+		finalSchema := panelSchema
 
-		querySchema, err := retrieveSchemaForKind(panelName, value, fmt.Sprintf("%s.%s", datasourceField, kindField), v.queries.schemas)
-		if err != nil {
-			res = err
-			break
-		}
-		logrus.Tracef("Query schema to use: %+v", querySchema.LookupPath(cue.ParsePath(queryDefPath)))
+		// retrieve the corresponding query schema
+		// the wrapping `if` tackles the particular case of panels without a datasource (e.g text panel)
+		if err := panelSchema.LookupPath(cue.ParsePath(panelDatasourcePath)).Err(); err == nil {
+			querySchema, err := retrieveSchemaForKind(panelName, value, fmt.Sprintf("%s.%s", datasourceField, kindField), v.queries.schemas)
+			if err != nil {
+				res = err
+				break
+			}
+			logrus.Tracef("Query schema to use: %+v", querySchema.LookupPath(cue.ParsePath(queryDefPath)))
 
-		// unify panel and query schemas
-		finalSchema := chartSchema.Unify(querySchema)
-		if finalSchema.Err() != nil {
-			logrus.WithError(finalSchema.Err()).Errorf("Error unifying chart and query schemas to validate panel %s", panelName)
-			continue
+			// unify panel and query schemas
+			finalSchema = panelSchema.Unify(querySchema)
+			if finalSchema.Err() != nil {
+				logrus.WithError(finalSchema.Err()).Errorf("Error unifying panel and query schemas to validate panel %s", panelName)
+				continue
+			}
 		}
 
 		// do the validation using the main #panel def of the schema
@@ -162,9 +169,9 @@ func (v *validator) Validate(panels map[string]json.RawMessage) error {
 	return res
 }
 
-// LoadCharts loads the list of available charts plugins as CUE schemas
-func (v *validator) LoadCharts() {
-	v.charts.load()
+// LoadPanels loads the list of available panels plugins as CUE schemas
+func (v *validator) LoadPanels() {
+	v.panels.load()
 }
 
 // LoadQueries loads the list of available queries plugins as CUE schemas

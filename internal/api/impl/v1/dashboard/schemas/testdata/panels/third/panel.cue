@@ -11,20 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package line
-
-import (
-	"github.com/perses/perses/schemas/common"
-)
+package third
 
 #panel: {
-	kind: "LineChart"
+	kind: "ThirdPanel"
 	options: {
-		queries: [...#query]
-		show_legend?: bool
-		unit?:        common.#unit
-		thresholds?:  common.#thresholds
+		a: string
+		b: string
 	}
 }
-
-#query: _ // needed for make cue-test only
