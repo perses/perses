@@ -351,6 +351,66 @@ const benchmarkDashboard: DashboardResource = {
           },
         },
       },
+      gaugeAltEx: {
+        kind: 'GaugeChart',
+        display: { name: 'Gauge Alt Ex', description: 'GaugeChart description text' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query: 'node_load15{instance="$instance",job="node"}',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: {
+            kind: 'PercentDecimal',
+            decimal_places: 1,
+          },
+          thresholds: {
+            // default_color: '#000', // optional
+            steps: [
+              {
+                value: 0.5,
+                name: 'Alert: Warning condition example',
+                // color: '#FFFFFF',
+              },
+              {
+                value: 0.75,
+                name: 'Alert: Critical condition example',
+                // color: '#0000FF', // blue
+              },
+            ],
+          },
+        },
+      },
+      gaugeFormatTest: {
+        kind: 'GaugeChart',
+        display: { name: 'Gauge Format Test' },
+        options: {
+          query: {
+            kind: 'PrometheusGraphQuery',
+            options: {
+              query:
+                'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+            },
+          },
+          calculation: 'LastNumber',
+          unit: {
+            kind: 'Bytes', // 'Decimal'
+          },
+          thresholds: {
+            max: 95000000,
+            steps: [
+              {
+                value: 71000000,
+              },
+              {
+                value: 82000000,
+              },
+            ],
+          },
+        },
+      },
     },
     layouts: [
       {
@@ -459,7 +519,9 @@ const benchmarkDashboard: DashboardResource = {
               y: 0,
               width: 8,
               height: 6,
-              content: { $ref: '#/spec/panels/gaugeEx' },
+              // content: { $ref: '#/spec/panels/gaugeEx' },
+              // content: { $ref: '#/spec/panels/gaugeAltEx' },
+              content: { $ref: '#/spec/panels/gaugeFormatTest' },
             },
           ],
         },

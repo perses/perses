@@ -35,6 +35,6 @@ describe('convertThresholds', () => {
   ];
 
   it('should convert gauge thresholds to valid echarts option colors', () => {
-    expect(convertThresholds(thresholdInput)).toEqual(thresholdOutput);
+    expect(convertThresholds(thresholdInput, { kind: 'PercentDecimal' })).toEqual(thresholdOutput);
   });
 });

@@ -38,19 +38,9 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     },
     contentDimensions,
   } = props;
-  const unit = props.definition.options.unit ?? { kind: 'Percent', decimal_places: 1 };
+  const unit = props.definition.options.unit ?? { kind: 'PercentDecimal', decimal_places: 1 };
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
-
-  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
-  const axisLineColors = convertThresholds(thresholds);
-  const axisLine = {
-    show: true,
-    lineStyle: {
-      width: 5,
-      color: axisLineColors,
-    },
-  };
 
   const chartData: GaugeChartData = useMemo(() => {
     if (data === undefined) return undefined;
@@ -80,6 +70,23 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     );
   }
 
+  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
+  if (thresholds.max === undefined) {
+    if (unit.kind === 'Percent') {
+      thresholds.max = 100;
+    } else if (unit.kind === 'PercentDecimal') {
+      thresholds.max = 1;
+    }
+  }
+  const axisLineColors = convertThresholds(thresholds, unit);
+  const axisLine = {
+    show: true,
+    lineStyle: {
+      width: 5,
+      color: axisLineColors,
+    },
+  };
+
   return (
     <GaugeChart
       width={contentDimensions.width}
@@ -87,6 +94,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
       data={chartData}
       unit={unit}
       axisLine={axisLine}
+      max={thresholds.max}
     />
   );
 }
