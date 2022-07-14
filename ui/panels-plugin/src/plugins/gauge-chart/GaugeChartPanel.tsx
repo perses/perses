@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { GaugeSeriesOption } from 'echarts';
 import { JsonObject } from '@perses-dev/core';
 import { GraphQueryDefinition, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeChartData, UnitOptions } from '@perses-dev/components';
@@ -79,7 +80,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     }
   }
   const axisLineColors = convertThresholds(thresholds, unit);
-  const axisLine = {
+  const axisLine: GaugeSeriesOption['axisLine'] = {
     show: true,
     lineStyle: {
       width: 5,
