@@ -43,6 +43,10 @@ export function LineChartContainer(props: LineChartContainerProps) {
   const { graphData, loading } = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
     if (timeScale === undefined) {
+      for (const query of queries) {
+        // does not show error message if any query is successful (due to timeScale check)
+        if (query.error !== undefined) throw query.error;
+      }
       return {
         graphData: EMPTY_GRAPH_DATA,
         loading: true,
