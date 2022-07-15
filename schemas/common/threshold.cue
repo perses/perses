@@ -21,6 +21,5 @@ package common
 
 #thresholds: {
 	default_color?: string
-	max?:           number
 	steps?: [...#stepOption]
 }

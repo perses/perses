@@ -396,10 +396,10 @@ const benchmarkDashboard: DashboardResource = {
           },
           calculation: 'LastNumber',
           unit: {
-            kind: 'Bytes', // 'Decimal'
+            kind: 'Decimal', // 'Decimal'
           },
+          max: 95000000,
           thresholds: {
-            max: 95000000,
             steps: [
               {
                 value: 71000000,

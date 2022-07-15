@@ -30,16 +30,19 @@ interface GaugeChartOptions extends JsonObject {
   calculation: CalculationType;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
+  max?: number;
 }
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const {
     definition: {
-      options: { query, calculation },
+      options: { query, calculation, max },
     },
     contentDimensions,
   } = props;
   const unit = props.definition.options.unit ?? { kind: 'PercentDecimal', decimal_places: 1 };
+  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
+
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
 
@@ -71,15 +74,16 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     );
   }
 
-  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
-  if (thresholds.max === undefined) {
-    if (unit.kind === 'Percent') {
-      thresholds.max = 100;
-    } else if (unit.kind === 'PercentDecimal') {
-      thresholds.max = 1;
+  // needed for end value of last threshold color segment
+  let thresholdMax = max;
+  if (thresholdMax === undefined) {
+    if (unit.kind === 'PercentDecimal') {
+      thresholdMax = 1;
+    } else {
+      thresholdMax = 100;
     }
   }
-  const axisLineColors = convertThresholds(thresholds, unit);
+  const axisLineColors = convertThresholds(thresholds, unit, thresholdMax);
   const axisLine: GaugeSeriesOption['axisLine'] = {
     show: true,
     lineStyle: {
@@ -95,7 +99,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
       data={chartData}
       unit={unit}
       axisLine={axisLine}
-      max={thresholds.max}
+      max={thresholdMax}
     />
   );
 }

@@ -45,7 +45,7 @@ export interface ThresholdOptions extends JsonObject {
 
 export const defaultThresholdInput: ThresholdOptions = { steps: [{ value: 0, color: ThresholdColors.GREEN }] };
 
-export function convertThresholds(thresholds: ThresholdOptions, unit: UnitOptions): EChartsAxisLineColors {
+export function convertThresholds(thresholds: ThresholdOptions, unit: UnitOptions, max: number): EChartsAxisLineColors {
   const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.GREEN;
   const defaultThresholdSteps: EChartsAxisLineColors = [[0, defaultThresholdColor]];
 
@@ -54,12 +54,9 @@ export function convertThresholds(thresholds: ThresholdOptions, unit: UnitOption
     // color segments must be decimal between 0 and 1
     const segmentMax = 1;
 
-    // used in Decimal and Percent conversion
-    const thresholdMax = thresholds.max ?? 100;
-
     const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => {
       if (unit.kind === 'PercentDecimal') return step.value;
-      return step.value / thresholdMax;
+      return step.value / max; // max needed for Decimal and Percent conversion
     });
     valuesArr.push(segmentMax);
 

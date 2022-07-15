@@ -35,7 +35,7 @@ describe('convertThresholds', () => {
         },
       ],
     };
-    expect(convertThresholds(percentInput, { kind: 'Percent' })).toEqual(gaugePercentOutput);
+    expect(convertThresholds(percentInput, { kind: 'Percent' }, 100)).toEqual(gaugePercentOutput);
 
     // example of unit.kind PercentDecimal conversion
     const percentDecimalInput = {
@@ -51,11 +51,10 @@ describe('convertThresholds', () => {
         },
       ],
     };
-    expect(convertThresholds(percentDecimalInput, { kind: 'PercentDecimal' })).toEqual(gaugePercentOutput);
+    expect(convertThresholds(percentDecimalInput, { kind: 'PercentDecimal' }, 1)).toEqual(gaugePercentOutput);
 
     // example of unit.kind Bytes conversion
     const bytesInput = {
-      max: 10000,
       steps: [
         {
           value: 8000,
@@ -70,6 +69,6 @@ describe('convertThresholds', () => {
       [0.9, 'rgba(253, 126, 20, 0.9)'],
       [1, 'rgba(220, 53, 69, 1)'],
     ];
-    expect(convertThresholds(bytesInput, { kind: 'Bytes' })).toEqual(bytesOutput);
+    expect(convertThresholds(bytesInput, { kind: 'Bytes' }, 10000)).toEqual(bytesOutput);
   });
 });
