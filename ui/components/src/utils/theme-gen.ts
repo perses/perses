@@ -11,11 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Theme as MuiTheme } from '@mui/material';
+import { Theme } from '@mui/material';
 import merge from 'lodash/merge';
 import { EChartsTheme, PersesChartsTheme } from '../model';
 
 const DEFAULT_TEXT_COLOR = '#222';
+
+// avoid component override type errors since only palette and typography are used
+type MuiTheme = Omit<Theme, 'components'>;
 
 export function generateChartsTheme(
   themeName: string,

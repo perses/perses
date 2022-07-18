@@ -30,10 +30,11 @@ interface GaugeChartProps {
   data: GaugeChartData;
   unit: UnitOptions;
   axisLine: GaugeSeriesOption['axisLine'];
+  max?: number;
 }
 
 export function GaugeChart(props: GaugeChartProps) {
-  const { width, height, data, unit, axisLine } = props;
+  const { width, height, data, unit, axisLine, max } = props;
 
   const chartsTheme = useChartsTheme();
 
@@ -56,7 +57,7 @@ export function GaugeChart(props: GaugeChartProps) {
           startAngle: 200,
           endAngle: -20,
           min: 0,
-          max: 100,
+          max,
           silent: true,
           progress: {
             show: true,
@@ -109,7 +110,7 @@ export function GaugeChart(props: GaugeChartProps) {
           startAngle: 200,
           endAngle: -20,
           min: 0,
-          max: 100,
+          max,
           pointer: {
             show: false,
             itemStyle: {
@@ -147,7 +148,7 @@ export function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, chartsTheme, unit, axisLine]);
+  }, [data, chartsTheme, unit, axisLine, max]);
 
   return (
     <EChart

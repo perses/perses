@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { JsonObject } from '@perses-dev/core';
+import { UnitOptions } from '@perses-dev/components';
 import { zip } from 'lodash-es';
 
 // TODO (sjcobb): pull threshold colors from perses charts theme
@@ -38,25 +39,33 @@ export interface StepOptions extends JsonObject {
 
 export interface ThresholdOptions extends JsonObject {
   default_color?: string;
+  max?: number;
   steps?: StepOptions[];
 }
 
 export const defaultThresholdInput: ThresholdOptions = { steps: [{ value: 0, color: ThresholdColors.GREEN }] };
 
-export function convertThresholds(thresholds: ThresholdOptions): EChartsAxisLineColors {
+export function convertThresholds(thresholds: ThresholdOptions, unit: UnitOptions, max: number): EChartsAxisLineColors {
   const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.GREEN;
   const defaultThresholdSteps: EChartsAxisLineColors = [[0, defaultThresholdColor]];
 
-  if (thresholds.steps) {
-    const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => step.value / 100);
-    valuesArr.push(1);
+  if (thresholds.steps !== undefined) {
+    // https://echarts.apache.org/en/option.html#series-gauge.axisLine.lineStyle.color
+    // color segments must be decimal between 0 and 1
+    const segmentMax = 1;
+
+    const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => {
+      if (unit.kind === 'PercentDecimal') return step.value;
+      return step.value / max; // max needed for Decimal and Percent conversion
+    });
+    valuesArr.push(segmentMax);
 
     const colorsArr = thresholds.steps.map((step: StepOptions, index) => step.color ?? ThresholdColorsPalette[index]);
     colorsArr.unshift(defaultThresholdColor);
 
     const zippedArr = zip(valuesArr, colorsArr);
     return zippedArr.map((elem) => {
-      const convertedValues = elem[0] ?? 1;
+      const convertedValues = elem[0] ?? segmentMax;
       const convertedColors = elem[1] ?? defaultThresholdColor;
       return [convertedValues, convertedColors];
     });

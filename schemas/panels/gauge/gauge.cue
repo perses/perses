@@ -25,6 +25,7 @@ import (
 		calculation: common.#calculation
 		unit?:       common.#unit
 		thresholds?: common.#thresholds
+		max?:        number // determines end value of last threshold color segment when unit is not a percent
 	}
 }
 
