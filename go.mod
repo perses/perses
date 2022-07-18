@@ -8,7 +8,7 @@ require (
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.13.0
-	github.com/prometheus/common v0.35.0
+	github.com/prometheus/common v0.37.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0
