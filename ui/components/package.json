@@ -24,7 +24,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/core": "^0.4.2",
+    "@perses-dev/core": "^0.5.0",
     "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",
     "react-error-boundary": "^3.1.4"

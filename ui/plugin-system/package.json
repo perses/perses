@@ -23,8 +23,8 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.4.2",
-    "@perses-dev/core": "^0.4.2",
+    "@perses-dev/components": "^0.5.0",
+    "@perses-dev/core": "^0.5.0",
     "immer": "^9.0.15",
     "use-immer": "^0.7.0"
   },
