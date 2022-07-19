@@ -1,3 +1,22 @@
+## 0.5.0 / 2022-07-19
+
+- [ENHANCEMENT] gauge chart support additional units #481
+- [FEATURE] support echarts theme customization #480
+- [BUGFIX] line chart query error handling #479
+- [ENHANCEMENT] BE: support charts without datasource, add text plugin #478
+- [FEATURE] Add ability to show info icon next to panel header #465
+- [FEATURE] `thresholds` support in line chart #462
+- [FEATURE] echarts legends using `show_legend` in line chart #462
+- [ENHANCEMENT] enable data zoom by default in line chart #462
+- [ENHANCEMENT] add Bytes formatting to line and stats charts #462
+- [ENHANCEMENT] stat chart selectable text and theme improvements #462
+- [ENHANCEMENT] cue format improvements #463, #470
+- [ENHANCEMENT] Validator: support query types as plugins #459
+- [ENHANCEMENT] configurable charts location, remove configurability of base def #457
+- [ENHANCEMENT] align layout definition between frontend and backend #454
+- [ENHANCEMENT] release process and license header improvements #452, #453, #456
+- [ENHANCEMENT] add documentation regarding how Perses might work on k8s #448
+
 ## 0.4.2 / 2022-05-18
 
 - [BUGFIX] fix line chart shows time beyond 24 hours #443
