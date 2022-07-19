@@ -2,7 +2,7 @@
 
 - [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at runtime #422 #434 #435 #457 #459 #478
 - [FEATURE] echarts theme customization which allows flexibility when Perses is embedded in other apps #480
-- [FEATURE] Add ability to show info icon next to panel header #465
+- [FEATURE] Add ability to show info icon next to panel header using `display.description` #465
 - [FEATURE] `thresholds` support in line chart #462
 - [FEATURE] echarts legends using `show_legend` in line chart #462
 - [FEATURE] enable data zoom by default in line chart, restore on double click #462
