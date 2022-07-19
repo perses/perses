@@ -5,7 +5,7 @@
 - [FEATURE] Add ability to show info icon next to panel header #465
 - [FEATURE] `thresholds` support in line chart #462
 - [FEATURE] echarts legends using `show_legend` in line chart #462
-- [ENHANCEMENT] enable data zoom by default in line chart #462
+- [FEATURE] enable data zoom by default in line chart, restore on double click #462
 - [ENHANCEMENT] gauge chart support additional units #481
 - [ENHANCEMENT] add `Bytes` formatting to line and stats charts #462
 - [ENHANCEMENT] stat chart selectable text and theme improvements #462
