@@ -1,4 +1,4 @@
-## 0.5.0 / 2022-07-19
+## 0.5.0 / 2022-07-20
 
 - [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at runtime #422 #434 #435 #457 #459 #478
 - [FEATURE] echarts theme customization which allows flexibility when Perses is embedded in other apps #480
