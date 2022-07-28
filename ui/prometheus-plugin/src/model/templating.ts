@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Duration, parser, StringLiteral } from 'lezer-promql';
+import { Duration, parser, StringLiteral } from '@prometheus-io/lezer-promql';
 import { useMemoized, DEFAULT_ALL_VALUE } from '@perses-dev/core';
 import { useTemplateVariables, VariableState } from '@perses-dev/plugin-system';
 
