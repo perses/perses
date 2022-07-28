@@ -1,3 +1,7 @@
+## 0.5.1 / 2022-07-28
+
+[ENHANCEMENT] update prometheus-plugin to use @prometheus-io/lezer-promql #486
+
 ## 0.5.0 / 2022-07-20
 
 - [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at runtime #422 #434 #435 #457 #459 #478
