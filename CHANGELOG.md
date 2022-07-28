@@ -1,6 +1,6 @@
 ## 0.5.1 / 2022-07-28
 
-[ENHANCEMENT] update prometheus-plugin to use @prometheus-io/lezer-promql
+[ENHANCEMENT] update prometheus-plugin to use @prometheus-io/lezer-promql #486
 
 ## 0.5.0 / 2022-07-20
 
