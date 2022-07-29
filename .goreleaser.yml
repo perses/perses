@@ -10,9 +10,8 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
-      - PKG_LDFLAGS=github.com/prometheus/common/version
     ldflags:
-      - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Revision={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildDate={{.Date}} -X {{.Env.PKG_LDFLAGS}}.Branch={{.Branch}}"
+      - "{{.Env.LDFLAGS}}"
   - id: "percli"
     main: ./cmd/percli/main.go
     binary: "percli"
@@ -24,9 +23,8 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
-      - PKG_LDFLAGS=github.com/prometheus/common/version
     ldflags:
-      - "-s -w -X {{.Env.PKG_LDFLAGS}}.Version={{.Version}} -X {{.Env.PKG_LDFLAGS}}.Revision={{.Commit}} -X {{.Env.PKG_LDFLAGS}}.BuildDate={{.Date}} -X {{.Env.PKG_LDFLAGS}}.Branch={{.Branch}}"
+      - "{{.Env.LDFLAGS}}"
 archives:
   - id: "default"
     builds:

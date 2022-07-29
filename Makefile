@@ -21,7 +21,9 @@ DATE          := $(shell date +%Y-%m-%d)
 BRANCH        := $(shell git rev-parse --abbrev-ref HEAD)
 COVER_PROFILE := coverage.txt
 PKG_LDFLAGS   := github.com/prometheus/common/version
-LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}"
+LDFLAGS       := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
+
+export LDFLAGS
 
 all: clean build
 
@@ -92,13 +94,20 @@ coverage-html: integration-test
 	@echo ">> Print test coverage"
 	$(GO) tool cover -html=$(COVER_PROFILE)
 
+.PHONY: cross-build
+cross-build: ## Cross build binaries for all platforms (Use "make build" in development)
+	goreleaser release --snapshot --rm-dist
+
+.PHONY: cross-release
+	goreleaser release --rm-dist
+
 .PHONY: build
 build: build-ui build-api build-cli
 
 .PHONY: build-api
 build-api: generate
 	@echo ">> build the perses api"
-	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/perses ./cmd/perses
+	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/perses ./cmd/perses
 
 .PHONY: build-ui
 build-ui:
@@ -107,7 +116,7 @@ build-ui:
 .PHONY: build-cli
 build-cli:
 	@echo ">> build the perses cli"
-	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/percli ./cmd/percli
+	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
 
 .PHONY: generate
 generate:
