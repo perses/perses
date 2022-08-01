@@ -20,6 +20,7 @@ import (
 	"github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
@@ -37,18 +38,18 @@ type keyCombination struct {
 
 type option struct {
 	persesCMD.Option
+	opt.FileOption
+	opt.ProjectOption
 	writer    io.Writer
 	kind      modelV1.Kind
 	all       bool
-	file      string
-	project   string
 	names     map[modelV1.Kind][]keyCombination
 	apiClient api.ClientInterface
 }
 
 func (o *option) Complete(args []string) error {
 	o.names = make(map[modelV1.Kind][]keyCombination)
-	if len(o.file) == 0 {
+	if len(o.File) == 0 {
 		// Then the user need to specify the resource type and the name of the resource to delete
 		if len(args) == 0 {
 			return fmt.Errorf(resource.FormatMessage())
@@ -67,13 +68,13 @@ func (o *option) Complete(args []string) error {
 		for _, name := range args[1:] {
 			o.names[o.kind] = append(o.names[o.kind], keyCombination{
 				name:    name,
-				project: o.project,
+				project: o.Project,
 			})
 		}
 	}
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
-	if len(o.project) == 0 {
-		o.project = config.Global.Project
+	if len(o.Project) == 0 {
+		o.Project = config.Global.Project
 	}
 	var err error
 	o.apiClient, err = config.Global.GetAPIClient()
@@ -85,7 +86,7 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	if len(o.file) > 0 {
+	if len(o.File) > 0 {
 		if err := o.setNamesFromFile(); err != nil {
 			return err
 		}
@@ -114,7 +115,7 @@ func (o *option) Execute() error {
 }
 
 func (o *option) setNamesFromAll() error {
-	svc, svcErr := service.New(o.kind, o.project, o.apiClient)
+	svc, svcErr := service.New(o.kind, o.Project, o.apiClient)
 	if svcErr != nil {
 		return svcErr
 	}
@@ -127,7 +128,7 @@ func (o *option) setNamesFromAll() error {
 }
 
 func (o *option) setNamesFromFile() error {
-	entities, err := file.UnmarshalEntity(o.file)
+	entities, err := file.UnmarshalEntity(o.File)
 	if err != nil {
 		return err
 	}
@@ -141,7 +142,7 @@ func (o *option) setNames(entities []modelAPI.Entity) {
 		metadata := entity.GetMetadata()
 		o.names[kind] = append(o.names[kind], keyCombination{
 			name:    metadata.GetName(),
-			project: resource.GetProject(metadata, o.project),
+			project: resource.GetProject(metadata, o.Project),
 		})
 	}
 }
@@ -181,8 +182,8 @@ percli delete dashboards --all
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to delete")
+	opt.AddFileFlags(cmd, &o.FileOption)
+	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	cmd.Flags().BoolVarP(&o.all, "all", "a", o.all, "Delete all resources in the project of the specified resource types.")
-	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request")
 	return cmd
 }
