@@ -83,6 +83,8 @@ jobs:
     name: "go and github release"
     needs: "build-frontend"
     runs-on: ubuntu-latest
+    env:
+      GORELEASER_PARALLEL: 1
     permissions:
       contents: write
     steps:

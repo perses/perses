@@ -11,17 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-GO            ?= go
-CUE           ?= cue
-GOCI          ?= golangci-lint
-GOFMT         ?= $(GO)fmt
-GOARCH        ?= amd64
-COMMIT        := $(shell git rev-parse HEAD)
-DATE          := $(shell date +%Y-%m-%d)
-BRANCH        := $(shell git rev-parse --abbrev-ref HEAD)
-COVER_PROFILE := coverage.txt
-PKG_LDFLAGS   := github.com/prometheus/common/version
-LDFLAGS       := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
+GO                    ?= go
+CUE                   ?= cue
+GOCI                  ?= golangci-lint
+GOFMT                 ?= $(GO)fmt
+GOARCH                ?= amd64
+COMMIT                := $(shell git rev-parse HEAD)
+DATE                  := $(shell date +%Y-%m-%d)
+BRANCH                := $(shell git rev-parse --abbrev-ref HEAD)
+COVER_PROFILE         := coverage.txt
+PKG_LDFLAGS           := github.com/prometheus/common/version
+LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
+GORELEASER_PARALLEL   ?= 0
 
 export LDFLAGS
 
@@ -96,10 +97,10 @@ coverage-html: integration-test
 
 .PHONY: cross-build
 cross-build: ## Cross build binaries for all platforms (Use "make build" in development)
-	goreleaser release --snapshot --rm-dist
+	goreleaser release --snapshot --rm-dist --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: cross-release
-	goreleaser release --rm-dist
+	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: build
 build: build-ui build-api build-cli
