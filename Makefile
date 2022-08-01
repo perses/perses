@@ -11,29 +11,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-GO            ?= go
-CUE           ?= cue
-GOCI          ?= golangci-lint
-GOFMT         ?= $(GO)fmt
-GOARCH        ?= amd64
-COMMIT        := $(shell git rev-parse HEAD)
-DATE          := $(shell date +%Y-%m-%d)
-BRANCH        := $(shell git rev-parse --abbrev-ref HEAD)
-COVER_PROFILE := coverage.txt
-PKG_LDFLAGS   := github.com/prometheus/common/version
-LDFLAGS       := -ldflags "-X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}"
+GO                    ?= go
+CUE                   ?= cue
+GOCI                  ?= golangci-lint
+GOFMT                 ?= $(GO)fmt
+GOARCH                ?= amd64
+COMMIT                := $(shell git rev-parse HEAD)
+DATE                  := $(shell date +%Y-%m-%d)
+BRANCH                := $(shell git rev-parse --abbrev-ref HEAD)
+VERSION               ?= $(shell cat VERSION)
+COVER_PROFILE         := coverage.txt
+PKG_LDFLAGS           := github.com/prometheus/common/version
+LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
+GORELEASER_PARALLEL   ?= 0
+
+export LDFLAGS
 
 all: clean build
 
 .PHONY: bump-version
 bump-version:
-	version=$$(< VERSION) && ./scripts/ui_release.sh --bump-version "$${version}"
+	./scripts/ui_release.sh --bump-version "${VERSION}"
 	cd ui/ && npm install
 	git add "./ui/package-lock.json" "./**/package.json"
 
 .PHONY: tag
 tag:
-	version=$$(< VERSION) && ./scripts/release.sh --tag "$${version}"
+	./scripts/release.sh --tag "${VERSION}"
 
 .PHONY: checkformat
 checkformat:
@@ -92,13 +96,20 @@ coverage-html: integration-test
 	@echo ">> Print test coverage"
 	$(GO) tool cover -html=$(COVER_PROFILE)
 
+.PHONY: cross-build
+cross-build: ## Cross build binaries for all platforms (Use "make build" in development)
+	goreleaser release --snapshot --rm-dist --parallelism ${GORELEASER_PARALLEL}
+
+.PHONY: cross-release
+	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL}
+
 .PHONY: build
 build: build-ui build-api build-cli
 
 .PHONY: build-api
 build-api: generate
 	@echo ">> build the perses api"
-	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/perses ./cmd/perses
+	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/perses ./cmd/perses
 
 .PHONY: build-ui
 build-ui:
@@ -107,7 +118,7 @@ build-ui:
 .PHONY: build-cli
 build-cli:
 	@echo ">> build the perses cli"
-	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build ${LDFLAGS} -o ./bin/percli ./cmd/percli
+	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
 
 .PHONY: generate
 generate:
