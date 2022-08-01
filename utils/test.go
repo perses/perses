@@ -23,11 +23,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	config2 "github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/shared/database"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/internal/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
@@ -172,22 +171,22 @@ func NewUser() *v1.User {
 	return entity
 }
 
-func defaultFileConfig() *config.File {
-	return &config.File{
+func defaultFileConfig() *config2.File {
+	return &config2.File{
 		Folder:        "./test",
-		FileExtension: config.JSONExtension,
+		FileExtension: config2.JSONExtension,
 	}
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
 	handler := echo.New()
-	persistenceManager, err := dependency.NewPersistenceManager(config.Database{
+	persistenceManager, err := dependency.NewPersistenceManager(config2.Database{
 		File: defaultFileConfig(),
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, config.Config{})
+	serviceManager := dependency.NewServiceManager(persistenceManager, config2.Config{})
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
 	return httptest.NewServer(handler), persistenceManager

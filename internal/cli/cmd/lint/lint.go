@@ -17,10 +17,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	cmdUtils "github.com/perses/perses/internal/cli/utils"
 	"github.com/perses/perses/internal/cli/utils/file"
-	"github.com/perses/perses/internal/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
