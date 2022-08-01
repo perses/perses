@@ -21,20 +21,20 @@ import (
 	"github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
 	persesCMD.Option
+	opt.ProjectOption
+	opt.FileOption
 	writer    io.Writer
-	file      string
-	project   string
 	apiClient api.ClientInterface
 }
 
@@ -44,8 +44,11 @@ func (o *option) Complete(args []string) error {
 	}
 
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
-	if len(o.project) == 0 {
-		o.project = config.Global.Project
+	// In this particular case, we don't use the Complete method of the ProjectOption because
+	// we don't want to make this command fail if there is no project provided.
+	// If we want to apply a project, there is no need to set a projectName for that
+	if len(o.Project) == 0 {
+		o.Project = config.Global.Project
 	}
 
 	// Finally, get the api client we will need later.
@@ -58,21 +61,18 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	if len(o.file) == 0 {
-		return fmt.Errorf("file must be provided")
-	}
 	return nil
 }
 
 func (o *option) Execute() error {
-	entities, err := file.UnmarshalEntity(o.file)
+	entities, err := file.UnmarshalEntity(o.File)
 	if err != nil {
 		return err
 	}
 	for _, entity := range entities {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
-		project := resource.GetProject(entity.GetMetadata(), o.project)
+		project := resource.GetProject(entity.GetMetadata(), o.Project)
 		svc, svcErr := service.New(kind, project, o.apiClient)
 		if svcErr != nil {
 			return svcErr
@@ -123,10 +123,8 @@ cat ./resources.json | percli apply -f -
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")
-	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to create/update.")
-	if err := cmd.MarkFlagRequired("file"); err != nil {
-		logrus.Panic(err)
-	}
+	opt.AddProjectFlags(cmd, &o.ProjectOption)
+	opt.AddFileFlags(cmd, &o.FileOption)
+	opt.MarkFileFlagAsMandatory(cmd)
 	return cmd
 }

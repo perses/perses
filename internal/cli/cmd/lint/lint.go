@@ -21,17 +21,17 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
 	persesCMD.Option
+	opt.FileOption
 	writer         io.Writer
-	file           string
 	chartsSchemas  string
 	queriesSchemas string
 	validator      schemas.Validator
@@ -51,14 +51,11 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	if len(o.file) == 0 {
-		return fmt.Errorf("file must be provided")
-	}
 	return nil
 }
 
 func (o *option) Execute() error {
-	objects, err := file.UnmarshalEntity(o.file)
+	objects, err := file.UnmarshalEntity(o.File)
 	if err != nil {
 		return err
 	}
@@ -109,12 +106,10 @@ cat resources.json | percli lint -f -
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to check.")
+	opt.AddFileFlags(cmd, &o.FileOption)
+	opt.MarkFileFlagAsMandatory(cmd)
 	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for charts.")
 	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for queries.")
-	if err := cmd.MarkFlagRequired("file"); err != nil {
-		logrus.Fatal(err)
-	}
 	cmd.MarkFlagsRequiredTogether("schemas.charts", "schemas.queries")
 	return cmd
 }
