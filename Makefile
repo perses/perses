@@ -19,6 +19,7 @@ GOARCH                ?= amd64
 COMMIT                := $(shell git rev-parse HEAD)
 DATE                  := $(shell date +%Y-%m-%d)
 BRANCH                := $(shell git rev-parse --abbrev-ref HEAD)
+VERSION               ?= $(shell cat VERSION)
 COVER_PROFILE         := coverage.txt
 PKG_LDFLAGS           := github.com/prometheus/common/version
 LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
@@ -30,13 +31,13 @@ all: clean build
 
 .PHONY: bump-version
 bump-version:
-	version=$$(< VERSION) && ./scripts/ui_release.sh --bump-version "$${version}"
+	./scripts/ui_release.sh --bump-version "${VERSION}"
 	cd ui/ && npm install
 	git add "./ui/package-lock.json" "./**/package.json"
 
 .PHONY: tag
 tag:
-	version=$$(< VERSION) && ./scripts/release.sh --tag "$${version}"
+	./scripts/release.sh --tag "${VERSION}"
 
 .PHONY: checkformat
 checkformat:
