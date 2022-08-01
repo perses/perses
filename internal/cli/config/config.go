@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package config
 
 import (
 	"encoding/json"
@@ -30,31 +30,31 @@ const (
 	configFileName = "config.json"
 )
 
-var GlobalConfig *CLIConfig
+var Global *Config
 
-func InitGlobalConfig(configPath string) {
+func Init(configPath string) {
 	var err error
-	GlobalConfig, err = readConfig(configPath)
+	Global, err = readConfig(configPath)
 	if err != nil {
 		logrus.WithError(err).Debug("unable to read the config")
-		GlobalConfig = &CLIConfig{}
+		Global = &Config{}
 	} else {
-		err = GlobalConfig.init()
+		err = Global.init()
 		if err != nil {
 			logrus.WithError(err).Errorf("unable to initialize the CLI from the config")
 		}
 	}
-	GlobalConfig.filePath = configPath
+	Global.filePath = configPath
 }
 
-type CLIConfig struct {
+type Config struct {
 	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
 	Project          string                      `json:"project"`
 	filePath         string
 	apiClient        api.ClientInterface
 }
 
-func (c *CLIConfig) init() error {
+func (c *Config) init() error {
 	restClient, err := perseshttp.NewFromConfig(c.RestClientConfig)
 	if err != nil {
 		return err
@@ -63,18 +63,18 @@ func (c *CLIConfig) init() error {
 	return nil
 }
 
-func (c *CLIConfig) GetAPIClient() (api.ClientInterface, error) {
+func (c *Config) GetAPIClient() (api.ClientInterface, error) {
 	if c.apiClient != nil {
 		return c.apiClient, nil
 	}
 	return nil, fmt.Errorf("you are not connected to any API")
 }
 
-func (c *CLIConfig) SetAPIClient(apiClient api.ClientInterface) {
+func (c *Config) SetAPIClient(apiClient api.ClientInterface) {
 	c.apiClient = apiClient
 }
 
-func GetDefaultConfigPath() string {
+func GetDefaultPath() string {
 	return filepath.Join(getRootFolder(), pathConfig, configFileName)
 }
 
@@ -91,7 +91,7 @@ func getRootFolder() string {
 
 // ReadConfig reads the configuration file stored in the path {USER_HOME}/.argos/config
 // If there is no error during the read, it returns the result in the struct ArgosCLIConfig
-func readConfig(filePath string) (*CLIConfig, error) {
+func readConfig(filePath string) (*Config, error) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("file %q doesn't exist", filePath)
 	} else if err != nil {
@@ -103,21 +103,21 @@ func readConfig(filePath string) (*CLIConfig, error) {
 		return nil, err
 	}
 
-	result := &CLIConfig{}
+	result := &Config{}
 	return result, json.Unmarshal(data, result)
 }
 
 func SetProject(project string) error {
-	return WriteConfig(&CLIConfig{
+	return Write(&Config{
 		Project: project,
 	})
 }
 
-// WriteConfig writes the configuration file in the path {USER_HOME}/.perses/config
+// Write writes the configuration file in the path {USER_HOME}/.perses/config
 // if the directory doesn't exist, the function will create it
-func WriteConfig(config *CLIConfig) error {
+func Write(config *Config) error {
 	// this value has been set by the root command and that will be the path where the config must be saved
-	filePath := GlobalConfig.filePath
+	filePath := Global.filePath
 	directory := filepath.Dir(filePath)
 
 	if _, err := os.Stat(directory); os.IsNotExist(err) {

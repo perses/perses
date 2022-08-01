@@ -23,7 +23,8 @@ import (
 	"testing"
 	"time"
 
-	config2 "github.com/perses/perses/internal/api/config"
+	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/shared/database"
 	"github.com/perses/perses/internal/api/shared/dependency"
@@ -171,22 +172,22 @@ func NewUser() *v1.User {
 	return entity
 }
 
-func defaultFileConfig() *config2.File {
-	return &config2.File{
+func defaultFileConfig() *config.File {
+	return &config.File{
 		Folder:        "./test",
-		FileExtension: config2.JSONExtension,
+		FileExtension: config.JSONExtension,
 	}
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
 	handler := echo.New()
-	persistenceManager, err := dependency.NewPersistenceManager(config2.Database{
+	persistenceManager, err := dependency.NewPersistenceManager(config.Database{
 		File: defaultFileConfig(),
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, config2.Config{})
+	serviceManager := dependency.NewServiceManager(persistenceManager, config.Config{})
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
 	return httptest.NewServer(handler), persistenceManager

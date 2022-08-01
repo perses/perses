@@ -18,14 +18,16 @@ import (
 	"fmt"
 	"io"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
 	writer      io.Writer
 	projectName string
 	apiClient   api.ClientInterface
@@ -38,7 +40,7 @@ func (o *option) Complete(args []string) error {
 	if len(args) == 1 {
 		o.projectName = args[0]
 	}
-	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
+	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err
 	}
@@ -53,7 +55,7 @@ func (o *option) Validate() error {
 func (o *option) Execute() error {
 	if len(o.projectName) == 0 {
 		// In that case we simply print the current project used.
-		fmt.Printf("Using project %q on server %q\n", cmdUtils.GlobalConfig.Project, cmdUtils.GlobalConfig.RestClientConfig.URL)
+		fmt.Printf("Using project %q on server %q\n", config.Global.Project, config.Global.RestClientConfig.URL)
 		return nil
 	}
 	// in case the project is provided we should verify if it exists first
@@ -65,10 +67,10 @@ func (o *option) Execute() error {
 		return err
 	}
 	// Set the project in the config
-	if configError := cmdUtils.SetProject(o.projectName); configError != nil {
+	if configError := config.SetProject(o.projectName); configError != nil {
 		return configError
 	}
-	return cmdUtils.HandleString(o.writer, fmt.Sprintf("project %s selected", o.projectName))
+	return output.HandleString(o.writer, fmt.Sprintf("project %s selected", o.projectName))
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -92,7 +94,7 @@ percli project myapp
 percli project
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	return cmd

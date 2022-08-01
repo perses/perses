@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"io"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/internal/cli/utils/file"
-	cmdUtilsService "github.com/perses/perses/internal/cli/utils/service"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/resource"
+	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -29,7 +31,7 @@ import (
 )
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
 	writer    io.Writer
 	file      string
 	project   string
@@ -43,11 +45,11 @@ func (o *option) Complete(args []string) error {
 
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
 	if len(o.project) == 0 {
-		o.project = cmdUtils.GlobalConfig.Project
+		o.project = config.Global.Project
 	}
 
 	// Finally, get the api client we will need later.
-	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
+	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err
 	}
@@ -63,16 +65,15 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	unmarshaller := file.Unmarshaller{}
-	entities, err := unmarshaller.Unmarshal(o.file)
+	entities, err := file.UnmarshalEntity(o.file)
 	if err != nil {
 		return err
 	}
 	for _, entity := range entities {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
-		project := cmdUtils.GetProject(entity.GetMetadata(), o.project)
-		svc, svcErr := cmdUtilsService.NewService(kind, project, o.apiClient)
+		project := resource.GetProject(entity.GetMetadata(), o.project)
+		svc, svcErr := service.New(kind, project, o.apiClient)
 		if svcErr != nil {
 			return svcErr
 		}
@@ -95,7 +96,7 @@ func (o *option) Execute() error {
 			}
 		}
 
-		if outputError := cmdUtils.HandleSuccessResourceMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {
+		if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {
 			return outputError
 		}
 	}
@@ -119,7 +120,7 @@ percli apply -f ./resources.json
 cat ./resources.json | percli apply -f -
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")

@@ -16,11 +16,11 @@ package lint
 import (
 	"testing"
 
-	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
+	cmdTest "github.com/perses/perses/internal/cli/test"
 )
 
 func TestLintCMD(t *testing.T) {
-	testSuite := []cmdUtilsTest.Suite{
+	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
 			Args:            []string{},
@@ -35,24 +35,24 @@ func TestLintCMD(t *testing.T) {
 		},
 		{
 			Title:           "lint unknown document",
-			Args:            []string{"-f", "../../utils/test/sample_resources/unknown_resource.json"},
+			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" not supported by the command`,
 		},
 		{
 			Title:           "lint a single resource",
-			Args:            []string{"-f", "../../utils/test/sample_resources/single_resource.json"},
+			Args:            []string{"-f", "../../test/sample_resources/single_resource.json"},
 			IsErrorExpected: false,
 			ExpectedMessage: `your resources look good
 `,
 		},
 		{
 			Title:           "lint multiples different resources",
-			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json"},
+			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json"},
 			IsErrorExpected: false,
 			ExpectedMessage: `your resources look good
 `,
 		},
 	}
-	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }

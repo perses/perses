@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/sirupsen/logrus"

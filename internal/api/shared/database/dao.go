@@ -25,6 +25,7 @@ import (
 
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/config"
+	"gopkg.in/yaml.v2"
 )
 
 type DAO interface {
