@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package resource
 
 import (
 	"fmt"
 	"io"
 	"strings"
 
+	"github.com/perses/perses/internal/cli/output"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -68,19 +69,19 @@ var resources = []resource{
 	},
 }
 
-func HandleSuccessResourceMessage(writer io.Writer, kind modelV1.Kind, project string, globalResourceMessage string) error {
+func HandleSuccessMessage(writer io.Writer, kind modelV1.Kind, project string, globalResourceMessage string) error {
 	var outputErr error
-	if IsGlobalResource(kind) {
-		outputErr = HandleString(writer, globalResourceMessage)
+	if IsGlobal(kind) {
+		outputErr = output.HandleString(writer, globalResourceMessage)
 	} else {
-		outputErr = HandleString(writer, fmt.Sprintf("%s in the project %q", globalResourceMessage, project))
+		outputErr = output.HandleString(writer, fmt.Sprintf("%s in the project %q", globalResourceMessage, project))
 	}
 	return outputErr
 }
 
-// IsGlobalResource returns true if the give resource type doesn't belong to a project.
+// IsGlobal returns true if the give resource type doesn't belong to a project.
 // Returns false otherwise.
-func IsGlobalResource(kind modelV1.Kind) bool {
+func IsGlobal(kind modelV1.Kind) bool {
 	switch kind {
 	case modelV1.KindProject, modelV1.KindGlobalDatasource:
 		return true
@@ -132,8 +133,8 @@ func reverseResourceAliases() map[string]modelV1.Kind {
 	return result
 }
 
-// FormatAvailableResourcesMessage formats the available resources that the user can use
-func FormatAvailableResourcesMessage() string {
+// FormatMessage formats the available resources that the user can use
+func FormatMessage() string {
 	var result []string
 	for _, r := range resources {
 		var res string
@@ -144,5 +145,5 @@ func FormatAvailableResourcesMessage() string {
 		}
 		result = append(result, res)
 	}
-	return FormatArrayMessage("you have to specify the resource type that you want to retrieve. Valid resource type include:", result)
+	return output.FormatArrayMessage("you have to specify the resource type that you want to retrieve. Valid resource type include:", result)
 }

@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	cuelang.org/go v0.4.2
+	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/olekukonko/tablewriter v0.0.5
@@ -13,7 +14,6 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
-	gopkg.in/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v2 v2.4.0
 )
 

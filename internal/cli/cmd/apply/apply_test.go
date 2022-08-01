@@ -16,12 +16,12 @@ package apply
 import (
 	"testing"
 
-	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
+	cmdTest "github.com/perses/perses/internal/cli/test"
 	"github.com/perses/perses/pkg/client/fake/api"
 )
 
 func TestApplyCMD(t *testing.T) {
-	testSuite := []cmdUtilsTest.Suite{
+	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
 			Args:            []string{},
@@ -36,14 +36,14 @@ func TestApplyCMD(t *testing.T) {
 		},
 		{
 			Title:           "apply unknown document",
-			Args:            []string{"-f", "../../utils/test/sample_resources/unknown_resource.json"},
+			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" not supported by the command`,
 		},
 		{
 			Title:           "apply a single resource",
-			Args:            []string{"-f", "../../utils/test/sample_resources/single_resource.json", "--project", "perses"},
+			Args:            []string{"-f", "../../test/sample_resources/single_resource.json", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been applied in the project "perses"
@@ -51,7 +51,7 @@ func TestApplyCMD(t *testing.T) {
 		},
 		{
 			Title:           "apply multiples different resources",
-			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json", "--project", "perses"},
+			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been applied in the project "perses"
@@ -60,5 +60,5 @@ object "Project" "perses" has been applied
 `,
 		},
 	}
-	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }

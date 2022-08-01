@@ -17,29 +17,32 @@ import (
 	"fmt"
 	"io"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	cmdUtilsService "github.com/perses/perses/internal/cli/utils/service"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/output"
+	"github.com/perses/perses/internal/cli/resource"
+	"github.com/perses/perses/internal/cli/service"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
 	writer          io.Writer
 	kind            modelV1.Kind
 	project         string
 	name            string
 	output          string
-	resourceService cmdUtilsService.Service
+	resourceService service.Service
 }
 
 func (o *option) Complete(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
+		return fmt.Errorf(resource.FormatMessage())
 	}
 
 	var err error
-	o.kind, err = cmdUtils.GetKind(args[0])
+	o.kind, err = resource.GetKind(args[0])
 	if err != nil {
 		return err
 	}
@@ -53,16 +56,16 @@ func (o *option) Complete(args []string) error {
 
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
 	if len(o.project) == 0 {
-		o.project = cmdUtils.GlobalConfig.Project
+		o.project = config.Global.Project
 	}
 
 	// Finally, get the api client we will need later.
-	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
+	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err
 	}
 
-	svc, svcErr := cmdUtilsService.NewService(o.kind, o.project, apiClient)
+	svc, svcErr := service.New(o.kind, o.project, apiClient)
 	if svcErr != nil {
 		return err
 	}
@@ -72,10 +75,10 @@ func (o *option) Complete(args []string) error {
 
 func (o *option) Validate() error {
 	// check if project should be defined (through the config or through the flag) for the given resource.
-	if len(o.project) == 0 && !cmdUtils.IsGlobalResource(o.kind) {
+	if len(o.project) == 0 && !resource.IsGlobal(o.kind) {
 		return fmt.Errorf("no project has been defined for the scope of this command")
 	}
-	return cmdUtils.ValidateAndSetOutput(&o.output)
+	return output.ValidateAndSet(&o.output)
 }
 
 func (o *option) Execute() error {
@@ -83,7 +86,7 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	return cmdUtils.HandleOutput(o.writer, o.output, entity)
+	return output.Handle(o.writer, o.output, entity)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -103,7 +106,7 @@ percli describe dashboard nodeExporter
 percli describe dashboard nodeExporter -ojson
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")

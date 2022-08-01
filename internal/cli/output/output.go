@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package output
 
 import (
 	"encoding/json"
@@ -30,8 +30,8 @@ const (
 	YAMLOutput = "yaml"
 )
 
-// ValidateAndSetOutput will validate the given output and if it's empty will set it with the default value "yaml"
-func ValidateAndSetOutput(o *string) error {
+// ValidateAndSet will validate the given output and if it's empty will set it with the default value "yaml"
+func ValidateAndSet(o *string) error {
 	if *o == "" {
 		*o = YAMLOutput
 		return nil
@@ -42,7 +42,7 @@ func ValidateAndSetOutput(o *string) error {
 	return nil
 }
 
-func HandleOutput(writer io.Writer, output string, obj interface{}) error {
+func Handle(writer io.Writer, output string, obj interface{}) error {
 	var data []byte
 	var err error
 	if output == JSONOutput {

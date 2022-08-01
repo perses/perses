@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -58,10 +58,10 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			cmd.SetOut(buffer)
 			cmd.SetErr(buffer)
 			cmd.SetArgs(test.Args)
-			cmdUtils.GlobalConfig = &cmdUtils.CLIConfig{
+			config.Global = &config.Config{
 				Project: test.Project,
 			}
-			cmdUtils.GlobalConfig.SetAPIClient(test.APIClient)
+			config.Global.SetAPIClient(test.APIClient)
 
 			err := cmd.Execute()
 			if test.IsErrorExpected {

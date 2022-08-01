@@ -19,11 +19,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
-	"github.com/perses/perses/internal/config"
+	"github.com/perses/perses/internal/api/config"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/fsnotify.v1"
 )
 
 type watcher struct {

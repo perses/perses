@@ -17,9 +17,11 @@ import (
 	"fmt"
 	"io"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/internal/cli/utils/file"
-	cmdUtilsService "github.com/perses/perses/internal/cli/utils/service"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/resource"
+	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -34,7 +36,7 @@ type keyCombination struct {
 }
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
 	writer    io.Writer
 	kind      modelV1.Kind
 	all       bool
@@ -49,11 +51,11 @@ func (o *option) Complete(args []string) error {
 	if len(o.file) == 0 {
 		// Then the user need to specify the resource type and the name of the resource to delete
 		if len(args) == 0 {
-			return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
+			return fmt.Errorf(resource.FormatMessage())
 		}
 
 		var err error
-		o.kind, err = cmdUtils.GetKind(args[0])
+		o.kind, err = resource.GetKind(args[0])
 		if err != nil {
 			return err
 		}
@@ -71,10 +73,10 @@ func (o *option) Complete(args []string) error {
 	}
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
 	if len(o.project) == 0 {
-		o.project = cmdUtils.GlobalConfig.Project
+		o.project = config.Global.Project
 	}
 	var err error
-	o.apiClient, err = cmdUtils.GlobalConfig.GetAPIClient()
+	o.apiClient, err = config.Global.GetAPIClient()
 	return err
 }
 
@@ -96,14 +98,14 @@ func (o *option) Execute() error {
 		for _, key := range keys {
 			name := key.name
 			project := key.project
-			svc, svcErr := cmdUtilsService.NewService(kind, project, o.apiClient)
+			svc, svcErr := service.New(kind, project, o.apiClient)
 			if svcErr != nil {
 				return svcErr
 			}
 			if err := svc.DeleteResource(name); err != nil {
 				return err
 			}
-			if outputError := cmdUtils.HandleSuccessResourceMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been deleted", kind, name)); outputError != nil {
+			if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been deleted", kind, name)); outputError != nil {
 				return outputError
 			}
 		}
@@ -112,7 +114,7 @@ func (o *option) Execute() error {
 }
 
 func (o *option) setNamesFromAll() error {
-	svc, svcErr := cmdUtilsService.NewService(o.kind, o.project, o.apiClient)
+	svc, svcErr := service.New(o.kind, o.project, o.apiClient)
 	if svcErr != nil {
 		return svcErr
 	}
@@ -125,8 +127,7 @@ func (o *option) setNamesFromAll() error {
 }
 
 func (o *option) setNamesFromFile() error {
-	unmarshaller := file.Unmarshaller{}
-	entities, err := unmarshaller.Unmarshal(o.file)
+	entities, err := file.UnmarshalEntity(o.file)
 	if err != nil {
 		return err
 	}
@@ -140,7 +141,7 @@ func (o *option) setNames(entities []modelAPI.Entity) {
 		metadata := entity.GetMetadata()
 		o.names[kind] = append(o.names[kind], keyCombination{
 			name:    metadata.GetName(),
-			project: cmdUtils.GetProject(metadata, o.project),
+			project: resource.GetProject(metadata, o.project),
 		})
 	}
 }
@@ -177,7 +178,7 @@ percli delete dashboards node_exporter cadvisor
 percli delete dashboards --all
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to delete")

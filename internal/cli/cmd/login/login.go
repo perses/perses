@@ -18,13 +18,14 @@ import (
 	"io"
 	"net/url"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
 	writer      io.Writer
 	url         string
 	insecureTLS bool
@@ -46,7 +47,7 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	return cmdUtils.WriteConfig(&cmdUtils.CLIConfig{
+	return config.Write(&config.Config{
 		RestClientConfig: perseshttp.RestConfigClient{
 			URL:         o.url,
 			InsecureTLS: o.insecureTLS,
@@ -68,7 +69,7 @@ func NewCMD() *cobra.Command {
 percli login https://perses.dev
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "If true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")

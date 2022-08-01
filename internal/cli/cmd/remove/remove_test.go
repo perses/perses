@@ -16,18 +16,18 @@ package remove
 import (
 	"testing"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
+	"github.com/perses/perses/internal/cli/resource"
+	cmdTest "github.com/perses/perses/internal/cli/test"
 	"github.com/perses/perses/pkg/client/fake/api"
 )
 
 func TestDeleteCMD(t *testing.T) {
-	testSuite := []cmdUtilsTest.Suite{
+	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
 			Args:            []string{},
 			IsErrorExpected: true,
-			ExpectedMessage: cmdUtils.FormatAvailableResourcesMessage(),
+			ExpectedMessage: resource.FormatMessage(),
 		},
 		{
 			Title:           "kind not managed",
@@ -61,14 +61,14 @@ object "Project" "Chronosphere" has been deleted
 		},
 		{
 			Title:           "delete unknown document from a file",
-			Args:            []string{"-f", "../../utils/test/sample_resources/unknown_resource.json"},
+			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" not supported by the command`,
 		},
 		{
 			Title:           "delete a single resource from a file",
-			Args:            []string{"-f", "../../utils/test/sample_resources/single_resource.json", "--project", "perses"},
+			Args:            []string{"-f", "../../test/sample_resources/single_resource.json", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
@@ -76,7 +76,7 @@ object "Project" "Chronosphere" has been deleted
 		},
 		{
 			Title:           "delete multiples resources from a file",
-			Args:            []string{"-f", "../../utils/test/sample_resources/multiple_resources.json", "--project", "perses"},
+			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
@@ -85,5 +85,5 @@ object "Project" "perses" has been deleted
 `,
 		},
 	}
-	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }

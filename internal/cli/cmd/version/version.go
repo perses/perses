@@ -16,7 +16,9 @@ package version
 import (
 	"io"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
@@ -35,7 +37,7 @@ type outputVersion struct {
 }
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
 	writer    io.Writer
 	short     bool
 	output    string
@@ -43,7 +45,7 @@ type option struct {
 }
 
 func (o *option) Complete(_ []string) error {
-	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
+	apiClient, err := config.Global.GetAPIClient()
 	// In case you are not connected to any API, it is still fine.
 	logrus.WithError(err).Debug("unable to get the api client from config")
 	o.apiClient = apiClient
@@ -51,7 +53,7 @@ func (o *option) Complete(_ []string) error {
 }
 
 func (o *option) Validate() error {
-	return cmdUtils.ValidateAndSetOutput(&o.output)
+	return output.ValidateAndSet(&o.output)
 }
 
 func (o *option) Execute() error {
@@ -77,7 +79,7 @@ func (o *option) Execute() error {
 			}
 		}
 	}
-	return cmdUtils.HandleOutput(o.writer, o.output, v)
+	return output.Handle(o.writer, o.output, v)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -90,7 +92,7 @@ func NewCMD() *cobra.Command {
 		Use:   "version",
 		Short: "Display client version.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	cmd.Flags().BoolVar(&o.short, "short", o.short, "If true, just print the version number.")

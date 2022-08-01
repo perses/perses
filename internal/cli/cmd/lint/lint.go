@@ -17,10 +17,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	"github.com/perses/perses/internal/cli/utils/file"
-	"github.com/perses/perses/internal/config"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/output"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -28,7 +29,7 @@ import (
 )
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
 	writer         io.Writer
 	file           string
 	chartsSchemas  string
@@ -57,15 +58,14 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	unmarshaller := file.Unmarshaller{}
-	objects, err := unmarshaller.Unmarshal(o.file)
+	objects, err := file.UnmarshalEntity(o.file)
 	if err != nil {
 		return err
 	}
 	if validateErr := o.validate(objects); validateErr != nil {
 		return validateErr
 	}
-	return cmdUtils.HandleString(o.writer, "your resources look good")
+	return output.HandleString(o.writer, "your resources look good")
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -106,7 +106,7 @@ percli lint -f ./resources.json
 cat resources.json | percli lint -f -
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	cmd.Flags().StringVarP(&o.file, "file", "f", o.file, "Path to the file that contains the resources to check.")

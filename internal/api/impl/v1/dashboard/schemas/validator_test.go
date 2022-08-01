@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/perses/perses/internal/config"
+	"github.com/perses/perses/internal/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"

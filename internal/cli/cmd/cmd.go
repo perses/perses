@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package persesCMD
 
 import (
 	"io"
@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type CMDOption interface {
+type Option interface {
 	// Complete is the method where the option is extracting the data from the args and is setting its different attributes.
 	Complete(args []string) error
 	// Validate is ensuring that the different value of its attribute are coherent (when it makes sense).
@@ -29,7 +29,7 @@ type CMDOption interface {
 	SetWriter(writer io.Writer)
 }
 
-func RunCMD(o CMDOption, cmd *cobra.Command, args []string) error {
+func Run(o Option, cmd *cobra.Command, args []string) error {
 	o.SetWriter(cmd.OutOrStdout())
 	if err := o.Complete(args); err != nil {
 		return err

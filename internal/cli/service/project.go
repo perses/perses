@@ -14,7 +14,7 @@
 package service
 
 import (
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/internal/cli/output"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -51,7 +51,7 @@ func (p *project) BuildMatrix(hits []modelAPI.Entity) [][]string {
 		entity := hit.(*modelV1.Project)
 		line := []string{
 			entity.Metadata.Name,
-			cmdUtils.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)
 	}
