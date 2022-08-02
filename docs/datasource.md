@@ -1,12 +1,12 @@
 Datasource Specification
 ========================
 
-This is a new draft about how we will define the datasource in Perses. It is following the discussion we had Monday 18th
-July.
+This documentation is describing how a datasource can be defined and can be used in a dashboard. It is the conclusion of
+the discussion #404.
 
 ## How datasource can be defined
 
-Like in the first draft we will have three different ways to define a datasource, depending on the scope we want to give
+We will have three different ways to define a datasource, depending on the scope we want to give
 to the datasource.
 
 ### Dashboard level
@@ -28,7 +28,8 @@ Once we will have user feedbacks, if they don’t like it, it won’t be that ha
 
 ### Project level
 
-In case you would like to share a datasource across different dashboards in the **same** project, you will need to create
+In case you would like to share a datasource across different dashboards in the **same** project, you will need to
+create
 an object called Datasource.
 
 ```typescript
@@ -350,7 +351,8 @@ interface DatasourceSelector {
 }
 ```
 
-Just as a reminder, priority is `"Local datasource in the dashboard" > "Project datasource" > "Global datasource"`.
+Priority is `"Local datasource in the dashboard" > "Project datasource" > "Global datasource"`.
+
 So if by any chance you a local datasource that is named exactly like a Project datasource, or a Global datasource, we
 will consider that the user intentionally wanted to override the upper datasource, so we will use the one with the
 smallest scope.
@@ -382,7 +384,7 @@ Perses server based on what kind of datasource is used.
     if datasource.kind == 'Datasource'; then 
       url= '/proxy/projects' + datasource.metadata.project + '/datasources/' + datasource.metadata.name 
   ```
-  
+
 * datasource is at global scope.
   ```
     var datasource; 
