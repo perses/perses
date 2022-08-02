@@ -20,7 +20,7 @@ interface DashboardSpec {
 }
 ```
 
-Of course the scope of such definition is the dashboard where it is defined. It cannot be used outside on the dashboard.
+Of course the scope of such definition is the dashboard where it is defined. It cannot be used outside of the dashboard.
 
 **Note**: We don’t really have a use case in mind, but as it is not really complicated to have it in the dashboard
 specification, we decided to support it.
@@ -28,7 +28,7 @@ Once we will have user feedbacks, if they don’t like it, it won’t be that ha
 
 ### Project level
 
-In case you would like to share a datasource across different dashboard in the **same** project, you will need to create
+In case you would like to share a datasource across different dashboards in the **same** project, you will need to create
 an object called Datasource.
 
 ```typescript
@@ -49,10 +49,10 @@ GET /api/v1/projects/<project_name>/datasources
 
 URL query parameters:
 
-- kind = <string> : should be used to filter the list of datasource with a specific kind
-- default = <boolean> : should be used to filter the list of datasource to only have the default one. You should have
+- kind = <string> : should be used to filter the list of datasources with a specific kind
+- default = <boolean> : should be used to filter the list of datasources to only have the default one. You should have
   one default datasource per kind
-- name = <string> : should be used to filter the list of datasource based on the prefix name.
+- name = <string> : should be used to filter the list of datasources based on the prefix name.
 
 Example:
 
@@ -153,10 +153,10 @@ DELETE /api/v1/globaldatasources/<name>
 
 ### Reason why we don't provide a single object containing a list of datasource
 
-We are wishing to provide a REST API that exposes a way to manage the datasource per project and globally. When we talk
+We are wishing to provide a REST API that exposes a way to manage the datasources per project and globally. When we talk
 about REST API, it means for every resource provided it comes with the same (at least) 5 different endpoints:
 
-* `GET /<plural resource like dashboardS>` : to be used to return a list of the resource
+* `GET /<plural resource like dashboardS>` : to be used to return a list of this resource
 * `GET /<plural resource>/<resource_name>` : to be used to return a unique resource
 * `POST /<plural resource>` : to be used to create a new resource
 * `PUT /<plural resource>/<resource_name>` : to be used to update a resource
@@ -172,15 +172,15 @@ interface ProjectConfigSpec {
 }
 ```
 
-then with the first endpoint that is returning a list of resources, we will have a list of map of datasource.
+then with the first endpoint that is returning a list of resources, we would have a list of map of datasources.
 Not a good thing in this context.
 
-It is understandable using a map will make easier the research, the filtering ...etc. But that's totally something that
-be considered. We can add more query parameter to the first endpoint, so we can filter the datasource per kind for
+It is understandable using a map will make the research easier, the filtering etc, and that's totally something that can
+be considered. We can add more query parameters to the first endpoint, so we could filter the datasources per kind for
 example (like it is proposed above)
 
 2. Providing these endpoints for each resource supported helps to maintain a clean code in the backend as the code won't
-   really make a difference between handling a datasource or dashboard. The endpoints will be similar, so the code can
+   really make a difference between handling a datasource or a dashboard. The endpoints will be similar, so the code can
    be a bit more generic.
 
 3. We want to install Perses natively on Kubernetes using CRDs (Custom Resource Documents). Kubernetes will
@@ -205,7 +205,7 @@ interface DatasourceSpec {
 
 ### Prometheus Datasource
 
-Prometheus as a datasource is basically an HTTP server, so we will likely have just an HTTP config
+Prometheus as a datasource is basically an HTTP server, so we will likely just have an HTTP config
 
 ```typescript
 
@@ -213,7 +213,7 @@ interface commonProxySpec {
     // secret is the name of the secret that should be used for the proxy or discovery configuration
     // It will contain any sensitive information such as password, token, certificate.
     secret?: string;
-    // discovery will contain a discovery configuration. For example this is where you will have the k8s discover.
+    // discovery will contain a discovery configuration. For example this is where you will have the k8s discovery.
     // IMPORTANT: This is not yet specified how the discovery configuration will look like. It will be decided and implemented later. 
     discovery?: any;
 }
@@ -222,13 +222,13 @@ interface HTTPProxySpec extends commonProxySpec {
     // url is the url of datasource. It is not the url of the proxy.
     // Once the discovery configuration is available, url won't be mandatory anymore.
     url: string;
-    // allowed_endpoints is a list of tuple of http method and http endpoint that will be accessible.
+    // allowed_endpoints is a list of tuples of http methods and http endpoints that will be accessible.
     // Leave it empty if you don't want to restrict the access to the datasource.
     allowed_endpoints?: {
         endpoint_pattern: RegExp;
         method: 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'
     }[];
-    // headers can be used to provide additional header that needs to be forwarded when requesting the datasource
+    // headers can be used to provide additional headers that need to be forwarded when requesting the datasource
     headers?: Record<string, string>
 }
 
@@ -319,7 +319,7 @@ A more complex one:
 
 #### How an SQL datasource could look like
 
-This is just an example what an SQL datasource could look like. This is just to be sure our datasource model can squale.
+This is just an example what an SQL datasource could look like. This is just to be sure our datasource model can scale.
 
 ```typescript
 interface SQLDatasourceSpec {
@@ -373,8 +373,8 @@ As described before, you can provide a proxy configuration that will be used by 
 queries to the datasource.
 
 It means in case of the Prometheus datasource, if the field `direct_url` is not set, then the FE needs to use the Perses
-server to contact the datasource. For that the FE will have determinate which URL it should be used to contact the
-Perses server based on what kind of datasource it is used.
+server to contact the datasource. For that the FE will have to determinate which URL should be used to contact the
+Perses server based on what kind of datasource is used.
 
 * datasource is at project scope.
   ```
