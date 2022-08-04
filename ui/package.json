@@ -9,7 +9,7 @@
     "test": "npm test --workspaces",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
-    "start": "npm run start -w app",
+    "start": "npm run clean && npm run start -w app",
     "clean": "rimraf .build-cache && npm run clean --workspaces"
   },
   "workspaces": [
