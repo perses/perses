@@ -1,3 +1,25 @@
+## 0.5.1 / 2022-07-28
+
+[ENHANCEMENT] update prometheus-plugin to use @prometheus-io/lezer-promql #486
+
+## 0.5.0 / 2022-07-20
+
+- [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at runtime #422 #434 #435 #457 #459 #478
+- [FEATURE] echarts theme customization which allows flexibility when Perses is embedded in other apps #480
+- [FEATURE] Add ability to show info icon next to panel header using `display.description` #465
+- [FEATURE] `thresholds` support in line chart #462
+- [FEATURE] echarts legends using `show_legend` in line chart #462
+- [FEATURE] enable data zoom by default in line chart, restore on double click #462
+- [ENHANCEMENT] gauge chart support additional units #481
+- [ENHANCEMENT] add `Bytes` formatting to line and stats charts #462
+- [ENHANCEMENT] stat chart selectable text and theme improvements #462
+- [ENHANCEMENT] release process and license header improvements #452, #456
+- [ENHANCEMENT] add a version number on every resources managed. This number is increased when a resource is updated. #453
+- [ENHANCEMENT] add documentation regarding how Perses might work on k8s #448
+- [BUGFIX] line chart query error handling #479
+- [BUGFIX] line chart fill empty data regression #462
+- [BREAKINGCHANGE] align layout definition between FE and BE, `spec` moved inside `display` #454
+
 ## 0.4.2 / 2022-05-18
 
 - [BUGFIX] fix line chart shows time beyond 24 hours #443
