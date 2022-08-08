@@ -17,9 +17,9 @@ import { JsonObject, VariableDefinition } from '@perses-dev/core';
 import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
 import { mockPluginRegistryProps, renderWithContext } from '../../test';
 import { TemplateVariablesProvider } from '../../context';
-import { VariableOptionsDrawer } from './VariableOptionsDrawer';
+import { VariableList } from './VariableList';
 
-describe('VariableOptionsDrawer', () => {
+describe('VariableList', () => {
   const variables: Record<string, VariableDefinition> = {
     job: {
       display: {
@@ -58,7 +58,7 @@ describe('VariableOptionsDrawer', () => {
     renderWithContext(
       <PluginRegistry {...pluginRegistryProps}>
         <TemplateVariablesProvider variableDefinitions={variables}>
-          <VariableOptionsDrawer variables={variables} />
+          <VariableList variables={variables} />
         </TemplateVariablesProvider>
       </PluginRegistry>
     );
@@ -66,26 +66,31 @@ describe('VariableOptionsDrawer', () => {
 
   it('should display Variables as the title', async () => {
     renderVariableOptionsDrawer();
-    await screen.findByText('Variables');
+    const title = await screen.findByText('Variables');
+    expect(title).toBeInTheDocument();
   });
 
   describe('VariableAutocomplete', () => {
     it('should display correct variable', async () => {
       renderVariableOptionsDrawer();
-      await screen.findByLabelText('Job');
+      const jobInput = await screen.findByLabelText('Job');
+      expect(jobInput).toBeInTheDocument();
     });
 
     it('should display correct default value', async () => {
       renderVariableOptionsDrawer();
-      await screen.findByDisplayValue('node');
+      const jobValue = await screen.findByDisplayValue('node');
+      expect(jobValue).toBeInTheDocument();
     });
 
     it('should display correct options', async () => {
       renderVariableOptionsDrawer();
       const openButton = await screen.findByRole('button', { name: 'Open' });
       userEvent.click(openButton);
-      await screen.findByText('all');
-      screen.getByText('node');
+      const option1 = await screen.findByText('all');
+      expect(option1).toBeInTheDocument();
+      const option2 = screen.getByText('node');
+      expect(option2).toBeInTheDocument();
     });
   });
 });
