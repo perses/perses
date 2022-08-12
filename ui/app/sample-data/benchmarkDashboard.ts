@@ -100,7 +100,10 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          unit: { kind: 'Bytes' },
+          unit: {
+            kind: 'Decimal',
+            decimal_places: 4,
+          },
         },
       },
       basicEx: {
@@ -116,7 +119,10 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          unit: { kind: 'Percent' },
+          unit: {
+            kind: 'PercentDecimal',
+            decimal_places: 0,
+          },
         },
       },
       legendEx: {
@@ -419,7 +425,7 @@ const benchmarkDashboard: DashboardResource = {
           display: {
             title: 'Row 1',
             collapse: {
-              open: false,
+              open: true,
             },
           },
           items: [
@@ -439,6 +445,22 @@ const benchmarkDashboard: DashboardResource = {
               height: 6,
               content: { $ref: '#/spec/panels/basicEx' },
             },
+            {
+              x: 0,
+              y: 6,
+              width: 12,
+              height: 6,
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+            {
+              x: 12,
+              y: 6,
+              width: 12,
+              height: 6,
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
           ],
         },
       },
@@ -447,6 +469,51 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: {
             title: 'Row 2',
+            collapse: {
+              open: true,
+            },
+          },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/legendEx' },
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+              // content: { $ref: '#/spec/panels/seriesTest' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+            {
+              x: 0,
+              y: 6,
+              width: 12,
+              height: 6,
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+            {
+              x: 12,
+              y: 6,
+              width: 12,
+              height: 6,
+              // content: { $ref: '#/spec/panels/seriesTestAlt' },
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+          ],
+        },
+      },
+      {
+        kind: 'Grid',
+        spec: {
+          display: {
+            title: 'Row 3',
             collapse: {
               open: true,
             },
@@ -475,7 +542,7 @@ const benchmarkDashboard: DashboardResource = {
           display: {
             title: 'Row 3',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [

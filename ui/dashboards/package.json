@@ -28,6 +28,7 @@
     "@perses-dev/core": "^0.5.1",
     "@perses-dev/plugin-system": "^0.5.1",
     "immer": "^9.0.15",
+    "react-intersection-observer": "^9.4.0",
     "use-immer": "^0.7.0",
     "use-resize-observer": "^8.0.0"
   },
