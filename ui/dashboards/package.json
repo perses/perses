@@ -32,6 +32,9 @@
     "use-immer": "^0.7.0",
     "use-resize-observer": "^8.0.0"
   },
+  "devDependencies": {
+    "intersection-observer": "^0.12.2"
+  },
   "peerDependencies": {
     "@mui/material": "^5.5.1",
     "react": "^17.0.2"
