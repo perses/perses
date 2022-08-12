@@ -43,7 +43,7 @@ export function getNearbySeries(data: EChartsDataFormat, pointInGrid: number[], 
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
-      if (currentFocusedData.length > TOOLTIP_MAX_ITEMS) break;
+      if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
         const markerColor = currentSeries.color ?? '#000';
