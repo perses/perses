@@ -16,28 +16,21 @@ import { Box, Portal } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { EChartsDataFormat } from '../model/graph';
 import { getFocusedSeriesData } from './focused-series';
-import {
-  CursorCoordinates,
-  CursorData,
-  TooltipData,
-  TOOLTIP_MAX_HEIGHT,
-  TOOLTIP_MAX_WIDTH,
-  useMousePosition,
-} from './tooltip-model';
+import { CursorCoordinates, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH, useMousePosition } from './tooltip-model';
 import { TooltipContent } from './TooltipContent';
+import { assembleTransform } from './utils';
 
 interface TooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
-  tooltipData: TooltipData;
   chartData: EChartsDataFormat;
   wrapLabels?: boolean;
 }
 
-export function Tooltip(props: TooltipProps) {
-  const { chartRef, chartData } = props;
+const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels }: TooltipProps) {
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
-  if (mousePos === null) return null;
+  if (mousePos === null || mousePos.target === null) return null;
+  if ((mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
   const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart);
@@ -89,51 +82,10 @@ export function Tooltip(props: TooltipProps) {
         onMouseEnter={() => handleMouseEnter()}
         onMouseLeave={() => handleMouseLeave()}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={props.wrapLabels} />
+        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
       </Box>
     </Portal>
   );
-}
+});
 
-function assembleTransform(
-  mousePos: CursorData['coords'],
-  seriesNum: number,
-  chartWidth: number,
-  chartHeight: number,
-  pinnedPos: CursorCoordinates | null
-) {
-  if (mousePos === null) {
-    return 'translate3d(0, 0)';
-  }
-
-  if (pinnedPos !== null) {
-    mousePos = pinnedPos;
-  }
-
-  const cursorPaddingX = 32;
-  const cursorPaddingY = 16;
-  const x = mousePos.viewport.x;
-  let y = mousePos.viewport.y + cursorPaddingY;
-
-  const isCloseToBottom = mousePos.viewport.y > window.innerHeight * 0.8;
-  const yPosAdjustThreshold = chartHeight * 0.75;
-  // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
-  if (isCloseToBottom === true) {
-    if (seriesNum > 6) {
-      y = mousePos.viewport.y * 0.65;
-    } else {
-      y = mousePos.viewport.y * 0.75;
-    }
-  } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
-    y = mousePos.viewport.y * 0.85;
-  }
-
-  // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
-  const tooltipWidth = seriesNum > 1 ? TOOLTIP_MAX_WIDTH : TOOLTIP_MAX_WIDTH / 2;
-  const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;
-
-  // reposition so tooltip is never too close to right side of chart or left side of browser window
-  return mousePos.plotCanvas.x > xPosAdjustThreshold && x > TOOLTIP_MAX_WIDTH
-    ? `translate3d(${x - cursorPaddingX}px, ${y}px, 0) translateX(-100%)`
-    : `translate3d(${x + cursorPaddingX}px, ${y}px, 0)`;
-}
+export { Tooltip };
