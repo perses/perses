@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { useState, useMemo } from 'react';
+import useResizeObserver from 'use-resize-observer';
+import { useInView } from 'react-intersection-observer';
 import { PluginBoundary, PanelComponent } from '@perses-dev/plugin-system';
 import { ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Box, Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import useResizeObserver from 'use-resize-observer';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
@@ -37,11 +38,18 @@ export function Panel(props: PanelProps) {
     return { width, height };
   }, [width, height]);
 
+  const { ref, inView } = useInView({
+    threshold: 0.3,
+    initialInView: false,
+    triggerOnce: true,
+  });
+
   // TODO: adjust padding for small panels, consistent way to determine isLargePanel here and in StatChart
   const panelPadding = 1.5;
 
   return (
     <Card
+      ref={ref}
       sx={{
         ...others.sx,
         width: '100%',
@@ -105,7 +113,7 @@ export function Panel(props: PanelProps) {
         ref={setContentElement}
       >
         <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-          <PanelComponent definition={definition} contentDimensions={contentDimensions} />
+          {inView === true && <PanelComponent definition={definition} contentDimensions={contentDimensions} />}
         </PluginBoundary>
       </CardContent>
     </Card>

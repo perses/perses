@@ -457,7 +457,7 @@ const benchmarkDashboard: DashboardResource = {
               y: 6,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/seriesTestAlt' },
+              content: { $ref: '#/spec/panels/basicEx' },
             },
           ],
         },
@@ -467,6 +467,47 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: {
             title: 'Row 2',
+            collapse: {
+              open: true,
+            },
+          },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/legendEx' },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+            {
+              x: 0,
+              y: 6,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+            {
+              x: 12,
+              y: 6,
+              width: 12,
+              height: 6,
+              content: { $ref: '#/spec/panels/basicEx' },
+            },
+          ],
+        },
+      },
+      {
+        kind: 'Grid',
+        spec: {
+          display: {
+            title: 'Row 3',
             collapse: {
               open: true,
             },
