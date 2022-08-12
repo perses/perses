@@ -1,7 +1,7 @@
 ## 0.5.2 / 2022-08-12
 
 [ENHANCEMENT] lazy load panels on scroll #500
-[BUGFIX] improve tooltip performance when many charts on single dashboard #499
+[BUGFIX] improve tooltip performance when many line charts are on a single dashboard #499
 
 ## 0.5.1 / 2022-07-28
 
