@@ -29,7 +29,10 @@ interface TooltipProps {
 const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels }: TooltipProps) {
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
+
   if (mousePos === null || mousePos.target === null) return null;
+
+  // ensure user is hovering over a chart before checking for nearby series
   if ((mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;

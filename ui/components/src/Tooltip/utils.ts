@@ -13,6 +13,9 @@
 
 import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 
+/**
+ * Determine position of tooltip depending on chart dimensions and the number of focused series
+ */
 export function assembleTransform(
   mousePos: CursorData['coords'],
   seriesNum: number,
