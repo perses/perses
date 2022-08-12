@@ -13,7 +13,7 @@
 
 import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
 
-const benchmarkDashboard: DashboardResource = {
+const demoDashboard: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'Node Stats',
@@ -100,10 +100,7 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          unit: {
-            kind: 'Decimal',
-            decimal_places: 4,
-          },
+          unit: { kind: 'Bytes' },
         },
       },
       basicEx: {
@@ -119,10 +116,7 @@ const benchmarkDashboard: DashboardResource = {
               },
             },
           ],
-          unit: {
-            kind: 'PercentDecimal',
-            decimal_places: 0,
-          },
+          unit: { kind: 'Percent' },
         },
       },
       legendEx: {
@@ -425,7 +419,7 @@ const benchmarkDashboard: DashboardResource = {
           display: {
             title: 'Row 1',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [
@@ -444,20 +438,6 @@ const benchmarkDashboard: DashboardResource = {
               width: 12,
               height: 6,
               content: { $ref: '#/spec/panels/basicEx' },
-            },
-            {
-              x: 0,
-              y: 6,
-              width: 12,
-              height: 6,
-              content: { $ref: '#/spec/panels/seriesTestAlt' },
-            },
-            {
-              x: 12,
-              y: 6,
-              width: 12,
-              height: 6,
-              content: { $ref: '#/spec/panels/seriesTestAlt' },
             },
           ],
         },
@@ -495,7 +475,7 @@ const benchmarkDashboard: DashboardResource = {
           display: {
             title: 'Row 3',
             collapse: {
-              open: false,
+              open: true,
             },
           },
           items: [
@@ -550,4 +530,4 @@ const benchmarkDashboard: DashboardResource = {
   },
 };
 
-export default benchmarkDashboard;
+export default demoDashboard;
