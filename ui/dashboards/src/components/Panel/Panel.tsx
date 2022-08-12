@@ -39,8 +39,8 @@ export function Panel(props: PanelProps) {
   }, [width, height]);
 
   const { ref, inView } = useInView({
-    threshold: 0,
-    initialInView: true,
+    threshold: 0.3,
+    initialInView: false,
     triggerOnce: true,
   });
 
