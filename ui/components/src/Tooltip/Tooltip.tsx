@@ -23,35 +23,28 @@ import { assembleTransform } from './utils';
 interface TooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
+  pinTooltip: boolean;
   wrapLabels?: boolean;
 }
 
-const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels }: TooltipProps) {
+const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, pinTooltip }: TooltipProps) {
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
 
   if (mousePos === null || mousePos.target === null) return null;
 
   // ensure user is hovering over a chart before checking for nearby series
-  if ((mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
+  if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
+
+  if (pinTooltip === true && pinnedPos === null) {
+    setPinnedPos(mousePos);
+  }
 
   const chart = chartRef.current;
   const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart);
   const chartWidth = chart?.getWidth() ?? 750;
   const chartHeight = chart?.getHeight() ?? 230;
   const cursorTransform = assembleTransform(mousePos, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
-
-  function handleMouseEnter() {
-    if (mousePos !== null) {
-      setPinnedPos(mousePos);
-    }
-  }
-
-  function handleMouseLeave() {
-    if (pinnedPos !== null) {
-      setPinnedPos(null);
-    }
-  }
 
   if (focusedSeries.length === 0) {
     return null;
@@ -82,8 +75,8 @@ const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels }:
         style={{
           transform: cursorTransform,
         }}
-        onMouseEnter={() => handleMouseEnter()}
-        onMouseLeave={() => handleMouseLeave()}
+        // onMouseEnter={() => handleMouseEnter()}
+        // onMouseLeave={() => handleMouseLeave()}
       >
         <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
       </Box>

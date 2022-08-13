@@ -468,7 +468,7 @@ const benchmarkDashboard: DashboardResource = {
           display: {
             title: 'Row 2',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [
@@ -509,7 +509,7 @@ const benchmarkDashboard: DashboardResource = {
           display: {
             title: 'Row 3',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [

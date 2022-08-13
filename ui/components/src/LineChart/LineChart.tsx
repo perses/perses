@@ -72,9 +72,14 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
+  const [pinTooltip, setPinTooltip] = useState<boolean>(false);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
+      // TODO: use params to pass series info to tooltip?
+      click: () => {
+        setPinTooltip(true);
+      },
       // TODO: use legendselectchanged event to fix tooltip when legend selected
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -123,6 +128,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleOnMouseLeave = () => {
     setShowTooltip(false);
+    setPinTooltip(false);
   };
 
   const option: EChartsCoreOption = useDeepMemo(() => {
@@ -190,7 +196,9 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
       onMouseLeave={handleOnMouseLeave}
       onMouseEnter={handleOnMouseEnter}
     >
-      {showTooltip === true && <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true}></Tooltip>}
+      {showTooltip === true && (
+        <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip}></Tooltip>
+      )}
 
       <EChart
         sx={{
