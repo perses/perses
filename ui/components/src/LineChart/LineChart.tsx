@@ -72,11 +72,17 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
+  const [pinTooltip, setPinTooltip] = useState<boolean>(false);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
-      // TODO: use legendselectchanged event to fix tooltip when legend selected
       datazoom: (params) => {
+        if (onDataZoom === undefined) {
+          setTimeout(() => {
+            // workaround so unpin happens after click event
+            setPinTooltip(false);
+          }, 10);
+        }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
         const startIndex = params.batch[0].startValue ?? 0;
         const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
@@ -93,14 +99,18 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
           onDataZoom(zoomEvent);
         }
       },
+      // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
-  }, [data, onDataZoom]);
+  }, [data, onDataZoom, setPinTooltip]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
   }
 
+  const handleOnClick = () => setPinTooltip((current) => !current);
+
   const handleOnDoubleClick = () => {
+    setPinTooltip(false);
     if (chartRef.current !== undefined) {
       restoreChart(chartRef.current);
     }
@@ -123,6 +133,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleOnMouseLeave = () => {
     setShowTooltip(false);
+    setPinTooltip(false);
   };
 
   const option: EChartsCoreOption = useDeepMemo(() => {
@@ -184,13 +195,16 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
       sx={{
         height,
       }}
+      onClick={handleOnClick}
       onDoubleClick={handleOnDoubleClick}
       onMouseDown={handleOnMouseDown}
       onMouseUp={handleOnMouseUp}
       onMouseLeave={handleOnMouseLeave}
       onMouseEnter={handleOnMouseEnter}
     >
-      {showTooltip === true && <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true}></Tooltip>}
+      {showTooltip === true && (
+        <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip}></Tooltip>
+      )}
 
       <EChart
         sx={{
