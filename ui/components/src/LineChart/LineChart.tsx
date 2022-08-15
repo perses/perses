@@ -81,7 +81,6 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
           setTimeout(() => {
             // workaround so unpin happens after click event
             setPinTooltip(false);
-            console.log('TEST UNPIN...');
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
