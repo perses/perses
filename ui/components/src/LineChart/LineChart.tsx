@@ -104,9 +104,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
   const handleOnClick = () => setPinTooltip((current) => !current);
 
   const handleOnDoubleClick = () => {
-    if (pinTooltip === true) {
-      setPinTooltip(false);
-    }
+    setPinTooltip(false);
     if (chartRef.current !== undefined) {
       restoreChart(chartRef.current);
     }
