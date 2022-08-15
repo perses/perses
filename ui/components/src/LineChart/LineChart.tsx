@@ -101,13 +101,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
     enableDataZoom(chartRef.current);
   }
 
-  const handleOnClick = () => {
-    if (pinTooltip === false) {
-      setPinTooltip(true);
-    } else {
-      setPinTooltip(false);
-    }
-  };
+  const handleOnClick = () => setPinTooltip((current) => !current);
 
   const handleOnDoubleClick = () => {
     if (pinTooltip === true) {
@@ -127,11 +121,6 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleOnMouseUp = () => {
     setShowTooltip(true);
-  };
-
-  const handleOnDragEnd = () => {
-    setShowTooltip(true);
-    setPinTooltip(false);
   };
 
   const handleOnMouseEnter = () => {
@@ -206,7 +195,6 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
       onDoubleClick={handleOnDoubleClick}
       onMouseDown={handleOnMouseDown}
       onMouseUp={handleOnMouseUp}
-      onDragEnd={handleOnDragEnd}
       onMouseLeave={handleOnMouseLeave}
       onMouseEnter={handleOnMouseEnter}
     >
