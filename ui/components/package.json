@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/components",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Common UI components used across Perses features",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -24,14 +24,15 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/core": "^0.5.2",
+    "@perses-dev/core": "^0.6.0",
     "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",
     "react-error-boundary": "^3.1.4"
   },
   "peerDependencies": {
     "@mui/material": "^5.5.1",
-    "react": "^17.0.2"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   },
   "files": [
     "dist"
