@@ -14,55 +14,55 @@
 package service
 
 import (
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/internal/cli/output"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type dashboard struct {
+type globalDatasource struct {
 	Service
-	apiClient v1.DashboardInterface
+	apiClient v1.GlobalDatasourceInterface
 }
 
-func (d *dashboard) CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
-	return d.apiClient.Create(entity.(*modelV1.Dashboard))
+func (d *globalDatasource) CreateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Create(entity.(*modelV1.GlobalDatasource))
 }
 
-func (d *dashboard) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
-	return d.apiClient.Update(entity.(*modelV1.Dashboard))
+func (d *globalDatasource) UpdateResource(entity modelAPI.Entity) (modelAPI.Entity, error) {
+	return d.apiClient.Update(entity.(*modelV1.GlobalDatasource))
 }
 
-func (d *dashboard) ListResource(prefix string) ([]modelAPI.Entity, error) {
+func (d *globalDatasource) ListResource(prefix string) ([]modelAPI.Entity, error) {
 	return convertToEntityIfNoError(d.apiClient.List(prefix))
 }
 
-func (d *dashboard) GetResource(name string) (modelAPI.Entity, error) {
+func (d *globalDatasource) GetResource(name string) (modelAPI.Entity, error) {
 	return d.apiClient.Get(name)
 }
 
-func (d *dashboard) DeleteResource(name string) error {
+func (d *globalDatasource) DeleteResource(name string) error {
 	return d.apiClient.Delete(name)
 }
 
-func (d *dashboard) BuildMatrix(hits []modelAPI.Entity) [][]string {
+func (d *globalDatasource) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.Dashboard)
+		entity := hit.(*modelV1.GlobalDatasource)
 		line := []string{
 			entity.Metadata.Name,
-			entity.Metadata.Project,
-			cmdUtils.FormatTime(entity.Metadata.UpdatedAt),
+			string(entity.Spec.GetKind()),
+			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)
 	}
 	return data
 }
 
-func (d *dashboard) GetColumHeader() []string {
+func (d *globalDatasource) GetColumHeader() []string {
 	return []string{
 		"NAME",
-		"PROJECT",
+		"DATASOURCE_TYPE",
 		"AGE",
 	}
 }

@@ -24,10 +24,10 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/shared/database"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/internal/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"

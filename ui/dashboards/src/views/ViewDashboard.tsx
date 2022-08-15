@@ -15,7 +15,7 @@ import { Box, BoxProps } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { TimeRangeStateProvider, TemplateVariablesProvider } from '../context';
-import { Dashboard, VariableOptionsDrawer } from '../components';
+import { Dashboard, VariableList } from '../components';
 
 export interface ViewDashboardProps extends BoxProps {
   dashboardResource: DashboardResource;
@@ -51,11 +51,13 @@ export function ViewDashboard(props: ViewDashboardProps) {
               overflowY: 'auto',
             }}
           >
+            <VariableList
+              variables={dashboardResource.spec.variables}
+              sx={{ margin: (theme) => theme.spacing(1, 0, 2) }}
+            />
             <Dashboard spec={dashboardResource.spec} />
             {children}
           </Box>
-
-          <VariableOptionsDrawer variables={dashboardResource.spec.variables} />
         </Box>
       </TemplateVariablesProvider>
     </TimeRangeStateProvider>

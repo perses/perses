@@ -24,7 +24,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
-	"github.com/perses/perses/internal/config"
+	"github.com/perses/perses/internal/api/config"
 	"github.com/sirupsen/logrus"
 )
 

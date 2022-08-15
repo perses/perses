@@ -24,7 +24,7 @@ import (
 	"github.com/perses/perses/internal/cli/cmd/project"
 	"github.com/perses/perses/internal/cli/cmd/remove"
 	"github.com/perses/perses/internal/cli/cmd/version"
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -51,7 +51,7 @@ func newRootCommand() *cobra.Command {
 	cmd.AddCommand(version.NewCMD())
 
 	// the list of the global flags supported
-	cmd.PersistentFlags().StringVar(&configPath, "percliconfig", cmdUtils.GetDefaultConfigPath(), "Path to the percliconfig file to use for CLI requests.")
+	cmd.PersistentFlags().StringVar(&configPath, "percliconfig", config.GetDefaultPath(), "Path to the percliconfig file to use for CLI requests.")
 	cmd.PersistentFlags().StringVar(&logLevel, "log.level", "info", "Set the log verbosity level. Possible values: panic, fatal, error, warning, info, debug, trace")
 
 	// Some custom settings about the percli itself
@@ -77,7 +77,7 @@ func initLogrus() {
 
 func initializeCLI() {
 	initLogrus()
-	cmdUtils.InitGlobalConfig(configPath)
+	config.Init(configPath)
 }
 
 func main() {

@@ -23,12 +23,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Unmarshaller struct {
+func UnmarshalEntity(file string) ([]modelAPI.Entity, error) {
+	u := &unmarshaller{}
+	return u.unmarshal(file)
+}
+
+type unmarshaller struct {
 	isJSON  bool
 	objects []map[string]interface{}
 }
 
-func (u *Unmarshaller) Unmarshal(file string) ([]modelAPI.Entity, error) {
+func (u *unmarshaller) unmarshal(file string) ([]modelAPI.Entity, error) {
 	if err := u.read(file); err != nil {
 		return nil, err
 	}
@@ -36,7 +41,7 @@ func (u *Unmarshaller) Unmarshal(file string) ([]modelAPI.Entity, error) {
 	return u.unmarshalEntities()
 }
 
-func (u *Unmarshaller) read(file string) error {
+func (u *unmarshaller) read(file string) error {
 	data, isJSON, err := readAndDetect(file)
 	if err != nil {
 		return err
@@ -65,7 +70,7 @@ func (u *Unmarshaller) read(file string) error {
 	return nil
 }
 
-func (u *Unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
+func (u *unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
 	if len(u.objects) == 0 {
 		return nil, fmt.Errorf("unable to unmarshall data, data is empty")
 	}
@@ -102,7 +107,7 @@ func (u *Unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
 	return result, nil
 }
 
-func (u *Unmarshaller) unmarshalEntity(data []byte, entity modelAPI.Entity) error {
+func (u *unmarshaller) unmarshalEntity(data []byte, entity modelAPI.Entity) error {
 	var unmarshalErr error
 	if u.isJSON {
 		unmarshalErr = json.Unmarshal(data, entity)

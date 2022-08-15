@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -25,6 +25,9 @@ export interface VariableAutocompleteProps {
   onChange: (value: string | string[]) => void;
   onOptionsChange: (options: string[]) => void;
   TextFieldProps?: TextFieldProps;
+
+  className?: AutocompleteProps['className'];
+  sx?: AutocompleteProps['sx'];
 }
 
 /**
@@ -32,7 +35,7 @@ export interface VariableAutocompleteProps {
  * appropriate plugin.
  */
 export function VariableAutocomplete(props: VariableAutocompleteProps) {
-  const { definition, state, onChange, onOptionsChange, TextFieldProps } = props;
+  const { definition, state, onChange, onOptionsChange, TextFieldProps, ...others } = props;
   const { value, options } = state;
 
   const allValue = 'all_value' in definition.selection ? definition.selection.all_value : undefined;
@@ -93,6 +96,7 @@ export function VariableAutocomplete(props: VariableAutocompleteProps) {
         color: 'default',
         variant: 'outlined',
       }}
+      {...others}
     />
   );
 }

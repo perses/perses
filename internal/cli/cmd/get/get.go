@@ -17,27 +17,31 @@ import (
 	"fmt"
 	"io"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	cmdUtilsService "github.com/perses/perses/internal/cli/utils/service"
+	"github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/opt"
+	"github.com/perses/perses/internal/cli/output"
+	"github.com/perses/perses/internal/cli/resource"
+	"github.com/perses/perses/internal/cli/service"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
-	cmdUtils.CMDOption
+	persesCMD.Option
+	opt.ProjectOption
+	opt.OutputOption
 	writer          io.Writer
 	kind            modelV1.Kind
 	allProject      bool
-	project         string
-	output          string
 	prefix          string
-	resourceService cmdUtilsService.Service
+	resourceService service.Service
 }
 
 func (o *option) Complete(args []string) error {
 	// first let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
 	if len(args) == 0 {
-		return fmt.Errorf(cmdUtils.FormatAvailableResourcesMessage())
+		return fmt.Errorf(resource.FormatMessage())
 	} else if len(args) == 2 {
 		// In second position in the arguments, you can have a prefix that will be used to filter the resources.
 		o.prefix = args[1]
@@ -46,23 +50,32 @@ func (o *option) Complete(args []string) error {
 	}
 
 	var err error
-	o.kind, err = cmdUtils.GetKind(args[0])
+	o.kind, err = resource.GetKind(args[0])
 	if err != nil {
 		return err
 	}
 
-	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
-	if len(o.project) == 0 && !o.allProject {
-		o.project = cmdUtils.GlobalConfig.Project
+	// Complete the output only if it has been set by the user
+	if len(o.Output) > 0 {
+		if outputErr := o.OutputOption.Complete(); outputErr != nil {
+			return err
+		}
+	}
+	// Complete the Project field if only the flag all is not set
+	if !o.allProject && !resource.IsGlobal(o.kind) {
+		// Complete the project only if the user want to get project resources
+		if projectErr := o.ProjectOption.Complete(); projectErr != nil {
+			return projectErr
+		}
 	}
 
 	// Finally, get the api client we will need later.
-	apiClient, err := cmdUtils.GlobalConfig.GetAPIClient()
+	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err
 	}
 
-	svc, svcErr := cmdUtilsService.NewService(o.kind, o.project, apiClient)
+	svc, svcErr := service.New(o.kind, o.Project, apiClient)
 	if svcErr != nil {
 		return svcErr
 	}
@@ -71,14 +84,6 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	// check if project should be defined (through the config or through the flag) for the given resource.
-	if !o.allProject && len(o.project) == 0 && !cmdUtils.IsGlobalResource(o.kind) {
-		return fmt.Errorf("no project has been defined for the scope of this command. If you intended to get all resources across projects, please use the flag --all")
-	}
-	if len(o.output) > 0 {
-		// In this particular command, the default display is a matrix.
-		return cmdUtils.ValidateAndSetOutput(&o.output)
-	}
 	return nil
 }
 
@@ -87,11 +92,11 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	if len(o.output) > 0 {
-		return cmdUtils.HandleOutput(o.writer, o.output, resourceList)
+	if len(o.Output) > 0 {
+		return output.Handle(o.writer, o.Output, resourceList)
 	}
 	data := o.resourceService.BuildMatrix(resourceList)
-	cmdUtils.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
+	output.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
 	return nil
 }
 
@@ -119,12 +124,12 @@ percli get dashboards -a -ojson
 
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmdUtils.RunCMD(o, cmd, args)
+			return persesCMD.Run(o, cmd, args)
 		},
 	}
+	opt.AddOutputFlags(cmd, &o.OutputOption)
+	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	cmd.Flags().BoolVarP(&o.allProject, "all", "a", o.allProject, "If present, list the requested object(s) across all projects. The project in the current context is ignored even if specified with --project.")
-	cmd.Flags().StringVarP(&o.project, "project", "p", o.project, "If present, the project scope for this CLI request.")
-	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "Kind of display: 'yaml' or 'json'.")
 	cmd.MarkFlagsMutuallyExclusive("project", "all")
 	return cmd
 }

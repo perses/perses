@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,44 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Paper, Typography, PaperProps } from '@mui/material';
-import { ErrorAlert, combineSx } from '@perses-dev/components';
+import { Stack, StackProps, Typography } from '@mui/material';
+import { ErrorAlert } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/core';
 import { PluginBoundary, useTemplateVariables } from '@perses-dev/plugin-system';
 import { useTemplateVariablesSetters } from '../../context';
 import { VariableAutocomplete } from '../VariableAutocomplete';
 
-const DRAWER_WIDTH = 296;
-
-export interface VariableOptionsDrawerProps extends PaperProps {
+export interface VariableListProps extends StackProps {
   variables: DashboardSpec['variables'];
 }
 
 /**
- * Dashboard options drawer that includes variable inputs.
+ * Displays the list of variable inputs for a dashboard.
  */
-export function VariableOptionsDrawer(props: VariableOptionsDrawerProps) {
-  const { variables, sx, ...others } = props;
+export function VariableList(props: VariableListProps) {
+  const { variables, ...others } = props;
 
   const { variables: variablesState } = useTemplateVariables();
   const { setValue, setOptions } = useTemplateVariablesSetters();
 
   return (
-    <Paper
-      sx={combineSx(
-        {
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          padding: (theme) => theme.spacing(1, 2),
-          borderLeft: (theme) => `1px solid ${theme.palette.divider}`,
-        },
-        sx
-      )}
-      square
-      elevation={0}
-      {...others}
-    >
-      <Typography component="h2" variant="h6">
+    <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} spacing={2} {...others}>
+      <Typography variant="body2" sx={{ fontWeight: (theme) => theme.typography.fontWeightMedium }}>
         Variables
       </Typography>
       {Object.entries(variables).map(([variableName, variableDef]) => {
@@ -67,10 +52,14 @@ export function VariableOptionsDrawer(props: VariableOptionsDrawerProps) {
               state={variableState}
               onChange={(value) => setValue(variableName, value)}
               onOptionsChange={(options) => setOptions(variableName, options)}
+              TextFieldProps={{
+                margin: 'none',
+              }}
+              sx={{ minWidth: 250 }}
             />
           </PluginBoundary>
         );
       })}
-    </Paper>
+    </Stack>
   );
 }

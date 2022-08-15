@@ -17,12 +17,12 @@ import (
 	"flag"
 
 	"github.com/perses/common/app"
+	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/front"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/internal/config"
 	"github.com/sirupsen/logrus"
 )
 

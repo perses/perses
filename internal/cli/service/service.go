@@ -42,7 +42,7 @@ type Service interface {
 	GetColumHeader() []string
 }
 
-func NewService(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (Service, error) {
+func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (Service, error) {
 	switch kind {
 	case modelV1.KindDashboard:
 		return &dashboard{

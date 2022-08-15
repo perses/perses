@@ -16,19 +16,19 @@ package describe
 import (
 	"testing"
 
-	cmdUtils "github.com/perses/perses/internal/cli/utils"
-	cmdUtilsTest "github.com/perses/perses/internal/cli/utils/test"
+	"github.com/perses/perses/internal/cli/resource"
+	cmdTest "github.com/perses/perses/internal/cli/test"
 	"github.com/perses/perses/pkg/client/fake/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func TestDescribeCMD(t *testing.T) {
-	testSuite := []cmdUtilsTest.Suite{
+	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
 			Args:            []string{},
 			IsErrorExpected: true,
-			ExpectedMessage: cmdUtils.FormatAvailableResourcesMessage(),
+			ExpectedMessage: resource.FormatMessage(),
 		},
 		{
 			Title:           "kind not managed",
@@ -59,7 +59,7 @@ func TestDescribeCMD(t *testing.T) {
 			Args:            []string{"project", "perses", "-ojson"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(
+			ExpectedMessage: string(cmdTest.JSONMarshalStrict(
 				&modelV1.Project{
 					Kind: modelV1.KindProject,
 					Metadata: modelV1.Metadata{
@@ -72,7 +72,7 @@ func TestDescribeCMD(t *testing.T) {
 			Args:            []string{"project", "perses", "-oyaml"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.YAMLMarshalStrict(
+			ExpectedMessage: string(cmdTest.YAMLMarshalStrict(
 				&modelV1.Project{
 					Kind: modelV1.KindProject,
 					Metadata: modelV1.Metadata{
@@ -85,7 +85,7 @@ func TestDescribeCMD(t *testing.T) {
 			Args:            []string{"folder", "myFolder", "-ojson", "-p", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(&modelV1.Folder{
+			ExpectedMessage: string(cmdTest.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,
 				Metadata: modelV1.ProjectMetadata{
 					Metadata: modelV1.Metadata{
@@ -101,7 +101,7 @@ func TestDescribeCMD(t *testing.T) {
 			Project:         "perses",
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdUtilsTest.JSONMarshalStrict(&modelV1.Folder{
+			ExpectedMessage: string(cmdTest.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,
 				Metadata: modelV1.ProjectMetadata{
 					Metadata: modelV1.Metadata{
@@ -113,5 +113,5 @@ func TestDescribeCMD(t *testing.T) {
 		},
 	}
 
-	cmdUtilsTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }

@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/perses/common/etcd"
-	"github.com/perses/perses/internal/config"
+	"github.com/perses/perses/internal/api/config"
 	"gopkg.in/yaml.v2"
 )
 
