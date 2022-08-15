@@ -1,3 +1,12 @@
+## 0.6.0 / 2022-08-15
+
+- [FEATURE] Pin and enter line chart tooltip on click #505
+- [FEATURE] Move variable inputs to the top of dashboard view #498
+- [BUGFIX] Fix stuck tooltip when moving cursor quickly #505
+- [ENHANCEMENT] Create optional flag that can be used across different commands #491
+- [ENHANCEMENT] Refactor how the different files for the CLI are dispatched #490
+- [ENHANCEMENT] Review the way to cross build Perses #489
+
 ## 0.5.2 / 2022-08-12
 
 - [ENHANCEMENT] lazy load panels on scroll #500

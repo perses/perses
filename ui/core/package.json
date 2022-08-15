@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -27,6 +27,7 @@
     "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
+    "react-dom": "^17.0.2",
     "react": "^17.0.2"
   },
   "devDependencies": {
