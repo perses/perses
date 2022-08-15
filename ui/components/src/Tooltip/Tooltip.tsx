@@ -75,8 +75,6 @@ const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, p
         style={{
           transform: cursorTransform,
         }}
-        // onMouseEnter={() => handleMouseEnter()}
-        // onMouseLeave={() => handleMouseLeave()}
       >
         <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
       </Box>
