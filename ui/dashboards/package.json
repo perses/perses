@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/dashboards",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "The dashboards feature in Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -24,12 +24,16 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.5.1",
-    "@perses-dev/core": "^0.5.1",
-    "@perses-dev/plugin-system": "^0.5.1",
+    "@perses-dev/components": "^0.5.2",
+    "@perses-dev/core": "^0.5.2",
+    "@perses-dev/plugin-system": "^0.5.2",
     "immer": "^9.0.15",
+    "react-intersection-observer": "^9.4.0",
     "use-immer": "^0.7.0",
     "use-resize-observer": "^8.0.0"
+  },
+  "devDependencies": {
+    "intersection-observer": "^0.12.2"
   },
   "peerDependencies": {
     "@mui/material": "^5.5.1",

@@ -13,6 +13,7 @@
 
 import { JsonObject } from '@perses-dev/core';
 import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
+import 'intersection-observer';
 import { screen } from '@testing-library/react';
 import { renderWithContext, mockPluginRegistryProps } from '../../test';
 import { Panel, PanelProps } from './Panel';
