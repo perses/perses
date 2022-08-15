@@ -36,10 +36,6 @@ const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, p
   // ensure user is hovering over a chart before checking for nearby series
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
-  if (pinTooltip === true && pinnedPos === null) {
-    setPinnedPos(mousePos);
-  }
-
   const chart = chartRef.current;
   const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart);
   const chartWidth = chart?.getWidth() ?? 750;
@@ -48,6 +44,10 @@ const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, p
 
   if (focusedSeries.length === 0) {
     return null;
+  }
+
+  if (pinTooltip === true && pinnedPos === null) {
+    setPinnedPos(mousePos);
   }
 
   return (
