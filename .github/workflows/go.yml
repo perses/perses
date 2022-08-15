@@ -25,7 +25,7 @@ jobs:
         go-version: 1.18.x
     - name: install cue
       run: go install cuelang.org/go/cmd/cue@v0.4.2
-    - uses: actions/cache@v3.0.5
+    - uses: actions/cache@v3.0.7
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -45,7 +45,7 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.18.x
-    - uses: actions/cache@v3.0.5
+    - uses: actions/cache@v3.0.7
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
