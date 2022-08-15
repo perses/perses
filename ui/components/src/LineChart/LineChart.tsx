@@ -76,10 +76,6 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
-      // TODO: use params to pass series info to tooltip?
-      click: () => {
-        setPinTooltip(true);
-      },
       // TODO: use legendselectchanged event to fix tooltip when legend selected
       datazoom: (params) => {
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -105,7 +101,18 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
     enableDataZoom(chartRef.current);
   }
 
+  const handleOnClick = () => {
+    if (pinTooltip === false) {
+      setPinTooltip(true);
+    } else {
+      setPinTooltip(false);
+    }
+  };
+
   const handleOnDoubleClick = () => {
+    if (pinTooltip === true) {
+      setPinTooltip(false);
+    }
     if (chartRef.current !== undefined) {
       restoreChart(chartRef.current);
     }
@@ -120,6 +127,11 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleOnMouseUp = () => {
     setShowTooltip(true);
+  };
+
+  const handleOnDragEnd = () => {
+    setShowTooltip(true);
+    setPinTooltip(false);
   };
 
   const handleOnMouseEnter = () => {
@@ -190,9 +202,11 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
       sx={{
         height,
       }}
+      onClick={handleOnClick}
       onDoubleClick={handleOnDoubleClick}
       onMouseDown={handleOnMouseDown}
       onMouseUp={handleOnMouseUp}
+      onDragEnd={handleOnDragEnd}
       onMouseLeave={handleOnMouseLeave}
       onMouseEnter={handleOnMouseEnter}
     >
