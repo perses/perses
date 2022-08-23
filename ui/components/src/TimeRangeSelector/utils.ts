@@ -11,14 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './InfoTooltip';
-export * from './LineChart';
-export * from './GaugeChart';
-export * from './StatChart';
-export * from './TimeRangeSelector';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
+import { isBefore, isValid } from 'date-fns';
+
+/*
+ * Date validation and check if end is after start
+ */
+export function validateDateRange(startDate: Date, endDate: Date) {
+  // TODO: display error as helperText
+  if (!isValid(startDate) || !isValid(endDate)) {
+    console.error('Invalid Date');
+    return false;
+  }
+  if (!isBefore(startDate, endDate)) {
+    console.error('End Time is before Start Time');
+    return false;
+  }
+  return true;
+}

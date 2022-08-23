@@ -26,6 +26,14 @@ export interface RelativeTimeRange {
   pastDuration: DurationString;
 }
 
+export interface TimeOption {
+  from: string;
+  to: string;
+  display: string;
+}
+
+export type DateTimeFormat = number | string;
+
 /**
  * Returns an absolute time range from a RelativeTimeRange.
  */
@@ -92,4 +100,19 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
   // time increments that make sense (e.g. 15s, 30s, 1m, 5m, etc.)
   const queryRangeMs = timeRange.end.valueOf() - timeRange.start.valueOf();
   return Math.floor(queryRangeMs / width);
+}
+
+/**
+ * Convert time shortcuts to absolute time range
+ */
+export function convertTimeShortcut(value: DateTimeFormat): AbsoluteTimeRange {
+  // TODO: support all dateTime formats, ex: moment().relativeTime(val).valueOf()
+  const convertedDuration =
+    typeof value === 'number' ? value : value.startsWith('now-') === true ? value.substring(4, value.length) : value;
+
+  const relativeTimeInput: RelativeTimeRange = {
+    pastDuration: convertedDuration as DurationString,
+    end: new Date(),
+  };
+  return toAbsoluteTimeRange(relativeTimeInput);
 }

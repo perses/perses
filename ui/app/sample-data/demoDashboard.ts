@@ -24,7 +24,7 @@ const demoDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '6h',
+    duration: '1h',
     variables: {
       job: {
         kind: 'PrometheusLabelValues',

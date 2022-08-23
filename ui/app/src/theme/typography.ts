@@ -29,8 +29,52 @@ const fontWeightBold = 900;
  */
 export const typography: ThemeOptions['typography'] = {
   fontFamily: '"Lato", sans-serif',
+  fontSize: 16,
   fontWeightLight,
   fontWeightRegular,
   fontWeightMedium,
   fontWeightBold,
+  h1: {
+    // 24px
+    fontSize: '1.5rem',
+    fontWeight: fontWeightRegular,
+  },
+  h2: {
+    // 20px
+    fontSize: '1.25rem',
+    fontWeight: fontWeightRegular,
+  },
+  h3: {
+    // 16px
+    fontSize: '1rem',
+    fontWeight: fontWeightRegular,
+  },
+  h4: {
+    // 14px
+    fontSize: '0.875rem',
+    fontWeight: fontWeightBold,
+  },
+  h6: {
+    // 16px
+    fontSize: '1rem',
+    fontWeight: fontWeightRegular,
+  },
+  body1: {
+    // 14px
+    fontSize: '0.875rem',
+    fontWeight: fontWeightRegular,
+  },
+  body2: {
+    // 12px
+    fontSize: '0.75rem',
+    fontWeight: fontWeightRegular,
+  },
+  subtitle1: {
+    // 16px
+    fontSize: '1rem',
+    fontWeight: fontWeightMedium,
+  },
+  button: {
+    textTransform: 'none',
+  },
 };
