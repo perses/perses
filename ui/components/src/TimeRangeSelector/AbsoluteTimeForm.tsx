@@ -46,7 +46,13 @@ export const AbsoluteTimeForm = ({ initialTimeRange, onChange }: AbsoluteTimeFor
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Stack spacing={3} sx={{ padding: (theme) => theme.spacing(1, 2, 3) }}>
         {showStartCalendar && (
-          <Box>
+          <Box
+            sx={(theme) => ({
+              '.MuiPickerStaticWrapper-content': {
+                backgroundColor: theme.palette.background.default,
+              },
+            })}
+          >
             <h3>Select Start Time</h3>
             <StaticDateTimePicker
               displayStaticWrapperAs="desktop"
@@ -64,7 +70,13 @@ export const AbsoluteTimeForm = ({ initialTimeRange, onChange }: AbsoluteTimeFor
           </Box>
         )}
         {showEndCalendar && (
-          <Box>
+          <Box
+            sx={(theme) => ({
+              '.MuiPickerStaticWrapper-content': {
+                backgroundColor: theme.palette.background.default,
+              },
+            })}
+          >
             <h3>Select End Time</h3>
             <StaticDateTimePicker
               displayStaticWrapperAs="desktop"
