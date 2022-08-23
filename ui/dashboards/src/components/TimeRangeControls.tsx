@@ -3,6 +3,7 @@ import { TimeOption } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useTimeRangeSetter } from '../context/TimeRangeStateProvider';
 
+// TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
   { from: 'now-5m', to: 'now', display: 'Last 5 minutes' },
   { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
@@ -18,7 +19,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 export function TimeRangeControls() {
   const { setTimeRange } = useTimeRangeSetter();
   const { defaultDuration } = useTimeRange();
-  // TODO (sjcobb): default to URL param if populated
+  // TODO: default to URL param if populated
   const defaultTimeOption = TIME_OPTIONS.find((option) => option.from === `now-${defaultDuration}`);
   return <TimeRangeSelector defaultTimeOption={defaultTimeOption} onChange={setTimeRange} timeOptions={TIME_OPTIONS} />;
 }
