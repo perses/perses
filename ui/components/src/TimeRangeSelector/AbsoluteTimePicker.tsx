@@ -48,8 +48,15 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
         {showStartCalendar && (
           <Box
             sx={(theme) => ({
+              // TODO: create separate reusable calendar component
               '.MuiPickerStaticWrapper-content': {
                 backgroundColor: theme.palette.background.default,
+              },
+              // reposition AM and PM buttons
+              '.MuiIconButton-sizeMedium': {
+                top: 80,
+                bottom: 'auto',
+                margin: theme.spacing(0, 3),
               },
             })}
           >
@@ -58,7 +65,6 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              ampm={false}
               value={initialTimeRange.start}
               onChange={(newValue) => {
                 if (newValue === null) return;
@@ -75,6 +81,12 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               '.MuiPickerStaticWrapper-content': {
                 backgroundColor: theme.palette.background.default,
               },
+              // reposition AM and PM buttons
+              '.MuiIconButton-sizeMedium': {
+                top: 80,
+                bottom: 'auto',
+                margin: theme.spacing(0, 3),
+              },
             })}
           >
             <h3>Select End Time</h3>
@@ -82,7 +94,6 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              ampm={false}
               value={initialTimeRange.end}
               onChange={(newValue) => {
                 if (newValue === null) return;
