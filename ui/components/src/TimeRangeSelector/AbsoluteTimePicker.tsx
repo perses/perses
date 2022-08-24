@@ -26,7 +26,7 @@ interface AbsoluteTimeFormProps {
   onChange: (timeRange: AbsoluteTimeRange) => void;
 }
 
-export const AbsoluteTimeForm = ({ initialTimeRange, onChange }: AbsoluteTimeFormProps) => {
+export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeFormProps) => {
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
   const [showEndCalendar, setShowEndCalendar] = useState<boolean>(false);

@@ -12,4 +12,4 @@
 // limitations under the License.
 
 export * from './TimeRangeSelector';
-export * from './AbsoluteTimeForm';
+export * from './AbsoluteTimePicker';
