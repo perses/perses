@@ -12,13 +12,11 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
-import { FormControl, InputLabel, MenuItem, Popover, Select, SelectProps, Stack } from '@mui/material';
-import { format, sub } from 'date-fns';
+import { MenuItem, Select, SelectProps } from '@mui/material';
+import { sub } from 'date-fns';
 import { AbsoluteTimeRange, TimeOption, convertTimeShortcut, parseDurationString } from '@perses-dev/core';
-import { AbsoluteTimePicker } from './AbsoluteTimePicker';
-import { TimeRangeInput } from './TimeRangeInput';
 
-const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+// const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 const FORM_CONTROL_LABEL = 'Time Range';
 
 // TODO: support both absolute and relative ranges: https://github.com/perses/perses/pull/509#discussion_r954029540
@@ -29,13 +27,13 @@ const FORM_CONTROL_LABEL = 'Time Range';
 //   onChange: (value: AbsoluteTimeRange | RelativeTimeRange) => void;
 // }
 
-interface TimeRangeSelectorProps {
+interface TimeRangeInputProps {
   timeOptions: TimeOption[];
   onChange: (value: AbsoluteTimeRange) => void;
   defaultTimeOption?: TimeOption;
 }
 
-export function TimeRangeSelector(props: TimeRangeSelectorProps) {
+export function TimeRangeInput(props: TimeRangeInputProps) {
   const { timeOptions, onChange } = props;
 
   // TODO: refactor when adding shareable URLs support
@@ -62,36 +60,32 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
     setShowCustomDateSelector(false);
   };
 
-  const handleTimePickerChange = (timeRange: AbsoluteTimeRange) => {
-    onChange(timeRange);
-    setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
-    const formattedStart = format(timeRange.start, DATE_TIME_FORMAT);
-    const formattedEnd = format(timeRange.end, DATE_TIME_FORMAT);
-    const formattedRange = `${formattedStart} - ${formattedEnd}`;
-    setSelectedTimeRange(formattedRange);
-    setShowCustomDateSelector(false);
-  };
-
   return (
-    <Stack direction="row" spacing={1}>
-      <Popover
-        anchorEl={anchorEl.current}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        open={showCustomDateSelector}
-        onClose={() => setShowCustomDateSelector(false)}
-        sx={(theme) => ({
-          padding: theme.spacing(2),
-        })}
-      >
-        <AbsoluteTimePicker initialTimeRange={absoluteTimeRange} onChange={handleTimePickerChange} />
-      </Popover>
-      <FormControl fullWidth>
-        <InputLabel>{FORM_CONTROL_LABEL}</InputLabel>
-        <TimeRangeInput timeOptions={timeOptions} onChange={handleSelectChange}></TimeRangeInput>
-      </FormControl>
-    </Stack>
+    <Select value={selectedTimeRange} label={FORM_CONTROL_LABEL} onChange={handleSelectChange} ref={anchorEl}>
+      {timeOptions.map((item, idx) => (
+        <MenuItem key={idx} value={item.from}>
+          {item.display}
+        </MenuItem>
+      ))}
+
+      {selectedTimeRange.startsWith('now-') ? (
+        <MenuItem
+          onClick={() => {
+            setShowCustomDateSelector(true);
+          }}
+        >
+          Custom time range
+        </MenuItem>
+      ) : (
+        <MenuItem
+          value={selectedTimeRange}
+          onClick={() => {
+            setShowCustomDateSelector(true);
+          }}
+        >
+          {selectedTimeRange}
+        </MenuItem>
+      )}
+    </Select>
   );
 }

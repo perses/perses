@@ -475,7 +475,7 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 3',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [
