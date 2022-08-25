@@ -12,11 +12,18 @@
 // limitations under the License.
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import { TimeOption } from '@perses-dev/core';
+// import { AbsoluteTimeRange, RelativeTimeRange } from '@perses-dev/core';
+import { RelativeTimeRange } from '@perses-dev/core';
+
+export interface TimeOption {
+  value: RelativeTimeRange;
+  display: string;
+}
 
 interface TimeRangeSelectorProps {
   inputLabel: string;
-  selectedTimeRange: string;
+  // selectedTimeRange: RelativeTimeRange | AbsoluteTimeRange;
+  selectedTimeRange: RelativeTimeRange;
   timeOptions: TimeOption[];
   onSelectChange: (event: SelectChangeEvent<string>) => void;
   onCustomClick: () => void;
@@ -26,14 +33,14 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   const { inputLabel, selectedTimeRange, timeOptions, onSelectChange, onCustomClick } = props;
 
   return (
-    <Select value={selectedTimeRange} label={inputLabel} onChange={onSelectChange}>
+    <Select value={selectedTimeRange.pastDuration} label={inputLabel} onChange={onSelectChange}>
       {timeOptions.map((item, idx) => (
-        <MenuItem key={idx} value={item.from}>
+        <MenuItem key={idx} value={item.value.pastDuration}>
           {item.display}
         </MenuItem>
       ))}
 
-      {selectedTimeRange.startsWith('now-') ? (
+      {selectedTimeRange.pastDuration !== undefined ? (
         <MenuItem
           onClick={() => {
             onCustomClick();
@@ -43,7 +50,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         </MenuItem>
       ) : (
         <MenuItem
-          value={selectedTimeRange}
+          value={selectedTimeRange.pastDuration}
           onClick={() => {
             onCustomClick();
           }}

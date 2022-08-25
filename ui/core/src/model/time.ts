@@ -26,12 +26,6 @@ export interface RelativeTimeRange {
   pastDuration: DurationString;
 }
 
-export interface TimeOption {
-  from: string;
-  to: string;
-  display: string;
-}
-
 export type DateTimeFormat = number | string;
 
 /**

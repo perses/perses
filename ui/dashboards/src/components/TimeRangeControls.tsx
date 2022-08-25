@@ -14,42 +14,69 @@
 import { useRef, useState } from 'react';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
 import { format, sub } from 'date-fns';
-import { AbsoluteTimePicker, TimeRangeSelector } from '@perses-dev/components';
-import { AbsoluteTimeRange, TimeOption, convertTimeShortcut, parseDurationString } from '@perses-dev/core';
+import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
+import { AbsoluteTimeRange, convertTimeShortcut, parseDurationString, RelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useTimeRangeSetter } from '../context/TimeRangeStateProvider';
 
 // TODO: add time shortcut if one does not match duration
+// export const TIME_OPTIONS: TimeOption[] = [
+//   { from: 'now-5m', to: 'now', display: 'Last 5 minutes' },
+//   { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
+//   { from: 'now-30m', to: 'now', display: 'Last 30 minutes' },
+//   { from: 'now-1h', to: 'now', display: 'Last 1 hour' },
+//   { from: 'now-6h', to: 'now', display: 'Last 6 hours' },
+//   { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
+//   { from: 'now-1d', to: 'now', display: 'Last 1 day' },
+//   { from: 'now-7d', to: 'now', display: 'Last 7 days' },
+//   { from: 'now-14d', to: 'now', display: 'Last 14 days' },
+// ];
+
 export const TIME_OPTIONS: TimeOption[] = [
-  { from: 'now-5m', to: 'now', display: 'Last 5 minutes' },
-  { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
-  { from: 'now-30m', to: 'now', display: 'Last 30 minutes' },
-  { from: 'now-1h', to: 'now', display: 'Last 1 hour' },
-  { from: 'now-6h', to: 'now', display: 'Last 6 hours' },
-  { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
-  { from: 'now-1d', to: 'now', display: 'Last 1 day' },
-  { from: 'now-7d', to: 'now', display: 'Last 7 days' },
-  { from: 'now-14d', to: 'now', display: 'Last 14 days' },
+  { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
+  { value: { pastDuration: '15m' }, display: 'Last 15 minutes' },
+  { value: { pastDuration: '30m' }, display: 'Last 30 minutes' },
+  { value: { pastDuration: '1h' }, display: 'Last 1 hour' },
+  { value: { pastDuration: '6h' }, display: 'Last 6 hours' },
 ];
 
+// TODO: move to TimeRangeSelector.tsx
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 const FORM_CONTROL_LABEL = 'Time Range';
+
+// export interface RelativeTimeRange {
+//   // End date or undefined if relative to the current Date
+//   end?: Date;
+//   pastDuration: DurationString;
+// }
 
 export function TimeRangeControls() {
   const { setTimeRange } = useTimeRangeSetter();
   const { defaultDuration } = useTimeRange();
   // TODO: default to URL param if populated
 
-  // TODO: use existing RelativeTimeRange from core instead of defining new TimeOption interface
-  const defaultTimeOption = TIME_OPTIONS.find((option) => option.from === `now-${defaultDuration}`) ?? {
-    from: 'now-6h',
-    to: 'now',
-    display: 'Last 6 hours',
+  // const defaultTimeOption = TIME_OPTIONS.find((option) => option.value.pastDuration === defaultDuration) ?? {
+  //   pastDuration: '6h',
+  //   display: 'Last 6 hours',
+  // };
+  const defaultTimeOption: RelativeTimeRange = {
+    pastDuration: '6h',
   };
-  const parsedDuration = defaultTimeOption.from.split('-')[1] ?? '6h';
-  const defaultStart = parseDurationString(parsedDuration);
 
-  const [selectedTimeRange, setSelectedTimeRange] = useState(defaultTimeOption.from);
+  const findOption = TIME_OPTIONS.find((option) => option.value.pastDuration === defaultDuration);
+  console.log('findOption: ', findOption);
+
+  // // TODO: use existing RelativeTimeRange from core instead of defining new TimeOption interface
+  // const defaultTimeOption = TIME_OPTIONS.find((option) => option.from === `now-${defaultDuration}`) ?? {
+  //   from: 'now-6h',
+  //   to: 'now',
+  //   display: 'Last 6 hours',
+  // };
+  // const parsedDuration = defaultTimeOption.from.split('-')[1] ?? '6h';
+  const defaultStart = parseDurationString(defaultDuration);
+
+  // const [selectedTimeRange, setSelectedTimeRange] = useState(defaultTimeOption.pastDuration);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<AbsoluteTimeRange | RelativeTimeRange>(defaultTimeOption);
 
   const [absoluteTimeRange, setAbsoluteTime] = useState<AbsoluteTimeRange>({
     start: sub(new Date(), { ...defaultStart }),
@@ -62,10 +89,11 @@ export function TimeRangeControls() {
   const handleTimePickerChange = (timeRange: AbsoluteTimeRange) => {
     setTimeRange(timeRange);
     setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
-    const formattedStart = format(timeRange.start, DATE_TIME_FORMAT);
-    const formattedEnd = format(timeRange.end, DATE_TIME_FORMAT);
-    const formattedRange = `${formattedStart} - ${formattedEnd}`;
-    setSelectedTimeRange(formattedRange);
+    // const formattedStart = format(timeRange.start, DATE_TIME_FORMAT);
+    // const formattedEnd = format(timeRange.end, DATE_TIME_FORMAT);
+    // const formattedRange = `${formattedStart} - ${formattedEnd}`;
+    // setSelectedTimeRange(formattedRange);
+    setSelectedTimeRange(timeRange);
     setShowCustomDateSelector(false);
   };
 
