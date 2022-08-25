@@ -29,18 +29,6 @@ interface AbsoluteTimeFormProps {
 export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeFormProps) => {
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
-  const [showEndCalendar, setShowEndCalendar] = useState<boolean>(false);
-
-  const handleOnStartAccept = () => {
-    setShowStartCalendar(false);
-    setShowEndCalendar(true);
-  };
-
-  const handleOnEndAccept = () => {
-    setShowEndCalendar(false);
-    setShowStartCalendar(true);
-    onChange(timeRange);
-  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -72,12 +60,14 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
                   return { start: newValue, end: current.end };
                 });
               }}
-              onAccept={() => handleOnStartAccept()}
+              onAccept={() => {
+                setShowStartCalendar(false);
+              }}
               renderInput={(params) => <TextField {...params} />}
             />
           </Box>
         )}
-        {showEndCalendar && (
+        {!showStartCalendar && (
           <Box
             sx={(theme) => ({
               '.MuiPickerStaticWrapper-content': {
@@ -103,7 +93,10 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
                   return { start: current.start, end: newValue };
                 });
               }}
-              onAccept={() => handleOnEndAccept()}
+              onAccept={() => {
+                setShowStartCalendar(true);
+                onChange(timeRange);
+              }}
               renderInput={(params) => <TextField {...params} />}
             />
           </Box>
@@ -111,6 +104,8 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
         <TextField
           fullWidth
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            // TODO: add new function to share with endDate TextField onChange
+            // - https://github.com/perses/perses/pull/509#discussion_r954249766
             // TODO: add helperText, fix validation after we decide on form state solution
             const startDate = new Date(event.target.value);
             const isValidDateRange = validateDateRange(startDate, timeRange.end);
