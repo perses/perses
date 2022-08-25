@@ -11,57 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState } from 'react';
 import { MenuItem, Select, SelectProps } from '@mui/material';
-import { sub } from 'date-fns';
-import { AbsoluteTimeRange, TimeOption, convertTimeShortcut, parseDurationString } from '@perses-dev/core';
-
-// const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
-const FORM_CONTROL_LABEL = 'Time Range';
-
-// TODO: support both absolute and relative ranges: https://github.com/perses/perses/pull/509#discussion_r954029540
-// // type TimeRangeValue = AbsoluteTimeRange | RelativeTimeRange
-// interface TimeRangeSelectorProps {
-//   timeOptions: TimeOption[];
-//   value: AbsoluteTimeRange | RelativeTimeRange;
-//   onChange: (value: AbsoluteTimeRange | RelativeTimeRange) => void;
-// }
+import { TimeOption } from '@perses-dev/core';
 
 interface TimeRangeInputProps {
+  inputLabel: string;
   timeOptions: TimeOption[];
-  onChange: (value: AbsoluteTimeRange) => void;
+  selectedTimeRange: string;
+  onSelectChange: (value: string) => void;
+  onCustomClick: () => void;
   defaultTimeOption?: TimeOption;
 }
 
 export function TimeRangeInput(props: TimeRangeInputProps) {
-  const { timeOptions, onChange } = props;
-
-  // TODO: refactor when adding shareable URLs support
-  const defaultTimeOption = props.defaultTimeOption ?? { from: 'now-6h', to: 'now', display: 'Last 6 hours' };
-  const defaultDuration = defaultTimeOption.from.split('-')[1] ?? '6h';
-  const defaultStart = parseDurationString(defaultDuration);
-
-  const [selectedTimeRange, setSelectedTimeRange] = useState(defaultTimeOption.from);
-
-  const [absoluteTimeRange, setAbsoluteTime] = useState<AbsoluteTimeRange>({
-    start: sub(new Date(), { ...defaultStart }),
-    end: new Date(),
-  });
-
-  const anchorEl = useRef();
-  const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
+  const { inputLabel, timeOptions, selectedTimeRange, onSelectChange, onCustomClick } = props;
 
   const handleSelectChange: SelectProps['onChange'] = (event) => {
     const timeShortcut = event.target.value as string;
-    setSelectedTimeRange(timeShortcut);
-    const convertedAbsoluteTime = convertTimeShortcut(timeShortcut);
-    onChange(convertedAbsoluteTime);
-    setAbsoluteTime(convertedAbsoluteTime);
-    setShowCustomDateSelector(false);
+    onSelectChange(timeShortcut);
   };
 
   return (
-    <Select value={selectedTimeRange} label={FORM_CONTROL_LABEL} onChange={handleSelectChange} ref={anchorEl}>
+    <Select value={selectedTimeRange} label={inputLabel} onChange={handleSelectChange}>
       {timeOptions.map((item, idx) => (
         <MenuItem key={idx} value={item.from}>
           {item.display}
@@ -71,7 +42,7 @@ export function TimeRangeInput(props: TimeRangeInputProps) {
       {selectedTimeRange.startsWith('now-') ? (
         <MenuItem
           onClick={() => {
-            setShowCustomDateSelector(true);
+            onCustomClick();
           }}
         >
           Custom time range
@@ -80,7 +51,7 @@ export function TimeRangeInput(props: TimeRangeInputProps) {
         <MenuItem
           value={selectedTimeRange}
           onClick={() => {
-            setShowCustomDateSelector(true);
+            onCustomClick();
           }}
         >
           {selectedTimeRange}

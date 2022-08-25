@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
-import { FormControl, InputLabel, MenuItem, Popover, Select, SelectProps, Stack } from '@mui/material';
+import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
 import { format, sub } from 'date-fns';
 import { AbsoluteTimeRange, TimeOption, convertTimeShortcut, parseDurationString } from '@perses-dev/core';
 import { AbsoluteTimePicker } from './AbsoluteTimePicker';
@@ -53,10 +53,8 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   const anchorEl = useRef();
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
 
-  const handleSelectChange: SelectProps['onChange'] = (event) => {
-    const timeShortcut = event.target.value as string;
-    setSelectedTimeRange(timeShortcut);
-    const convertedAbsoluteTime = convertTimeShortcut(timeShortcut);
+  const handleSelectChange = (event: string) => {
+    const convertedAbsoluteTime = convertTimeShortcut(event);
     onChange(convertedAbsoluteTime);
     setAbsoluteTime(convertedAbsoluteTime);
     setShowCustomDateSelector(false);
@@ -90,7 +88,17 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
       </Popover>
       <FormControl fullWidth>
         <InputLabel>{FORM_CONTROL_LABEL}</InputLabel>
-        <TimeRangeInput timeOptions={timeOptions} onChange={handleSelectChange}></TimeRangeInput>
+        <Box ref={anchorEl}>
+          <TimeRangeInput
+            inputLabel="Time Range"
+            timeOptions={timeOptions}
+            selectedTimeRange={selectedTimeRange}
+            onSelectChange={handleSelectChange}
+            onCustomClick={() => {
+              setShowCustomDateSelector(true);
+            }}
+          />
+        </Box>
       </FormControl>
     </Stack>
   );
