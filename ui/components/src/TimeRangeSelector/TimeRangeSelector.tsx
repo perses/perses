@@ -53,13 +53,6 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   const anchorEl = useRef();
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
 
-  const handleSelectChange = (event: string) => {
-    const convertedAbsoluteTime = convertTimeShortcut(event);
-    onChange(convertedAbsoluteTime);
-    setAbsoluteTime(convertedAbsoluteTime);
-    setShowCustomDateSelector(false);
-  };
-
   const handleTimePickerChange = (timeRange: AbsoluteTimeRange) => {
     onChange(timeRange);
     setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
@@ -93,7 +86,13 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
             inputLabel="Time Range"
             timeOptions={timeOptions}
             selectedTimeRange={selectedTimeRange}
-            onSelectChange={handleSelectChange}
+            onSelectChange={(event) => {
+              const timeShortcut = event.target.value;
+              const convertedAbsoluteTime = convertTimeShortcut(timeShortcut);
+              onChange(convertedAbsoluteTime);
+              setAbsoluteTime(convertedAbsoluteTime);
+              setShowCustomDateSelector(false);
+            }}
             onCustomClick={() => {
               setShowCustomDateSelector(true);
             }}

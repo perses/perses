@@ -11,28 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MenuItem, Select, SelectProps } from '@mui/material';
+import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import { TimeOption } from '@perses-dev/core';
 
 interface TimeRangeInputProps {
   inputLabel: string;
-  timeOptions: TimeOption[];
   selectedTimeRange: string;
-  onSelectChange: (value: string) => void;
+  timeOptions: TimeOption[];
+  onSelectChange: (event: SelectChangeEvent<string>) => void;
   onCustomClick: () => void;
-  defaultTimeOption?: TimeOption;
 }
 
 export function TimeRangeInput(props: TimeRangeInputProps) {
-  const { inputLabel, timeOptions, selectedTimeRange, onSelectChange, onCustomClick } = props;
-
-  const handleSelectChange: SelectProps['onChange'] = (event) => {
-    const timeShortcut = event.target.value as string;
-    onSelectChange(timeShortcut);
-  };
+  const { inputLabel, selectedTimeRange, timeOptions, onSelectChange, onCustomClick } = props;
 
   return (
-    <Select value={selectedTimeRange} label={inputLabel} onChange={handleSelectChange}>
+    <Select value={selectedTimeRange} label={inputLabel} onChange={onSelectChange}>
       {timeOptions.map((item, idx) => (
         <MenuItem key={idx} value={item.from}>
           {item.display}
