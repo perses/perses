@@ -68,7 +68,9 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               value={initialTimeRange.start}
               onChange={(newValue) => {
                 if (newValue === null) return;
-                setTimeRange({ start: newValue, end: timeRange.end });
+                setTimeRange((current) => {
+                  return { start: newValue, end: current.end };
+                });
               }}
               onAccept={() => handleOnStartAccept()}
               renderInput={(params) => <TextField {...params} />}
@@ -97,7 +99,9 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               value={initialTimeRange.end}
               onChange={(newValue) => {
                 if (newValue === null) return;
-                setTimeRange({ start: timeRange.start, end: newValue });
+                setTimeRange((current) => {
+                  return { start: current.start, end: newValue };
+                });
               }}
               onAccept={() => handleOnEndAccept()}
               renderInput={(params) => <TextField {...params} />}
