@@ -19,10 +19,11 @@ import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/c
 import {
   AbsoluteTimeRange,
   TimeRangeValue,
-  convertTimeShortcut,
   parseDurationString,
+  toAbsoluteTimeRange,
   isRelativeValue,
   DurationString,
+  RelativeTimeRange,
 } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useTimeRangeSetter } from '../context/TimeRangeStateProvider';
@@ -125,12 +126,14 @@ export function TimeRangeControls() {
             timeOptions={TIME_OPTIONS}
             value={selectedTimeRange}
             onSelectChange={(event) => {
-              const timeShortcut = event.target.value;
-              if (isRelativeValue(selectedTimeRange)) {
-                setSelectedTimeRange({ pastDuration: timeShortcut as DurationString });
-              }
-              // TODO: consolidate state
-              const convertedAbsoluteTime = convertTimeShortcut(timeShortcut);
+              const duration = event.target.value;
+              const relativeTimeInput: RelativeTimeRange = {
+                pastDuration: duration as DurationString,
+                end: new Date(),
+              };
+              // TODO: consolidate unnecessary state
+              setSelectedTimeRange(relativeTimeInput);
+              const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
               setTimeRange(convertedAbsoluteTime);
               setAbsoluteTime(convertedAbsoluteTime);
               setShowCustomDateSelector(false);
