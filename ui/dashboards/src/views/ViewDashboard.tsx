@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps } from '@mui/material';
+import { Box, BoxProps, Button, Toolbar, Typography } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { TimeRangeStateProvider, TemplateVariablesProvider } from '../context';
+import PencilIcon from 'mdi-material-ui/PencilOutline';
+import AddIcon from 'mdi-material-ui/Plus';
+import { TimeRangeStateProvider, TemplateVariablesProvider, useEditMode } from '../context';
 import { Dashboard, VariableList } from '../components';
 
 export interface ViewDashboardProps extends BoxProps {
@@ -27,9 +29,45 @@ export interface ViewDashboardProps extends BoxProps {
 export function ViewDashboard(props: ViewDashboardProps) {
   const { dashboardResource, sx, children, ...others } = props;
 
+  const { isEditMode, setEditMode } = useEditMode();
+
+  const onEditButtonClick = () => {
+    setEditMode(true);
+  };
+
+  const onCancelButtonClick = () => {
+    setEditMode(false);
+  };
+
   return (
     <TimeRangeStateProvider initialValue={{ pastDuration: dashboardResource.spec.duration }}>
       <TemplateVariablesProvider variableDefinitions={dashboardResource.spec.variables}>
+        {isEditMode && (
+          <Toolbar sx={{ display: 'flex', paddingLeft: '16px', paddingRight: '16px' }}>
+            <Typography variant="h6" sx={{ marginRight: '1rem' }}>
+              Edit Dashboard
+            </Typography>
+            <Box sx={{ marginLeft: 'auto' }}>
+              <Button
+                variant="outlined"
+                sx={{
+                  margin: '0 4px',
+                }}
+                onClick={onCancelButtonClick}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                sx={{
+                  margin: '0 4px',
+                }}
+              >
+                Save
+              </Button>
+            </Box>
+          </Toolbar>
+        )}
         <Box
           sx={combineSx(
             {
@@ -49,8 +87,31 @@ export function ViewDashboard(props: ViewDashboardProps) {
               flexGrow: 1,
               overflowX: 'hidden',
               overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
+            {isEditMode ? (
+              <Button
+                sx={{
+                  alignSelf: 'flex-end',
+                }}
+              >
+                <AddIcon sx={{ fontSize: '1rem', marginRight: '8px' }} />
+                Add Panel
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                sx={{
+                  alignSelf: 'flex-end',
+                }}
+                onClick={onEditButtonClick}
+              >
+                <PencilIcon sx={{ fontSize: '1rem', marginRight: '8px' }} />
+                Edit
+              </Button>
+            )}
             <VariableList
               variables={dashboardResource.spec.variables}
               sx={{ margin: (theme) => theme.spacing(1, 0, 2) }}

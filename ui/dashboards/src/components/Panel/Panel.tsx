@@ -19,6 +19,9 @@ import { ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/component
 import { PanelDefinition } from '@perses-dev/core';
 import { Box, Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import MenuIcon from 'mdi-material-ui/DotsVertical';
+import { useEditMode } from '../../context';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
@@ -47,6 +50,8 @@ export function Panel(props: PanelProps) {
   // TODO: adjust padding for small panels, consistent way to determine isLargePanel here and in StatChart
   const panelPadding = 1.5;
 
+  const { isEditMode } = useEditMode();
+
   return (
     <Card
       ref={ref}
@@ -66,6 +71,7 @@ export function Panel(props: PanelProps) {
             sx={{
               display: 'flex',
               alignItems: 'center',
+              height: '20px',
             }}
           >
             <Typography
@@ -78,19 +84,33 @@ export function Panel(props: PanelProps) {
             >
               {definition.display.name}
             </Typography>
-            {definition.display.description && (
-              <InfoTooltip
-                id="info-tooltip"
-                description={definition.display.description}
-                placement={TooltipPlacement.Right}
-              >
-                <InformationOutlineIcon
-                  aria-describedby="info-tooltip"
-                  aria-hidden={false}
-                  sx={{ fontSize: '1rem', position: 'relative', left: '4px', cursor: 'pointer' }}
-                />
-              </InfoTooltip>
-            )}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginLeft: 'auto',
+              }}
+            >
+              {!isEditMode && definition.display.description && (
+                <InfoTooltip
+                  id="info-tooltip"
+                  description={definition.display.description}
+                  placement={TooltipPlacement.Right}
+                >
+                  <InformationOutlineIcon
+                    aria-describedby="info-tooltip"
+                    aria-hidden={false}
+                    sx={{ fontSize: '1rem', cursor: 'pointer', margin: '0 4px' }}
+                  />
+                </InfoTooltip>
+              )}
+              {isEditMode && (
+                <>
+                  <PencilIcon sx={{ fontSize: '1rem', cursor: 'pointer', margin: '0 4px' }} />
+                  <MenuIcon sx={{ fontSize: '1rem', cursor: 'pointer', margin: '0 4px' }} />
+                </>
+              )}
+            </Box>
           </Box>
         }
         sx={{
