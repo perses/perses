@@ -55,17 +55,8 @@ export function TimeRangeControls() {
     end: new Date(),
   });
 
-  const anchorEl = useRef();
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
-
-  const handleTimePickerChange = (timeRange: TimeRangeValue) => {
-    setTimeRange(timeRange);
-    if (!isRelativeValue(timeRange)) {
-      setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
-    }
-    setSelectedTimeRange(timeRange);
-    setShowCustomDateSelector(false);
-  };
+  const anchorEl = useRef();
 
   return (
     <Stack direction="row" spacing={1}>
@@ -81,7 +72,17 @@ export function TimeRangeControls() {
           padding: theme.spacing(2),
         })}
       >
-        <AbsoluteTimePicker initialTimeRange={absoluteTimeRange} onChange={handleTimePickerChange} />
+        <AbsoluteTimePicker
+          initialTimeRange={absoluteTimeRange}
+          onChange={(timeRange: TimeRangeValue) => {
+            setTimeRange(timeRange);
+            if (!isRelativeValue(timeRange)) {
+              setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
+            }
+            setSelectedTimeRange(timeRange);
+            setShowCustomDateSelector(false);
+          }}
+        />
       </Popover>
       <FormControl fullWidth>
         <InputLabel>{FORM_CONTROL_LABEL}</InputLabel>
