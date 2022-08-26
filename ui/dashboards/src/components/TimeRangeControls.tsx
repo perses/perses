@@ -22,6 +22,7 @@ import {
   convertTimeShortcut,
   parseDurationString,
   isRelativeValue,
+  DurationString,
 } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useTimeRangeSetter } from '../context/TimeRangeStateProvider';
@@ -125,6 +126,10 @@ export function TimeRangeControls() {
             value={selectedTimeRange}
             onSelectChange={(event) => {
               const timeShortcut = event.target.value;
+              if (isRelativeValue(selectedTimeRange)) {
+                setSelectedTimeRange({ pastDuration: timeShortcut as DurationString });
+              }
+              // TODO: consolidate state
               const convertedAbsoluteTime = convertTimeShortcut(timeShortcut);
               setTimeRange(convertedAbsoluteTime);
               setAbsoluteTime(convertedAbsoluteTime);
