@@ -30,6 +30,30 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
+  // validate start and end time, propagate changes
+  const updateDateRange = (input: string, isStartDate: boolean) => {
+    const newDate = new Date(input);
+    if (isStartDate === true) {
+      const isValidDateRange = validateDateRange(newDate, timeRange.end);
+      if (isValidDateRange === true) {
+        setTimeRange((current) => {
+          const updatedRange = { start: newDate, end: current.end };
+          onChange(updatedRange);
+          return updatedRange;
+        });
+      }
+    } else {
+      const isValidDateRange = validateDateRange(timeRange.start, newDate);
+      if (isValidDateRange === true) {
+        setTimeRange((current) => {
+          const updatedRange = { start: current.start, end: newDate };
+          onChange(updatedRange);
+          return updatedRange;
+        });
+      }
+    }
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Stack spacing={3} sx={{ padding: (theme) => theme.spacing(1, 2, 3) }}>
@@ -104,16 +128,8 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
         <TextField
           fullWidth
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            // TODO: add new function to share with endDate TextField onChange
-            // - https://github.com/perses/perses/pull/509#discussion_r954249766
             // TODO: add helperText, fix validation after we decide on form state solution
-            const startDate = new Date(event.target.value);
-            const isValidDateRange = validateDateRange(startDate, timeRange.end);
-            if (isValidDateRange === true) {
-              const updatedRange = { start: startDate, end: timeRange.end };
-              setTimeRange(updatedRange);
-              onChange(updatedRange);
-            }
+            updateDateRange(event.target.value, true);
           }}
           value={format(timeRange.start, DATE_TIME_FORMAT)}
           label="Start Time"
@@ -129,13 +145,7 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
         <TextField
           fullWidth
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            const endDate = new Date(event.target.value);
-            const isValidDateRange = validateDateRange(timeRange.start, endDate);
-            if (isValidDateRange === true) {
-              const updatedRange = { start: timeRange.start, end: endDate };
-              setTimeRange(updatedRange);
-              onChange(updatedRange);
-            }
+            updateDateRange(event.target.value, false);
           }}
           value={format(timeRange.end, DATE_TIME_FORMAT)}
           label="End Time"
