@@ -13,9 +13,16 @@
 
 import { useRef, useState } from 'react';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
-import { format, sub } from 'date-fns';
+// import { format, sub } from 'date-fns';
+import { sub } from 'date-fns';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
-import { AbsoluteTimeRange, convertTimeShortcut, parseDurationString, RelativeTimeRange } from '@perses-dev/core';
+import {
+  AbsoluteTimeRange,
+  TimeRangeValue,
+  convertTimeShortcut,
+  parseDurationString,
+  isRelativeValue,
+} from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useTimeRangeSetter } from '../context/TimeRangeStateProvider';
 
@@ -41,7 +48,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 ];
 
 // TODO: move to TimeRangeSelector.tsx
-const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+// const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 const FORM_CONTROL_LABEL = 'Time Range';
 
 // export interface RelativeTimeRange {
@@ -59,12 +66,11 @@ export function TimeRangeControls() {
   //   pastDuration: '6h',
   //   display: 'Last 6 hours',
   // };
-  const defaultTimeOption: RelativeTimeRange = {
+  const defaultTimeOption: TimeRangeValue = {
     pastDuration: '6h',
   };
 
-  const findOption = TIME_OPTIONS.find((option) => option.value.pastDuration === defaultDuration);
-  console.log('findOption: ', findOption);
+  // const findOption = TIME_OPTIONS.find((option) => option.value.pastDuration === defaultDuration);
 
   // // TODO: use existing RelativeTimeRange from core instead of defining new TimeOption interface
   // const defaultTimeOption = TIME_OPTIONS.find((option) => option.from === `now-${defaultDuration}`) ?? {
@@ -75,8 +81,7 @@ export function TimeRangeControls() {
   // const parsedDuration = defaultTimeOption.from.split('-')[1] ?? '6h';
   const defaultStart = parseDurationString(defaultDuration);
 
-  // const [selectedTimeRange, setSelectedTimeRange] = useState(defaultTimeOption.pastDuration);
-  const [selectedTimeRange, setSelectedTimeRange] = useState<AbsoluteTimeRange | RelativeTimeRange>(defaultTimeOption);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeOption);
 
   const [absoluteTimeRange, setAbsoluteTime] = useState<AbsoluteTimeRange>({
     start: sub(new Date(), { ...defaultStart }),
@@ -86,13 +91,11 @@ export function TimeRangeControls() {
   const anchorEl = useRef();
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
 
-  const handleTimePickerChange = (timeRange: AbsoluteTimeRange) => {
+  const handleTimePickerChange = (timeRange: TimeRangeValue) => {
     setTimeRange(timeRange);
-    setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
-    // const formattedStart = format(timeRange.start, DATE_TIME_FORMAT);
-    // const formattedEnd = format(timeRange.end, DATE_TIME_FORMAT);
-    // const formattedRange = `${formattedStart} - ${formattedEnd}`;
-    // setSelectedTimeRange(formattedRange);
+    if (!isRelativeValue(timeRange)) {
+      setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
+    }
     setSelectedTimeRange(timeRange);
     setShowCustomDateSelector(false);
   };
@@ -119,7 +122,7 @@ export function TimeRangeControls() {
           <TimeRangeSelector
             inputLabel={FORM_CONTROL_LABEL}
             timeOptions={TIME_OPTIONS}
-            selectedTimeRange={selectedTimeRange}
+            value={selectedTimeRange}
             onSelectChange={(event) => {
               const timeShortcut = event.target.value;
               const convertedAbsoluteTime = convertTimeShortcut(timeShortcut);

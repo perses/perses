@@ -12,7 +12,13 @@
 // limitations under the License.
 
 import { useState, useMemo, createContext, useContext, useCallback } from 'react';
-import { AbsoluteTimeRange, RelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
+import {
+  TimeRangeValue,
+  AbsoluteTimeRange,
+  RelativeTimeRange,
+  toAbsoluteTimeRange,
+  isRelativeValue,
+} from '@perses-dev/core';
 import { TimeRangeContext } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
@@ -26,12 +32,16 @@ export interface TimeRangeProviderProps {
 export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
   const { initialValue, children } = props;
 
+  // const defaultTimeRange: TimeRangeValue = toAbsoluteTimeRange(initialValue);
   const defaultTimeRange: AbsoluteTimeRange = toAbsoluteTimeRange(initialValue);
   const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
   // TODO: add support for passing relative time ranges in setTimeRange, ex: { from: 'now-1h', to: 'now' }
-  const setTimeRange: TimeRangeSetter['setTimeRange'] = useCallback((value: AbsoluteTimeRange) => {
-    setActiveTimeRange(value);
+  const setTimeRange: TimeRangeSetter['setTimeRange'] = useCallback((value: TimeRangeValue) => {
+    // setActiveTimeRange(value);
+    if (!isRelativeValue(value)) {
+      setActiveTimeRange(value);
+    }
   }, []);
 
   const ctx = useMemo(() => ({ timeRange, defaultDuration: initialValue.pastDuration }), [timeRange, initialValue]);
@@ -49,7 +59,7 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
  * Setters for manipulating time range state.
  */
 export interface TimeRangeSetter {
-  setTimeRange: (value: AbsoluteTimeRange) => void;
+  setTimeRange: (value: TimeRangeValue) => void;
 }
 
 export const TimeRangeSetterContext = createContext<TimeRangeSetter | undefined>(undefined);

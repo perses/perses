@@ -15,6 +15,8 @@ import { Duration, sub } from 'date-fns';
 
 export type UnixTimeMs = number;
 
+export type DateTimeFormat = number | string;
+
 export interface AbsoluteTimeRange {
   start: Date;
   end: Date;
@@ -26,7 +28,14 @@ export interface RelativeTimeRange {
   pastDuration: DurationString;
 }
 
-export type DateTimeFormat = number | string;
+export type TimeRangeValue = AbsoluteTimeRange | RelativeTimeRange;
+
+/**
+ * Determine whether a given time range is relative or absolute
+ */
+export function isRelativeValue(timeRange: TimeRangeValue): timeRange is RelativeTimeRange {
+  return (timeRange as RelativeTimeRange).pastDuration !== undefined;
+}
 
 /**
  * Returns an absolute time range from a RelativeTimeRange.

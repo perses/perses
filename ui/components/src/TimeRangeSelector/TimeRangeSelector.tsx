@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
-// import { AbsoluteTimeRange, RelativeTimeRange } from '@perses-dev/core';
-import { RelativeTimeRange } from '@perses-dev/core';
+import { TimeRangeValue, RelativeTimeRange, isRelativeValue } from '@perses-dev/core';
+import { formatAbsoluteRange } from './utils';
+
+const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 
 export interface TimeOption {
   value: RelativeTimeRange;
@@ -22,25 +24,27 @@ export interface TimeOption {
 
 interface TimeRangeSelectorProps {
   inputLabel: string;
-  // selectedTimeRange: RelativeTimeRange | AbsoluteTimeRange;
-  selectedTimeRange: RelativeTimeRange;
+  value: TimeRangeValue;
   timeOptions: TimeOption[];
   onSelectChange: (event: SelectChangeEvent<string>) => void;
   onCustomClick: () => void;
 }
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
-  const { inputLabel, selectedTimeRange, timeOptions, onSelectChange, onCustomClick } = props;
+  const { inputLabel, value, timeOptions, onSelectChange, onCustomClick } = props;
+
+  const relativeValue = isRelativeValue(value) ? value : { pastDuration: '6h' };
+  const formattedValue = !isRelativeValue(value) ? formatAbsoluteRange(value, DATE_TIME_FORMAT) : value.pastDuration;
 
   return (
-    <Select value={selectedTimeRange.pastDuration} label={inputLabel} onChange={onSelectChange}>
+    <Select value={relativeValue.pastDuration} label={inputLabel} onChange={onSelectChange}>
       {timeOptions.map((item, idx) => (
         <MenuItem key={idx} value={item.value.pastDuration}>
-          {item.display}
+          {item.value.pastDuration}
         </MenuItem>
       ))}
 
-      {selectedTimeRange.pastDuration !== undefined ? (
+      {isRelativeValue(value) ? (
         <MenuItem
           onClick={() => {
             onCustomClick();
@@ -50,14 +54,15 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         </MenuItem>
       ) : (
         <MenuItem
-          value={selectedTimeRange.pastDuration}
+          value={formattedValue}
           onClick={() => {
             onCustomClick();
           }}
         >
-          {selectedTimeRange}
+          {formattedValue}
         </MenuItem>
       )}
     </Select>
   );
 }
+
