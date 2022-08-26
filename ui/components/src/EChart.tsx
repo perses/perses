@@ -174,6 +174,14 @@ export const EChart = React.memo(function EChart<T>({
     };
   }, [onEvents]);
 
+  useEffect(() => {
+    const updateSize = debounce(() => {
+      if (chartElement.current === null) return;
+      chartElement.current.resize();
+    }, 200);
+    updateSize();
+  }, [sx]);
+
   return <Box ref={containerRef} sx={sx}></Box>;
 });
 

@@ -1,3 +1,16 @@
+// Copyright 2022 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import create from 'zustand';
 import type { StoreApi } from 'zustand';
 import createZustandContext from 'zustand/context';
@@ -19,8 +32,12 @@ interface DashboardActions {
 
 export type DashboardStoreState = DashboardState & DashboardActions;
 
-interface DashboardProviderProps {
-  initialDashboard: DashboardSpec;
+export interface DashboardStoreProps {
+  dashboardSpec: DashboardSpec;
+  isEditMode?: boolean;
+}
+export interface DashboardProviderProps {
+  initialState: DashboardStoreProps;
   children?: React.ReactNode;
 }
 
@@ -44,16 +61,19 @@ export function useEditMode() {
 export function DashboardProvider(props: DashboardProviderProps) {
   const {
     children,
-    initialDashboard: { layouts, panels },
+    initialState: {
+      dashboardSpec: { layouts, panels },
+      isEditMode,
+    },
   } = props;
 
   return (
     <Provider
       createStore={() =>
         create((set) => ({
-          isEditMode: false,
           layouts,
           panels,
+          isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
           setLayouts: (layouts: LayoutDefinition[]) => set({ layouts }),
           setPanels: (panels: Record<string, PanelDefinition>) => set({ panels }),

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps, Button, Toolbar, Typography } from '@mui/material';
+import { Box, BoxProps, Button, Stack, Toolbar, Typography } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -47,25 +47,12 @@ export function ViewDashboard(props: ViewDashboardProps) {
             <Typography variant="h6" sx={{ marginRight: '1rem' }}>
               Edit Dashboard
             </Typography>
-            <Box sx={{ marginLeft: 'auto' }}>
-              <Button
-                variant="outlined"
-                sx={{
-                  margin: '0 4px',
-                }}
-                onClick={onCancelButtonClick}
-              >
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ marginLeft: 'auto' }}>
+              <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
-              <Button
-                variant="contained"
-                sx={{
-                  margin: '0 4px',
-                }}
-              >
-                Save
-              </Button>
-            </Box>
+              <Button variant="contained">Save</Button>
+            </Stack>
           </Toolbar>
         )}
         <Box

@@ -17,10 +17,21 @@ import { useInView } from 'react-intersection-observer';
 import { PluginBoundary, PanelComponent } from '@perses-dev/plugin-system';
 import { ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
-import { Box, Card, CardProps, CardHeader, CardContent, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardProps,
+  CardHeader,
+  CardContent,
+  Typography,
+  IconButton as MuiIconButton,
+  Stack,
+  styled,
+} from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import MenuIcon from 'mdi-material-ui/DotsVertical';
+import DragIcon from 'mdi-material-ui/Drag';
 import { useEditMode } from '../../context';
 
 export interface PanelProps extends CardProps {
@@ -71,7 +82,7 @@ export function Panel(props: PanelProps) {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              height: '20px',
+              minHeight: '24px',
             }}
           >
             <Typography
@@ -95,20 +106,28 @@ export function Panel(props: PanelProps) {
                 <InfoTooltip
                   id="info-tooltip"
                   description={definition.display.description}
-                  placement={TooltipPlacement.Right}
+                  placement={TooltipPlacement.Bottom}
                 >
                   <InformationOutlineIcon
                     aria-describedby="info-tooltip"
                     aria-hidden={false}
-                    sx={{ fontSize: '1rem', cursor: 'pointer', margin: '0 4px' }}
+                    fontSize="small"
+                    sx={{ cursor: 'pointer' }}
                   />
                 </InfoTooltip>
               )}
               {isEditMode && (
-                <>
-                  <PencilIcon sx={{ fontSize: '1rem', cursor: 'pointer', margin: '0 4px' }} />
-                  <MenuIcon sx={{ fontSize: '1rem', cursor: 'pointer', margin: '0 4px' }} />
-                </>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <IconButton aria-label="drag handle" size="small">
+                    <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
+                  </IconButton>
+                  <IconButton aria-label="edit panel" size="small">
+                    <PencilIcon />
+                  </IconButton>
+                  <IconButton aria-label="more" size="small">
+                    <MenuIcon />
+                  </IconButton>
+                </Stack>
               )}
             </Box>
           </Box>
@@ -139,3 +158,8 @@ export function Panel(props: PanelProps) {
     </Card>
   );
 }
+
+const IconButton = styled(MuiIconButton)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  padding: '4px',
+}));
