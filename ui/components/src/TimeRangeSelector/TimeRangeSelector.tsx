@@ -33,6 +33,7 @@ interface TimeRangeSelectorProps {
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   const { inputLabel, value, timeOptions, onSelectChange, onCustomClick } = props;
   const formattedValue = !isRelativeValue(value) ? formatAbsoluteRange(value, DATE_TIME_FORMAT) : value.pastDuration;
+  // TODO: show display string in list instead of duration
   return (
     <Select value={formattedValue} label={inputLabel} onChange={onSelectChange}>
       {timeOptions.map((item, idx) => (

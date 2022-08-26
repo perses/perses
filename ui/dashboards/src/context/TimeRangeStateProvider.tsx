@@ -31,14 +31,11 @@ export interface TimeRangeProviderProps {
  */
 export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
   const { initialValue, children } = props;
-
-  // const defaultTimeRange: TimeRangeValue = toAbsoluteTimeRange(initialValue);
   const defaultTimeRange: AbsoluteTimeRange = toAbsoluteTimeRange(initialValue);
   const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
   // TODO: add support for passing relative time ranges in setTimeRange, ex: { from: 'now-1h', to: 'now' }
   const setTimeRange: TimeRangeSetter['setTimeRange'] = useCallback((value: TimeRangeValue) => {
-    // setActiveTimeRange(value);
     if (!isRelativeValue(value)) {
       setActiveTimeRange(value);
     }
