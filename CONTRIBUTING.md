@@ -54,7 +54,7 @@ cd ../
 make build-api
 ```
 
-* Finally, run the built binary by using the simple configuration file from the `dev` folder:
+* Finally, run the built binary, using the simple configuration file found in the `dev` folder:
 
 ```bash
 ./bin/perses -config ./dev/config.yaml
