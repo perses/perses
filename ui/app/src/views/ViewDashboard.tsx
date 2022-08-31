@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DashboardResource } from '@perses-dev/core';
-import { DashboardProvider, ViewDashboard as DashboardView } from '@perses-dev/dashboards';
+import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import Footer from '../components/Footer';
 import { useSampleData } from '../utils/temp-sample-data';
 
@@ -30,11 +30,9 @@ function ViewDashboard() {
   }
 
   return (
-    <DashboardProvider initialState={{ dashboardSpec: dashboard.spec }}>
-      <DashboardView dashboardResource={dashboard}>
-        <Footer />
-      </DashboardView>
-    </DashboardProvider>
+    <DashboardView dashboardResource={dashboard}>
+      <Footer />
+    </DashboardView>
   );
 }
 
