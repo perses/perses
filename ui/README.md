@@ -51,6 +51,8 @@ be available to the local packages that depend on them (e.g. you need to build
 You can also run a script across all packages in the workspace using NPM's
 `--workspaces` flag.
 
+Note: If you are trying to run the app (`npm run start -w app`), you may need to first [setup a local backend server](https://github.com/perses/perses/blob/main/CONTRIBUTING.md).
+
 ## Library Architecture Diagram
 
 Perses is broken up in to a number of separate packages to allow for flexibility when embedding functionality. Below is the current structure of these libraries:
