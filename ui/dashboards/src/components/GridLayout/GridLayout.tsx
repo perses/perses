@@ -10,13 +10,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 import { useState } from 'react';
+import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Box, BoxProps, Collapse } from '@mui/material';
 import { GridDefinition, GridItemDefinition } from '@perses-dev/core';
+import { useEditMode } from '../../context';
 import { GridTitle } from './GridTitle';
 
-const COLUMNS = 24;
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
   definition: GridDefinition;
@@ -35,33 +39,18 @@ export function GridLayout(props: GridLayoutProps) {
 
   const [isOpen, setIsOpen] = useState(spec.display?.collapse?.open ?? true);
 
+  const { isEditMode } = useEditMode();
+
   const gridItems: React.ReactNode[] = [];
-  let mobileRowStart = 1;
 
   spec.items.forEach((item, idx) => {
-    // Try to maintain the chart's aspect ratio on mobile
-    const widthScale = COLUMNS / item.width;
-    const mobileRows = Math.floor(item.height * widthScale);
+    const { x, y, width: w, height: h } = item;
 
     gridItems.push(
-      <Box
-        key={idx}
-        sx={{
-          gridColumn: {
-            xs: `1 / span ${COLUMNS}`,
-            sm: `${item.x + 1} / span ${item.width}`,
-          },
-          gridRow: {
-            xs: `${mobileRowStart} / span ${mobileRows}`,
-            sm: `${item.y + 1} / span ${item.height}`,
-          },
-        }}
-      >
+      <div key={idx} data-grid={{ x, y, w, h }}>
         {renderGridItemContent(item)}
-      </Box>
+      </div>
     );
-
-    mobileRowStart += mobileRows;
   });
 
   return (
@@ -77,20 +66,18 @@ export function GridLayout(props: GridLayoutProps) {
         />
       )}
       <Collapse in={isOpen} unmountOnExit>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${COLUMNS}, 1fr)`,
-            gridAutoRows: {
-              xs: 24,
-              sm: 36,
-            },
-            columnGap: (theme) => theme.spacing(1),
-            rowGap: (theme) => theme.spacing(1),
-          }}
+        <ResponsiveGridLayout
+          className="layout"
+          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 2 }}
+          rowHeight={30}
+          draggableHandle={'.drag-handle'}
+          resizeHandles={['se']}
+          isDraggable={isEditMode}
+          isResizable={isEditMode}
         >
           {gridItems}
-        </Box>
+        </ResponsiveGridLayout>
       </Collapse>
     </Box>
   );

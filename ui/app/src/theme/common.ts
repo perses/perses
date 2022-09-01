@@ -57,6 +57,21 @@ export function getTheme(overrides: ThemeOptions = {}) {
         size: 'small',
       },
     },
+    MuiSvgIcon: {
+      defaultProps: {
+        fontSize: 'small',
+      },
+      styleOverrides: {
+        fontSizeSmall: {
+          fontSize: '1rem',
+        },
+      },
+    },
+    MuiCardHeader: {
+      defaultProps: {
+        disableTypography: true,
+      },
+    },
   };
 
   theme.components = merge(components, overrides.components);

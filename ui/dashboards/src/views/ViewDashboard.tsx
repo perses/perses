@@ -14,8 +14,9 @@
 import { Box, BoxProps } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { TimeRangeStateProvider, TemplateVariablesProvider } from '../context';
+import { TimeRangeStateProvider, TemplateVariablesProvider, DashboardProvider } from '../context';
 import { Dashboard, VariableList } from '../components';
+import { DashboardToolbar } from '../components/DashboardToolbar';
 
 export interface ViewDashboardProps extends BoxProps {
   dashboardResource: DashboardResource;
@@ -28,38 +29,43 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const { dashboardResource, sx, children, ...others } = props;
 
   return (
-    <TimeRangeStateProvider initialValue={{ pastDuration: dashboardResource.spec.duration }}>
-      <TemplateVariablesProvider variableDefinitions={dashboardResource.spec.variables}>
-        <Box
-          sx={combineSx(
-            {
-              display: 'flex',
-              width: '100%',
-              height: '100%',
-              position: 'relative',
-              overflow: 'hidden',
-            },
-            sx
-          )}
-          {...others}
-        >
+    <DashboardProvider initialState={{ dashboardSpec: dashboardResource.spec }}>
+      <TimeRangeStateProvider initialValue={{ pastDuration: dashboardResource.spec.duration }}>
+        <TemplateVariablesProvider variableDefinitions={dashboardResource.spec.variables}>
           <Box
-            sx={{
-              padding: (theme) => theme.spacing(1, 2),
-              flexGrow: 1,
-              overflowX: 'hidden',
-              overflowY: 'auto',
-            }}
+            sx={combineSx(
+              {
+                display: 'flex',
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden',
+              },
+              sx
+            )}
+            {...others}
           >
-            <VariableList
-              variables={dashboardResource.spec.variables}
-              sx={{ margin: (theme) => theme.spacing(1, 0, 2) }}
-            />
-            <Dashboard spec={dashboardResource.spec} />
-            {children}
+            <Box
+              sx={{
+                padding: (theme) => theme.spacing(1, 2),
+                flexGrow: 1,
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <DashboardToolbar />
+              <VariableList
+                variables={dashboardResource.spec.variables}
+                sx={{ margin: (theme) => theme.spacing(1, 0, 2) }}
+              />
+              <Dashboard spec={dashboardResource.spec} />
+              {children}
+            </Box>
           </Box>
-        </Box>
-      </TemplateVariablesProvider>
-    </TimeRangeStateProvider>
+        </TemplateVariablesProvider>
+      </TimeRangeStateProvider>
+    </DashboardProvider>
   );
 }
