@@ -4,6 +4,38 @@ This document provides an initial governance structure for the Perses project.
 We've deliberately kept this as simple as possible for now, but 
 we expect the governance to evolve as the project grows.
 
+## Team Members
+
+A Team Member is any member if the private [perses-team](perses-team@googlegroups.com)
+Google Group.
+
+Team member status may be given to those who have made ongoing contributions to
+the project for at least 3 months. Contributions can include 
+code improvements, notable work on documentation, organizing events,
+user support, and other contributions.
+
+New members may be proposed by any existing member by email to 
+[perses-team](perses-team@googlegroups.com).
+
+It is highly desirable to reach consensus about acceptance of a new member.
+However, the proposal is ultimately voted on by a formal 2/3 majority vote.
+
+If the new member proposal is accepted, the proposed team member should be
+contacted privately via email to confirm or deny their acceptance of team
+membership. This email will also be CC'd to perses-team for record-keeping
+purposes.
+
+Team members may retire at any time by emailing the team.
+
+Team members can be removed by 2/3 majority vote on the team mailing list. For
+this vote, the member in question is not eligible to vote and does not count
+towards the quorum. Any removal vote can cover only one single person.
+
+Upon death of a member, they leave the team automatically.
+
+The current team members are:
+TBD
+
 ## Maintainers
 
 Perses maintainers have write access to projects under the Perses GitHub organization.
@@ -34,10 +66,10 @@ To become a Maintainer you need to demonstrate the following:
   * understanding of how the team works (policies, processes for testing and code review, etc),
   * understanding of the project's code base and coding and documentation style.
 
-A new maintainer must be proposed by an existing maintainer by sending an email to the
-private maintainer mailing list (perses-team@googlegroups.com). A 2/3 majority of existing maintainers
+A new maintainer must be proposed by an existing team member by sending an email to the
+private mailing list (perses-team@googlegroups.com). A 2/3 majority of team members
 must vote to approve a new maintainer. After the new maintainer is approved, they will 
-be added to the private maintainer mailing list.
+be added to the private team member mailing list.
 
 ## Voting
 
