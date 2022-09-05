@@ -35,7 +35,7 @@ Upon death of a member, they leave the team automatically.
 
 The current team members are:
 
-| Maintainer | GitHub ID | Affiliation |
+| Team Member | GitHub ID | Affiliation |
 | --------------- | --------- | ----------- |
 | Augustin Husson | [nexucis](https://github.com/Nexucis) | Amadeus IT Group |
 | Luke Tillman | [luketillman](https://github.com/LukeTillman) | Chronosphere |
