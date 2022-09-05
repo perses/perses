@@ -13,27 +13,32 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardSpec } from '@perses-dev/core';
+import { DashboardSpec, GridDefinition } from '@perses-dev/core';
+import { useDashboard, useLayouts } from '../context';
 import { GridLayout, GridItemContent } from './GridLayout';
 
 export interface DashboardProps extends BoxProps {
   spec: DashboardSpec;
+  layouts: GridDefinition[];
 }
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
  */
 export function Dashboard(props: DashboardProps) {
-  const { spec, ...others } = props;
+  const { ...others } = props;
+
+  const { dashboard } = useDashboard();
+  const { layouts } = useLayouts();
 
   return (
     <Box {...others}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        {spec.layouts.map((layout, idx) => (
+        {layouts.map((layout, idx) => (
           <GridLayout
             key={idx}
             definition={layout}
-            renderGridItemContent={(definition) => <GridItemContent content={definition.content} spec={spec} />}
+            renderGridItemContent={(definition) => <GridItemContent content={definition.content} spec={dashboard} />}
           />
         ))}
       </ErrorBoundary>

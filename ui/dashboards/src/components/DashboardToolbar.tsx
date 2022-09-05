@@ -12,17 +12,19 @@
 // limitations under the License.
 
 import { Toolbar, Typography, Stack, Button, Box } from '@mui/material';
+import { LayoutDefinition } from '@perses-dev/core';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import { useEditMode } from '../context';
+import { useEditMode, useLayouts } from '../context';
 import { TimeRangeControls } from '../components';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
+  onAddPanel: () => void;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
-  const { dashboardName } = props;
+  const { dashboardName, onAddPanel } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
 
@@ -34,41 +36,67 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     setEditMode(false);
   };
 
+  const { addLayout } = useLayouts();
+
+  const onAddGroup = () => {
+    const newLayout: LayoutDefinition = {
+      kind: 'Grid',
+      spec: {
+        display: {
+          title: 'New Group',
+          collapse: {
+            open: true,
+          },
+        },
+        items: [],
+      },
+    };
+    addLayout(newLayout);
+  };
+
   return (
-    <Toolbar disableGutters>
-      <Stack spacing={2} sx={{ width: '100%' }}>
-        {isEditMode ? (
-          <Box sx={{ display: 'flex' }}>
+    <Toolbar disableGutters sx={{ display: 'block', padding: (theme) => theme.spacing(2, 0) }}>
+      {isEditMode ? (
+        <>
+          <Box sx={{ display: 'flex', width: '100%' }}>
             <Typography variant="h2">Edit {dashboardName}</Typography>
             <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
-              <Button
-                sx={{
-                  alignSelf: 'flex-end',
-                }}
-              >
-                <AddIcon sx={{ marginRight: '8px' }} />
-                Add Panel
-              </Button>
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
               <Button variant="contained">Save</Button>
             </Stack>
           </Box>
-        ) : (
-          <Box sx={{ display: 'flex' }}>
-            <Typography variant="h2">{dashboardName}</Typography>
-            <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
-              <TimeRangeControls />
-              <Button variant="contained" onClick={onEditButtonClick} sx={{ marginLeft: 'auto' }}>
-                <PencilIcon sx={{ marginRight: '8px' }} />
-                Edit
-              </Button>
-            </Stack>
-          </Box>
-        )}
-      </Stack>
+          <Stack
+            direction={'row'}
+            spacing={1}
+            sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding: (theme) => theme.spacing(2, 0) }}
+          >
+            <Button startIcon={<AddIcon />} onClick={onAddGroup}>
+              Add Group
+            </Button>
+            <Button startIcon={<AddIcon />} onClick={onAddPanel}>
+              Add Panel
+            </Button>
+          </Stack>
+        </>
+      ) : (
+        <Box sx={{ display: 'flex', width: '100%' }}>
+          <Typography variant="h2">{dashboardName}</Typography>
+          <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
+            <TimeRangeControls />
+            <Button
+              variant="contained"
+              startIcon={<PencilIcon />}
+              onClick={onEditButtonClick}
+              sx={{ marginLeft: 'auto' }}
+            >
+              Edit
+            </Button>
+          </Stack>
+        </Box>
+      )}
     </Toolbar>
   );
 };
