@@ -34,7 +34,14 @@ towards the quorum. Any removal vote can cover only one single person.
 Upon death of a member, they leave the team automatically.
 
 The current team members are:
-TBD
+
+| Maintainer | GitHub ID | Affiliation |
+| --------------- | --------- | ----------- |
+| Augustin Husson | [nexucis](https://github.com/Nexucis) | Amadeus IT Group |
+| Luke Tillman | [luketillman](https://github.com/LukeTillman) | Chronosphere |
+| Steven Cobb | [sjcobb](https://github.com/sjcobb) | Chronosphere |
+| Julius Volz | [juliusv](https://github.com/juliusv) | PromLabs |
+| Antoine Thebaud | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus IT Group |
 
 ## Maintainers
 
