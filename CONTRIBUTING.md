@@ -30,7 +30,7 @@ Building and starting the backend API server requires the following tools:
 * [Go](https://go.dev/doc/install) (usually the latest version as we are following upstream Go releases closely)
 * [Docker](https://docs.docker.com/engine/install/), which includes docker-compose
 * Make
-* [jq](https://stedolan.github.io/jq/download/)
+* [jq](https://stedolan.github.io/jq/download/) to run the populate.sh script below
 
 With these dependencies installed, you can proceed as follows:
 
