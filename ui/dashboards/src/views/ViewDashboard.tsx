@@ -20,6 +20,7 @@ import { DashboardToolbar } from '../components/DashboardToolbar';
 
 export interface ViewDashboardProps extends BoxProps {
   dashboardResource: DashboardResource;
+  onSave: (dashboardResource: DashboardResource) => void;
 }
 
 /**
@@ -55,7 +56,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 flexDirection: 'column',
               }}
             >
-              <DashboardToolbar />
+              <DashboardToolbar onSave={onSave} />
               <VariableList
                 variables={dashboardResource.spec.variables}
                 sx={{ margin: (theme) => theme.spacing(1, 0, 2) }}
@@ -69,3 +70,14 @@ export function ViewDashboard(props: ViewDashboardProps) {
     </DashboardProvider>
   );
 }
+
+ViewDashboard.defaultProps = {
+  onSave: (dashboardResource: DashboardResource) => {
+    fetch('https://jsonplaceholder.typicode.com', {
+      method: 'POST',
+      body: JSON.stringify(dashboardResource),
+    })
+      .then((response) => response.json())
+      .then((json) => console.log(json));
+  },
+};

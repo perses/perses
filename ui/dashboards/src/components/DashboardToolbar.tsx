@@ -16,7 +16,7 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import { useEditMode } from '../context';
 
-export const DashboardToolbar = () => {
+export const DashboardToolbar = ({ onSave }) => {
   const { isEditMode, setEditMode } = useEditMode();
 
   const onEditButtonClick = () => {
@@ -25,6 +25,11 @@ export const DashboardToolbar = () => {
 
   const onCancelButtonClick = () => {
     setEditMode(false);
+  };
+
+  const onSaveButtonClick = () => {
+    // Need to be able to pull the entire dashboard resource from context
+    onSave();
   };
 
   return (
@@ -37,7 +42,9 @@ export const DashboardToolbar = () => {
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
-              <Button variant="contained">Save</Button>
+              <Button variant="contained" onClick={onSaveButtonClick}>
+                Save
+              </Button>
             </Stack>
           </Box>
           <Button
