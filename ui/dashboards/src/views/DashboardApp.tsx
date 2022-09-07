@@ -17,14 +17,13 @@ import { useState } from 'react';
 import { VariableList, Dashboard } from '../components';
 import AddPanel from '../components/AddPanel/AddPanel';
 import { DashboardToolbar } from '../components/DashboardToolbar';
-import { useDashboard, useLayouts } from '../context';
+import { useDashboard } from '../context';
 import { ViewDashboardProps } from './ViewDashboard';
 
 export const DashboardApp = (props: ViewDashboardProps) => {
   const { dashboardResource, sx, children, ...others } = props;
   const [showAddPanel, setShowAddPanel] = useState(false);
   const { dashboard } = useDashboard();
-  const { layouts } = useLayouts();
 
   return (
     <Box
@@ -52,7 +51,7 @@ export const DashboardApp = (props: ViewDashboardProps) => {
       >
         <DashboardToolbar dashboardName={dashboardResource.metadata.name} onAddPanel={() => setShowAddPanel(true)} />
         <VariableList variables={dashboardResource.spec.variables} sx={{ margin: (theme) => theme.spacing(1, 0, 2) }} />
-        <Dashboard spec={dashboard} layouts={layouts} />
+        <Dashboard spec={dashboard} />
         <AddPanel isOpen={showAddPanel} onClose={() => setShowAddPanel(false)} />
         {children}
       </Box>

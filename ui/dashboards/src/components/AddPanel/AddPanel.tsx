@@ -25,7 +25,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Drawer } from '@perses-dev/components';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 
