@@ -25,7 +25,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Drawer } from '@perses-dev/components';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 
@@ -54,8 +54,10 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
     setPanelDescription(e.target.value);
   };
 
-  const onAddPanelClick = () => {
-    addPanel(removeWhiteSpacesAndSpecialCharacters(panelName), {
+  const onAddPanelClick = (e: FormEvent) => {
+    e.preventDefault();
+    const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
+    addPanel(panelKey, {
       kind: 'EmptyChart',
       display: { name: panelName, description: panelDescription },
       options: {},
@@ -73,7 +75,7 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
       y: maxY + 1,
       width: 12,
       height: 6,
-      content: { $ref: `#/spec/panels/${panelName}` },
+      content: { $ref: `#/spec/panels/${panelKey}` },
     });
     onClose();
   };
