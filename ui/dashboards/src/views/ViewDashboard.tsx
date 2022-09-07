@@ -28,9 +28,12 @@ export interface ViewDashboardProps extends BoxProps {
 export function ViewDashboard(props: ViewDashboardProps) {
   const { dashboardResource, sx, children, ...others } = props;
 
+  // TODO: add shareable URL support
+  const pastDuration = dashboardResource.spec.duration;
+
   return (
     <DashboardProvider initialState={{ dashboardSpec: dashboardResource.spec }}>
-      <TimeRangeStateProvider initialValue={{ pastDuration: dashboardResource.spec.duration }}>
+      <TimeRangeStateProvider initialValue={{ pastDuration: pastDuration }}>
         <TemplateVariablesProvider variableDefinitions={dashboardResource.spec.variables}>
           <Box
             sx={combineSx(
@@ -55,7 +58,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 flexDirection: 'column',
               }}
             >
-              <DashboardToolbar />
+              <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
               <VariableList
                 variables={dashboardResource.spec.variables}
                 sx={{ margin: (theme) => theme.spacing(1, 0, 2) }}
