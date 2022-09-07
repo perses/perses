@@ -17,6 +17,7 @@ import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
     >
       <Header />
       <Box
+        component="main"
         sx={{
           flexGrow: 1,
           overflow: 'hidden',
@@ -54,6 +56,7 @@ function App() {
           </PluginRegistry>
         </ChartsThemeProvider>
       </Box>
+      <Footer />
     </Box>
   );
 }
