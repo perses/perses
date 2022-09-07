@@ -15,6 +15,7 @@ import { Toolbar, Typography, Stack, Button, Box } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import { useEditMode } from '../context';
+import { TimeRangeControls } from '../components';
 
 export const DashboardToolbar = () => {
   const { isEditMode, setEditMode } = useEditMode();
@@ -32,8 +33,9 @@ export const DashboardToolbar = () => {
       {isEditMode ? (
         <Stack spacing={2} sx={{ width: '100%' }}>
           <Box sx={{ display: 'flex' }}>
-            <Typography variant="h6">Edit Dashboard</Typography>
+            <Typography variant="h2">Edit Dashboard</Typography>
             <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+              <TimeRangeControls />
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
@@ -50,10 +52,13 @@ export const DashboardToolbar = () => {
           </Button>
         </Stack>
       ) : (
-        <Button variant="contained" onClick={onEditButtonClick} sx={{ marginLeft: 'auto' }}>
-          <PencilIcon sx={{ marginRight: '8px' }} />
-          Edit
-        </Button>
+        <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
+          <TimeRangeControls />
+          <Button variant="contained" onClick={onEditButtonClick} sx={{ marginLeft: 'auto' }}>
+            <PencilIcon sx={{ marginRight: '8px' }} />
+            Edit
+          </Button>
+        </Stack>
       )}
     </Toolbar>
   );
