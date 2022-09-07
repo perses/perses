@@ -16,6 +16,8 @@ import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-sys
 import 'intersection-observer';
 import { screen } from '@testing-library/react';
 import { renderWithContext, mockPluginRegistryProps } from '../../test';
+import testDashboard from '../../test/testDashboard';
+import { DashboardProvider, DashboardStoreProps } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
 const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
@@ -30,6 +32,8 @@ const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
 
 describe('Panel', () => {
   let props: PanelProps;
+  let initialState: DashboardStoreProps;
+
   beforeEach(() => {
     props = {
       definition: {
@@ -41,23 +45,38 @@ describe('Panel', () => {
         options: {},
       },
     };
+
+    initialState = {
+      isEditMode: false,
+      dashboardSpec: testDashboard.spec,
+    };
   });
 
   // Helper to render the panel with some context set
-  const renderPanel = () => {
+  const renderPanel = (initialState: DashboardStoreProps) => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
     addMockPlugin(FAKE_PANEL_PLUGIN);
 
     renderWithContext(
-      <PluginRegistry {...pluginRegistryProps}>
-        <Panel {...props} />
-      </PluginRegistry>
+      <DashboardProvider initialState={initialState}>
+        <PluginRegistry {...pluginRegistryProps}>
+          <Panel {...props} />
+        </PluginRegistry>
+      </DashboardProvider>
     );
   };
 
   it('should render name and info icon', async () => {
-    renderPanel();
+    renderPanel(initialState);
     await screen.findByText('Fake Panel');
     screen.queryByLabelText('info-tooltip');
+  });
+
+  it('should render edit icons when in edit mode', async () => {
+    initialState.isEditMode = true;
+    renderPanel(initialState);
+    await screen.queryByLabelText('drag handle');
+    screen.queryByLabelText('edit panel');
+    screen.queryByLabelText('more');
   });
 });

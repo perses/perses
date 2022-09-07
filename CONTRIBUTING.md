@@ -27,9 +27,10 @@ Both components can be started and tested individually as described below.
 
 Building and starting the backend API server requires the following tools:
 
-* Go (usually the latest version as we are following upstream Go releases closely)
-* Docker & docker-compose
+* [Go](https://go.dev/doc/install) (usually the latest version as we are following upstream Go releases closely)
+* [Docker](https://docs.docker.com/engine/install/), which includes docker-compose
 * Make
+* [jq](https://stedolan.github.io/jq/download/)
 
 With these dependencies installed, you can proceed as follows:
 
@@ -53,7 +54,7 @@ cd ../
 make build-api
 ```
 
-* Finally, run the built binary by using the simple configuration file from the `dev` folder:
+* Finally, run the built binary, using the simple configuration file found in the `dev` folder:
 
 ```bash
 ./bin/perses -config ./dev/config.yaml

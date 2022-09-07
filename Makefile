@@ -101,6 +101,7 @@ cross-build: ## Cross build binaries for all platforms (Use "make build" in deve
 	goreleaser release --snapshot --rm-dist --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: cross-release
+cross-release:
 	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: build
