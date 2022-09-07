@@ -58,7 +58,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 flexDirection: 'column',
               }}
             >
-              <DashboardToolbar />
+              <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
               <VariableList
                 variables={dashboardResource.spec.variables}
                 sx={{ margin: (theme) => theme.spacing(1, 0, 2) }}

@@ -17,7 +17,13 @@ import AddIcon from 'mdi-material-ui/Plus';
 import { useEditMode } from '../context';
 import { TimeRangeControls } from '../components';
 
-export const DashboardToolbar = () => {
+export interface DashboardToolbarProps {
+  dashboardName: string;
+}
+
+export const DashboardToolbar = (props: DashboardToolbarProps) => {
+  const { dashboardName } = props;
+
   const { isEditMode, setEditMode } = useEditMode();
 
   const onEditButtonClick = () => {
@@ -52,12 +58,17 @@ export const DashboardToolbar = () => {
           </Button>
         </Stack>
       ) : (
-        <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
-          <TimeRangeControls />
-          <Button variant="contained" onClick={onEditButtonClick} sx={{ marginLeft: 'auto' }}>
-            <PencilIcon sx={{ marginRight: '8px' }} />
-            Edit
-          </Button>
+        <Stack spacing={2} sx={{ width: '100%' }}>
+          <Box sx={{ display: 'flex' }}>
+            <Typography variant="h2">{dashboardName}</Typography>
+            <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
+              <TimeRangeControls />
+              <Button variant="contained" onClick={onEditButtonClick} sx={{ marginLeft: 'auto' }}>
+                <PencilIcon sx={{ marginRight: '8px' }} />
+                Edit
+              </Button>
+            </Stack>
+          </Box>
         </Stack>
       )}
     </Toolbar>
