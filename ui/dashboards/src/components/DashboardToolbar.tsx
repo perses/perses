@@ -36,29 +36,27 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   return (
     <Toolbar disableGutters>
-      {isEditMode ? (
-        <Stack spacing={2} sx={{ width: '100%' }}>
+      <Stack spacing={2} sx={{ width: '100%' }}>
+        {isEditMode ? (
           <Box sx={{ display: 'flex' }}>
-            <Typography variant="h2">Edit Dashboard</Typography>
+            <Typography variant="h2">Edit {dashboardName}</Typography>
             <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
+              <Button
+                sx={{
+                  alignSelf: 'flex-end',
+                }}
+              >
+                <AddIcon sx={{ marginRight: '8px' }} />
+                Add Panel
+              </Button>
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
               <Button variant="contained">Save</Button>
             </Stack>
           </Box>
-          <Button
-            sx={{
-              alignSelf: 'flex-end',
-            }}
-          >
-            <AddIcon sx={{ marginRight: '8px' }} />
-            Add Panel
-          </Button>
-        </Stack>
-      ) : (
-        <Stack spacing={2} sx={{ width: '100%' }}>
+        ) : (
           <Box sx={{ display: 'flex' }}>
             <Typography variant="h2">{dashboardName}</Typography>
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
@@ -69,8 +67,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               </Button>
             </Stack>
           </Box>
-        </Stack>
-      )}
+        )}
+      </Stack>
     </Toolbar>
   );
 };
