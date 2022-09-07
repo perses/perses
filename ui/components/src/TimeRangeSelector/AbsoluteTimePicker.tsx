@@ -111,6 +111,7 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               openTo="day"
               disableHighlightToday={true}
               value={initialTimeRange.end}
+              minDateTime={timeRange.start}
               onChange={(newValue) => {
                 if (newValue === null) return;
                 setTimeRange((current) => {
