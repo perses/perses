@@ -35,7 +35,7 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '1h' }, display: 'Last 1 hour' },
   { value: { pastDuration: '6h' }, display: 'Last 6 hours' },
   { value: { pastDuration: '12h' }, display: 'Last 12 hours' },
-  { value: { pastDuration: '1d' }, display: 'Last 1 day' },
+  { value: { pastDuration: '24h' }, display: 'Last 1 day' },
   { value: { pastDuration: '7d' }, display: 'Last 7 days' },
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
