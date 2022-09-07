@@ -27,7 +27,7 @@ export default function Footer(): JSX.Element {
   const { exceptionSnackbar } = useSnackbar();
   const { data, isLoading } = useHealth({ onError: exceptionSnackbar });
   return (
-    <Box sx={style}>
+    <Box component="footer" sx={style}>
       <ul>
         <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
         <li>

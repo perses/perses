@@ -13,15 +13,16 @@
 
 import { DashboardResource } from '@perses-dev/core';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
-import Footer from '../components/Footer';
 import { useSampleData } from '../utils/temp-sample-data';
+
+const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
 
 /**
  * The View for viewing a Dashboard.
  */
 function ViewDashboard() {
   const dashboard = useSampleData<DashboardResource>(
-    new URLSearchParams(window.location.search).get('dashboard') || 'node-exporter-full'
+    new URLSearchParams(window.location.search).get('dashboard') || DEFAULT_DASHBOARD_ID
   );
 
   // TODO: Loading indicator
@@ -29,11 +30,7 @@ function ViewDashboard() {
     return null;
   }
 
-  return (
-    <DashboardView dashboardResource={dashboard}>
-      <Footer />
-    </DashboardView>
-  );
+  return <DashboardView dashboardResource={dashboard} />;
 }
 
 export default ViewDashboard;
