@@ -135,6 +135,7 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
           value={format(timeRange.start, DATE_TIME_FORMAT)}
           label="Start Time"
           placeholder="mm/dd/yyyy hh:mm"
+          // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
           type="tel"
         />
         <Divider
