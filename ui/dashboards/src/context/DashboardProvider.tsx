@@ -15,9 +15,10 @@ import create from 'zustand';
 import type { StoreApi } from 'zustand';
 import createZustandContext from 'zustand/context';
 import produce from 'immer';
-import { DashboardSpec, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
+import { DashboardSpec, GridItemDefinition, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
 
 interface DashboardState {
+  dashboard: DashboardSpec;
   isEditMode: boolean;
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
@@ -26,6 +27,8 @@ interface DashboardState {
 interface DashboardActions {
   setEditMode: (isEditMode: boolean) => void;
   setLayouts: (layouts: LayoutDefinition[]) => void;
+  addLayout: (layout: LayoutDefinition) => void;
+  addItemToLayout: (index: number, item: GridItemDefinition) => void;
   setPanels: (panels: Record<string, PanelDefinition>) => void;
   addPanel: (name: string, panel: PanelDefinition) => void;
 }
@@ -49,8 +52,15 @@ export function usePanels() {
 }
 
 export function useLayouts() {
-  const { layouts, setLayouts } = useStore(({ layouts, setLayouts }) => ({ layouts, setLayouts }));
-  return { layouts, setLayouts };
+  const { layouts, setLayouts, addLayout, addItemToLayout } = useStore(
+    ({ layouts, setLayouts, addLayout, addItemToLayout }) => ({
+      layouts,
+      setLayouts,
+      addLayout,
+      addItemToLayout,
+    })
+  );
+  return { layouts, setLayouts, addLayout, addItemToLayout };
 }
 
 export function useEditMode() {
@@ -58,14 +68,25 @@ export function useEditMode() {
   return { isEditMode, setEditMode };
 }
 
+export function useDashboard() {
+  const selectDashboardSpec = (state: DashboardStoreState) => {
+    return produce(state.dashboard, (draftState) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      draftState.panels = state.panels as any;
+      draftState.layouts = state.layouts;
+    });
+  };
+  const dashboard = useStore(selectDashboardSpec);
+  return { dashboard };
+}
+
 export function DashboardProvider(props: DashboardProviderProps) {
   const {
     children,
-    initialState: {
-      dashboardSpec: { layouts, panels },
-      isEditMode,
-    },
+    initialState: { dashboardSpec, isEditMode },
   } = props;
+
+  const { layouts, panels } = dashboardSpec;
 
   return (
     <Provider
@@ -73,9 +94,22 @@ export function DashboardProvider(props: DashboardProviderProps) {
         create((set) => ({
           layouts,
           panels,
+          dashboard: dashboardSpec,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
           setLayouts: (layouts: LayoutDefinition[]) => set({ layouts }),
+          addLayout: (layout: LayoutDefinition) =>
+            set(
+              produce((state) => {
+                state.layouts.push(layout);
+              })
+            ),
+          addItemToLayout: (index: number, item: GridItemDefinition) =>
+            set(
+              produce((state) => {
+                state.layouts[index].spec.items.push(item);
+              })
+            ),
           setPanels: (panels: Record<string, PanelDefinition>) => set({ panels }),
           addPanel: (name: string, panel: PanelDefinition) => {
             set(

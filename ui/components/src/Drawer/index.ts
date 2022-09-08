@@ -12,14 +12,3 @@
 // limitations under the License.
 
 export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './InfoTooltip';
-export * from './LineChart';
-export * from './GaugeChart';
-export * from './StatChart';
-export * from './TimeRangeSelector';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
