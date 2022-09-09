@@ -10,13 +10,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-
 import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Box, BoxProps, Collapse } from '@mui/material';
+import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
 import { GridDefinition, GridItemDefinition } from '@perses-dev/core';
+import styles from '../../css/styles';
 import { useEditMode } from '../../context';
 import { GridTitle } from './GridTitle';
 
@@ -54,31 +52,34 @@ export function GridLayout(props: GridLayoutProps) {
   });
 
   return (
-    <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
-      {spec.display !== undefined && (
-        <GridTitle
-          title={spec.display.title}
-          collapse={
-            spec.display.collapse === undefined
-              ? undefined
-              : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
-          }
-        />
-      )}
-      <Collapse in={isOpen} unmountOnExit>
-        <ResponsiveGridLayout
-          className="layout"
-          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 2 }}
-          rowHeight={30}
-          draggableHandle={'.drag-handle'}
-          resizeHandles={['se']}
-          isDraggable={isEditMode}
-          isResizable={isEditMode}
-        >
-          {gridItems}
-        </ResponsiveGridLayout>
-      </Collapse>
-    </Box>
+    <>
+      <GlobalStyles styles={styles} />
+      <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
+        {spec.display !== undefined && (
+          <GridTitle
+            title={spec.display.title}
+            collapse={
+              spec.display.collapse === undefined
+                ? undefined
+                : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
+            }
+          />
+        )}
+        <Collapse in={isOpen} unmountOnExit>
+          <ResponsiveGridLayout
+            className="layout"
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 2 }}
+            rowHeight={30}
+            draggableHandle={'.drag-handle'}
+            resizeHandles={['se']}
+            isDraggable={isEditMode}
+            isResizable={isEditMode}
+          >
+            {gridItems}
+          </ResponsiveGridLayout>
+        </Collapse>
+      </Box>
+    </>
   );
 }
