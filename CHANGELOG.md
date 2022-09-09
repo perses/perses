@@ -1,3 +1,7 @@
+## 0.7.1 / 2022-09-09
+
+- [ENHANCEMENT] Removed react-grid-layout and react-resizable css imports #524
+
 ## 0.7.0 / 2022-09-09
 
 - [FEATURE] Edit mode and drag & drop using react-grid-layout #510
