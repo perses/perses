@@ -14,6 +14,7 @@
 import { CssBaseline } from '@mui/material';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
 import { SnackbarProvider } from './context/SnackbarProvider';
@@ -27,14 +28,16 @@ export function renderApp(container: ReactDOM.Container | null) {
 
   ReactDOM.render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <DarkModeContextProvider>
-          <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-            <CssBaseline />
-            <App />
-          </SnackbarProvider>
-        </DarkModeContextProvider>
-      </QueryClientProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <DarkModeContextProvider>
+            <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+              <CssBaseline />
+              <App />
+            </SnackbarProvider>
+          </DarkModeContextProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
     </React.StrictMode>,
     container
   );

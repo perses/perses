@@ -24,8 +24,7 @@ import {
   DurationString,
   RelativeTimeRange,
 } from '@perses-dev/core';
-import { useTimeRange } from '@perses-dev/plugin-system';
-import { useTimeRangeSetter } from '../context/TimeRangeStateProvider';
+import { useTimeRange, useTimeRangeSetter } from '@perses-dev/plugin-system';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -98,9 +97,10 @@ export function TimeRangeControls() {
                 end: new Date(),
               };
               // TODO: consolidate unnecessary state
+              // https://github.com/perses/perses/blob/sjcobb/time-range-zoom-init-2/ui/dashboards/src/components/TimeRangeControls.tsx
               setSelectedTimeRange(relativeTimeInput);
+              setTimeRange(relativeTimeInput);
               const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
-              setTimeRange(convertedAbsoluteTime);
               setAbsoluteTime(convertedAbsoluteTime);
               setShowCustomDateSelector(false);
             }}

@@ -31,10 +31,17 @@ export interface RelativeTimeRange {
 export type TimeRangeValue = AbsoluteTimeRange | RelativeTimeRange;
 
 /**
- * Determine whether a given time range is relative or absolute
+ * Determine whether a given time range is relative
  */
 export function isRelativeValue(timeRange: TimeRangeValue): timeRange is RelativeTimeRange {
   return (timeRange as RelativeTimeRange).pastDuration !== undefined;
+}
+
+/**
+ * Determine whether a given time range is absolute
+ */
+export function isAbsoluteValue(timeRange: TimeRangeValue): timeRange is AbsoluteTimeRange {
+  return (timeRange as AbsoluteTimeRange).start !== undefined && (timeRange as AbsoluteTimeRange).end !== undefined;
 }
 
 /**

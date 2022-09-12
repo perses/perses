@@ -11,53 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, useTheme } from '@mui/material';
-import { ErrorAlert, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/components';
-import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
-import ViewDashboard from './views/ViewDashboard';
-import { DataSourceRegistry } from './context/DataSourceRegistry';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import { useBundledPlugins } from './model/bundled-plugins';
+import { Routes, Route } from 'react-router-dom';
+import HomeDashboard from './views/HomeDashboard';
+import Docs from './views/Docs';
 
 function App() {
-  const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
-
-  const muiTheme = useTheme();
-
-  // app specific echarts option overrides, empty since perses uses default
-  // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-  const echartsThemeOverrides = {};
-  const chartsTheme = generateChartsTheme('perses', muiTheme, echartsThemeOverrides);
-
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-      }}
-    >
-      <Header />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          overflow: 'hidden',
-        }}
-      >
-        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-            <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-              <DataSourceRegistry>
-                <ViewDashboard />
-              </DataSourceRegistry>
-            </PluginBoundary>
-          </PluginRegistry>
-        </ChartsThemeProvider>
-      </Box>
-      <Footer />
-    </Box>
+    <Routes>
+      <Route path="/" element={<HomeDashboard />} />
+      <Route path="docs" element={<Docs />} />
+    </Routes>
   );
 }
 

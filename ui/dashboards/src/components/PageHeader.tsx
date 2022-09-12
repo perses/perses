@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,5 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TemplateVariablesProvider';
-export * from './DashboardProvider';
+import { Box, BoxProps } from '@mui/material';
+import { combineSx } from '@perses-dev/components';
+
+export function PageHeader(props: BoxProps) {
+  const { children, sx, ...others } = props;
+  return (
+    <Box
+      sx={combineSx(
+        (theme) => ({
+          padding: theme.spacing(1, 2),
+          display: 'flex',
+          justifyContent: ' space-between',
+          alignItems: 'center',
+        }),
+        sx
+      )}
+      {...others}
+    >
+      {children}
+    </Box>
+  );
+}

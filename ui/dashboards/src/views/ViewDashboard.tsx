@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useSearchParams } from 'react-router-dom';
 import { BoxProps } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
-import { TimeRangeStateProvider, TemplateVariablesProvider, DashboardProvider } from '../context';
+import { DashboardResource, isDurationString } from '@perses-dev/core';
+import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
+import { TemplateVariablesProvider, DashboardProvider } from '../context';
 
 import { DashboardApp } from './DashboardApp';
 
@@ -29,11 +31,16 @@ export function ViewDashboard(props: ViewDashboardProps) {
     dashboardResource: { spec },
     children,
   } = props;
-  const pastDuration = spec.duration;
+
+  const [searchParams] = useSearchParams();
+  const fromParam = searchParams.get('from');
+
+  const parsedParam = fromParam !== null ? fromParam.split('-')[1] : spec.duration;
+  const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : spec.duration;
 
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
-      <TimeRangeStateProvider initialValue={{ pastDuration }}>
+      <TimeRangeStateProvider initialValue={{ pastDuration: pastDuration }}>
         <TemplateVariablesProvider variableDefinitions={spec.variables}>
           <DashboardApp {...props}>{children}</DashboardApp>
         </TemplateVariablesProvider>

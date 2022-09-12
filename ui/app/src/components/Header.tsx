@@ -108,12 +108,15 @@ export default function Header(): JSX.Element {
     <AppBar position="relative">
       <Toolbar>
         <Box sx={style} flexGrow={1}>
-          <Typography variant="h6" sx={{ marginRight: '1rem' }}>
+          <Typography variant="h6" sx={{ margin: '1rem' }}>
             Perses
           </Typography>
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
+        <Button href="/docs" color="inherit">
+          Docs
+        </Button>
         <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
       </Toolbar>
     </AppBar>

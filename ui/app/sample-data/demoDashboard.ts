@@ -16,7 +16,7 @@ import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
 const demoDashboard: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
-    name: 'Node Stats',
+    name: 'Demo Dashboard',
     project: 'perses',
     created_at: '2021-11-09',
     updated_at: '2021-11-09',

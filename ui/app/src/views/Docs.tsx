@@ -11,5 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TemplateVariablesProvider';
-export * from './DashboardProvider';
+function Docs() {
+  return <h1>Docs</h1>;
+}
+
+export default Docs;
