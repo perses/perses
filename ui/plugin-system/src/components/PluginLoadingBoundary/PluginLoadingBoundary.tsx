@@ -14,7 +14,7 @@
 import { JsonObject } from '@perses-dev/core';
 import { Fragment, createContext, useContext, useMemo, useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
-import { PluginType, ALL_PLUGIN_TYPES, PluginDefinition, PluginImplementation } from '../../model';
+import { PluginType, ALL_PLUGIN_TYPES, PluginImplementation } from '../../model';
 import { usePluginRegistry } from '../PluginRegistry';
 import { PluginLoader } from './PluginLoader';
 
