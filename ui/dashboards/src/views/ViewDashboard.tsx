@@ -13,7 +13,8 @@
 
 import { useSearchParams } from 'react-router-dom';
 import { BoxProps } from '@mui/material';
-import { DashboardResource, isDurationString } from '@perses-dev/core';
+import { getUnixTime } from 'date-fns';
+import { DashboardResource, isDurationString, isRelativeValue, TimeRangeValue } from '@perses-dev/core';
 import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
 import { TemplateVariablesProvider, DashboardProvider } from '../context';
 
@@ -32,15 +33,37 @@ export function ViewDashboard(props: ViewDashboardProps) {
     children,
   } = props;
 
-  const [searchParams] = useSearchParams();
-  const fromParam = searchParams.get('from');
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  // TODO: preserve all existing params
+  const dashboardParam = searchParams.get('dashboard');
+
+  const fromParam = searchParams.get('from');
   const parsedParam = fromParam !== null ? fromParam.split('-')[1] : spec.duration;
   const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : spec.duration;
 
+  const handleOnDateRangeChange = (event: TimeRangeValue) => {
+    // TODO: create util to convert Perses RelativeTimeRange to GrafanaRelativeTimeRange (ex: from=now-1h&to=now)
+    if (isRelativeValue(event)) {
+      setSearchParams({
+        dashboard: dashboardParam ?? '',
+        from: `now-${event.pastDuration}`,
+        to: 'now',
+      });
+    } else {
+      const startUnixMs = getUnixTime(event.start) * 1000;
+      const endUnixMs = getUnixTime(event.end) * 1000;
+      setSearchParams({
+        dashboard: dashboardParam ?? '',
+        from: startUnixMs.toString(),
+        to: endUnixMs.toString(),
+      });
+    }
+  };
+
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
-      <TimeRangeStateProvider initialValue={{ pastDuration: pastDuration }}>
+      <TimeRangeStateProvider initialValue={{ pastDuration: pastDuration }} onDateRangeChange={handleOnDateRangeChange}>
         <TemplateVariablesProvider variableDefinitions={spec.variables}>
           <DashboardApp {...props}>{children}</DashboardApp>
         </TemplateVariablesProvider>
