@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ButtonBase, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronUp';
 import CollapsedIcon from 'mdi-material-ui/ChevronDown';
+import AddIcon from 'mdi-material-ui/Plus';
+import PencilIcon from 'mdi-material-ui/PencilOutline';
 
 export interface GridTitleProps {
   title: string;
@@ -21,6 +23,9 @@ export interface GridTitleProps {
     isOpen: boolean;
     onToggleOpen: () => void;
   };
+  isEditMode?: boolean;
+  onAddClick?: () => void;
+  onEditClick?: () => void;
 }
 
 /**
@@ -28,32 +33,45 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { title, collapse } = props;
+  const { title, collapse, isEditMode, onAddClick, onEditClick } = props;
 
   const text = (
-    <Typography variant="h5" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
+    <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
       {title}
     </Typography>
   );
 
-  // If we don't need expand/collapse, just render the title text
-  if (collapse === undefined) {
-    return text;
-  }
-
-  // Otherwise render something clickable
   return (
-    <ButtonBase
-      component="header"
+    <Box
       sx={{
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
+        padding: (theme) => theme.spacing(1),
+        backgroundColor: (theme) => theme.palette.background.default,
       }}
-      onClick={collapse.onToggleOpen}
     >
-      {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
-      {text}
-    </ButtonBase>
+      {collapse ? (
+        <>
+          <IconButton onClick={collapse.onToggleOpen}>
+            {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
+          </IconButton>
+          {text}
+          {isEditMode && onAddClick && onEditClick && (
+            <Stack direction="row" sx={{ marginLeft: 'auto' }}>
+              <IconButton onClick={onAddClick}>
+                <AddIcon />
+              </IconButton>
+              <IconButton onClick={onEditClick}>
+                <PencilIcon />
+              </IconButton>
+            </Stack>
+          )}
+        </>
+      ) : (
+        // If we don't need expand/collapse, just render the title text
+        text
+      )}
+    </Box>
   );
 }

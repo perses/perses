@@ -151,10 +151,10 @@ const PanelDrawerHeader = ({ onClose }: { onClose: () => void }) => {
         borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
       }}
     >
-      <Typography variant="h5">Add Panel</Typography>
+      <Typography variant="h2">{`${action} Panel`}</Typography>
       <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
         <Button type="submit" variant="contained">
-          Add Panel
+          {`${action} Panel`}
         </Button>
         <Button variant="outlined" onClick={onClose}>
           Cancel
