@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,8 +22,10 @@ import {
   PluginType,
   ALL_PLUGIN_TYPES,
   PluginImplementation,
+  VariablePlugin,
+  PanelPlugin,
+  GraphQueryPlugin,
 } from '../../model';
-import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from './create-plugin';
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
 export type PluginResourcesByTypeAndKind = {
@@ -87,17 +89,17 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
       switch (config.pluginType) {
         case 'Variable':
           setPlugins((draft) => {
-            draft.Variable[config.kind] = createVariablePlugin(config);
+            draft.Variable[config.kind] = config.plugin as unknown as VariablePlugin;
           });
           return;
         case 'Panel':
           setPlugins((draft) => {
-            draft.Panel[config.kind] = createPanelPlugin(config);
+            draft.Panel[config.kind] = config.plugin as unknown as PanelPlugin;
           });
           return;
         case 'GraphQuery':
           setPlugins((draft) => {
-            draft.GraphQuery[config.kind] = createGraphQueryPlugin(config);
+            draft.GraphQuery[config.kind] = config.plugin as unknown as GraphQueryPlugin;
           });
           return;
         default:
