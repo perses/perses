@@ -36,7 +36,7 @@ export interface PanelProps<Options extends JsonObject> {
  * Renders a PanelComponent from a panel plugin at runtime.
  */
 export const PanelComponent: PanelPlugin['PanelComponent'] = (props) => {
-  const plugin = usePlugin('Panel', props.definition);
+  const plugin = usePlugin('Panel', props.definition.kind);
   if (plugin === undefined) {
     return null;
   }
