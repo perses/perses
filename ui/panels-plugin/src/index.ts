@@ -21,7 +21,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Panel',
     kind: LineChartKind,
-    validate: undefined,
     plugin: {
       PanelComponent: LineChartPanel,
     },
@@ -30,7 +29,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Panel',
     kind: GaugeChartKind,
-    validate: undefined,
     plugin: {
       PanelComponent: GaugeChartPanel,
     },
@@ -39,7 +37,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Panel',
     kind: StatChartKind,
-    validate: undefined,
     plugin: {
       PanelComponent: StatChartPanel,
     },
@@ -48,7 +45,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Panel',
     kind: EmptyChartKind,
-    validate: undefined,
     plugin: {
       PanelComponent: EmptyChart,
     },
