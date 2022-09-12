@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BoxProps } from '@mui/material';
 import { getUnixTime } from 'date-fns';
@@ -39,8 +40,19 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const dashboardParam = searchParams.get('dashboard');
 
   const fromParam = searchParams.get('from');
+  const toParam = searchParams.get('to');
+
   const parsedParam = fromParam !== null ? fromParam.split('-')[1] : spec.duration;
   const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : spec.duration;
+
+  const defaultDuration =
+    fromParam !== null && toParam !== null && toParam !== 'now'
+      ? { start: new Date(Number(fromParam)), end: new Date(Number(toParam)) }
+      : { pastDuration: pastDuration };
+  // TODO: cleanup, fix types
+  const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultDuration as TimeRangeValue);
+
+  // let initialActiveDateRange: TimeRangeValue = { pastDuration: pastDuration };
 
   const handleOnDateRangeChange = (event: TimeRangeValue) => {
     // TODO: create util to convert Perses RelativeTimeRange to GrafanaRelativeTimeRange (ex: from=now-1h&to=now)
@@ -58,12 +70,14 @@ export function ViewDashboard(props: ViewDashboardProps) {
         from: startUnixMs.toString(),
         to: endUnixMs.toString(),
       });
+      setActiveTimeRange({ start: event.start, end: event.end });
+      // initialActiveDateRange = { start: event.start, end: event.end };
     }
   };
 
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
-      <TimeRangeStateProvider initialValue={{ pastDuration: pastDuration }} onDateRangeChange={handleOnDateRangeChange}>
+      <TimeRangeStateProvider initialValue={activeTimeRange} onDateRangeChange={handleOnDateRangeChange}>
         <TemplateVariablesProvider variableDefinitions={spec.variables}>
           <DashboardApp {...props}>{children}</DashboardApp>
         </TemplateVariablesProvider>

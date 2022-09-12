@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { AbsoluteTimeRange, DurationString } from '@perses-dev/core';
+import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
 
 export interface TimeRange {
   timeRange: AbsoluteTimeRange;
-  defaultDuration: DurationString;
+  initialValue: TimeRangeValue;
+  // defaultDuration: DurationString;
 }
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);

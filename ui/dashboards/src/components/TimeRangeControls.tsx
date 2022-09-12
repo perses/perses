@@ -13,12 +13,10 @@
 
 import { useRef, useState } from 'react';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
-import { sub } from 'date-fns';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
   AbsoluteTimeRange,
   TimeRangeValue,
-  parseDurationString,
   toAbsoluteTimeRange,
   isRelativeValue,
   DurationString,
@@ -42,17 +40,16 @@ export const TIME_OPTIONS: TimeOption[] = [
 const FORM_CONTROL_LABEL = 'Time Range';
 
 export function TimeRangeControls() {
+  // TODO: combine setter into useTimeRange instead of importing separately
   const { setTimeRange } = useTimeRangeSetter();
-  const { defaultDuration } = useTimeRange();
-  const defaultStart = parseDurationString(defaultDuration);
+  const { initialValue } = useTimeRange();
 
-  // TODO: default to URL param if populated
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>({ pastDuration: defaultDuration });
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialValue);
 
-  const [absoluteTimeRange, setAbsoluteTime] = useState<AbsoluteTimeRange>({
-    start: sub(new Date(), { ...defaultStart }),
-    end: new Date(),
-  });
+  const initialAbsoluteTimeRange: AbsoluteTimeRange = isRelativeValue(initialValue)
+    ? toAbsoluteTimeRange(initialValue)
+    : initialValue;
+  const [absoluteTimeRange, setAbsoluteTime] = useState<AbsoluteTimeRange>(initialAbsoluteTimeRange);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();

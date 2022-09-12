@@ -12,13 +12,7 @@
 // limitations under the License.
 
 import { useState, useMemo, createContext, useContext, useCallback } from 'react';
-import {
-  TimeRangeValue,
-  AbsoluteTimeRange,
-  toAbsoluteTimeRange,
-  isRelativeValue,
-  RelativeTimeRange,
-} from '@perses-dev/core';
+import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeValue } from '@perses-dev/core';
 import { TimeRangeContext } from '../runtime/time-range';
 
 export interface TimeRangeProviderProps {
@@ -54,10 +48,12 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
     [onDateRangeChange]
   );
 
-  const ctx = useMemo(
-    () => ({ timeRange, defaultDuration: (initialValue as RelativeTimeRange).pastDuration ?? '1h' }),
-    [timeRange, initialValue]
-  );
+  // const ctx = useMemo(
+  //   () => ({ timeRange, defaultDuration: (initialValue as RelativeTimeRange).pastDuration ?? '1h' }),
+  //   [timeRange, initialValue]
+  // );
+
+  const ctx = useMemo(() => ({ timeRange, initialValue }), [timeRange, initialValue]);
 
   const setters = useMemo(() => ({ setTimeRange }), [setTimeRange]);
 
