@@ -36,23 +36,19 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // TODO: preserve all existing params
+  // TODO: preserve all existing params, change to use template variable approach
   const dashboardParam = searchParams.get('dashboard');
-
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
-
   const parsedParam = fromParam !== null ? fromParam.split('-')[1] : spec.duration;
   const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : spec.duration;
 
+  // TODO: cleanup, fix types
   const defaultDuration =
     fromParam !== null && toParam !== null && toParam !== 'now'
       ? { start: new Date(Number(fromParam)), end: new Date(Number(toParam)) }
       : { pastDuration: pastDuration };
-  // TODO: cleanup, fix types
   const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultDuration as TimeRangeValue);
-
-  // let initialActiveDateRange: TimeRangeValue = { pastDuration: pastDuration };
 
   const handleOnDateRangeChange = (event: TimeRangeValue) => {
     // TODO: create util to convert Perses RelativeTimeRange to GrafanaRelativeTimeRange (ex: from=now-1h&to=now)
@@ -71,7 +67,6 @@ export function ViewDashboard(props: ViewDashboardProps) {
         to: endUnixMs.toString(),
       });
       setActiveTimeRange({ start: event.start, end: event.end });
-      // initialActiveDateRange = { start: event.start, end: event.end };
     }
   };
 

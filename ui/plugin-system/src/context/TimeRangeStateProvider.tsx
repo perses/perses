@@ -48,6 +48,7 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
     [onDateRangeChange]
   );
 
+  // TODO: delete, consolidate with runtime/time-range.ts
   // const ctx = useMemo(
   //   () => ({ timeRange, defaultDuration: (initialValue as RelativeTimeRange).pastDuration ?? '1h' }),
   //   [timeRange, initialValue]
