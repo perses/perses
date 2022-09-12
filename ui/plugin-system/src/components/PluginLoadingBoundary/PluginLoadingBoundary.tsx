@@ -122,15 +122,15 @@ export function usePluginLoadingBoundary() {
  */
 export function usePlugin<Type extends PluginType>(
   pluginType: Type,
-  definition: PluginDefinition<Type, JsonObject>
+  kind: string
 ): PluginImplementation<Type, JsonObject> | undefined {
   // Tell the loading boundary about the dependency
   const { registerPluginDependency } = usePluginLoadingBoundary();
   useEffect(() => {
-    registerPluginDependency(pluginType, definition.kind);
-  }, [pluginType, definition.kind, registerPluginDependency]);
+    registerPluginDependency(pluginType, kind);
+  }, [pluginType, kind, registerPluginDependency]);
 
   // Get the plugin, which could be undefined if it hasn't loaded yet
   const { plugins } = usePluginRegistry();
-  return plugins[pluginType][definition.kind];
+  return plugins[pluginType][kind];
 }

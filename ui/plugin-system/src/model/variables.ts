@@ -35,7 +35,7 @@ export type UseVariableOptionsHook<Options extends JsonObject> = (definition: Va
  * Use the variable options from a variable plugin at runtime.
  */
 export const useVariableOptions: VariablePlugin['useVariableOptions'] = (definition) => {
-  const plugin = usePlugin('Variable', definition);
+  const plugin = usePlugin('Variable', definition.kind);
   if (plugin === undefined) {
     // Provide default values while the plugin is being loaded
     return { data: [], loading: true };
