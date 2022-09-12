@@ -27,6 +27,10 @@ const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
     PanelComponent: () => {
       return <div role="figure">FakePanel chart</div>;
     },
+    OptionsEditorComponent: () => {
+      return <div>Edit options here</div>;
+    },
+    createInitialOptions: () => ({}),
   },
 };
 

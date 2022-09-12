@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph-queries';
-export * from './panels';
-export * from './plugins';
-export * from './variables';
-export * from './visual-editing';
+export * from './gauge-chart-model';
+export * from './GaugeChartPanel';
+export * from './GaugeChartOptionsEditor';
