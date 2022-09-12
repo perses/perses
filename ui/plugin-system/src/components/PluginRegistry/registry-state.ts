@@ -86,6 +86,8 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
   // Create the register callback to pass to the module's setup function
   const registerPlugin: RegisterPlugin = useCallback(
     <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => {
+      // Just cast to the runtime plugin type that framework code knows about since the `Options` generic argument is
+      // really only known to plugin authors for their type safety when developing plugins in Typescript
       switch (config.pluginType) {
         case 'Variable':
           setPlugins((draft) => {
