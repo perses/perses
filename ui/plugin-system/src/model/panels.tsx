@@ -36,13 +36,20 @@ export interface PanelProps<Options extends JsonObject> {
 }
 
 /**
- * Renders a PanelComponent from a panel plugin at runtime.
+ * Hook for using a panel plugin at runtime.
  */
-export const PanelComponent: PanelPlugin['PanelComponent'] = (props) => {
-  const plugin = usePlugin('Panel', props.definition.kind);
-  if (plugin === undefined) {
-    return null;
+export function usePanelPlugin(kind: string): PanelPlugin<JsonObject> {
+  const plugin = usePlugin('Panel', kind);
+  if (plugin !== undefined) {
+    return plugin;
   }
-  const { PanelComponent: PluginComponent } = plugin;
-  return <PluginComponent {...props} />;
+
+  // Return a default/placeholder plugin while loading happens
+  return defaultPanelPlugin;
+}
+
+const defaultPanelPlugin: PanelPlugin<JsonObject> = {
+  PanelComponent: () => null,
+  OptionsEditorComponent: () => null,
+  createInitialOptions: () => ({}),
 };
