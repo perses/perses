@@ -14,7 +14,7 @@
 import { useState, useMemo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { PluginBoundary, PanelComponent } from '@perses-dev/plugin-system';
+import { PluginBoundary } from '@perses-dev/plugin-system';
 import { ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import {
@@ -33,6 +33,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import MenuIcon from 'mdi-material-ui/DotsVertical';
 import DragIcon from 'mdi-material-ui/Drag';
 import { useEditMode } from '../../context';
+import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
@@ -152,7 +153,7 @@ export function Panel(props: PanelProps) {
         ref={setContentElement}
       >
         <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-          {inView === true && <PanelComponent definition={definition} contentDimensions={contentDimensions} />}
+          {inView === true && <PanelContent definition={definition} contentDimensions={contentDimensions} />}
         </PluginBoundary>
       </CardContent>
     </Card>
