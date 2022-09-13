@@ -16,7 +16,6 @@ import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeValue
 import { TimeRange, TimeRangeContext } from '../runtime/time-range';
 
 export interface TimeRangeProviderProps {
-  // TODO: initialValue also needs to accept an AbsoluteTimeRange
   initialValue: TimeRangeValue;
   children?: React.ReactNode;
   onDateRangeChange?: (e: TimeRangeValue) => void;
