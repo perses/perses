@@ -28,18 +28,21 @@ export interface TimeRangeProviderProps {
 export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
   const { initialValue, children, onDateRangeChange } = props;
 
+  const [timeRange, setActiveTimeRange] = useState<TimeRangeValue>(initialValue);
+
   const defaultTimeRange: AbsoluteTimeRange = isRelativeValue(initialValue)
     ? toAbsoluteTimeRange(initialValue)
     : initialValue;
-  const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
+  const [absoluteTimeRange, setAbsoluteTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
+      setActiveTimeRange(value);
       if (isRelativeValue(value)) {
         const convertedAbsoluteTime = toAbsoluteTimeRange(value);
-        setActiveTimeRange(convertedAbsoluteTime);
+        setAbsoluteTimeRange(convertedAbsoluteTime);
       } else {
-        setActiveTimeRange(value);
+        setAbsoluteTimeRange(value);
       }
       if (onDateRangeChange !== undefined) {
         onDateRangeChange(value);
@@ -48,7 +51,10 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
     [onDateRangeChange]
   );
 
-  const ctx = useMemo(() => ({ timeRange, initialValue, setTimeRange }), [timeRange, initialValue, setTimeRange]);
+  const ctx = useMemo(
+    () => ({ timeRange, absoluteTimeRange, initialValue, setTimeRange }),
+    [timeRange, absoluteTimeRange, initialValue, setTimeRange]
+  );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }

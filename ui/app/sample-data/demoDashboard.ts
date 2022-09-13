@@ -419,7 +419,7 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 1',
             collapse: {
-              open: false,
+              open: true,
             },
           },
           items: [

@@ -14,14 +14,7 @@
 import { useRef, useState } from 'react';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
-import {
-  AbsoluteTimeRange,
-  TimeRangeValue,
-  toAbsoluteTimeRange,
-  isRelativeValue,
-  DurationString,
-  RelativeTimeRange,
-} from '@perses-dev/core';
+import { TimeRangeValue, DurationString, RelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 
 // TODO: add time shortcut if one does not match duration
@@ -40,14 +33,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 const FORM_CONTROL_LABEL = 'Time Range';
 
 export function TimeRangeControls() {
-  const { initialValue, setTimeRange } = useTimeRange();
-
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialValue);
-
-  const initialAbsoluteTimeRange: AbsoluteTimeRange = isRelativeValue(initialValue)
-    ? toAbsoluteTimeRange(initialValue)
-    : initialValue;
-  const [absoluteTimeRange, setAbsoluteTime] = useState<AbsoluteTimeRange>(initialAbsoluteTimeRange);
+  const { timeRange, absoluteTimeRange, setTimeRange } = useTimeRange();
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -70,10 +56,6 @@ export function TimeRangeControls() {
           initialTimeRange={absoluteTimeRange}
           onChange={(timeRange: TimeRangeValue) => {
             setTimeRange(timeRange);
-            if (!isRelativeValue(timeRange)) {
-              setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
-            }
-            setSelectedTimeRange(timeRange);
             setShowCustomDateSelector(false);
           }}
         />
@@ -84,19 +66,14 @@ export function TimeRangeControls() {
           <TimeRangeSelector
             inputLabel={FORM_CONTROL_LABEL}
             timeOptions={TIME_OPTIONS}
-            value={selectedTimeRange}
+            value={timeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {
                 pastDuration: duration as DurationString,
                 end: new Date(),
               };
-              // TODO: consolidate unnecessary state
-              // https://github.com/perses/perses/blob/sjcobb/time-range-zoom-init-2/ui/dashboards/src/components/TimeRangeControls.tsx
-              setSelectedTimeRange(relativeTimeInput);
               setTimeRange(relativeTimeInput);
-              const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
-              setAbsoluteTime(convertedAbsoluteTime);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {

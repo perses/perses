@@ -42,9 +42,6 @@ export function LineChartContainer(props: LineChartContainerProps) {
 
   const { setTimeRange } = useTimeRange();
 
-  const debugTimeRange = useTimeRange();
-  console.log('debugTimeRange: ', debugTimeRange);
-
   // populate series data based on query results
   const { graphData, loading } = useMemo(() => {
     const timeScale = getCommonTimeScale(queries);
