@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,33 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-import { StatChart, StatChartData, UnitOptions, useChartsTheme, PersesChartsTheme } from '@perses-dev/components';
+import { StatChart, StatChartData, useChartsTheme, PersesChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
-import { GraphQueryDefinition, GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
-import { ThresholdOptions } from '../../model/thresholds';
+import { GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { useSuggestedStepMs } from '../../model/time';
-
-export const StatChartKind = 'StatChart' as const;
+import { SparklineOptions, StatChartOptions } from './stat-chart-model';
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
-
-export interface SparklineOptions extends JsonObject {
-  color?: string;
-  width?: number;
-}
-
-interface StatChartOptions extends JsonObject {
-  name: string;
-  query: GraphQueryDefinition;
-  calculation: CalculationType;
-  unit: UnitOptions;
-  thresholds?: ThresholdOptions;
-  sparkline?: SparklineOptions;
-}
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {

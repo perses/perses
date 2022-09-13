@@ -11,8 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph-queries';
-export * from './panels';
-export * from './plugins';
-export * from './variables';
-export * from './visual-editing';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Box } from '@mui/material';
+import { GaugeChartOptions } from './gauge-chart-model';
+
+export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
+
+export function GaugeChartOptionsEditor(props: GaugeChartOptionsEditorProps) {
+  const { value } = props;
+  return <Box>{JSON.stringify(value)}</Box>;
+}

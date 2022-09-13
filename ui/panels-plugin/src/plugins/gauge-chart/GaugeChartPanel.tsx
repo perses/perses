@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,26 +12,16 @@
 // limitations under the License.
 
 import { GaugeSeriesOption } from 'echarts';
-import { JsonObject } from '@perses-dev/core';
-import { GraphQueryDefinition, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
-import { GaugeChart, GaugeChartData, UnitOptions } from '@perses-dev/components';
+import { useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
+import { GaugeChart, GaugeChartData } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
 import { useMemo } from 'react';
-import { convertThresholds, defaultThresholdInput, ThresholdOptions } from '../../model/thresholds';
-import { CalculationsMap, CalculationType } from '../../model/calculations';
+import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
+import { CalculationsMap } from '../../model/calculations';
 import { useSuggestedStepMs } from '../../model/time';
-
-export const GaugeChartKind = 'GaugeChart' as const;
+import { GaugeChartOptions } from './gauge-chart-model';
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
-
-interface GaugeChartOptions extends JsonObject {
-  query: GraphQueryDefinition;
-  calculation: CalculationType;
-  unit?: UnitOptions;
-  thresholds?: ThresholdOptions;
-  max?: number;
-}
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const {

@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph-queries';
-export * from './panels';
-export * from './plugins';
-export * from './variables';
-export * from './visual-editing';
+import { JsonObject } from '@perses-dev/core';
+
+export type EmptyChartOptions = JsonObject;
+
+export function createInitialEmptyChartOptions(): EmptyChartOptions {
+  return {};
+}
