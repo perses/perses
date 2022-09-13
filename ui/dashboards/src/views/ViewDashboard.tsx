@@ -11,12 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { BoxProps } from '@mui/material';
-import { getUnixTime } from 'date-fns';
-import { DashboardResource, isDurationString, isRelativeValue, TimeRangeValue } from '@perses-dev/core';
-import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
+import { DashboardResource } from '@perses-dev/core';
 import { TemplateVariablesProvider, DashboardProvider } from '../context';
 
 import { DashboardApp } from './DashboardApp';
@@ -34,49 +30,11 @@ export function ViewDashboard(props: ViewDashboardProps) {
     children,
   } = props;
 
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // TODO: preserve all existing params, change to use template variable approach
-  const dashboardParam = searchParams.get('dashboard');
-  const fromParam = searchParams.get('from');
-  const toParam = searchParams.get('to');
-  const parsedParam = fromParam !== null ? fromParam.split('-')[1] : spec.duration;
-  const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : spec.duration;
-
-  // TODO: cleanup, fix types
-  const defaultDuration =
-    fromParam !== null && toParam !== null && toParam !== 'now'
-      ? { start: new Date(Number(fromParam)), end: new Date(Number(toParam)) }
-      : { pastDuration: pastDuration };
-  const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultDuration as TimeRangeValue);
-
-  const handleOnDateRangeChange = (event: TimeRangeValue) => {
-    // TODO: create util to convert Perses RelativeTimeRange to GrafanaRelativeTimeRange (ex: from=now-1h&to=now)
-    if (isRelativeValue(event)) {
-      setSearchParams({
-        dashboard: dashboardParam ?? '',
-        from: `now-${event.pastDuration}`,
-        to: 'now',
-      });
-    } else {
-      const startUnixMs = getUnixTime(event.start) * 1000;
-      const endUnixMs = getUnixTime(event.end) * 1000;
-      setSearchParams({
-        dashboard: dashboardParam ?? '',
-        from: startUnixMs.toString(),
-        to: endUnixMs.toString(),
-      });
-      setActiveTimeRange({ start: event.start, end: event.end });
-    }
-  };
-
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
-      <TimeRangeStateProvider initialValue={activeTimeRange} onDateRangeChange={handleOnDateRangeChange}>
-        <TemplateVariablesProvider variableDefinitions={spec.variables}>
-          <DashboardApp {...props}>{children}</DashboardApp>
-        </TemplateVariablesProvider>
-      </TimeRangeStateProvider>
+      <TemplateVariablesProvider variableDefinitions={spec.variables}>
+        <DashboardApp {...props}>{children}</DashboardApp>
+      </TemplateVariablesProvider>
     </DashboardProvider>
   );
 }
