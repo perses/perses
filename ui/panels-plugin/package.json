@@ -34,8 +34,8 @@
   },
   "peerDependencies": {
     "@mui/material": "^5.5.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "perses": {
     "kind": "Plugin",
