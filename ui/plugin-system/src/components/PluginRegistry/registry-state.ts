@@ -17,7 +17,7 @@ import { JsonObject } from '@perses-dev/core';
 import {
   PluginRegistrationConfig,
   PluginModule,
-  PluginResource,
+  PluginModuleResource,
   RegisterPlugin,
   PluginType,
   ALL_PLUGIN_TYPES,
@@ -29,7 +29,7 @@ import {
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
 export type PluginResourcesByTypeAndKind = {
-  [K in PluginType]: Record<string, PluginResource>;
+  [K in PluginType]: Record<string, PluginModuleResource>;
 };
 
 // Once a plugin is registered, it's stored by plugin type and kind
@@ -41,7 +41,7 @@ export type LoadedPluginsByTypeAndKind = {
  * Hook for setting up plugin registry state. Returns the state, plus a function
  * for registering plugins with that state.
  */
-export function useRegistryState(installedPlugins?: PluginResource[]) {
+export function useRegistryState(installedPlugins?: PluginModuleResource[]) {
   // Go through all installed plugins and bundled plugins and build an index of
   // those resources by type and kind
   const loadablePlugins = useMemo(() => {
@@ -53,11 +53,9 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
     // If no plugins installed or waiting on that data, nothing else to do
     if (installedPlugins === undefined) return loadableProps;
 
-    const addToLoadable = (resource: PluginResource) => {
-      const supportedKinds = resource.spec.supported_kinds;
-      for (const kind in supportedKinds) {
-        const pluginType = supportedKinds[kind];
-        if (pluginType === undefined) continue;
+    for (const resource of installedPlugins) {
+      for (const plugin of resource.spec.plugins) {
+        const { pluginType, kind } = plugin;
 
         const map = loadableProps[pluginType];
         if (map[kind] !== undefined) {
@@ -66,10 +64,6 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
         }
         map[kind] = resource;
       }
-    };
-
-    for (const resource of installedPlugins) {
-      addToLoadable(resource);
     }
 
     return loadableProps;

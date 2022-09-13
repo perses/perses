@@ -37,22 +37,8 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
-  "perses": {
-    "kind": "Plugin",
-    "metadata": {
-      "name": "Core Panels"
-    },
-    "spec": {
-      "supported_kinds": {
-        "LineChart": "Panel",
-        "GaugeChart": "Panel",
-        "StatChart": "Panel",
-        "EmptyChart": "Panel"
-      },
-      "plugin_module_path": "./dist/index.js"
-    }
-  },
   "files": [
-    "dist"
+    "dist",
+    "plugin.json"
   ]
 }

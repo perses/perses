@@ -13,7 +13,7 @@
 import {
   PluginModule,
   PluginRegistryProps,
-  PluginResource,
+  PluginModuleResource,
   PluginSetupFunction,
   RegisterPlugin,
 } from '@perses-dev/plugin-system';
@@ -24,20 +24,27 @@ import {
  * to add mock plugins before rendering components that use them.
  */
 export function mockPluginRegistryProps() {
-  const mockPluginResource: PluginResource = {
-    kind: 'Plugin',
+  const mockPluginResource: PluginModuleResource = {
+    kind: 'PluginModule',
     metadata: {
-      name: 'Fake Plugin for Tests',
+      name: 'Fake Plugin Module for Tests',
     },
     spec: {
-      supported_kinds: {},
+      plugins: [],
     },
   };
 
   // Allow adding mock plugins in tests
   const mockSetupFunctions: PluginSetupFunction[] = [];
   const addMockPlugin: RegisterPlugin = (config) => {
-    mockPluginResource.spec.supported_kinds[config.kind] = config.pluginType;
+    mockPluginResource.spec.plugins.push({
+      pluginType: config.pluginType,
+      kind: config.kind,
+      display: {
+        name: `Fake Plugin ${mockPluginResource.spec.plugins.length + 1}`,
+      },
+    });
+
     mockSetupFunctions.push((registerPlugin) => {
       registerPlugin(config);
     });

@@ -34,22 +34,8 @@
     "react": "^17.0.2",
     "react-query": "^3.34.16"
   },
-  "perses": {
-    "kind": "Plugin",
-    "metadata": {
-      "name": "Prometheus"
-    },
-    "spec": {
-      "supported_kinds": {
-        "PrometheusLabelNames": "Variable",
-        "PrometheusLabelValues": "Variable",
-        "Interval": "Variable",
-        "PrometheusGraphQuery": "GraphQuery"
-      },
-      "plugin_module_path": "./dist/index.js"
-    }
-  },
   "files": [
-    "dist"
+    "dist",
+    "plugin.json"
   ]
 }
