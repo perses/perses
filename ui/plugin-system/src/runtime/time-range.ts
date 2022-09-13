@@ -17,7 +17,7 @@ import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
 export interface TimeRange {
   timeRange: AbsoluteTimeRange;
   initialValue: TimeRangeValue;
-  // defaultDuration: DurationString;
+  setTimeRange: (value: TimeRangeValue) => void;
 }
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);

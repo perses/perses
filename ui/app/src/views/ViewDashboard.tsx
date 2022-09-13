@@ -29,16 +29,14 @@ function ViewDashboard() {
 
   const dashboardParam = searchParams.get('dashboard');
   const dashboard = useSampleData<DashboardResource>(dashboardParam || DEFAULT_DASHBOARD_ID);
-
   const defaultDuration = dashboard?.spec.duration ?? '1h';
 
-  // TODO: preserve all existing params, change to use template variable approach
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
   const parsedParam = fromParam !== null ? fromParam.split('-')[1] : defaultDuration;
   const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : defaultDuration;
 
-  // TODO: cleanup, fix types
+  // TODO: cleanup, better way to determine query param format
   const defaultTimeRange =
     fromParam !== null && toParam !== null && toParam !== 'now'
       ? { start: new Date(Number(fromParam)), end: new Date(Number(toParam)) }
@@ -51,7 +49,7 @@ function ViewDashboard() {
   }
 
   const handleOnDateRangeChange = (event: TimeRangeValue) => {
-    // TODO: create util to convert Perses RelativeTimeRange to GrafanaRelativeTimeRange (ex: from=now-1h&to=now)
+    // TODO: refactor, preserve all existing params
     if (isRelativeValue(event)) {
       setSearchParams({
         dashboard: dashboardParam ?? '',

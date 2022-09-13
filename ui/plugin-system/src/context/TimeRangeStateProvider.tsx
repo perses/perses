@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo, createContext, useContext, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeValue } from '@perses-dev/core';
-import { TimeRangeContext } from '../runtime/time-range';
+import { TimeRange, TimeRangeContext } from '../runtime/time-range';
 
 export interface TimeRangeProviderProps {
   // TODO: initialValue also needs to accept an AbsoluteTimeRange
@@ -33,7 +33,7 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
     : initialValue;
   const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
-  const setTimeRange: TimeRangeSetter['setTimeRange'] = useCallback(
+  const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
       if (isRelativeValue(value)) {
         const convertedAbsoluteTime = toAbsoluteTimeRange(value);
@@ -48,39 +48,7 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
     [onDateRangeChange]
   );
 
-  // TODO: delete, consolidate with runtime/time-range.ts
-  // const ctx = useMemo(
-  //   () => ({ timeRange, defaultDuration: (initialValue as RelativeTimeRange).pastDuration ?? '1h' }),
-  //   [timeRange, initialValue]
-  // );
+  const ctx = useMemo(() => ({ timeRange, initialValue, setTimeRange }), [timeRange, initialValue, setTimeRange]);
 
-  const ctx = useMemo(() => ({ timeRange, initialValue }), [timeRange, initialValue]);
-
-  const setters = useMemo(() => ({ setTimeRange }), [setTimeRange]);
-
-  return (
-    <TimeRangeSetterContext.Provider value={setters}>
-      <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>
-    </TimeRangeSetterContext.Provider>
-  );
-}
-
-/**
- * Setters for manipulating time range state.
- */
-export interface TimeRangeSetter {
-  setTimeRange: (value: TimeRangeValue) => void;
-}
-
-export const TimeRangeSetterContext = createContext<TimeRangeSetter | undefined>(undefined);
-
-/**
- * Gets the setters for time range selection provided by the TimeRangeStateProvider at runtime.
- */
-export function useTimeRangeSetter() {
-  const ctx = useContext(TimeRangeSetterContext);
-  if (ctx === undefined) {
-    throw new Error('No TimeRangeSetterContext found. Did you forget a Provider?');
-  }
-  return ctx;
+  return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }

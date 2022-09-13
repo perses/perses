@@ -22,7 +22,7 @@ import {
   DurationString,
   RelativeTimeRange,
 } from '@perses-dev/core';
-import { useTimeRange, useTimeRangeSetter } from '@perses-dev/plugin-system';
+import { useTimeRange } from '@perses-dev/plugin-system';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -40,9 +40,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 const FORM_CONTROL_LABEL = 'Time Range';
 
 export function TimeRangeControls() {
-  // TODO: combine setter into useTimeRange instead of importing separately
-  const { setTimeRange } = useTimeRangeSetter();
-  const { initialValue } = useTimeRange();
+  const { initialValue, setTimeRange } = useTimeRange();
 
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialValue);
 
