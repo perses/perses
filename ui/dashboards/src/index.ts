@@ -14,3 +14,4 @@
 export * from './components';
 export * from './context';
 export * from './views';
+export * from './templating';

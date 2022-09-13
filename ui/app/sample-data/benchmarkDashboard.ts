@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 
 const benchmarkDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -25,51 +25,83 @@ const benchmarkDashboard: DashboardResource = {
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
     duration: '6h',
-    variables: {
-      job: {
-        kind: 'PrometheusLabelValues',
+    variables: [
+      {
+        name: 'job',
+        kind: 'TextVariable',
         options: {
-          label_name: 'job',
-          match: ['node_uname_info'],
+          value: 'node',
         },
-        display: {
-          label: 'Job',
-        },
-        selection: {
-          default_value: 'node',
-        },
-      } as AnyVariableDefinition,
-      instance: {
-        kind: 'PrometheusLabelValues',
+      },
+      {
+        name: 'instance',
+        kind: 'TextVariable',
         options: {
-          label_name: 'instance',
-          match: ['node_uname_info{job="node"}'],
+          value: 'demo.do.prometheus.io:9100',
         },
-        display: {
-          label: 'Node',
-        },
-        selection: {
-          default_value: ['demo.do.prometheus.io:9100'],
-          all_value: '$__all',
-        },
-      } as AnyVariableDefinition,
-      interval: {
-        kind: 'Interval',
+      },
+      {
+        name: 'other',
+        kind: 'ListVariable',
         options: {
-          values: ['1m', '5m', '10m', '1h'],
-          auto: {
-            step_count: 50,
-            min_interval: '1m',
-          },
+          kind: 'Test',
+          allowMultiple: true,
+          options: {},
         },
-        display: {
-          label: 'Interval',
+      },
+      {
+        name: 'interval',
+        kind: 'TextVariable',
+        options: {
+          value: '1m',
         },
-        selection: {
-          default_value: '1h',
-        },
-      } as AnyVariableDefinition,
-    },
+      },
+    ],
+    // variables: {
+    //   job: {
+    //     kind: 'PrometheusLabelValues',
+    //     options: {
+    //       label_name: 'job',
+    //       match: ['node_uname_info'],
+    //     },
+    //     display: {
+    //       label: 'Job',
+    //     },
+    //     selection: {
+    //       default_value: 'node',
+    //     },
+    //   } as AnyVariableDefinition,
+    //   instance: {
+    //     kind: 'PrometheusLabelValues',
+    //     options: {
+    //       label_name: 'instance',
+    //       match: ['node_uname_info{job="node"}'],
+    //     },
+    //     display: {
+    //       label: 'Node',
+    //     },
+    //     selection: {
+    //       default_value: ['demo.do.prometheus.io:9100'],
+    //       all_value: '$__all',
+    //     },
+    //   } as AnyVariableDefinition,
+    //   interval: {
+    //     kind: 'Interval',
+    //     options: {
+    //       values: ['1m', '5m', '10m', '1h'],
+    //       auto: {
+    //         step_count: 50,
+    //         min_interval: '1m',
+    //       },
+    //     },
+    //     display: {
+    //       label: 'Interval',
+    //     },
+    //     selection: {
+    //       default_value: '1h',
+    //     },
+    //   } as AnyVariableDefinition,
+    // },
     panels: {
       seriesTest: {
         kind: 'LineChart',

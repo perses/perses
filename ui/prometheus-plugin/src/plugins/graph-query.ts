@@ -60,7 +60,7 @@ export function usePrometheusGraphQuery(
     };
   }, [timeRange, step]);
 
-  const { result: query, needsVariableValuesFor } = useReplaceTemplateString(definition.options.query);
+  const query = useReplaceTemplateString(definition.options.query.replace('$__rate_interval', `15s`));
 
   const request: RangeQueryRequestParameters = {
     query,
@@ -74,7 +74,7 @@ export function usePrometheusGraphQuery(
     isLoading: loading,
     error,
   } = useRangeQuery(request, {
-    enabled: needsVariableValuesFor.size === 0,
+    enabled: true,
   });
 
   const data = useMemo(() => {

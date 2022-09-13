@@ -13,29 +13,55 @@
 
 import { Definition, JsonObject } from './definitions';
 
-/**
- * Variable definition options that are common to all variables.
- */
-export interface VariableDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
-  display: VariableDisplayOptions;
-  selection: VariableSelectionOptions;
-  capturing_regexp?: string;
-}
-
-export interface VariableDisplayOptions extends JsonObject {
-  hide?: boolean;
-  label: string;
-}
-
-export type VariableSelectionOptions = SingleSelectOptions | MultiSelectOptions;
-
-export type SingleSelectOptions = {
-  default_value: string;
-};
-
-export type MultiSelectOptions = {
-  default_value: string[];
-  all_value?: string | typeof DEFAULT_ALL_VALUE;
-};
-
 export const DEFAULT_ALL_VALUE = '$__all' as const;
+
+export type VariableName = string;
+
+export type VariableState = {
+  name: VariableName;
+  value: VariableValue;
+  options?: VariableOption[];
+  loading: boolean;
+  error?: Error | null;
+};
+
+export type VariableOption = { label: string; value: string };
+
+export type VariablesState = Record<VariableName, VariableState>;
+
+export type VariableValue = string | string[] | null;
+
+export interface IVariable<TKind extends string, TOptions extends JsonObject = JsonObject>
+  extends Definition<TOptions> {
+  kind: TKind;
+  name: VariableName;
+  display?: {
+    label?: string;
+    hidden?: boolean;
+  };
+  defaultValue?: VariableValue;
+  options: TOptions;
+}
+
+export interface TextVariableOptions extends JsonObject {
+  value: string;
+}
+
+export type TextVariableDefintion = IVariable<'TextVariable', TextVariableOptions>;
+
+export type ListVariableOptions<TKind extends string, TOptions extends JsonObject> = {
+  allowMultiple?: boolean;
+  allowAllValue?: boolean;
+  customAllValue?: string;
+  kind: TKind;
+  options: TOptions;
+};
+
+export type ListVariableDefintion<TOptions extends JsonObject = JsonObject, TKind extends string = string> = IVariable<
+  'ListVariable',
+  ListVariableOptions<TKind, TOptions>
+>;
+
+// All Variables
+export type VariableDefinition = TextVariableDefintion | ListVariableDefintion;
+export type VariableDefinitions = VariableDefinition[];

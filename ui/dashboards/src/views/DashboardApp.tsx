@@ -14,10 +14,11 @@
 import { Box } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { useState } from 'react';
-import { VariableList, Dashboard } from '../components';
+import { Dashboard } from '../components';
 import AddPanel from '../components/AddPanel/AddPanel';
 import { DashboardToolbar } from '../components/DashboardToolbar';
 import { useDashboard } from '../context';
+import { TemplateVariableList } from '../templating';
 import { ViewDashboardProps } from './ViewDashboard';
 
 export const DashboardApp = (props: ViewDashboardProps) => {
@@ -50,7 +51,7 @@ export const DashboardApp = (props: ViewDashboardProps) => {
         }}
       >
         <DashboardToolbar dashboardName={dashboardResource.metadata.name} onAddPanel={() => setShowAddPanel(true)} />
-        <VariableList variables={dashboardResource.spec.variables} sx={{ margin: (theme) => theme.spacing(1, 0, 2) }} />
+        <TemplateVariableList />
         <Dashboard spec={dashboard} />
         <AddPanel isOpen={showAddPanel} onClose={() => setShowAddPanel(false)} />
         {children}
