@@ -1,0 +1,42 @@
+{
+  "kind": "PluginModule",
+  "metadata": {
+    "name": "Core Panels"
+  },
+  "spec": {
+    "plugins": [
+      {
+        "pluginType": "Panel",
+        "kind": "LineChart",
+        "display": {
+          "name": "Line Chart",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "GaugeChart",
+        "display": {
+          "name": "Gauge Chart",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "StatChart",
+        "display": {
+          "name": "Stat Chart",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "EmptyChart",
+        "display": {
+          "name": "Empty Chart",
+          "description": ""
+        }
+      }
+    ]
+  }
+}
