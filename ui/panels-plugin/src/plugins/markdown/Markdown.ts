@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EmptyChart } from './plugins/empty-chart';
-import { GaugeChart } from './plugins/gauge-chart';
-import { LineChart } from './plugins/line-chart';
-import { Markdown } from './plugins/markdown';
-import { StatChart } from './plugins/stat-chart';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialMarkdownPanelOptions, MarkdownPanelOptions } from './markdown-panel-model';
+import { MarkdownPanel } from './MarkdownPanel';
+import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';
 
-// Just export the plugins under the same name as the kinds they handle from the plugin.json
-export { LineChart, GaugeChart, EmptyChart, StatChart, Markdown };
+/**
+ * The core Markdown panel plugin in Perses.
+ */
+export const Markdown: PanelPlugin<MarkdownPanelOptions> = {
+  PanelComponent: MarkdownPanel,
+  OptionsEditorComponent: MarkdownPanelOptionsEditor,
+  createInitialOptions: createInitialMarkdownPanelOptions,
+};
