@@ -32,7 +32,9 @@ interface TimeRangeSelectorProps {
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   const { inputLabel, value, timeOptions, onSelectChange, onCustomClick } = props;
-  const formattedValue = !isRelativeTimeRange(value) ? formatAbsoluteRange(value, DATE_TIME_FORMAT) : value.pastDuration;
+  const formattedValue = !isRelativeTimeRange(value)
+    ? formatAbsoluteRange(value, DATE_TIME_FORMAT)
+    : value.pastDuration;
   return (
     <Select value={formattedValue} label={inputLabel} onChange={onSelectChange}>
       {timeOptions.map((item, idx) => (
