@@ -11,9 +11,8 @@ import {
   VariableValue,
   ListVariableDefinition,
   VariableDefinition,
+  DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/core';
-
-const ALL_VALUE = '$__all';
 
 type TemplateVariableSrv = {
   variableDefinitions: VariableDefinitions;

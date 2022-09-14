@@ -57,51 +57,6 @@ const benchmarkDashboard: DashboardResource = {
         },
       },
     ],
-    // variables: {
-    //   job: {
-    //     kind: 'PrometheusLabelValues',
-    //     options: {
-    //       label_name: 'job',
-    //       match: ['node_uname_info'],
-    //     },
-    //     display: {
-    //       label: 'Job',
-    //     },
-    //     selection: {
-    //       default_value: 'node',
-    //     },
-    //   } as AnyVariableDefinition,
-    //   instance: {
-    //     kind: 'PrometheusLabelValues',
-    //     options: {
-    //       label_name: 'instance',
-    //       match: ['node_uname_info{job="node"}'],
-    //     },
-    //     display: {
-    //       label: 'Node',
-    //     },
-    //     selection: {
-    //       default_value: ['demo.do.prometheus.io:9100'],
-    //       all_value: '$__all',
-    //     },
-    //   } as AnyVariableDefinition,
-    //   interval: {
-    //     kind: 'Interval',
-    //     options: {
-    //       values: ['1m', '5m', '10m', '1h'],
-    //       auto: {
-    //         step_count: 50,
-    //         min_interval: '1m',
-    //       },
-    //     },
-    //     display: {
-    //       label: 'Interval',
-    //     },
-    //     selection: {
-    //       default_value: '1h',
-    //     },
-    //   } as AnyVariableDefinition,
-    // },
     panels: {
       seriesTest: {
         kind: 'LineChart',

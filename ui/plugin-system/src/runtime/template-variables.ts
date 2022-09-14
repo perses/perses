@@ -23,7 +23,7 @@ export const TemplateVariableContext = createContext<TemplateVariableSrv | undef
 function useTemplateVariableContext() {
   const ctx = useContext(TemplateVariableContext);
   if (ctx === undefined) {
-    throw new Error('No TemplateVariableContextV2 found. Did you forget a Provider?');
+    throw new Error('No TemplateVariableContext found. Did you forget a Provider?');
   }
   return ctx;
 }

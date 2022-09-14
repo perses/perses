@@ -41,52 +41,14 @@ const testDashboard: DashboardResource = {
           value: 'demo.do.prometheus.io:9100',
         },
       },
+      {
+        name: 'interval',
+        kind: 'TextVariable',
+        options: {
+          value: '1m',
+        },
+      },
     ],
-    // variables: {
-    //   job: {
-    //     kind: 'PrometheusLabelValues',
-    //     options: {
-    //       label_name: 'job',
-    //       match: ['node_uname_info'],
-    //     },
-    //     display: {
-    //       label: 'Job',
-    //     },
-    //     selection: {
-    //       default_value: 'node',
-    //     },
-    //   },
-    //   instance: {
-    //     kind: 'PrometheusLabelValues',
-    //     options: {
-    //       label_name: 'instance',
-    //       match: ['node_uname_info{job="node"}'],
-    //     },
-    //     display: {
-    //       label: 'Node',
-    //     },
-    //     selection: {
-    //       default_value: ['demo.do.prometheus.io:9100'],
-    //       all_value: '$__all',
-    //     },
-    //   },
-    //   interval: {
-    //     kind: 'Interval',
-    //     options: {
-    //       values: ['1m', '5m', '10m', '1h'],
-    //       auto: {
-    //         step_count: 50,
-    //         min_interval: '1m',
-    //       },
-    //     },
-    //     display: {
-    //       label: 'Interval',
-    //     },
-    //     selection: {
-    //       default_value: '1m',
-    //     },
-    //   },
-    // },
     panels: {
       cpu: {
         kind: 'LineChart',

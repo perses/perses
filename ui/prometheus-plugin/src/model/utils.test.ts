@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
 import { parseTemplateVariables, replaceTemplateVariable, replaceTemplateVariables } from './utils';
 
 describe('parseTemplateVariables()', () => {
