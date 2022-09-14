@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,45 +12,49 @@
 // limitations under the License.
 
 import { PluginSetupFunction } from '@perses-dev/plugin-system';
-import { EmptyChart, EmptyChartKind } from './plugins/empty-chart/EmptyChart';
-import { GaugeChartPanel, GaugeChartKind } from './plugins/gauge-chart/GaugeChartPanel';
-import { LineChartPanel, LineChartKind } from './plugins/line-chart/LineChartPanel';
-import { StatChartKind, StatChartPanel } from './plugins/stat-chart/StatChartPanel';
+import { createInitialEmptyChartOptions, EmptyChart, EmptyChartOptionsEditor } from './plugins/empty-chart';
+import { createInitialGaugeChartOptions, GaugeChartPanel, GaugeChartOptionsEditor } from './plugins/gauge-chart';
+import { LineChartPanel, LineChartOptionsEditor, createInitialLineChartOptions } from './plugins/line-chart';
+import { createInitialStatChartOptions, StatChartOptionsEditor, StatChartPanel } from './plugins/stat-chart';
 
 export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Panel',
-    kind: LineChartKind,
-    validate: undefined,
+    kind: 'LineChart',
     plugin: {
       PanelComponent: LineChartPanel,
+      OptionsEditorComponent: LineChartOptionsEditor,
+      createInitialOptions: createInitialLineChartOptions,
     },
   });
 
   registerPlugin({
     pluginType: 'Panel',
-    kind: GaugeChartKind,
-    validate: undefined,
+    kind: 'GaugeChart',
     plugin: {
       PanelComponent: GaugeChartPanel,
+      OptionsEditorComponent: GaugeChartOptionsEditor,
+      createInitialOptions: createInitialGaugeChartOptions,
     },
   });
 
   registerPlugin({
     pluginType: 'Panel',
-    kind: StatChartKind,
-    validate: undefined,
+    kind: 'StatChart',
     plugin: {
       PanelComponent: StatChartPanel,
+      OptionsEditorComponent: StatChartOptionsEditor,
+      createInitialOptions: createInitialStatChartOptions,
     },
   });
 
   registerPlugin({
     pluginType: 'Panel',
-    kind: EmptyChartKind,
-    validate: undefined,
+    kind: 'EmptyChart',
     plugin: {
       PanelComponent: EmptyChart,
+      OptionsEditorComponent: EmptyChartOptionsEditor,
+      createInitialOptions: createInitialEmptyChartOptions,
     },
   });
 };

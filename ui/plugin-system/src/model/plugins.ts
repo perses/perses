@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,14 +16,29 @@ import { GraphQueryDefinition, GraphQueryPlugin } from './graph-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
 
-export interface PluginResource {
-  kind: 'Plugin';
+/**
+ * Information about a module/package that contains plugins.
+ */
+export interface PluginModuleResource {
+  kind: 'PluginModule';
   metadata: ResourceMetadata;
   spec: PluginSpec;
 }
 
 export interface PluginSpec {
-  supported_kinds: Record<string, PluginType>;
+  plugins: PluginMetadata[];
+}
+
+/**
+ * Metadata about an individual plugin that's part of a PluginModule.
+ */
+export interface PluginMetadata {
+  pluginType: PluginType;
+  kind: string;
+  display: {
+    name: string;
+    description?: string;
+  };
 }
 
 /**
@@ -100,6 +115,5 @@ export type PluginRegistrationConfig<Options extends JsonObject> = {
 export type PluginConfig<Type extends PluginType, Options extends JsonObject> = {
   pluginType: Type;
   kind: string;
-  validate?: (config: PluginDefinition<Type, JsonObject>) => string[];
   plugin: PluginImplementation<Type, Options>;
 };

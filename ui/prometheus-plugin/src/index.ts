@@ -21,7 +21,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Variable',
     kind: PrometheusLabelNamesKind,
-    validate: undefined, // TODO
     plugin: {
       useVariableOptions: usePrometheusLabelNames,
     },
@@ -29,7 +28,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Variable',
     kind: PrometheusLabelValuesKind,
-    validate: undefined, // TODO
     plugin: {
       useVariableOptions: usePrometheusLabelValues,
     },
@@ -37,7 +35,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'Variable',
     kind: IntervalKind,
-    validate: undefined, // TODO
     plugin: {
       useVariableOptions: useIntervalValues,
     },
@@ -45,7 +42,6 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
   registerPlugin({
     pluginType: 'GraphQuery',
     kind: PrometheusGraphQueryKind,
-    validate: undefined, // TODO
     plugin: {
       useGraphQuery: usePrometheusGraphQuery,
     },

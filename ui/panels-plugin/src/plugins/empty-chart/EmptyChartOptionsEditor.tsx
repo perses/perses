@@ -11,8 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph-queries';
-export * from './panels';
-export * from './plugins';
-export * from './variables';
-export * from './visual-editing';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Box } from '@mui/material';
+import { EmptyChartOptions } from './empty-chart-model';
+
+export type EmptyChartOptionsEditorProps = OptionsEditorProps<EmptyChartOptions>;
+
+export function EmptyChartOptionsEditor(props: EmptyChartOptionsEditorProps) {
+  const { value } = props;
+  return <Box>{JSON.stringify(value)}</Box>;
+}

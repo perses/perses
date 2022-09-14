@@ -15,19 +15,22 @@ import {
   MenuItem,
   Stack,
   Select,
+  SelectProps,
   TextField,
   InputLabel,
   FormControl,
   Grid,
-  SelectChangeEvent,
   Box,
   Button,
   Typography,
 } from '@mui/material';
-import { Drawer } from '@perses-dev/components';
+import { Drawer, ErrorAlert } from '@perses-dev/components';
+import { JsonObject } from '@perses-dev/core';
+import { PluginBoundary } from '@perses-dev/plugin-system';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
+import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
 
 interface AddPanelProps {
   isOpen: boolean;
@@ -41,26 +44,42 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
   const [group, setGroup] = useState(0);
   const [panelName, setPanelName] = useState('');
   const [panelDescription, setPanelDescription] = useState('');
+  const [kind, setKind] = useState('');
+  const [options, setOptions] = useState<JsonObject>({});
 
-  const onSelectGroupChange = (e: SelectChangeEvent<number>) => {
-    setGroup(e.target.value as number);
+  const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
+    const { value } = e.target;
+
+    // Handle string (which would be empty string but shouldn't happen since we don't allow a "None" option) by
+    // just ignoring it
+    if (typeof value === 'string') return;
+
+    setGroup(value);
   };
 
-  const onPanelNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handlePanelNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPanelName(e.target.value);
   };
 
-  const onPanelDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handlePanelDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPanelDescription(e.target.value);
+  };
+
+  const handleKindChange: SelectProps<string>['onChange'] = (e) => {
+    setKind(e.target.value);
+  };
+
+  const handleOptionsChange: PanelOptionsEditorProps['onChange'] = (next) => {
+    setOptions(next);
   };
 
   const onAddPanelClick = (e: FormEvent) => {
     e.preventDefault();
     const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
     addPanel(panelKey, {
-      kind: 'EmptyChart',
+      kind,
       display: { name: panelName, description: panelDescription },
-      options: {},
+      options,
     });
 
     // find maximum y so new panel is added to the end of the grid
@@ -88,7 +107,7 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
           <Grid item xs={4}>
             <FormControl>
               <InputLabel id="select-group">Group</InputLabel>
-              <Select required labelId="select-group" label="Group" value={group} onChange={onSelectGroupChange}>
+              <Select required labelId="select-group" label="Group" value={group} onChange={handleGroupChange}>
                 {layouts.map((layout, index) => (
                   <MenuItem key={index} value={index}>
                     {layout.spec.display?.title || `Group ${index + 1}`}
@@ -99,13 +118,25 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
           </Grid>
           <Grid item xs={8}>
             <Stack spacing={2} sx={{ flexGrow: '1' }}>
-              <FormControl>
-                <TextField required label="Panel Name" variant="outlined" onChange={onPanelNameChange} />
-              </FormControl>
-              <FormControl>
-                <TextField label="Description" variant="outlined" onChange={onPanelDescriptionChange} />
-              </FormControl>
+              <TextField required label="Panel Name" variant="outlined" onChange={handlePanelNameChange} />
+              <TextField label="Description" variant="outlined" onChange={handlePanelDescriptionChange} />
             </Stack>
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl>
+              <InputLabel id="panel-type-label">Panel Type</InputLabel>
+              <Select required labelId="panel-type-label" label="Panel Type" value={kind} onChange={handleKindChange}>
+                {/* TODO: Replace this with options that come from asking the plugin system what panel plugins are available */}
+                <MenuItem value="LineChart">Line Chart</MenuItem>
+                <MenuItem value="GaugeChart">Gauge Chart</MenuItem>
+                <MenuItem value="StatChart">Stat Chart</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={8}>
+            <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
+              {kind !== '' && <PanelOptionsEditor kind={kind} value={options} onChange={handleOptionsChange} />}
+            </PluginBoundary>
           </Grid>
         </Grid>
       </form>

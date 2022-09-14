@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,14 +12,10 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { JsonObject } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
-
-export const EmptyChartKind = 'EmptyChart' as const;
+import { EmptyChartOptions } from './empty-chart-model';
 
 export type EmptyChartProps = PanelProps<EmptyChartOptions>;
-
-type EmptyChartOptions = JsonObject;
 
 export function EmptyChart(props: EmptyChartProps) {
   return <Box sx={{ overflow: 'hidden' }}>{props.definition.kind}</Box>;

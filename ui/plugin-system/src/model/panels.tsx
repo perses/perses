@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,12 +13,15 @@
 
 import { JsonObject, PanelDefinition } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
+import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
 
 /**
  * Plugin the provides custom visualizations inside of a Panel.
  */
 export interface PanelPlugin<Options extends JsonObject = JsonObject> {
   PanelComponent: React.ComponentType<PanelProps<Options>>;
+  OptionsEditorComponent: OptionsEditor<Options>;
+  createInitialOptions: InitialOptionsCallback<Options>;
 }
 
 /**
@@ -33,13 +36,20 @@ export interface PanelProps<Options extends JsonObject> {
 }
 
 /**
- * Renders a PanelComponent from a panel plugin at runtime.
+ * Hook for using a panel plugin at runtime.
  */
-export const PanelComponent: PanelPlugin['PanelComponent'] = (props) => {
-  const plugin = usePlugin('Panel', props.definition);
-  if (plugin === undefined) {
-    return null;
+export function usePanelPlugin(kind: string): PanelPlugin<JsonObject> {
+  const plugin = usePlugin('Panel', kind);
+  if (plugin !== undefined) {
+    return plugin;
   }
-  const { PanelComponent: PluginComponent } = plugin;
-  return <PluginComponent {...props} />;
+
+  // Return a default/placeholder plugin while loading happens
+  return defaultPanelPlugin;
+}
+
+const defaultPanelPlugin: PanelPlugin<JsonObject> = {
+  PanelComponent: () => null,
+  OptionsEditorComponent: () => null,
+  createInitialOptions: () => ({}),
 };
