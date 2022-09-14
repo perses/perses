@@ -61,7 +61,9 @@ export function TimeRangeControls() {
         />
       </Popover>
       <FormControl fullWidth>
-        <InputLabel id="select-time-range">{FORM_CONTROL_LABEL}</InputLabel>
+        <InputLabel id="select-time-range" variant="filled">
+          {FORM_CONTROL_LABEL}
+        </InputLabel>
         <Box ref={anchorEl}>
           <TimeRangeSelector
             timeOptions={TIME_OPTIONS}

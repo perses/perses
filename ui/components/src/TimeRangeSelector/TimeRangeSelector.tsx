@@ -35,7 +35,14 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
     ? formatAbsoluteRange(value, DATE_TIME_FORMAT)
     : value.pastDuration;
   return (
-    <Select value={formattedValue} labelId="select-time-range" onChange={onSelectChange}>
+    <Select
+      value={formattedValue}
+      labelId="select-time-range"
+      onChange={onSelectChange}
+      sx={(theme) => ({
+        paddingTop: theme.spacing(1),
+      })}
+    >
       {timeOptions.map((item, idx) => (
         <MenuItem key={idx} value={item.value.pastDuration}>
           {item.display}
