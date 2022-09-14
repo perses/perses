@@ -36,17 +36,20 @@ describe('VariableList', () => {
     },
   };
 
+  // Make sure fake data stays consistent so don't get a render loop
+  const data = ['node', 'all'];
+
   const FAKE_VARIABLE_PLUGIN: VariablePlugin<JsonObject> = {
     useVariableOptions: () => {
       return {
-        data: ['node', 'all'],
+        data,
         loading: false,
         error: undefined,
       };
     },
   };
 
-  const renderVariableOptionsDrawer = () => {
+  const renderVariableList = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
     addMockPlugin('Variable', 'PrometheusLabelValues', FAKE_VARIABLE_PLUGIN);
     renderWithContext(
@@ -59,26 +62,26 @@ describe('VariableList', () => {
   };
 
   it('should display Variables as the title', async () => {
-    renderVariableOptionsDrawer();
+    renderVariableList();
     const title = await screen.findByText('Variables');
     expect(title).toBeInTheDocument();
   });
 
   describe('VariableAutocomplete', () => {
     it('should display correct variable', async () => {
-      renderVariableOptionsDrawer();
+      renderVariableList();
       const jobInput = await screen.findByLabelText('Job');
       expect(jobInput).toBeInTheDocument();
     });
 
     it('should display correct default value', async () => {
-      renderVariableOptionsDrawer();
+      renderVariableList();
       const jobValue = await screen.findByDisplayValue('node');
       expect(jobValue).toBeInTheDocument();
     });
 
     it('should display correct options', async () => {
-      renderVariableOptionsDrawer();
+      renderVariableList();
       const openButton = await screen.findByRole('button', { name: 'Open' });
       userEvent.click(openButton);
       const option1 = await screen.findByText('all');
