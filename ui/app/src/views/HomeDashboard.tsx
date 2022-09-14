@@ -41,6 +41,7 @@ function HomeDashboard() {
 
   const [searchParams] = useSearchParams();
 
+  // TODO: completely remove old dashboard url param approach
   const dashboardParam = searchParams.get('dashboard');
   const dashboard = useSampleData<DashboardResource>(dashboardParam || DEFAULT_DASHBOARD_ID);
 
