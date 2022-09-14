@@ -41,15 +41,6 @@ const benchmarkDashboard: DashboardResource = {
         },
       },
       {
-        name: 'other',
-        kind: 'ListVariable',
-        options: {
-          kind: 'Test',
-          allowMultiple: true,
-          options: {},
-        },
-      },
-      {
         name: 'interval',
         kind: 'TextVariable',
         options: {

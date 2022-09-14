@@ -235,7 +235,6 @@ function getAllOption() {
 function hydrateTemplateVariableState(definition: VariableDefinition) {
   const v = definition;
   const varState: VariableState = {
-    name: v.name,
     value: null,
     loading: false,
     error: null,
