@@ -90,7 +90,7 @@ export function useTemplateVariableActions() {
   });
 }
 
-export function useTemplateVariableDefintions() {
+export function useTemplateVariableDefinitions() {
   const store = useTemplateVariableSrvContext();
   return useStore(store, (s) => s.variableDefinitions);
 }

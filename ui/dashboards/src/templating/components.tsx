@@ -38,7 +38,7 @@ import { useEditMode } from '../context';
 import {
   useTemplateVariableSrv,
   useTemplateVariable,
-  useTemplateVariableDefintions,
+  useTemplateVariableDefinitions,
   useTemplateVariableActions,
 } from './core';
 
@@ -120,7 +120,7 @@ function ListVariable({ name }: TemplateVariableProps) {
 
 export function TemplateVariableList() {
   const [isEditing, setIsEditing] = useState(false);
-  const variableDefinitions = useTemplateVariableDefintions();
+  const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
   return (
     <Box m={2}>
