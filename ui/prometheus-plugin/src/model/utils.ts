@@ -27,7 +27,7 @@ export function replaceTemplateVariables(text: string, variableState: VariablesS
 }
 
 export function replaceTemplateVariable(text: string, varName: string, templateVariableValue: VariableValue) {
-  const variableTemplate = '\$' + varName;
+  const variableTemplate = '$' + varName;
   let replaceString = '';
   if (Array.isArray(templateVariableValue)) {
     replaceString = `(${templateVariableValue.join('|')})`; // regex style
@@ -36,8 +36,7 @@ export function replaceTemplateVariable(text: string, varName: string, templateV
     replaceString = templateVariableValue;
   }
 
-  // replace all
-  return text.replace(new RegExp(variableTemplate, 'g'), replaceString);
+  return text.replaceAll(variableTemplate, replaceString);
 }
 
 const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
