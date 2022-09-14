@@ -18,7 +18,6 @@ export const DEFAULT_ALL_VALUE = '$__all' as const;
 export type VariableName = string;
 
 export type VariableState = {
-  name: VariableName;
   value: VariableValue;
   options?: VariableOption[];
   loading: boolean;
