@@ -26,8 +26,6 @@ import { useRangeQuery } from '../model/prometheus-client';
 import { TemplateString, useReplaceTemplateString } from '../model/templating';
 import { getDurationStringSeconds, useDashboardPrometheusTimeRange, usePanelRangeStep } from '../model/time';
 
-export const PrometheusGraphQueryKind = 'PrometheusGraphQuery' as const;
-
 type PrometheusGraphQuery = GraphQueryDefinition<GraphQueryOptions>;
 
 interface GraphQueryOptions extends JsonObject {

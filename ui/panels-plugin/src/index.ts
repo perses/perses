@@ -11,50 +11,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginSetupFunction } from '@perses-dev/plugin-system';
-import { createInitialEmptyChartOptions, EmptyChart, EmptyChartOptionsEditor } from './plugins/empty-chart';
+import {
+  createInitialEmptyChartOptions,
+  EmptyChart as EmptyChartPanel,
+  EmptyChartOptionsEditor,
+} from './plugins/empty-chart';
 import { createInitialGaugeChartOptions, GaugeChartPanel, GaugeChartOptionsEditor } from './plugins/gauge-chart';
 import { LineChartPanel, LineChartOptionsEditor, createInitialLineChartOptions } from './plugins/line-chart';
 import { createInitialStatChartOptions, StatChartOptionsEditor, StatChartPanel } from './plugins/stat-chart';
 
-export const setup: PluginSetupFunction = (registerPlugin) => {
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: 'LineChart',
-    plugin: {
-      PanelComponent: LineChartPanel,
-      OptionsEditorComponent: LineChartOptionsEditor,
-      createInitialOptions: createInitialLineChartOptions,
-    },
-  });
+export const LineChart = {
+  pluginType: 'Panel',
+  kind: 'LineChart',
+  plugin: {
+    PanelComponent: LineChartPanel,
+    OptionsEditorComponent: LineChartOptionsEditor,
+    createInitialOptions: createInitialLineChartOptions,
+  },
+};
 
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: 'GaugeChart',
-    plugin: {
-      PanelComponent: GaugeChartPanel,
-      OptionsEditorComponent: GaugeChartOptionsEditor,
-      createInitialOptions: createInitialGaugeChartOptions,
-    },
-  });
+export const GaugeChart = {
+  pluginType: 'Panel',
+  kind: 'GaugeChart',
+  plugin: {
+    PanelComponent: GaugeChartPanel,
+    OptionsEditorComponent: GaugeChartOptionsEditor,
+    createInitialOptions: createInitialGaugeChartOptions,
+  },
+};
 
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: 'StatChart',
-    plugin: {
-      PanelComponent: StatChartPanel,
-      OptionsEditorComponent: StatChartOptionsEditor,
-      createInitialOptions: createInitialStatChartOptions,
-    },
-  });
+export const StatChart = {
+  pluginType: 'Panel',
+  kind: 'StatChart',
+  plugin: {
+    PanelComponent: StatChartPanel,
+    OptionsEditorComponent: StatChartOptionsEditor,
+    createInitialOptions: createInitialStatChartOptions,
+  },
+};
 
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: 'EmptyChart',
-    plugin: {
-      PanelComponent: EmptyChart,
-      OptionsEditorComponent: EmptyChartOptionsEditor,
-      createInitialOptions: createInitialEmptyChartOptions,
-    },
-  });
+export const EmptyChart = {
+  pluginType: 'Panel',
+  kind: 'EmptyChart',
+  plugin: {
+    PanelComponent: EmptyChartPanel,
+    OptionsEditorComponent: EmptyChartOptionsEditor,
+    createInitialOptions: createInitialEmptyChartOptions,
+  },
 };

@@ -42,24 +42,6 @@ export interface PluginMetadata {
 }
 
 /**
- * A JavaScript module with Perses plugins.
- */
-export interface PluginModule {
-  setup: PluginSetupFunction;
-}
-
-/**
- * When a PluginModule is loaded, this function is called to allow the module
- * to register plugins with Perses.
- */
-export type PluginSetupFunction = (registerPlugin: RegisterPlugin) => void;
-
-/**
- * Callback function that registers a plugin with Perses.
- */
-export type RegisterPlugin = <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => void;
-
-/**
  * All supported plugin type values as an array for use at runtime.
  */
 export const ALL_PLUGIN_TYPES = ['Variable', 'Panel', 'GraphQuery'] as const;

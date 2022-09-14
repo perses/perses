@@ -11,39 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginSetupFunction } from '@perses-dev/plugin-system';
-import { PrometheusGraphQueryKind, usePrometheusGraphQuery } from './plugins/graph-query';
-import { IntervalKind, useIntervalValues } from './plugins/interval-variable';
-import { PrometheusLabelNamesKind, usePrometheusLabelNames } from './plugins/label-names-variable';
-import { PrometheusLabelValuesKind, usePrometheusLabelValues } from './plugins/label-values-variable';
+import { usePrometheusGraphQuery } from './plugins/graph-query';
+import { useIntervalValues } from './plugins/interval-variable';
+import { usePrometheusLabelNames } from './plugins/label-names-variable';
+import { usePrometheusLabelValues } from './plugins/label-values-variable';
 
-export const setup: PluginSetupFunction = (registerPlugin) => {
-  registerPlugin({
-    pluginType: 'Variable',
-    kind: PrometheusLabelNamesKind,
-    plugin: {
-      useVariableOptions: usePrometheusLabelNames,
-    },
-  });
-  registerPlugin({
-    pluginType: 'Variable',
-    kind: PrometheusLabelValuesKind,
-    plugin: {
-      useVariableOptions: usePrometheusLabelValues,
-    },
-  });
-  registerPlugin({
-    pluginType: 'Variable',
-    kind: IntervalKind,
-    plugin: {
-      useVariableOptions: useIntervalValues,
-    },
-  });
-  registerPlugin({
-    pluginType: 'GraphQuery',
-    kind: PrometheusGraphQueryKind,
-    plugin: {
-      useGraphQuery: usePrometheusGraphQuery,
-    },
-  });
+export const PrometheusLabelNames = {
+  pluginType: 'Variable',
+  kind: 'PrometheusLabelNames',
+  plugin: {
+    useVariableOptions: usePrometheusLabelNames,
+  },
+};
+
+export const PrometheusLabelValues = {
+  pluginType: 'Variable',
+  kind: 'PrometheusLabelValues',
+  plugin: {
+    useVariableOptions: usePrometheusLabelValues,
+  },
+};
+
+export const Interval = {
+  pluginType: 'Variable',
+  kind: 'Interval',
+  plugin: {
+    useVariableOptions: useIntervalValues,
+  },
+};
+
+export const PrometheusGraphQuery = {
+  pluginType: 'GraphQuery',
+  kind: 'PrometheusGraphQuery',
+  plugin: {
+    useGraphQuery: usePrometheusGraphQuery,
+  },
 };

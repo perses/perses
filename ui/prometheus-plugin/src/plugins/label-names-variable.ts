@@ -18,8 +18,6 @@ import { useDashboardPrometheusTimeRange } from '../model/time';
 import { LabelNamesRequestParameters } from '../model/api-types';
 import { useLabelNames } from '../model/prometheus-client';
 
-export const PrometheusLabelNamesKind = 'PrometheusLabelNames' as const;
-
 type PrometheusLabelNames = VariableDefinition<LabelNamesOptions>;
 
 interface LabelNamesOptions extends JsonObject {

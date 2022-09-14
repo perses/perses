@@ -14,8 +14,6 @@
 import { JsonObject, DurationString, VariableDefinition } from '@perses-dev/core';
 import { UseVariableOptionsHook } from '@perses-dev/plugin-system';
 
-export const IntervalKind = 'Inverval' as const;
-
 type IntervalVariable = VariableDefinition<IntervalOptions>;
 
 interface IntervalOptions extends JsonObject {

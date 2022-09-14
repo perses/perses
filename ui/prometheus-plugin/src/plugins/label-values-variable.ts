@@ -18,8 +18,6 @@ import { useDashboardPrometheusTimeRange } from '../model/time';
 import { TemplateString, useReplaceTemplateStrings } from '../model/templating';
 import { useLabelValues } from '../model/prometheus-client';
 
-export const PrometheusLabelValuesKind = 'PrometheusLabelValues' as const;
-
 type PrometheusLabelValues = VariableDefinition<LabelValuesOptions>;
 
 interface LabelValuesOptions extends JsonObject {

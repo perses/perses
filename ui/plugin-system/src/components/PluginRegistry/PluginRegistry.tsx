@@ -13,13 +13,13 @@
 
 import { createContext, useContext, useMemo, useCallback } from 'react';
 import { useQuery } from 'react-query';
-import { PluginModule, PluginModuleResource, PluginType } from '../../model';
+import { PluginModuleResource, PluginType } from '../../model';
 import { LoadedPluginsByTypeAndKind, useRegistryState } from './registry-state';
 
 export interface PluginRegistryProps {
   children?: React.ReactNode;
   getInstalledPlugins: () => Promise<PluginModuleResource[]>;
-  importPluginModule: (resource: PluginModuleResource) => Promise<PluginModule>;
+  importPluginModule: (resource: PluginModuleResource) => Promise<unknown>;
 }
 
 /**

@@ -10,13 +10,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import {
-  PluginModule,
-  PluginRegistryProps,
-  PluginModuleResource,
-  PluginSetupFunction,
-  RegisterPlugin,
-} from '@perses-dev/plugin-system';
+import { JsonObject } from '@perses-dev/core';
+import { PluginRegistryProps, PluginModuleResource, PluginRegistrationConfig } from '@perses-dev/plugin-system';
 
 /**
  * Helper for mocking `PluginRegistry` data during tests. Returns props that can be spread on the `PluginRegistry`
@@ -34,9 +29,10 @@ export function mockPluginRegistryProps() {
     },
   };
 
+  const mockPluginModule: Record<string, PluginRegistrationConfig<JsonObject>> = {};
+
   // Allow adding mock plugins in tests
-  const mockSetupFunctions: PluginSetupFunction[] = [];
-  const addMockPlugin: RegisterPlugin = (config) => {
+  const addMockPlugin = (config: PluginRegistrationConfig<JsonObject>) => {
     mockPluginResource.spec.plugins.push({
       pluginType: config.pluginType,
       kind: config.kind,
@@ -45,18 +41,7 @@ export function mockPluginRegistryProps() {
       },
     });
 
-    mockSetupFunctions.push((registerPlugin) => {
-      registerPlugin(config);
-    });
-  };
-
-  // Our mock plugin module just calls all the setup functions that were added
-  const mockPluginModule: PluginModule = {
-    setup(registerPlugin) {
-      for (const setup of mockSetupFunctions) {
-        setup(registerPlugin);
-      }
-    },
+    mockPluginModule[config.kind] = config;
   };
 
   const pluginRegistryProps: Omit<PluginRegistryProps, 'children'> = {

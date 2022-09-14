@@ -16,9 +16,7 @@ import { useImmer } from 'use-immer';
 import { JsonObject } from '@perses-dev/core';
 import {
   PluginRegistrationConfig,
-  PluginModule,
   PluginModuleResource,
-  RegisterPlugin,
   PluginType,
   ALL_PLUGIN_TYPES,
   PluginImplementation,
@@ -78,7 +76,7 @@ export function useRegistryState(installedPlugins?: PluginModuleResource[]) {
   });
 
   // Create the register callback to pass to the module's setup function
-  const registerPlugin: RegisterPlugin = useCallback(
+  const registerPlugin = useCallback(
     <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => {
       // Just cast to the runtime plugin type that framework code knows about since the `Options` generic argument is
       // really only known to plugin authors for their type safety when developing plugins in Typescript
@@ -106,17 +104,21 @@ export function useRegistryState(installedPlugins?: PluginModuleResource[]) {
     [setPlugins]
   );
 
-  const registeredModules = useRef(new Set<PluginModule>());
+  const registeredModules = useRef(new Set<unknown>());
   const register = useCallback(
-    (pluginModule: PluginModule): void => {
+    (pluginModule: unknown): void => {
       // De-dupe register calls in case multiple plugin loading boundaries
       // are waiting for the same module in parallel
       if (registeredModules.current.has(pluginModule)) {
         return;
       }
 
-      // Call the setup function and remember it's been registered
-      pluginModule.setup(registerPlugin);
+      // For now, just treat the plugin module as something with some unknown plugin configs as named exports
+      for (const pluginConfig of Object.values(pluginModule as Record<string, PluginRegistrationConfig<JsonObject>>)) {
+        registerPlugin(pluginConfig);
+      }
+
+      // Remember it's been registered
       registeredModules.current.add(pluginModule);
     },
     [registerPlugin]
