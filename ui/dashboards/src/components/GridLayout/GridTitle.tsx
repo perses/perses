@@ -16,8 +16,11 @@ import ExpandedIcon from 'mdi-material-ui/ChevronUp';
 import CollapsedIcon from 'mdi-material-ui/ChevronDown';
 import AddIcon from 'mdi-material-ui/Plus';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
+import { useState } from 'react';
+import { useDashboardApp } from '../../context';
 
 export interface GridTitleProps {
+  index: number;
   title: string;
   collapse?: {
     isOpen: boolean;
@@ -33,7 +36,13 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { title, collapse, isEditMode, onAddClick, onEditClick } = props;
+  const { index, title, collapse, isEditMode, onAddClick, onEditClick } = props;
+
+  const [isHovered, setIsHovered] = useState(false);
+  const {
+    addPanelComponent: { setIsOpen: setIsAddPanelOpen },
+    addGroupComponent: { setIsOpen: setIsAddGroupOpen },
+  } = useDashboardApp();
 
   const text = (
     <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
@@ -50,6 +59,8 @@ export function GridTitle(props: GridTitleProps) {
         padding: (theme) => theme.spacing(1),
         backgroundColor: (theme) => theme.palette.background.default,
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {collapse ? (
         <>
@@ -57,12 +68,12 @@ export function GridTitle(props: GridTitleProps) {
             {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
           </IconButton>
           {text}
-          {isEditMode && onAddClick && onEditClick && (
+          {isEditMode && isHovered && onAddClick && onEditClick && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton onClick={onAddClick}>
+              <IconButton onClick={() => setIsAddPanelOpen(true)}>
                 <AddIcon />
               </IconButton>
-              <IconButton onClick={onEditClick}>
+              <IconButton onClick={() => setIsAddGroupOpen(true, index)}>
                 <PencilIcon />
               </IconButton>
             </Stack>

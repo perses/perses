@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Toolbar, Typography, Stack, Button, Box } from '@mui/material';
-import { LayoutDefinition } from '@perses-dev/core';
+// import { LayoutDefinition } from '@perses-dev/core';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import { useDashboardApp, useEditMode, useLayouts } from '../context';

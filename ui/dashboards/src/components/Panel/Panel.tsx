@@ -28,21 +28,15 @@ import {
   Stack,
   styled,
 } from '@mui/material';
-// import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import MenuIcon from 'mdi-material-ui/DotsVertical';
-import DragIcon from 'mdi-material-ui/Drag';
+import DragIcon from 'mdi-material-ui/DragVertical';
 import { useEditMode } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
-}
-
-enum PanelIcons {
-  Edit = 'edit',
-  Drag = 'drag',
-  Move = 'move',
 }
 
 /**
@@ -52,7 +46,7 @@ export function Panel(props: PanelProps) {
   const { definition, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
-  const [displayIcon, setDisplayIcon] = useState<PanelIcons | undefined>(undefined);
+  const [isHovered, setIsHovered] = useState(false);
 
   const { width, height } = useResizeObserver({ ref: contentElement });
 
@@ -84,6 +78,8 @@ export function Panel(props: PanelProps) {
       }}
       variant="outlined"
       {...others}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <CardHeader
         title={
@@ -111,7 +107,7 @@ export function Panel(props: PanelProps) {
                 marginLeft: 'auto',
               }}
             >
-              {/* {!isEditMode && definition.display.description && (
+              {!isEditMode && isHovered && definition.display.description && (
                 <InfoTooltip
                   id="info-tooltip"
                   description={definition.display.description}
@@ -124,60 +120,18 @@ export function Panel(props: PanelProps) {
                     sx={{ cursor: 'pointer' }}
                   />
                 </InfoTooltip>
-              )} */}
-              {isEditMode && (
+              )}
+              {isEditMode && isHovered && (
                 <Stack direction="row" alignItems="center" spacing={0.5}>
-                  {
-                    <Box
-                      sx={{ width: '24px', height: '24px' }}
-                      onMouseEnter={() => setDisplayIcon(PanelIcons.Drag)}
-                      onMouseLeave={() => setDisplayIcon(undefined)}
-                    >
-                      {displayIcon === PanelIcons.Drag && (
-                        <IconButton
-                          aria-label="drag handle"
-                          size="small"
-                          // sx={{ visibility: 'hidden', ':hover': { visibility: 'visible' } }}
-                        >
-                          <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
-                        </IconButton>
-                      )}
-                    </Box>
-                  }
-                  {
-                    <Box
-                      sx={{ width: '24px', height: '24px' }}
-                      onMouseEnter={() => setDisplayIcon(PanelIcons.Edit)}
-                      onMouseLeave={() => setDisplayIcon(undefined)}
-                    >
-                      {displayIcon === PanelIcons.Edit && (
-                        <IconButton
-                          aria-label="edit panel"
-                          size="small"
-                          // sx={{ visibility: 'hidden', ':hover': { visibility: 'visible' } }}
-                        >
-                          <PencilIcon />
-                        </IconButton>
-                      )}
-                    </Box>
-                  }
-                  {
-                    <Box
-                      sx={{ width: '24px', height: '24px' }}
-                      onMouseEnter={() => setDisplayIcon(PanelIcons.Move)}
-                      onMouseLeave={() => setDisplayIcon(undefined)}
-                    >
-                      {displayIcon === PanelIcons.Move && (
-                        <IconButton
-                          aria-label="more"
-                          size="small"
-                          // sx={{ visibility: 'hidden', ':hover': { visibility: 'visible' } }}
-                        >
-                          <MenuIcon />
-                        </IconButton>
-                      )}
-                    </Box>
-                  }
+                  <IconButton aria-label="edit panel" size="small">
+                    <PencilIcon />
+                  </IconButton>
+                  <IconButton aria-label="more" size="small">
+                    <MenuIcon />
+                  </IconButton>
+                  <IconButton aria-label="drag handle" size="small">
+                    <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
+                  </IconButton>
                 </Stack>
               )}
             </Box>

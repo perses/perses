@@ -32,6 +32,7 @@ export function Dashboard(props: DashboardProps) {
         {spec.layouts.map((layout, idx) => (
           <GridLayout
             key={idx}
+            index={idx}
             definition={layout}
             renderGridItemContent={(definition) => <GridItemContent content={definition.content} spec={spec} />}
           />

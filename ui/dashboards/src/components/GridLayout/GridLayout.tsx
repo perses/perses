@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
 import { GridDefinition, GridItemDefinition } from '@perses-dev/core';
@@ -21,6 +21,7 @@ import { GridTitle } from './GridTitle';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
+  index: number;
   definition: GridDefinition;
   renderGridItemContent: (definition: GridItemDefinition) => React.ReactNode;
 }
@@ -30,12 +31,18 @@ export interface GridLayoutProps extends BoxProps {
  */
 export function GridLayout(props: GridLayoutProps) {
   const {
+    index,
     definition: { spec },
     renderGridItemContent,
     ...others
   } = props;
 
-  const [isOpen, setIsOpen] = useState(spec.display?.collapse?.open ?? true);
+  console.log('index', index);
+
+  const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
+  useEffect(() => {
+    setIsOpen(!!spec.display?.collapse?.open);
+  }, [spec]);
 
   const { isEditMode } = useEditMode();
 
@@ -57,6 +64,7 @@ export function GridLayout(props: GridLayoutProps) {
       <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
         {spec.display !== undefined && (
           <GridTitle
+            index={index}
             title={spec.display.title}
             collapse={
               spec.display.collapse === undefined
