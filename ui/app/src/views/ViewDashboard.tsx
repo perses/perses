@@ -33,9 +33,9 @@ function ViewDashboard(props: ViewDashboardProps) {
   const fromParam = searchParams.get('from') ?? '';
   const toParam = searchParams.get('to') ?? '';
   const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboardResource);
-  const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultTimeRange as TimeRangeValue);
+  const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
 
-  const handleOnDateRangeChange = (event: TimeRangeValue) => {
+  const handleonTimeRangeChange = (event: TimeRangeValue) => {
     if (isRelativeTimeRange(event)) {
       searchParams.set('from', `now-${event.pastDuration}`);
       searchParams.set('to', 'now');
@@ -51,7 +51,7 @@ function ViewDashboard(props: ViewDashboardProps) {
   };
 
   return (
-    <TimeRangeStateProvider initialValue={activeTimeRange} onDateRangeChange={handleOnDateRangeChange}>
+    <TimeRangeStateProvider initialValue={activeTimeRange} onTimeRangeChange={handleonTimeRangeChange}>
       <DashboardView dashboardResource={dashboardResource} />
     </TimeRangeStateProvider>
   );

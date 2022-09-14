@@ -18,14 +18,14 @@ import { TimeRange, TimeRangeContext } from '../runtime/time-range';
 export interface TimeRangeProviderProps {
   initialValue: TimeRangeValue;
   children?: React.ReactNode;
-  onDateRangeChange?: (e: TimeRangeValue) => void;
+  onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
 /**
  * Provider implementation that supplies the TimeRangeState at runtime.
  */
 export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
-  const { initialValue, children, onDateRangeChange } = props;
+  const { initialValue, children, onTimeRangeChange } = props;
 
   const [timeRange, setActiveTimeRange] = useState<TimeRangeValue>(initialValue);
 
@@ -43,11 +43,11 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
       } else {
         setAbsoluteTimeRange(value);
       }
-      if (onDateRangeChange !== undefined) {
-        onDateRangeChange(value);
+      if (onTimeRangeChange !== undefined) {
+        onTimeRangeChange(value);
       }
     },
-    [onDateRangeChange]
+    [onTimeRangeChange]
   );
 
   const ctx = useMemo(
