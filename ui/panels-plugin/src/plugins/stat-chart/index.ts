@@ -11,6 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './stat-chart-model';
-export * from './StatChartOptionsEditor';
-export * from './StatChartPanel';
+export * from './StatChart';

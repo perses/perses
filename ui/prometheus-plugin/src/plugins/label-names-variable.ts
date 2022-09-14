@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,24 +12,22 @@
 // limitations under the License.
 
 import { JsonObject, VariableDefinition } from '@perses-dev/core';
-import { UseVariableOptionsHook } from '@perses-dev/plugin-system';
+import { UseVariableOptionsHook, VariablePlugin } from '@perses-dev/plugin-system';
 import { TemplateString, useReplaceTemplateStrings } from '../model/templating';
 import { useDashboardPrometheusTimeRange } from '../model/time';
 import { LabelNamesRequestParameters } from '../model/api-types';
 import { useLabelNames } from '../model/prometheus-client';
 
-type PrometheusLabelNames = VariableDefinition<LabelNamesOptions>;
-
-interface LabelNamesOptions extends JsonObject {
+interface PrometheusLabelNamesOptions extends JsonObject {
   match: TemplateString[];
 }
 
 /**
  * Get variable option values by running a Prometheus label names query.
  */
-export function usePrometheusLabelNames(
-  definition: PrometheusLabelNames
-): ReturnType<UseVariableOptionsHook<LabelNamesOptions>> {
+function usePrometheusLabelNames(
+  definition: VariableDefinition<PrometheusLabelNamesOptions>
+): ReturnType<UseVariableOptionsHook<PrometheusLabelNamesOptions>> {
   const { start, end } = useDashboardPrometheusTimeRange();
   const { result: match, needsVariableValuesFor } = useReplaceTemplateStrings(definition.options.match);
 
@@ -55,3 +53,10 @@ export function usePrometheusLabelNames(
     error: error ?? undefined,
   };
 }
+
+/**
+ * The core Prometheus Label Names variable plugin for Perses.
+ */
+export const PrometheusLabelNames: VariablePlugin<PrometheusLabelNamesOptions> = {
+  useVariableOptions: usePrometheusLabelNames,
+};

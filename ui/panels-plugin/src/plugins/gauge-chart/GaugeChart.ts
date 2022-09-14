@@ -11,10 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EmptyChart } from './plugins/empty-chart';
-import { GaugeChart } from './plugins/gauge-chart';
-import { LineChart } from './plugins/line-chart';
-import { StatChart } from './plugins/stat-chart';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialGaugeChartOptions, GaugeChartOptions } from './gauge-chart-model';
+import { GaugeChartOptionsEditor } from './GaugeChartOptionsEditor';
+import { GaugeChartPanel } from './GaugeChartPanel';
 
-// Just export the plugins under the same name as the kinds they handle from the plugin.json
-export { LineChart, GaugeChart, EmptyChart, StatChart };
+/**
+ * The core GaugeChart panel plugin for Perses.
+ */
+export const GaugeChart: PanelPlugin<GaugeChartOptions> = {
+  PanelComponent: GaugeChartPanel,
+  OptionsEditorComponent: GaugeChartOptionsEditor,
+  createInitialOptions: createInitialGaugeChartOptions,
+};

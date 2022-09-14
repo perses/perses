@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EmptyChart } from './plugins/empty-chart';
-import { GaugeChart } from './plugins/gauge-chart';
-import { LineChart } from './plugins/line-chart';
-import { StatChart } from './plugins/stat-chart';
+import { Box } from '@mui/material';
+import { PanelProps } from '@perses-dev/plugin-system';
+import { EmptyChartOptions } from './empty-chart-model';
 
-// Just export the plugins under the same name as the kinds they handle from the plugin.json
-export { LineChart, GaugeChart, EmptyChart, StatChart };
+export type EmptyChartPanelProps = PanelProps<EmptyChartOptions>;
+
+export function EmptyChartPanel(props: EmptyChartPanelProps) {
+  return <Box sx={{ overflow: 'hidden' }}>{props.definition.kind}</Box>;
+}

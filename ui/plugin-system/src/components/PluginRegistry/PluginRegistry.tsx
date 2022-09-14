@@ -46,7 +46,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
 
       // Load and register the resource
       const pluginModule = await importPluginModule(resource);
-      register(pluginModule);
+      register(resource, pluginModule);
     },
     [plugins, loadablePlugins, importPluginModule, register]
   );

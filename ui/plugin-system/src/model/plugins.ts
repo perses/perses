@@ -68,12 +68,11 @@ type SupportedPlugins<Options extends JsonObject> = {
 };
 
 /**
- * The definition handled for a given plugin type.
+ * Union type of all available plugin implementations.
  */
-export type PluginDefinition<
-  Type extends PluginType,
-  Options extends JsonObject
-> = SupportedPlugins<Options>[Type]['Def'];
+export type Plugin<Options extends JsonObject> = {
+  [Type in PluginType]: PluginImplementation<Type, Options>;
+}[PluginType];
 
 /**
  * The implementation for a given plugin type.
@@ -82,20 +81,3 @@ export type PluginImplementation<
   Type extends PluginType,
   Options extends JsonObject
 > = SupportedPlugins<Options>[Type]['Impl'];
-
-/**
- * Configuration (including the plugin implementation) that's expected when
- * registering a plugin with Perses.
- */
-export type PluginRegistrationConfig<Options extends JsonObject> = {
-  [Type in PluginType]: PluginConfig<Type, Options>;
-}[PluginType];
-
-/**
- * Configuration expected for a particular plugin type.
- */
-export type PluginConfig<Type extends PluginType, Options extends JsonObject> = {
-  pluginType: Type;
-  kind: string;
-  plugin: PluginImplementation<Type, Options>;
-};

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,6 +15,7 @@ import { DurationString, JsonObject, useMemoized } from '@perses-dev/core';
 import {
   GraphData,
   GraphQueryDefinition,
+  GraphQueryPlugin,
   UseGraphQueryHook,
   UseGraphQueryHookOptions,
 } from '@perses-dev/plugin-system';
@@ -26,18 +27,16 @@ import { useRangeQuery } from '../model/prometheus-client';
 import { TemplateString, useReplaceTemplateString } from '../model/templating';
 import { getDurationStringSeconds, useDashboardPrometheusTimeRange, usePanelRangeStep } from '../model/time';
 
-type PrometheusGraphQuery = GraphQueryDefinition<GraphQueryOptions>;
-
-interface GraphQueryOptions extends JsonObject {
+interface PrometheusGraphQueryOptions extends JsonObject {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
 }
 
-export function usePrometheusGraphQuery(
-  definition: PrometheusGraphQuery,
+function usePrometheusGraphQuery(
+  definition: GraphQueryDefinition<PrometheusGraphQueryOptions>,
   hookOptions?: UseGraphQueryHookOptions
-): ReturnType<UseGraphQueryHook<GraphQueryOptions>> {
+): ReturnType<UseGraphQueryHook<PrometheusGraphQueryOptions>> {
   const minStep = getDurationStringSeconds(definition.options.min_step);
   const timeRange = useDashboardPrometheusTimeRange();
   const step = usePanelRangeStep(timeRange, minStep, undefined, hookOptions?.suggestedStepMs);
@@ -106,3 +105,10 @@ export function usePrometheusGraphQuery(
 
   return { data, loading, error: error ?? undefined };
 }
+
+/**
+ * The core Prometheus GraphQuery plugin for Perses.
+ */
+export const PrometheusGraphQuery: GraphQueryPlugin<PrometheusGraphQueryOptions> = {
+  useGraphQuery: usePrometheusGraphQuery,
+};

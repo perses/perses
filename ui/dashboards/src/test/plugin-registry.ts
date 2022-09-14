@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { JsonObject } from '@perses-dev/core';
-import { PluginRegistryProps, PluginModuleResource, PluginRegistrationConfig } from '@perses-dev/plugin-system';
+import {
+  PluginRegistryProps,
+  PluginModuleResource,
+  PluginImplementation,
+  PluginType,
+  Plugin,
+} from '@perses-dev/plugin-system';
 
 /**
  * Helper for mocking `PluginRegistry` data during tests. Returns props that can be spread on the `PluginRegistry`
@@ -29,19 +35,24 @@ export function mockPluginRegistryProps() {
     },
   };
 
-  const mockPluginModule: Record<string, PluginRegistrationConfig<JsonObject>> = {};
+  const mockPluginModule: Record<string, Plugin<JsonObject>> = {};
 
   // Allow adding mock plugins in tests
-  const addMockPlugin = (config: PluginRegistrationConfig<JsonObject>) => {
+  const addMockPlugin = <T extends PluginType>(
+    pluginType: T,
+    kind: string,
+    plugin: PluginImplementation<T, JsonObject>
+  ) => {
     mockPluginResource.spec.plugins.push({
-      pluginType: config.pluginType,
-      kind: config.kind,
+      pluginType,
+      kind,
       display: {
-        name: `Fake Plugin ${mockPluginResource.spec.plugins.length + 1}`,
+        name: `Fake ${pluginType} Plugin for ${kind}`,
       },
     });
 
-    mockPluginModule[config.kind] = config;
+    // "Export" on the module under the same name as the kind the plugin handles
+    mockPluginModule[kind] = plugin;
   };
 
   const pluginRegistryProps: Omit<PluginRegistryProps, 'children'> = {

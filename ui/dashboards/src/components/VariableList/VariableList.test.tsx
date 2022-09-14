@@ -14,7 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { JsonObject, VariableDefinition } from '@perses-dev/core';
-import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry, VariablePlugin } from '@perses-dev/plugin-system';
 import { mockPluginRegistryProps, renderWithContext } from '../../test';
 import { TemplateVariablesProvider } from '../../context';
 import { VariableList } from './VariableList';
@@ -36,25 +36,19 @@ describe('VariableList', () => {
     },
   };
 
-  const options: any = {
-    data: ['node', 'all'],
-    isLoading: false,
-    error: undefined,
-  };
-
-  const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
-    pluginType: 'Variable',
-    kind: 'PrometheusLabelValues',
-    plugin: {
-      useVariableOptions: () => {
-        return options;
-      },
+  const FAKE_VARIABLE_PLUGIN: VariablePlugin<JsonObject> = {
+    useVariableOptions: () => {
+      return {
+        data: ['node', 'all'],
+        loading: false,
+        error: undefined,
+      };
     },
   };
 
   const renderVariableOptionsDrawer = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin(FAKE_PANEL_PLUGIN);
+    addMockPlugin('Variable', 'PrometheusLabelValues', FAKE_VARIABLE_PLUGIN);
     renderWithContext(
       <PluginRegistry {...pluginRegistryProps}>
         <TemplateVariablesProvider variableDefinitions={variables}>
