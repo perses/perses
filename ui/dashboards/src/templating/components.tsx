@@ -20,7 +20,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Reload } from 'mdi-material-ui';
-import { VariableName, ListVariableDefintion } from '@perses-dev/core';
+import { VariableName, ListVariableDefinition } from '@perses-dev/core';
 import { useEditMode } from '../context';
 import {
   useTemplateVariableSrv,
@@ -64,7 +64,7 @@ function TextVariable({ name }: TemplateVariableProps) {
 
 function ListVariable({ name }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name);
-  const definition = ctx.definition as ListVariableDefintion;
+  const definition = ctx.definition as ListVariableDefinition;
   const { setVariableValue, loadTemplateVariable } = useTemplateVariableActions();
   const allowMultiple = definition?.options.allowMultiple === true;
   useEffect(() => {

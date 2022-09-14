@@ -9,7 +9,7 @@ import {
   VariableState,
   VariableName,
   VariableValue,
-  ListVariableDefintion,
+  ListVariableDefinition,
   VariableDefinition,
 } from '@perses-dev/core';
 
@@ -106,7 +106,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: Tem
 
         // Actions
         loadTemplateVariable: async (name: VariableName) => {
-          const def = get().variableDefinitions.find((v) => v.name === name) as ListVariableDefintion;
+          const def = get().variableDefinitions.find((v) => v.name === name) as ListVariableDefinition;
           if (!def) {
             // Can't find the variable definition
             return;

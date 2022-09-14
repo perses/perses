@@ -57,11 +57,11 @@ export type ListVariableOptions<TKind extends string, TOptions extends JsonObjec
   options: TOptions;
 };
 
-export type ListVariableDefintion<TOptions extends JsonObject = JsonObject, TKind extends string = string> = IVariable<
+export type ListVariableDefinition<TOptions extends JsonObject = JsonObject, TKind extends string = string> = IVariable<
   'ListVariable',
   ListVariableOptions<TKind, TOptions>
 >;
 
 // All Variables
-export type VariableDefinition = TextVariableDefintion | ListVariableDefintion;
+export type VariableDefinition = TextVariableDefintion | ListVariableDefinition;
 export type VariableDefinitions = VariableDefinition[];
