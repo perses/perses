@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
 import {
   ErrorAlert,
@@ -21,23 +22,37 @@ import {
   PersesChartsTheme,
 } from '@perses-dev/components';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
+import { DashboardResource } from '@perses-dev/core';
 import ViewDashboard from '../views/ViewDashboard';
 import { DataSourceRegistry } from '../context/DataSourceRegistry';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useBundledPlugins } from '../model/bundled-plugins';
+import { useSampleData } from '../utils/temp-sample-data';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
 const ECHARTS_THEME_OVERRIDES: EChartsTheme = {};
 
+const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
+
 function HomeDashboard() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
+
+  const [searchParams] = useSearchParams();
+
+  const dashboardParam = searchParams.get('dashboard');
+  const dashboard = useSampleData<DashboardResource>(dashboardParam || DEFAULT_DASHBOARD_ID);
 
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
   }, [muiTheme]);
+
+  // TODO: Loading indicator
+  if (dashboard === undefined) {
+    return null;
+  }
 
   return (
     <Box
@@ -59,7 +74,7 @@ function HomeDashboard() {
           <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
               <DataSourceRegistry>
-                <ViewDashboard />
+                <ViewDashboard dashboardResource={dashboard} />
               </DataSourceRegistry>
             </PluginBoundary>
           </PluginRegistry>

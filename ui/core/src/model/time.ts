@@ -123,11 +123,12 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
 /**
  * Gets the default time range taking into account URL params
  */
-export function getDefaultTimeRange(from: string, to: string, dashboard?: DashboardResource) {
-  const defaultDuration = dashboard?.spec.duration ?? '1h';
-  const parsedParam = from !== null ? from.split('-')[1] : defaultDuration;
-  const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : defaultDuration;
+export function getDefaultTimeRange(from: string, to: string, dashboard?: DashboardResource): TimeRangeValue {
+  const dashboardDuration = dashboard?.spec.duration ?? '1h';
+  const parsedParam = from !== null ? from.split('-')[1] : dashboardDuration;
+  const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : dashboardDuration;
+  if (from === '' || to === '') return { pastDuration };
   return isGrafanaRelativeTimeRange(from, to)
-    ? { pastDuration: pastDuration }
+    ? { pastDuration }
     : { start: new Date(Number(from)), end: new Date(Number(to)) };
 }

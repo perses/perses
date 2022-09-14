@@ -17,52 +17,42 @@ import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
 import { useSearchParams } from 'react-router-dom';
 import { DashboardResource, getDefaultTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/core';
-import { useSampleData } from '../utils/temp-sample-data';
 
-const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
+export interface ViewDashboardProps {
+  dashboardResource: DashboardResource;
+}
 
 /**
  * The View for viewing a Dashboard.
  */
-function ViewDashboard() {
+function ViewDashboard(props: ViewDashboardProps) {
+  const { dashboardResource } = props;
+
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const dashboardParam = searchParams.get('dashboard');
-  const dashboard = useSampleData<DashboardResource>(dashboardParam || DEFAULT_DASHBOARD_ID);
   const fromParam = searchParams.get('from') ?? '';
   const toParam = searchParams.get('to') ?? '';
-  const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboard);
-
+  const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboardResource);
   const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultTimeRange as TimeRangeValue);
 
-  // TODO: Loading indicator
-  if (dashboard === undefined) {
-    return null;
-  }
-
   const handleOnDateRangeChange = (event: TimeRangeValue) => {
-    // TODO: refactor, preserve all existing params
     if (isRelativeTimeRange(event)) {
-      setSearchParams({
-        dashboard: dashboardParam ?? '',
-        from: `now-${event.pastDuration}`,
-        to: 'now',
-      });
+      searchParams.set('from', `now-${event.pastDuration}`);
+      searchParams.set('to', 'now');
+      setSearchParams(searchParams);
     } else {
       const startUnixMs = getUnixTime(event.start) * 1000;
       const endUnixMs = getUnixTime(event.end) * 1000;
-      setSearchParams({
-        dashboard: dashboardParam ?? '',
-        from: startUnixMs.toString(),
-        to: endUnixMs.toString(),
-      });
+      searchParams.set('from', startUnixMs.toString());
+      searchParams.set('to', endUnixMs.toString());
+      setSearchParams(searchParams);
       setActiveTimeRange({ start: event.start, end: event.end });
     }
   };
 
   return (
     <TimeRangeStateProvider initialValue={activeTimeRange} onDateRangeChange={handleOnDateRangeChange}>
-      <DashboardView dashboardResource={dashboard} />
+      <DashboardView dashboardResource={dashboardResource} />
     </TimeRangeStateProvider>
   );
 }
