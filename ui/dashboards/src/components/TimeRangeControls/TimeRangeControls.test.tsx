@@ -30,8 +30,8 @@ describe('TimeRangeControls', () => {
 
   it('should render correct initial relative time shortcut', async () => {
     renderTimeRangeControls();
+    expect(screen.getByText('Time Range')).toBeInTheDocument();
     expect(screen.getByText('Last 6 hours')).toBeInTheDocument();
-    expect(screen.getAllByText('Time Range')).toHaveLength(2);
   });
 
   it('should be able to select the first option', () => {
