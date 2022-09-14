@@ -11,131 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { JsonObject } from '@perses-dev/core';
-// import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
-// import 'intersection-observer';
-// import { screen } from '@testing-library/react';
-// import { renderWithContext, mockPluginRegistryProps } from '../../test';
-import testDashboard from '../../test/testDashboard';
-// import { DashboardProvider, DashboardStoreProps } from '../../context';
-// import { Panel, PanelProps } from '../Panel';
+import userEvent from '@testing-library/user-event';
+import { TimeRangeValue } from '@perses-dev/core';
+import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
+import { screen } from '@testing-library/react';
+import { renderWithContext } from '../../test';
+import { TimeRangeControls } from './TimeRangeControls';
 
-console.log(testDashboard);
+describe('TimeRangeControls', () => {
+  const renderTimeRangeControls = () => {
+    const testRelativeTimeRange: TimeRangeValue = { pastDuration: '6h' };
+    renderWithContext(
+      <TimeRangeStateProvider initialValue={testRelativeTimeRange}>
+        <TimeRangeControls />
+      </TimeRangeStateProvider>
+    );
+  };
 
-// const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
-//   pluginType: 'Panel',
-//   kind: 'FakePanel',
-//   plugin: {
-//     PanelComponent: () => {
-//       return <div role="figure">FakePanel chart</div>;
-//     },
-//     OptionsEditorComponent: () => {
-//       return <div>Edit options here</div>;
-//     },
-//     createInitialOptions: () => ({}),
-//   },
-// };
+  it('should render correct initial relative time shortcut', async () => {
+    renderTimeRangeControls();
+    expect(screen.getByText('Last 6 hours')).toBeInTheDocument();
+    expect(screen.getAllByText('Time Range')).toHaveLength(2);
+  });
 
-// describe('TimeRangeControls', () => {
-//   let props: PanelProps;
-//   let initialState: DashboardStoreProps;
+  it('should be able to select the first option', () => {
+    renderTimeRangeControls();
+    const dateButton = screen.getByRole('button');
+    userEvent.click(dateButton);
+    userEvent.click(screen.getByRole('option', { name: 'Last 5 minutes' }));
+    expect(dateButton).toHaveTextContent(/5 minutes/i);
+  });
 
-//   beforeEach(() => {
-//     props = {
-//       definition: {
-//         display: {
-//           name: 'Fake Panel',
-//           description: 'This is a fake panel',
-//         },
-//         kind: 'FakePanel',
-//         options: {},
-//       },
-//     };
-
-//     initialState = {
-//       isEditMode: false,
-//       dashboardSpec: testDashboard.spec,
-//     };
-//   });
-
-//   // Helper to render the panel with some context set
-//   const renderPanel = (initialState: DashboardStoreProps) => {
-//     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-//     addMockPlugin(FAKE_PANEL_PLUGIN);
-
-//     renderWithContext(
-//       <DashboardProvider initialState={initialState}>
-//         <PluginRegistry {...pluginRegistryProps}>
-//           <Panel {...props} />
-//         </PluginRegistry>
-//       </DashboardProvider>
-//     );
-//   };
-
-//   it('should render name and info icon', async () => {
-//     renderPanel(initialState);
-//     await screen.findByText('Fake Panel');
-//     screen.queryByLabelText('info-tooltip');
-//   });
-
-//   it('should render edit icons when in edit mode', async () => {
-//     initialState.isEditMode = true;
-//     renderPanel(initialState);
-//     await screen.queryByLabelText('drag handle');
-//     screen.queryByLabelText('edit panel');
-//     screen.queryByLabelText('more');
-//   });
-// });
-
-// /*
-// describe('Panel', () => {
-//   let props: PanelProps;
-//   let initialState: DashboardStoreProps;
-
-//   beforeEach(() => {
-//     props = {
-//       definition: {
-//         display: {
-//           name: 'Fake Panel',
-//           description: 'This is a fake panel',
-//         },
-//         kind: 'FakePanel',
-//         options: {},
-//       },
-//     };
-
-//     initialState = {
-//       isEditMode: false,
-//       dashboardSpec: testDashboard.spec,
-//     };
-//   });
-
-//   // Helper to render the panel with some context set
-//   const renderPanel = (initialState: DashboardStoreProps) => {
-//     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-//     addMockPlugin(FAKE_PANEL_PLUGIN);
-
-//     renderWithContext(
-//       <DashboardProvider initialState={initialState}>
-//         <PluginRegistry {...pluginRegistryProps}>
-//           <Panel {...props} />
-//         </PluginRegistry>
-//       </DashboardProvider>
-//     );
-//   };
-
-//   it('should render name and info icon', async () => {
-//     renderPanel(initialState);
-//     await screen.findByText('Fake Panel');
-//     screen.queryByLabelText('info-tooltip');
-//   });
-
-//   it('should render edit icons when in edit mode', async () => {
-//     initialState.isEditMode = true;
-//     renderPanel(initialState);
-//     await screen.queryByLabelText('drag handle');
-//     screen.queryByLabelText('edit panel');
-//     screen.queryByLabelText('more');
-//   });
-// });
-// */
+  // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.
+});
