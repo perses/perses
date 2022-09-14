@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import { TimeRangeValue, RelativeTimeRange, isRelativeValue } from '@perses-dev/core';
+import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
 import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
@@ -32,7 +32,7 @@ interface TimeRangeSelectorProps {
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   const { inputLabel, value, timeOptions, onSelectChange, onCustomClick } = props;
-  const formattedValue = !isRelativeValue(value) ? formatAbsoluteRange(value, DATE_TIME_FORMAT) : value.pastDuration;
+  const formattedValue = !isRelativeTimeRange(value) ? formatAbsoluteRange(value, DATE_TIME_FORMAT) : value.pastDuration;
   return (
     <Select value={formattedValue} label={inputLabel} onChange={onSelectChange}>
       {timeOptions.map((item, idx) => (
@@ -41,7 +41,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         </MenuItem>
       ))}
 
-      {isRelativeValue(value) ? (
+      {isRelativeTimeRange(value) ? (
         <MenuItem
           onClick={() => {
             onCustomClick();

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeValue } from '@perses-dev/core';
+import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
 import { TimeRange, TimeRangeContext } from '../runtime/time-range';
 
 export interface TimeRangeProviderProps {
@@ -29,7 +29,7 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
 
   const [timeRange, setActiveTimeRange] = useState<TimeRangeValue>(initialValue);
 
-  const defaultTimeRange: AbsoluteTimeRange = isRelativeValue(initialValue)
+  const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialValue)
     ? toAbsoluteTimeRange(initialValue)
     : initialValue;
   const [absoluteTimeRange, setAbsoluteTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
@@ -37,7 +37,7 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
       setActiveTimeRange(value);
-      if (isRelativeValue(value)) {
+      if (isRelativeTimeRange(value)) {
         const convertedAbsoluteTime = toAbsoluteTimeRange(value);
         setAbsoluteTimeRange(convertedAbsoluteTime);
       } else {

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Duration, sub } from 'date-fns';
+import { DashboardResource } from './dashboard';
 
 export type UnixTimeMs = number;
 
@@ -33,14 +34,21 @@ export type TimeRangeValue = AbsoluteTimeRange | RelativeTimeRange;
 /**
  * Determine whether a given time range is relative
  */
-export function isRelativeValue(timeRange: TimeRangeValue): timeRange is RelativeTimeRange {
+export function isRelativeTimeRange(timeRange: TimeRangeValue): timeRange is RelativeTimeRange {
   return (timeRange as RelativeTimeRange).pastDuration !== undefined;
+}
+
+/**
+ * Determine whether a given time range is in Grafana format
+ */
+export function isGrafanaRelativeTimeRange(from: string, to: string): boolean {
+  return from.startsWith('now-') && to === 'now';
 }
 
 /**
  * Determine whether a given time range is absolute
  */
-export function isAbsoluteValue(timeRange: TimeRangeValue): timeRange is AbsoluteTimeRange {
+export function isAbsoluteTimeRange(timeRange: TimeRangeValue): timeRange is AbsoluteTimeRange {
   return (timeRange as AbsoluteTimeRange).start !== undefined && (timeRange as AbsoluteTimeRange).end !== undefined;
 }
 
@@ -110,4 +118,16 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
   // time increments that make sense (e.g. 15s, 30s, 1m, 5m, etc.)
   const queryRangeMs = timeRange.end.valueOf() - timeRange.start.valueOf();
   return Math.floor(queryRangeMs / width);
+}
+
+/**
+ * Gets the default time range taking into account URL params
+ */
+export function getDefaultTimeRange(from: string, to: string, dashboard?: DashboardResource) {
+  const defaultDuration = dashboard?.spec.duration ?? '1h';
+  const parsedParam = from !== null ? from.split('-')[1] : defaultDuration;
+  const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : defaultDuration;
+  return isGrafanaRelativeTimeRange(from, to)
+    ? { pastDuration: pastDuration }
+    : { start: new Date(Number(from)), end: new Date(Number(to)) };
 }

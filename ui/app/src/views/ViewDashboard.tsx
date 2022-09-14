@@ -16,7 +16,7 @@ import { getUnixTime } from 'date-fns';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
 import { useSearchParams } from 'react-router-dom';
-import { DashboardResource, isDurationString, isRelativeValue, TimeRangeValue } from '@perses-dev/core';
+import { DashboardResource, getDefaultTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/core';
 import { useSampleData } from '../utils/temp-sample-data';
 
 const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
@@ -29,18 +29,10 @@ function ViewDashboard() {
 
   const dashboardParam = searchParams.get('dashboard');
   const dashboard = useSampleData<DashboardResource>(dashboardParam || DEFAULT_DASHBOARD_ID);
-  const defaultDuration = dashboard?.spec.duration ?? '1h';
+  const fromParam = searchParams.get('from') ?? '';
+  const toParam = searchParams.get('to') ?? '';
+  const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboard);
 
-  const fromParam = searchParams.get('from');
-  const toParam = searchParams.get('to');
-  const parsedParam = fromParam !== null ? fromParam.split('-')[1] : defaultDuration;
-  const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : defaultDuration;
-
-  // TODO: cleanup, better way to determine query param format
-  const defaultTimeRange =
-    fromParam !== null && toParam !== null && toParam !== 'now'
-      ? { start: new Date(Number(fromParam)), end: new Date(Number(toParam)) }
-      : { pastDuration: pastDuration };
   const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultTimeRange as TimeRangeValue);
 
   // TODO: Loading indicator
@@ -50,7 +42,7 @@ function ViewDashboard() {
 
   const handleOnDateRangeChange = (event: TimeRangeValue) => {
     // TODO: refactor, preserve all existing params
-    if (isRelativeValue(event)) {
+    if (isRelativeTimeRange(event)) {
       setSearchParams({
         dashboard: dashboardParam ?? '',
         from: `now-${event.pastDuration}`,
