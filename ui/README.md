@@ -37,7 +37,7 @@ developing:
 
 Occasionally, after switching branches or installing new dependencies, your environment may start throwing build errors. To fix, try clearing all dist folders by running `npm run clean` in the ui folder (before rerunning `npm start`).
 
-If this does not work, try also deleting all node_modules folders (`rm -rf **/node_modules && npm install`). To do this as well as clean dist folders for each package, use: `npm run reinstall`
+If this does not work, `npm run reinstall` can be used to remove all `node_modules` folders and clear the `dist` folders.
 
 ## Running Scripts
 
