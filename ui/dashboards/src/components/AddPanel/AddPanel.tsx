@@ -28,18 +28,16 @@ import { Drawer, ErrorAlert } from '@perses-dev/components';
 import { JsonObject } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { useLayouts, usePanels } from '../../context';
+import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
 
-interface AddPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
+const AddPanel = () => {
   const { layouts, addItemToLayout } = useLayouts();
-  const { addPanel } = usePanels();
+  const { updatePanel } = usePanels();
+  const {
+    addPanelComponent: { isOpen, setIsOpen },
+  } = useDashboardApp();
 
   const [group, setGroup] = useState(0);
   const [panelName, setPanelName] = useState('');
@@ -76,7 +74,7 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
   const onAddPanelClick = (e: FormEvent) => {
     e.preventDefault();
     const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
-    addPanel(panelKey, {
+    updatePanel(panelKey, {
       kind,
       display: { name: panelName, description: panelDescription },
       options,
@@ -96,13 +94,17 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
       height: 6,
       content: { $ref: `#/spec/panels/${panelKey}` },
     });
-    onClose();
+    closePanel();
+  };
+
+  const closePanel = () => {
+    setIsOpen(false);
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
+    <Drawer isOpen={isOpen} onClose={closePanel}>
       <form onSubmit={onAddPanelClick}>
-        <AddPanelHeader onClose={onClose} />
+        <AddPanelHeader onClose={closePanel} />
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <FormControl>
@@ -144,7 +146,7 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
   );
 };
 
-const AddPanelHeader = ({ onClose }: Pick<AddPanelProps, 'onClose'>) => {
+const AddPanelHeader = ({ onClose }: { onClose: () => void }) => {
   return (
     <Box
       sx={{

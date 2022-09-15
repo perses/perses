@@ -15,18 +15,20 @@ import { Toolbar, Typography, Stack, Button, Box } from '@mui/material';
 import { LayoutDefinition } from '@perses-dev/core';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import { useEditMode, useLayouts } from '../context';
+import { useDashboardApp, useEditMode, useLayouts } from '../context';
 import { TimeRangeControls } from '../components';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
-  onAddPanel: () => void;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
-  const { dashboardName, onAddPanel } = props;
+  const { dashboardName } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
+  const {
+    addPanelComponent: { setIsOpen },
+  } = useDashboardApp();
 
   const onEditButtonClick = () => {
     setEditMode(true);
@@ -36,7 +38,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     setEditMode(false);
   };
 
-  const { addLayout } = useLayouts();
+  const { updateLayout } = useLayouts();
 
   const onAddGroup = () => {
     const newLayout: LayoutDefinition = {
@@ -51,7 +53,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
         items: [],
       },
     };
-    addLayout(newLayout);
+    updateLayout(newLayout);
   };
 
   return (
@@ -76,7 +78,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Button startIcon={<AddIcon />} onClick={onAddGroup}>
               Add Group
             </Button>
-            <Button startIcon={<AddIcon />} onClick={onAddPanel}>
+            <Button startIcon={<AddIcon />} onClick={() => setIsOpen(true)}>
               Add Panel
             </Button>
           </Stack>
