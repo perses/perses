@@ -15,7 +15,7 @@ import { createStore, useStore } from 'zustand';
 import type { StoreApi } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
-import { createContext, useContext, useCallback } from 'react';
+import { createContext, useContext } from 'react';
 import produce from 'immer';
 import { DashboardSpec, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
