@@ -71,6 +71,16 @@ const benchmarkDashboard: DashboardResource = {
       } as AnyVariableDefinition,
     },
     panels: {
+      markdownEx: {
+        kind: 'Markdown',
+        display: {
+          name: 'Dashboard Team Overview',
+          description: 'This is a markdown panel',
+        },
+        options: {
+          text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\n```\n{ look: 'at this code' }```\n\n1. One\n2. Two\n3. Three\n\n[check the internet again](https://www.google.com)\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | ",
+        },
+      },
       seriesTest: {
         kind: 'LineChart',
         display: { name: '1500+ Series', description: 'This is a line chart' },
@@ -434,16 +444,14 @@ const benchmarkDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/legendEx' },
-              // content: { $ref: '#/spec/panels/seriesTestAlt' },
-              // content: { $ref: '#/spec/panels/seriesTest' },
+              content: { $ref: '#/spec/panels/markdownEx' },
             },
             {
               x: 12,
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/basicEx' },
+              content: { $ref: '#/spec/panels/legendEx' },
             },
             {
               x: 0,

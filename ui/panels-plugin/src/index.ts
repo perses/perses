@@ -14,7 +14,8 @@
 import { PluginSetupFunction } from '@perses-dev/plugin-system';
 import { createInitialEmptyChartOptions, EmptyChart, EmptyChartOptionsEditor } from './plugins/empty-chart';
 import { createInitialGaugeChartOptions, GaugeChartPanel, GaugeChartOptionsEditor } from './plugins/gauge-chart';
-import { LineChartPanel, LineChartOptionsEditor, createInitialLineChartOptions } from './plugins/line-chart';
+import { createInitialLineChartOptions, LineChartPanel, LineChartOptionsEditor } from './plugins/line-chart';
+import { createInitialMarkdownPanelOptions, MarkdownPanel, MarkdownPanelOptionsEditor } from './plugins/markdown';
 import { createInitialStatChartOptions, StatChartOptionsEditor, StatChartPanel } from './plugins/stat-chart';
 
 export const setup: PluginSetupFunction = (registerPlugin) => {
@@ -55,6 +56,16 @@ export const setup: PluginSetupFunction = (registerPlugin) => {
       PanelComponent: EmptyChart,
       OptionsEditorComponent: EmptyChartOptionsEditor,
       createInitialOptions: createInitialEmptyChartOptions,
+    },
+  });
+
+  registerPlugin({
+    pluginType: 'Panel',
+    kind: 'Markdown',
+    plugin: {
+      PanelComponent: MarkdownPanel,
+      OptionsEditorComponent: MarkdownPanelOptionsEditor,
+      createInitialOptions: createInitialMarkdownPanelOptions,
     },
   });
 };
