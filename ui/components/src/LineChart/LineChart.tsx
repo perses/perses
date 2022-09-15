@@ -80,7 +80,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
       datazoom: (params) => {
         if (onDataZoom === undefined) {
           setTimeout(() => {
-            // workaround so unpin happens after click e
+            // workaround so unpin happens after click event
             setPinTooltip(false);
           }, 10);
         }
