@@ -11,10 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PrometheusGraphQuery } from './plugins/graph-query';
-import { Interval } from './plugins/interval-variable';
-import { PrometheusLabelNames } from './plugins/label-names-variable';
-import { PrometheusLabelValues } from './plugins/label-values-variable';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialGaugeChartOptions, GaugeChartOptions } from './gauge-chart-model';
+import { GaugeChartOptionsEditor } from './GaugeChartOptionsEditor';
+import { GaugeChartPanel } from './GaugeChartPanel';
 
-// Export plugins under the same name as the kinds they handle from the plugin.json
-export { PrometheusGraphQuery, Interval, PrometheusLabelNames, PrometheusLabelValues };
+/**
+ * The core GaugeChart panel plugin for Perses.
+ */
+export const GaugeChart: PanelPlugin<GaugeChartOptions> = {
+  PanelComponent: GaugeChartPanel,
+  OptionsEditorComponent: GaugeChartOptionsEditor,
+  createInitialOptions: createInitialGaugeChartOptions,
+};

@@ -14,7 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { JsonObject, VariableDefinition } from '@perses-dev/core';
-import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry, VariablePlugin } from '@perses-dev/plugin-system';
 import { mockPluginRegistryProps, renderWithContext } from '../../test';
 import { TemplateVariablesProvider } from '../../context';
 import { VariableList } from './VariableList';
@@ -36,25 +36,22 @@ describe('VariableList', () => {
     },
   };
 
-  const options: any = {
-    data: ['node', 'all'],
-    isLoading: false,
-    error: undefined,
-  };
+  // Make sure fake data stays consistent so don't get a render loop
+  const data = ['node', 'all'];
 
-  const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
-    pluginType: 'Variable',
-    kind: 'PrometheusLabelValues',
-    plugin: {
-      useVariableOptions: () => {
-        return options;
-      },
+  const FAKE_VARIABLE_PLUGIN: VariablePlugin<JsonObject> = {
+    useVariableOptions: () => {
+      return {
+        data,
+        loading: false,
+        error: undefined,
+      };
     },
   };
 
-  const renderVariableOptionsDrawer = () => {
+  const renderVariableList = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin(FAKE_PANEL_PLUGIN);
+    addMockPlugin('Variable', 'PrometheusLabelValues', FAKE_VARIABLE_PLUGIN);
     renderWithContext(
       <PluginRegistry {...pluginRegistryProps}>
         <TemplateVariablesProvider variableDefinitions={variables}>
@@ -65,26 +62,26 @@ describe('VariableList', () => {
   };
 
   it('should display Variables as the title', async () => {
-    renderVariableOptionsDrawer();
+    renderVariableList();
     const title = await screen.findByText('Variables');
     expect(title).toBeInTheDocument();
   });
 
   describe('VariableAutocomplete', () => {
     it('should display correct variable', async () => {
-      renderVariableOptionsDrawer();
+      renderVariableList();
       const jobInput = await screen.findByLabelText('Job');
       expect(jobInput).toBeInTheDocument();
     });
 
     it('should display correct default value', async () => {
-      renderVariableOptionsDrawer();
+      renderVariableList();
       const jobValue = await screen.findByDisplayValue('node');
       expect(jobValue).toBeInTheDocument();
     });
 
     it('should display correct options', async () => {
-      renderVariableOptionsDrawer();
+      renderVariableList();
       const openButton = await screen.findByRole('button', { name: 'Open' });
       userEvent.click(openButton);
       const option1 = await screen.findByText('all');

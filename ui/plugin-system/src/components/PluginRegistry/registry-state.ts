@@ -15,10 +15,8 @@ import { useCallback, useMemo, useRef } from 'react';
 import { useImmer } from 'use-immer';
 import { JsonObject } from '@perses-dev/core';
 import {
-  PluginRegistrationConfig,
-  PluginModule,
+  Plugin,
   PluginModuleResource,
-  RegisterPlugin,
   PluginType,
   ALL_PLUGIN_TYPES,
   PluginImplementation,
@@ -77,49 +75,53 @@ export function useRegistryState(installedPlugins?: PluginModuleResource[]) {
     return loadedPlugins;
   });
 
-  // Create the register callback to pass to the module's setup function
-  const registerPlugin: RegisterPlugin = useCallback(
-    <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => {
-      // Just cast to the runtime plugin type that framework code knows about since the `Options` generic argument is
-      // really only known to plugin authors for their type safety when developing plugins in Typescript
-      switch (config.pluginType) {
-        case 'Variable':
-          setPlugins((draft) => {
-            draft.Variable[config.kind] = config.plugin as unknown as VariablePlugin;
-          });
-          return;
-        case 'Panel':
-          setPlugins((draft) => {
-            draft.Panel[config.kind] = config.plugin as unknown as PanelPlugin;
-          });
-          return;
-        case 'GraphQuery':
-          setPlugins((draft) => {
-            draft.GraphQuery[config.kind] = config.plugin as unknown as GraphQueryPlugin;
-          });
-          return;
-        default:
-          const exhaustive: never = config;
-          throw new Error(`Unhandled plugin config: ${exhaustive}`);
-      }
-    },
-    [setPlugins]
-  );
-
-  const registeredModules = useRef(new Set<PluginModule>());
+  const registeredModules = useRef(new Set<unknown>());
   const register = useCallback(
-    (pluginModule: PluginModule): void => {
+    (resource: PluginModuleResource, pluginModule: unknown): void => {
       // De-dupe register calls in case multiple plugin loading boundaries
       // are waiting for the same module in parallel
       if (registeredModules.current.has(pluginModule)) {
         return;
       }
 
-      // Call the setup function and remember it's been registered
-      pluginModule.setup(registerPlugin);
+      // Treat plugin module as JS module with named exports that are each a Plugin
+      const plugins = pluginModule as Record<string, Plugin<JsonObject>>;
+
+      setPlugins((draft) => {
+        // Look for all the plugins specified in the metadata
+        for (const pluginMetadata of resource.spec.plugins) {
+          // Assume that plugins will be exported under the same named export as the kind they handle
+          // TODO: Do we need to allow for different named exports and an option in the metadata to tell us the name?
+          const { pluginType, kind } = pluginMetadata;
+          const plugin = plugins[kind];
+          if (plugin === undefined) {
+            // TODO: How to handle missing plugins?
+            console.warn(`Could not find ${pluginType} plugin for kind '${kind}' in ${resource.metadata.name}`);
+            continue;
+          }
+
+          // Add to registry state
+          switch (pluginType) {
+            case 'Variable':
+              draft.Variable[kind] = plugin as unknown as VariablePlugin;
+              break;
+            case 'Panel':
+              draft.Panel[kind] = plugin as unknown as PanelPlugin;
+              break;
+            case 'GraphQuery':
+              draft.GraphQuery[kind] = plugin as unknown as GraphQueryPlugin;
+              break;
+            default:
+              const exhaustive: never = pluginType;
+              throw new Error(`Unhandled plugin config: ${exhaustive}`);
+          }
+        }
+      });
+
+      // Remember this module has been registered
       registeredModules.current.add(pluginModule);
     },
-    [registerPlugin]
+    [setPlugins]
   );
 
   return { loadablePlugins, plugins, register };

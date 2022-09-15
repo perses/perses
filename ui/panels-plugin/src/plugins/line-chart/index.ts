@@ -11,6 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './line-chart-model';
-export * from './LineChartOptionsEditor';
-export * from './LineChartPanel';
+export * from './LineChart';
