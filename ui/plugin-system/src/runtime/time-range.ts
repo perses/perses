@@ -18,6 +18,7 @@ export interface TimeRange {
   timeRange: TimeRangeValue;
   absoluteTimeRange: AbsoluteTimeRange;
   initialValue: TimeRangeValue;
+  previousTimeRange: TimeRangeValue | null;
   setTimeRange: (value: TimeRangeValue) => void;
 }
 

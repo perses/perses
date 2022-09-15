@@ -38,9 +38,10 @@ export interface LineChartContainerProps {
  */
 export function LineChartContainer(props: LineChartContainerProps) {
   const { width, height, show_legend, thresholds } = props;
+
   const queries = useRunningGraphQueries();
 
-  const { setTimeRange } = useTimeRange();
+  const { previousTimeRange, setTimeRange } = useTimeRange();
 
   // populate series data based on query results
   const { graphData, loading } = useMemo(() => {
@@ -130,6 +131,11 @@ export function LineChartContainer(props: LineChartContainerProps) {
     }, 10);
   };
 
+  const handleDoubleClick = () => {
+    if (previousTimeRange === null) return;
+    setTimeRange(previousTimeRange);
+  };
+
   return (
     <LineChart
       height={height}
@@ -138,6 +144,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
       legend={legendOverrides}
       grid={gridOverrides}
       onDataZoom={handleDataZoom}
+      onDoubleClick={handleDoubleClick}
     />
   );
 }
