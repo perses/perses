@@ -93,16 +93,6 @@ export function DashboardProvider(props: DashboardProviderProps) {
           }),
         isEditMode: !!isEditMode,
         setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-        addPanelComponent: {
-          isOpen: false,
-          groupIndex: 0,
-          setIsOpen: (isOpen: boolean, groupIndex = 0, panelRef?: string) =>
-            set((state) => {
-              state.addPanelComponent.isOpen = isOpen;
-              state.addPanelComponent.groupIndex = groupIndex;
-              state.addPanelComponent.panelRef = panelRef;
-            }),
-        },
       };
     })
   );
