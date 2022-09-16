@@ -33,6 +33,12 @@ developing:
 - [NPM](https://npmjs.com/) v7 or higher: a version of `npm` that supports workspaces (use
   `npm --version` to check your version locally)
 
+### Debugging Build Errors
+
+Occasionally, after switching branches or installing new dependencies, your environment may start throwing build errors. To fix, try clearing all dist folders by running `npm run clean` in the ui folder (before rerunning `npm start`).
+
+If this does not work, `npm run reinstall` can be used to remove all `node_modules` folders and clear the `dist` folders.
+
 ## Running Scripts
 
 You can use the `-w ${WORKSPACE_NAME}` flag of `npm run` to run scripts inside

@@ -14,11 +14,11 @@
 // Eagerly load the metadata for the bundled plugins, but lazy-load the plugins
 import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
-import { PluginRegistryProps, PluginModuleResource, PluginModule } from '@perses-dev/plugin-system';
+import { PluginRegistryProps, PluginModuleResource } from '@perses-dev/plugin-system';
 import { useCallback } from 'react';
 
 interface BundledPlugin {
-  importPluginModule: () => Promise<PluginModule>;
+  importPluginModule: () => Promise<unknown>;
 }
 
 /**

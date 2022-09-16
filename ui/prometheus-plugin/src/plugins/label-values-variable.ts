@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,17 +12,13 @@
 // limitations under the License.
 
 import { JsonObject, useMemoized, VariableDefinition } from '@perses-dev/core';
-import { UseVariableOptionsHook } from '@perses-dev/plugin-system';
+import { UseVariableOptionsHook, VariablePlugin } from '@perses-dev/plugin-system';
 import { LabelValuesRequestParameters } from '../model/api-types';
 import { useDashboardPrometheusTimeRange } from '../model/time';
 import { TemplateString, useReplaceTemplateStrings } from '../model/templating';
 import { useLabelValues } from '../model/prometheus-client';
 
-export const PrometheusLabelValuesKind = 'PrometheusLabelValues' as const;
-
-type PrometheusLabelValues = VariableDefinition<LabelValuesOptions>;
-
-interface LabelValuesOptions extends JsonObject {
+interface PrometheusLabelValuesOptions extends JsonObject {
   label_name: string;
   match?: TemplateString[];
 }
@@ -30,9 +26,9 @@ interface LabelValuesOptions extends JsonObject {
 /**
  * Get variable option values by running a Prometheus label values query.
  */
-export function usePrometheusLabelValues(
-  definition: PrometheusLabelValues
-): ReturnType<UseVariableOptionsHook<LabelValuesOptions>> {
+function usePrometheusLabelValues(
+  definition: VariableDefinition<PrometheusLabelValuesOptions>
+): ReturnType<UseVariableOptionsHook<PrometheusLabelValuesOptions>> {
   const { start, end } = useDashboardPrometheusTimeRange();
   const { result: match, needsVariableValuesFor } = useReplaceTemplateStrings(definition.options.match);
 
@@ -59,3 +55,10 @@ export function usePrometheusLabelValues(
     error: error ?? undefined,
   };
 }
+
+/**
+ * The core Prometheus Label Values variable plugin in Perses.
+ */
+export const PrometheusLabelValues: VariablePlugin<PrometheusLabelValuesOptions> = {
+  useVariableOptions: usePrometheusLabelValues,
+};

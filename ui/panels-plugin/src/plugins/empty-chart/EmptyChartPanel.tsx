@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PrometheusGraphQuery } from './plugins/graph-query';
-import { Interval } from './plugins/interval-variable';
-import { PrometheusLabelNames } from './plugins/label-names-variable';
-import { PrometheusLabelValues } from './plugins/label-values-variable';
+import { Box } from '@mui/material';
+import { PanelProps } from '@perses-dev/plugin-system';
+import { EmptyChartOptions } from './empty-chart-model';
 
-// Export plugins under the same name as the kinds they handle from the plugin.json
-export { PrometheusGraphQuery, Interval, PrometheusLabelNames, PrometheusLabelValues };
+export type EmptyChartPanelProps = PanelProps<EmptyChartOptions>;
+
+export function EmptyChartPanel(props: EmptyChartPanelProps) {
+  return <Box sx={{ overflow: 'hidden' }}>{props.definition.kind}</Box>;
+}

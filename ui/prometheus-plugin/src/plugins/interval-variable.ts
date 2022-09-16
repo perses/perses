@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,11 +12,7 @@
 // limitations under the License.
 
 import { JsonObject, DurationString, VariableDefinition } from '@perses-dev/core';
-import { UseVariableOptionsHook } from '@perses-dev/plugin-system';
-
-export const IntervalKind = 'Inverval' as const;
-
-type IntervalVariable = VariableDefinition<IntervalOptions>;
+import { UseVariableOptionsHook, VariablePlugin } from '@perses-dev/plugin-system';
 
 interface IntervalOptions extends JsonObject {
   values: DurationString[];
@@ -30,10 +26,19 @@ interface IntervalOptions extends JsonObject {
  * Variable plugin for getting a list of variable options from a predefined
  * list of duration values.
  */
-export function useIntervalValues(definition: IntervalVariable): ReturnType<UseVariableOptionsHook<IntervalOptions>> {
+function useIntervalValues(
+  definition: VariableDefinition<IntervalOptions>
+): ReturnType<UseVariableOptionsHook<IntervalOptions>> {
   // TODO: What about auto?
   const {
     options: { values },
   } = definition;
   return { loading: false, error: undefined, data: values };
 }
+
+/**
+ * The core Interval variable plugin for Perses.
+ */
+export const Interval: VariablePlugin<IntervalOptions> = {
+  useVariableOptions: useIntervalValues,
+};
