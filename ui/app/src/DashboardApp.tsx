@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getUnixTime } from 'date-fns';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { useSearchParams } from 'react-router-dom';
 import { DashboardResource, getDefaultTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/core';
 
 export interface DashboardAppProps {
@@ -22,7 +23,7 @@ export interface DashboardAppProps {
 }
 
 /**
- * The View for viewing a Dashboard.
+ * Determines initial state and renders a Dashboard
  */
 function DashboardApp(props: DashboardAppProps) {
   const { dashboardResource } = props;
@@ -31,7 +32,16 @@ function DashboardApp(props: DashboardAppProps) {
 
   const fromParam = searchParams.get('from') ?? '';
   const toParam = searchParams.get('to') ?? '';
-  const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboardResource);
+  const dashboardDuration = dashboardResource?.spec.duration ?? '1h';
+  const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboardDuration);
+
+  useEffect(() => {
+    if (fromParam === '') {
+      searchParams.set('from', `now-${dashboardDuration}`);
+      searchParams.set('to', 'now');
+      setSearchParams(searchParams);
+    }
+  }, [dashboardDuration, fromParam, searchParams, setSearchParams]);
 
   const handleonTimeRangeChange = (event: TimeRangeValue) => {
     if (isRelativeTimeRange(event)) {

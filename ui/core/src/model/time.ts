@@ -123,8 +123,7 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
 /**
  * Gets the default time range taking into account URL params
  */
-export function getDefaultTimeRange(from: string, to: string, dashboard?: DashboardResource): TimeRangeValue {
-  const dashboardDuration = dashboard?.spec.duration ?? '1h';
+export function getDefaultTimeRange(from: string, to: string, dashboardDuration: DurationString): TimeRangeValue {
   const parsedParam = from !== null ? from.split('-')[1] : dashboardDuration;
   const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : dashboardDuration;
   if (from === '' || to === '') {
