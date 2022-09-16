@@ -13,7 +13,7 @@
 
 import { JsonObject, useEvent } from '@perses-dev/core';
 import { useRef, useCallback, useMemo } from 'react';
-import { PluginModuleResource, PluginType, Plugin } from '../../model';
+import { PluginModuleResource, PluginType, Plugin, PluginImplementation } from '../../model';
 import { GetInstalledPlugins, getTypeAndKindKey, usePluginIndexes } from './plugin-indexes';
 import { PluginRegistryContext } from './plugin-registry-model';
 
@@ -50,7 +50,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
   });
 
   const getPlugin = useCallback(
-    async (pluginType: PluginType, kind: string) => {
+    async <T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T, JsonObject>> => {
       // Get the indexes of the installed plugins
       const pluginIndexes = await getPluginIndexes();
 
