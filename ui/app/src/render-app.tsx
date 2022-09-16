@@ -13,7 +13,7 @@
 
 import { CssBaseline } from '@mui/material';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
 import { SnackbarProvider } from './context/SnackbarProvider';
@@ -22,10 +22,16 @@ import { DarkModeContextProvider } from './context/DarkMode';
 /**
  * Renders the Perses application in the target container.
  */
-export function renderApp(container: ReactDOM.Container | null) {
+export function renderApp(container: Element | null) {
+  if (container === null) {
+    return;
+  }
+
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
 
-  ReactDOM.render(
+  const root = ReactDOM.createRoot(container);
+
+  root.render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <DarkModeContextProvider>
@@ -35,7 +41,6 @@ export function renderApp(container: ReactDOM.Container | null) {
           </SnackbarProvider>
         </DarkModeContextProvider>
       </QueryClientProvider>
-    </React.StrictMode>,
-    container
+    </React.StrictMode>
   );
 }
