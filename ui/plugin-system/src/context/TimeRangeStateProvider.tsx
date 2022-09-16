@@ -29,8 +29,6 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
 
   const [timeRange, setActiveTimeRange] = useState<TimeRangeValue>(initialValue);
 
-  const [previousTimeRange, setPreviousTimeRange] = useState<TimeRangeValue | null>(null);
-
   const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialValue)
     ? toAbsoluteTimeRange(initialValue)
     : initialValue;
@@ -38,7 +36,6 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
-      setPreviousTimeRange(timeRange);
       setActiveTimeRange(value);
       if (isRelativeTimeRange(value)) {
         const convertedAbsoluteTime = toAbsoluteTimeRange(value);
@@ -50,12 +47,12 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
         onTimeRangeChange(value);
       }
     },
-    [timeRange, onTimeRangeChange]
+    [onTimeRangeChange]
   );
 
   const ctx = useMemo(
-    () => ({ timeRange, absoluteTimeRange, initialValue, previousTimeRange, setTimeRange }),
-    [timeRange, absoluteTimeRange, initialValue, previousTimeRange, setTimeRange]
+    () => ({ timeRange, absoluteTimeRange, initialValue, setTimeRange }),
+    [timeRange, absoluteTimeRange, initialValue, setTimeRange]
   );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
