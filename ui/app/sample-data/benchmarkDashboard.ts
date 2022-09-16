@@ -78,7 +78,7 @@ const benchmarkDashboard: DashboardResource = {
           description: 'This is a markdown panel',
         },
         options: {
-          text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\n```\n{ look: 'at this code' }```\n\n1. One\n2. Two\n3. Three\n\n[check the internet again](https://www.google.com)\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | ",
+          text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n[check the internet again](https://www.google.com)\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>Will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n",
         },
       },
       seriesTest: {
