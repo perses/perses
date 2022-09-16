@@ -17,7 +17,6 @@ import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
 export interface TimeRange {
   timeRange: TimeRangeValue;
   absoluteTimeRange: AbsoluteTimeRange;
-  initialValue: TimeRangeValue;
   setTimeRange: (value: TimeRangeValue) => void;
 }
 

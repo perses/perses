@@ -51,8 +51,8 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
   );
 
   const ctx = useMemo(
-    () => ({ timeRange, absoluteTimeRange, initialValue, setTimeRange }),
-    [timeRange, absoluteTimeRange, initialValue, setTimeRange]
+    () => ({ timeRange, absoluteTimeRange, setTimeRange }),
+    [timeRange, absoluteTimeRange, setTimeRange]
   );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
