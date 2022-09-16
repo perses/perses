@@ -12,9 +12,16 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
+import { sub } from 'date-fns';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
-import { TimeRangeValue, DurationString, RelativeTimeRange } from '@perses-dev/core';
+import {
+  TimeRangeValue,
+  DurationString,
+  RelativeTimeRange,
+  AbsoluteTimeRange,
+  toAbsoluteTimeRange,
+} from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 
 // TODO: add time shortcut if one does not match duration
@@ -33,7 +40,9 @@ export const TIME_OPTIONS: TimeOption[] = [
 const FORM_CONTROL_LABEL = 'Time Range';
 
 export function TimeRangeControls() {
-  const { timeRange, absoluteTimeRange, setTimeRange } = useTimeRange();
+  const { initialTimeRange, timeRange, setTimeRange } = useTimeRange();
+
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialTimeRange);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -53,8 +62,8 @@ export function TimeRangeControls() {
         })}
       >
         <AbsoluteTimePicker
-          initialTimeRange={absoluteTimeRange}
-          onChange={(timeRange: TimeRangeValue) => {
+          initialTimeRange={timeRange}
+          onChange={(timeRange: AbsoluteTimeRange) => {
             setTimeRange(timeRange);
             setShowCustomDateSelector(false);
           }}
@@ -67,14 +76,16 @@ export function TimeRangeControls() {
         <Box ref={anchorEl}>
           <TimeRangeSelector
             timeOptions={TIME_OPTIONS}
-            value={timeRange}
+            value={selectedTimeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {
                 pastDuration: duration as DurationString,
                 end: new Date(),
               };
-              setTimeRange(relativeTimeInput);
+              setSelectedTimeRange(relativeTimeInput);
+              const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
+              setTimeRange(convertedAbsoluteTime);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {

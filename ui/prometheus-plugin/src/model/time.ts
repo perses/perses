@@ -27,7 +27,7 @@ export interface PrometheusTimeRange {
  */
 export function useDashboardPrometheusTimeRange() {
   const {
-    absoluteTimeRange: { start, end },
+    timeRange: { start, end },
   } = useTimeRange();
 
   // Only recalculate the time range if the value on the dashboard changes

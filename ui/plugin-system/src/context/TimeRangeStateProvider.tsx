@@ -16,7 +16,7 @@ import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeR
 import { TimeRange, TimeRangeContext } from '../runtime/time-range';
 
 export interface TimeRangeProviderProps {
-  initialValue: TimeRangeValue;
+  initialTimeRange: TimeRangeValue;
   children?: React.ReactNode;
   onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
@@ -25,23 +25,18 @@ export interface TimeRangeProviderProps {
  * Provider implementation that supplies the TimeRangeState at runtime.
  */
 export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
-  const { initialValue, children, onTimeRangeChange } = props;
+  const { initialTimeRange, children, onTimeRangeChange } = props;
 
-  const [timeRange, setActiveTimeRange] = useState<TimeRangeValue>(initialValue);
+  const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
+    ? toAbsoluteTimeRange(initialTimeRange)
+    : initialTimeRange;
 
-  const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialValue)
-    ? toAbsoluteTimeRange(initialValue)
-    : initialValue;
-  const [absoluteTimeRange, setAbsoluteTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
+  const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
-      setActiveTimeRange(value);
-      if (isRelativeTimeRange(value)) {
-        const convertedAbsoluteTime = toAbsoluteTimeRange(value);
-        setAbsoluteTimeRange(convertedAbsoluteTime);
-      } else {
-        setAbsoluteTimeRange(value);
+      if (!isRelativeTimeRange(value)) {
+        setActiveTimeRange(value);
       }
       if (onTimeRangeChange !== undefined) {
         onTimeRangeChange(value);
@@ -51,8 +46,8 @@ export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
   );
 
   const ctx = useMemo(
-    () => ({ timeRange, absoluteTimeRange, setTimeRange }),
-    [timeRange, absoluteTimeRange, setTimeRange]
+    () => ({ initialTimeRange, timeRange, setTimeRange }),
+    [initialTimeRange, timeRange, setTimeRange]
   );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;

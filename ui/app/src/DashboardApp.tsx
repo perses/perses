@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { getUnixTime } from 'date-fns';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
@@ -33,7 +32,6 @@ function DashboardApp(props: DashboardAppProps) {
   const fromParam = searchParams.get('from') ?? '';
   const toParam = searchParams.get('to') ?? '';
   const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboardResource);
-  const [activeTimeRange, setActiveTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
 
   const handleonTimeRangeChange = (event: TimeRangeValue) => {
     if (isRelativeTimeRange(event)) {
@@ -46,12 +44,11 @@ function DashboardApp(props: DashboardAppProps) {
       searchParams.set('from', startUnixMs.toString());
       searchParams.set('to', endUnixMs.toString());
       setSearchParams(searchParams);
-      setActiveTimeRange({ start: event.start, end: event.end });
     }
   };
 
   return (
-    <TimeRangeStateProvider initialValue={activeTimeRange} onTimeRangeChange={handleonTimeRangeChange}>
+    <TimeRangeStateProvider initialTimeRange={defaultTimeRange} onTimeRangeChange={handleonTimeRangeChange}>
       <DashboardView dashboardResource={dashboardResource} />
     </TimeRangeStateProvider>
   );

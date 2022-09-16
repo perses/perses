@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { TimeRangeValue } from '@perses-dev/core';
+import { RelativeTimeRange } from '@perses-dev/core';
 import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
 import { screen } from '@testing-library/react';
 import { renderWithContext } from '../../test';
@@ -20,9 +20,9 @@ import { TimeRangeControls } from './TimeRangeControls';
 
 describe('TimeRangeControls', () => {
   const renderTimeRangeControls = () => {
-    const testRelativeTimeRange: TimeRangeValue = { pastDuration: '6h' };
+    const testRelativeTimeRange: RelativeTimeRange = { pastDuration: '6h' };
     renderWithContext(
-      <TimeRangeStateProvider initialValue={testRelativeTimeRange}>
+      <TimeRangeStateProvider initialTimeRange={testRelativeTimeRange}>
         <TimeRangeControls />
       </TimeRangeStateProvider>
     );
