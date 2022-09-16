@@ -32,12 +32,10 @@ import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
 
-const AddPanel = () => {
+const PanelDrawer = () => {
   const { layouts, addItemToLayout } = useLayouts();
   const { updatePanel } = usePanels();
-  const {
-    addPanelComponent: { isOpen, setIsOpen },
-  } = useDashboardApp();
+  const { panelDrawer, closePanelDrawer } = useDashboardApp();
 
   const [group, setGroup] = useState(0);
   const [panelName, setPanelName] = useState('');
@@ -71,7 +69,7 @@ const AddPanel = () => {
     setOptions(next);
   };
 
-  const onAddPanelClick = (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
     updatePanel(panelKey, {
@@ -94,17 +92,13 @@ const AddPanel = () => {
       height: 6,
       content: { $ref: `#/spec/panels/${panelKey}` },
     });
-    closePanel();
-  };
-
-  const closePanel = () => {
-    setIsOpen(false);
+    closePanelDrawer();
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={closePanel}>
-      <form onSubmit={onAddPanelClick}>
-        <AddPanelHeader onClose={closePanel} />
+    <Drawer isOpen={!!panelDrawer} onClose={closePanelDrawer}>
+      <form onSubmit={handleSubmit}>
+        <PanelDrawerHeader onClose={closePanelDrawer} />
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <FormControl>
@@ -146,7 +140,7 @@ const AddPanel = () => {
   );
 };
 
-const AddPanelHeader = ({ onClose }: { onClose: () => void }) => {
+const PanelDrawerHeader = ({ onClose }: { onClose: () => void }) => {
   return (
     <Box
       sx={{
@@ -170,4 +164,4 @@ const AddPanelHeader = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-export default AddPanel;
+export default PanelDrawer;

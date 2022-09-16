@@ -14,45 +14,61 @@
 import { immer } from 'zustand/middleware/immer';
 import { useDashboardStore } from './DashboardProvider';
 
+interface PanelDrawer {
+  groupIndex?: number;
+  panelRef?: string;
+}
+interface PanelGroupDialog {
+  groupIndex?: number;
+}
+
 export interface DashboardAppSlice {
-  addPanelComponent: {
-    isOpen: boolean;
-    groupIndex: number;
-    setIsOpen: (isOpen: boolean, groupIndex?: number, panelRef?: string) => void;
-    panelRef?: string;
-  };
-  addGroupComponent: {
-    isOpen: boolean;
-    setIsOpen: (isOpen: boolean, index?: number) => void;
-    index?: number;
-  };
+  panelDrawer?: PanelDrawer;
+  openPanelDrawer: (panelDrawer: PanelDrawer) => void;
+  closePanelDrawer: () => void;
+  panelGroupDialog?: PanelGroupDialog;
+  openPanelGroupDialog: (groupIndex: number) => void;
+  closePanelGroupDialog: () => void;
 }
 
 export const createDashboardAppSlice = immer<DashboardAppSlice>((set) => ({
-  addPanelComponent: {
-    isOpen: false,
-    groupIndex: 0,
-    setIsOpen: (isOpen: boolean, groupIndex = 0, panelRef?: string) =>
-      set((state) => {
-        state.addPanelComponent.isOpen = isOpen;
-        state.addPanelComponent.groupIndex = groupIndex;
-        state.addPanelComponent.panelRef = panelRef;
-      }),
-  },
-  addGroupComponent: {
-    isOpen: false,
-    isEdit: false,
-    setIsOpen: (isOpen: boolean, index?: number) =>
-      set((state) => {
-        state.addGroupComponent.isOpen = isOpen;
-        state.addGroupComponent.index = index;
-      }),
-  },
+  openPanelDrawer: ({ groupIndex, panelRef }: PanelDrawer) =>
+    set((state) => {
+      state.panelDrawer = {
+        groupIndex,
+        panelRef,
+      };
+    }),
+  closePanelDrawer: () =>
+    set((state) => {
+      state.panelDrawer = undefined;
+    }),
+  openPanelGroupDialog: (groupIndex: number) =>
+    set((state) => {
+      state.panelGroupDialog = { groupIndex };
+    }),
+  closePanelGroupDialog: () =>
+    set((state) => {
+      state.panelGroupDialog = undefined;
+    }),
 }));
 
 export function useDashboardApp() {
-  return useDashboardStore(({ addGroupComponent, addPanelComponent }) => ({
-    addGroupComponent,
-    addPanelComponent,
-  }));
+  return useDashboardStore(
+    ({
+      panelDrawer,
+      openPanelDrawer,
+      closePanelDrawer,
+      panelGroupDialog,
+      openPanelGroupDialog,
+      closePanelGroupDialog,
+    }) => ({
+      panelDrawer,
+      openPanelDrawer,
+      closePanelDrawer,
+      panelGroupDialog,
+      openPanelGroupDialog,
+      closePanelGroupDialog,
+    })
+  );
 }
