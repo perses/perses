@@ -112,7 +112,6 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleOnDoubleClick = (e: MouseEvent) => {
     setPinTooltip(false);
-
     // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
     if (onDoubleClick === undefined) {
       if (chartRef.current !== undefined) {

@@ -38,7 +38,6 @@ export interface LineChartContainerProps {
  */
 export function LineChartContainer(props: LineChartContainerProps) {
   const { width, height, show_legend, thresholds } = props;
-
   const queries = useRunningGraphQueries();
 
   const { setTimeRange } = useTimeRange();
