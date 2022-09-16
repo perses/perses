@@ -10,7 +10,8 @@
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
     "start": "npm run start -w app",
-    "clean": "rimraf .build-cache && npm run clean --workspaces"
+    "clean": "rimraf .build-cache && npm run clean --workspaces",
+    "reinstall": "npm run clean && rm -rf **/node_modules && npm install"
   },
   "workspaces": [
     "app",
