@@ -13,7 +13,7 @@
 
 import { createContext, useContext, useMemo, useCallback } from 'react';
 import { useQuery } from 'react-query';
-import { PluginModuleResource, PluginType } from '../../model';
+import { PluginModuleResource, PluginType } from '../../../model';
 import { LoadedPluginsByTypeAndKind, useRegistryState } from './registry-state';
 
 export interface PluginRegistryProps {
