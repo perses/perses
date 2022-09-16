@@ -13,7 +13,7 @@
 
 import { getUnixTime } from 'date-fns';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
-import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
+import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { useSearchParams } from 'react-router-dom';
 import { DashboardResource, getDefaultTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/core';
 
@@ -48,9 +48,9 @@ function DashboardApp(props: DashboardAppProps) {
   };
 
   return (
-    <TimeRangeStateProvider initialTimeRange={defaultTimeRange} onTimeRangeChange={handleonTimeRangeChange}>
+    <TimeRangeProvider initialTimeRange={defaultTimeRange} onTimeRangeChange={handleonTimeRangeChange}>
       <DashboardView dashboardResource={dashboardResource} />
-    </TimeRangeStateProvider>
+    </TimeRangeProvider>
   );
 }
 

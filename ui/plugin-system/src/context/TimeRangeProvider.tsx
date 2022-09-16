@@ -24,7 +24,7 @@ export interface TimeRangeProviderProps {
 /**
  * Provider implementation that supplies the TimeRangeState at runtime.
  */
-export function TimeRangeStateProvider(props: TimeRangeProviderProps) {
+export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
 
   const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
