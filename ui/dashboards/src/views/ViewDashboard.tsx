@@ -13,8 +13,7 @@
 
 import { BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-import { TimeRangeStateProvider, DashboardProvider } from '../context';
-import { TemplateVariableProvider } from '../templating';
+import { TimeRangeStateProvider, DashboardProvider, TemplateVariableProvider } from '../context';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends BoxProps {

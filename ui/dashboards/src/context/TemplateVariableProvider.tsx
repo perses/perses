@@ -237,7 +237,6 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
   const varState: VariableState = {
     value: null,
     loading: false,
-    error: null,
   };
   switch (v.kind) {
     case 'TextVariable':

@@ -14,11 +14,10 @@
 import { Box } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { useState } from 'react';
-import { Dashboard } from '../components';
+import { Dashboard, TemplateVariableList } from '../components';
 import AddPanel from '../components/AddPanel/AddPanel';
 import { DashboardToolbar } from '../components/DashboardToolbar';
 import { useDashboard } from '../context';
-import { TemplateVariableList } from '../templating';
 import { ViewDashboardProps } from './ViewDashboard';
 
 export const DashboardApp = (props: ViewDashboardProps) => {

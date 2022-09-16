@@ -21,7 +21,7 @@ export type VariableState = {
   value: VariableValue;
   options?: VariableOption[];
   loading: boolean;
-  error?: Error | null;
+  error?: Error;
 };
 
 export type VariableOption = { label: string; value: string };
@@ -30,9 +30,8 @@ export type VariablesState = Record<VariableName, VariableState>;
 
 export type VariableValue = string | string[] | null;
 
-export interface IVariable<TKind extends string, TOptions extends JsonObject = JsonObject>
-  extends Definition<TOptions> {
-  kind: TKind;
+export interface Variable<Kind extends string, TOptions extends JsonObject = JsonObject> extends Definition<TOptions> {
+  kind: Kind;
   name: VariableName;
   display?: {
     label?: string;
@@ -46,19 +45,19 @@ export interface TextVariableOptions extends JsonObject {
   value: string;
 }
 
-export type TextVariableDefintion = IVariable<'TextVariable', TextVariableOptions>;
+export type TextVariableDefintion = Variable<'TextVariable', TextVariableOptions>;
 
-export type ListVariableOptions<TKind extends string, TOptions extends JsonObject> = {
+export type ListVariableOptions<Kind extends string, Options extends JsonObject> = {
   allowMultiple?: boolean;
   allowAllValue?: boolean;
   customAllValue?: string;
-  kind: TKind;
-  options: TOptions;
+  kind: Kind;
+  options: Options;
 };
 
-export type ListVariableDefinition<TOptions extends JsonObject = JsonObject, TKind extends string = string> = IVariable<
+export type ListVariableDefinition<Options extends JsonObject = JsonObject, Kind extends string = string> = Variable<
   'ListVariable',
-  ListVariableOptions<TKind, TOptions>
+  ListVariableOptions<Kind, Options>
 >;
 
 // All Variables

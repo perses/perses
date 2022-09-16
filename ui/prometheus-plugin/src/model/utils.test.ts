@@ -68,16 +68,16 @@ describe('replaceTemplateVariables()', () => {
     {
       text: 'hello $var1 $var2',
       state: {
-        var1: { value: 'world', loading: false, error: null },
-        var2: { value: 'world', loading: false, error: null },
+        var1: { value: 'world', loading: false },
+        var2: { value: 'world', loading: false },
       },
       expected: 'hello world world',
     },
     {
       text: 'hello $var1 $var2',
       state: {
-        var1: { value: 'world', loading: false, error: null },
-        var2: { value: ['a', 'b'], loading: false, error: null },
+        var1: { value: 'world', loading: false },
+        var2: { value: ['a', 'b'], loading: false },
       },
       expected: 'hello world (a|b)',
     },

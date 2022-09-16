@@ -13,3 +13,4 @@
 
 export * from './TimeRangeStateProvider';
 export * from './DashboardProvider';
+export * from './TemplateVariableProvider';
