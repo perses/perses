@@ -127,7 +127,9 @@ export function getDefaultTimeRange(from: string, to: string, dashboard?: Dashbo
   const dashboardDuration = dashboard?.spec.duration ?? '1h';
   const parsedParam = from !== null ? from.split('-')[1] : dashboardDuration;
   const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : dashboardDuration;
-  if (from === '' || to === '') return { pastDuration };
+  if (from === '' || to === '') {
+    return { pastDuration };
+  }
   return isGrafanaRelativeTimeRange(from, to)
     ? { pastDuration }
     : { start: new Date(Number(from)), end: new Date(Number(to)) };
