@@ -63,11 +63,10 @@ const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined
 
 export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T) {
   const store = useContext(DashboardContext);
-  if (store === null) {
+  if (store === undefined) {
     throw new Error('No DashboardContext found. Did you forget a Provider?');
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return useStore(store!, selector, shallow);
+  return useStore(store, selector, shallow);
 }
 
 export function DashboardProvider(props: DashboardProviderProps) {
