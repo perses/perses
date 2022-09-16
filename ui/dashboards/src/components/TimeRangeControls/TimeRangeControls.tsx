@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
-import { sub } from 'date-fns';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {

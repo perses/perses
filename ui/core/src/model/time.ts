@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Duration, sub } from 'date-fns';
-import { DashboardResource } from './dashboard';
 
 export type UnixTimeMs = number;
 
