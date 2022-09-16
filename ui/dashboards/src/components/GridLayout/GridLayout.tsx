@@ -14,7 +14,7 @@ import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
 import { GridDefinition, GridItemDefinition } from '@perses-dev/core';
-import styles from '../../css/styles';
+import { styles } from '../../css/styles';
 import { useEditMode } from '../../context';
 import { GridTitle } from './GridTitle';
 

@@ -11,4 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './LineChart';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialMarkdownPanelOptions, MarkdownPanelOptions } from './markdown-panel-model';
+import { MarkdownPanel } from './MarkdownPanel';
+import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';
+
+/**
+ * The core Markdown panel plugin in Perses.
+ */
+export const Markdown: PanelPlugin<MarkdownPanelOptions> = {
+  PanelComponent: MarkdownPanel,
+  OptionsEditorComponent: MarkdownPanelOptionsEditor,
+  createInitialOptions: createInitialMarkdownPanelOptions,
+};

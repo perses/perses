@@ -13,7 +13,7 @@
 
 import { useQuery } from 'react-query';
 import { PluginType } from '../../model';
-import { usePluginRegistry } from '../PluginRegistry';
+import { usePluginRegistry } from '../PluginRegistry/legacy';
 
 export interface PluginLoaderProps {
   pluginType: PluginType;

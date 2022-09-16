@@ -11,4 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './LineChart';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialStatChartOptions, StatChartOptions } from './stat-chart-model';
+import { StatChartOptionsEditor } from './StatChartOptionsEditor';
+import { StatChartPanel } from './StatChartPanel';
+
+/**
+ * The core StatChart panel plugin for Perses.
+ */
+export const StatChart: PanelPlugin<StatChartOptions> = {
+  PanelComponent: StatChartPanel,
+  OptionsEditorComponent: StatChartOptionsEditor,
+  createInitialOptions: createInitialStatChartOptions,
+};

@@ -11,4 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './LineChart';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialGaugeChartOptions, GaugeChartOptions } from './gauge-chart-model';
+import { GaugeChartOptionsEditor } from './GaugeChartOptionsEditor';
+import { GaugeChartPanel } from './GaugeChartPanel';
+
+/**
+ * The core GaugeChart panel plugin for Perses.
+ */
+export const GaugeChart: PanelPlugin<GaugeChartOptions> = {
+  PanelComponent: GaugeChartPanel,
+  OptionsEditorComponent: GaugeChartOptionsEditor,
+  createInitialOptions: createInitialGaugeChartOptions,
+};

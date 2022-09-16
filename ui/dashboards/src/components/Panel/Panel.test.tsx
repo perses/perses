@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { JsonObject } from '@perses-dev/core';
-import { PluginRegistrationConfig, PluginRegistry } from '@perses-dev/plugin-system';
+import { PanelPlugin, PluginRegistry } from '@perses-dev/plugin-system';
 import 'intersection-observer';
 import { screen } from '@testing-library/react';
 import { renderWithContext, mockPluginRegistryProps } from '../../test';
@@ -20,18 +20,14 @@ import testDashboard from '../../test/testDashboard';
 import { DashboardProvider, DashboardStoreProps } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
-const FAKE_PANEL_PLUGIN: PluginRegistrationConfig<JsonObject> = {
-  pluginType: 'Panel',
-  kind: 'FakePanel',
-  plugin: {
-    PanelComponent: () => {
-      return <div role="figure">FakePanel chart</div>;
-    },
-    OptionsEditorComponent: () => {
-      return <div>Edit options here</div>;
-    },
-    createInitialOptions: () => ({}),
+const FAKE_PANEL_PLUGIN: PanelPlugin<JsonObject> = {
+  PanelComponent: () => {
+    return <div role="figure">FakePanel chart</div>;
   },
+  OptionsEditorComponent: () => {
+    return <div>Edit options here</div>;
+  },
+  createInitialOptions: () => ({}),
 };
 
 describe('Panel', () => {
@@ -59,7 +55,7 @@ describe('Panel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (initialState: DashboardStoreProps) => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin(FAKE_PANEL_PLUGIN);
+    addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
 
     renderWithContext(
       <DashboardProvider initialState={initialState}>

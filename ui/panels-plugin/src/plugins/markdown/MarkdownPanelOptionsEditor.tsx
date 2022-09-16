@@ -11,4 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './LineChart';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Box } from '@mui/material';
+import { MarkdownPanelOptions } from './markdown-panel-model';
+
+export type MarkdownPanelOptionsEditorProps = OptionsEditorProps<MarkdownPanelOptions>;
+
+export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProps) {
+  const { value } = props;
+  return <Box>{JSON.stringify(value)}</Box>;
+}

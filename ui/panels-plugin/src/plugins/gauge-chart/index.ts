@@ -11,6 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './gauge-chart-model';
-export * from './GaugeChartPanel';
-export * from './GaugeChartOptionsEditor';
+export * from './GaugeChart';

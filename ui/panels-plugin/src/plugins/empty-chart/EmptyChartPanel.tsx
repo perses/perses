@@ -11,4 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './LineChart';
+import { Box } from '@mui/material';
+import { PanelProps } from '@perses-dev/plugin-system';
+import { EmptyChartOptions } from './empty-chart-model';
+
+export type EmptyChartPanelProps = PanelProps<EmptyChartOptions>;
+
+export function EmptyChartPanel(props: EmptyChartPanelProps) {
+  return <Box sx={{ overflow: 'hidden' }}>{props.definition.kind}</Box>;
+}

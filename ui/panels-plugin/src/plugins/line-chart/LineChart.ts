@@ -11,12 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { EmptyChartOptions } from './empty-chart-model';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialLineChartOptions, LineChartOptions } from './line-chart-model';
+import { LineChartOptionsEditor } from './LineChartOptionsEditor';
+import { LineChartPanel } from './LineChartPanel';
 
-export type EmptyChartProps = PanelProps<EmptyChartOptions>;
-
-export function EmptyChart(props: EmptyChartProps) {
-  return <Box sx={{ overflow: 'hidden' }}>{props.definition.kind}</Box>;
-}
+/**
+ * The core LineChart panel plugin for Perses.
+ */
+export const LineChart: PanelPlugin<LineChartOptions> = {
+  PanelComponent: LineChartPanel,
+  OptionsEditorComponent: LineChartOptionsEditor,
+  createInitialOptions: createInitialLineChartOptions,
+};

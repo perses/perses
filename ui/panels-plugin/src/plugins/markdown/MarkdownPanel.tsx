@@ -11,4 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './LineChart';
+import { Box } from '@mui/material';
+import { PanelProps } from '@perses-dev/plugin-system';
+import { MarkdownPanelOptions } from './markdown-panel-model';
+
+export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
+
+export function MarkdownPanel(props: MarkdownPanelProps) {
+  const {
+    definition: {
+      options: { text },
+    },
+  } = props;
+
+  return <Box sx={{ height: '100%', overflowY: 'auto' }}>{text}</Box>;
+}

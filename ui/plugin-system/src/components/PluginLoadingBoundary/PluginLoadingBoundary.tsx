@@ -15,7 +15,7 @@ import { JsonObject } from '@perses-dev/core';
 import { Fragment, createContext, useContext, useMemo, useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
 import { PluginType, ALL_PLUGIN_TYPES, PluginImplementation } from '../../model';
-import { usePluginRegistry } from '../PluginRegistry';
+import { usePluginRegistry } from '../PluginRegistry/legacy';
 import { PluginLoader } from './PluginLoader';
 
 // Plugin dependencies by PluginType and a Set of the kinds
