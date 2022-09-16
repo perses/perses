@@ -39,7 +39,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
   // callback below
   const loadPluginModule = useEvent((resource: PluginModuleResource) => {
     let request = importCache.current.get(resource);
-    if (request !== undefined) {
+    if (request === undefined) {
       request = importPluginModule(resource);
       importCache.current.set(resource, request);
 
@@ -71,6 +71,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
           `The ${pluginType} plugin for kind '${kind}' is missing from the ${resource.metadata.name} plugin module`
         );
       }
+
       return plugin;
     },
     [getPluginIndexes, loadPluginModule]
