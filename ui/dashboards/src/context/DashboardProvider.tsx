@@ -21,7 +21,7 @@ import { DashboardSpec, LayoutDefinition, PanelDefinition } from '@perses-dev/co
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
 import { LayoutsSlice, createLayoutsSlice } from './LayoutsSlice';
 
-interface DashboardStoreState extends DashboardAppSlice, LayoutsSlice {
+export interface DashboardStoreState extends DashboardAppSlice, LayoutsSlice {
   dashboard: DashboardSpec;
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;

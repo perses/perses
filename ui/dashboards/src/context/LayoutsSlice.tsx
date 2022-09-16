@@ -12,33 +12,31 @@
 // limitations under the License.
 
 import { LayoutDefinition, GridItemDefinition } from '@perses-dev/core';
-import produce from 'immer';
-import { StateCreator } from 'zustand';
-import { useDashboardStore } from './DashboardProvider';
+import { immer } from 'zustand/middleware/immer';
+import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
 
 export interface LayoutsSlice {
   updateLayout: (layout: LayoutDefinition, index?: number) => void;
   addItemToLayout: (index: number, item: GridItemDefinition) => void;
 }
 
-export const createLayoutsSlice: StateCreator<LayoutsSlice> = (set) => ({
+export const createLayoutsSlice = immer<LayoutsSlice>((set) => ({
   updateLayout: (layout: LayoutDefinition, index?: number) =>
-    set(
-      produce((state) => {
-        if (index === undefined) {
-          state.layouts.unshift(layout);
-        } else {
-          state.layouts[index] = layout;
-        }
-      })
-    ),
+    set((state) => {
+      if (index === undefined) {
+        (state as DashboardStoreState).layouts.unshift(layout);
+      } else {
+        (state as DashboardStoreState).layouts[index] = layout;
+      }
+    }),
   addItemToLayout: (index: number, item: GridItemDefinition) =>
-    set(
-      produce((state) => {
-        state.layouts[index].spec.items.push(item);
-      })
-    ),
-});
+    set((state) => {
+      const layouts = (state as DashboardStoreState).layouts;
+      if (layouts && layouts[index]) {
+        layouts[index]?.spec.items.push(item);
+      }
+    }),
+}));
 
 export function useLayouts() {
   return useDashboardStore(({ layouts, updateLayout, addItemToLayout }) => ({

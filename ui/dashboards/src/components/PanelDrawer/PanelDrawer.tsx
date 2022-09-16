@@ -96,9 +96,9 @@ const PanelDrawer = () => {
   };
 
   return (
-    <Drawer isOpen={!!panelDrawer} onClose={closePanelDrawer}>
+    <Drawer isOpen={!!panelDrawer} onClose={() => closePanelDrawer()}>
       <form onSubmit={handleSubmit}>
-        <PanelDrawerHeader onClose={closePanelDrawer} />
+        <PanelDrawerHeader onClose={() => closePanelDrawer()} />
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <FormControl>
