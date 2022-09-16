@@ -43,8 +43,9 @@ function DashboardApp(props: DashboardAppProps) {
     }
   }, [dashboardDuration, fromParam, searchParams, setSearchParams]);
 
-  const handleonTimeRangeChange = (event: TimeRangeValue) => {
+  const handleOnTimeRangeChange = (event: TimeRangeValue) => {
     if (isRelativeTimeRange(event)) {
+      // TODO: fix relative time dropdown, currently params are always being converted to absolute
       searchParams.set('from', `now-${event.pastDuration}`);
       searchParams.set('to', 'now');
       setSearchParams(searchParams);
@@ -58,7 +59,7 @@ function DashboardApp(props: DashboardAppProps) {
   };
 
   return (
-    <TimeRangeProvider initialTimeRange={defaultTimeRange} onTimeRangeChange={handleonTimeRangeChange}>
+    <TimeRangeProvider initialTimeRange={defaultTimeRange} onTimeRangeChange={handleOnTimeRangeChange}>
       <DashboardView dashboardResource={dashboardResource} />
     </TimeRangeProvider>
   );
