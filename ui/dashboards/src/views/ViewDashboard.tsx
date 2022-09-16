@@ -14,8 +14,7 @@
 import { BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import { TemplateVariablesProvider, DashboardProvider } from '../context';
-
-import { DashboardApp } from './DashboardApp';
+import { PersesDashboard } from '../components/PersesDashboard';
 
 export interface ViewDashboardProps extends BoxProps {
   dashboardResource: DashboardResource;
@@ -33,7 +32,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
       <TemplateVariablesProvider variableDefinitions={spec.variables}>
-        <DashboardApp {...props}>{children}</DashboardApp>
+        <PersesDashboard {...props}>{children}</PersesDashboard>
       </TemplateVariablesProvider>
     </DashboardProvider>
   );

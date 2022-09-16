@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CssBaseline } from '@mui/material';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
 import { SnackbarProvider } from './context/SnackbarProvider';
@@ -33,14 +34,16 @@ export function renderApp(container: Element | null) {
 
   root.render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <DarkModeContextProvider>
-          <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-            <CssBaseline />
-            <App />
-          </SnackbarProvider>
-        </DarkModeContextProvider>
-      </QueryClientProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <DarkModeContextProvider>
+            <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+              <CssBaseline />
+              <App />
+            </SnackbarProvider>
+          </DarkModeContextProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
     </React.StrictMode>
   );
 }

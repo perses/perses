@@ -14,6 +14,7 @@
 export * from './Dashboard';
 export * from './GridLayout';
 export * from './Panel';
+export * from './PersesDashboard';
 export * from './TimeRangeControls';
 export * from './VariableAutocomplete';
 export * from './VariableList';

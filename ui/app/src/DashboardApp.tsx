@@ -18,14 +18,14 @@ import { TimeRangeStateProvider } from '@perses-dev/plugin-system';
 import { useSearchParams } from 'react-router-dom';
 import { DashboardResource, getDefaultTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/core';
 
-export interface ViewDashboardProps {
+export interface DashboardAppProps {
   dashboardResource: DashboardResource;
 }
 
 /**
  * The View for viewing a Dashboard.
  */
-function ViewDashboard(props: ViewDashboardProps) {
+function DashboardApp(props: DashboardAppProps) {
   const { dashboardResource } = props;
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,4 +57,4 @@ function ViewDashboard(props: ViewDashboardProps) {
   );
 }
 
-export default ViewDashboard;
+export default DashboardApp;
