@@ -122,51 +122,59 @@ type graph struct {
 
 // buildOrder determinate the build order of the variables
 // For example we could have:
-//          (f)         (d)
-//         / | \         |
-//       (c) |  (b)     (g)
-//        \  |  /|
-//          (a)  /
-//           |  /
-//           | /
-//           (e)
+//
+//	   (f)         (d)
+//	  / | \         |
+//	(c) |  (b)     (g)
+//	 \  |  /|
+//	   (a)  /
+//	    |  /
+//	    | /
+//	    (e)
+//
 // In this example, we should build first (f) and (d), because there is no incoming edge to these nodes.
 // Once it is done, it is irrelevant that some nodes are dependent on (f) and (d) since they have already been built.
 // So we can remove the d and f's outgoing edges.
-//      build order, (f), (d)
-//          (f)         (d)
 //
-//       (c)    (b)     (g)
-//        \     /|
-//          (a)  /
-//           |  /
-//           | /
-//           (e)
+//	build order, (f), (d)
+//	    (f)         (d)
+//
+//	 (c)    (b)     (g)
+//	  \     /|
+//	    (a)  /
+//	     |  /
+//	     | /
+//	     (e)
+//
 // Also we can notice (f) and (d) can be built in parallel.
 // So instead of having an ordered list of the different variable/node to build, we could have instead a list of ordered variable's group.
 // Where every variable contained in the group can be built in parallel.
 // Like that we have now the following build order:
-//      build order: group0
-//      group0: (f), (d)
+//
+//	build order: group0
+//	group0: (f), (d)
 //
 // Next we can build (c), (b) and (g) (also in parallel applying the same logic as above) And then we can remove their outgoing edges
-//      build order: group0, group1
-//      group0: (f), (d)
-//      group1: (c), (b), (g)
-//          (f)         (d)
 //
-//       (c)    (b)     (g)
+//	build order: group0, group1
+//	group0: (f), (d)
+//	group1: (c), (b), (g)
+//	    (f)         (d)
 //
-//          (a)
-//           |
-//           |
-//          (e)
+//	 (c)    (b)     (g)
+//
+//	    (a)
+//	     |
+//	     |
+//	    (e)
+//
 // Then variable (a) can be built which is removing the outgoing edge to (e). This leaves just (e) to be built and we have the final build order:
-//      build order: group0, group1, group2, group3
-//      group0: (f), (d)
-//      group1: (c), (b), (g)
-//      group2: (a)
-//      group3: (e)
+//
+//	build order: group0, group1, group2, group3
+//	group0: (f), (d)
+//	group1: (c), (b), (g)
+//	group2: (a)
+//	group3: (e)
 func (g *graph) buildOrder() ([]Group, error) {
 	remainingNodes := g.buildInitialRemainingNodes()
 	var groups []Group
