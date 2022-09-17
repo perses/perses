@@ -30,7 +30,7 @@ func Resolve(configFile string, dbFolder string, dbExtension string) (Config, er
 			FileExtension: FileExtension(dbExtension),
 		}
 	}
-	return c, config.NewResolver().
+	return c, config.NewResolver[Config]().
 		SetConfigFile(configFile).
 		SetEnvPrefix("PERSES").
 		Resolve(&c).
