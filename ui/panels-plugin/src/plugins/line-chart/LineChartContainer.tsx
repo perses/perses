@@ -14,7 +14,7 @@
 import { useMemo } from 'react';
 import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { useTimeRange } from '@perses-dev/plugin-system';
+import { useQueryParams } from '@perses-dev/plugin-system';
 import { LineChart, EChartsDataFormat, UnitOptions, ZoomEventData } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { useRunningGraphQueries } from './GraphQueryRunner';
@@ -40,7 +40,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
   const { width, height, show_legend, thresholds } = props;
   const queries = useRunningGraphQueries();
 
-  const { setTimeRange } = useTimeRange();
+  const { queryParams, setQueryParams } = useQueryParams();
 
   // populate series data based on query results
   const { graphData, loading } = useMemo(() => {
@@ -122,11 +122,14 @@ export function LineChartContainer(props: LineChartContainerProps) {
   const handleDataZoom = (event: ZoomEventData) => {
     // TODO: remove setTimeout, add zoom transition using ECharts animations
     // - https://echarts.apache.org/handbook/en/how-to/animation/transition/
-    const start = new Date(event.start);
-    const end = new Date(event.end);
+    const start = event.start.toString();
+    const end = event.end.toString();
+    queryParams.set('from', start);
+    queryParams.set('to', end);
+
     // slight delay to avoid trigger error due to pending echarts action
     setTimeout(() => {
-      setTimeRange({ start, end });
+      setQueryParams(queryParams);
     }, 10);
   };
 

@@ -21,7 +21,7 @@ import {
   AbsoluteTimeRange,
   toAbsoluteTimeRange,
 } from '@perses-dev/core';
-import { useTimeRange } from '@perses-dev/plugin-system';
+import { useTimeRange, useQueryParams } from '@perses-dev/plugin-system';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -40,6 +40,8 @@ const FORM_CONTROL_LABEL = 'Time Range';
 
 export function TimeRangeControls() {
   const { initialTimeRange, timeRange, setTimeRange } = useTimeRange();
+
+  const { queryParams, setQueryParams } = useQueryParams();
 
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialTimeRange);
 
@@ -84,6 +86,12 @@ export function TimeRangeControls() {
               };
               setSelectedTimeRange(relativeTimeInput);
               const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
+
+              // TODO: make useQueryParams single source of truth
+              queryParams.set('from', `now-${duration}`);
+              queryParams.set('to', 'now');
+              setQueryParams(queryParams);
+
               setTimeRange(convertedAbsoluteTime);
               setShowCustomDateSelector(false);
             }}

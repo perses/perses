@@ -13,10 +13,9 @@
 
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getUnixTime } from 'date-fns';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { DashboardResource, getDefaultTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/core';
+import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
@@ -43,23 +42,8 @@ function DashboardApp(props: DashboardAppProps) {
     }
   }, [dashboardDuration, fromParam, searchParams, setSearchParams]);
 
-  const handleOnTimeRangeChange = (event: TimeRangeValue) => {
-    if (isRelativeTimeRange(event)) {
-      // TODO: fix relative time dropdown, currently params are always being converted to absolute
-      searchParams.set('from', `now-${event.pastDuration}`);
-      searchParams.set('to', 'now');
-      setSearchParams(searchParams);
-    } else {
-      const startUnixMs = getUnixTime(event.start) * 1000;
-      const endUnixMs = getUnixTime(event.end) * 1000;
-      searchParams.set('from', startUnixMs.toString());
-      searchParams.set('to', endUnixMs.toString());
-      setSearchParams(searchParams);
-    }
-  };
-
   return (
-    <TimeRangeProvider initialTimeRange={defaultTimeRange} onTimeRangeChange={handleOnTimeRangeChange}>
+    <TimeRangeProvider initialTimeRange={defaultTimeRange}>
       <DashboardView dashboardResource={dashboardResource} />
     </TimeRangeProvider>
   );

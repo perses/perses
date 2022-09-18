@@ -16,7 +16,7 @@ import { Routes, Route, useSearchParams } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
-import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
+import { PluginRegistry, PluginBoundary, QueryStringProvider } from '@perses-dev/plugin-system';
 import DashboardApp from './DashboardApp';
 import Docs from './views/Docs';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
@@ -34,7 +34,7 @@ const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // TODO: completely remove old dashboard url param approach
   const dashboardParam = searchParams.get('dashboard');
@@ -73,7 +73,9 @@ function App() {
           <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
               <DataSourceRegistry>
-                <DashboardApp dashboardResource={dashboard} />
+                <QueryStringProvider queryParams={searchParams} setQueryParams={setSearchParams}>
+                  <DashboardApp dashboardResource={dashboard} />
+                </QueryStringProvider>
               </DataSourceRegistry>
             </PluginBoundary>
           </PluginRegistry>
