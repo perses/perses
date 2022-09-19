@@ -51,8 +51,10 @@ export type ListVariableOptions<Kind extends string, Options extends JsonObject>
   allowMultiple?: boolean;
   allowAllValue?: boolean;
   customAllValue?: string;
-  kind: Kind;
-  options: Options;
+  optionsLoader: {
+    kind: Kind;
+    options: Options;
+  };
 };
 
 export type ListVariableDefinition<Options extends JsonObject = JsonObject, Kind extends string = string> = Variable<
