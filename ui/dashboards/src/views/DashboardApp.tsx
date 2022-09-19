@@ -13,16 +13,14 @@
 
 import { Box } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { useState } from 'react';
 import { Dashboard, TemplateVariableList } from '../components';
-import AddPanel from '../components/AddPanel/AddPanel';
+import PanelDrawer from '../components/PanelDrawer/PanelDrawer';
 import { DashboardToolbar } from '../components/DashboardToolbar';
 import { useDashboard } from '../context';
 import { ViewDashboardProps } from './ViewDashboard';
 
 export const DashboardApp = (props: ViewDashboardProps) => {
   const { dashboardResource, sx, children, ...others } = props;
-  const [showAddPanel, setShowAddPanel] = useState(false);
   const { dashboard } = useDashboard();
 
   return (
@@ -49,10 +47,10 @@ export const DashboardApp = (props: ViewDashboardProps) => {
           flexDirection: 'column',
         }}
       >
-        <DashboardToolbar dashboardName={dashboardResource.metadata.name} onAddPanel={() => setShowAddPanel(true)} />
+        <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
         <TemplateVariableList />
         <Dashboard spec={dashboard} />
-        <AddPanel isOpen={showAddPanel} onClose={() => setShowAddPanel(false)} />
+        <PanelDrawer />
         {children}
       </Box>
     </Box>

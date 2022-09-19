@@ -11,29 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import create from 'zustand';
+import { createStore, useStore } from 'zustand';
 import type { StoreApi } from 'zustand';
-import createZustandContext from 'zustand/context';
+import { immer } from 'zustand/middleware/immer';
+import shallow from 'zustand/shallow';
+import { createContext, useContext } from 'react';
 import produce from 'immer';
-import { DashboardSpec, GridItemDefinition, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
+import { DashboardSpec, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
+import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
+import { LayoutsSlice, createLayoutsSlice } from './LayoutsSlice';
 
-interface DashboardState {
+export interface DashboardStoreState extends DashboardAppSlice, LayoutsSlice {
   dashboard: DashboardSpec;
-  isEditMode: boolean;
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
-}
-
-interface DashboardActions {
+  updatePanel: (name: string, panel: PanelDefinition) => void;
+  isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
-  setLayouts: (layouts: LayoutDefinition[]) => void;
-  addLayout: (layout: LayoutDefinition) => void;
-  addItemToLayout: (index: number, item: GridItemDefinition) => void;
-  setPanels: (panels: Record<string, PanelDefinition>) => void;
-  addPanel: (name: string, panel: PanelDefinition) => void;
 }
-
-export type DashboardStoreState = DashboardState & DashboardActions;
 
 export interface DashboardStoreProps {
   dashboardSpec: DashboardSpec;
@@ -44,28 +39,12 @@ export interface DashboardProviderProps {
   children?: React.ReactNode;
 }
 
-const { Provider, useStore } = createZustandContext<StoreApi<DashboardStoreState>>();
-
 export function usePanels() {
-  const { panels, addPanel } = useStore(({ panels, addPanel }) => ({ panels, addPanel }));
-  return { panels, addPanel };
-}
-
-export function useLayouts() {
-  const { layouts, setLayouts, addLayout, addItemToLayout } = useStore(
-    ({ layouts, setLayouts, addLayout, addItemToLayout }) => ({
-      layouts,
-      setLayouts,
-      addLayout,
-      addItemToLayout,
-    })
-  );
-  return { layouts, setLayouts, addLayout, addItemToLayout };
+  return useDashboardStore(({ panels, updatePanel }) => ({ panels, updatePanel }));
 }
 
 export function useEditMode() {
-  const { isEditMode, setEditMode } = useStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
-  return { isEditMode, setEditMode };
+  return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
 }
 
 export function useDashboard() {
@@ -76,8 +55,18 @@ export function useDashboard() {
       draftState.layouts = state.layouts;
     });
   };
-  const dashboard = useStore(selectDashboardSpec);
+  const dashboard = useDashboardStore(selectDashboardSpec);
   return { dashboard };
+}
+
+const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
+
+export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T) {
+  const store = useContext(DashboardContext);
+  if (store === undefined) {
+    throw new Error('No DashboardContext found. Did you forget a Provider?');
+  }
+  return useStore(store, selector, shallow);
 }
 
 export function DashboardProvider(props: DashboardProviderProps) {
@@ -88,40 +77,27 @@ export function DashboardProvider(props: DashboardProviderProps) {
 
   const { layouts, panels } = dashboardSpec;
 
+  const dashboardStore = createStore<DashboardStoreState>()(
+    immer((set, get, api) => {
+      return {
+        ...(createDashboardAppSlice(set, get, api, []) as unknown as DashboardAppSlice),
+        ...(createLayoutsSlice(set, get, api, []) as unknown as LayoutsSlice),
+        layouts,
+        panels,
+        dashboard: dashboardSpec,
+        updatePanel: (name: string, panel: PanelDefinition) =>
+          set((state) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            state.panels[name] = panel as any;
+          }),
+        isEditMode: !!isEditMode,
+        setEditMode: (isEditMode: boolean) => set({ isEditMode }),
+      };
+    })
+  );
   return (
-    <Provider
-      createStore={() =>
-        create((set) => ({
-          layouts,
-          panels,
-          dashboard: dashboardSpec,
-          isEditMode: !!isEditMode,
-          setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setLayouts: (layouts: LayoutDefinition[]) => set({ layouts }),
-          addLayout: (layout: LayoutDefinition) =>
-            set(
-              produce((state) => {
-                state.layouts.push(layout);
-              })
-            ),
-          addItemToLayout: (index: number, item: GridItemDefinition) =>
-            set(
-              produce((state) => {
-                state.layouts[index].spec.items.push(item);
-              })
-            ),
-          setPanels: (panels: Record<string, PanelDefinition>) => set({ panels }),
-          addPanel: (name: string, panel: PanelDefinition) => {
-            set(
-              produce((state: DashboardStoreState) => {
-                state.panels[name] = panel;
-              }, {})
-            );
-          },
-        }))
-      }
-    >
+    <DashboardContext.Provider value={dashboardStore as StoreApi<DashboardStoreState>}>
       {children}
-    </Provider>
+    </DashboardContext.Provider>
   );
 }
