@@ -34,19 +34,19 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   const { queryParams, setQueryParams } = useQueryParams();
 
-  const fromParam = queryParams.get('from') ?? '';
-  const toParam = queryParams.get('to') ?? '';
+  const startParam = queryParams.get('start') ?? '';
+  const endParam = queryParams.get('end') ?? '';
   const dashboardDuration = spec.duration ?? '1h';
-  const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboardDuration);
+  const defaultTimeRange = getDefaultTimeRange(startParam, endParam, dashboardDuration);
 
   // TODO: replace with useSyncToQueryString util
   useEffect(() => {
-    if (fromParam === '') {
-      queryParams.set('from', `now-${dashboardDuration}`);
-      queryParams.set('to', 'now');
+    if (startParam === '') {
+      queryParams.set('start', dashboardDuration);
+      queryParams.set('end', 'now');
       setQueryParams(queryParams);
     }
-  }, [dashboardDuration, fromParam, queryParams, setQueryParams]);
+  }, [dashboardDuration, startParam, queryParams, setQueryParams]);
 
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>

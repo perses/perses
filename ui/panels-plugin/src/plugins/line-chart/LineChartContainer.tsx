@@ -124,8 +124,8 @@ export function LineChartContainer(props: LineChartContainerProps) {
     // - https://echarts.apache.org/handbook/en/how-to/animation/transition/
     const start = event.start.toString();
     const end = event.end.toString();
-    queryParams.set('from', start);
-    queryParams.set('to', end);
+    queryParams.set('start', start);
+    queryParams.set('end', end);
 
     // slight delay to avoid trigger error due to pending echarts action
     setTimeout(() => {

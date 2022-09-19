@@ -16,6 +16,7 @@ import { QueryString, QueryStringContext } from '@perses-dev/plugin-system';
 
 export interface QueryStringProviderProps {
   queryParams: URLSearchParams;
+  // TODO: allow no-op for apps that do not sync to query string
   setQueryParams: (queryParams: URLSearchParams) => void;
   children?: React.ReactNode;
 }

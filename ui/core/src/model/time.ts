@@ -38,13 +38,6 @@ export function isRelativeTimeRange(timeRange: TimeRangeValue): timeRange is Rel
 }
 
 /**
- * Determine whether a given time range is in Grafana format
- */
-export function isGrafanaRelativeTimeRange(from: string, to: string): boolean {
-  return from.startsWith('now-') && to === 'now';
-}
-
-/**
  * Determine whether a given time range is absolute
  */
 export function isAbsoluteTimeRange(timeRange: TimeRangeValue): timeRange is AbsoluteTimeRange {
@@ -122,13 +115,11 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
 /**
  * Gets the default time range taking into account URL params
  */
-export function getDefaultTimeRange(from: string, to: string, dashboardDuration: DurationString): TimeRangeValue {
-  const parsedParam = from !== null ? from.split('-')[1] : dashboardDuration;
-  const pastDuration = parsedParam && isDurationString(parsedParam) ? parsedParam : dashboardDuration;
-  if (from === '' || to === '') {
-    return { pastDuration };
+export function getDefaultTimeRange(start: string, end: string, dashboardDuration: DurationString): TimeRangeValue {
+  if (start === '' || end === '') {
+    return { pastDuration: dashboardDuration };
   }
-  return isGrafanaRelativeTimeRange(from, to)
-    ? { pastDuration }
-    : { start: new Date(Number(from)), end: new Date(Number(to)) };
+  return isDurationString(start)
+    ? { pastDuration: start }
+    : { start: new Date(Number(start)), end: new Date(Number(end)) };
 }

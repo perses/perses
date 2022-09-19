@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
+import { getUnixTime } from 'date-fns';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
@@ -42,9 +43,12 @@ export function TimeRangeControls() {
   const { initialTimeRange, timeRange, setTimeRange } = useTimeRange();
 
   const { queryParams, setQueryParams } = useQueryParams();
-  // TODO: use queryParams to set initial selectedTimeRange aka initialTimeRange so that back button works
+  // const startParam = queryParams.get('start');
 
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialTimeRange);
+  // const defaultSelectedTimeRange = startParam ?? initialTimeRange;
+  const defaultSelectedTimeRange = initialTimeRange;
+
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultSelectedTimeRange);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -66,7 +70,14 @@ export function TimeRangeControls() {
         <AbsoluteTimePicker
           initialTimeRange={timeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
+            // TODO: simplify call of setTimeRange or setQueryParams, add no-op condition
             setTimeRange(timeRange);
+            setSelectedTimeRange(timeRange);
+            const startUnixMs = getUnixTime(timeRange.start);
+            const endUnixMs = getUnixTime(timeRange.end);
+            queryParams.set('start', startUnixMs.toString());
+            queryParams.set('end', endUnixMs.toString());
+            setQueryParams(queryParams);
             setShowCustomDateSelector(false);
           }}
         />
@@ -86,14 +97,11 @@ export function TimeRangeControls() {
                 end: new Date(),
               };
               setSelectedTimeRange(relativeTimeInput);
+              // TODO: if setQueryParams is no-op use setTimeRange
               const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
-
-              // TODO: make useQueryParams single source of truth
-              queryParams.set('from', `now-${duration}`);
-              queryParams.set('to', 'now');
-              setQueryParams(queryParams);
-
               setTimeRange(convertedAbsoluteTime);
+              queryParams.set('start', duration);
+              setQueryParams(queryParams);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {

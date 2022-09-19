@@ -15,6 +15,7 @@ import { createContext, useContext } from 'react';
 
 export interface QueryString {
   queryParams: URLSearchParams;
+  // TODO: allow no-op for apps that do not sync to query string
   setQueryParams: (queryParams: URLSearchParams) => void;
 }
 
