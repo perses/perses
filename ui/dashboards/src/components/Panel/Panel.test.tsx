@@ -17,7 +17,7 @@ import 'intersection-observer';
 import { screen } from '@testing-library/react';
 import { renderWithContext, mockPluginRegistryProps } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import { DashboardProvider, DashboardStoreProps } from '../../context';
+import { DashboardStoreProps } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
 const FAKE_PANEL_PLUGIN: PanelPlugin<JsonObject> = {
@@ -44,6 +44,8 @@ describe('Panel', () => {
         kind: 'FakePanel',
         options: {},
       },
+      groupIndex: 0,
+      panelRef: 'panelRef',
     };
 
     initialState = {
@@ -53,21 +55,21 @@ describe('Panel', () => {
   });
 
   // Helper to render the panel with some context set
-  const renderPanel = (initialState: DashboardStoreProps) => {
+  const renderPanel = (initialState?: DashboardStoreProps) => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
     addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
 
     renderWithContext(
-      <DashboardProvider initialState={initialState}>
-        <PluginRegistry {...pluginRegistryProps}>
-          <Panel {...props} />
-        </PluginRegistry>
-      </DashboardProvider>
+      <PluginRegistry {...pluginRegistryProps}>
+        <Panel {...props} />
+      </PluginRegistry>,
+      undefined,
+      initialState
     );
   };
 
   it('should render name and info icon', async () => {
-    renderPanel(initialState);
+    renderPanel();
     await screen.findByText('Fake Panel');
     screen.queryByLabelText('info-tooltip');
   });

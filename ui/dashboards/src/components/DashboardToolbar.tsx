@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { Toolbar, Typography, Stack, Button, Box } from '@mui/material';
-// import { LayoutDefinition } from '@perses-dev/core';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import { useDashboardApp, useEditMode, useLayouts } from '../context';
+import { useDashboardApp, useEditMode } from '../context';
 import { TimeRangeControls } from '../components';
 
 export interface DashboardToolbarProps {
@@ -26,7 +25,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { openPanelDrawer } = useDashboardApp();
+  const { openPanelDrawer, openPanelGroupDialog } = useDashboardApp();
 
   const onEditButtonClick = () => {
     setEditMode(true);
@@ -34,24 +33,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   const onCancelButtonClick = () => {
     setEditMode(false);
-  };
-
-  const { updateLayout } = useLayouts();
-
-  const onAddGroup = () => {
-    const newLayout: LayoutDefinition = {
-      kind: 'Grid',
-      spec: {
-        display: {
-          title: 'New Group',
-          collapse: {
-            open: true,
-          },
-        },
-        items: [],
-      },
-    };
-    updateLayout(newLayout);
   };
 
   return (
@@ -73,7 +54,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             spacing={1}
             sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding: (theme) => theme.spacing(2, 0) }}
           >
-            <Button startIcon={<AddIcon />} onClick={onAddGroup}>
+            <Button startIcon={<AddIcon />} onClick={() => openPanelGroupDialog()}>
               Add Group
             </Button>
             <Button startIcon={<AddIcon />} onClick={() => openPanelDrawer({ groupIndex: 0 })}>

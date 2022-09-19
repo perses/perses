@@ -30,20 +30,21 @@ import {
 } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import MenuIcon from 'mdi-material-ui/DotsVertical';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import { useEditMode } from '../../context';
+import { useDashboardApp, useEditMode } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
+  groupIndex: number;
+  panelRef: string;
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, ...others } = props;
+  const { definition, groupIndex, panelRef, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -65,6 +66,12 @@ export function Panel(props: PanelProps) {
   const panelPadding = 1.5;
 
   const { isEditMode } = useEditMode();
+
+  const { openPanelDrawer } = useDashboardApp();
+
+  const handleEditButtonClick = () => {
+    openPanelDrawer({ groupIndex, panelRef });
+  };
 
   return (
     <Card
@@ -123,11 +130,8 @@ export function Panel(props: PanelProps) {
               )}
               {isEditMode && isHovered && (
                 <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <IconButton aria-label="edit panel" size="small">
+                  <IconButton aria-label="edit panel" size="small" onClick={handleEditButtonClick}>
                     <PencilIcon />
-                  </IconButton>
-                  <IconButton aria-label="more" size="small">
-                    <MenuIcon />
                   </IconButton>
                   <IconButton aria-label="drag handle" size="small">
                     <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />

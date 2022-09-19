@@ -43,12 +43,12 @@ export function usePanels() {
   return useDashboardStore(({ panels, updatePanel }) => ({ panels, updatePanel }));
 }
 
-export function useEditMode() {'
+export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
 }
 
 export function useDashboard() {
-  const selectDashboardSpec = useCallback((state: DashboardStoreState) => {
+  const selectDashboardSpec = (state: DashboardStoreState) => {
     return produce(state.dashboard, (draftState) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       draftState.panels = state.panels as any;

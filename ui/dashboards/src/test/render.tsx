@@ -13,12 +13,27 @@
 
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { DashboardProvider, DashboardStoreProps } from '../context';
+import testDashboard from './testDashboard';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
 
+const initialStore: DashboardStoreProps = {
+  isEditMode: true,
+  dashboardSpec: testDashboard.spec,
+};
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.
  */
-export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
+export function renderWithContext(
+  ui: React.ReactElement,
+  options?: Omit<RenderOptions, 'queries'>,
+  initialState: DashboardStoreProps = initialStore
+) {
+  return render(
+    <DashboardProvider initialState={initialState}>
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    </DashboardProvider>,
+    options
+  );
 }

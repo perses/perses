@@ -27,7 +27,7 @@ export interface DashboardAppSlice {
   openPanelDrawer: (panelDrawer: PanelDrawer) => void;
   closePanelDrawer: () => void;
   panelGroupDialog?: PanelGroupDialog;
-  openPanelGroupDialog: (groupIndex: number) => void;
+  openPanelGroupDialog: (groupIndex?: number) => void;
   closePanelGroupDialog: () => void;
 }
 
@@ -43,7 +43,7 @@ export const createDashboardAppSlice = immer<DashboardAppSlice>((set) => ({
     set((state) => {
       state.panelDrawer = undefined;
     }),
-  openPanelGroupDialog: (groupIndex: number) =>
+  openPanelGroupDialog: (groupIndex?: number) =>
     set((state) => {
       state.panelGroupDialog = { groupIndex };
     }),

@@ -27,21 +27,39 @@ import {
 import { Drawer, ErrorAlert } from '@perses-dev/components';
 import { JsonObject } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
 
+interface PanelDrawerHeaderProps {
+  onClose: () => void;
+  panelRef?: string;
+}
+
 const PanelDrawer = () => {
   const { layouts, addItemToLayout } = useLayouts();
-  const { updatePanel } = usePanels();
+  const { panels, updatePanel } = usePanels();
   const { panelDrawer, closePanelDrawer } = useDashboardApp();
 
-  const [group, setGroup] = useState(0);
-  const [panelName, setPanelName] = useState('');
-  const [panelDescription, setPanelDescription] = useState('');
+  let defaultPanelName = '';
+  let defaultDescription = '';
+  if (panelDrawer?.panelRef) {
+    defaultPanelName = panels[panelDrawer.panelRef]?.display.name ?? '';
+    defaultDescription = panels[panelDrawer.panelRef]?.display.description ?? '';
+  }
+
+  const [group, setGroup] = useState(panelDrawer?.groupIndex);
+  const [panelName, setPanelName] = useState(defaultPanelName);
+  const [panelDescription, setPanelDescription] = useState(defaultDescription);
   const [kind, setKind] = useState('');
   const [options, setOptions] = useState<JsonObject>({});
+
+  useEffect(() => {
+    setGroup(panelDrawer?.groupIndex);
+    setPanelName(defaultPanelName);
+    setPanelDescription(defaultDescription);
+  }, [panelDrawer, defaultPanelName, defaultDescription]);
 
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
     const { value } = e.target;
@@ -71,27 +89,38 @@ const PanelDrawer = () => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
-    updatePanel(panelKey, {
-      kind,
-      display: { name: panelName, description: panelDescription },
-      options,
-    });
 
-    // find maximum y so new panel is added to the end of the grid
-    let maxY = 0;
-    layouts[group]?.spec.items.forEach((layout) => {
-      if (layout.y > maxY) {
-        maxY = layout.y;
-      }
-    });
-    addItemToLayout(group, {
-      x: 0,
-      y: maxY + 1,
-      width: 12,
-      height: 6,
-      content: { $ref: `#/spec/panels/${panelKey}` },
-    });
+    if (panelDrawer?.groupIndex !== undefined && !panelDrawer?.panelRef) {
+      const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
+      updatePanel(panelKey, {
+        kind,
+        options,
+        display: { name: panelName, description: panelDescription },
+      });
+      // find maximum y so new panel is added to the end of the grid
+      let maxY = 0;
+      layouts[panelDrawer.groupIndex]?.spec.items.forEach((layout) => {
+        if (layout.y > maxY) {
+          maxY = layout.y;
+        }
+      });
+      addItemToLayout(panelDrawer.groupIndex, {
+        x: 0,
+        y: maxY + 1,
+        width: 12,
+        height: 6,
+        content: { $ref: `#/spec/panels/${panelKey}` },
+      });
+    } else if (panelDrawer?.panelRef) {
+      updatePanel(panelDrawer.panelRef, {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ...panels[panelDrawer.panelRef]!,
+        kind,
+        options,
+        display: { name: panelName ?? '', description: panelDescription },
+      });
+      // TO DO: need to move panel if panel group changes
+    }
     closePanelDrawer();
   };
 
@@ -103,7 +132,7 @@ const PanelDrawer = () => {
           <Grid item xs={4}>
             <FormControl>
               <InputLabel id="select-group">Group</InputLabel>
-              <Select required labelId="select-group" label="Group" value={group} onChange={handleGroupChange}>
+              <Select required labelId="select-group" label="Group" value={group ?? 0} onChange={handleGroupChange}>
                 {layouts.map((layout, index) => (
                   <MenuItem key={index} value={index}>
                     {layout.spec.display?.title || `Group ${index + 1}`}
@@ -140,7 +169,8 @@ const PanelDrawer = () => {
   );
 };
 
-const PanelDrawerHeader = ({ onClose }: { onClose: () => void }) => {
+const PanelDrawerHeader = ({ panelRef, onClose }: PanelDrawerHeaderProps) => {
+  const action = panelRef ? 'Edit' : 'Add';
   return (
     <Box
       sx={{
@@ -154,7 +184,7 @@ const PanelDrawerHeader = ({ onClose }: { onClose: () => void }) => {
       <Typography variant="h2">{`${action} Panel`}</Typography>
       <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
         <Button type="submit" variant="contained">
-          {`${action} Panel`}
+          {panelRef ? 'Apply' : 'Add'}
         </Button>
         <Button variant="outlined" onClick={onClose}>
           Cancel

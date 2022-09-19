@@ -34,7 +34,9 @@ export function Dashboard(props: DashboardProps) {
             key={idx}
             index={idx}
             definition={layout}
-            renderGridItemContent={(definition) => <GridItemContent content={definition.content} spec={spec} />}
+            renderGridItemContent={(definition, groupIndex) => (
+              <GridItemContent content={definition.content} spec={spec} groupIndex={groupIndex} />
+            )}
           />
         ))}
       </ErrorBoundary>

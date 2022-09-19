@@ -23,7 +23,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 export interface GridLayoutProps extends BoxProps {
   index: number;
   definition: GridDefinition;
-  renderGridItemContent: (definition: GridItemDefinition) => React.ReactNode;
+  renderGridItemContent: (definition: GridItemDefinition, groupIndex: number) => React.ReactNode;
 }
 
 /**
@@ -37,12 +37,10 @@ export function GridLayout(props: GridLayoutProps) {
     ...others
   } = props;
 
-  console.log('index', index);
-
   const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
   useEffect(() => {
     setIsOpen(!!spec.display?.collapse?.open);
-  }, [spec]);
+  }, [spec.display?.collapse]);
 
   const { isEditMode } = useEditMode();
 
@@ -53,7 +51,7 @@ export function GridLayout(props: GridLayoutProps) {
 
     gridItems.push(
       <div key={idx} data-grid={{ x, y, w, h }}>
-        {renderGridItemContent(item)}
+        {renderGridItemContent(item, index)}
       </div>
     );
   });
@@ -72,8 +70,6 @@ export function GridLayout(props: GridLayoutProps) {
                 : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
             }
             isEditMode={isEditMode}
-            onAddClick={() => {}}
-            onEditClick={() => {}}
           />
         )}
         <Collapse in={isOpen} unmountOnExit>

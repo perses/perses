@@ -27,8 +27,6 @@ export interface GridTitleProps {
     onToggleOpen: () => void;
   };
   isEditMode?: boolean;
-  onAddClick?: () => void;
-  onEditClick?: () => void;
 }
 
 /**
@@ -36,13 +34,10 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { index, title, collapse, isEditMode, onAddClick, onEditClick } = props;
+  const { index, title, collapse, isEditMode } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const {
-    addPanelComponent: { setIsOpen: setIsAddPanelOpen },
-    addGroupComponent: { setIsOpen: setIsAddGroupOpen },
-  } = useDashboardApp();
+  const { openPanelDrawer, openPanelGroupDialog } = useDashboardApp();
 
   const text = (
     <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
@@ -68,12 +63,12 @@ export function GridTitle(props: GridTitleProps) {
             {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
           </IconButton>
           {text}
-          {isEditMode && isHovered && onAddClick && onEditClick && (
+          {isEditMode && isHovered && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton onClick={() => setIsAddPanelOpen(true)}>
+              <IconButton onClick={() => openPanelDrawer({ groupIndex: index })}>
                 <AddIcon />
               </IconButton>
-              <IconButton onClick={() => setIsAddGroupOpen(true, index)}>
+              <IconButton onClick={() => openPanelGroupDialog(index)}>
                 <PencilIcon />
               </IconButton>
             </Stack>
