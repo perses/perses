@@ -46,18 +46,16 @@ const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?
  */
 export const parseTemplateVariables = (text: string) => {
   const regex = TEMPLATE_VARIABLE_REGEX;
-  let m;
   const matches = [];
-  // find all matches in regex and return them
-  do {
-    m = regex.exec(text);
-    if (m) {
-      if (m && m.length > 1 && m[1]) {
-        matches.push(m[1]);
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match) {
+      if (match && match.length > 1 && match[1]) {
+        matches.push(match[1]);
       }
     }
-  } while (m);
-
+  }
   // return unique matches
   return Array.from(new Set(matches));
 };
