@@ -45,10 +45,10 @@ const PanelDrawer = () => {
   let defaultPanelName = '';
   let defaultDescription = '';
   if (panelDrawer?.panelRef) {
+    // editing an existing panel
     defaultPanelName = panels[panelDrawer.panelRef]?.display.name ?? '';
     defaultDescription = panels[panelDrawer.panelRef]?.display.description ?? '';
   }
-
   const [group, setGroup] = useState(panelDrawer?.groupIndex);
   const [panelName, setPanelName] = useState(defaultPanelName);
   const [panelDescription, setPanelDescription] = useState(defaultDescription);
@@ -57,9 +57,12 @@ const PanelDrawer = () => {
 
   useEffect(() => {
     setGroup(panelDrawer?.groupIndex);
-    setPanelName(defaultPanelName);
-    setPanelDescription(defaultDescription);
-  }, [panelDrawer, defaultPanelName, defaultDescription]);
+    if (panelDrawer?.panelRef) {
+      // editing an existing panel
+      setPanelName(panels[panelDrawer.panelRef]?.display.name ?? '');
+      setPanelDescription(panels[panelDrawer.panelRef]?.display.description ?? '');
+    }
+  }, [panelDrawer, panels]);
 
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
     const { value } = e.target;
@@ -91,43 +94,58 @@ const PanelDrawer = () => {
     e.preventDefault();
 
     if (panelDrawer?.groupIndex !== undefined && !panelDrawer?.panelRef) {
-      const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
-      updatePanel(panelKey, {
-        kind,
-        options,
-        display: { name: panelName, description: panelDescription },
-      });
-      // find maximum y so new panel is added to the end of the grid
-      let maxY = 0;
-      layouts[panelDrawer.groupIndex]?.spec.items.forEach((layout) => {
-        if (layout.y > maxY) {
-          maxY = layout.y;
-        }
-      });
-      addItemToLayout(panelDrawer.groupIndex, {
-        x: 0,
-        y: maxY + 1,
-        width: 12,
-        height: 6,
-        content: { $ref: `#/spec/panels/${panelKey}` },
-      });
+      addNewPanel();
     } else if (panelDrawer?.panelRef) {
-      updatePanel(panelDrawer.panelRef, {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...panels[panelDrawer.panelRef]!,
-        kind,
-        options,
-        display: { name: panelName ?? '', description: panelDescription },
-      });
-      // TO DO: need to move panel if panel group changes
+      editPanel();
     }
     closePanelDrawer();
+  };
+
+  const addNewPanel = (): void => {
+    if (panelDrawer?.groupIndex === undefined) {
+      return;
+    }
+
+    const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
+    updatePanel(panelKey, {
+      kind,
+      options,
+      display: { name: panelName, description: panelDescription },
+    });
+    // find maximum y so new panel is added to the end of the grid
+    let maxY = 0;
+    layouts[panelDrawer.groupIndex]?.spec.items.forEach((layout) => {
+      if (layout.y > maxY) {
+        maxY = layout.y;
+      }
+    });
+    addItemToLayout(panelDrawer.groupIndex, {
+      x: 0,
+      y: maxY + 1,
+      width: 12,
+      height: 6,
+      content: { $ref: `#/spec/panels/${panelKey}` },
+    });
+  };
+
+  const editPanel = (): void => {
+    if (panelDrawer?.panelRef === undefined) {
+      return;
+    }
+    updatePanel(panelDrawer.panelRef, {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      ...panels[panelDrawer.panelRef]!,
+      kind,
+      options,
+      display: { name: panelName ?? '', description: panelDescription },
+    });
+    // TO DO: need to move panel if panel group changes
   };
 
   return (
     <Drawer isOpen={!!panelDrawer} onClose={() => closePanelDrawer()}>
       <form onSubmit={handleSubmit}>
-        <PanelDrawerHeader onClose={() => closePanelDrawer()} />
+        <PanelDrawerHeader panelRef={panelDrawer?.panelRef} onClose={() => closePanelDrawer()} />
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <FormControl>
@@ -143,8 +161,19 @@ const PanelDrawer = () => {
           </Grid>
           <Grid item xs={8}>
             <Stack spacing={2} sx={{ flexGrow: '1' }}>
-              <TextField required label="Panel Name" variant="outlined" onChange={handlePanelNameChange} />
-              <TextField label="Description" variant="outlined" onChange={handlePanelDescriptionChange} />
+              <TextField
+                required
+                label="Panel Name"
+                value={panelName}
+                variant="outlined"
+                onChange={handlePanelNameChange}
+              />
+              <TextField
+                label="Description"
+                value={panelDescription}
+                variant="outlined"
+                onChange={handlePanelDescriptionChange}
+              />
             </Stack>
           </Grid>
           <Grid item xs={4}>

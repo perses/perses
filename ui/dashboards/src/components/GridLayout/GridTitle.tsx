@@ -17,7 +17,7 @@ import CollapsedIcon from 'mdi-material-ui/ChevronDown';
 import AddIcon from 'mdi-material-ui/Plus';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { useState } from 'react';
-import { useDashboardApp } from '../../context';
+import { useDashboardApp, useEditMode } from '../../context';
 
 export interface GridTitleProps {
   index: number;
@@ -26,7 +26,6 @@ export interface GridTitleProps {
     isOpen: boolean;
     onToggleOpen: () => void;
   };
-  isEditMode?: boolean;
 }
 
 /**
@@ -34,10 +33,11 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { index, title, collapse, isEditMode } = props;
+  const { index, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
   const { openPanelDrawer, openPanelGroupDialog } = useDashboardApp();
+  const { isEditMode } = useEditMode();
 
   const text = (
     <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>

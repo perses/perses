@@ -19,13 +19,15 @@ import * as dashboardAppSlice from '../../context/DashboardAppSlice';
 import * as layoutsSlice from '../../context/LayoutsSlice';
 import { renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import AddGroup from './PanelGroupDialog';
+import PanelGroupDialog from './PanelGroupDialog';
 
 const dashboardApp = {
   panelDrawer: undefined,
   openPanelDrawer: jest.fn(),
   closePanelDrawer: jest.fn(),
-  panelGroupDialog: undefined,
+  panelGroupDialog: {
+    groupIndex: undefined,
+  },
   openPanelGroupDialog: jest.fn(),
   closePanelGroupDialog: jest.fn(),
 };
@@ -44,7 +46,7 @@ describe('Add Panel Group', () => {
 
   it('should add new panel group', async () => {
     jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue(dashboardApp);
-    renderWithContext(<AddGroup />);
+    renderWithContext(<PanelGroupDialog />);
     const nameInput = await screen.getByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel Group');
     userEvent.click(screen.getByText('Add'));
@@ -72,7 +74,7 @@ describe('Add Panel Group', () => {
         groupIndex: 0,
       },
     });
-    renderWithContext(<AddGroup />);
+    renderWithContext(<PanelGroupDialog />);
     const nameInput = await screen.getByLabelText(/Name/);
     userEvent.type(nameInput, 'New Name');
     userEvent.click(screen.getByText('Apply'));

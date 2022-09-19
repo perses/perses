@@ -32,17 +32,19 @@ import { LayoutDefinition } from '@perses-dev/core';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useDashboardApp, useLayouts } from '../../context';
 
-const AddGroup = () => {
+const PanelGroupDialog = () => {
   const { layouts, updateLayout } = useLayouts();
   const { panelGroupDialog, closePanelGroupDialog } = useDashboardApp();
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const { groupIndex } = panelGroupDialog!;
+  const { groupIndex } = panelGroupDialog!; // PanelGroupDialog is only mounted if panelGroupDialog is defined
 
-  const isEditingGroup = groupIndex !== undefined;
+  const isEditingPanelGroup = groupIndex !== undefined;
 
-  const [isCollapsed, setIsCollapsed] = useState(isEditingGroup && !layouts[groupIndex]?.spec.display?.collapse?.open);
-  const [name, setName] = useState(isEditingGroup ? layouts[groupIndex]?.spec.display?.title : '');
+  const [isCollapsed, setIsCollapsed] = useState(
+    isEditingPanelGroup && !layouts[groupIndex]?.spec.display?.collapse?.open
+  );
+  const [name, setName] = useState(isEditingPanelGroup ? layouts[groupIndex]?.spec.display?.title : '');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -55,8 +57,7 @@ const AddGroup = () => {
             open: !isCollapsed,
           },
         },
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        items: groupIndex === undefined ? [] : layouts[groupIndex]!.spec.items,
+        items: groupIndex === undefined ? [] : layouts[groupIndex]?.spec.items ?? [],
       },
     };
     updateLayout(newLayout, groupIndex);
@@ -116,7 +117,7 @@ const AddGroup = () => {
         </DialogContent>
         <DialogActions>
           <Button variant="contained" type="submit">
-            {isEditingGroup ? 'Apply' : 'Add'}
+            {isEditingPanelGroup ? 'Apply' : 'Add'}
           </Button>
           <Button onClick={() => closePanelGroupDialog()}>Cancel</Button>
         </DialogActions>
@@ -125,4 +126,4 @@ const AddGroup = () => {
   );
 };
 
-export default AddGroup;
+export default PanelGroupDialog;

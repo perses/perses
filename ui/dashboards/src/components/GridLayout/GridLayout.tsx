@@ -69,7 +69,6 @@ export function GridLayout(props: GridLayoutProps) {
                 ? undefined
                 : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
             }
-            isEditMode={isEditMode}
           />
         )}
         <Collapse in={isOpen} unmountOnExit>

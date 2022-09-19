@@ -11,24 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-import { PanelPlugin, PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import 'intersection-observer';
 import { screen } from '@testing-library/react';
-import { renderWithContext, mockPluginRegistryProps } from '../../test';
+import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN } from '../../test';
 import testDashboard from '../../test/testDashboard';
 import { DashboardStoreProps } from '../../context';
 import { Panel, PanelProps } from './Panel';
-
-const FAKE_PANEL_PLUGIN: PanelPlugin<JsonObject> = {
-  PanelComponent: () => {
-    return <div role="figure">FakePanel chart</div>;
-  },
-  OptionsEditorComponent: () => {
-    return <div>Edit options here</div>;
-  },
-  createInitialOptions: () => ({}),
-};
 
 describe('Panel', () => {
   let props: PanelProps;

@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as dashboardAppSlice from '../../context/DashboardAppSlice';
 import * as layoutsSlice from '../../context/LayoutsSlice';
 import * as context from '../../context/DashboardProvider';
-import { DashboardStoreProps } from '../../context';
-import { renderWithContext } from '../../test';
+import { FAKE_PANEL_PLUGIN, mockPluginRegistryProps, renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
 import PanelDrawer from './PanelDrawer';
 
@@ -35,7 +35,9 @@ jest.spyOn(layoutsSlice, 'useLayouts').mockReturnValue({
 });
 
 const dashboardApp = {
-  panelDrawer: undefined,
+  panelDrawer: {
+    groupIndex: 0,
+  },
   openPanelDrawer: jest.fn(),
   closePanelDrawer: jest.fn(),
   panelGroupDialog: undefined,
@@ -43,23 +45,30 @@ const dashboardApp = {
   closePanelGroupDialog: jest.fn(),
 };
 
-describe('Add Panel', () => {
-  let initialState: DashboardStoreProps;
+describe('Panel Drawer', () => {
   beforeEach(() => {
-    initialState = {
-      isEditMode: true,
-      dashboardSpec: testDashboard.spec,
-    };
     jest.clearAllMocks();
   });
-  it('should add new panel', async () => {
+
+  const renderPanelDrawer = () => {
+    const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
+    addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
+
+    renderWithContext(
+      <PluginRegistry {...pluginRegistryProps}>
+        <PanelDrawer />,
+      </PluginRegistry>
+    );
+  };
+
+  it('should add new panel', () => {
     jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue(dashboardApp);
-    renderWithContext(<PanelDrawer />, undefined, initialState);
-    const nameInput = await screen.getByLabelText(/Panel Name/);
+    renderPanelDrawer();
+    const nameInput = screen.getByLabelText(/Panel Name/);
     userEvent.type(nameInput, 'New Panel');
     userEvent.click(screen.getByText('Add'));
     expect(updatePanel).toHaveBeenCalledWith('NewPanel', {
-      kind: 'EmptyChart',
+      kind: '',
       display: { name: 'New Panel', description: '' },
       options: {},
     });
@@ -72,7 +81,7 @@ describe('Add Panel', () => {
     });
   });
 
-  it('should edit an existing panel', async () => {
+  it('should edit an existing panel', () => {
     jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue({
       ...dashboardApp,
       panelDrawer: {
@@ -80,12 +89,14 @@ describe('Add Panel', () => {
         panelRef: 'cpu',
       },
     });
-    renderWithContext(<PanelDrawer />, undefined, initialState);
-    const nameInput = await screen.getByLabelText(/Panel Name/);
+    renderPanelDrawer();
+    const nameInput = screen.getByLabelText(/Panel Name/);
     userEvent.type(nameInput, 'cpu usage');
     userEvent.click(screen.getByText('Apply'));
     expect(updatePanel).toHaveBeenCalledWith('cpu', {
       display: { name: 'cpu usage', description: '' },
+      kind: '',
+      options: {},
     });
   });
 });
