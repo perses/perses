@@ -16,13 +16,14 @@ import { getUnixTime } from 'date-fns';
 import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
-  TimeRangeValue,
   DurationString,
   RelativeTimeRange,
   AbsoluteTimeRange,
   toAbsoluteTimeRange,
+  getDefaultTimeRange,
 } from '@perses-dev/core';
 import { useTimeRange, useQueryParams } from '@perses-dev/plugin-system';
+import { useDashboard } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -40,15 +41,13 @@ export const TIME_OPTIONS: TimeOption[] = [
 const FORM_CONTROL_LABEL = 'Time Range';
 
 export function TimeRangeControls() {
-  const { initialTimeRange, timeRange, setTimeRange } = useTimeRange();
+  const { dashboard } = useDashboard();
+  const { timeRange, setTimeRange } = useTimeRange();
 
   const { queryParams, setQueryParams } = useQueryParams();
-  // const startParam = queryParams.get('start');
-
-  // const defaultSelectedTimeRange = startParam ?? initialTimeRange;
-  const defaultSelectedTimeRange = initialTimeRange;
-
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultSelectedTimeRange);
+  const startParam = queryParams.get('start') ?? '';
+  const endParam = queryParams.get('end') ?? '';
+  const defaultTimeRange = getDefaultTimeRange(startParam, endParam, dashboard.duration);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -72,9 +71,8 @@ export function TimeRangeControls() {
           onChange={(timeRange: AbsoluteTimeRange) => {
             // TODO: simplify call of setTimeRange or setQueryParams, add no-op condition
             setTimeRange(timeRange);
-            setSelectedTimeRange(timeRange);
-            const startUnixMs = getUnixTime(timeRange.start);
-            const endUnixMs = getUnixTime(timeRange.end);
+            const startUnixMs = getUnixTime(timeRange.start) * 1000;
+            const endUnixMs = getUnixTime(timeRange.end) * 1000;
             queryParams.set('start', startUnixMs.toString());
             queryParams.set('end', endUnixMs.toString());
             setQueryParams(queryParams);
@@ -89,18 +87,18 @@ export function TimeRangeControls() {
         <Box ref={anchorEl}>
           <TimeRangeSelector
             timeOptions={TIME_OPTIONS}
-            value={selectedTimeRange}
+            value={defaultTimeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {
                 pastDuration: duration as DurationString,
                 end: new Date(),
               };
-              setSelectedTimeRange(relativeTimeInput);
               // TODO: if setQueryParams is no-op use setTimeRange
               const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
               setTimeRange(convertedAbsoluteTime);
               queryParams.set('start', duration);
+              queryParams.set('end', 'now');
               setQueryParams(queryParams);
               setShowCustomDateSelector(false);
             }}

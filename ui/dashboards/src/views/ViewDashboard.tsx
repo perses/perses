@@ -41,12 +41,13 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   // TODO: replace with useSyncToQueryString util
   useEffect(() => {
-    if (startParam === '') {
+    const currentParams = Object.fromEntries([...queryParams]);
+    if (!currentParams.start) {
       queryParams.set('start', dashboardDuration);
       queryParams.set('end', 'now');
       setQueryParams(queryParams);
     }
-  }, [dashboardDuration, startParam, queryParams, setQueryParams]);
+  }, [dashboardDuration, queryParams, setQueryParams]);
 
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
