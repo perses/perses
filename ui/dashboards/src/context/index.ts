@@ -13,6 +13,6 @@
 
 export * from './DashboardAppSlice';
 export * from './LayoutsSlice';
-export * from './TemplateVariablesProvider';
+export * from './TemplateVariableProvider';
 export * from './TimeRangeStateProvider';
 export * from './DashboardProvider';
