@@ -13,9 +13,9 @@
 
 import userEvent from '@testing-library/user-event';
 import { RelativeTimeRange } from '@perses-dev/core';
-import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { screen } from '@testing-library/react';
 import { renderWithContext } from '../../test';
+import { TimeRangeProvider } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
 
 describe('TimeRangeControls', () => {

@@ -11,12 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext, useMemo } from 'react';
-
-interface QueryString {
-  queryParams: URLSearchParams;
-  setQueryParams: (queryParams: URLSearchParams) => void;
-}
+import React, { useContext, useMemo } from 'react';
+import { QueryString, QueryStringContext } from '@perses-dev/plugin-system';
 
 export interface QueryStringProviderProps {
   queryParams: URLSearchParams;
@@ -24,16 +20,11 @@ export interface QueryStringProviderProps {
   children?: React.ReactNode;
 }
 
-export const QueryStringContext = createContext<QueryString | undefined>(undefined);
-
 /**
  * Allows apps to provide their own query string implementations
  */
 export function QueryStringProvider(props: QueryStringProviderProps) {
   const { queryParams, setQueryParams, children } = props;
-
-  console.log('queryParams: ', queryParams);
-  console.log('setQueryParams: ', setQueryParams);
 
   const ctx = useMemo(() => ({ queryParams, setQueryParams }), [queryParams, setQueryParams]);
 

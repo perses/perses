@@ -14,8 +14,8 @@
 import { useEffect } from 'react';
 import { BoxProps } from '@mui/material';
 import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
-import { TimeRangeProvider, useQueryParams } from '@perses-dev/plugin-system';
-import { TemplateVariablesProvider, DashboardProvider } from '../context';
+import { useQueryParams } from '@perses-dev/plugin-system';
+import { TimeRangeProvider, TemplateVariablesProvider, DashboardProvider } from '../context';
 
 import { DashboardApp } from './DashboardApp';
 

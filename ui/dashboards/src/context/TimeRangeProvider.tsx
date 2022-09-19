@@ -13,7 +13,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext } from '../runtime/time-range';
+import { TimeRange, TimeRangeContext } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
