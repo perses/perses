@@ -131,6 +131,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
 
     // slight delay to avoid trigger error due to pending echarts action
     setTimeout(() => {
+      // TODO: add setQueryParams no-op condition
       setQueryParams(queryParams);
       setTimeRange({ start: startDate, end: endDate });
     }, 10);
