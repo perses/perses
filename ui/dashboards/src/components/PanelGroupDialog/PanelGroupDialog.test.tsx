@@ -44,10 +44,10 @@ describe('Add Panel Group', () => {
     jest.clearAllMocks();
   });
 
-  it('should add new panel group', async () => {
+  it('should add new panel group', () => {
     jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue(dashboardApp);
     renderWithContext(<PanelGroupDialog />);
-    const nameInput = await screen.getByLabelText(/Name/);
+    const nameInput = screen.getByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel Group');
     userEvent.click(screen.getByText('Add'));
     expect(updateLayout).toHaveBeenCalledWith(
@@ -67,7 +67,7 @@ describe('Add Panel Group', () => {
     );
   });
 
-  it('should edit existing panel group', async () => {
+  it('should edit existing panel group', () => {
     jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue({
       ...dashboardApp,
       panelGroupDialog: {
@@ -75,7 +75,7 @@ describe('Add Panel Group', () => {
       },
     });
     renderWithContext(<PanelGroupDialog />);
-    const nameInput = await screen.getByLabelText(/Name/);
+    const nameInput = screen.getByLabelText(/Name/);
     userEvent.type(nameInput, 'New Name');
     userEvent.click(screen.getByText('Apply'));
     expect(updateLayout).toHaveBeenCalledWith(
