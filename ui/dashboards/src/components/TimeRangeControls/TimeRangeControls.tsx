@@ -42,6 +42,7 @@ export function TimeRangeControls() {
   const { initialTimeRange, timeRange, setTimeRange } = useTimeRange();
 
   const { queryParams, setQueryParams } = useQueryParams();
+  // TODO: use queryParams to set initial selectedTimeRange aka initialTimeRange so that back button works
 
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialTimeRange);
 

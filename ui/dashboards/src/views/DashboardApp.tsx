@@ -24,7 +24,7 @@ export interface PersesDashboardProps extends BoxProps {
   dashboardResource: DashboardResource;
 }
 
-export const PersesDashboard = (props: PersesDashboardProps) => {
+export const DashboardApp = (props: PersesDashboardProps) => {
   const { dashboardResource, sx, children, ...others } = props;
   const [showAddPanel, setShowAddPanel] = useState(false);
   const { dashboard } = useDashboard();

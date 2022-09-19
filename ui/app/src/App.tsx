@@ -14,41 +14,28 @@
 import { useMemo } from 'react';
 import { Routes, Route, useSearchParams } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
 import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
 import { PluginRegistry, PluginBoundary, QueryStringProvider } from '@perses-dev/plugin-system';
-import DashboardApp from './DashboardApp';
+import ViewDashboard from './views/ViewDashboard';
 import Docs from './views/Docs';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
-import { useSampleData } from './utils/temp-sample-data';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
 const ECHARTS_THEME_OVERRIDES = {};
-
-const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
 
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // TODO: completely remove old dashboard url param approach
-  const dashboardParam = searchParams.get('dashboard');
-  const dashboard = useSampleData<DashboardResource>(dashboardParam || DEFAULT_DASHBOARD_ID);
-
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
   }, [muiTheme]);
-
-  // TODO: Loading indicator
-  if (dashboard === undefined) {
-    return null;
-  }
 
   return (
     <Box
@@ -74,7 +61,7 @@ function App() {
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
               <DataSourceRegistry>
                 <QueryStringProvider queryParams={searchParams} setQueryParams={setSearchParams}>
-                  <DashboardApp dashboardResource={dashboard} />
+                  <ViewDashboard />
                 </QueryStringProvider>
               </DataSourceRegistry>
             </PluginBoundary>

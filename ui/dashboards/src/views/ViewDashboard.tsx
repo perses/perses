@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2021 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect } from 'react';
 import { BoxProps } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
+import { TimeRangeProvider, useQueryParams } from '@perses-dev/plugin-system';
 import { TemplateVariablesProvider, DashboardProvider } from '../context';
-import { PersesDashboard } from '../components/PersesDashboard';
+
+import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends BoxProps {
   dashboardResource: DashboardResource;
@@ -29,11 +32,29 @@ export function ViewDashboard(props: ViewDashboardProps) {
     children,
   } = props;
 
+  const { queryParams, setQueryParams } = useQueryParams();
+
+  const fromParam = queryParams.get('from') ?? '';
+  const toParam = queryParams.get('to') ?? '';
+  const dashboardDuration = spec.duration ?? '1h';
+  const defaultTimeRange = getDefaultTimeRange(fromParam, toParam, dashboardDuration);
+
+  // TODO: replace with useSyncToQueryString util
+  useEffect(() => {
+    if (fromParam === '') {
+      queryParams.set('from', `now-${dashboardDuration}`);
+      queryParams.set('to', 'now');
+      setQueryParams(queryParams);
+    }
+  }, [dashboardDuration, fromParam, queryParams, setQueryParams]);
+
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
-      <TemplateVariablesProvider variableDefinitions={spec.variables}>
-        <PersesDashboard {...props}>{children}</PersesDashboard>
-      </TemplateVariablesProvider>
+      <TimeRangeProvider initialTimeRange={defaultTimeRange}>
+        <TemplateVariablesProvider variableDefinitions={spec.variables}>
+          <DashboardApp {...props}>{children}</DashboardApp>
+        </TemplateVariablesProvider>
+      </TimeRangeProvider>
     </DashboardProvider>
   );
 }

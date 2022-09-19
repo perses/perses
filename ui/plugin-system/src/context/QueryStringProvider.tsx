@@ -32,6 +32,9 @@ export const QueryStringContext = createContext<QueryString | undefined>(undefin
 export function QueryStringProvider(props: QueryStringProviderProps) {
   const { queryParams, setQueryParams, children } = props;
 
+  console.log('queryParams: ', queryParams);
+  console.log('setQueryParams: ', setQueryParams);
+
   const ctx = useMemo(() => ({ queryParams, setQueryParams }), [queryParams, setQueryParams]);
 
   return <QueryStringContext.Provider value={ctx}>{children}</QueryStringContext.Provider>;
