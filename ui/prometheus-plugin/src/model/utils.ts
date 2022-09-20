@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariablesState, VariableValue } from '@perses-dev/core';
+import { VariableStateMap, VariableValue } from '@perses-dev/core';
 
-export function replaceTemplateVariables(text: string, variableState: VariablesState): string {
+export function replaceTemplateVariables(text: string, variableState: VariableStateMap): string {
   const variables = parseTemplateVariables(text);
   let finalText = text;
   variables.forEach((v) => {

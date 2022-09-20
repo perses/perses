@@ -17,8 +17,7 @@ import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 import { TemplateVariableContext } from '@perses-dev/plugin-system';
 import {
-  VariableDefinitions,
-  VariablesState,
+  VariableStateMap,
   VariableState,
   VariableName,
   VariableValue,
@@ -27,31 +26,31 @@ import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/core';
 
-type TemplateVariableSrv = {
-  variableDefinitions: VariableDefinitions;
-  variableState: VariablesState;
+type TemplateVariableStore = {
+  variableDefinitions: VariableDefinition[];
+  variableState: VariableStateMap;
   setVariableValue: (variableName: VariableName, value: VariableValue) => void;
   loadTemplateVariable: (name: VariableName) => Promise<void>;
 };
 
-const TemplateVariableSrvContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
+const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
   undefined
 );
-function useTemplateVariableSrvContext() {
-  const context = useContext(TemplateVariableSrvContext);
+function useTemplateVariableStore() {
+  const context = useContext(TemplateVariableStoreContext);
   if (!context) {
-    throw new Error('TemplateVariableSrvContext not initialized');
+    throw new Error('TemplateVariableStoreContext not initialized');
   }
   return context;
 }
 
 export function useTemplateVariableValues(variableNames?: string[]) {
-  const store = useTemplateVariableSrvContext();
+  const store = useTemplateVariableStore();
   const state = useStore(
     store,
     (s) => {
       const names = variableNames ?? Object.keys(s.variableState);
-      const vars: VariablesState = {};
+      const vars: VariableStateMap = {};
       names.forEach((name) => {
         const varState = s.variableState[name];
         if (!varState) {
@@ -69,7 +68,7 @@ export function useTemplateVariableValues(variableNames?: string[]) {
 }
 
 export function useTemplateVariable(name: string) {
-  const store = useTemplateVariableSrvContext();
+  const store = useTemplateVariableStore();
   return useStore(store, (s) => {
     const variableState = s.variableState[name];
     const definition = s.variableDefinitions.find((v) => v.name === name);
@@ -81,7 +80,7 @@ export function useTemplateVariable(name: string) {
 }
 
 export function useTemplateVariableActions() {
-  const store = useTemplateVariableSrvContext();
+  const store = useTemplateVariableStore();
   return useStore(store, (s) => {
     return {
       setVariableValue: s.setVariableValue,
@@ -91,12 +90,12 @@ export function useTemplateVariableActions() {
 }
 
 export function useTemplateVariableDefinitions() {
-  const store = useTemplateVariableSrvContext();
+  const store = useTemplateVariableStore();
   return useStore(store, (s) => s.variableDefinitions);
 }
 
 export function useTemplateVariableSrv() {
-  const store = useTemplateVariableSrvContext();
+  const store = useTemplateVariableStore();
   return useStore(store);
 }
 
@@ -106,11 +105,11 @@ function PluginProvider({ children }: { children: React.ReactNode }) {
 }
 
 interface TemplateVariableSrvArgs {
-  initialVariableDefinitions?: VariableDefinitions;
+  initialVariableDefinitions?: VariableDefinition[];
 }
 
 function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: TemplateVariableSrvArgs) {
-  const store = createStore<TemplateVariableSrv>()(
+  const store = createStore<TemplateVariableStore>()(
     devtools(
       immer((set, get) => ({
         variableState: hydrateTemplateVariableStates(initialVariableDefinitions),
@@ -177,14 +176,14 @@ export function TemplateVariableProvider({
   initialVariableDefinitions = [],
 }: {
   children: React.ReactNode;
-  initialVariableDefinitions?: VariableDefinitions;
+  initialVariableDefinitions?: VariableDefinition[];
 }) {
   const store = createTemplateVariableSrvStore({ initialVariableDefinitions });
 
   return (
-    <TemplateVariableSrvContext.Provider value={store}>
+    <TemplateVariableStoreContext.Provider value={store}>
       <PluginProvider>{children}</PluginProvider>
-    </TemplateVariableSrvContext.Provider>
+    </TemplateVariableStoreContext.Provider>
   );
 }
 
@@ -259,8 +258,8 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
   return varState;
 }
 
-function hydrateTemplateVariableStates(definitions: VariableDefinitions): VariablesState {
-  const state: VariablesState = {};
+function hydrateTemplateVariableStates(definitions: VariableDefinition[]): VariableStateMap {
+  const state: VariableStateMap = {};
   definitions.forEach((v) => {
     state[v.name] = hydrateTemplateVariableState(v);
   });

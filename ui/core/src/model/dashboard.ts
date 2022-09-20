@@ -15,7 +15,7 @@ import { LayoutDefinition } from './layout';
 import { PanelDefinition } from './panels';
 import { ProjectMetadata } from './resource';
 import { DurationString } from './time';
-import { VariableDefinitions } from './variables';
+import { VariableDefinition } from './variables';
 
 export interface DatasourceSelector {
   name: string;
@@ -32,7 +32,7 @@ export interface DashboardResource {
 export interface DashboardSpec {
   datasource: DatasourceSelector;
   duration: DurationString;
-  variables: VariableDefinitions;
+  variables: VariableDefinition[];
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
 }

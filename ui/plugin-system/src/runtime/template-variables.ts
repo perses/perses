@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { VariablesState } from '@perses-dev/core';
+import { VariableStateMap } from '@perses-dev/core';
 
 export type TemplateVariableSrv = {
-  state: VariablesState;
+  state: VariableStateMap;
 };
 
 export const TemplateVariableContext = createContext<TemplateVariableSrv | undefined>(undefined);
@@ -35,7 +35,7 @@ export function useTemplateVariableValues(names?: string[]) {
     return state;
   }
 
-  const values: VariablesState = {};
+  const values: VariableStateMap = {};
   names.forEach((name) => {
     const s = state[name];
     if (s) {

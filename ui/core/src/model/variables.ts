@@ -26,11 +26,11 @@ export type VariableState = {
 
 export type VariableOption = { label: string; value: string };
 
-export type VariablesState = Record<VariableName, VariableState>;
+export type VariableStateMap = Record<VariableName, VariableState>;
 
 export type VariableValue = string | string[] | null;
 
-export interface Variable<Kind extends string, TOptions extends JsonObject = JsonObject> extends Definition<TOptions> {
+export interface Variable<Kind extends string, Options extends JsonObject = JsonObject> extends Definition<Options> {
   kind: Kind;
   name: VariableName;
   display?: {
@@ -38,14 +38,14 @@ export interface Variable<Kind extends string, TOptions extends JsonObject = Jso
     hidden?: boolean;
   };
   defaultValue?: VariableValue;
-  options: TOptions;
+  options: Options;
 }
 
 export interface TextVariableOptions extends JsonObject {
   value: string;
 }
 
-export type TextVariableDefintion = Variable<'TextVariable', TextVariableOptions>;
+export type TextVariableDefinition = Variable<'TextVariable', TextVariableOptions>;
 
 export type ListVariableOptions<Kind extends string, Options extends JsonObject> = {
   allowMultiple?: boolean;
@@ -63,5 +63,4 @@ export type ListVariableDefinition<Options extends JsonObject = JsonObject, Kind
 >;
 
 // All Variables
-export type VariableDefinition = TextVariableDefintion | ListVariableDefinition;
-export type VariableDefinitions = VariableDefinition[];
+export type VariableDefinition = TextVariableDefinition | ListVariableDefinition;
