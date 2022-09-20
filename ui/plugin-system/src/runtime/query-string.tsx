@@ -14,8 +14,8 @@
 import { createContext, useContext } from 'react';
 
 export interface QueryString {
-  queryParams: URLSearchParams;
-  setQueryParams?: (queryParams: URLSearchParams) => void;
+  queryString: URLSearchParams;
+  setQueryString?: (queryString: URLSearchParams) => void;
 }
 
 export const QueryStringContext = createContext<QueryString | undefined>(undefined);
@@ -23,7 +23,7 @@ export const QueryStringContext = createContext<QueryString | undefined>(undefin
 /**
  * Gets the current query params at runtime.
  */
-export function useQueryParams(): QueryString {
+export function useQueryString(): QueryString {
   const ctx = useContext(QueryStringContext);
   if (ctx === undefined) {
     throw new Error('No QueryStringContext found. Did you forget a Provider?');

@@ -15,8 +15,8 @@ import React, { useContext, useMemo } from 'react';
 import { QueryString, QueryStringContext } from '@perses-dev/plugin-system';
 
 export interface QueryStringProviderProps {
-  queryParams: URLSearchParams;
-  setQueryParams?: (queryParams: URLSearchParams) => void;
+  queryString: URLSearchParams;
+  setQueryString?: (queryString: URLSearchParams) => void;
   children?: React.ReactNode;
 }
 
@@ -24,14 +24,14 @@ export interface QueryStringProviderProps {
  * Allows apps to provide their own query string implementations
  */
 export function QueryStringProvider(props: QueryStringProviderProps) {
-  const { queryParams, setQueryParams, children } = props;
+  const { queryString, setQueryString, children } = props;
 
-  const ctx = useMemo(() => ({ queryParams, setQueryParams }), [queryParams, setQueryParams]);
+  const ctx = useMemo(() => ({ queryString, setQueryString }), [queryString, setQueryString]);
 
   return <QueryStringContext.Provider value={ctx}>{children}</QueryStringContext.Provider>;
 }
 
-export function useQueryParams(): QueryString {
+export function useQueryString(): QueryString {
   const ctx = useContext(QueryStringContext);
   if (ctx === undefined) {
     throw new Error('No QueryStringContext found. Did you forget a Provider?');

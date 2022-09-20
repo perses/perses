@@ -14,7 +14,7 @@
 import { useEffect } from 'react';
 import { BoxProps } from '@mui/material';
 import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
-import { useQueryParams } from '@perses-dev/plugin-system';
+import { useQueryString } from '@perses-dev/plugin-system';
 import { TimeRangeProvider, TemplateVariablesProvider, DashboardProvider } from '../context';
 
 import { DashboardApp } from './DashboardApp';
@@ -32,19 +32,19 @@ export function ViewDashboard(props: ViewDashboardProps) {
     children,
   } = props;
 
-  const { queryParams, setQueryParams } = useQueryParams();
+  const { queryString, setQueryString } = useQueryString();
   const dashboardDuration = spec.duration ?? '1h';
-  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryParams);
+  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString);
 
   // TODO: add reusable sync query string or no-op util
   useEffect(() => {
-    const currentParams = Object.fromEntries([...queryParams]);
+    const currentParams = Object.fromEntries([...queryString]);
     // if app does not provide query string implementation, setTimeRange is used instead
-    if (!currentParams.start && setQueryParams) {
-      queryParams.set('start', dashboardDuration);
-      setQueryParams(queryParams);
+    if (!currentParams.start && setQueryString) {
+      queryString.set('start', dashboardDuration);
+      setQueryString(queryString);
     }
-  }, [dashboardDuration, queryParams, setQueryParams]);
+  }, [dashboardDuration, queryString, setQueryString]);
 
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>

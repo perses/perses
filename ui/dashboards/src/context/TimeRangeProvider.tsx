@@ -14,7 +14,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { getUnixTime } from 'date-fns';
 import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext, useQueryParams } from '@perses-dev/plugin-system';
+import { TimeRange, TimeRangeContext, useQueryString } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
@@ -28,7 +28,7 @@ export interface TimeRangeProviderProps {
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
 
-  const { queryParams, setQueryParams } = useQueryParams();
+  const { queryString, setQueryString } = useQueryString();
 
   const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
     ? toAbsoluteTimeRange(initialTimeRange)
@@ -45,11 +45,11 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
       }
 
       if (isRelativeTimeRange(value)) {
-        if (setQueryParams) {
-          queryParams.set('start', value.pastDuration);
+        if (setQueryString) {
+          queryString.set('start', value.pastDuration);
           // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
-          queryParams.delete('end');
-          setQueryParams(queryParams);
+          queryString.delete('end');
+          setQueryString(queryString);
         } else {
           setActiveTimeRange(toAbsoluteTimeRange(value));
         }
@@ -57,17 +57,17 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
       }
 
       // allows app to specify whether query params should be source of truth for active time range
-      if (setQueryParams) {
+      if (setQueryString) {
         const startUnixMs = getUnixTime(timeRange.start) * 1000;
         const endUnixMs = getUnixTime(timeRange.end) * 1000;
-        queryParams.set('start', startUnixMs.toString());
-        queryParams.set('end', endUnixMs.toString());
-        setQueryParams(queryParams);
+        queryString.set('start', startUnixMs.toString());
+        queryString.set('end', endUnixMs.toString());
+        setQueryString(queryString);
       } else {
         setActiveTimeRange(value);
       }
     },
-    [queryParams, setQueryParams, timeRange, onTimeRangeChange]
+    [queryString, setQueryString, timeRange, onTimeRangeChange]
   );
 
   const ctx = useMemo(

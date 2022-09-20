@@ -61,8 +61,8 @@ function App() {
           <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
               <DataSourceRegistry>
-                <QueryStringProvider queryParams={searchParams} setQueryParams={setSearchParams}>
-                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryParams not reloading as expected  */}
+                <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
+                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
                   <ViewDashboard key={location.key} />
                 </QueryStringProvider>
               </DataSourceRegistry>

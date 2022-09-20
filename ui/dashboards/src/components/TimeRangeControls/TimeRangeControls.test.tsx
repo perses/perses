@@ -29,10 +29,10 @@ describe('TimeRangeControls', () => {
   });
 
   const renderTimeRangeControls = () => {
-    const queryParams = new URLSearchParams();
-    const defaultTimeRange = getDefaultTimeRange(initialState.dashboardSpec.duration, queryParams);
+    const queryString = new URLSearchParams();
+    const defaultTimeRange = getDefaultTimeRange(initialState.dashboardSpec.duration, queryString);
     renderWithContext(
-      <QueryStringProvider queryParams={queryParams}>
+      <QueryStringProvider queryString={queryString}>
         <DashboardProvider initialState={initialState}>
           <TimeRangeProvider initialTimeRange={defaultTimeRange}>
             <TimeRangeControls />
