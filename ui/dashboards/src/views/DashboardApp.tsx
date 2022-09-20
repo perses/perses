@@ -13,7 +13,7 @@
 
 import { Box } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { VariableList, Dashboard } from '../components';
+import { Dashboard, TemplateVariableList } from '../components';
 import PanelDrawer from '../components/PanelDrawer/PanelDrawer';
 import { DashboardToolbar } from '../components/DashboardToolbar';
 import { useDashboard } from '../context';
@@ -48,7 +48,7 @@ export const DashboardApp = (props: ViewDashboardProps) => {
         }}
       >
         <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
-        <VariableList variables={dashboardResource.spec.variables} sx={{ margin: (theme) => theme.spacing(1, 0, 2) }} />
+        <TemplateVariableList />
         <Dashboard spec={dashboard} />
         <PanelDrawer />
         {children}
