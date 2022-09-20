@@ -14,7 +14,8 @@
 import { JsonObject, useEvent } from '@perses-dev/core';
 import { useRef, useCallback, useMemo } from 'react';
 import { PluginModuleResource, PluginType, Plugin, PluginImplementation } from '../../model';
-import { GetInstalledPlugins, getTypeAndKindKey, usePluginIndexes } from './plugin-indexes';
+import { getTypeAndKindKey } from '../../utils/cache-keys';
+import { GetInstalledPlugins, usePluginIndexes } from './plugin-indexes';
 import { PluginRegistryContext } from './plugin-registry-model';
 
 export interface PluginRegistryProps {

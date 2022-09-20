@@ -14,6 +14,7 @@
 import { useEvent } from '@perses-dev/core';
 import { useCallback, useRef } from 'react';
 import { PluginMetadata, PluginModuleResource, PluginType } from '../../model';
+import { getTypeAndKindKey } from '../../utils/cache-keys';
 
 export type GetInstalledPlugins = () => Promise<PluginModuleResource[]>;
 
@@ -79,11 +80,4 @@ export function usePluginIndexes(getInstalledPlugins: GetInstalledPlugins) {
   }, [createPluginIndexes]);
 
   return getPluginIndexes;
-}
-
-/**
- * Gets a key for a plugin type/kind that's used in the pluginResourcesByTypeAndKind index.
- */
-export function getTypeAndKindKey(pluginType: PluginType, kind: string) {
-  return `${pluginType}:${kind}`;
 }
