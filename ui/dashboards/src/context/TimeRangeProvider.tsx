@@ -39,6 +39,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
       if (onTimeRangeChange !== undefined) {
+        // optional callback to override default behavior
         onTimeRangeChange(value);
         return;
       }
@@ -49,11 +50,13 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
           // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
           queryParams.delete('end');
           setQueryParams(queryParams);
+        } else {
+          setActiveTimeRange(toAbsoluteTimeRange(value));
         }
         return;
-        // TODO: use relative version of query params
       }
 
+      // allows app to specify whether query params should be source of truth for active time range
       if (setQueryParams) {
         const startUnixMs = getUnixTime(timeRange.start) * 1000;
         const endUnixMs = getUnixTime(timeRange.end) * 1000;
