@@ -13,8 +13,7 @@
 
 import { BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-import { TimeRangeStateProvider, TemplateVariablesProvider, DashboardProvider } from '../context';
-
+import { TimeRangeStateProvider, DashboardProvider, TemplateVariableProvider } from '../context';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends BoxProps {
@@ -34,9 +33,9 @@ export function ViewDashboard(props: ViewDashboardProps) {
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
       <TimeRangeStateProvider initialValue={{ pastDuration }}>
-        <TemplateVariablesProvider variableDefinitions={spec.variables}>
+        <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
           <DashboardApp {...props}>{children}</DashboardApp>
-        </TemplateVariablesProvider>
+        </TemplateVariableProvider>
       </TimeRangeStateProvider>
     </DashboardProvider>
   );

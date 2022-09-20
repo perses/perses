@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ResourceMetadata, VariableDefinition, PanelDefinition } from '@perses-dev/core';
+import { JsonObject, ResourceMetadata, ListVariableDefinition, PanelDefinition } from '@perses-dev/core';
 import { GraphQueryDefinition, GraphQueryPlugin } from './graph-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
@@ -54,7 +54,7 @@ export type PluginType = typeof ALL_PLUGIN_TYPES[number];
 // Map of plugin type -> config and implementation type
 type SupportedPlugins<Options extends JsonObject> = {
   Variable: {
-    Def: VariableDefinition<Options>;
+    Def: ListVariableDefinition<Options>;
     Impl: VariablePlugin<Options>;
   };
   Panel: {

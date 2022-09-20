@@ -12,28 +12,36 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
+import { VariableStateMap } from '@perses-dev/core';
 
-export interface TemplateVariables {
-  variables: Record<string, VariableState>;
-}
+export type TemplateVariableSrv = {
+  state: VariableStateMap;
+};
 
-/**
- * The value and options for a template variable.
- */
-export interface VariableState {
-  value: string | string[];
-  options?: string[];
-}
+export const TemplateVariableContext = createContext<TemplateVariableSrv | undefined>(undefined);
 
-export const TemplateVariablesContext = createContext<TemplateVariables | undefined>(undefined);
-
-/**
- * Gets TemplateVariables at runtime.
- */
-export function useTemplateVariables(): TemplateVariables {
-  const ctx = useContext(TemplateVariablesContext);
+function useTemplateVariableContext() {
+  const ctx = useContext(TemplateVariableContext);
   if (ctx === undefined) {
-    throw new Error('No TemplateVariablesContext found. Did you forget a Provider?');
+    throw new Error('No TemplateVariableContext found. Did you forget a Provider?');
   }
   return ctx;
+}
+
+export function useTemplateVariableValues(names?: string[]) {
+  const { state } = useTemplateVariableContext();
+
+  if (names === undefined) {
+    return state;
+  }
+
+  const values: VariableStateMap = {};
+  names.forEach((name) => {
+    const s = state[name];
+    if (s) {
+      values[name] = s;
+    }
+  });
+
+  return values;
 }

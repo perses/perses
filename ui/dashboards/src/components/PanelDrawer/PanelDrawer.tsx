@@ -28,18 +28,14 @@ import { Drawer, ErrorAlert } from '@perses-dev/components';
 import { JsonObject } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { useLayouts, usePanels } from '../../context';
+import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
 
-interface AddPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
+const PanelDrawer = () => {
   const { layouts, addItemToLayout } = useLayouts();
-  const { addPanel } = usePanels();
+  const { updatePanel } = usePanels();
+  const { panelDrawer, closePanelDrawer } = useDashboardApp();
 
   const [group, setGroup] = useState(0);
   const [panelName, setPanelName] = useState('');
@@ -73,10 +69,10 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
     setOptions(next);
   };
 
-  const onAddPanelClick = (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
-    addPanel(panelKey, {
+    updatePanel(panelKey, {
       kind,
       display: { name: panelName, description: panelDescription },
       options,
@@ -96,13 +92,13 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
       height: 6,
       content: { $ref: `#/spec/panels/${panelKey}` },
     });
-    onClose();
+    closePanelDrawer();
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
-      <form onSubmit={onAddPanelClick}>
-        <AddPanelHeader onClose={onClose} />
+    <Drawer isOpen={!!panelDrawer} onClose={() => closePanelDrawer()}>
+      <form onSubmit={handleSubmit}>
+        <PanelDrawerHeader onClose={() => closePanelDrawer()} />
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <FormControl>
@@ -144,7 +140,7 @@ const AddPanel = ({ isOpen, onClose }: AddPanelProps) => {
   );
 };
 
-const AddPanelHeader = ({ onClose }: Pick<AddPanelProps, 'onClose'>) => {
+const PanelDrawerHeader = ({ onClose }: { onClose: () => void }) => {
   return (
     <Box
       sx={{
@@ -168,4 +164,4 @@ const AddPanelHeader = ({ onClose }: Pick<AddPanelProps, 'onClose'>) => {
   );
 };
 
-export default AddPanel;
+export default PanelDrawer;
