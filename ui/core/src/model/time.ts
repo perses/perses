@@ -115,8 +115,12 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
 /**
  * Gets the default time range taking into account URL params
  */
-export function getDefaultTimeRange(start: string, end: string, dashboardDuration: DurationString): TimeRangeValue {
-  if (start === '' || end === '') {
+export function getDefaultTimeRange(
+  dashboardDuration: DurationString,
+  start: string | null,
+  end: string | null
+): TimeRangeValue {
+  if (start === null || end === null) {
     return { pastDuration: dashboardDuration };
   }
   return isDurationString(start)

@@ -34,14 +34,15 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   const { queryParams, setQueryParams } = useQueryParams();
 
-  const startParam = queryParams.get('start') ?? '';
-  const endParam = queryParams.get('end') ?? '';
+  const startParam = queryParams.get('start');
+  const endParam = queryParams.get('end');
   const dashboardDuration = spec.duration ?? '1h';
-  const defaultTimeRange = getDefaultTimeRange(startParam, endParam, dashboardDuration);
+  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, startParam, endParam);
 
+  // TODO: add reusable sync query string or no-op util
   useEffect(() => {
     const currentParams = Object.fromEntries([...queryParams]);
-    if (!currentParams.start) {
+    if (!currentParams.start && setQueryParams) {
       queryParams.set('start', dashboardDuration);
       queryParams.set('end', 'now');
       setQueryParams(queryParams);

@@ -13,7 +13,7 @@
 
 import { useRef, useState } from 'react';
 import { getUnixTime } from 'date-fns';
-import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
+import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
   DurationString,
@@ -43,9 +43,9 @@ export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useTimeRange();
 
   const { queryParams, setQueryParams } = useQueryParams();
-  const startParam = queryParams.get('start') ?? '';
-  const endParam = queryParams.get('end') ?? '';
-  const defaultTimeRange = getDefaultTimeRange(startParam, endParam, dashboard.duration);
+  const startParam = queryParams.get('start');
+  const endParam = queryParams.get('end');
+  const defaultTimeRange = getDefaultTimeRange(dashboard.duration, startParam, endParam);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -67,13 +67,15 @@ export function TimeRangeControls() {
         <AbsoluteTimePicker
           initialTimeRange={timeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
-            // TODO: add no-op condition
-            // setTimeRange(timeRange);
-            const startUnixMs = getUnixTime(timeRange.start) * 1000;
-            const endUnixMs = getUnixTime(timeRange.end) * 1000;
-            queryParams.set('start', startUnixMs.toString());
-            queryParams.set('end', endUnixMs.toString());
-            setQueryParams(queryParams);
+            if (setQueryParams) {
+              const startUnixMs = getUnixTime(timeRange.start) * 1000;
+              const endUnixMs = getUnixTime(timeRange.end) * 1000;
+              queryParams.set('start', startUnixMs.toString());
+              queryParams.set('end', endUnixMs.toString());
+              setQueryParams(queryParams);
+            } else {
+              setTimeRange(timeRange);
+            }
             setShowCustomDateSelector(false);
           }}
         />
@@ -85,16 +87,18 @@ export function TimeRangeControls() {
             value={defaultTimeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
-              // const relativeTimeInput: RelativeTimeRange = {
-              //   pastDuration: duration as DurationString,
-              //   end: new Date(),
-              // };
-              // TODO: if setQueryParams is no-op use setTimeRange
-              // const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
-              // setTimeRange(convertedAbsoluteTime);
-              queryParams.set('start', duration);
-              queryParams.set('end', 'now');
-              setQueryParams(queryParams);
+              if (setQueryParams) {
+                queryParams.set('start', duration);
+                queryParams.set('end', 'now');
+                setQueryParams(queryParams);
+              } else {
+                const relativeTimeInput: RelativeTimeRange = {
+                  pastDuration: duration as DurationString,
+                  end: new Date(),
+                };
+                const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
+                setTimeRange(convertedAbsoluteTime);
+              }
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {
