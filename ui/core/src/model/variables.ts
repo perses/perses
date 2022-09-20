@@ -47,19 +47,19 @@ export interface TextVariableOptions extends JsonObject {
 
 export type TextVariableDefinition = Variable<'TextVariable', TextVariableOptions>;
 
-export type ListVariableOptions<Kind extends string, Options extends JsonObject> = {
+export type ListVariableOptions<Options extends JsonObject> = {
   allowMultiple?: boolean;
   allowAllValue?: boolean;
   customAllValue?: string;
   optionsLoader: {
-    kind: Kind;
+    kind: string;
     options: Options;
   };
 };
 
-export type ListVariableDefinition<Options extends JsonObject = JsonObject, Kind extends string = string> = Variable<
+export type ListVariableDefinition<Options extends JsonObject = JsonObject> = Variable<
   'ListVariable',
-  ListVariableOptions<Kind, Options>
+  ListVariableOptions<Options>
 >;
 
 // All Variables

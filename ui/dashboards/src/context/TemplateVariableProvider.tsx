@@ -36,7 +36,7 @@ type TemplateVariableStore = {
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
   undefined
 );
-function useTemplateVariableStore() {
+function useTemplateVariableStoreCtx() {
   const context = useContext(TemplateVariableStoreContext);
   if (!context) {
     throw new Error('TemplateVariableStoreContext not initialized');
@@ -45,7 +45,7 @@ function useTemplateVariableStore() {
 }
 
 export function useTemplateVariableValues(variableNames?: string[]) {
-  const store = useTemplateVariableStore();
+  const store = useTemplateVariableStoreCtx();
   const state = useStore(
     store,
     (s) => {
@@ -68,7 +68,7 @@ export function useTemplateVariableValues(variableNames?: string[]) {
 }
 
 export function useTemplateVariable(name: string) {
-  const store = useTemplateVariableStore();
+  const store = useTemplateVariableStoreCtx();
   return useStore(store, (s) => {
     const variableState = s.variableState[name];
     const definition = s.variableDefinitions.find((v) => v.name === name);
@@ -80,7 +80,7 @@ export function useTemplateVariable(name: string) {
 }
 
 export function useTemplateVariableActions() {
-  const store = useTemplateVariableStore();
+  const store = useTemplateVariableStoreCtx();
   return useStore(store, (s) => {
     return {
       setVariableValue: s.setVariableValue,
@@ -90,12 +90,12 @@ export function useTemplateVariableActions() {
 }
 
 export function useTemplateVariableDefinitions() {
-  const store = useTemplateVariableStore();
+  const store = useTemplateVariableStoreCtx();
   return useStore(store, (s) => s.variableDefinitions);
 }
 
-export function useTemplateVariableSrv() {
-  const store = useTemplateVariableStore();
+export function useTemplateVariableStore() {
+  const store = useTemplateVariableStoreCtx();
   return useStore(store);
 }
 

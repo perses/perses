@@ -15,7 +15,7 @@ import { useEffect, useRef } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, IconButton, TextField } from '@mui/material';
 import { Reload } from 'mdi-material-ui';
 import { VariableName, ListVariableDefinition } from '@perses-dev/core';
-import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableSrv } from '../../context';
+import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
 
 type TemplateVariableProps = {
   name: VariableName;
@@ -79,7 +79,7 @@ function ListVariable({ name }: TemplateVariableProps) {
 
 function TextVariable({ name }: TemplateVariableProps) {
   const { state } = useTemplateVariable(name);
-  const s = useTemplateVariableSrv();
+  const s = useTemplateVariableStore();
   const setVariableValue = s.setVariableValue;
   const ref = useRef<HTMLInputElement>(null);
   return (
