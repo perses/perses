@@ -16,7 +16,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import App from './App';
+import Router from './Router';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import { DarkModeContextProvider } from './context/DarkMode';
 
@@ -39,7 +39,7 @@ export function renderApp(container: Element | null) {
           <DarkModeContextProvider>
             <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
               <CssBaseline />
-              <App />
+              <Router />
             </SnackbarProvider>
           </DarkModeContextProvider>
         </QueryClientProvider>

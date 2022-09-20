@@ -69,8 +69,8 @@ export function TimeRangeControls() {
         <AbsoluteTimePicker
           initialTimeRange={timeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
-            // TODO: simplify call of setTimeRange or setQueryParams, add no-op condition
-            setTimeRange(timeRange);
+            // TODO: add no-op condition
+            // setTimeRange(timeRange);
             const startUnixMs = getUnixTime(timeRange.start) * 1000;
             const endUnixMs = getUnixTime(timeRange.end) * 1000;
             queryParams.set('start', startUnixMs.toString());
@@ -90,13 +90,13 @@ export function TimeRangeControls() {
             value={defaultTimeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
-              const relativeTimeInput: RelativeTimeRange = {
-                pastDuration: duration as DurationString,
-                end: new Date(),
-              };
+              // const relativeTimeInput: RelativeTimeRange = {
+              //   pastDuration: duration as DurationString,
+              //   end: new Date(),
+              // };
               // TODO: if setQueryParams is no-op use setTimeRange
-              const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
-              setTimeRange(convertedAbsoluteTime);
+              // const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
+              // setTimeRange(convertedAbsoluteTime);
               queryParams.set('start', duration);
               queryParams.set('end', 'now');
               setQueryParams(queryParams);

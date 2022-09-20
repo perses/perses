@@ -39,7 +39,6 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const dashboardDuration = spec.duration ?? '1h';
   const defaultTimeRange = getDefaultTimeRange(startParam, endParam, dashboardDuration);
 
-  // TODO: replace with useSyncToQueryString util
   useEffect(() => {
     const currentParams = Object.fromEntries([...queryParams]);
     if (!currentParams.start) {

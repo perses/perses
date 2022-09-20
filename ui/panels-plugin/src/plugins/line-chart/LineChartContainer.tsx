@@ -121,20 +121,14 @@ export function LineChartContainer(props: LineChartContainerProps) {
   };
 
   const handleDataZoom = (event: ZoomEventData) => {
-    // TODO: remove setTimeout, add zoom transition using ECharts animations
-    // - https://echarts.apache.org/handbook/en/how-to/animation/transition/
-    const startDate = new Date(event.start);
-    const endDate = new Date(event.end);
-
+    // TODO: add ECharts transition animation on zoom
     queryParams.set('start', event.start.toString());
     queryParams.set('end', event.end.toString());
-
-    // slight delay to avoid trigger error due to pending echarts action
-    setTimeout(() => {
-      // TODO: add setQueryParams no-op condition
+    if (setQueryParams) {
       setQueryParams(queryParams);
-      setTimeRange({ start: startDate, end: endDate });
-    }, 10);
+    } else {
+      setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
+    }
   };
 
   return (

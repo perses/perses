@@ -12,13 +12,12 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { Routes, Route, useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
 import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
 import { QueryStringProvider } from '@perses-dev/dashboards';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
-import Docs from './views/Docs';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -33,6 +32,9 @@ function App() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // TODO: remove temporary location.key reload hack when routing setup properly
+  const location = useLocation();
+
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
@@ -46,9 +48,6 @@ function App() {
         height: '100vh',
       }}
     >
-      <Routes>
-        <Route path="docs" element={<Docs />} />
-      </Routes>
       <Header />
       <Box
         component="main"
@@ -62,7 +61,8 @@ function App() {
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
               <DataSourceRegistry>
                 <QueryStringProvider queryParams={searchParams} setQueryParams={setSearchParams}>
-                  <ViewDashboard />
+                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryParams not reloading as expected  */}
+                  <ViewDashboard key={location.key} />
                 </QueryStringProvider>
               </DataSourceRegistry>
             </PluginBoundary>
