@@ -11,7 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './event';
-export * from './fetch';
-export * from './memo';
-export * from './panel-refs';
+import { PluginType } from '../model';
+
+/**
+ * Gets a unique key for a plugin type/kind that can be used as a cache key.
+ */
+export function getTypeAndKindKey(pluginType: PluginType, kind: string) {
+  return `${pluginType}:${kind}`;
+}

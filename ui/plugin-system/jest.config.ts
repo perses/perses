@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './event';
-export * from './fetch';
-export * from './memo';
-export * from './panel-refs';
+import type { Config } from '@jest/types';
+import shared from '../jest.shared';
+
+const jestConfig: Config.InitialOptions = {
+  ...shared,
+
+  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
+};
+
+export default jestConfig;

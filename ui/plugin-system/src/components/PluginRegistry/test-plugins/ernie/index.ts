@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './event';
-export * from './fetch';
-export * from './memo';
-export * from './panel-refs';
+import { VariableOption } from '@perses-dev/core';
+import { VariablePlugin } from '../../../../model';
+
+const data: VariableOption[] = [
+  { label: 'Grover', value: 'Grover' },
+  { label: 'Snuffleupagus', value: 'Snuffleupagus' },
+];
+
+// Dummy plugin to test loading
+export const ErnieVariable: VariablePlugin = {
+  useVariableOptions: () => ({ loading: false, error: undefined, data }),
+};
