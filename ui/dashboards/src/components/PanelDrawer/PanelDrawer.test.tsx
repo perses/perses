@@ -67,18 +67,15 @@ describe('Panel Drawer', () => {
     const nameInput = screen.getByLabelText(/Panel Name/);
     userEvent.type(nameInput, 'New Panel');
     userEvent.click(screen.getByText('Add'));
-    expect(updatePanel).toHaveBeenCalledWith('NewPanel', {
-      kind: '',
-      display: { name: 'New Panel', description: '' },
-      options: {},
-    });
-    expect(addItemToLayout).toHaveBeenCalledWith(0, {
-      x: 0,
-      y: 1,
-      width: 12,
-      height: 6,
-      content: { $ref: `#/spec/panels/NewPanel` },
-    });
+    expect(updatePanel).toHaveBeenCalledWith(
+      'NewPanel',
+      {
+        kind: '',
+        display: { name: 'New Panel', description: '' },
+        options: {},
+      },
+      0
+    );
   });
 
   it('should edit an existing panel', () => {
