@@ -37,12 +37,7 @@ export function GridLayout(props: GridLayoutProps) {
     ...others
   } = props;
 
-  // If the dashboard JSON changes, it will sync the grid collapse state
-  // However, we also keep track at local state so it doesn't modify the original dashboard definition
   const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
-  useEffect(() => {
-    setIsOpen(!!spec.display?.collapse?.open);
-  }, [spec.display?.collapse]);
 
   const { isEditMode } = useEditMode();
 

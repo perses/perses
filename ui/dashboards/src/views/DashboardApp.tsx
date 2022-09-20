@@ -24,7 +24,6 @@ export const DashboardApp = (props: ViewDashboardProps) => {
   const { dashboardResource, sx, children, ...others } = props;
   const { dashboard } = useDashboard();
   const { panelGroupDialog } = useDashboardApp();
-
   return (
     <Box
       sx={combineSx(

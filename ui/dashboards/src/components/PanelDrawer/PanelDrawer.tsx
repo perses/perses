@@ -27,7 +27,7 @@ import {
 import { Drawer, ErrorAlert } from '@perses-dev/components';
 import { JsonObject } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
@@ -55,8 +55,10 @@ const PanelDrawer = () => {
   const [kind, setKind] = useState('');
   const [options, setOptions] = useState<JsonObject>({});
 
+  // TO DO: we might want to make the form a sub component we don't need this useEffect
+  // currently, we need to reset the states whenever panelDrawer is reopened
+  // since this component does not get remounted when it open/closes (otherwise we lose the animation of sliding in/out)
   useEffect(() => {
-    // we need to reset the states whenever panelDrawer is reopened
     setGroup(panelDrawer?.groupIndex);
     if (panelDrawer?.panelKey) {
       // display panel name and description in text fields when editing an existing panel
