@@ -13,29 +13,54 @@
 
 import { Definition, JsonObject } from './definitions';
 
-/**
- * Variable definition options that are common to all variables.
- */
-export interface VariableDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
-  display: VariableDisplayOptions;
-  selection: VariableSelectionOptions;
-  capturing_regexp?: string;
-}
-
-export interface VariableDisplayOptions extends JsonObject {
-  hide?: boolean;
-  label: string;
-}
-
-export type VariableSelectionOptions = SingleSelectOptions | MultiSelectOptions;
-
-export type SingleSelectOptions = {
-  default_value: string;
-};
-
-export type MultiSelectOptions = {
-  default_value: string[];
-  all_value?: string | typeof DEFAULT_ALL_VALUE;
-};
-
 export const DEFAULT_ALL_VALUE = '$__all' as const;
+
+export type VariableName = string;
+
+export type VariableState = {
+  value: VariableValue;
+  options?: VariableOption[];
+  loading: boolean;
+  error?: Error;
+};
+
+export type VariableOption = { label: string; value: string };
+
+export type VariableStateMap = Record<VariableName, VariableState>;
+
+export type VariableValue = string | string[] | null;
+
+export interface Variable<Kind extends string, Options extends JsonObject = JsonObject> extends Definition<Options> {
+  kind: Kind;
+  name: VariableName;
+  display?: {
+    label?: string;
+    hidden?: boolean;
+  };
+  defaultValue?: VariableValue;
+  options: Options;
+}
+
+export interface TextVariableOptions extends JsonObject {
+  value: string;
+}
+
+export type TextVariableDefinition = Variable<'TextVariable', TextVariableOptions>;
+
+export type ListVariableOptions<Options extends JsonObject> = {
+  allowMultiple?: boolean;
+  allowAllValue?: boolean;
+  customAllValue?: string;
+  optionsLoader: {
+    kind: string;
+    options: Options;
+  };
+};
+
+export type ListVariableDefinition<Options extends JsonObject = JsonObject> = Variable<
+  'ListVariable',
+  ListVariableOptions<Options>
+>;
+
+// All Variables
+export type VariableDefinition = TextVariableDefinition | ListVariableDefinition;
