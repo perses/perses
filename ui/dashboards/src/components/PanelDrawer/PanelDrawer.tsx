@@ -34,20 +34,20 @@ import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEdito
 
 interface PanelDrawerHeaderProps {
   onClose: () => void;
-  panelRef?: string;
+  panelKey?: string;
 }
 
 const PanelDrawer = () => {
-  const { layouts, addItemToLayout } = useLayouts();
+  const { layouts } = useLayouts();
   const { panels, updatePanel } = usePanels();
   const { panelDrawer, closePanelDrawer } = useDashboardApp();
 
   let defaultPanelName = '';
   let defaultDescription = '';
-  if (panelDrawer?.panelRef) {
+  if (panelDrawer?.panelKey) {
     // editing an existing panel
-    defaultPanelName = panels[panelDrawer.panelRef]?.display.name ?? '';
-    defaultDescription = panels[panelDrawer.panelRef]?.display.description ?? '';
+    defaultPanelName = panels[panelDrawer.panelKey]?.display.name ?? '';
+    defaultDescription = panels[panelDrawer.panelKey]?.display.description ?? '';
   }
   const [group, setGroup] = useState(panelDrawer?.groupIndex);
   const [panelName, setPanelName] = useState(defaultPanelName);
@@ -56,11 +56,15 @@ const PanelDrawer = () => {
   const [options, setOptions] = useState<JsonObject>({});
 
   useEffect(() => {
+    // we need to reset the states whenever panelDrawer is reopened
     setGroup(panelDrawer?.groupIndex);
-    if (panelDrawer?.panelRef) {
-      // editing an existing panel
-      setPanelName(panels[panelDrawer.panelRef]?.display.name ?? '');
-      setPanelDescription(panels[panelDrawer.panelRef]?.display.description ?? '');
+    if (panelDrawer?.panelKey) {
+      // display panel name and description in text fields when editing an existing panel
+      setPanelName(panels[panelDrawer.panelKey]?.display.name ?? '');
+      setPanelDescription(panels[panelDrawer.panelKey]?.display.description ?? '');
+    } else {
+      setPanelName('');
+      setPanelDescription('');
     }
   }, [panelDrawer, panels]);
 
@@ -93,9 +97,9 @@ const PanelDrawer = () => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    if (panelDrawer?.groupIndex !== undefined && !panelDrawer?.panelRef) {
+    if (panelDrawer?.groupIndex !== undefined && !panelDrawer?.panelKey) {
       addNewPanel();
-    } else if (panelDrawer?.panelRef) {
+    } else if (panelDrawer?.panelKey) {
       editPanel();
     }
     closePanelDrawer();
@@ -107,34 +111,23 @@ const PanelDrawer = () => {
     }
 
     const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
-    updatePanel(panelKey, {
-      kind,
-      options,
-      display: { name: panelName, description: panelDescription },
-    });
-    // find maximum y so new panel is added to the end of the grid
-    let maxY = 0;
-    layouts[panelDrawer.groupIndex]?.spec.items.forEach((layout) => {
-      if (layout.y > maxY) {
-        maxY = layout.y;
-      }
-    });
-    addItemToLayout(panelDrawer.groupIndex, {
-      x: 0,
-      y: maxY + 1,
-      width: 12,
-      height: 6,
-      content: { $ref: `#/spec/panels/${panelKey}` },
-    });
+    updatePanel(
+      panelKey,
+      {
+        kind,
+        options,
+        display: { name: panelName, description: panelDescription },
+      },
+      panelDrawer.groupIndex
+    );
   };
 
   const editPanel = (): void => {
-    if (panelDrawer?.panelRef === undefined) {
+    if (panelDrawer?.panelKey === undefined) {
       return;
     }
-    updatePanel(panelDrawer.panelRef, {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      ...panels[panelDrawer.panelRef]!,
+    updatePanel(panelDrawer.panelKey, {
+      ...panels[panelDrawer.panelKey],
       kind,
       options,
       display: { name: panelName ?? '', description: panelDescription },
@@ -145,7 +138,7 @@ const PanelDrawer = () => {
   return (
     <Drawer isOpen={!!panelDrawer} onClose={() => closePanelDrawer()}>
       <form onSubmit={handleSubmit}>
-        <PanelDrawerHeader panelRef={panelDrawer?.panelRef} onClose={() => closePanelDrawer()} />
+        <PanelDrawerHeader panelKey={panelDrawer?.panelKey} onClose={() => closePanelDrawer()} />
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <FormControl>
@@ -198,8 +191,8 @@ const PanelDrawer = () => {
   );
 };
 
-const PanelDrawerHeader = ({ panelRef, onClose }: PanelDrawerHeaderProps) => {
-  const action = panelRef ? 'Edit' : 'Add';
+const PanelDrawerHeader = ({ panelKey, onClose }: PanelDrawerHeaderProps) => {
+  const action = panelKey ? 'Edit' : 'Add';
   return (
     <Box
       sx={{
@@ -213,7 +206,7 @@ const PanelDrawerHeader = ({ panelRef, onClose }: PanelDrawerHeaderProps) => {
       <Typography variant="h2">{`${action} Panel`}</Typography>
       <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
         <Button type="submit" variant="contained">
-          {panelRef ? 'Apply' : 'Add'}
+          {panelKey ? 'Apply' : 'Add'}
         </Button>
         <Button variant="outlined" onClick={onClose}>
           Cancel

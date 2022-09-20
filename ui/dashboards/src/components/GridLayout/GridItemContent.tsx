@@ -28,7 +28,7 @@ export function GridItemContent(props: GridItemContentProps) {
   const { content, spec, groupIndex } = props;
   try {
     const { panelDefinition, panelsKey } = resolvePanelRef(spec, content);
-    return <Panel definition={panelDefinition} groupIndex={groupIndex} panelRef={panelsKey} />;
+    return <Panel definition={panelDefinition} groupIndex={groupIndex} panelKey={panelsKey} />;
   } catch (err) {
     return <ErrorAlert error={err as Error} />;
   }

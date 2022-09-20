@@ -37,14 +37,14 @@ import { PanelContent } from './PanelContent';
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
   groupIndex: number;
-  panelRef: string;
+  panelKey: string;
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, groupIndex, panelRef, ...others } = props;
+  const { definition, groupIndex, panelKey, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -70,7 +70,7 @@ export function Panel(props: PanelProps) {
   const { openPanelDrawer } = useDashboardApp();
 
   const handleEditButtonClick = () => {
-    openPanelDrawer({ groupIndex, panelRef });
+    openPanelDrawer({ groupIndex, panelKey });
   };
 
   return (

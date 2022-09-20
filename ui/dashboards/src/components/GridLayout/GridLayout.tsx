@@ -21,7 +21,7 @@ import { GridTitle } from './GridTitle';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
-  index: number;
+  groupIndex: number;
   definition: GridDefinition;
   renderGridItemContent: (definition: GridItemDefinition, groupIndex: number) => React.ReactNode;
 }
@@ -31,12 +31,14 @@ export interface GridLayoutProps extends BoxProps {
  */
 export function GridLayout(props: GridLayoutProps) {
   const {
-    index,
+    groupIndex,
     definition: { spec },
     renderGridItemContent,
     ...others
   } = props;
 
+  // If the dashboard JSON changes, it will sync the grid collapse state
+  // However, we also keep track at local state so it doesn't modify the original dashboard definition
   const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
   useEffect(() => {
     setIsOpen(!!spec.display?.collapse?.open);
@@ -51,7 +53,7 @@ export function GridLayout(props: GridLayoutProps) {
 
     gridItems.push(
       <div key={idx} data-grid={{ x, y, w, h }}>
-        {renderGridItemContent(item, index)}
+        {renderGridItemContent(item, groupIndex)}
       </div>
     );
   });
@@ -62,7 +64,7 @@ export function GridLayout(props: GridLayoutProps) {
       <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
         {spec.display !== undefined && (
           <GridTitle
-            index={index}
+            groupIndex={groupIndex}
             title={spec.display.title}
             collapse={
               spec.display.collapse === undefined

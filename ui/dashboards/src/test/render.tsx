@@ -27,8 +27,8 @@ const initialStore: DashboardStoreProps = {
  */
 export function renderWithContext(
   ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'queries'>,
-  initialState: DashboardStoreProps = initialStore
+  initialState: DashboardStoreProps = initialStore,
+  options?: Omit<RenderOptions, 'queries'>
 ) {
   return render(
     <DashboardProvider initialState={initialState}>

@@ -34,7 +34,7 @@ describe('Panel', () => {
         options: {},
       },
       groupIndex: 0,
-      panelRef: 'panelRef',
+      panelKey: 'panelRef',
     };
 
     initialState = {
@@ -52,7 +52,6 @@ describe('Panel', () => {
       <PluginRegistry {...pluginRegistryProps}>
         <Panel {...props} />
       </PluginRegistry>,
-      undefined,
       initialState
     );
   };

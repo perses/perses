@@ -20,7 +20,7 @@ import { useState } from 'react';
 import { useDashboardApp, useEditMode } from '../../context';
 
 export interface GridTitleProps {
-  index: number;
+  groupIndex: number;
   title: string;
   collapse?: {
     isOpen: boolean;
@@ -33,7 +33,7 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { index, title, collapse } = props;
+  const { groupIndex, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
   const { openPanelDrawer, openPanelGroupDialog } = useDashboardApp();
@@ -65,10 +65,10 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && isHovered && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton onClick={() => openPanelDrawer({ groupIndex: index })}>
+              <IconButton onClick={() => openPanelDrawer({ groupIndex })}>
                 <AddIcon />
               </IconButton>
-              <IconButton onClick={() => openPanelGroupDialog(index)}>
+              <IconButton onClick={() => openPanelGroupDialog(groupIndex)}>
                 <PencilIcon />
               </IconButton>
             </Stack>

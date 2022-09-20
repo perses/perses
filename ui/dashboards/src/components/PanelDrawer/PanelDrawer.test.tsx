@@ -86,7 +86,7 @@ describe('Panel Drawer', () => {
       ...dashboardApp,
       panelDrawer: {
         groupIndex: 0,
-        panelRef: 'cpu',
+        panelKey: 'cpu',
       },
     });
     renderPanelDrawer();
