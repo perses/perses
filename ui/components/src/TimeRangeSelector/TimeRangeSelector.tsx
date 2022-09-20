@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import EventIcon from '@mui/icons-material/Event';
 import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
 import { formatAbsoluteRange } from './utils';
 
@@ -39,9 +40,12 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
       value={formattedValue}
       labelId="select-time-range"
       onChange={onSelectChange}
-      sx={(theme) => ({
-        paddingTop: theme.spacing(1),
-      })}
+      IconComponent={EventIcon}
+      sx={{
+        '.MuiSelect-icon': {
+          marginTop: '1px',
+        },
+      }}
     >
       {timeOptions.map((item, idx) => (
         <MenuItem key={idx} value={item.value.pastDuration}>

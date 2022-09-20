@@ -38,8 +38,6 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
 
-const FORM_CONTROL_LABEL = 'Time Range';
-
 export function TimeRangeControls() {
   const { dashboard } = useDashboard();
   const { timeRange, setTimeRange } = useTimeRange();
@@ -81,9 +79,6 @@ export function TimeRangeControls() {
         />
       </Popover>
       <FormControl fullWidth>
-        <InputLabel id="select-time-range" variant="filled">
-          {FORM_CONTROL_LABEL}
-        </InputLabel>
         <Box ref={anchorEl}>
           <TimeRangeSelector
             timeOptions={TIME_OPTIONS}
