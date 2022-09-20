@@ -24,7 +24,6 @@ const testDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', global: true, name: 'Public Prometheus Demo Server' },
-    // TODO: Should duration actually be a time range?
     duration: '24h',
     variables: {
       job: {

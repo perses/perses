@@ -14,7 +14,7 @@
 import { useMemo } from 'react';
 import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { useQueryParams, useTimeRange } from '@perses-dev/plugin-system';
+import { useTimeRange } from '@perses-dev/plugin-system';
 import { LineChart, EChartsDataFormat, UnitOptions, ZoomEventData } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { useRunningGraphQueries } from './GraphQueryRunner';
@@ -40,7 +40,6 @@ export function LineChartContainer(props: LineChartContainerProps) {
   const { width, height, show_legend, thresholds } = props;
   const queries = useRunningGraphQueries();
 
-  const { queryParams, setQueryParams } = useQueryParams();
   const { setTimeRange } = useTimeRange();
 
   // populate series data based on query results
@@ -122,15 +121,7 @@ export function LineChartContainer(props: LineChartContainerProps) {
 
   const handleDataZoom = (event: ZoomEventData) => {
     // TODO: add ECharts transition animation on zoom
-    // TODO: move setQueryParams condition inside TimeRangeProvider
-    if (setQueryParams) {
-      // fallback to setTimeRange if app does not provide setQueryParams
-      queryParams.set('start', event.start.toString());
-      queryParams.set('end', event.end.toString());
-      setQueryParams(queryParams);
-    } else {
-      setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
-    }
+    setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
 
   return (

@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { getUnixTime } from 'date-fns';
 import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext } from '@perses-dev/plugin-system';
+import { TimeRange, TimeRangeContext, useQueryParams } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
@@ -27,6 +28,8 @@ export interface TimeRangeProviderProps {
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
 
+  const { queryParams, setQueryParams } = useQueryParams();
+
   const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
     ? toAbsoluteTimeRange(initialTimeRange)
     : initialTimeRange;
@@ -35,14 +38,33 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
-      if (!isRelativeTimeRange(value)) {
-        setActiveTimeRange(value);
-      }
       if (onTimeRangeChange !== undefined) {
         onTimeRangeChange(value);
+        return;
+      }
+
+      if (isRelativeTimeRange(value)) {
+        if (setQueryParams) {
+          queryParams.set('start', value.pastDuration);
+          // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
+          queryParams.delete('end');
+          setQueryParams(queryParams);
+        }
+        return;
+        // TODO: use relative version of query params
+      }
+
+      if (setQueryParams) {
+        const startUnixMs = getUnixTime(timeRange.start) * 1000;
+        const endUnixMs = getUnixTime(timeRange.end) * 1000;
+        queryParams.set('start', startUnixMs.toString());
+        queryParams.set('end', endUnixMs.toString());
+        setQueryParams(queryParams);
+      } else {
+        setActiveTimeRange(value);
       }
     },
-    [onTimeRangeChange]
+    [queryParams, setQueryParams, timeRange, onTimeRangeChange]
   );
 
   const ctx = useMemo(

@@ -12,32 +12,47 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { RelativeTimeRange } from '@perses-dev/core';
+import { getDefaultTimeRange } from '@perses-dev/core';
 import { screen } from '@testing-library/react';
 import { renderWithContext } from '../../test';
-import { TimeRangeProvider } from '../../context';
+import testDashboard from '../../test/testDashboard';
+import { DashboardProvider, DashboardStoreProps, TimeRangeProvider, QueryStringProvider } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
 
 describe('TimeRangeControls', () => {
+  let initialState: DashboardStoreProps;
+
+  beforeEach(() => {
+    initialState = {
+      dashboardSpec: testDashboard.spec,
+    };
+  });
+
   const renderTimeRangeControls = () => {
-    const testRelativeTimeRange: RelativeTimeRange = { pastDuration: '6h' };
+    const queryParams = new URLSearchParams();
+    const defaultTimeRange = getDefaultTimeRange(initialState.dashboardSpec.duration, queryParams);
     renderWithContext(
-      <TimeRangeProvider initialTimeRange={testRelativeTimeRange}>
-        <TimeRangeControls />
-      </TimeRangeProvider>
+      <QueryStringProvider queryParams={queryParams}>
+        <DashboardProvider initialState={initialState}>
+          <TimeRangeProvider initialTimeRange={defaultTimeRange}>
+            <TimeRangeControls />
+          </TimeRangeProvider>
+        </DashboardProvider>
+      </QueryStringProvider>
     );
   };
 
   it('should render correct initial relative time shortcut', async () => {
     renderTimeRangeControls();
-    expect(screen.getByText('Last 6 hours')).toBeInTheDocument();
+    expect(screen.getByText('Last 1 day')).toBeInTheDocument();
   });
 
   it('should be able to select the first option', () => {
     renderTimeRangeControls();
     const dateButton = screen.getByRole('button');
     userEvent.click(dateButton);
-    userEvent.click(screen.getByRole('option', { name: 'Last 5 minutes' }));
+    const firstOption = screen.getByRole('option', { name: 'Last 5 minutes' });
+    userEvent.click(firstOption);
     expect(dateButton).toHaveTextContent(/5 minutes/i);
   });
 

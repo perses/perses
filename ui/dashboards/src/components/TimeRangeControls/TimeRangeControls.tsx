@@ -12,14 +12,13 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
-import { getUnixTime } from 'date-fns';
 import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
   DurationString,
   RelativeTimeRange,
   AbsoluteTimeRange,
-  toAbsoluteTimeRange,
+  TimeRangeValue,
   getDefaultTimeRange,
 } from '@perses-dev/core';
 import { useTimeRange, useQueryParams } from '@perses-dev/plugin-system';
@@ -39,13 +38,12 @@ export const TIME_OPTIONS: TimeOption[] = [
 ];
 
 export function TimeRangeControls() {
-  const { dashboard } = useDashboard();
-
-  // setTimeRange only used if setQueryParams not provided by app
   const { timeRange, setTimeRange } = useTimeRange();
+  const { dashboard } = useDashboard();
+  const { queryParams } = useQueryParams();
 
-  const { queryParams, setQueryParams } = useQueryParams();
   const defaultTimeRange = getDefaultTimeRange(dashboard.duration, queryParams);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -67,16 +65,8 @@ export function TimeRangeControls() {
         <AbsoluteTimePicker
           initialTimeRange={timeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
-            // TODO: move setQueryParams condition inside TimeRangeProvider
-            if (setQueryParams) {
-              const startUnixMs = getUnixTime(timeRange.start) * 1000;
-              const endUnixMs = getUnixTime(timeRange.end) * 1000;
-              queryParams.set('start', startUnixMs.toString());
-              queryParams.set('end', endUnixMs.toString());
-              setQueryParams(queryParams);
-            } else {
-              setTimeRange(timeRange);
-            }
+            setTimeRange(timeRange);
+            setSelectedTimeRange(timeRange);
             setShowCustomDateSelector(false);
           }}
         />
@@ -85,23 +75,15 @@ export function TimeRangeControls() {
         <Box ref={anchorEl}>
           <TimeRangeSelector
             timeOptions={TIME_OPTIONS}
-            value={defaultTimeRange}
+            value={selectedTimeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
-              // TODO: move setQueryParams condition inside TimeRangeProvider
-              if (setQueryParams) {
-                queryParams.set('start', duration);
-                // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
-                queryParams.delete('end');
-                setQueryParams(queryParams);
-              } else {
-                const relativeTimeInput: RelativeTimeRange = {
-                  pastDuration: duration as DurationString,
-                  end: new Date(),
-                };
-                const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
-                setTimeRange(convertedAbsoluteTime);
-              }
+              const relativeTimeInput: RelativeTimeRange = {
+                pastDuration: duration as DurationString,
+                end: new Date(),
+              };
+              setTimeRange(relativeTimeInput);
+              setSelectedTimeRange(relativeTimeInput);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {
