@@ -11,20 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
+import { Box } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { useState } from 'react';
 import { VariableList, Dashboard } from '../components';
 import AddPanel from '../components/AddPanel/AddPanel';
 import { DashboardToolbar } from '../components/DashboardToolbar';
 import { useDashboard } from '../context';
+import { ViewDashboardProps } from './ViewDashboard';
 
-export interface PersesDashboardProps extends BoxProps {
-  dashboardResource: DashboardResource;
-}
-
-export const DashboardApp = (props: PersesDashboardProps) => {
+export const DashboardApp = (props: ViewDashboardProps) => {
   const { dashboardResource, sx, children, ...others } = props;
   const [showAddPanel, setShowAddPanel] = useState(false);
   const { dashboard } = useDashboard();

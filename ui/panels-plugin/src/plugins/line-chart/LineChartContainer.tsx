@@ -122,9 +122,10 @@ export function LineChartContainer(props: LineChartContainerProps) {
 
   const handleDataZoom = (event: ZoomEventData) => {
     // TODO: add ECharts transition animation on zoom
-    queryParams.set('start', event.start.toString());
-    queryParams.set('end', event.end.toString());
     if (setQueryParams) {
+      // fallback to setTimeRange if app does not provide setQueryParams
+      queryParams.set('start', event.start.toString());
+      queryParams.set('end', event.end.toString());
       setQueryParams(queryParams);
     } else {
       setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
