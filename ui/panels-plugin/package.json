@@ -28,8 +28,10 @@
     "@perses-dev/core": "^0.6.0",
     "@perses-dev/plugin-system": "^0.6.0",
     "date-fns": "^2.28.0",
+    "dompurify": "^2.4.0",
     "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",
+    "marked": "^4.1.0",
     "mathjs": "^10.6.4"
   },
   "peerDependencies": {
@@ -40,5 +42,9 @@
   "files": [
     "dist",
     "plugin.json"
-  ]
+  ],
+  "devDependencies": {
+    "@types/dompurify": "^2.3.4",
+    "@types/marked": "^4.0.7"
+  }
 }

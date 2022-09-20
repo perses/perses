@@ -11,11 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as DOMPurify from 'dompurify';
+import { marked } from 'marked';
 import { Box } from '@mui/material';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
+
+// Overall, this panel does:
+// 1. text --> html (with support for original markdown and GFM)
+// 2. sanitize the html to prevent XSS attacks
 
 export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
@@ -24,5 +30,8 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
     },
   } = props;
 
-  return <Box sx={{ height: '100%', overflowY: 'auto' }}>{text}</Box>;
+  const html = marked.parse(text, { gfm: true });
+  const sanitizedHTML = DOMPurify.sanitize(html);
+
+  return <Box sx={{ height: '100%', overflowY: 'auto' }} dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
 }
