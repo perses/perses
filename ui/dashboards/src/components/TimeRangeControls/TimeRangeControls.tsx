@@ -67,6 +67,7 @@ export function TimeRangeControls() {
         <AbsoluteTimePicker
           initialTimeRange={timeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
+            // TODO: move setQueryParams condition inside TimeRangeProvider
             if (setQueryParams) {
               const startUnixMs = getUnixTime(timeRange.start) * 1000;
               const endUnixMs = getUnixTime(timeRange.end) * 1000;
@@ -87,6 +88,7 @@ export function TimeRangeControls() {
             value={defaultTimeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
+              // TODO: move setQueryParams condition inside TimeRangeProvider
               if (setQueryParams) {
                 queryParams.set('start', duration);
                 // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
