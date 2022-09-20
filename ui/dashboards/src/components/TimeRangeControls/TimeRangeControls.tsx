@@ -89,7 +89,8 @@ export function TimeRangeControls() {
               const duration = event.target.value;
               if (setQueryParams) {
                 queryParams.set('start', duration);
-                queryParams.set('end', 'now');
+                // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
+                queryParams.delete('end');
                 setQueryParams(queryParams);
               } else {
                 const relativeTimeInput: RelativeTimeRange = {
