@@ -115,15 +115,15 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
 /**
  * Gets the default time range taking into account URL params
  */
-export function getDefaultTimeRange(
-  dashboardDuration: DurationString,
-  start: string | null,
-  end: string | null
-): TimeRangeValue {
-  if (start === null || end === null) {
+export function getDefaultTimeRange(dashboardDuration: DurationString, queryParams: URLSearchParams): TimeRangeValue {
+  const startParam = queryParams.get('start');
+  const endParam = queryParams.get('end');
+
+  if (startParam === null) {
     return { pastDuration: dashboardDuration };
   }
-  return isDurationString(start)
-    ? { pastDuration: start }
-    : { start: new Date(Number(start)), end: new Date(Number(end)) };
+
+  return isDurationString(startParam)
+    ? { pastDuration: startParam }
+    : { start: new Date(Number(startParam)), end: new Date(Number(endParam)) };
 }

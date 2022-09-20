@@ -40,12 +40,12 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { dashboard } = useDashboard();
+
+  // setTimeRange only used if setQueryParams not provided by app
   const { timeRange, setTimeRange } = useTimeRange();
 
   const { queryParams, setQueryParams } = useQueryParams();
-  const startParam = queryParams.get('start');
-  const endParam = queryParams.get('end');
-  const defaultTimeRange = getDefaultTimeRange(dashboard.duration, startParam, endParam);
+  const defaultTimeRange = getDefaultTimeRange(dashboard.duration, queryParams);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
