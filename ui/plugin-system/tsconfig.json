@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": ["src"],
+  // Includes JSON just for test compilation/test files
+  "include": ["src", "src/**/*.json"],
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",

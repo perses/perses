@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, VariableDefinition } from '@perses-dev/core';
+import { JsonObject, ListVariableDefinition, VariableOption } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
 
 /**
@@ -25,8 +25,10 @@ export interface VariablePlugin<Options extends JsonObject = JsonObject> {
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type UseVariableOptionsHook<Options extends JsonObject> = (definition: VariableDefinition<Options>) => {
-  data: string[];
+export type UseVariableOptionsHook<Options extends JsonObject = JsonObject> = (
+  definition: ListVariableDefinition<Options>
+) => {
+  data: VariableOption[];
   loading: boolean;
   error?: Error;
 };
@@ -35,7 +37,7 @@ export type UseVariableOptionsHook<Options extends JsonObject> = (definition: Va
  * Use the variable options from a variable plugin at runtime.
  */
 export const useVariableOptions: VariablePlugin['useVariableOptions'] = (definition) => {
-  const plugin = usePlugin('Variable', definition);
+  const plugin = usePlugin('Variable', definition.kind);
   if (plugin === undefined) {
     // Provide default values while the plugin is being loaded
     return { data: [], loading: true };

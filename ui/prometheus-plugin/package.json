@@ -18,7 +18,8 @@
     "clean": "rimraf dist/",
     "build": "tsc --build",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "test": "echo 'no test to run' && exit 0",
+    "test": "TZ=UTC jest",
+    "test:watch": "TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
@@ -31,25 +32,11 @@
     "date-fns": "^2.28.0"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
+    "react": "^17.0.2 || ^18.0.0",
     "react-query": "^3.34.16"
   },
-  "perses": {
-    "kind": "Plugin",
-    "metadata": {
-      "name": "Prometheus"
-    },
-    "spec": {
-      "supported_kinds": {
-        "PrometheusLabelNames": "Variable",
-        "PrometheusLabelValues": "Variable",
-        "Interval": "Variable",
-        "PrometheusGraphQuery": "GraphQuery"
-      },
-      "plugin_module_path": "./dist/index.js"
-    }
-  },
   "files": [
-    "dist"
+    "dist",
+    "plugin.json"
   ]
 }

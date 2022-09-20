@@ -14,8 +14,8 @@
 import { JsonObject } from '@perses-dev/core';
 import { Fragment, createContext, useContext, useMemo, useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
-import { PluginType, ALL_PLUGIN_TYPES, PluginDefinition, PluginImplementation } from '../../model';
-import { usePluginRegistry } from '../PluginRegistry';
+import { PluginType, ALL_PLUGIN_TYPES, PluginImplementation } from '../../model';
+import { usePluginRegistry } from '../PluginRegistry/legacy';
 import { PluginLoader } from './PluginLoader';
 
 // Plugin dependencies by PluginType and a Set of the kinds
@@ -122,15 +122,15 @@ export function usePluginLoadingBoundary() {
  */
 export function usePlugin<Type extends PluginType>(
   pluginType: Type,
-  definition: PluginDefinition<Type, JsonObject>
+  kind: string
 ): PluginImplementation<Type, JsonObject> | undefined {
   // Tell the loading boundary about the dependency
   const { registerPluginDependency } = usePluginLoadingBoundary();
   useEffect(() => {
-    registerPluginDependency(pluginType, definition.kind);
-  }, [pluginType, definition.kind, registerPluginDependency]);
+    registerPluginDependency(pluginType, kind);
+  }, [pluginType, kind, registerPluginDependency]);
 
   // Get the plugin, which could be undefined if it hasn't loaded yet
   const { plugins } = usePluginRegistry();
-  return plugins[pluginType][definition.kind];
+  return plugins[pluginType][kind];
 }

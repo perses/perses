@@ -28,31 +28,23 @@
     "@perses-dev/core": "^0.7.1",
     "@perses-dev/plugin-system": "^0.7.1",
     "date-fns": "^2.28.0",
+    "dompurify": "^2.4.0",
     "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",
+    "marked": "^4.1.0",
     "mathjs": "^10.6.4"
   },
   "peerDependencies": {
     "@mui/material": "^5.5.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
-  },
-  "perses": {
-    "kind": "Plugin",
-    "metadata": {
-      "name": "Core Panels"
-    },
-    "spec": {
-      "supported_kinds": {
-        "LineChart": "Panel",
-        "GaugeChart": "Panel",
-        "StatChart": "Panel",
-        "EmptyChart": "Panel"
-      },
-      "plugin_module_path": "./dist/index.js"
-    }
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "files": [
-    "dist"
-  ]
+    "dist",
+    "plugin.json"
+  ],
+  "devDependencies": {
+    "@types/dompurify": "^2.3.4",
+    "@types/marked": "^4.0.7"
+  }
 }

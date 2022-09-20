@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,46 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginSetupFunction } from '@perses-dev/plugin-system';
-import { EmptyChart, EmptyChartKind } from './plugins/empty-chart/EmptyChart';
-import { GaugeChartPanel, GaugeChartKind } from './plugins/gauge-chart/GaugeChartPanel';
-import { LineChartPanel, LineChartKind } from './plugins/line-chart/LineChartPanel';
-import { StatChartKind, StatChartPanel } from './plugins/stat-chart/StatChartPanel';
+import { EmptyChart } from './plugins/empty-chart';
+import { GaugeChart } from './plugins/gauge-chart';
+import { LineChart } from './plugins/line-chart';
+import { Markdown } from './plugins/markdown';
+import { StatChart } from './plugins/stat-chart';
 
-export const setup: PluginSetupFunction = (registerPlugin) => {
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: LineChartKind,
-    validate: undefined,
-    plugin: {
-      PanelComponent: LineChartPanel,
-    },
-  });
-
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: GaugeChartKind,
-    validate: undefined,
-    plugin: {
-      PanelComponent: GaugeChartPanel,
-    },
-  });
-
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: StatChartKind,
-    validate: undefined,
-    plugin: {
-      PanelComponent: StatChartPanel,
-    },
-  });
-
-  registerPlugin({
-    pluginType: 'Panel',
-    kind: EmptyChartKind,
-    validate: undefined,
-    plugin: {
-      PanelComponent: EmptyChart,
-    },
-  });
-};
+// Just export the plugins under the same name as the kinds they handle from the plugin.json
+export { LineChart, GaugeChart, EmptyChart, StatChart, Markdown };

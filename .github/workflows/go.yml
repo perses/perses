@@ -22,7 +22,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18.x
+        go-version: 1.19.x
     - name: install cue
       run: go install cuelang.org/go/cmd/cue@v0.4.2
     - uses: actions/cache@v3.0.8
@@ -44,7 +44,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18.x
+        go-version: 1.19.x
     - uses: actions/cache@v3.0.8
       with:
         path: ~/go/pkg/mod
@@ -65,14 +65,14 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18.x
+        go-version: 1.19.x
     - name: generate files
       run: make generate
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v3.2.0
       with:
         # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-        version: v1.46.2
+        version: v1.49.0
         args: --timeout 5m
   cue-eval:
     name: cue
@@ -83,7 +83,7 @@ jobs:
     - name: install golang
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18.x
+        go-version: 1.19.x
     - name: install cue
       run: go install cuelang.org/go/cmd/cue@latest
     - name: eval cue schema

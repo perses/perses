@@ -18,7 +18,7 @@
     "clean": "rimraf dist/",
     "build": "tsc --build",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "test": "echo 'no test to run' && exit 0",
+    "test": "TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
@@ -29,8 +29,8 @@
     "use-immer": "^0.7.0"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0",
     "react-query": "^3.34.16"
   },
   "files": [

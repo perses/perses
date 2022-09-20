@@ -12,23 +12,23 @@
 // limitations under the License.
 
 // Eagerly load the metadata for the bundled plugins, but lazy-load the plugins
-import prometheusPackage from '@perses-dev/prometheus-plugin/package.json';
-import panelsPackage from '@perses-dev/panels-plugin/package.json';
-import { PluginRegistryProps, PluginResource, PluginModule } from '@perses-dev/plugin-system';
+import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
+import panelsResource from '@perses-dev/panels-plugin/plugin.json';
+import { PluginRegistryProps, PluginModuleResource } from '@perses-dev/plugin-system';
 import { useCallback } from 'react';
 
 interface BundledPlugin {
-  importPluginModule: () => Promise<PluginModule>;
+  importPluginModule: () => Promise<unknown>;
 }
 
 /**
  * Plugins that are bundled with the app via code-splitting.
  */
-const BUNDLED_PLUGINS = new Map<PluginResource, BundledPlugin>();
-BUNDLED_PLUGINS.set(prometheusPackage.perses as PluginResource, {
+const BUNDLED_PLUGINS = new Map<PluginModuleResource, BundledPlugin>();
+BUNDLED_PLUGINS.set(prometheusResource as PluginModuleResource, {
   importPluginModule: () => import('@perses-dev/prometheus-plugin'),
 });
-BUNDLED_PLUGINS.set(panelsPackage.perses as PluginResource, {
+BUNDLED_PLUGINS.set(panelsResource as PluginModuleResource, {
   importPluginModule: () => import('@perses-dev/panels-plugin'),
 });
 

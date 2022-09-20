@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,38 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ResourceMetadata, VariableDefinition, PanelDefinition } from '@perses-dev/core';
+import { JsonObject, ResourceMetadata, ListVariableDefinition, PanelDefinition } from '@perses-dev/core';
 import { GraphQueryDefinition, GraphQueryPlugin } from './graph-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
 
-export interface PluginResource {
-  kind: 'Plugin';
+/**
+ * Information about a module/package that contains plugins.
+ */
+export interface PluginModuleResource {
+  kind: 'PluginModule';
   metadata: ResourceMetadata;
   spec: PluginSpec;
 }
 
 export interface PluginSpec {
-  supported_kinds: Record<string, PluginType>;
+  plugins: PluginMetadata[];
 }
 
 /**
- * A JavaScript module with Perses plugins.
+ * Metadata about an individual plugin that's part of a PluginModule.
  */
-export interface PluginModule {
-  setup: PluginSetupFunction;
+export interface PluginMetadata {
+  pluginType: PluginType;
+  kind: string;
+  display: {
+    name: string;
+    description?: string;
+  };
 }
-
-/**
- * When a PluginModule is loaded, this function is called to allow the module
- * to register plugins with Perses.
- */
-export type PluginSetupFunction = (registerPlugin: RegisterPlugin) => void;
-
-/**
- * Callback function that registers a plugin with Perses.
- */
-export type RegisterPlugin = <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => void;
 
 /**
  * All supported plugin type values as an array for use at runtime.
@@ -57,7 +54,7 @@ export type PluginType = typeof ALL_PLUGIN_TYPES[number];
 // Map of plugin type -> config and implementation type
 type SupportedPlugins<Options extends JsonObject> = {
   Variable: {
-    Def: VariableDefinition<Options>;
+    Def: ListVariableDefinition<Options>;
     Impl: VariablePlugin<Options>;
   };
   Panel: {
@@ -71,12 +68,11 @@ type SupportedPlugins<Options extends JsonObject> = {
 };
 
 /**
- * The definition handled for a given plugin type.
+ * Union type of all available plugin implementations.
  */
-export type PluginDefinition<
-  Type extends PluginType,
-  Options extends JsonObject
-> = SupportedPlugins<Options>[Type]['Def'];
+export type Plugin<Options extends JsonObject> = {
+  [Type in PluginType]: PluginImplementation<Type, Options>;
+}[PluginType];
 
 /**
  * The implementation for a given plugin type.
@@ -85,21 +81,3 @@ export type PluginImplementation<
   Type extends PluginType,
   Options extends JsonObject
 > = SupportedPlugins<Options>[Type]['Impl'];
-
-/**
- * Configuration (including the plugin implementation) that's expected when
- * registering a plugin with Perses.
- */
-export type PluginRegistrationConfig<Options extends JsonObject> = {
-  [Type in PluginType]: PluginConfig<Type, Options>;
-}[PluginType];
-
-/**
- * Configuration expected for a particular plugin type.
- */
-export type PluginConfig<Type extends PluginType, Options extends JsonObject> = {
-  pluginType: Type;
-  kind: string;
-  validate?: (config: PluginDefinition<Type, JsonObject>) => string[];
-  plugin: PluginImplementation<Type, Options>;
-};

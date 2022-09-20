@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TemplateVariablesProvider';
+export * from './DashboardAppSlice';
+export * from './LayoutsSlice';
+export * from './TemplateVariableProvider';
 export * from './TimeRangeStateProvider';
 export * from './DashboardProvider';

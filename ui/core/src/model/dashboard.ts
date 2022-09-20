@@ -32,7 +32,7 @@ export interface DashboardResource {
 export interface DashboardSpec {
   datasource: DatasourceSelector;
   duration: DurationString;
-  variables: Record<string, VariableDefinition>;
+  variables: VariableDefinition[];
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
 }

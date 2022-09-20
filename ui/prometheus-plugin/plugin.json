@@ -1,0 +1,42 @@
+{
+  "kind": "PluginModule",
+  "metadata": {
+    "name": "Prometheus"
+  },
+  "spec": {
+    "plugins": [
+      {
+        "pluginType": "Variable",
+        "kind": "PrometheusLabelNames",
+        "display": {
+          "name": "Prometheus Label Names",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Variable",
+        "kind": "PrometheusLabelValues",
+        "display": {
+          "name": "Prometheus Label Values",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Variable",
+        "kind": "Interval",
+        "display": {
+          "name": "Time Duration",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "GraphQuery",
+        "kind": "PrometheusGraphQuery",
+        "display": {
+          "name": "Prometheus Range Query",
+          "description": ""
+        }
+      }
+    ]
+  }
+}

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyVariableDefinition, DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 
 const benchmarkDashboard: DashboardResource = {
   kind: 'Dashboard',
@@ -25,52 +25,40 @@ const benchmarkDashboard: DashboardResource = {
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
     duration: '6h',
-    variables: {
-      job: {
-        kind: 'PrometheusLabelValues',
+    variables: [
+      {
+        name: 'job',
+        kind: 'TextVariable',
         options: {
-          label_name: 'job',
-          match: ['node_uname_info'],
+          value: 'node',
         },
-        display: {
-          label: 'Job',
-        },
-        selection: {
-          default_value: 'node',
-        },
-      } as AnyVariableDefinition,
-      instance: {
-        kind: 'PrometheusLabelValues',
+      },
+      {
+        name: 'instance',
+        kind: 'TextVariable',
         options: {
-          label_name: 'instance',
-          match: ['node_uname_info{job="node"}'],
+          value: 'demo.do.prometheus.io:9100',
         },
-        display: {
-          label: 'Node',
-        },
-        selection: {
-          default_value: ['demo.do.prometheus.io:9100'],
-          all_value: '$__all',
-        },
-      } as AnyVariableDefinition,
-      interval: {
-        kind: 'Interval',
+      },
+      {
+        name: 'interval',
+        kind: 'TextVariable',
         options: {
-          values: ['1m', '5m', '10m', '1h'],
-          auto: {
-            step_count: 50,
-            min_interval: '1m',
-          },
+          value: '1m',
         },
-        display: {
-          label: 'Interval',
-        },
-        selection: {
-          default_value: '1h',
-        },
-      } as AnyVariableDefinition,
-    },
+      },
+    ],
     panels: {
+      markdownEx: {
+        kind: 'Markdown',
+        display: {
+          name: 'Dashboard Team Overview',
+          description: 'This is a markdown panel',
+        },
+        options: {
+          text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n[check the internet again](https://www.google.com)\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>Will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n",
+        },
+      },
       seriesTest: {
         kind: 'LineChart',
         display: { name: '1500+ Series', description: 'This is a line chart' },
@@ -434,16 +422,14 @@ const benchmarkDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/legendEx' },
-              // content: { $ref: '#/spec/panels/seriesTestAlt' },
-              // content: { $ref: '#/spec/panels/seriesTest' },
+              content: { $ref: '#/spec/panels/markdownEx' },
             },
             {
               x: 12,
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/basicEx' },
+              content: { $ref: '#/spec/panels/legendEx' },
             },
             {
               x: 0,

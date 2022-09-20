@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,24 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-import { UnitOptions } from '@perses-dev/components';
-import { GraphQueryDefinition, PanelProps } from '@perses-dev/plugin-system';
+import { PanelProps } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
-import { ThresholdOptions } from '../../model/thresholds';
 import GraphQueryRunner from './GraphQueryRunner';
+import { LineChartOptions } from './line-chart-model';
 import { LineChartContainer } from './LineChartContainer';
 
-export const LineChartKind = 'LineChart' as const;
-
 export type LineChartProps = PanelProps<LineChartOptions>;
-
-interface LineChartOptions extends JsonObject {
-  queries: GraphQueryDefinition[];
-  show_legend?: boolean;
-  unit?: UnitOptions;
-  thresholds?: ThresholdOptions;
-}
 
 export function LineChartPanel(props: LineChartProps) {
   const {

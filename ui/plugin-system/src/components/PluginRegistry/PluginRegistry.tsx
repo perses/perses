@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,76 +11,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext, useMemo, useCallback } from 'react';
-import { useQuery } from 'react-query';
-import { PluginModule, PluginResource, PluginType } from '../../model';
-import { LoadedPluginsByTypeAndKind, useRegistryState } from './registry-state';
+import { JsonObject, useEvent } from '@perses-dev/core';
+import { useRef, useCallback, useMemo } from 'react';
+import { PluginModuleResource, PluginType, Plugin, PluginImplementation } from '../../model';
+import { getTypeAndKindKey } from '../../utils/cache-keys';
+import { GetInstalledPlugins, usePluginIndexes } from './plugin-indexes';
+import { PluginRegistryContext } from './plugin-registry-model';
 
 export interface PluginRegistryProps {
   children?: React.ReactNode;
-  getInstalledPlugins: () => Promise<PluginResource[]>;
-  importPluginModule: (resource: PluginResource) => Promise<PluginModule>;
+  getInstalledPlugins: GetInstalledPlugins;
+  importPluginModule: (resource: PluginModuleResource) => Promise<unknown>;
 }
 
 /**
- * PluginRegistryContext provider that keeps track of all available plugins and
- * their implementations once they've been loaded.
+ * PluginRegistryContext provider that keeps track of all available plugins and provides an API for getting them or
+ * querying the metadata about them.
  */
 export function PluginRegistry(props: PluginRegistryProps) {
-  const { children, getInstalledPlugins, importPluginModule } = props;
+  const { getInstalledPlugins, importPluginModule, children } = props;
 
-  const installedPlugins = useQuery('installed-plugins', getInstalledPlugins);
-  const { loadablePlugins, plugins, register } = useRegistryState(installedPlugins.data);
+  const getPluginIndexes = usePluginIndexes(getInstalledPlugins);
 
-  const loadPlugin = useCallback(
-    async (pluginType: PluginType, kind: string) => {
-      // Is it already loaded?
-      const plugin = plugins[pluginType][kind];
-      if (plugin !== undefined) return;
+  // De-dupe calls to import plugin modules
+  const importCache = useRef(new Map<PluginModuleResource, Promise<unknown>>());
 
-      // Is it a valid plugin we know about?
-      const resource = loadablePlugins[pluginType][kind];
+  // Do useEvent here since this accesses the importPluginModule prop and we want a stable reference to it for the
+  // callback below
+  const loadPluginModule = useEvent((resource: PluginModuleResource) => {
+    let request = importCache.current.get(resource);
+    if (request === undefined) {
+      request = importPluginModule(resource);
+      importCache.current.set(resource, request);
+
+      // Remove failed requests from the cache so they can potentially be retried
+      request.catch(() => importCache.current.delete(resource));
+    }
+    return request;
+  });
+
+  const getPlugin = useCallback(
+    async <T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T, JsonObject>> => {
+      // Get the indexes of the installed plugins
+      const pluginIndexes = await getPluginIndexes();
+
+      // Figure out what module the plugin is in by looking in the index
+      const typeAndKindKey = getTypeAndKindKey(pluginType, kind);
+      const resource = pluginIndexes.pluginResourcesByTypeAndKind.get(typeAndKindKey);
       if (resource === undefined) {
-        throw new Error(`No ${pluginType} plugin is available for kind ${kind}`);
+        throw new Error(`A ${pluginType} plugin for kind '${kind}' is not installed`);
       }
 
-      // Load and register the resource
-      const pluginModule = await importPluginModule(resource);
-      register(pluginModule);
+      // Treat the plugin module as a bunch of named exports that have plugins
+      const pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<JsonObject>>;
+
+      // We currently assume that plugin modules will have named exports that match the kinds they handle
+      const plugin = pluginModule[kind];
+      if (plugin === undefined) {
+        throw new Error(
+          `The ${pluginType} plugin for kind '${kind}' is missing from the ${resource.metadata.name} plugin module`
+        );
+      }
+
+      return plugin;
     },
-    [plugins, loadablePlugins, importPluginModule, register]
+    [getPluginIndexes, loadPluginModule]
   );
 
-  const registry: PluginRegistryContextType = useMemo(
-    () => ({ plugins, loadPlugin: installedPlugins.isLoading ? undefined : loadPlugin }),
-    [installedPlugins.isLoading, plugins, loadPlugin]
+  const listPluginMetadata = useCallback(
+    async (pluginType: PluginType) => {
+      const pluginIndexes = await getPluginIndexes();
+      return pluginIndexes.pluginMetadataByType.get(pluginType) ?? [];
+    },
+    [getPluginIndexes]
   );
 
-  return <PluginRegistryContext.Provider value={registry}>{children}</PluginRegistryContext.Provider>;
-}
-
-const PluginRegistryContext = createContext<PluginRegistryContextType | undefined>(undefined);
-
-export interface PluginRegistryContextType {
-  /**
-   * Plugins that have already been loaded and are available for use.
-   */
-  plugins: LoadedPluginsByTypeAndKind;
-
-  /**
-   * Asks the plugin registry to load the specified plugin. This will be undefined until the list of available plugins
-   * has finished loading.
-   */
-  loadPlugin?: (pluginType: PluginType, kind: string) => Promise<void>;
-}
-
-/**
- * Gets the PluginRegistryContext, throwing if the provider is missing.
- */
-export function usePluginRegistry(): PluginRegistryContextType {
-  const ctx = useContext(PluginRegistryContext);
-  if (ctx === undefined) {
-    throw new Error('No PluginRegistry context found. Did you forget a Provider?');
-  }
-  return ctx;
+  // Create the registry's context value and render
+  const context = useMemo(() => ({ getPlugin, listPluginMetadata }), [getPlugin, listPluginMetadata]);
+  return <PluginRegistryContext.Provider value={context}>{children}</PluginRegistryContext.Provider>;
 }

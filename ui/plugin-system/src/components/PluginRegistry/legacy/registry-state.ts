@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,19 +15,19 @@ import { useCallback, useMemo, useRef } from 'react';
 import { useImmer } from 'use-immer';
 import { JsonObject } from '@perses-dev/core';
 import {
-  PluginRegistrationConfig,
-  PluginModule,
-  PluginResource,
-  RegisterPlugin,
+  Plugin,
+  PluginModuleResource,
   PluginType,
   ALL_PLUGIN_TYPES,
   PluginImplementation,
-} from '../../model';
-import { createGraphQueryPlugin, createPanelPlugin, createVariablePlugin } from './create-plugin';
+  VariablePlugin,
+  PanelPlugin,
+  GraphQueryPlugin,
+} from '../../../model';
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
 export type PluginResourcesByTypeAndKind = {
-  [K in PluginType]: Record<string, PluginResource>;
+  [K in PluginType]: Record<string, PluginModuleResource>;
 };
 
 // Once a plugin is registered, it's stored by plugin type and kind
@@ -39,7 +39,7 @@ export type LoadedPluginsByTypeAndKind = {
  * Hook for setting up plugin registry state. Returns the state, plus a function
  * for registering plugins with that state.
  */
-export function useRegistryState(installedPlugins?: PluginResource[]) {
+export function useRegistryState(installedPlugins?: PluginModuleResource[]) {
   // Go through all installed plugins and bundled plugins and build an index of
   // those resources by type and kind
   const loadablePlugins = useMemo(() => {
@@ -51,11 +51,9 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
     // If no plugins installed or waiting on that data, nothing else to do
     if (installedPlugins === undefined) return loadableProps;
 
-    const addToLoadable = (resource: PluginResource) => {
-      const supportedKinds = resource.spec.supported_kinds;
-      for (const kind in supportedKinds) {
-        const pluginType = supportedKinds[kind];
-        if (pluginType === undefined) continue;
+    for (const resource of installedPlugins) {
+      for (const plugin of resource.spec.plugins) {
+        const { pluginType, kind } = plugin;
 
         const map = loadableProps[pluginType];
         if (map[kind] !== undefined) {
@@ -64,10 +62,6 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
         }
         map[kind] = resource;
       }
-    };
-
-    for (const resource of installedPlugins) {
-      addToLoadable(resource);
     }
 
     return loadableProps;
@@ -81,47 +75,53 @@ export function useRegistryState(installedPlugins?: PluginResource[]) {
     return loadedPlugins;
   });
 
-  // Create the register callback to pass to the module's setup function
-  const registerPlugin: RegisterPlugin = useCallback(
-    <Options extends JsonObject>(config: PluginRegistrationConfig<Options>) => {
-      switch (config.pluginType) {
-        case 'Variable':
-          setPlugins((draft) => {
-            draft.Variable[config.kind] = createVariablePlugin(config);
-          });
-          return;
-        case 'Panel':
-          setPlugins((draft) => {
-            draft.Panel[config.kind] = createPanelPlugin(config);
-          });
-          return;
-        case 'GraphQuery':
-          setPlugins((draft) => {
-            draft.GraphQuery[config.kind] = createGraphQueryPlugin(config);
-          });
-          return;
-        default:
-          const exhaustive: never = config;
-          throw new Error(`Unhandled plugin config: ${exhaustive}`);
-      }
-    },
-    [setPlugins]
-  );
-
-  const registeredModules = useRef(new Set<PluginModule>());
+  const registeredModules = useRef(new Set<unknown>());
   const register = useCallback(
-    (pluginModule: PluginModule): void => {
+    (resource: PluginModuleResource, pluginModule: unknown): void => {
       // De-dupe register calls in case multiple plugin loading boundaries
       // are waiting for the same module in parallel
       if (registeredModules.current.has(pluginModule)) {
         return;
       }
 
-      // Call the setup function and remember it's been registered
-      pluginModule.setup(registerPlugin);
+      // Treat plugin module as JS module with named exports that are each a Plugin
+      const plugins = pluginModule as Record<string, Plugin<JsonObject>>;
+
+      setPlugins((draft) => {
+        // Look for all the plugins specified in the metadata
+        for (const pluginMetadata of resource.spec.plugins) {
+          // Assume that plugins will be exported under the same named export as the kind they handle
+          // TODO: Do we need to allow for different named exports and an option in the metadata to tell us the name?
+          const { pluginType, kind } = pluginMetadata;
+          const plugin = plugins[kind];
+          if (plugin === undefined) {
+            // TODO: How to handle missing plugins?
+            console.warn(`Could not find ${pluginType} plugin for kind '${kind}' in ${resource.metadata.name}`);
+            continue;
+          }
+
+          // Add to registry state
+          switch (pluginType) {
+            case 'Variable':
+              draft.Variable[kind] = plugin as unknown as VariablePlugin;
+              break;
+            case 'Panel':
+              draft.Panel[kind] = plugin as unknown as PanelPlugin;
+              break;
+            case 'GraphQuery':
+              draft.GraphQuery[kind] = plugin as unknown as GraphQueryPlugin;
+              break;
+            default:
+              const exhaustive: never = pluginType;
+              throw new Error(`Unhandled plugin config: ${exhaustive}`);
+          }
+        }
+      });
+
+      // Remember this module has been registered
       registeredModules.current.add(pluginModule);
     },
-    [registerPlugin]
+    [setPlugins]
   );
 
   return { loadablePlugins, plugins, register };

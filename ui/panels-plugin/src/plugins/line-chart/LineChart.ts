@@ -11,4 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './VariableList';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialLineChartOptions, LineChartOptions } from './line-chart-model';
+import { LineChartOptionsEditor } from './LineChartOptionsEditor';
+import { LineChartPanel } from './LineChartPanel';
+
+/**
+ * The core LineChart panel plugin for Perses.
+ */
+export const LineChart: PanelPlugin<LineChartOptions> = {
+  PanelComponent: LineChartPanel,
+  OptionsEditorComponent: LineChartOptionsEditor,
+  createInitialOptions: createInitialLineChartOptions,
+};

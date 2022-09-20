@@ -13,7 +13,6 @@
 
 export * from './Dashboard';
 export * from './GridLayout';
-export * from './Panel/Panel';
+export * from './Panel';
 export * from './TimeRangeControls';
-export * from './VariableAutocomplete';
-export * from './VariableList';
+export * from './Variables';
