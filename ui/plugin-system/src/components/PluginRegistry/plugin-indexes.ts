@@ -13,7 +13,7 @@
 
 import { useEvent } from '@perses-dev/core';
 import { useCallback, useRef } from 'react';
-import { PluginMetadata, PluginModuleResource, PluginType } from '../../model';
+import { PluginMetadata, PluginModuleResource } from '../../model';
 import { getTypeAndKindKey } from '../../utils/cache-keys';
 
 export type GetInstalledPlugins = () => Promise<PluginModuleResource[]>;
