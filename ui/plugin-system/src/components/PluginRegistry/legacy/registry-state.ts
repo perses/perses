@@ -23,7 +23,7 @@ import {
   VariablePlugin,
   PanelPlugin,
   GraphQueryPlugin,
-} from '../../model';
+} from '../../../model';
 
 // Given a PluginType and Kind, return the associated Plugin that can be loaded
 export type PluginResourcesByTypeAndKind = {
