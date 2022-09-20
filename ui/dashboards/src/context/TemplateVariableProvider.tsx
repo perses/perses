@@ -21,7 +21,7 @@ import {
   VariableState,
   VariableName,
   VariableValue,
-  ListVariableDefinition,
+  VariableOption,
   VariableDefinition,
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/core';
@@ -30,7 +30,8 @@ type TemplateVariableStore = {
   variableDefinitions: VariableDefinition[];
   variableState: VariableStateMap;
   setVariableValue: (variableName: VariableName, value: VariableValue) => void;
-  loadTemplateVariable: (name: VariableName) => Promise<void>;
+  setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
+  setVariableLoading: (name: VariableName, loading: boolean) => void;
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -84,7 +85,8 @@ export function useTemplateVariableActions() {
   return useStore(store, (s) => {
     return {
       setVariableValue: s.setVariableValue,
-      loadTemplateVariable: s.loadTemplateVariable,
+      setVariableLoading: s.setVariableLoading,
+      setVariableOptions: s.setVariableOptions,
     };
   });
 }
@@ -111,39 +113,26 @@ interface TemplateVariableSrvArgs {
 function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: TemplateVariableSrvArgs) {
   const store = createStore<TemplateVariableStore>()(
     devtools(
-      immer((set, get) => ({
+      immer((set) => ({
         variableState: hydrateTemplateVariableStates(initialVariableDefinitions),
         variableDefinitions: initialVariableDefinitions,
-
-        // Actions
-        loadTemplateVariable: async (name: VariableName) => {
-          const def = get().variableDefinitions.find((v) => v.name === name) as ListVariableDefinition;
-          if (!def) {
-            // Can't find the variable definition
-            return;
-          }
-
+        setVariableOptions(name, options) {
           set((state) => {
             const varState = state.variableState[name];
-            if (varState) {
-              varState.loading = true;
+            if (!varState) {
+              return;
             }
+            varState.options = options;
           });
-
-          // Replace with loader
-          const { data: values } = await loadTemplateVariables();
-
-          if (def.options.allowAllValue) {
-            values.unshift(getAllOption());
-          }
+        },
+        setVariableLoading(name, loading) {
           set((state) => {
             const varState = state.variableState[name];
-            if (varState) {
-              varState.options = values;
-              varState.loading = false;
+            if (!varState) {
+              return;
             }
+            varState.loading = loading;
           });
-          return;
         },
 
         setVariableValue: (name, value) =>
@@ -157,7 +146,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: Tem
             // Make sure there is only one all value
             if (Array.isArray(val) && val.includes(ALL_VALUE)) {
               if (val.at(-1) === ALL_VALUE) {
-                val = [ALL_VALUE];
+                val = ALL_VALUE;
               } else {
                 val = val.filter((v) => v !== ALL_VALUE);
               }
@@ -188,48 +177,6 @@ export function TemplateVariableProvider({
 }
 
 /** Helpers */
-async function loadTemplateVariables() {
-  // @TODO: Replace with plugin call
-  // simluate sleep for 2 seconds
-  // random time between 1 and 3 seconds
-
-  const sleepTime = Math.floor(Math.random() * 10000) + 1000;
-  await new Promise((resolve) => setTimeout(resolve, sleepTime));
-  return {
-    data: [
-      'a',
-      'b',
-      'c',
-      'd',
-      'e',
-      'f',
-      'g',
-      'h',
-      'i',
-      'j',
-      'k',
-      'l',
-      'm',
-      'n',
-      'o',
-      'p',
-      'q',
-      'r',
-      's',
-      't',
-      'u',
-      'v',
-      'w',
-      'x',
-      'y',
-      'z',
-    ].map((v) => ({ label: v, value: v })),
-  };
-}
-
-function getAllOption() {
-  return { label: 'All', value: ALL_VALUE };
-}
 
 function hydrateTemplateVariableState(definition: VariableDefinition) {
   const v = definition;
@@ -243,9 +190,6 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
       break;
     case 'ListVariable':
       varState.options = [];
-      if (v.options.allowAllValue) {
-        varState.options.unshift({ label: 'All', value: ALL_VALUE });
-      }
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {

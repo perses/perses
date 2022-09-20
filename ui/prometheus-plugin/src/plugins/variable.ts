@@ -12,14 +12,24 @@
 // limitations under the License.
 
 import { VariableOption } from '@perses-dev/core';
-import { VariablePlugin } from '../../../../model';
+import { VariablePlugin } from '@perses-dev/plugin-system';
 
-const data: VariableOption[] = [
-  { label: 'Grover', value: 'Grover' },
-  { label: 'Snuffleupagus', value: 'Snuffleupagus' },
-];
+type StaticListOption = string | VariableOption;
 
-// Dummy plugin to test loading
-export const ErnieVariable: VariablePlugin = {
-  getVariableOptions: async () => ({ data }),
+type StaticListVariableOptions = {
+  values: StaticListOption[];
+};
+
+export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
+  getVariableOptions: async (definition) => {
+    const values = definition.options.optionsLoader.options.values?.map((v) => {
+      if (typeof v === 'string') {
+        return { label: v, value: v };
+      }
+      return v;
+    });
+    return {
+      data: values,
+    };
+  },
 };

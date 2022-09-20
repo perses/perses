@@ -18,29 +18,30 @@ import { usePlugin } from '../components/PluginLoadingBoundary';
  * Plugin for handling custom VariableDefinitions.
  */
 export interface VariablePlugin<Options extends JsonObject = JsonObject> {
-  useVariableOptions: UseVariableOptionsHook<Options>;
+  getVariableOptions: GetVariableOptions<Options>;
 }
 
 /**
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type UseVariableOptionsHook<Options extends JsonObject = JsonObject> = (
+export type GetVariableOptions<Options extends JsonObject = JsonObject> = (
   definition: ListVariableDefinition<Options>
-) => {
-  data: VariableOption[];
-  loading: boolean;
-  error?: Error;
-};
+) => Promise<{ data: VariableOption[] }>;
 
 /**
  * Use the variable options from a variable plugin at runtime.
  */
-export const useVariableOptions: VariablePlugin['useVariableOptions'] = (definition) => {
-  const plugin = usePlugin('Variable', definition.kind);
+export const useVariablePlugin = (definition: ListVariableDefinition) => {
+  const plugin = usePlugin('Variable', definition.options.optionsLoader.kind);
   if (plugin === undefined) {
     // Provide default values while the plugin is being loaded
-    return { data: [], loading: true };
+    return;
   }
-  return plugin.useVariableOptions(definition);
+
+  return {
+    getVariableOptions: () => {
+      return plugin.getVariableOptions(definition);
+    },
+  };
 };

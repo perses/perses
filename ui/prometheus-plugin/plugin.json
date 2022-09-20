@@ -7,26 +7,10 @@
     "plugins": [
       {
         "pluginType": "Variable",
-        "kind": "PrometheusLabelNames",
+        "kind": "StaticListVariable",
         "display": {
-          "name": "Prometheus Label Names",
-          "description": ""
-        }
-      },
-      {
-        "pluginType": "Variable",
-        "kind": "PrometheusLabelValues",
-        "display": {
-          "name": "Prometheus Label Values",
-          "description": ""
-        }
-      },
-      {
-        "pluginType": "Variable",
-        "kind": "Interval",
-        "display": {
-          "name": "Time Duration",
-          "description": ""
+          "name": "Static List Variable",
+          "description": "Static list variables allow you to define an array of values"
         }
       },
       {

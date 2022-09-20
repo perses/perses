@@ -35,16 +35,26 @@ const demoDashboard: DashboardResource = {
       },
       {
         name: 'instance',
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         options: {
-          value: 'demo.do.prometheus.io:9100',
+          optionsLoader: {
+            kind: 'StaticListVariable',
+            options: {
+              values: ['demo.do.prometheus.io:3000', 'demo.do.prometheus.io:9100'],
+            },
+          },
         },
       },
       {
         name: 'interval',
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         options: {
-          value: '1m',
+          optionsLoader: {
+            kind: 'StaticListVariable',
+            options: {
+              values: ['1m', '5m'],
+            },
+          },
         },
       },
     ],
