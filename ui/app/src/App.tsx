@@ -30,8 +30,7 @@ const ECHARTS_THEME_OVERRIDES = {};
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
-  const [searchParams] = useSearchParams();
-  const setSearchParams = undefined;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // TODO: remove temporary location.key reload hack when routing setup properly
   const location = useLocation();
