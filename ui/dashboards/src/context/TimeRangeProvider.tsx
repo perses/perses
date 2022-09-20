@@ -58,8 +58,8 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
       // allows app to specify whether query params should be source of truth for active time range
       if (setQueryString) {
-        const startUnixMs = getUnixTime(timeRange.start) * 1000;
-        const endUnixMs = getUnixTime(timeRange.end) * 1000;
+        const startUnixMs = getUnixTime(value.start) * 1000;
+        const endUnixMs = getUnixTime(value.end) * 1000;
         queryString.set('start', startUnixMs.toString());
         queryString.set('end', endUnixMs.toString());
         setQueryString(queryString);
@@ -67,7 +67,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
         setActiveTimeRange(value);
       }
     },
-    [queryString, setQueryString, timeRange, onTimeRangeChange]
+    [queryString, setQueryString, onTimeRangeChange]
   );
 
   const ctx = useMemo(
