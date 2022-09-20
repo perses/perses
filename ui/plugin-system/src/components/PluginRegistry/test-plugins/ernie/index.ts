@@ -11,9 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { VariableOption } from '@perses-dev/core';
 import { VariablePlugin } from '../../../../model';
 
-const data: string[] = ['Grover', 'Snuffleupagus'];
+const data: VariableOption[] = [
+  { label: 'Grover', value: 'Grover' },
+  { label: 'Snuffleupagus', value: 'Snuffleupagus' },
+];
 
 // Dummy plugin to test loading
 export const ErnieVariable: VariablePlugin = {
