@@ -31,9 +31,12 @@ export function Dashboard(props: DashboardProps) {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {spec.layouts.map((layout, idx) => (
           <GridLayout
-            key={idx}
+            key={`${JSON.stringify(spec.layouts)} ${idx}`} // reset grid layout states when spec.layout changes
+            groupIndex={idx}
             definition={layout}
-            renderGridItemContent={(definition) => <GridItemContent content={definition.content} spec={spec} />}
+            renderGridItemContent={(definition, groupIndex) => (
+              <GridItemContent content={definition.content} spec={spec} groupIndex={groupIndex} />
+            )}
           />
         ))}
       </ErrorBoundary>

@@ -16,6 +16,7 @@ import {
   PluginImplementation,
   PluginType,
   Plugin,
+  PanelPlugin,
 } from '@perses-dev/plugin-system';
 
 /**
@@ -68,3 +69,13 @@ export function mockPluginRegistryProps() {
     addMockPlugin,
   };
 }
+
+export const FAKE_PANEL_PLUGIN: PanelPlugin<JsonObject> = {
+  PanelComponent: () => {
+    return <div role="figure">FakePanel chart</div>;
+  },
+  OptionsEditorComponent: () => {
+    return <div>Edit options here</div>;
+  },
+  createInitialOptions: () => ({}),
+};

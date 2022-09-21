@@ -21,8 +21,9 @@ import { GridTitle } from './GridTitle';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
+  groupIndex: number;
   definition: GridDefinition;
-  renderGridItemContent: (definition: GridItemDefinition) => React.ReactNode;
+  renderGridItemContent: (definition: GridItemDefinition, groupIndex: number) => React.ReactNode;
 }
 
 /**
@@ -30,12 +31,13 @@ export interface GridLayoutProps extends BoxProps {
  */
 export function GridLayout(props: GridLayoutProps) {
   const {
+    groupIndex,
     definition: { spec },
     renderGridItemContent,
     ...others
   } = props;
 
-  const [isOpen, setIsOpen] = useState(spec.display?.collapse?.open ?? true);
+  const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
 
   const { isEditMode } = useEditMode();
 
@@ -46,7 +48,7 @@ export function GridLayout(props: GridLayoutProps) {
 
     gridItems.push(
       <div key={idx} data-grid={{ x, y, w, h }}>
-        {renderGridItemContent(item)}
+        {renderGridItemContent(item, groupIndex)}
       </div>
     );
   });
@@ -57,6 +59,7 @@ export function GridLayout(props: GridLayoutProps) {
       <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
         {spec.display !== undefined && (
           <GridTitle
+            groupIndex={groupIndex}
             title={spec.display.title}
             collapse={
               spec.display.collapse === undefined

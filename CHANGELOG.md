@@ -1,3 +1,18 @@
+## 0.7.1 / 2022-09-09
+
+- [ENHANCEMENT] Removed react-grid-layout and react-resizable css imports #524
+
+## 0.7.0 / 2022-09-09
+
+- [FEATURE] Edit mode and drag & drop using react-grid-layout #510
+- [FEATURE] Add new panel and panel group #517
+- [FEATURE] Time range selection: relative time dropdown, absolute time calendar #509
+- [BUGFIX] Bytes formatted with 'undefined' as unit #513
+- [ENHANCEMENT] Update CONTRIBUTING and ui/README #512 #519
+- [ENHANCEMENT] Update Node and NPM to latest #514
+- [ENHANCEMENT] Add missing makefile target 'cross-release' #515
+- [ENHANCEMENT] Move footer component into App #518
+
 ## 0.6.0 / 2022-08-15
 
 - [FEATURE] Pin and enter line chart tooltip on click #505

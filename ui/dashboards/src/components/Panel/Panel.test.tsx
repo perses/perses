@@ -11,23 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin, PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import 'intersection-observer';
 import { screen } from '@testing-library/react';
-import { renderWithContext, mockPluginRegistryProps } from '../../test';
+import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import { DashboardProvider, DashboardStoreProps } from '../../context';
+import { DashboardStoreProps } from '../../context';
 import { Panel, PanelProps } from './Panel';
-
-const FAKE_PANEL_PLUGIN: PanelPlugin = {
-  PanelComponent: () => {
-    return <div role="figure">FakePanel chart</div>;
-  },
-  OptionsEditorComponent: () => {
-    return <div>Edit options here</div>;
-  },
-  createInitialOptions: () => ({}),
-};
 
 describe('Panel', () => {
   let props: PanelProps;
@@ -48,6 +38,8 @@ describe('Panel', () => {
           },
         },
       },
+      groupIndex: 0,
+      panelKey: 'panelRef',
     };
 
     initialState = {
@@ -57,21 +49,20 @@ describe('Panel', () => {
   });
 
   // Helper to render the panel with some context set
-  const renderPanel = (initialState: DashboardStoreProps) => {
+  const renderPanel = (initialState?: DashboardStoreProps) => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
     addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
 
     renderWithContext(
-      <DashboardProvider initialState={initialState}>
-        <PluginRegistry {...pluginRegistryProps}>
-          <Panel {...props} />
-        </PluginRegistry>
-      </DashboardProvider>
+      <PluginRegistry {...pluginRegistryProps}>
+        <Panel {...props} />
+      </PluginRegistry>,
+      initialState
     );
   };
 
   it('should render name and info icon', async () => {
-    renderPanel(initialState);
+    renderPanel();
     await screen.findByText('Fake Panel');
     screen.queryByLabelText('info-tooltip');
   });
