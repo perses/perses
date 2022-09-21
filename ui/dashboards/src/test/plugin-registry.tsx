@@ -70,7 +70,7 @@ export function mockPluginRegistryProps() {
   };
 }
 
-export const FAKE_PANEL_PLUGIN: PanelPlugin<JsonObject> = {
+export const FAKE_PANEL_PLUGIN: PanelPlugin = {
   PanelComponent: () => {
     return <div role="figure">FakePanel chart</div>;
   },

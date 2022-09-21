@@ -45,8 +45,8 @@ const PanelDrawer = () => {
   let defaultDescription = '';
   if (panelDrawer?.panelKey) {
     // editing an existing panel
-    defaultPanelName = panels[panelDrawer.panelKey]?.display.name ?? '';
-    defaultDescription = panels[panelDrawer.panelKey]?.display.description ?? '';
+    defaultPanelName = panels[panelDrawer.panelKey]?.spec.display.name ?? '';
+    defaultDescription = panels[panelDrawer.panelKey]?.spec.display.description ?? '';
   }
   const [group, setGroup] = useState(panelDrawer?.groupIndex);
   const [panelName, setPanelName] = useState(defaultPanelName);
@@ -61,8 +61,8 @@ const PanelDrawer = () => {
     setGroup(panelDrawer?.groupIndex);
     if (panelDrawer?.panelKey) {
       // display panel name and description in text fields when editing an existing panel
-      setPanelName(panels[panelDrawer.panelKey]?.display.name ?? '');
-      setPanelDescription(panels[panelDrawer.panelKey]?.display.description ?? '');
+      setPanelName(panels[panelDrawer.panelKey]?.spec.display.name ?? '');
+      setPanelDescription(panels[panelDrawer.panelKey]?.spec.display.description ?? '');
     } else {
       setPanelName('');
       setPanelDescription('');
@@ -133,10 +133,15 @@ const PanelDrawer = () => {
       return;
     }
     updatePanel(panelDrawer.panelKey, {
-      ...panels[panelDrawer.panelKey],
-      kind,
-      options,
-      display: { name: panelName ?? '', description: panelDescription },
+      kind: 'Panel',
+      spec: {
+        ...panels[panelDrawer.panelKey]?.spec,
+        display: { name: panelName ?? '', description: panelDescription },
+        panelPlugin: {
+          kind,
+          spec: options,
+        },
+      },
     });
     // TO DO: need to move panel if panel group changes
   };
