@@ -49,13 +49,13 @@ function ListVariable({ name }: TemplateVariableProps) {
     }
     setVariableLoading(name, true);
     try {
-      const { data } = await variablePlugin.getVariableOptions();
+      const { data } = await variablePlugin.getVariableOptions(definition);
       setVariableOptions(name, data);
     } catch (e) {
       console.error('Failed to load template variable options', e);
     }
     setVariableLoading(name, false);
-  }, [definition]);
+  }, [variablePlugin, definition, name, setVariableLoading, setVariableOptions]);
 
   useEffect(() => {
     loadOptions();

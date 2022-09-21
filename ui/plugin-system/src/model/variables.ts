@@ -35,15 +35,5 @@ export type GetVariableOptions<Spec> = (
  * Use the variable options from a variable plugin at runtime.
  */
 export const useVariablePlugin = (definition: ListVariableDefinition) => {
-  const plugin = usePlugin('Variable', definition.spec.plugin.kind);
-  if (plugin === undefined) {
-    // Provide default values while the plugin is being loaded
-    return;
-  }
-
-  return {
-    getVariableOptions: () => {
-      return plugin.getVariableOptions(definition);
-    },
-  };
+  return usePlugin('Variable', definition.spec.plugin.kind);
 };
