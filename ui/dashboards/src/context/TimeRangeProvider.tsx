@@ -23,7 +23,7 @@ export interface TimeRangeProviderProps {
 }
 
 /**
- * Provider implementation that supplies the TimeRangeState at runtime.
+ * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
@@ -58,6 +58,8 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
       // allows app to specify whether query params should be source of truth for active time range
       if (setQueryString) {
+        // Absolute URL example) ?start=1663707045000&end=1663713330000
+        // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
         const startUnixMs = getUnixTime(value.start) * 1000;
         const endUnixMs = getUnixTime(value.end) * 1000;
         queryString.set('start', startUnixMs.toString());
