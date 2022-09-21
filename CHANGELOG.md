@@ -1,3 +1,27 @@
+# Changelog
+
+## 0.8.0 / 2022-09-21
+
+- [FEATURE] ListVariable and TextVariable have been introduced #535
+- [FEATURE] Add a panel that supports markdown (no editing capabilities yet) #532, #541
+- [FEATURE] time range selection shareable URLs #530
+- [FEATURE] zoom event on a line chart panel updates the dashboard active time range #530
+- [ENHANCEMENT] QueryStringProvider allows apps to pass their own utils to update the URL #530
+- [ENHANCEMENT] DashboardProvider improvements #540
+- [ENHANCEMENT] Governance process changes #431 #522 #523 
+- [ENHANCEMENT] Use React 18 for development, allow React 17 backward compatability #533
+- [ENHANCEMENT] upgrade go to 1.19 #543
+- [ENHANCEMENT] build process improvements #489, #490, #491 #515
+- [ENHANCEMENT] add datasource documentation #404
+- [BUGFIX] fix no kebab case error #538
+- [BREAKINGCHANGE] Remove unused validate prop from plugin definitions #526
+- [BREAKINGCHANGE] usePlugin needs kind not definition #527
+- [BREAKINGCHANGE] Add metadata for individual plugins to plugin module metadata #531
+- [BREAKINGCHANGE] Panel plugins now need additional props to support visual editing #528
+- [BREAKINGCHANGE] Simplify plugin module export format #534
+- [BREAKINGCHANGE] Template variable definitions have changed completely #535
+- [BREAKINGCHANGE] Plugin spec for template variables has changed and only supports ListVariables #535
+
 ## 0.7.1 / 2022-09-09
 
 - [ENHANCEMENT] Removed react-grid-layout and react-resizable css imports #524
