@@ -27,7 +27,7 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
     definition: {
       spec: {
-        panelPlugin: {
+        plugin: {
           spec: { text },
         },
       },

@@ -36,7 +36,7 @@ export function createInitialStatChartOptions(): StatChartOptions {
     query: {
       kind: 'GraphQuery',
       spec: {
-        graphQueryPlugin: {
+        plugin: {
           kind: '',
           spec: {},
         },

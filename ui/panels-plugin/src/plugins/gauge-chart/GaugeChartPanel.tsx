@@ -27,7 +27,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const {
     definition: {
       spec: {
-        panelPlugin: { spec: pluginSpec },
+        plugin: { spec: pluginSpec },
       },
     },
     contentDimensions,

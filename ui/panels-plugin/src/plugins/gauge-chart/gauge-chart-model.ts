@@ -36,7 +36,7 @@ export function createInitialGaugeChartOptions(): GaugeChartOptions {
     query: {
       kind: 'GraphQuery',
       spec: {
-        graphQueryPlugin: {
+        plugin: {
           kind: '',
           spec: {},
         },

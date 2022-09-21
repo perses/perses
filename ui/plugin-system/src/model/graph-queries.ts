@@ -51,7 +51,7 @@ export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
  * Use a Graph Query's results from a graph query plugin at runtime.
  */
 export const useGraphQuery: GraphQueryPlugin['useGraphQuery'] = (definition) => {
-  const plugin = usePlugin('GraphQuery', definition.spec.graphQueryPlugin.kind);
+  const plugin = usePlugin('GraphQuery', definition.spec.plugin.kind);
   if (plugin === undefined) {
     // Provide default values while the plugin is being loaded
     return { loading: true };

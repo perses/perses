@@ -18,5 +18,5 @@ export interface GraphQueryDefinition<PluginSpec = unknown> extends Definition<G
 }
 
 export interface GraphQuerySpec<PluginSpec> {
-  graphQueryPlugin: Definition<PluginSpec>;
+  plugin: Definition<PluginSpec>;
 }

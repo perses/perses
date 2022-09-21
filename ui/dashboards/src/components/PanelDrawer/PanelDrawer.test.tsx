@@ -73,7 +73,7 @@ describe('Panel Drawer', () => {
         kind: 'Panel',
         spec: {
           display: { name: 'New Panel', description: '' },
-          panelPlugin: {
+          plugin: {
             kind: '',
             spec: {},
           },
@@ -99,7 +99,7 @@ describe('Panel Drawer', () => {
       kind: 'Panel',
       spec: {
         display: { name: 'cpu usage', description: '' },
-        panelPlugin: {
+        plugin: {
           kind: '',
           spec: {},
         },

@@ -53,14 +53,14 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: '1500+ Series', description: 'This is a line chart' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
@@ -79,14 +79,14 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: '~130 Series', description: 'This is a line chart' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
@@ -105,14 +105,14 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Single Query' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query:
@@ -131,14 +131,14 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Legend Example' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query:
@@ -150,7 +150,7 @@ const demoDashboard: DashboardResource = {
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
@@ -161,7 +161,7 @@ const demoDashboard: DashboardResource = {
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
@@ -172,7 +172,7 @@ const demoDashboard: DashboardResource = {
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
@@ -191,14 +191,14 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Thresholds Example', description: 'Description text' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_load15{instance="$instance",job="node"}',
@@ -209,7 +209,7 @@ const demoDashboard: DashboardResource = {
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_load1{instance="$instance",job="node"}',
@@ -246,14 +246,14 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'CPU', description: 'This is a line chart' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query:
@@ -279,13 +279,13 @@ const demoDashboard: DashboardResource = {
             name: 'Stat Sm',
             // description: 'This is a stat chart',
           },
-          panelPlugin: {
+          plugin: {
             kind: 'StatChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query:
@@ -311,13 +311,13 @@ const demoDashboard: DashboardResource = {
             name: 'RAM Used',
             description: 'This is a stat chart',
           },
-          panelPlugin: {
+          plugin: {
             kind: 'StatChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query:
@@ -339,13 +339,13 @@ const demoDashboard: DashboardResource = {
             name: 'RAM Total',
             description: 'This is a stat chart',
           },
-          panelPlugin: {
+          plugin: {
             kind: 'StatChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query: 'node_memory_MemTotal_bytes{job="node",instance="$instance"}',
@@ -369,13 +369,13 @@ const demoDashboard: DashboardResource = {
             name: 'Stat Md',
             // description: 'This is a stat chart',
           },
-          panelPlugin: {
+          plugin: {
             kind: 'StatChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query:
@@ -405,13 +405,13 @@ const demoDashboard: DashboardResource = {
             name: 'Stat Lg',
             description: 'This is a stat chart',
           },
-          panelPlugin: {
+          plugin: {
             kind: 'StatChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query:
@@ -435,13 +435,13 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Gauge Ex', description: 'This is a gauge chart' },
-          panelPlugin: {
+          plugin: {
             kind: 'GaugeChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query:
@@ -473,13 +473,13 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Gauge Alt Ex', description: 'GaugeChart description text' },
-          panelPlugin: {
+          plugin: {
             kind: 'GaugeChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query: 'node_load15{instance="$instance",job="node"}',
@@ -515,13 +515,13 @@ const demoDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Gauge Format Test' },
-          panelPlugin: {
+          plugin: {
             kind: 'GaugeChart',
             spec: {
               query: {
                 kind: 'GraphQuery',
                 spec: {
-                  graphQueryPlugin: {
+                  plugin: {
                     kind: 'PrometheusGraphQuery',
                     spec: {
                       query:

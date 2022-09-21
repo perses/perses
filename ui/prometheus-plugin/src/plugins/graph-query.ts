@@ -31,7 +31,7 @@ function usePrometheusGraphQuery(
   definition: GraphQueryDefinition<PrometheusGraphQueryOptions>,
   hookOptions?: UseGraphQueryHookOptions
 ): ReturnType<UseGraphQueryHook<PrometheusGraphQueryOptions>> {
-  const pluginSpec = definition.spec.graphQueryPlugin.spec;
+  const pluginSpec = definition.spec.plugin.spec;
 
   const minStep = getDurationStringSeconds(pluginSpec.min_step);
   const timeRange = useDashboardPrometheusTimeRange();

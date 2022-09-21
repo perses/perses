@@ -54,14 +54,14 @@ const testDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'CPU' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query:
@@ -80,14 +80,14 @@ const testDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Memory' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query:
@@ -99,7 +99,7 @@ const testDashboard: DashboardResource = {
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
@@ -110,7 +110,7 @@ const testDashboard: DashboardResource = {
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
@@ -121,7 +121,7 @@ const testDashboard: DashboardResource = {
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
@@ -139,14 +139,14 @@ const testDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Disk I/O Utilization' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query:
@@ -165,14 +165,14 @@ const testDashboard: DashboardResource = {
         kind: 'Panel',
         spec: {
           display: { name: 'Filesystem Fullness' },
-          panelPlugin: {
+          plugin: {
             kind: 'LineChart',
             spec: {
               queries: [
                 {
                   kind: 'GraphQuery',
                   spec: {
-                    graphQueryPlugin: {
+                    plugin: {
                       kind: 'PrometheusGraphQuery',
                       spec: {
                         query:

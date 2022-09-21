@@ -77,7 +77,7 @@ function convertPanel(grafanaPanel: GrafanaPanel): PanelDefinition {
           display: {
             name: grafanaPanel.title,
           },
-          panelPlugin: {
+          plugin: {
             kind: 'EmptyChart',
             spec: {},
           },
@@ -93,7 +93,7 @@ function convertGraphPanel(graphPanel: GrafanaGraphPanel): PanelDefinition {
       display: {
         name: graphPanel.title,
       },
-      panelPlugin: {
+      plugin: {
         kind: 'LineChart',
         spec: {
           queries: graphPanel.targets.map(convertQueryTarget),
@@ -118,7 +118,7 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): PanelDefinition {
       display: {
         name: gaugePanel.title,
       },
-      panelPlugin: {
+      plugin: {
         kind: 'GaugeChart',
         spec: {
           query: convertQueryTarget(target),
@@ -141,7 +141,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): PanelDefinit
       display: {
         name: statPanel.title,
       },
-      panelPlugin: {
+      plugin: {
         kind: 'StatChart',
         spec: {
           query: convertQueryTarget(target),
@@ -156,7 +156,7 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): PanelDefinit
     },
   };
   if (statPanel.sparkline.show === true) {
-    convertedPanel.spec.panelPlugin.spec['sparkline'] = {};
+    convertedPanel.spec.plugin.spec['sparkline'] = {};
   }
   return convertedPanel;
 }
@@ -168,7 +168,7 @@ function convertQueryTarget(target?: PromQueryTarget): GraphQueryDefinition {
   return {
     kind: 'GraphQuery',
     spec: {
-      graphQueryPlugin: {
+      plugin: {
         kind: 'PrometheusGraphQuery',
         spec: {
           query,

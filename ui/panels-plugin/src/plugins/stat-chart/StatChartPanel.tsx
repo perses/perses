@@ -27,7 +27,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
     definition: {
       spec: {
         display: { name },
-        panelPlugin: {
+        plugin: {
           spec: { query, calculation, unit, sparkline },
         },
       },

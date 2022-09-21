@@ -21,6 +21,6 @@ export type PanelContentProps = PanelProps<unknown>;
  * the plugin is loading.
  */
 export function PanelContent(props: PanelContentProps) {
-  const { PanelComponent } = usePanelPlugin(props.definition.spec.panelPlugin.kind);
+  const { PanelComponent } = usePanelPlugin(props.definition.spec.plugin.kind);
   return <PanelComponent {...props} />;
 }

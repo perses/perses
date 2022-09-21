@@ -32,7 +32,7 @@ describe('Panel', () => {
             name: 'Fake Panel',
             description: 'This is a fake panel',
           },
-          panelPlugin: {
+          plugin: {
             kind: 'FakePanel',
             spec: {},
           },

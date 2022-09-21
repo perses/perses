@@ -118,7 +118,7 @@ const PanelDrawer = () => {
         kind: 'Panel',
         spec: {
           display: { name: panelName, description: panelDescription },
-          panelPlugin: {
+          plugin: {
             kind,
             spec: options,
           },
@@ -137,7 +137,7 @@ const PanelDrawer = () => {
       spec: {
         ...panels[panelDrawer.panelKey]?.spec,
         display: { name: panelName ?? '', description: panelDescription },
-        panelPlugin: {
+        plugin: {
           kind,
           spec: options,
         },

@@ -23,7 +23,7 @@ export function LineChartPanel(props: LineChartProps) {
   const {
     definition: {
       spec: {
-        panelPlugin: {
+        plugin: {
           spec: { queries, show_legend, thresholds, unit },
         },
       },

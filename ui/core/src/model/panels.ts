@@ -22,7 +22,7 @@ export interface PanelSpec<PluginSpec> {
     name: string;
     description?: string;
   };
-  panelPlugin: Definition<PluginSpec>;
+  plugin: Definition<PluginSpec>;
 }
 
 /**

@@ -42,7 +42,7 @@ export interface ListVariableSpec<PluginSpec> extends VariableSpec {
   allowMultiple?: boolean;
   allowAllValue?: boolean;
   customAllValue?: string;
-  variablePlugin: Definition<PluginSpec>;
+  plugin: Definition<PluginSpec>;
 }
 
 export type VariableDefinition = TextVariableDefinition | ListVariableDefinition;
