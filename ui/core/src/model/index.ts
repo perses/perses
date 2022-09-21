@@ -12,10 +12,8 @@
 // limitations under the License.
 
 export * from './dashboard';
-export * from './datasource';
 export * from './definitions';
 export * from './graph-queries';
-export * from './http';
 export * from './layout';
 export * from './panels';
 export * from './resource';

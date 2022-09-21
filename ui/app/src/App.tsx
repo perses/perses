@@ -18,7 +18,7 @@ import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme
 import { QueryStringProvider } from '@perses-dev/dashboards';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
-import { DataSourceRegistry } from './context/DataSourceRegistry';
+import { LegacyDataSourceRegistry } from './context/LegacyDataSourceRegistry';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
@@ -60,12 +60,12 @@ function App() {
         <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
           <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-              <DataSourceRegistry>
+              <LegacyDataSourceRegistry>
                 <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
                   {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
                   <ViewDashboard key={location.key} />
                 </QueryStringProvider>
-              </DataSourceRegistry>
+              </LegacyDataSourceRegistry>
             </PluginBoundary>
           </PluginRegistry>
         </ChartsThemeProvider>

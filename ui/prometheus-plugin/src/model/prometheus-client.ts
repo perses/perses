@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from 'react-query';
-import { buildDatasourceURL, DatasourceSelector, fetchJson } from '@perses-dev/core';
+import { fetchJson } from '@perses-dev/core';
+import { useLegacyDatasources } from '@perses-dev/plugin-system';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -23,11 +24,8 @@ import {
   RangeQueryRequestParameters,
   RangeQueryResponse,
 } from './api-types';
-import { usePrometheusConfig } from './datasource';
 
-export type QueryOptions = Pick<UseQueryOptions, 'enabled'> & {
-  datasource?: DatasourceSelector;
-};
+export type QueryOptions = Pick<UseQueryOptions, 'enabled'>;
 
 /**
  * Calls the `/api/v1/query` endpoint to get metrics data.
@@ -65,8 +63,13 @@ function useQueryWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions?: QueryOptions
 ) {
-  const config = usePrometheusConfig(queryOptions?.datasource);
-  const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
+  const {
+    defaultDatasource: {
+      spec: {
+        http: { url: datasourceURL },
+      },
+    },
+  } = useLegacyDatasources();
   const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
@@ -90,8 +93,13 @@ function useQueryWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions?: QueryOptions
 ) {
-  const config = usePrometheusConfig(queryOptions?.datasource);
-  const datasourceURL = buildDatasourceURL(config.metadata.name, config.spec.http);
+  const {
+    defaultDatasource: {
+      spec: {
+        http: { url: datasourceURL },
+      },
+    },
+  } = useLegacyDatasources();
   const key = [datasourceURL, apiURI, params] as const;
 
   return useQuery<TResponse, Error, TResponse, typeof key>(
