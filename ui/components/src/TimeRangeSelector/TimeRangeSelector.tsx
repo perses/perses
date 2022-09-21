@@ -38,7 +38,6 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   return (
     <Select
       value={formattedValue}
-      labelId="select-time-range"
       onChange={onSelectChange}
       IconComponent={EventIcon}
       sx={{

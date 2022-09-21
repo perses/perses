@@ -120,9 +120,11 @@ export function getDefaultTimeRange(dashboardDuration: DurationString, queryStri
   const endParam = queryString.get('end');
 
   if (startParam === null) {
+    // use relative time range from dashboard definition if start param is empty
     return { pastDuration: dashboardDuration };
   }
 
+  // convert query param format to RelativeTimeRange or AbsoluteTimeRange
   return isDurationString(startParam)
     ? { pastDuration: startParam }
     : { start: new Date(Number(startParam)), end: new Date(Number(endParam)) };

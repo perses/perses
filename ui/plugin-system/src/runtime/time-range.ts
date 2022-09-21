@@ -15,7 +15,6 @@ import { createContext, useContext } from 'react';
 import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
 
 export interface TimeRange {
-  initialTimeRange: TimeRangeValue;
   timeRange: AbsoluteTimeRange;
   setTimeRange: (value: TimeRangeValue) => void;
 }

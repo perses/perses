@@ -72,10 +72,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
     [queryString, setQueryString, onTimeRangeChange]
   );
 
-  const ctx = useMemo(
-    () => ({ initialTimeRange, timeRange, setTimeRange }),
-    [initialTimeRange, timeRange, setTimeRange]
-  );
+  const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }
