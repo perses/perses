@@ -24,9 +24,9 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.7.1",
-    "@perses-dev/core": "^0.7.1",
-    "@perses-dev/plugin-system": "^0.7.1",
+    "@perses-dev/components": "^0.8.0",
+    "@perses-dev/core": "^0.8.0",
+    "@perses-dev/plugin-system": "^0.8.0",
     "@types/react-grid-layout": "^1.3.2",
     "immer": "^9.0.15",
     "react-grid-layout": "^1.3.4",

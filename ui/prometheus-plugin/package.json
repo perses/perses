@@ -26,8 +26,8 @@
   "dependencies": {
     "@lezer/highlight": "^1.0.0",
     "@lezer/lr": "^1.2.0",
-    "@perses-dev/core": "^0.7.1",
-    "@perses-dev/plugin-system": "^0.7.1",
+    "@perses-dev/core": "^0.8.0",
+    "@perses-dev/plugin-system": "^0.8.0",
     "@prometheus-io/lezer-promql": "^0.37.0",
     "date-fns": "^2.28.0"
   },
