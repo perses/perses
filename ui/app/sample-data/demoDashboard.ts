@@ -34,17 +34,27 @@ const demoDashboard: DashboardResource = {
         },
       },
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'instance',
-          value: 'demo.do.prometheus.io:9100',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['demo.do.prometheus.io:3000', 'demo.do.prometheus.io:9100'],
+            },
+          },
         },
       },
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'interval',
-          value: '1m',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['1m', '5m'],
+            },
+          },
         },
       },
     ],

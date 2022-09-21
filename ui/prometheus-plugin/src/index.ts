@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { PrometheusGraphQuery } from './plugins/graph-query';
+// @TODO: Move this to a more generic location;
+import { StaticListVariable } from './plugins/variable';
 
 // Export plugins under the same name as the kinds they handle from the plugin.json
-export { PrometheusGraphQuery };
+export { PrometheusGraphQuery, StaticListVariable };

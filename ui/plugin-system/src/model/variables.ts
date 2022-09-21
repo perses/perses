@@ -20,27 +20,20 @@ export type VariableOption = { label: string; value: string };
  * Plugin for handling custom VariableDefinitions.
  */
 export interface VariablePlugin<Spec = unknown> {
-  useVariableOptions: UseVariableOptionsHook<Spec>;
+  getVariableOptions: GetVariableOptions<Spec>;
 }
 
 /**
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type UseVariableOptionsHook<Spec> = (definition: ListVariableDefinition<Spec>) => {
-  data: VariableOption[];
-  loading: boolean;
-  error?: Error;
-};
+export type GetVariableOptions<Spec> = (
+  definition: ListVariableDefinition<Spec>
+) => Promise<{ data: VariableOption[] }>;
 
 /**
  * Use the variable options from a variable plugin at runtime.
  */
-export const useVariableOptions: VariablePlugin['useVariableOptions'] = (definition) => {
-  const plugin = usePlugin('Variable', definition.kind);
-  if (plugin === undefined) {
-    // Provide default values while the plugin is being loaded
-    return { data: [], loading: true };
-  }
-  return plugin.useVariableOptions(definition);
+export const useVariablePlugin = (definition: ListVariableDefinition) => {
+  return usePlugin('Variable', definition.spec.plugin.kind);
 };
