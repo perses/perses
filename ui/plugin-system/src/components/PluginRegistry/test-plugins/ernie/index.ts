@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableOption } from '@perses-dev/core';
-import { VariablePlugin } from '../../../../model';
+import { VariablePlugin, VariableOption } from '../../../../model';
 
 const data: VariableOption[] = [
   { label: 'Grover', value: 'Grover' },

@@ -40,8 +40,8 @@ function ListVariable({ name }: TemplateVariableProps) {
   const variablePlugin = useVariablePlugin(definition);
 
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
-  const allowMultiple = definition?.options.allowMultiple === true;
-  const allowAllValue = definition?.options.allowAllValue === true;
+  const allowMultiple = definition?.spec.allowMultiple === true;
+  const allowAllValue = definition?.spec.allowAllValue === true;
 
   const loadOptions = useCallback(async () => {
     if (!variablePlugin) {

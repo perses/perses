@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
-import { GraphQueryDefinition } from '@perses-dev/plugin-system';
+import { GraphQueryDefinition } from '@perses-dev/core';
 import { ThresholdOptions } from '../../model/thresholds';
 
 /**
  * The Options object supported by the LineChartPanel plugin.
  */
-export interface LineChartOptions extends JsonObject {
+export interface LineChartOptions {
   queries: GraphQueryDefinition[];
   show_legend?: boolean;
   unit?: UnitOptions;

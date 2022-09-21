@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { AbsoluteTimeRange, DurationString } from '@perses-dev/core';
+import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
 
 export interface TimeRange {
   timeRange: AbsoluteTimeRange;
-  defaultDuration: DurationString;
+  setTimeRange: (value: TimeRangeValue) => void;
 }
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);

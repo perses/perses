@@ -15,16 +15,14 @@ import { createContext, useContext } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
-import { TemplateVariableContext } from '@perses-dev/plugin-system';
 import {
+  TemplateVariableContext,
   VariableStateMap,
   VariableState,
-  VariableName,
-  VariableValue,
   VariableOption,
-  VariableDefinition,
   DEFAULT_ALL_VALUE as ALL_VALUE,
-} from '@perses-dev/core';
+} from '@perses-dev/plugin-system';
+import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
 
 type TemplateVariableStore = {
   variableDefinitions: VariableDefinition[];
@@ -72,7 +70,7 @@ export function useTemplateVariable(name: string) {
   const store = useTemplateVariableStoreCtx();
   return useStore(store, (s) => {
     const variableState = s.variableState[name];
-    const definition = s.variableDefinitions.find((v) => v.name === name);
+    const definition = s.variableDefinitions.find((v) => v.spec.name === name);
     return {
       state: variableState,
       definition,
@@ -186,14 +184,14 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
   };
   switch (v.kind) {
     case 'TextVariable':
-      varState.value = v.options.value;
+      varState.value = v.spec.value;
       break;
     case 'ListVariable':
       varState.options = [];
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {
-          varState.value = v.options.allowMultiple ? [firstOptionValue] : firstOptionValue;
+          varState.value = v.spec.allowMultiple ? [firstOptionValue] : firstOptionValue;
         }
       }
     default:
@@ -205,7 +203,7 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
 function hydrateTemplateVariableStates(definitions: VariableDefinition[]): VariableStateMap {
   const state: VariableStateMap = {};
   definitions.forEach((v) => {
-    state[v.name] = hydrateTemplateVariableState(v);
+    state[v.spec.name] = hydrateTemplateVariableState(v);
   });
   return state;
 }

@@ -17,7 +17,7 @@ import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
 import produce from 'immer';
-import { DashboardSpec, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
+import { DashboardSpec, GridItemDefinition, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
 import { LayoutsSlice, createLayoutsSlice } from './LayoutsSlice';
 
@@ -25,7 +25,7 @@ export interface DashboardStoreState extends DashboardAppSlice, LayoutsSlice {
   dashboard: DashboardSpec;
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
-  updatePanel: (name: string, panel: PanelDefinition) => void;
+  updatePanel: (name: string, panel: PanelDefinition, groupIndex?: number) => void;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
 }
@@ -85,8 +85,30 @@ export function DashboardProvider(props: DashboardProviderProps) {
         layouts,
         panels,
         dashboard: dashboardSpec,
-        updatePanel: (name: string, panel: PanelDefinition) =>
+        updatePanel: (name: string, panel: PanelDefinition, groupIndex = 0) =>
           set((state) => {
+            // add new panel to layouts if panels[name] is undefined
+            if (state.panels[name] === undefined) {
+              // find maximum y so new panel is added to the end of the grid
+              let maxY = 0;
+              state.layouts[groupIndex]?.spec.items.forEach((layout) => {
+                if (layout.y > maxY) {
+                  maxY = layout.y;
+                }
+              });
+              const panelLayout: GridItemDefinition = {
+                x: 0,
+                y: maxY + 1,
+                width: 12,
+                height: 6,
+                content: { $ref: `#/spec/panels/${name}` },
+              };
+              const layouts = state.layouts;
+              if (layouts && layouts[groupIndex]) {
+                layouts[groupIndex]?.spec.items.push(panelLayout);
+              }
+            }
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             state.panels[name] = panel as any;
           }),

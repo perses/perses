@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,10 +31,17 @@ export interface RelativeTimeRange {
 export type TimeRangeValue = AbsoluteTimeRange | RelativeTimeRange;
 
 /**
- * Determine whether a given time range is relative or absolute
+ * Determine whether a given time range is relative
  */
-export function isRelativeValue(timeRange: TimeRangeValue): timeRange is RelativeTimeRange {
+export function isRelativeTimeRange(timeRange: TimeRangeValue): timeRange is RelativeTimeRange {
   return (timeRange as RelativeTimeRange).pastDuration !== undefined;
+}
+
+/**
+ * Determine whether a given time range is absolute
+ */
+export function isAbsoluteTimeRange(timeRange: TimeRangeValue): timeRange is AbsoluteTimeRange {
+  return (timeRange as AbsoluteTimeRange).start !== undefined && (timeRange as AbsoluteTimeRange).end !== undefined;
 }
 
 /**
@@ -103,4 +110,22 @@ export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) 
   // time increments that make sense (e.g. 15s, 30s, 1m, 5m, etc.)
   const queryRangeMs = timeRange.end.valueOf() - timeRange.start.valueOf();
   return Math.floor(queryRangeMs / width);
+}
+
+/**
+ * Gets the default time range taking into account URL params
+ */
+export function getDefaultTimeRange(dashboardDuration: DurationString, queryString: URLSearchParams): TimeRangeValue {
+  const startParam = queryString.get('start');
+  const endParam = queryString.get('end');
+
+  if (startParam === null) {
+    // use relative time range from dashboard definition if start param is empty
+    return { pastDuration: dashboardDuration };
+  }
+
+  // convert query param format to RelativeTimeRange or AbsoluteTimeRange
+  return isDurationString(startParam)
+    ? { pastDuration: startParam }
+    : { start: new Date(Number(startParam)), end: new Date(Number(endParam)) };
 }

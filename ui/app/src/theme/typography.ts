@@ -29,52 +29,71 @@ const fontWeightBold = 900;
  */
 export const typography: ThemeOptions['typography'] = {
   fontFamily: '"Lato", sans-serif',
-  fontSize: 16,
+
   fontWeightLight,
   fontWeightRegular,
   fontWeightMedium,
   fontWeightBold,
+
   h1: {
-    // 24px
-    fontSize: '1.5rem',
-    fontWeight: fontWeightRegular,
+    fontSize: '1.5rem', // 24px
+    fontWeight: fontWeightMedium,
+    lineHeight: '32px',
   },
   h2: {
-    // 20px
-    fontSize: '1.25rem',
-    fontWeight: fontWeightRegular,
+    fontSize: '1.25rem', // 20px
+    fontWeight: fontWeightMedium,
+    lineHeight: '28px',
   },
   h3: {
-    // 16px
-    fontSize: '1rem',
-    fontWeight: fontWeightRegular,
+    fontSize: '1rem', // 16px
+    fontWeight: fontWeightMedium,
+    lineHeight: '24px',
   },
   h4: {
-    // 14px
-    fontSize: '0.875rem',
-    fontWeight: fontWeightBold,
+    fontSize: '0.875rem', // 14px
+    fontWeight: fontWeightMedium,
+    lineHeight: '22px',
   },
-  h6: {
-    // 16px
-    fontSize: '1rem',
-    fontWeight: fontWeightRegular,
-  },
+  h5: undefined,
+  h6: undefined,
+
   body1: {
-    // 14px
-    fontSize: '0.875rem',
+    fontSize: '0.875rem', // 14px
     fontWeight: fontWeightRegular,
+    lineHeight: '20px',
   },
   body2: {
-    // 12px
-    fontSize: '0.75rem',
+    fontSize: '0.75rem', // 12px
     fontWeight: fontWeightRegular,
+    lineHeight: '18px',
   },
   subtitle1: {
-    // 16px
-    fontSize: '1rem',
-    fontWeight: fontWeightMedium,
+    fontSize: '1rem', // 16px
+    fontWeight: fontWeightRegular,
+    lineHeight: '24px',
+    letterSpacing: '0.02rem',
   },
+  subtitle2: {
+    fontSize: '0.875rem', // 14px
+    fontWeight: fontWeightMedium,
+    lineHeight: '22px',
+    letterSpacing: '0.03rem',
+    textTransform: 'uppercase',
+  },
+
   button: {
+    // 14px
+    fontSize: '0.875rem',
+    fontWeight: fontWeightMedium,
+    // 20 px
+    lineHeight: '1.25rem',
     textTransform: 'none',
+    letterSpacing: '0.03rem',
+  },
+  caption: {
+    fontSize: '0.6875rem', // 11px
+    fontWeight: fontWeightRegular,
+    lineHeight: '16px',
   },
 };

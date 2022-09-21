@@ -10,13 +10,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { JsonObject } from '@perses-dev/core';
 import {
   PluginRegistryProps,
   PluginModuleResource,
   PluginImplementation,
   PluginType,
   Plugin,
+  PanelPlugin,
 } from '@perses-dev/plugin-system';
 
 /**
@@ -35,13 +35,13 @@ export function mockPluginRegistryProps() {
     },
   };
 
-  const mockPluginModule: Record<string, Plugin<JsonObject>> = {};
+  const mockPluginModule: Record<string, Plugin<unknown>> = {};
 
   // Allow adding mock plugins in tests
   const addMockPlugin = <T extends PluginType>(
     pluginType: T,
     kind: string,
-    plugin: PluginImplementation<T, JsonObject>
+    plugin: PluginImplementation<T, unknown>
   ) => {
     mockPluginResource.spec.plugins.push({
       pluginType,
@@ -69,3 +69,13 @@ export function mockPluginRegistryProps() {
     addMockPlugin,
   };
 }
+
+export const FAKE_PANEL_PLUGIN: PanelPlugin = {
+  PanelComponent: () => {
+    return <div role="figure">FakePanel chart</div>;
+  },
+  OptionsEditorComponent: () => {
+    return <div>Edit options here</div>;
+  },
+  createInitialOptions: () => ({}),
+};

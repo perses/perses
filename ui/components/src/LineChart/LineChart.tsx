@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo, useRef, useState } from 'react';
+import { MouseEvent, useMemo, useRef, useState } from 'react';
 import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
@@ -66,9 +66,10 @@ interface LineChartProps {
   legend?: LegendComponentOption;
   visualMap?: VisualMapComponentOption[];
   onDataZoom?: (e: ZoomEventData) => void;
+  onDoubleClick?: (e: MouseEvent) => void;
 }
 
-export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZoom }: LineChartProps) {
+export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZoom, onDoubleClick }: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -109,16 +110,21 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
   const handleOnClick = () => setPinTooltip((current) => !current);
 
-  const handleOnDoubleClick = () => {
+  const handleOnDoubleClick = (e: MouseEvent) => {
     setPinTooltip(false);
-    if (chartRef.current !== undefined) {
-      restoreChart(chartRef.current);
+    // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
+    if (onDoubleClick === undefined) {
+      if (chartRef.current !== undefined) {
+        restoreChart(chartRef.current);
+      }
+    } else {
+      onDoubleClick(e);
     }
   };
 
-  const handleOnMouseDown = (event: React.MouseEvent) => {
+  const handleOnMouseDown = (e: MouseEvent) => {
     // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
-    if (event.target instanceof HTMLCanvasElement) {
+    if (e.target instanceof HTMLCanvasElement) {
       setShowTooltip(false);
     }
   };

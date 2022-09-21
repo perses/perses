@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -108,12 +108,18 @@ export default function Header(): JSX.Element {
     <AppBar position="relative">
       <Toolbar>
         <Box sx={style} flexGrow={1}>
-          <Typography variant="h6" sx={{ marginRight: '1rem' }}>
+          <Typography variant="h1" sx={{ marginRight: '1rem' }}>
             Perses
           </Typography>
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
+        <Button href="/?dashboard=demoDashboard" color="inherit">
+          Demo
+        </Button>
+        <Button href="/docs" color="inherit">
+          Docs
+        </Button>
         <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
       </Toolbar>
     </AppBar>

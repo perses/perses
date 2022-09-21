@@ -14,7 +14,8 @@
 import { useMemo } from 'react';
 import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, UnitOptions } from '@perses-dev/components';
+import { useTimeRange } from '@perses-dev/plugin-system';
+import { LineChart, EChartsDataFormat, UnitOptions, ZoomEventData } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { useRunningGraphQueries } from './GraphQueryRunner';
 import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
@@ -38,6 +39,8 @@ export interface LineChartContainerProps {
 export function LineChartContainer(props: LineChartContainerProps) {
   const { width, height, show_legend, thresholds } = props;
   const queries = useRunningGraphQueries();
+
+  const { setTimeRange } = useTimeRange();
 
   // populate series data based on query results
   const { graphData, loading } = useMemo(() => {
@@ -116,5 +119,20 @@ export function LineChartContainer(props: LineChartContainerProps) {
     bottom: show_legend === true ? 35 : 0,
   };
 
-  return <LineChart height={height} data={graphData} unit={unit} legend={legendOverrides} grid={gridOverrides} />;
+  const handleDataZoom = (event: ZoomEventData) => {
+    // TODO: add ECharts transition animation on zoom
+    // absolute time range query string update is handled inside TimeRangeProvider
+    setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
+  };
+
+  return (
+    <LineChart
+      height={height}
+      data={graphData}
+      unit={unit}
+      legend={legendOverrides}
+      grid={gridOverrides}
+      onDataZoom={handleDataZoom}
+    />
+  );
 }

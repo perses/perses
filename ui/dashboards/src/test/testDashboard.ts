@@ -24,112 +24,166 @@ const testDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', global: true, name: 'Public Prometheus Demo Server' },
-    // TODO: Should duration actually be a time range?
     duration: '24h',
     variables: [
       {
-        name: 'job',
         kind: 'TextVariable',
-        options: {
+        spec: {
+          name: 'job',
           value: 'node',
         },
       },
       {
-        name: 'instance',
         kind: 'TextVariable',
-        options: {
+        spec: {
+          name: 'instance',
           value: 'demo.do.prometheus.io:9100',
         },
       },
       {
-        name: 'interval',
         kind: 'TextVariable',
-        options: {
+        spec: {
+          name: 'interval',
           value: '1m',
         },
       },
     ],
     panels: {
       cpu: {
-        kind: 'LineChart',
-        display: { name: 'CPU' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query:
-                  'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
-              },
+        kind: 'Panel',
+        spec: {
+          display: { name: 'CPU' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: { kind: '%' },
             },
-          ],
-          unit: { kind: '%' },
+          },
         },
       },
       memory: {
-        kind: 'LineChart',
-        display: { name: 'Memory' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query:
-                  'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
-              },
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Memory' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: { kind: 'Bytes' },
             },
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
-              },
-            },
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
-              },
-            },
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
-              },
-            },
-          ],
-          unit: { kind: 'Bytes' },
+          },
         },
       },
       diskIO: {
-        kind: 'LineChart',
-        display: { name: 'Disk I/O Utilization' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query:
-                  'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
-              },
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Disk I/O Utilization' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: { kind: 'Percent' },
             },
-          ],
-          unit: { kind: 'Percent' },
+          },
         },
       },
       filesystemFullness: {
-        kind: 'LineChart',
-        display: { name: 'Filesystem Fullness' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query:
-                  '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
-              },
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Filesystem Fullness' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: { kind: 'Percent' },
             },
-          ],
-          unit: { kind: 'Percent' },
+          },
         },
       },
     },

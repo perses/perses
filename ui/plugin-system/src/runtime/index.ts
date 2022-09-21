@@ -14,3 +14,4 @@
 export * from './datasources';
 export * from './template-variables';
 export * from './time-range';
+export * from './query-string';

@@ -16,7 +16,7 @@ import { useDashboardStore } from './DashboardProvider';
 
 interface PanelDrawer {
   groupIndex?: number;
-  panelRef?: string;
+  panelKey?: string;
 }
 interface PanelGroupDialog {
   groupIndex?: number;
@@ -27,23 +27,23 @@ export interface DashboardAppSlice {
   openPanelDrawer: (panelDrawer: PanelDrawer) => void;
   closePanelDrawer: () => void;
   panelGroupDialog?: PanelGroupDialog;
-  openPanelGroupDialog: (groupIndex: number) => void;
+  openPanelGroupDialog: (groupIndex?: number) => void;
   closePanelGroupDialog: () => void;
 }
 
 export const createDashboardAppSlice = immer<DashboardAppSlice>((set) => ({
-  openPanelDrawer: ({ groupIndex, panelRef }: PanelDrawer) =>
+  openPanelDrawer: ({ groupIndex, panelKey }: PanelDrawer) =>
     set((state) => {
       state.panelDrawer = {
         groupIndex,
-        panelRef,
+        panelKey,
       };
     }),
   closePanelDrawer: () =>
     set((state) => {
       state.panelDrawer = undefined;
     }),
-  openPanelGroupDialog: (groupIndex: number) =>
+  openPanelGroupDialog: (groupIndex?: number) =>
     set((state) => {
       state.panelGroupDialog = { groupIndex };
     }),

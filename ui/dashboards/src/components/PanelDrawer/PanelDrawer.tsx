@@ -25,23 +25,49 @@ import {
   Typography,
 } from '@mui/material';
 import { Drawer, ErrorAlert } from '@perses-dev/components';
-import { JsonObject } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
 
+interface PanelDrawerHeaderProps {
+  onClose: () => void;
+  panelKey?: string;
+}
+
 const PanelDrawer = () => {
-  const { layouts, addItemToLayout } = useLayouts();
-  const { updatePanel } = usePanels();
+  const { layouts } = useLayouts();
+  const { panels, updatePanel } = usePanels();
   const { panelDrawer, closePanelDrawer } = useDashboardApp();
 
-  const [group, setGroup] = useState(0);
-  const [panelName, setPanelName] = useState('');
-  const [panelDescription, setPanelDescription] = useState('');
+  let defaultPanelName = '';
+  let defaultDescription = '';
+  if (panelDrawer?.panelKey) {
+    // editing an existing panel
+    defaultPanelName = panels[panelDrawer.panelKey]?.spec.display.name ?? '';
+    defaultDescription = panels[panelDrawer.panelKey]?.spec.display.description ?? '';
+  }
+  const [group, setGroup] = useState(panelDrawer?.groupIndex);
+  const [panelName, setPanelName] = useState(defaultPanelName);
+  const [panelDescription, setPanelDescription] = useState(defaultDescription);
   const [kind, setKind] = useState('');
-  const [options, setOptions] = useState<JsonObject>({});
+  const [options, setOptions] = useState<unknown>({});
+
+  // TO DO: we might want to make the form a sub component we don't need this useEffect
+  // currently, we need to reset the states whenever panelDrawer is reopened
+  // since this component does not get remounted when it open/closes (otherwise we lose the animation of sliding in/out)
+  useEffect(() => {
+    setGroup(panelDrawer?.groupIndex);
+    if (panelDrawer?.panelKey) {
+      // display panel name and description in text fields when editing an existing panel
+      setPanelName(panels[panelDrawer.panelKey]?.spec.display.name ?? '');
+      setPanelDescription(panels[panelDrawer.panelKey]?.spec.display.description ?? '');
+    } else {
+      setPanelName('');
+      setPanelDescription('');
+    }
+  }, [panelDrawer, panels]);
 
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
     const { value } = e.target;
@@ -71,39 +97,64 @@ const PanelDrawer = () => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
-    updatePanel(panelKey, {
-      kind,
-      display: { name: panelName, description: panelDescription },
-      options,
-    });
 
-    // find maximum y so new panel is added to the end of the grid
-    let maxY = 0;
-    layouts[group]?.spec.items.forEach((layout) => {
-      if (layout.y > maxY) {
-        maxY = layout.y;
-      }
-    });
-    addItemToLayout(group, {
-      x: 0,
-      y: maxY + 1,
-      width: 12,
-      height: 6,
-      content: { $ref: `#/spec/panels/${panelKey}` },
-    });
+    if (panelDrawer?.groupIndex !== undefined && !panelDrawer?.panelKey) {
+      addNewPanel();
+    } else if (panelDrawer?.panelKey) {
+      editPanel();
+    }
     closePanelDrawer();
+  };
+
+  const addNewPanel = (): void => {
+    if (panelDrawer?.groupIndex === undefined) {
+      return;
+    }
+
+    const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
+    updatePanel(
+      panelKey,
+      {
+        kind: 'Panel',
+        spec: {
+          display: { name: panelName, description: panelDescription },
+          plugin: {
+            kind,
+            spec: options,
+          },
+        },
+      },
+      panelDrawer.groupIndex
+    );
+  };
+
+  const editPanel = (): void => {
+    if (panelDrawer?.panelKey === undefined) {
+      return;
+    }
+    updatePanel(panelDrawer.panelKey, {
+      kind: 'Panel',
+      spec: {
+        ...panels[panelDrawer.panelKey]?.spec,
+        display: { name: panelName ?? '', description: panelDescription },
+        plugin: {
+          kind,
+          spec: options,
+        },
+      },
+    });
+    // TO DO: need to move panel if panel group changes
   };
 
   return (
     <Drawer isOpen={!!panelDrawer} onClose={() => closePanelDrawer()}>
       <form onSubmit={handleSubmit}>
-        <PanelDrawerHeader onClose={() => closePanelDrawer()} />
+        <PanelDrawerHeader panelKey={panelDrawer?.panelKey} onClose={() => closePanelDrawer()} />
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <FormControl>
               <InputLabel id="select-group">Group</InputLabel>
-              <Select required labelId="select-group" label="Group" value={group} onChange={handleGroupChange}>
+              <Select required labelId="select-group" label="Group" value={group ?? 0} onChange={handleGroupChange}>
                 {layouts.map((layout, index) => (
                   <MenuItem key={index} value={index}>
                     {layout.spec.display?.title || `Group ${index + 1}`}
@@ -114,8 +165,19 @@ const PanelDrawer = () => {
           </Grid>
           <Grid item xs={8}>
             <Stack spacing={2} sx={{ flexGrow: '1' }}>
-              <TextField required label="Panel Name" variant="outlined" onChange={handlePanelNameChange} />
-              <TextField label="Description" variant="outlined" onChange={handlePanelDescriptionChange} />
+              <TextField
+                required
+                label="Panel Name"
+                value={panelName}
+                variant="outlined"
+                onChange={handlePanelNameChange}
+              />
+              <TextField
+                label="Description"
+                value={panelDescription}
+                variant="outlined"
+                onChange={handlePanelDescriptionChange}
+              />
             </Stack>
           </Grid>
           <Grid item xs={4}>
@@ -140,7 +202,8 @@ const PanelDrawer = () => {
   );
 };
 
-const PanelDrawerHeader = ({ onClose }: { onClose: () => void }) => {
+const PanelDrawerHeader = ({ panelKey, onClose }: PanelDrawerHeaderProps) => {
+  const action = panelKey ? 'Edit' : 'Add';
   return (
     <Box
       sx={{
@@ -151,10 +214,10 @@ const PanelDrawerHeader = ({ onClose }: { onClose: () => void }) => {
         borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
       }}
     >
-      <Typography variant="h5">Add Panel</Typography>
+      <Typography variant="h2">{`${action} Panel`}</Typography>
       <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
         <Button type="submit" variant="contained">
-          Add Panel
+          {panelKey ? 'Apply' : 'Add'}
         </Button>
         <Button variant="outlined" onClick={onClose}>
           Cancel

@@ -11,25 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import React from 'react';
 
 /**
  * A component for visual editing of a plugin's options.
  */
-export type OptionsEditor<Options extends JsonObject = JsonObject> = React.ComponentType<OptionsEditorProps<Options>>;
+export type OptionsEditor<Spec> = React.ComponentType<OptionsEditorProps<Spec>>;
 
 /**
  * Common props passed to options editor components.
  */
-export interface OptionsEditorProps<Options extends JsonObject = JsonObject> {
+export interface OptionsEditorProps<Spec> {
   // TODO: These are temporary and may not actually make sense, so replace
   // with whatever makes sense as visual editing evolves
-  value: Options;
-  onChange: (next: Options) => void;
+  value: Spec;
+  onChange: (next: Spec) => void;
 }
 
 /**
  * Callback for creating initial/empty options for a plugin.
  */
-export type InitialOptionsCallback<Options extends JsonObject> = () => Options;
+export type InitialOptionsCallback<Spec> = () => Spec;

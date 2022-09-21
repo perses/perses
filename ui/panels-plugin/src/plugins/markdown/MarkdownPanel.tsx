@@ -26,7 +26,11 @@ export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
     definition: {
-      options: { text },
+      spec: {
+        plugin: {
+          spec: { text },
+        },
+      },
     },
   } = props;
 

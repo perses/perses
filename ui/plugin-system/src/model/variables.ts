@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,29 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ListVariableDefinition, VariableOption } from '@perses-dev/core';
+import { ListVariableDefinition } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
+
+export type VariableOption = { label: string; value: string };
 
 /**
  * Plugin for handling custom VariableDefinitions.
  */
-export interface VariablePlugin<Options extends JsonObject = JsonObject> {
-  getVariableOptions: GetVariableOptions<Options>;
+export interface VariablePlugin<Spec = unknown> {
+  getVariableOptions: GetVariableOptions<Spec>;
 }
 
 /**
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type GetVariableOptions<Options extends JsonObject = JsonObject> = (
-  definition: ListVariableDefinition<Options>
+export type GetVariableOptions<Spec> = (
+  definition: ListVariableDefinition<Spec>
 ) => Promise<{ data: VariableOption[] }>;
 
 /**
  * Use the variable options from a variable plugin at runtime.
  */
 export const useVariablePlugin = (definition: ListVariableDefinition) => {
-  const plugin = usePlugin('Variable', definition.options.optionsLoader.kind);
+  const plugin = usePlugin('Variable', definition.spec.plugin.kind);
   if (plugin === undefined) {
     // Provide default values while the plugin is being loaded
     return;
