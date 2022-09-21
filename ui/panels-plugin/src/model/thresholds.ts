@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { zip } from 'lodash-es';
 
@@ -31,13 +30,13 @@ export type GaugeColorStop = [number, string];
 
 export type EChartsAxisLineColors = GaugeColorStop[];
 
-export interface StepOptions extends JsonObject {
+export interface StepOptions {
   value: number;
   color?: ThresholdColorsType;
   name?: string;
 }
 
-export interface ThresholdOptions extends JsonObject {
+export interface ThresholdOptions {
   default_color?: string;
   max?: number;
   steps?: StepOptions[];

@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { useQuery, UseQueryOptions } from 'react-query';
 import { usePluginRegistry } from '../components/PluginRegistry';
 import { PluginImplementation, PluginMetadata, PluginType } from '../model';
@@ -19,7 +18,7 @@ import { getTypeAndKindKey } from '../utils/cache-keys';
 
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<
-  UseQueryOptions<PluginImplementation<T, JsonObject>, unknown, PluginImplementation<T, JsonObject>, string>,
+  UseQueryOptions<PluginImplementation<T, unknown>, unknown, PluginImplementation<T, unknown>, string>,
   'queryKey' | 'queryFn'
 >;
 
