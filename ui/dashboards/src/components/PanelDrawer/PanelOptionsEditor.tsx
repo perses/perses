@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { usePanelPlugin } from '@perses-dev/plugin-system';
 import { useEffect } from 'react';
 
 export interface PanelOptionsEditorProps {
   kind: string;
-  value: JsonObject;
-  onChange: (next: JsonObject) => void;
+  value: unknown;
+  onChange: (next: unknown) => void;
 }
 
 export function PanelOptionsEditor(props: PanelOptionsEditorProps) {

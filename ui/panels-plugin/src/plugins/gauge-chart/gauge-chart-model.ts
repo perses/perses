@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-import { GraphQueryDefinition } from '@perses-dev/plugin-system';
+import { GraphQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { ThresholdOptions } from '../../model/thresholds';
 import { CalculationType } from '../../model/calculations';
@@ -20,7 +19,7 @@ import { CalculationType } from '../../model/calculations';
 /**
  * The Options object type supported by the GaugeChart panel plugin.
  */
-export interface GaugeChartOptions extends JsonObject {
+export interface GaugeChartOptions {
   query: GraphQueryDefinition;
   calculation: CalculationType;
   unit?: UnitOptions;
@@ -35,8 +34,13 @@ export function createInitialGaugeChartOptions(): GaugeChartOptions {
   return {
     // TODO: How do you represent an initially empty/unset graph query?
     query: {
-      kind: '',
-      options: {},
+      kind: 'GraphQuery',
+      spec: {
+        graphQueryPlugin: {
+          kind: '',
+          spec: {},
+        },
+      },
     },
     calculation: 'First',
   };

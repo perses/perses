@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemoized } from '@perses-dev/core';
-import { GraphQueryDefinition, useGraphQuery } from '@perses-dev/plugin-system';
+import { useMemoized, GraphQueryDefinition } from '@perses-dev/core';
+import { useGraphQuery } from '@perses-dev/plugin-system';
 import { createContext, useContext } from 'react';
 
 export type QueryState = ReturnType<typeof useGraphQuery>;

@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { PanelPlugin, PluginRegistry } from '@perses-dev/plugin-system';
 import 'intersection-observer';
 import { screen } from '@testing-library/react';
@@ -20,7 +19,7 @@ import testDashboard from '../../test/testDashboard';
 import { DashboardProvider, DashboardStoreProps } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
-const FAKE_PANEL_PLUGIN: PanelPlugin<JsonObject> = {
+const FAKE_PANEL_PLUGIN: PanelPlugin = {
   PanelComponent: () => {
     return <div role="figure">FakePanel chart</div>;
   },
@@ -37,12 +36,17 @@ describe('Panel', () => {
   beforeEach(() => {
     props = {
       definition: {
-        display: {
-          name: 'Fake Panel',
-          description: 'This is a fake panel',
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Fake Panel',
+            description: 'This is a fake panel',
+          },
+          panelPlugin: {
+            kind: 'FakePanel',
+            spec: {},
+          },
         },
-        kind: 'FakePanel',
-        options: {},
       },
     };
 

@@ -11,9 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-
-export type EmptyChartOptions = JsonObject;
+export type EmptyChartOptions = Record<string, never>;
 
 export function createInitialEmptyChartOptions(): EmptyChartOptions {
   return {};

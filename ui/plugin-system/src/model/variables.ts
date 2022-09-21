@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ListVariableDefinition } from '@perses-dev/core';
+import { ListVariableDefinition } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
 
 export type VariableOption = { label: string; value: string };
@@ -19,17 +19,15 @@ export type VariableOption = { label: string; value: string };
 /**
  * Plugin for handling custom VariableDefinitions.
  */
-export interface VariablePlugin<Options extends JsonObject = JsonObject> {
-  useVariableOptions: UseVariableOptionsHook<Options>;
+export interface VariablePlugin<Spec = unknown> {
+  useVariableOptions: UseVariableOptionsHook<Spec>;
 }
 
 /**
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type UseVariableOptionsHook<Options extends JsonObject = JsonObject> = (
-  definition: ListVariableDefinition<Options>
-) => {
+export type UseVariableOptionsHook<Spec> = (definition: ListVariableDefinition<Spec>) => {
   data: VariableOption[];
   loading: boolean;
   error?: Error;

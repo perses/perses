@@ -15,16 +15,13 @@ import { createContext, useContext } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
-import { TemplateVariableContext } from '@perses-dev/plugin-system';
 import {
+  TemplateVariableContext,
   VariableStateMap,
   VariableState,
-  VariableName,
-  VariableValue,
-  ListVariableDefinition,
-  VariableDefinition,
   DEFAULT_ALL_VALUE as ALL_VALUE,
-} from '@perses-dev/core';
+} from '@perses-dev/plugin-system';
+import { VariableName, VariableValue, ListVariableDefinition, VariableDefinition } from '@perses-dev/core';
 
 type TemplateVariableStore = {
   variableDefinitions: VariableDefinition[];
@@ -71,7 +68,7 @@ export function useTemplateVariable(name: string) {
   const store = useTemplateVariableStoreCtx();
   return useStore(store, (s) => {
     const variableState = s.variableState[name];
-    const definition = s.variableDefinitions.find((v) => v.name === name);
+    const definition = s.variableDefinitions.find((v) => v.spec.name === name);
     return {
       state: variableState,
       definition,
@@ -117,7 +114,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: Tem
 
         // Actions
         loadTemplateVariable: async (name: VariableName) => {
-          const def = get().variableDefinitions.find((v) => v.name === name) as ListVariableDefinition;
+          const def = get().variableDefinitions.find((v) => v.spec.name === name) as ListVariableDefinition;
           if (!def) {
             // Can't find the variable definition
             return;
@@ -133,7 +130,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: Tem
           // Replace with loader
           const { data: values } = await loadTemplateVariables();
 
-          if (def.options.allowAllValue) {
+          if (def.spec.allowAllValue) {
             values.unshift(getAllOption());
           }
           set((state) => {
@@ -239,17 +236,17 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
   };
   switch (v.kind) {
     case 'TextVariable':
-      varState.value = v.options.value;
+      varState.value = v.spec.value;
       break;
     case 'ListVariable':
       varState.options = [];
-      if (v.options.allowAllValue) {
+      if (v.spec.allowAllValue) {
         varState.options.unshift({ label: 'All', value: ALL_VALUE });
       }
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {
-          varState.value = v.options.allowMultiple ? [firstOptionValue] : firstOptionValue;
+          varState.value = v.spec.allowMultiple ? [firstOptionValue] : firstOptionValue;
         }
       }
     default:
@@ -261,7 +258,7 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
 function hydrateTemplateVariableStates(definitions: VariableDefinition[]): VariableStateMap {
   const state: VariableStateMap = {};
   definitions.forEach((v) => {
-    state[v.name] = hydrateTemplateVariableState(v);
+    state[v.spec.name] = hydrateTemplateVariableState(v);
   });
   return state;
 }

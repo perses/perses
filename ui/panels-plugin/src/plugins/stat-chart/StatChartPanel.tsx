@@ -25,8 +25,12 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
     definition: {
-      display: { name },
-      options: { query, calculation, unit, sparkline },
+      spec: {
+        display: { name },
+        panelPlugin: {
+          spec: { query, calculation, unit, sparkline },
+        },
+      },
     },
     contentDimensions,
   } = props;

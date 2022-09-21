@@ -94,7 +94,7 @@ export function Panel(props: PanelProps) {
               overflow="hidden"
               textOverflow="ellipsis"
             >
-              {definition.display.name}
+              {definition.spec.display.name}
             </Typography>
             <Box
               sx={{
@@ -103,10 +103,10 @@ export function Panel(props: PanelProps) {
                 marginLeft: 'auto',
               }}
             >
-              {!isEditMode && definition.display.description && (
+              {!isEditMode && definition.spec.display.description && (
                 <InfoTooltip
                   id="info-tooltip"
-                  description={definition.display.description}
+                  description={definition.spec.display.description}
                   placement={TooltipPlacement.Bottom}
                 >
                   <InformationOutlineIcon

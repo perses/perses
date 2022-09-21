@@ -22,7 +22,11 @@ export type LineChartProps = PanelProps<LineChartOptions>;
 export function LineChartPanel(props: LineChartProps) {
   const {
     definition: {
-      options: { queries, show_legend, thresholds, unit },
+      spec: {
+        panelPlugin: {
+          spec: { queries, show_legend, thresholds, unit },
+        },
+      },
     },
     contentDimensions,
   } = props;

@@ -11,18 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, GraphQueryDefinition, JsonObject, UnixTimeMs } from '@perses-dev/core';
+import { AbsoluteTimeRange, GraphQueryDefinition, UnixTimeMs } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
 
 /**
  * A plugin for running graph queries.
  */
-export interface GraphQueryPlugin<Options extends JsonObject = JsonObject> {
-  useGraphQuery: UseGraphQueryHook<Options>;
+export interface GraphQueryPlugin<Spec = unknown> {
+  useGraphQuery: UseGraphQueryHook<Spec>;
 }
 
-export type UseGraphQueryHook<Options extends JsonObject> = (
-  definition: GraphQueryDefinition<Options>,
+export type UseGraphQueryHook<Spec> = (
+  definition: GraphQueryDefinition<Spec>,
   hookOptions?: UseGraphQueryHookOptions
 ) => {
   data?: GraphData;

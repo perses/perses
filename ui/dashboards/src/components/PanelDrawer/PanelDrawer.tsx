@@ -25,7 +25,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Drawer, ErrorAlert } from '@perses-dev/components';
-import { JsonObject } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
@@ -41,7 +40,7 @@ const PanelDrawer = () => {
   const [panelName, setPanelName] = useState('');
   const [panelDescription, setPanelDescription] = useState('');
   const [kind, setKind] = useState('');
-  const [options, setOptions] = useState<JsonObject>({});
+  const [options, setOptions] = useState<unknown>({});
 
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
     const { value } = e.target;
@@ -73,9 +72,14 @@ const PanelDrawer = () => {
     e.preventDefault();
     const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
     updatePanel(panelKey, {
-      kind,
-      display: { name: panelName, description: panelDescription },
-      options,
+      kind: 'Panel',
+      spec: {
+        display: { name: panelName, description: panelDescription },
+        panelPlugin: {
+          kind,
+          spec: options,
+        },
+      },
     });
 
     // find maximum y so new panel is added to the end of the grid

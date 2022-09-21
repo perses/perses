@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ResourceMetadata, ListVariableDefinition, PanelDefinition } from '@perses-dev/core';
-import { GraphQueryDefinition, GraphQueryPlugin } from './graph-queries';
+import { ResourceMetadata, ListVariableDefinition, PanelDefinition, GraphQueryDefinition } from '@perses-dev/core';
+import { GraphQueryPlugin } from './graph-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
 
@@ -52,32 +52,29 @@ export const ALL_PLUGIN_TYPES = ['Variable', 'Panel', 'GraphQuery'] as const;
 export type PluginType = typeof ALL_PLUGIN_TYPES[number];
 
 // Map of plugin type -> config and implementation type
-type SupportedPlugins<Options extends JsonObject> = {
+type SupportedPlugins<Spec> = {
   Variable: {
-    Def: ListVariableDefinition<Options>;
-    Impl: VariablePlugin<Options>;
+    Def: ListVariableDefinition<Spec>;
+    Impl: VariablePlugin<Spec>;
   };
   Panel: {
-    Def: PanelDefinition<Options>;
-    Impl: PanelPlugin<Options>;
+    Def: PanelDefinition<Spec>;
+    Impl: PanelPlugin<Spec>;
   };
   GraphQuery: {
-    Def: GraphQueryDefinition<Options>;
-    Impl: GraphQueryPlugin<Options>;
+    Def: GraphQueryDefinition<Spec>;
+    Impl: GraphQueryPlugin<Spec>;
   };
 };
 
 /**
  * Union type of all available plugin implementations.
  */
-export type Plugin<Options extends JsonObject> = {
-  [Type in PluginType]: PluginImplementation<Type, Options>;
+export type Plugin<Spec> = {
+  [Type in PluginType]: PluginImplementation<Type, Spec>;
 }[PluginType];
 
 /**
  * The implementation for a given plugin type.
  */
-export type PluginImplementation<
-  Type extends PluginType,
-  Options extends JsonObject
-> = SupportedPlugins<Options>[Type]['Impl'];
+export type PluginImplementation<Type extends PluginType, Spec> = SupportedPlugins<Spec>[Type]['Impl'];
