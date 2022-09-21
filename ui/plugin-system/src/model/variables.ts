@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ListVariableDefinition, VariableOption } from '@perses-dev/core';
+import { JsonObject, ListVariableDefinition } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
+
+export type VariableOption = { label: string; value: string };
 
 /**
  * Plugin for handling custom VariableDefinitions.

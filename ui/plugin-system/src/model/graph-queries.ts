@@ -11,15 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, Definition, JsonObject, ResourceSelector, UnixTimeMs } from '@perses-dev/core';
+import { AbsoluteTimeRange, GraphQueryDefinition, JsonObject, UnixTimeMs } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
-
-/**
- * Options that are common to all Graph Queries.
- */
-export interface GraphQueryDefinition<Options extends JsonObject = JsonObject> extends Definition<Options> {
-  datasource?: ResourceSelector;
-}
 
 /**
  * A plugin for running graph queries.
