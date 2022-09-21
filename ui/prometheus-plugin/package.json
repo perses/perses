@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/prometheus-plugin",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Prometheus plugin for Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
