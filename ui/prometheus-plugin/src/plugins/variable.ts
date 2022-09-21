@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableOption } from '@perses-dev/core';
-import { VariablePlugin } from '@perses-dev/plugin-system';
+import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
 
 type StaticListOption = string | VariableOption;
 
@@ -22,7 +21,7 @@ type StaticListVariableOptions = {
 
 export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
   getVariableOptions: async (definition) => {
-    const values = definition.options.optionsLoader.options.values?.map((v) => {
+    const values = definition.spec.plugin.spec.values?.map((v) => {
       if (typeof v === 'string') {
         return { label: v, value: v };
       }
