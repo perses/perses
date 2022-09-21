@@ -1,0 +1,24 @@
+{
+  "kind": "PluginModule",
+  "metadata": { "name": "Ernie" },
+  "spec": {
+    "plugins": [
+      {
+        "pluginType": "Variable",
+        "kind": "ErnieVariable",
+        "display": {
+          "name": "Ernie Variable",
+          "description": "A variable plugin that exists in the plugin module"
+        }
+      },
+      {
+        "pluginType": "Variable",
+        "kind": "MissingErnieVariable",
+        "display": {
+          "name": "Ernie Variable",
+          "description": "A variable plugin that exists here in the metadata, but is not in the plugin module"
+        }
+      }
+    ]
+  }
+}

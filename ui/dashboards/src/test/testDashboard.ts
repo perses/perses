@@ -25,51 +25,29 @@ const testDashboard: DashboardResource = {
   spec: {
     datasource: { kind: 'Prometheus', global: true, name: 'Public Prometheus Demo Server' },
     duration: '24h',
-    variables: {
-      job: {
-        kind: 'PrometheusLabelValues',
+    variables: [
+      {
+        name: 'job',
+        kind: 'TextVariable',
         options: {
-          label_name: 'job',
-          match: ['node_uname_info'],
-        },
-        display: {
-          label: 'Job',
-        },
-        selection: {
-          default_value: 'node',
+          value: 'node',
         },
       },
-      instance: {
-        kind: 'PrometheusLabelValues',
+      {
+        name: 'instance',
+        kind: 'TextVariable',
         options: {
-          label_name: 'instance',
-          match: ['node_uname_info{job="node"}'],
-        },
-        display: {
-          label: 'Node',
-        },
-        selection: {
-          default_value: ['demo.do.prometheus.io:9100'],
-          all_value: '$__all',
+          value: 'demo.do.prometheus.io:9100',
         },
       },
-      interval: {
-        kind: 'Interval',
+      {
+        name: 'interval',
+        kind: 'TextVariable',
         options: {
-          values: ['1m', '5m', '10m', '1h'],
-          auto: {
-            step_count: 50,
-            min_interval: '1m',
-          },
-        },
-        display: {
-          label: 'Interval',
-        },
-        selection: {
-          default_value: '1m',
+          value: '1m',
         },
       },
-    },
+    ],
     panels: {
       cpu: {
         kind: 'LineChart',

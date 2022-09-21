@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ButtonBase, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronUp';
 import CollapsedIcon from 'mdi-material-ui/ChevronDown';
+import AddIcon from 'mdi-material-ui/Plus';
+import PencilIcon from 'mdi-material-ui/PencilOutline';
+import { useState } from 'react';
+import { useDashboardApp, useEditMode } from '../../context';
 
 export interface GridTitleProps {
+  groupIndex: number;
   title: string;
   collapse?: {
     isOpen: boolean;
@@ -28,32 +33,51 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { title, collapse } = props;
+  const { groupIndex, title, collapse } = props;
+
+  const [isHovered, setIsHovered] = useState(false);
+  const { openPanelDrawer, openPanelGroupDialog } = useDashboardApp();
+  const { isEditMode } = useEditMode();
 
   const text = (
-    <Typography variant="h5" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
+    <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
       {title}
     </Typography>
   );
 
-  // If we don't need expand/collapse, just render the title text
-  if (collapse === undefined) {
-    return text;
-  }
-
-  // Otherwise render something clickable
   return (
-    <ButtonBase
-      component="header"
+    <Box
       sx={{
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
+        padding: (theme) => theme.spacing(1),
+        backgroundColor: (theme) => theme.palette.background.default,
       }}
-      onClick={collapse.onToggleOpen}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
-      {text}
-    </ButtonBase>
+      {collapse ? (
+        <>
+          <IconButton onClick={collapse.onToggleOpen}>
+            {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
+          </IconButton>
+          {text}
+          {isEditMode && isHovered && (
+            <Stack direction="row" sx={{ marginLeft: 'auto' }}>
+              <IconButton onClick={() => openPanelDrawer({ groupIndex })}>
+                <AddIcon />
+              </IconButton>
+              <IconButton onClick={() => openPanelGroupDialog(groupIndex)}>
+                <PencilIcon />
+              </IconButton>
+            </Stack>
+          )}
+        </>
+      ) : (
+        // If we don't need expand/collapse, just render the title text
+        text
+      )}
+    </Box>
   );
 }

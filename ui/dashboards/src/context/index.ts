@@ -13,8 +13,7 @@
 
 export * from './DashboardAppSlice';
 export * from './LayoutsSlice';
-export * from './TemplateVariablesProvider';
+export * from './TemplateVariableProvider';
 export * from './DashboardProvider';
-export * from './TemplateVariablesProvider';
 export * from './TimeRangeProvider';
 export * from './QueryStringProvider';

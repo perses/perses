@@ -46,6 +46,7 @@ function App() {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
+        backgroundColor: (theme) => theme.palette.background.paper,
       }}
     >
       <Header />

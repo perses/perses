@@ -13,16 +13,17 @@
 
 import { Box } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { VariableList, Dashboard } from '../components';
+import { TemplateVariableList, Dashboard } from '../components';
+import PanelGroupDialog from '../components/PanelGroupDialog/PanelGroupDialog';
 import PanelDrawer from '../components/PanelDrawer/PanelDrawer';
 import { DashboardToolbar } from '../components/DashboardToolbar';
-import { useDashboard } from '../context';
+import { useDashboard, useDashboardApp } from '../context';
 import { ViewDashboardProps } from './ViewDashboard';
 
 export const DashboardApp = (props: ViewDashboardProps) => {
   const { dashboardResource, sx, children, ...others } = props;
   const { dashboard } = useDashboard();
-
+  const { panelGroupDialog } = useDashboardApp();
   return (
     <Box
       sx={combineSx(
@@ -48,9 +49,10 @@ export const DashboardApp = (props: ViewDashboardProps) => {
         }}
       >
         <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
-        <VariableList variables={dashboardResource.spec.variables} sx={{ margin: (theme) => theme.spacing(1, 0, 2) }} />
+        <TemplateVariableList />
         <Dashboard spec={dashboard} />
         <PanelDrawer />
+        {panelGroupDialog && <PanelGroupDialog />}
         {children}
       </Box>
     </Box>

@@ -1,0 +1,32 @@
+{
+  "kind": "PluginModule",
+  "metadata": { "name": "Bert" },
+  "spec": {
+    "plugins": [
+      {
+        "pluginType": "Panel",
+        "kind": "BertPanel1",
+        "display": {
+          "name": "Bert Panel 1",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "BertPanel2",
+        "display": {
+          "name": "Bert Panel 2",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Variable",
+        "kind": "BertVariable",
+        "display": {
+          "name": "Bert Variable",
+          "description": ""
+        }
+      }
+    ]
+  }
+}

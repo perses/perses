@@ -108,7 +108,7 @@ export default function Header(): JSX.Element {
     <AppBar position="relative">
       <Toolbar>
         <Box sx={style} flexGrow={1}>
-          <Typography variant="h6" sx={{ margin: '1rem' }}>
+          <Typography variant="h1" sx={{ marginRight: '1rem' }}>
             Perses
           </Typography>
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />

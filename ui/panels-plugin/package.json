@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/panels-plugin",
-  "version": "0.6.0",
+  "version": "0.7.1",
   "description": "Core panels plugin for Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -24,12 +24,14 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.6.0",
-    "@perses-dev/core": "^0.6.0",
-    "@perses-dev/plugin-system": "^0.6.0",
+    "@perses-dev/components": "^0.7.1",
+    "@perses-dev/core": "^0.7.1",
+    "@perses-dev/plugin-system": "^0.7.1",
     "date-fns": "^2.28.0",
+    "dompurify": "^2.4.0",
     "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",
+    "marked": "^4.1.0",
     "mathjs": "^10.6.4"
   },
   "peerDependencies": {
@@ -40,5 +42,9 @@
   "files": [
     "dist",
     "plugin.json"
-  ]
+  ],
+  "devDependencies": {
+    "@types/dompurify": "^2.3.4",
+    "@types/marked": "^4.0.7"
+  }
 }

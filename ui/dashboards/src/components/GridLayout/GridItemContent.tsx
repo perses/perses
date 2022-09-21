@@ -18,16 +18,17 @@ import { Panel } from '../Panel/Panel';
 export interface GridItemContentProps {
   spec: DashboardSpec;
   content: GridItemDefinition['content'];
+  groupIndex: number;
 }
 
 /**
  * Resolves the reference to panel content in a GridItemDefinition and renders the panel.
  */
 export function GridItemContent(props: GridItemContentProps) {
-  const { content, spec } = props;
+  const { content, spec, groupIndex } = props;
   try {
-    const definition = resolvePanelRef(spec, content);
-    return <Panel definition={definition} />;
+    const { panelDefinition, panelsKey } = resolvePanelRef(spec, content);
+    return <Panel definition={panelDefinition} groupIndex={groupIndex} panelKey={panelsKey} />;
   } catch (err) {
     return <ErrorAlert error={err as Error} />;
   }

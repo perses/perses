@@ -11,97 +11,107 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardSpec, VariableDefinition, DEFAULT_ALL_VALUE } from '@perses-dev/core';
+import { DashboardSpec, VariableDefinition } from '@perses-dev/core';
 import { GrafanaVariable } from './grafana-json-model';
 
-const LABEL_NAMES = /^label_names\(\)\s*$/;
-const LABEL_VALUES = /^label_values\((?:(.+),\s*)?([a-zA-Z_][a-zA-Z0-9_]*)\)\s*$/;
-const METRIC_NAMES = /^metrics\((.+)\)\s*$/;
-const QUERY_RESULT = /^query_result\((.+)\)\s*$/;
+// const LABEL_NAMES = /^label_names\(\)\s*$/;
+// const LABEL_VALUES = /^label_values\((?:(.+),\s*)?([a-zA-Z_][a-zA-Z0-9_]*)\)\s*$/;
+// const METRIC_NAMES = /^metrics\((.+)\)\s*$/;
+// const QUERY_RESULT = /^query_result\((.+)\)\s*$/;
 
 export function convertVariables(grafanaVariables: GrafanaVariable[]): DashboardSpec['variables'] {
-  const variables: DashboardSpec['variables'] = {};
+  const variables: DashboardSpec['variables'] = [];
   for (const grafanaVariable of grafanaVariables) {
-    if (grafanaVariable.name === '') continue;
-
-    // Just punt on these for now
-    if (grafanaVariable.type === 'datasource') continue;
-
-    // TODO: This is just a static list of options, so we should support
-    if (grafanaVariable.type === 'custom') continue;
-
-    const { name, query, label, hide } = grafanaVariable;
-
-    // Figure out selection options
-    let selection: VariableDefinition['selection'];
-    if (grafanaVariable.multi === false) {
-      const { current } = grafanaVariable;
-      selection = {
-        default_value: 'value' in current ? current.value : '',
-      };
-    } else {
-      const { current, includeAll, allValue } = grafanaVariable;
-      selection = {
-        default_value: current.value,
-        all_value: includeAll === false ? undefined : allValue ?? DEFAULT_ALL_VALUE,
-      };
-    }
-
-    // Figure out other common options
-    const def: VariableDefinition = {
-      kind: '',
-      options: {},
-      display: {
-        label: label ?? name,
-        // TODO: Should we support hiding the label?
-        hide: hide === 2 ? true : false,
+    // Convert to text variable for now
+    const variable: VariableDefinition = {
+      name: grafanaVariable.name,
+      kind: 'TextVariable',
+      options: {
+        value: '',
       },
-      selection,
     };
 
-    // Is a label names query?
-    const labelNames = query.match(LABEL_NAMES);
-    if (labelNames !== null) {
-      def.kind = 'PrometheusLabelNames';
-      // Grafana doesn't support label_names(metric), just label_names()
-      def.options.match = [];
-      variables[name] = def;
-      continue;
-    }
+    variables.push(variable);
+    // if (grafanaVariable.name === '') continue;
 
-    // Is a label values query?
-    const labelValues = query.match(LABEL_VALUES);
-    if (labelValues !== null) {
-      const [, matcher, labelName] = labelValues;
-      def.kind = 'PrometheusLabelValues';
-      def.options.label_name = labelName;
+    // // Just punt on these for now
+    // if (grafanaVariable.type === 'datasource') continue;
 
-      // Grafana allows label_values(labelName) or label_values(matcher, labelName)
-      def.options.match = [];
-      if (matcher !== undefined) {
-        def.options.match.push(matcher);
-      }
-      variables[name] = def;
-      continue;
-    }
+    // // TODO: This is just a static list of options, so we should support
+    // if (grafanaVariable.type === 'custom') continue;
 
-    // Is a metric names query?
-    const metricNames = query.match(METRIC_NAMES);
-    if (metricNames !== null) {
-      def.kind = 'PrometheusLabelValues';
-      def.options.label_name = '__name__';
-      // TODO: Grafana allows metrics(RegExp) where RegExp is used to filter
-      // results on the client side, should we support that?
-      variables[name] = def;
-      continue;
-    }
+    // const { name, query, label, hide } = grafanaVariable;
 
-    // Is a query result query?
-    const queryResult = query.match(QUERY_RESULT);
-    if (queryResult !== null) {
-      // TODO: Grafana supports query_result(promQLExpression) to run an instant
-      // query and then maps the results to options. Should we support?
-    }
+    // // Figure out selection options
+    // let selection: VariableDefinition['selection'];
+    // if (grafanaVariable.multi === false) {
+    //   const { current } = grafanaVariable;
+    //   selection = {
+    //     default_value: 'value' in current ? current.value : '',
+    //   };
+    // } else {
+    //   const { current, includeAll, allValue } = grafanaVariable;
+    //   selection = {
+    //     default_value: current.value,
+    //     all_value: includeAll === false ? undefined : allValue ?? DEFAULT_ALL_VALUE,
+    //   };
+    // }
+
+    // // Figure out other common options
+    // const def: VariableDefinition = {
+    //   kind: '',
+    //   options: {},
+    //   display: {
+    //     label: label ?? name,
+    //     // TODO: Should we support hiding the label?
+    //     hide: hide === 2 ? true : false,
+    //   },
+    //   selection,
+    // };
+
+    // // Is a label names query?
+    // const labelNames = query.match(LABEL_NAMES);
+    // if (labelNames !== null) {
+    //   def.kind = 'PrometheusLabelNames';
+    //   // Grafana doesn't support label_names(metric), just label_names()
+    //   def.options.match = [];
+    //   variables[name] = def;
+    //   continue;
+    // }
+
+    // // Is a label values query?
+    // const labelValues = query.match(LABEL_VALUES);
+    // if (labelValues !== null) {
+    //   const [, matcher, labelName] = labelValues;
+    //   def.kind = 'PrometheusLabelValues';
+    //   def.options.label_name = labelName;
+
+    //   // Grafana allows label_values(labelName) or label_values(matcher, labelName)
+    //   def.options.match = [];
+    //   if (matcher !== undefined) {
+    //     def.options.match.push(matcher);
+    //   }
+    //   variables[name] = def;
+    //   continue;
+    // }
+
+    // // Is a metric names query?
+    // const metricNames = query.match(METRIC_NAMES);
+    // if (metricNames !== null) {
+    //   def.kind = 'PrometheusLabelValues';
+    //   def.options.label_name = '__name__';
+    //   // TODO: Grafana allows metrics(RegExp) where RegExp is used to filter
+    //   // results on the client side, should we support that?
+    //   variables[name] = def;
+    //   continue;
+    // }
+
+    // // Is a query result query?
+    // const queryResult = query.match(QUERY_RESULT);
+    // if (queryResult !== null) {
+    //   // TODO: Grafana supports query_result(promQLExpression) to run an instant
+    //   // query and then maps the results to options. Should we support?
+    // }
   }
   return variables;
 }

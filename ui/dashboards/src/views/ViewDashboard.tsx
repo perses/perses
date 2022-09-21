@@ -15,8 +15,7 @@ import { useEffect } from 'react';
 import { BoxProps } from '@mui/material';
 import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
 import { useQueryString } from '@perses-dev/plugin-system';
-import { TimeRangeProvider, TemplateVariablesProvider, DashboardProvider } from '../context';
-
+import { TimeRangeProvider, TemplateVariableProvider, DashboardProvider } from '../context';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends BoxProps {
@@ -49,9 +48,9 @@ export function ViewDashboard(props: ViewDashboardProps) {
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
       <TimeRangeProvider initialTimeRange={defaultTimeRange}>
-        <TemplateVariablesProvider variableDefinitions={spec.variables}>
+        <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
           <DashboardApp {...props}>{children}</DashboardApp>
-        </TemplateVariablesProvider>
+        </TemplateVariableProvider>
       </TimeRangeProvider>
     </DashboardProvider>
   );

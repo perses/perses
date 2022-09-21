@@ -30,21 +30,24 @@ import {
 } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import MenuIcon from 'mdi-material-ui/DotsVertical';
-import DragIcon from 'mdi-material-ui/Drag';
-import { useEditMode } from '../../context';
+import DragIcon from 'mdi-material-ui/DragVertical';
+import { useDashboardApp, useEditMode } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
+  groupIndex: number;
+  panelKey: string;
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, ...others } = props;
+  const { definition, groupIndex, panelKey, ...others } = props;
+
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const { width, height } = useResizeObserver({ ref: contentElement });
 
@@ -64,6 +67,12 @@ export function Panel(props: PanelProps) {
 
   const { isEditMode } = useEditMode();
 
+  const { openPanelDrawer } = useDashboardApp();
+
+  const handleEditButtonClick = () => {
+    openPanelDrawer({ groupIndex, panelKey });
+  };
+
   return (
     <Card
       ref={ref}
@@ -76,6 +85,8 @@ export function Panel(props: PanelProps) {
       }}
       variant="outlined"
       {...others}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <CardHeader
         title={
@@ -103,7 +114,7 @@ export function Panel(props: PanelProps) {
                 marginLeft: 'auto',
               }}
             >
-              {!isEditMode && definition.display.description && (
+              {!isEditMode && isHovered && definition.display.description && (
                 <InfoTooltip
                   id="info-tooltip"
                   description={definition.display.description}
@@ -117,16 +128,13 @@ export function Panel(props: PanelProps) {
                   />
                 </InfoTooltip>
               )}
-              {isEditMode && (
+              {isEditMode && isHovered && (
                 <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <IconButton aria-label="drag handle" size="small">
-                    <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
-                  </IconButton>
-                  <IconButton aria-label="edit panel" size="small">
+                  <IconButton aria-label="edit panel" size="small" onClick={handleEditButtonClick}>
                     <PencilIcon />
                   </IconButton>
-                  <IconButton aria-label="more" size="small">
-                    <MenuIcon />
+                  <IconButton aria-label="drag handle" size="small">
+                    <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
                   </IconButton>
                 </Stack>
               )}

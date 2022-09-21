@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-system",
-  "version": "0.6.0",
+  "version": "0.7.1",
   "description": "The plugin feature in Pereses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -18,13 +18,13 @@
     "clean": "rimraf dist/",
     "build": "tsc --build",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "test": "echo 'no test to run' && exit 0",
+    "test": "TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.6.0",
-    "@perses-dev/core": "^0.6.0",
+    "@perses-dev/components": "^0.7.1",
+    "@perses-dev/core": "^0.7.1",
     "immer": "^9.0.15",
     "use-immer": "^0.7.0"
   },
