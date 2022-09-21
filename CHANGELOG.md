@@ -2,13 +2,6 @@
 
 ## 0.8.0 / 2022-09-21
 
-- [BREAKINGCHANGE] Remove unused validate prop from plugin definitions #526
-- [BREAKINGCHANGE] usePlugin needs kind not definition #527
-- [BREAKINGCHANGE] Add metadata for individual plugins to plugin module metadata #531
-- [BREAKINGCHANGE] Panel plugins now need additional props to support visual editing #528
-- [BREAKINGCHANGE] Simplify plugin module export format #534
-- [BREAKINGCHANGE] Template variable definitions have changed completely #535
-- [BREAKINGCHANGE] Plugin spec for template variables has changed and only supports ListVariables #535
 - [FEATURE] ListVariable and TextVariable have been introduced #535
 - [FEATURE] Add a panel that supports markdown (no editing capabilities yet) #532, #541
 - [FEATURE] time range selection shareable URLs #530
@@ -21,6 +14,13 @@
 - [ENHANCEMENT] build process improvements #489, #490, #491 #515
 - [ENHANCEMENT] add datasource documentation #404
 - [BUGFIX] fix no kebab case error #538
+- [BREAKINGCHANGE] Remove unused validate prop from plugin definitions #526
+- [BREAKINGCHANGE] usePlugin needs kind not definition #527
+- [BREAKINGCHANGE] Add metadata for individual plugins to plugin module metadata #531
+- [BREAKINGCHANGE] Panel plugins now need additional props to support visual editing #528
+- [BREAKINGCHANGE] Simplify plugin module export format #534
+- [BREAKINGCHANGE] Template variable definitions have changed completely #535
+- [BREAKINGCHANGE] Plugin spec for template variables has changed and only supports ListVariables #535
 
 ## 0.7.1 / 2022-09-09
 
