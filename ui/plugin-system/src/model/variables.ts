@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,23 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject, ListVariableDefinition, VariableOption } from '@perses-dev/core';
+import { ListVariableDefinition } from '@perses-dev/core';
 import { usePlugin } from '../components/PluginLoadingBoundary';
+
+export type VariableOption = { label: string; value: string };
 
 /**
  * Plugin for handling custom VariableDefinitions.
  */
-export interface VariablePlugin<Options extends JsonObject = JsonObject> {
-  useVariableOptions: UseVariableOptionsHook<Options>;
+export interface VariablePlugin<Spec = unknown> {
+  useVariableOptions: UseVariableOptionsHook<Spec>;
 }
 
 /**
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type UseVariableOptionsHook<Options extends JsonObject = JsonObject> = (
-  definition: ListVariableDefinition<Options>
-) => {
+export type UseVariableOptionsHook<Spec> = (definition: ListVariableDefinition<Spec>) => {
   data: VariableOption[];
   loading: boolean;
   error?: Error;

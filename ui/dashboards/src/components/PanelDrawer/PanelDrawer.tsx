@@ -25,7 +25,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Drawer, ErrorAlert } from '@perses-dev/components';
-import { JsonObject } from '@perses-dev/core';
 import { PluginBoundary } from '@perses-dev/plugin-system';
 import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
@@ -46,14 +45,14 @@ const PanelDrawer = () => {
   let defaultDescription = '';
   if (panelDrawer?.panelKey) {
     // editing an existing panel
-    defaultPanelName = panels[panelDrawer.panelKey]?.display.name ?? '';
-    defaultDescription = panels[panelDrawer.panelKey]?.display.description ?? '';
+    defaultPanelName = panels[panelDrawer.panelKey]?.spec.display.name ?? '';
+    defaultDescription = panels[panelDrawer.panelKey]?.spec.display.description ?? '';
   }
   const [group, setGroup] = useState(panelDrawer?.groupIndex);
   const [panelName, setPanelName] = useState(defaultPanelName);
   const [panelDescription, setPanelDescription] = useState(defaultDescription);
   const [kind, setKind] = useState('');
-  const [options, setOptions] = useState<JsonObject>({});
+  const [options, setOptions] = useState<unknown>({});
 
   // TO DO: we might want to make the form a sub component we don't need this useEffect
   // currently, we need to reset the states whenever panelDrawer is reopened
@@ -62,8 +61,8 @@ const PanelDrawer = () => {
     setGroup(panelDrawer?.groupIndex);
     if (panelDrawer?.panelKey) {
       // display panel name and description in text fields when editing an existing panel
-      setPanelName(panels[panelDrawer.panelKey]?.display.name ?? '');
-      setPanelDescription(panels[panelDrawer.panelKey]?.display.description ?? '');
+      setPanelName(panels[panelDrawer.panelKey]?.spec.display.name ?? '');
+      setPanelDescription(panels[panelDrawer.panelKey]?.spec.display.description ?? '');
     } else {
       setPanelName('');
       setPanelDescription('');
@@ -116,9 +115,14 @@ const PanelDrawer = () => {
     updatePanel(
       panelKey,
       {
-        kind,
-        options,
-        display: { name: panelName, description: panelDescription },
+        kind: 'Panel',
+        spec: {
+          display: { name: panelName, description: panelDescription },
+          plugin: {
+            kind,
+            spec: options,
+          },
+        },
       },
       panelDrawer.groupIndex
     );
@@ -129,10 +133,15 @@ const PanelDrawer = () => {
       return;
     }
     updatePanel(panelDrawer.panelKey, {
-      ...panels[panelDrawer.panelKey],
-      kind,
-      options,
-      display: { name: panelName ?? '', description: panelDescription },
+      kind: 'Panel',
+      spec: {
+        ...panels[panelDrawer.panelKey]?.spec,
+        display: { name: panelName ?? '', description: panelDescription },
+        plugin: {
+          kind,
+          spec: options,
+        },
+      },
     });
     // TO DO: need to move panel if panel group changes
   };

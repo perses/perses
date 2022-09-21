@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,21 +12,9 @@
 // limitations under the License.
 
 /**
- * Json config object.
- */
-export interface JsonObject {
-  [key: string]: Json | undefined;
-}
-
-/**
- * Json definition values.
- */
-export type Json = string | number | boolean | null | JsonObject | Json[];
-
-/**
  * Base type for definitions in JSON config resources.
  */
-export interface Definition<Options extends JsonObject> extends JsonObject {
+export interface Definition<Spec> {
   kind: string;
-  options: Options;
+  spec: Spec;
 }

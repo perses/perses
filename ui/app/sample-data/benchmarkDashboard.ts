@@ -27,381 +27,546 @@ const benchmarkDashboard: DashboardResource = {
     duration: '6h',
     variables: [
       {
-        name: 'job',
         kind: 'TextVariable',
-        options: {
+        spec: {
+          name: 'job',
           value: 'node',
         },
       },
       {
-        name: 'instance',
         kind: 'TextVariable',
-        options: {
+        spec: {
+          name: 'instance',
           value: 'demo.do.prometheus.io:9100',
         },
       },
       {
-        name: 'interval',
         kind: 'TextVariable',
-        options: {
+        spec: {
+          name: 'interval',
           value: '1m',
         },
       },
     ],
     panels: {
       markdownEx: {
-        kind: 'Markdown',
-        display: {
-          name: 'Dashboard Team Overview',
-          description: 'This is a markdown panel',
-        },
-        options: {
-          text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n[check the internet again](https://www.google.com)\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>Will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n",
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Dashboard Team Overview',
+            description: 'This is a markdown panel',
+          },
+          plugin: {
+            kind: 'Markdown',
+            spec: {
+              text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n[check the internet again](https://www.google.com)\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>Will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n",
+            },
+          },
         },
       },
       seriesTest: {
-        kind: 'LineChart',
-        display: { name: '1500+ Series', description: 'This is a line chart' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
-                // query: 'caddy_http_request_duration_seconds_bucket',
-              },
+        kind: 'Panel',
+        spec: {
+          display: { name: '1500+ Series', description: 'This is a line chart' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
+                        // query: 'caddy_http_request_duration_seconds_bucket',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: { kind: 'Bytes' },
             },
-          ],
-          unit: { kind: 'Bytes' },
+          },
         },
       },
       seriesTestAlt: {
-        kind: 'LineChart',
-        display: { name: '~130 Series', description: 'This is a line chart' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
-                // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
+        kind: 'Panel',
+        spec: {
+          display: { name: '~130 Series', description: 'This is a line chart' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
+                        // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: {
+                kind: 'Decimal',
+                decimal_places: 4,
               },
             },
-          ],
-          unit: {
-            kind: 'Decimal',
-            decimal_places: 4,
           },
         },
       },
       basicEx: {
-        kind: 'LineChart',
-        display: { name: 'Single Query' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query:
-                  '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Single Query' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: {
+                kind: 'PercentDecimal',
+                decimal_places: 0,
               },
             },
-          ],
-          unit: {
-            kind: 'PercentDecimal',
-            decimal_places: 0,
           },
         },
       },
       legendEx: {
-        kind: 'LineChart',
-        display: { name: 'Legend Example' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query:
-                  'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
-              },
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Legend Example' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              show_legend: true,
+              unit: { kind: 'Bytes' },
             },
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
-              },
-            },
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
-              },
-            },
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
-              },
-            },
-          ],
-          show_legend: true,
-          unit: { kind: 'Bytes' },
+          },
         },
       },
       doubleQueries: {
-        kind: 'LineChart',
-        display: { name: 'Thresholds Example', description: 'Description text' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_load15{instance="$instance",job="node"}',
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Thresholds Example', description: 'Description text' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_load15{instance="$instance",job="node"}',
+                      },
+                    },
+                  },
+                },
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_load1{instance="$instance",job="node"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              show_legend: false,
+              unit: {
+                kind: 'PercentDecimal',
+                decimal_places: 1,
+              },
+              thresholds: {
+                // default_color: '#000', // optional
+                steps: [
+                  {
+                    value: 0.4,
+                    name: 'Alert: Warning condition example',
+                    // color: '#FFFFFF',
+                  },
+                  {
+                    value: 0.75,
+                    name: 'Alert: Critical condition example',
+                    // color: '#0000FF', // blue
+                  },
+                ],
               },
             },
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query: 'node_load1{instance="$instance",job="node"}',
-              },
-            },
-          ],
-          show_legend: false,
-          unit: {
-            kind: 'PercentDecimal',
-            decimal_places: 1,
-          },
-          thresholds: {
-            // default_color: '#000', // optional
-            steps: [
-              {
-                value: 0.4,
-                name: 'Alert: Warning condition example',
-                // color: '#FFFFFF',
-              },
-              {
-                value: 0.75,
-                name: 'Alert: Critical condition example',
-                // color: '#0000FF', // blue
-              },
-            ],
           },
         },
       },
       cpu: {
-        kind: 'LineChart',
-        display: { name: 'CPU', description: 'This is a line chart' },
-        options: {
-          queries: [
-            {
-              kind: 'PrometheusGraphQuery',
-              options: {
-                query:
-                  'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+        kind: 'Panel',
+        spec: {
+          display: { name: 'CPU', description: 'This is a line chart' },
+          plugin: {
+            kind: 'LineChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'GraphQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+                      },
+                    },
+                  },
+                },
+              ],
+              unit: {
+                kind: 'Decimal',
+                decimal_places: 2,
               },
+              show_legend: true,
             },
-          ],
-          unit: {
-            kind: 'Decimal',
-            decimal_places: 2,
           },
-          show_legend: true,
         },
       },
       statSm: {
-        kind: 'StatChart',
-        display: {
-          name: 'Stat Sm',
-          // description: 'This is a stat chart',
-        },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query:
-                'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
-            },
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Stat Sm',
+            // description: 'This is a stat chart',
           },
-          calculation: 'Mean',
-          unit: {
-            kind: 'Decimal',
-            decimal_places: 1,
-            abbreviate: true,
+          plugin: {
+            kind: 'StatChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query:
+                        'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+                    },
+                  },
+                },
+              },
+              calculation: 'Mean',
+              unit: {
+                kind: 'Decimal',
+                decimal_places: 1,
+                abbreviate: true,
+              },
+            },
           },
         },
       },
       statRAM: {
-        kind: 'StatChart',
-        display: {
-          name: 'RAM Used',
-          description: 'This is a stat chart',
-        },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query:
-                '100 - ((node_memory_MemAvailable_bytes{job="node",instance="$instance"} * 100) / node_memory_MemTotal_bytes{job="node",instance="$instance"})',
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'RAM Used',
+            description: 'This is a stat chart',
+          },
+          plugin: {
+            kind: 'StatChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query:
+                        '100 - ((node_memory_MemAvailable_bytes{job="node",instance="$instance"} * 100) / node_memory_MemTotal_bytes{job="node",instance="$instance"})',
+                    },
+                  },
+                },
+              },
+              calculation: 'LastNumber',
+              unit: { kind: 'Percent' },
             },
           },
-          calculation: 'LastNumber',
-          unit: { kind: 'Percent' },
         },
       },
       statTotalRAM: {
-        kind: 'StatChart',
-        display: {
-          name: 'RAM Total',
-          description: 'This is a stat chart',
-        },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query: 'node_memory_MemTotal_bytes{job="node",instance="$instance"}',
-            },
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'RAM Total',
+            description: 'This is a stat chart',
           },
-          calculation: 'LastNumber',
-          unit: {
-            kind: 'Bytes',
-            decimal_places: 1,
+          plugin: {
+            kind: 'StatChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query: 'node_memory_MemTotal_bytes{job="node",instance="$instance"}',
+                    },
+                  },
+                },
+              },
+              calculation: 'LastNumber',
+              unit: {
+                kind: 'Bytes',
+                decimal_places: 1,
+              },
+            },
           },
         },
       },
       statMd: {
-        kind: 'StatChart',
-        display: {
-          name: 'Stat Md',
-          // description: 'This is a stat chart',
-        },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query:
-                'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Stat Md',
+            // description: 'This is a stat chart',
+          },
+          plugin: {
+            kind: 'StatChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query:
+                        'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
+                    },
+                  },
+                },
+              },
+              calculation: 'Sum',
+              unit: {
+                kind: 'Decimal',
+                decimal_places: 2,
+                abbreviate: true,
+              },
+              sparkline: {
+                color: '#e65013', // red
+                width: 1.5,
+              },
             },
-          },
-          calculation: 'Sum',
-          unit: {
-            kind: 'Decimal',
-            decimal_places: 2,
-            abbreviate: true,
-          },
-          sparkline: {
-            color: '#e65013', // red
-            width: 1.5,
           },
         },
       },
       statLg: {
-        kind: 'StatChart',
-        display: {
-          name: 'Stat Lg',
-          description: 'This is a stat chart',
-        },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query:
-                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Stat Lg',
+            description: 'This is a stat chart',
+          },
+          plugin: {
+            kind: 'StatChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query:
+                        '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+                    },
+                  },
+                },
+              },
+              calculation: 'Mean', // 'First', 'Last', 'LastNumber'
+              unit: {
+                kind: 'Percent', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years',
+              },
+              sparkline: {
+                area_opacity: 0.2,
+              },
             },
-          },
-          calculation: 'Mean', // 'First', 'Last', 'LastNumber'
-          unit: {
-            kind: 'Percent', // 'Percent', 'Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years',
-          },
-          sparkline: {
-            area_opacity: 0.2,
           },
         },
       },
       gaugeEx: {
-        kind: 'GaugeChart',
-        display: { name: 'Gauge Ex', description: 'This is a gauge chart' },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query:
-                '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Gauge Ex', description: 'This is a gauge chart' },
+          plugin: {
+            kind: 'GaugeChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query:
+                        '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+                    },
+                  },
+                },
+              },
+              calculation: 'LastNumber',
+              unit: { kind: 'Percent' },
+              thresholds: {
+                // default_color: '#000', // optional
+                steps: [
+                  {
+                    value: 85,
+                    // color: '#800080',
+                  },
+                  {
+                    value: 95,
+                    // color: '#0000FF',
+                  },
+                ],
+              },
             },
-          },
-          calculation: 'LastNumber',
-          unit: { kind: 'Percent' },
-          thresholds: {
-            // default_color: '#000', // optional
-            steps: [
-              {
-                value: 85,
-                // color: '#800080',
-              },
-              {
-                value: 95,
-                // color: '#0000FF',
-              },
-            ],
           },
         },
       },
       gaugeAltEx: {
-        kind: 'GaugeChart',
-        display: { name: 'Gauge Alt Ex', description: 'GaugeChart description text' },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query: 'node_load15{instance="$instance",job="node"}',
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Gauge Alt Ex', description: 'GaugeChart description text' },
+          plugin: {
+            kind: 'GaugeChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query: 'node_load15{instance="$instance",job="node"}',
+                    },
+                  },
+                },
+              },
+              calculation: 'LastNumber',
+              unit: {
+                kind: 'PercentDecimal',
+                decimal_places: 1,
+              },
+              thresholds: {
+                // default_color: '#000', // optional
+                steps: [
+                  {
+                    value: 0.5,
+                    name: 'Alert: Warning condition example',
+                    // color: '#FFFFFF',
+                  },
+                  {
+                    value: 0.75,
+                    name: 'Alert: Critical condition example',
+                    // color: '#0000FF', // blue
+                  },
+                ],
+              },
             },
-          },
-          calculation: 'LastNumber',
-          unit: {
-            kind: 'PercentDecimal',
-            decimal_places: 1,
-          },
-          thresholds: {
-            // default_color: '#000', // optional
-            steps: [
-              {
-                value: 0.5,
-                name: 'Alert: Warning condition example',
-                // color: '#FFFFFF',
-              },
-              {
-                value: 0.75,
-                name: 'Alert: Critical condition example',
-                // color: '#0000FF', // blue
-              },
-            ],
           },
         },
       },
       gaugeFormatTest: {
-        kind: 'GaugeChart',
-        display: { name: 'Gauge Format Test' },
-        options: {
-          query: {
-            kind: 'PrometheusGraphQuery',
-            options: {
-              query:
-                'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Gauge Format Test' },
+          plugin: {
+            kind: 'GaugeChart',
+            spec: {
+              query: {
+                kind: 'GraphQuery',
+                spec: {
+                  plugin: {
+                    kind: 'PrometheusGraphQuery',
+                    spec: {
+                      query:
+                        'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+                    },
+                  },
+                },
+              },
+              calculation: 'LastNumber',
+              unit: {
+                kind: 'Decimal', // 'Decimal'
+              },
+              max: 95000000,
+              thresholds: {
+                steps: [
+                  {
+                    value: 71000000,
+                  },
+                  {
+                    value: 82000000,
+                  },
+                ],
+              },
             },
-          },
-          calculation: 'LastNumber',
-          unit: {
-            kind: 'Decimal', // 'Decimal'
-          },
-          max: 95000000,
-          thresholds: {
-            steps: [
-              {
-                value: 71000000,
-              },
-              {
-                value: 82000000,
-              },
-            ],
           },
         },
       },

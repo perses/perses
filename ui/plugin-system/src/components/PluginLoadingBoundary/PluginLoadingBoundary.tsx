@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { Fragment, createContext, useContext, useMemo, useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
 import { PluginType, ALL_PLUGIN_TYPES, PluginImplementation } from '../../model';
@@ -123,7 +122,7 @@ export function usePluginLoadingBoundary() {
 export function usePlugin<Type extends PluginType>(
   pluginType: Type,
   kind: string
-): PluginImplementation<Type, JsonObject> | undefined {
+): PluginImplementation<Type, unknown> | undefined {
   // Tell the loading boundary about the dependency
   const { registerPluginDependency } = usePluginLoadingBoundary();
   useEffect(() => {

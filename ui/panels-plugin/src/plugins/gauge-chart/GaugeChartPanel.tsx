@@ -26,12 +26,16 @@ export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const {
     definition: {
-      options: { query, calculation, max },
+      spec: {
+        plugin: { spec: pluginSpec },
+      },
     },
     contentDimensions,
   } = props;
-  const unit = props.definition.options.unit ?? { kind: 'PercentDecimal', decimal_places: 1 };
-  const thresholds = props.definition.options.thresholds ?? defaultThresholdInput;
+  const { query, calculation, max } = pluginSpec;
+
+  const unit = pluginSpec.unit ?? { kind: 'PercentDecimal', decimal_places: 1 };
+  const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });

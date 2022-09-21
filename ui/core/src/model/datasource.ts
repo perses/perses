@@ -13,7 +13,6 @@
 
 import { Metadata, ProjectMetadata } from './resource';
 
-// TODO: Should use Definition<> and JsonObject?
 export interface DatasourceSpecDefinition {
   kind: string;
   default: boolean;

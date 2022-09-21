@@ -11,14 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, JsonObject, useMemoized } from '@perses-dev/core';
-import {
-  GraphData,
-  GraphQueryDefinition,
-  GraphQueryPlugin,
-  UseGraphQueryHook,
-  UseGraphQueryHookOptions,
-} from '@perses-dev/plugin-system';
+import { DurationString, useMemoized, GraphQueryDefinition } from '@perses-dev/core';
+import { GraphData, GraphQueryPlugin, UseGraphQueryHook, UseGraphQueryHookOptions } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';
@@ -27,7 +21,7 @@ import { useRangeQuery } from '../model/prometheus-client';
 import { TemplateString, useReplaceTemplateString } from '../model/templating';
 import { getDurationStringSeconds, useDashboardPrometheusTimeRange, usePanelRangeStep } from '../model/time';
 
-interface PrometheusGraphQueryOptions extends JsonObject {
+interface PrometheusGraphQueryOptions {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
@@ -37,7 +31,9 @@ function usePrometheusGraphQuery(
   definition: GraphQueryDefinition<PrometheusGraphQueryOptions>,
   hookOptions?: UseGraphQueryHookOptions
 ): ReturnType<UseGraphQueryHook<PrometheusGraphQueryOptions>> {
-  const minStep = getDurationStringSeconds(definition.options.min_step);
+  const pluginSpec = definition.spec.plugin.spec;
+
+  const minStep = getDurationStringSeconds(pluginSpec.min_step);
   const timeRange = useDashboardPrometheusTimeRange();
   const step = usePanelRangeStep(timeRange, minStep, undefined, hookOptions?.suggestedStepMs);
 
@@ -57,7 +53,7 @@ function usePrometheusGraphQuery(
     };
   }, [timeRange, step]);
 
-  const query = useReplaceTemplateString(definition.options.query.replace('$__rate_interval', `15s`));
+  const query = useReplaceTemplateString(pluginSpec.query.replace('$__rate_interval', `15s`));
 
   const request: RangeQueryRequestParameters = {
     query,

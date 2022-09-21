@@ -13,21 +13,10 @@
 
 import { Definition } from './definitions';
 
-export interface PanelDefinition<PluginSpec = unknown> extends Definition<PanelSpec<PluginSpec>> {
-  kind: 'Panel';
+export interface GraphQueryDefinition<PluginSpec = unknown> extends Definition<GraphQuerySpec<PluginSpec>> {
+  kind: 'GraphQuery';
 }
 
-export interface PanelSpec<PluginSpec> {
-  display: {
-    name: string;
-    description?: string;
-  };
+export interface GraphQuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
-}
-
-/**
- * A reference to a panel defined in the DashboardSpec.
- */
-export interface PanelRef {
-  $ref: `#/spec/panels/${string}`;
 }

@@ -11,9 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-
-export interface MarkdownPanelOptions extends JsonObject {
+export interface MarkdownPanelOptions {
   text: string;
 }
 

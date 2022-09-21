@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { usePanelPlugin, PanelProps } from '@perses-dev/plugin-system';
 
-export type PanelContentProps = PanelProps<JsonObject>;
+export type PanelContentProps = PanelProps<unknown>;
 
 /**
  * A small wrapper component that renders the appropriate PanelComponent from a Panel plugin based on the panel
@@ -22,6 +21,6 @@ export type PanelContentProps = PanelProps<JsonObject>;
  * the plugin is loading.
  */
 export function PanelContent(props: PanelContentProps) {
-  const { PanelComponent } = usePanelPlugin(props.definition.kind);
+  const { PanelComponent } = usePanelPlugin(props.definition.spec.plugin.kind);
   return <PanelComponent {...props} />;
 }

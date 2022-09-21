@@ -13,7 +13,6 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { useImmer } from 'use-immer';
-import { JsonObject } from '@perses-dev/core';
 import {
   Plugin,
   PluginModuleResource,
@@ -32,7 +31,7 @@ export type PluginResourcesByTypeAndKind = {
 
 // Once a plugin is registered, it's stored by plugin type and kind
 export type LoadedPluginsByTypeAndKind = {
-  [Type in PluginType]: Record<string, PluginImplementation<Type, JsonObject>>;
+  [Type in PluginType]: Record<string, PluginImplementation<Type, unknown>>;
 };
 
 /**
@@ -85,7 +84,7 @@ export function useRegistryState(installedPlugins?: PluginModuleResource[]) {
       }
 
       // Treat plugin module as JS module with named exports that are each a Plugin
-      const plugins = pluginModule as Record<string, Plugin<JsonObject>>;
+      const plugins = pluginModule as Record<string, Plugin<unknown>>;
 
       setPlugins((draft) => {
         // Look for all the plugins specified in the metadata

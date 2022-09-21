@@ -70,9 +70,14 @@ describe('Panel Drawer', () => {
     expect(updatePanel).toHaveBeenCalledWith(
       'NewPanel',
       {
-        kind: '',
-        display: { name: 'New Panel', description: '' },
-        options: {},
+        kind: 'Panel',
+        spec: {
+          display: { name: 'New Panel', description: '' },
+          plugin: {
+            kind: '',
+            spec: {},
+          },
+        },
       },
       0
     );
@@ -91,9 +96,14 @@ describe('Panel Drawer', () => {
     userEvent.type(nameInput, 'cpu usage');
     userEvent.click(screen.getByText('Apply'));
     expect(updatePanel).toHaveBeenCalledWith('cpu', {
-      display: { name: 'cpu usage', description: '' },
-      kind: '',
-      options: {},
+      kind: 'Panel',
+      spec: {
+        display: { name: 'cpu usage', description: '' },
+        plugin: {
+          kind: '',
+          spec: {},
+        },
+      },
     });
   });
 });

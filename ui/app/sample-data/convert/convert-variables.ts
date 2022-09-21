@@ -24,9 +24,9 @@ export function convertVariables(grafanaVariables: GrafanaVariable[]): Dashboard
   for (const grafanaVariable of grafanaVariables) {
     // Convert to text variable for now
     const variable: VariableDefinition = {
-      name: grafanaVariable.name,
       kind: 'TextVariable',
-      options: {
+      spec: {
+        name: grafanaVariable.name,
         value: '',
       },
     };

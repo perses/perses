@@ -26,12 +26,17 @@ describe('Panel', () => {
   beforeEach(() => {
     props = {
       definition: {
-        display: {
-          name: 'Fake Panel',
-          description: 'This is a fake panel',
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Fake Panel',
+            description: 'This is a fake panel',
+          },
+          plugin: {
+            kind: 'FakePanel',
+            spec: {},
+          },
         },
-        kind: 'FakePanel',
-        options: {},
       },
       groupIndex: 0,
       panelKey: 'panelRef',
