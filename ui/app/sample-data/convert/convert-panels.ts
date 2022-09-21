@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnyGraphQueryDefinition, AnyPanelDefinition, DashboardSpec } from '@perses-dev/core';
+import { GraphQueryDefinition, PanelDefinition, DashboardSpec } from '@perses-dev/core';
 import { camelCase } from 'lodash-es';
 import {
   GrafanaGaugePanel,
@@ -62,7 +62,7 @@ export function convertPanels(rowsAndPanels: Array<GrafanaRow | GrafanaPanel>): 
   return { panels, panelKeys };
 }
 
-function convertPanel(grafanaPanel: GrafanaPanel): AnyPanelDefinition {
+function convertPanel(grafanaPanel: GrafanaPanel): PanelDefinition {
   switch (grafanaPanel.type) {
     case 'graph':
       return convertGraphPanel(grafanaPanel);
@@ -72,28 +72,38 @@ function convertPanel(grafanaPanel: GrafanaPanel): AnyPanelDefinition {
       return convertGaugePanel(grafanaPanel);
     default:
       return {
-        kind: 'EmptyChart',
-        display: {
-          name: grafanaPanel.title,
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: grafanaPanel.title,
+          },
+          panelPlugin: {
+            kind: 'EmptyChart',
+            spec: {},
+          },
         },
-        options: {},
       };
   }
 }
 
-function convertGraphPanel(graphPanel: GrafanaGraphPanel): AnyPanelDefinition {
+function convertGraphPanel(graphPanel: GrafanaGraphPanel): PanelDefinition {
   return {
-    kind: 'LineChart',
-    display: {
-      name: graphPanel.title,
-    },
-    options: {
-      queries: graphPanel.targets.map(convertQueryTarget),
+    kind: 'Panel',
+    spec: {
+      display: {
+        name: graphPanel.title,
+      },
+      panelPlugin: {
+        kind: 'LineChart',
+        spec: {
+          queries: graphPanel.targets.map(convertQueryTarget),
+        },
+      },
     },
   };
 }
 
-function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
+function convertGaugePanel(gaugePanel: GrafanaGaugePanel): PanelDefinition {
   // TODO: Does a Gauge chart with multiple queries even make sense?
   const target = gaugePanel.targets[0];
 
@@ -103,53 +113,68 @@ function convertGaugePanel(gaugePanel: GrafanaGaugePanel): AnyPanelDefinition {
   });
 
   return {
-    kind: 'GaugeChart',
-    display: {
-      name: gaugePanel.title,
-    },
-    options: {
-      query: convertQueryTarget(target),
-      calculation: 'LastNumber',
-      unit: { kind: 'Percent' }, // TODO (sjcobb): add calc mapping, support gauge formats other than percents
-      thresholds: {
-        steps: filteredThresholdSteps,
+    kind: 'Panel',
+    spec: {
+      display: {
+        name: gaugePanel.title,
+      },
+      panelPlugin: {
+        kind: 'GaugeChart',
+        spec: {
+          query: convertQueryTarget(target),
+          calculation: 'LastNumber',
+          unit: { kind: 'Percent' }, // TODO (sjcobb): add calc mapping, support gauge formats other than percents
+          thresholds: {
+            steps: filteredThresholdSteps,
+          },
+        },
       },
     },
   };
 }
 
-function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): AnyPanelDefinition {
+function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): PanelDefinition {
   const target = statPanel.targets[0];
   const convertedPanel = {
-    kind: 'StatChart',
-    display: {
-      name: statPanel.title,
-    },
-    options: {
-      query: convertQueryTarget(target),
-      calculation: convertTransformation(statPanel.valueName),
-      unit: {
-        kind: 'Decimal',
-        decimal_places: statPanel.decimals ?? 2,
-        abbreviate: true,
+    kind: 'Panel' as const,
+    spec: {
+      display: {
+        name: statPanel.title,
+      },
+      panelPlugin: {
+        kind: 'StatChart',
+        spec: {
+          query: convertQueryTarget(target),
+          calculation: convertTransformation(statPanel.valueName),
+          unit: {
+            kind: 'Decimal',
+            decimal_places: statPanel.decimals ?? 2,
+            abbreviate: true,
+          },
+        },
       },
     },
   };
   if (statPanel.sparkline.show === true) {
-    convertedPanel.options['sparkline'] = {};
+    convertedPanel.spec.panelPlugin.spec['sparkline'] = {};
   }
   return convertedPanel;
 }
 
-function convertQueryTarget(target?: PromQueryTarget): AnyGraphQueryDefinition {
-  const query = target.expr ?? '';
-  const min_step = target.step === undefined ? undefined : `${target.step}s`;
+function convertQueryTarget(target?: PromQueryTarget): GraphQueryDefinition {
+  const query = target?.expr ?? '';
+  const min_step = target?.step === undefined ? undefined : `${target.step}s`;
 
   return {
-    kind: 'PrometheusGraphQuery',
-    options: {
-      query,
-      min_step,
+    kind: 'GraphQuery',
+    spec: {
+      graphQueryPlugin: {
+        kind: 'PrometheusGraphQuery',
+        spec: {
+          query,
+          min_step,
+        },
+      },
     },
   };
 }
