@@ -16,6 +16,10 @@
 - [ENHANCEMENT] QueryStringProvider allows apps to pass their own utils to update the URL #530
 - [ENHANCEMENT] DashboardProvider improvements #540
 - [ENHANCEMENT] Governance process changes #431 #522 #523 
+- [ENHANCEMENT] Use React 18 for development, allow React 17 backward compatability #533
+- [ENHANCEMENT] upgrade go to 1.19 #543
+- [ENHANCEMENT] build process improvements #489, #490, #491 #515
+- [ENHANCEMENT] add datasource documentation #404
 - [BUGFIX] fix no kebab case error #538
 
 ## 0.7.1 / 2022-09-09
