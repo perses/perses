@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, UseQueryOptions } from 'react-query';
 import { fetchJson } from '@perses-dev/core';
-import { useLegacyDatasources } from '@perses-dev/plugin-system';
+import { LegacyDatasources } from '@perses-dev/plugin-system';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -25,98 +24,75 @@ import {
   RangeQueryResponse,
 } from './api-types';
 
-export type QueryOptions = Pick<UseQueryOptions, 'enabled'>;
+export type QueryOptions = {
+  datasource: LegacyDatasources['defaultDatasource'];
+};
 
 /**
  * Calls the `/api/v1/query` endpoint to get metrics data.
  */
-export function useInstantQuery(params: InstantQueryRequestParameters, queryOptions?: QueryOptions) {
-  return useQueryWithPost<InstantQueryRequestParameters, InstantQueryResponse>('/api/v1/query', params, queryOptions);
+export function instantQuery(params: InstantQueryRequestParameters, queryOptions: QueryOptions) {
+  return fetchWithPost<InstantQueryRequestParameters, InstantQueryResponse>('/api/v1/query', params, queryOptions);
 }
 
 /**
  * Calls the `/api/v1/query_range` endpoint to get metrics data.
  */
-export function useRangeQuery(params: RangeQueryRequestParameters, queryOptions?: QueryOptions) {
-  return useQueryWithPost<RangeQueryRequestParameters, RangeQueryResponse>('/api/v1/query_range', params, queryOptions);
+export function rangeQuery(params: RangeQueryRequestParameters, queryOptions: QueryOptions) {
+  return fetchWithPost<RangeQueryRequestParameters, RangeQueryResponse>('/api/v1/query_range', params, queryOptions);
 }
 
 /**
  * Calls the `/api/v1/labels` endpoint to get a list of label names.
  */
-export function useLabelNames(params: LabelNamesRequestParameters, queryOptions?: QueryOptions) {
-  return useQueryWithPost<LabelNamesRequestParameters, LabelNamesResponse>('/api/v1/labels', params, queryOptions);
+export function labelNames(params: LabelNamesRequestParameters, queryOptions: QueryOptions) {
+  return fetchWithPost<LabelNamesRequestParameters, LabelNamesResponse>('/api/v1/labels', params, queryOptions);
 }
 
 /**
- * Calls the `/api/v1/label/{labelName}/values` endpoint to get a list of
- * values for a label.
+ * Calls the `/api/v1/label/{labelName}/values` endpoint to get a list of values for a label.
  */
-export function useLabelValues(params: LabelValuesRequestParameters, queryOptions?: QueryOptions) {
+export function labelValues(params: LabelValuesRequestParameters, queryOptions: QueryOptions) {
   const { labelName, ...searchParams } = params;
   const apiURI = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
-  return useQueryWithGet<typeof searchParams, LabelValuesResponse>(apiURI, searchParams, queryOptions);
+  return fetchWithGet<typeof searchParams, LabelValuesResponse>(apiURI, searchParams, queryOptions);
 }
 
-function useQueryWithGet<T extends RequestParams<T>, TResponse>(
-  apiURI: string,
-  params: T,
-  queryOptions?: QueryOptions
-) {
+function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
   const {
-    defaultDatasource: {
+    datasource: {
       spec: {
         http: { url: datasourceURL },
       },
     },
-  } = useLegacyDatasources();
-  const key = [datasourceURL, apiURI, params] as const;
+  } = queryOptions;
 
-  return useQuery<TResponse, Error, TResponse, typeof key>(
-    key,
-    () => {
-      let url = `${datasourceURL}${apiURI}`;
-
-      const urlParams = createSearchParams(params).toString();
-      if (urlParams !== '') {
-        url += `?${urlParams}`;
-      }
-
-      return fetchJson<TResponse>(url, { method: 'GET' });
-    },
-    queryOptions
-  );
+  let url = `${datasourceURL}${apiURI}`;
+  const urlParams = createSearchParams(params).toString();
+  if (urlParams !== '') {
+    url += `?${urlParams}`;
+  }
+  return fetchJson<TResponse>(url, { method: 'GET' });
 }
 
-function useQueryWithPost<T extends RequestParams<T>, TResponse>(
-  apiURI: string,
-  params: T,
-  queryOptions?: QueryOptions
-) {
+function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
   const {
-    defaultDatasource: {
+    datasource: {
       spec: {
         http: { url: datasourceURL },
       },
     },
-  } = useLegacyDatasources();
-  const key = [datasourceURL, apiURI, params] as const;
+  } = queryOptions;
 
-  return useQuery<TResponse, Error, TResponse, typeof key>(
-    key,
-    () => {
-      const url = `${datasourceURL}${apiURI}`;
-      const init = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: createSearchParams(params),
-      };
-      return fetchJson<TResponse>(url, init);
+  const url = `${datasourceURL}${apiURI}`;
+  const init = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    queryOptions
-  );
+    body: createSearchParams(params),
+  };
+  return fetchJson<TResponse>(url, init);
 }
 
 // Request parameter values we know how to serialize

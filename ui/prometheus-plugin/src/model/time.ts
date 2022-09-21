@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, parseDurationString, useMemoized } from '@perses-dev/core';
-import { useTimeRange } from '@perses-dev/plugin-system';
+import { AbsoluteTimeRange, DurationString, parseDurationString } from '@perses-dev/core';
 import { milliseconds, getUnixTime } from 'date-fns';
-import { useRef } from 'react';
 import { UnixTimestampSeconds } from './api-types';
 
 export interface PrometheusTimeRange {
@@ -23,20 +21,14 @@ export interface PrometheusTimeRange {
 }
 
 /**
- * Get the time range for the current dashboard, converted to Prometheus time.
+ * Converts an AbsoluteTimeRange to Prometheus time in Unix time (i.e. in seconds).
  */
-export function useDashboardPrometheusTimeRange() {
-  const {
-    timeRange: { start, end },
-  } = useTimeRange();
-
-  // Only recalculate the time range if the value on the dashboard changes
-  return useMemoized(() => {
-    return {
-      start: Math.ceil(getUnixTime(start)),
-      end: Math.ceil(getUnixTime(end)),
-    };
-  }, [start, end]);
+export function getPrometheusTimeRange(timeRange: AbsoluteTimeRange) {
+  const { start, end } = timeRange;
+  return {
+    start: Math.ceil(getUnixTime(start)),
+    end: Math.ceil(getUnixTime(end)),
+  };
 }
 
 // Max data points to allow returning from a Prom Query, used to calculate a
@@ -44,32 +36,20 @@ export function useDashboardPrometheusTimeRange() {
 const MAX_PROM_DATA_POINTS = 10000;
 
 /**
- * Gets the step to use for a Panel range query. Tries to take into account
- * the width of the panel, any minimum step/resolution set by the user, and
- * a "safe" step based on the max data points we want to allow returning from
- * a Prom query.
+ * Gets the step to use for a Prom range query. Tries to take into account a suggested step size (probably based on the
+ * width of a visualization where the data will be graphed), any minimum step/resolution set by the user, and a "safe"
+ * step based on the max data points we want to allow returning from a Prom query.
  */
-export function usePanelRangeStep(
-  timeRange: PrometheusTimeRange,
-  minStepSeconds = 15,
-  resolution = 1,
-  suggestedStepMs = 0
-) {
-  // Keep track of the latest suggested step so we don't re-run the query if it changes
-  const latestSuggestedStep = useRef(suggestedStepMs * 1000);
-  latestSuggestedStep.current = suggestedStepMs * 1000;
+export function getRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15, resolution = 1, suggestedStepMs = 0) {
+  const suggestedStepSeconds = suggestedStepMs * 1000;
+  const queryRangeSeconds = timeRange.end - timeRange.start;
 
-  // Whenever the time range changes, recalculate the appropriate step
-  return useMemoized(() => {
-    const queryRangeSeconds = timeRange.end - timeRange.start;
+  let safeStep = queryRangeSeconds / MAX_PROM_DATA_POINTS;
+  if (safeStep > 1) {
+    safeStep = Math.ceil(safeStep);
+  }
 
-    let safeStep = queryRangeSeconds / MAX_PROM_DATA_POINTS;
-    if (safeStep > 1) {
-      safeStep = Math.ceil(safeStep);
-    }
-
-    return Math.max(latestSuggestedStep.current * resolution, minStepSeconds, safeStep);
-  }, [timeRange, minStepSeconds, resolution]);
+  return Math.max(suggestedStepSeconds * resolution, minStepSeconds, safeStep);
 }
 
 /**
