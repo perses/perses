@@ -16,7 +16,7 @@ import { DashboardResource } from '@perses-dev/core';
 const demoDashboard: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
-    name: 'Node Stats',
+    name: 'Demo Dashboard',
     project: 'perses',
     created_at: '2021-11-09',
     updated_at: '2021-11-09',
@@ -24,7 +24,7 @@ const demoDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '1h',
+    duration: '30m',
     variables: [
       {
         name: 'job',

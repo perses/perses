@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect } from 'react';
 import { BoxProps } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
-import { TimeRangeStateProvider, DashboardProvider, TemplateVariableProvider } from '../context';
+import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
+import { useQueryString } from '@perses-dev/plugin-system';
+import { TimeRangeProvider, TemplateVariableProvider, DashboardProvider } from '../context';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends BoxProps {
@@ -28,15 +30,29 @@ export function ViewDashboard(props: ViewDashboardProps) {
     dashboardResource: { spec },
     children,
   } = props;
-  const pastDuration = spec.duration;
+
+  const { queryString, setQueryString } = useQueryString();
+  const dashboardDuration = spec.duration ?? '1h';
+  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString);
+
+  // TODO: add reusable sync query string or no-op util
+  useEffect(() => {
+    const currentParams = Object.fromEntries([...queryString]);
+    // if app does not provide query string implementation, setTimeRange is used instead
+    if (!currentParams.start && setQueryString) {
+      // default to duration in dashboard definition if start param is not already set
+      queryString.set('start', dashboardDuration);
+      setQueryString(queryString);
+    }
+  }, [dashboardDuration, queryString, setQueryString]);
 
   return (
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
-      <TimeRangeStateProvider initialValue={{ pastDuration }}>
+      <TimeRangeProvider initialTimeRange={defaultTimeRange}>
         <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
           <DashboardApp {...props}>{children}</DashboardApp>
         </TemplateVariableProvider>
-      </TimeRangeStateProvider>
+      </TimeRangeProvider>
     </DashboardProvider>
   );
 }

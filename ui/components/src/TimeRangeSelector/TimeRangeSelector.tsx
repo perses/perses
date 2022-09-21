@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import { TimeRangeValue, RelativeTimeRange, isRelativeValue } from '@perses-dev/core';
+import EventIcon from '@mui/icons-material/Event';
+import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
 import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
@@ -23,7 +24,6 @@ export interface TimeOption {
 }
 
 interface TimeRangeSelectorProps {
-  inputLabel: string;
   value: TimeRangeValue;
   timeOptions: TimeOption[];
   onSelectChange: (event: SelectChangeEvent<string>) => void;
@@ -31,17 +31,28 @@ interface TimeRangeSelectorProps {
 }
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
-  const { inputLabel, value, timeOptions, onSelectChange, onCustomClick } = props;
-  const formattedValue = !isRelativeValue(value) ? formatAbsoluteRange(value, DATE_TIME_FORMAT) : value.pastDuration;
+  const { value, timeOptions, onSelectChange, onCustomClick } = props;
+  const formattedValue = !isRelativeTimeRange(value)
+    ? formatAbsoluteRange(value, DATE_TIME_FORMAT)
+    : value.pastDuration;
   return (
-    <Select value={formattedValue} label={inputLabel} onChange={onSelectChange}>
+    <Select
+      value={formattedValue}
+      onChange={onSelectChange}
+      IconComponent={EventIcon}
+      sx={{
+        '.MuiSelect-icon': {
+          marginTop: '1px',
+        },
+      }}
+    >
       {timeOptions.map((item, idx) => (
         <MenuItem key={idx} value={item.value.pastDuration}>
           {item.display}
         </MenuItem>
       ))}
 
-      {isRelativeValue(value) ? (
+      {isRelativeTimeRange(value) ? (
         <MenuItem
           onClick={() => {
             onCustomClick();

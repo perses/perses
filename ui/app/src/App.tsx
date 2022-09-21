@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,8 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
-import { ErrorAlert, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/components';
+import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
+import { QueryStringProvider } from '@perses-dev/dashboards';
 import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
 import { DataSourceRegistry } from './context/DataSourceRegistry';
@@ -20,15 +23,22 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
 
+// app specific echarts option overrides, empty since perses uses default
+// https://apache.github.io/echarts-handbook/en/concepts/style/#theme
+const ECHARTS_THEME_OVERRIDES = {};
+
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
-  const muiTheme = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // app specific echarts option overrides, empty since perses uses default
-  // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-  const echartsThemeOverrides = {};
-  const chartsTheme = generateChartsTheme('perses', muiTheme, echartsThemeOverrides);
+  // TODO: remove temporary location.key reload hack when routing setup properly
+  const location = useLocation();
+
+  const muiTheme = useTheme();
+  const chartsTheme: PersesChartsTheme = useMemo(() => {
+    return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
+  }, [muiTheme]);
 
   return (
     <Box
@@ -51,7 +61,10 @@ function App() {
           <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
               <DataSourceRegistry>
-                <ViewDashboard />
+                <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
+                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
+                  <ViewDashboard key={location.key} />
+                </QueryStringProvider>
               </DataSourceRegistry>
             </PluginBoundary>
           </PluginRegistry>

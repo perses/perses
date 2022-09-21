@@ -12,20 +12,17 @@
 // limitations under the License.
 
 import { useRef, useState } from 'react';
-import { Box, FormControl, InputLabel, Popover, Stack } from '@mui/material';
-import { sub } from 'date-fns';
+import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
-  AbsoluteTimeRange,
-  TimeRangeValue,
-  parseDurationString,
-  toAbsoluteTimeRange,
-  isRelativeValue,
   DurationString,
   RelativeTimeRange,
+  AbsoluteTimeRange,
+  TimeRangeValue,
+  getDefaultTimeRange,
 } from '@perses-dev/core';
-import { useTimeRange } from '@perses-dev/plugin-system';
-import { useTimeRangeSetter } from '../context/TimeRangeStateProvider';
+import { useTimeRange, useQueryString } from '@perses-dev/plugin-system';
+import { useDashboard } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -40,20 +37,15 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
 
-const FORM_CONTROL_LABEL = 'Time Range';
-
 export function TimeRangeControls() {
-  const { setTimeRange } = useTimeRangeSetter();
-  const { defaultDuration } = useTimeRange();
-  const defaultStart = parseDurationString(defaultDuration);
+  const { timeRange, setTimeRange } = useTimeRange();
+  const { dashboard } = useDashboard();
+  const { queryString } = useQueryString();
 
-  // TODO: default to URL param if populated
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>({ pastDuration: defaultDuration });
+  const defaultTimeRange = getDefaultTimeRange(dashboard.duration, queryString);
 
-  const [absoluteTimeRange, setAbsoluteTime] = useState<AbsoluteTimeRange>({
-    start: sub(new Date(), { ...defaultStart }),
-    end: new Date(),
-  });
+  // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -73,22 +65,17 @@ export function TimeRangeControls() {
         })}
       >
         <AbsoluteTimePicker
-          initialTimeRange={absoluteTimeRange}
-          onChange={(timeRange: TimeRangeValue) => {
+          initialTimeRange={timeRange}
+          onChange={(timeRange: AbsoluteTimeRange) => {
             setTimeRange(timeRange);
-            if (!isRelativeValue(timeRange)) {
-              setAbsoluteTime({ start: timeRange.start, end: timeRange.end });
-            }
             setSelectedTimeRange(timeRange);
             setShowCustomDateSelector(false);
           }}
         />
       </Popover>
       <FormControl fullWidth>
-        <InputLabel>{FORM_CONTROL_LABEL}</InputLabel>
         <Box ref={anchorEl}>
           <TimeRangeSelector
-            inputLabel={FORM_CONTROL_LABEL}
             timeOptions={TIME_OPTIONS}
             value={selectedTimeRange}
             onSelectChange={(event) => {
@@ -97,11 +84,8 @@ export function TimeRangeControls() {
                 pastDuration: duration as DurationString,
                 end: new Date(),
               };
-              // TODO: consolidate unnecessary state
+              setTimeRange(relativeTimeInput);
               setSelectedTimeRange(relativeTimeInput);
-              const convertedAbsoluteTime = toAbsoluteTimeRange(relativeTimeInput);
-              setTimeRange(convertedAbsoluteTime);
-              setAbsoluteTime(convertedAbsoluteTime);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {

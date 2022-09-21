@@ -11,4 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './ViewDashboard';
+import { Routes, Route } from 'react-router-dom';
+import App from './App';
+import Docs from './views/Docs';
+
+function Router() {
+  return (
+    <Routes>
+      <Route path="/" element={<App />} />
+      <Route path="docs" element={<Docs />} />
+    </Routes>
+  );
+}
+
+export default Router;
