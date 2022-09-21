@@ -59,10 +59,15 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'PrometheusGraphQuery',
-                  options: {
-                    query:
-                      'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+                  kind: 'GraphQuery',
+                  spec: {
+                    graphQueryPlugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+                      },
+                    },
                   },
                 },
               ],
@@ -80,28 +85,48 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'PrometheusGraphQuery',
-                  options: {
-                    query:
-                      'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
+                  kind: 'GraphQuery',
+                  spec: {
+                    graphQueryPlugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
+                      },
+                    },
                   },
                 },
                 {
-                  kind: 'PrometheusGraphQuery',
-                  options: {
-                    query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+                  kind: 'GraphQuery',
+                  spec: {
+                    graphQueryPlugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+                      },
+                    },
                   },
                 },
                 {
-                  kind: 'PrometheusGraphQuery',
-                  options: {
-                    query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                  kind: 'GraphQuery',
+                  spec: {
+                    graphQueryPlugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                      },
+                    },
                   },
                 },
                 {
-                  kind: 'PrometheusGraphQuery',
-                  options: {
-                    query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                  kind: 'GraphQuery',
+                  spec: {
+                    graphQueryPlugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                      },
+                    },
                   },
                 },
               ],
@@ -119,10 +144,15 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'PrometheusGraphQuery',
-                  options: {
-                    query:
-                      'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
+                  kind: 'GraphQuery',
+                  spec: {
+                    graphQueryPlugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
+                      },
+                    },
                   },
                 },
               ],
@@ -140,10 +170,15 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'PrometheusGraphQuery',
-                  options: {
-                    query:
-                      '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+                  kind: 'GraphQuery',
+                  spec: {
+                    graphQueryPlugin: {
+                      kind: 'PrometheusGraphQuery',
+                      spec: {
+                        query:
+                          '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+                      },
+                    },
                   },
                 },
               ],
