@@ -26,37 +26,37 @@ const demoDashboard: DashboardResource = {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
     duration: '30m',
     variables: [
-      // {
-      //   kind: 'TextVariable',
-      //   name: 'job',
-      //   spec: {
-      //     value: 'node',
-      //   },
-      // },
-      // {
-      //   name: 'instance',
-      //   kind: 'ListVariable',
-      //   spec: {
-      //     plugin: {
-      //       kind: 'StaticListVariable',
-      //       spec: {
-      //         values: ['demo.do.prometheus.io:3000', 'demo.do.prometheus.io:9100'],
-      //       },
-      //     },
-      //   },
-      // },
-      // {
-      //   name: 'interval',
-      //   kind: 'ListVariable',
-      //   spec: {
-      //     plugin: {
-      //       kind: 'StaticListVariable',
-      //       spec: {
-      //         values: ['1m', '5m'],
-      //       },
-      //     },
-      //   },
-      // },
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'job',
+          value: 'node',
+        },
+      },
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'instance',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['demo.do.prometheus.io:3000', 'demo.do.prometheus.io:9100'],
+            },
+          },
+        },
+      },
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'interval',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['1m', '5m'],
+            },
+          },
+        },
+      },
     ],
     panels: {
       seriesTest: {
