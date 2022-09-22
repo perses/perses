@@ -11,16 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { usePanelPlugin, PanelProps } from '@perses-dev/plugin-system';
+import { usePlugin, PanelProps } from '@perses-dev/plugin-system';
+import { Skeleton } from '@mui/material';
 
 export type PanelContentProps = PanelProps<unknown>;
 
 /**
  * A small wrapper component that renders the appropriate PanelComponent from a Panel plugin based on the panel
- * definition's kind. Used so that a PluginLoadingBoundary can be wrapped around this for fallback UI while
- * the plugin is loading.
+ * definition's kind. Used so that an ErrorBoundary can be wrapped around this.
  */
 export function PanelContent(props: PanelContentProps) {
-  const { PanelComponent } = usePanelPlugin(props.definition.spec.plugin.kind);
+  const {
+    definition: {
+      spec: {
+        plugin: { kind: pluginKind },
+      },
+    },
+    contentDimensions,
+  } = props;
+  const { data: plugin, isLoading } = usePlugin('Panel', pluginKind, { useErrorBoundary: true });
+  const PanelComponent = plugin?.PanelComponent;
+
+  if (isLoading) {
+    return <Skeleton variant="rectangular" width={contentDimensions?.width} height={contentDimensions?.height} />;
+  }
+
+  if (PanelComponent === undefined) {
+    throw new Error(`Missing PanelComponent from panel plugin for kind '${pluginKind}'`);
+  }
+
   return <PanelComponent {...props} />;
 }

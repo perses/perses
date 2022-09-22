@@ -12,15 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange, GraphQueryDefinition, UnixTimeMs } from '@perses-dev/core';
-import { useQuery } from 'react-query';
-import { usePlugin } from '../components/PluginLoadingBoundary';
-import {
-  LegacyDatasources,
-  useLegacyDatasources,
-  useTemplateVariableValues,
-  useTimeRange,
-  VariableStateMap,
-} from '../runtime';
+import { LegacyDatasources, VariableStateMap } from '../runtime';
 
 /**
  * A plugin for running graph queries.
@@ -51,43 +43,3 @@ export interface GraphSeries {
 }
 
 export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
-
-type UseGraphQueryOptions = {
-  suggestedStepMs?: number;
-};
-
-/**
- * Use a Graph Query's results from a graph query plugin at runtime.
- */
-export const useGraphQuery = (definition: GraphQueryDefinition, options?: UseGraphQueryOptions) => {
-  const plugin = usePlugin('GraphQuery', definition.spec.plugin.kind);
-
-  // Build the context object from data available at runtime
-  const { timeRange } = useTimeRange();
-  const variableState = useTemplateVariableValues();
-  const datasources = useLegacyDatasources();
-
-  const context: GraphQueryContext = {
-    suggestedStepMs: options?.suggestedStepMs,
-    timeRange,
-    variableState,
-    datasources,
-  };
-
-  const key = [definition, context] as const;
-  const { data, isLoading, error } = useQuery(
-    key,
-    ({ queryKey }) => {
-      // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
-      if (plugin === undefined) {
-        throw new Error('Expected plugin to be loaded');
-      }
-      const [definition, context] = queryKey;
-      return plugin.getGraphData(definition, context);
-    },
-    { enabled: plugin !== undefined }
-  );
-
-  // TODO: Stop aliasing fields, just return the hook results directly once we clean up query running in panels
-  return { data, loading: isLoading, error: error ?? undefined };
-};

@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useRef, useCallback } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
 import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
-import { useVariablePlugin, DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
+import { usePlugin, DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
 import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
 
 type TemplateVariableProps = {
@@ -37,7 +37,7 @@ export function TemplateVariable({ name }: TemplateVariableProps) {
 function ListVariable({ name }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name);
   const definition = ctx.definition as ListVariableDefinition;
-  const variablePlugin = useVariablePlugin(definition);
+  const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
 
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
   const allowMultiple = definition?.spec.allowMultiple === true;

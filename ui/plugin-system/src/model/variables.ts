@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { ListVariableDefinition } from '@perses-dev/core';
-import { usePlugin } from '../components/PluginLoadingBoundary';
 
 export type VariableOption = { label: string; value: string };
 
@@ -30,10 +29,3 @@ export interface VariablePlugin<Spec = unknown> {
 export type GetVariableOptions<Spec> = (
   definition: ListVariableDefinition<Spec>
 ) => Promise<{ data: VariableOption[] }>;
-
-/**
- * Use the variable options from a variable plugin at runtime.
- */
-export const useVariablePlugin = (definition: ListVariableDefinition) => {
-  return usePlugin('Variable', definition.spec.plugin.kind);
-};

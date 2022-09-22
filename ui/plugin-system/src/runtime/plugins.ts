@@ -28,8 +28,7 @@ type UsePluginOptions<T extends PluginType> = Omit<
 export function usePlugin<T extends PluginType>(pluginType: T, kind: string, options?: UsePluginOptions<T>) {
   const { getPlugin } = usePluginRegistry();
   const queryKey = getTypeAndKindKey(pluginType, kind);
-  const { data, isLoading, error } = useQuery(queryKey, () => getPlugin(pluginType, kind), options);
-  return { plugin: data, isLoading, error };
+  return useQuery(queryKey, () => getPlugin(pluginType, kind), options);
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
@@ -44,6 +43,5 @@ type UseListPluginMetadataOptions = Omit<
 export function useListPluginMetadata(pluginType: PluginType, options?: UseListPluginMetadataOptions) {
   const { listPluginMetadata } = usePluginRegistry();
   const queryKey: string = pluginType;
-  const { data, isLoading, error } = useQuery(queryKey, () => listPluginMetadata(pluginType), options);
-  return { pluginMetadata: data, isLoading, error };
+  return useQuery(queryKey, () => listPluginMetadata(pluginType), options);
 }
