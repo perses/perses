@@ -41,7 +41,7 @@ const MAX_PROM_DATA_POINTS = 10000;
  * step based on the max data points we want to allow returning from a Prom query.
  */
 export function getRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15, resolution = 1, suggestedStepMs = 0) {
-  const suggestedStepSeconds = suggestedStepMs * 1000;
+  const suggestedStepSeconds = suggestedStepMs / 1000;
   const queryRangeSeconds = timeRange.end - timeRange.start;
 
   let safeStep = queryRangeSeconds / MAX_PROM_DATA_POINTS;
