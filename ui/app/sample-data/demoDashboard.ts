@@ -25,6 +25,7 @@ const demoDashboard: DashboardResource = {
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
     duration: '30m',
+    // variables: {},
     variables: [
       {
         name: 'job',
@@ -397,7 +398,7 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 1',
             collapse: {
-              open: false,
+              open: true,
             },
           },
           items: [
@@ -423,12 +424,12 @@ const demoDashboard: DashboardResource = {
       {
         kind: 'Grid',
         spec: {
-          display: {
-            title: 'Row 2',
-            collapse: {
-              open: true,
-            },
-          },
+          // display: {
+          //   title: 'Row 2',
+          //   collapse: {
+          //     open: true,
+          //   },
+          // },
           items: [
             {
               x: 0,

@@ -37,7 +37,15 @@ export function GridLayout(props: GridLayoutProps) {
     ...others
   } = props;
 
-  const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
+  // allow display to be optional, default to open state
+  const rowDisplay = spec.display ?? {
+    title: '',
+    collapse: {
+      open: true,
+    },
+  };
+
+  const [isOpen, setIsOpen] = useState(rowDisplay.collapse?.open ?? true);
 
   const { isEditMode } = useEditMode();
 
@@ -57,17 +65,15 @@ export function GridLayout(props: GridLayoutProps) {
     <>
       <GlobalStyles styles={styles} />
       <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
-        {spec.display !== undefined && (
-          <GridTitle
-            groupIndex={groupIndex}
-            title={spec.display.title}
-            collapse={
-              spec.display.collapse === undefined
-                ? undefined
-                : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
-            }
-          />
-        )}
+        <GridTitle
+          groupIndex={groupIndex}
+          title={rowDisplay.title}
+          collapse={
+            rowDisplay.collapse === undefined
+              ? undefined
+              : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
+          }
+        />
         <Collapse in={isOpen} unmountOnExit>
           <ResponsiveGridLayout
             className="layout"
