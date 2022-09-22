@@ -24,12 +24,12 @@ export function PanelContent(props: PanelContentProps) {
   const {
     definition: {
       spec: {
-        plugin: { kind: pluginKind },
+        plugin: { kind: panelPluginKind },
       },
     },
     contentDimensions,
   } = props;
-  const { data: plugin, isLoading } = usePlugin('Panel', pluginKind, { useErrorBoundary: true });
+  const { data: plugin, isLoading } = usePlugin('Panel', panelPluginKind, { useErrorBoundary: true });
   const PanelComponent = plugin?.PanelComponent;
 
   if (isLoading) {
@@ -37,7 +37,7 @@ export function PanelContent(props: PanelContentProps) {
   }
 
   if (PanelComponent === undefined) {
-    throw new Error(`Missing PanelComponent from panel plugin for kind '${pluginKind}'`);
+    throw new Error(`Missing PanelComponent from panel plugin for kind '${panelPluginKind}'`);
   }
 
   return <PanelComponent {...props} />;
