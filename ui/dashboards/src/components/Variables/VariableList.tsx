@@ -62,7 +62,8 @@ export function TemplateVariableList() {
       </Drawer>
       <Box display={'flex'} justifyContent="space-between">
         <Stack direction={'row'} spacing={2}>
-          {Array.isArray(variableDefinitions) && variableDefinitions.map((v) => (
+          {Array.isArray(variableDefinitions) &&
+            variableDefinitions.map((v) => (
               <Box key={v.name}>
                 <TemplateVariable key={v.name} name={v.name} />
               </Box>
