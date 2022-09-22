@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { useEffect } from 'react';
-import { BoxProps } from '@mui/material';
+import { Box, BoxProps } from '@mui/material';
 import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
 import { useQueryString } from '@perses-dev/plugin-system';
-import { TimeRangeProvider, TemplateVariableProvider, DashboardProvider } from '../context';
+import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
+import { TimeRangeProvider, TemplateVariableProvider, DashboardProvider } from '../../context';
 import { DashboardApp } from './DashboardApp';
 
-export interface ViewDashboardProps extends BoxProps {
+export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
 }
 
@@ -26,10 +27,8 @@ export interface ViewDashboardProps extends BoxProps {
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
 export function ViewDashboard(props: ViewDashboardProps) {
-  const {
-    dashboardResource: { spec },
-    children,
-  } = props;
+  const { dashboardResource, sx, ...others } = props;
+  const { spec } = dashboardResource;
 
   const { queryString, setQueryString } = useQueryString();
   const dashboardDuration = spec.duration ?? '1h';
@@ -50,7 +49,23 @@ export function ViewDashboard(props: ViewDashboardProps) {
     <DashboardProvider initialState={{ dashboardSpec: spec }}>
       <TimeRangeProvider initialTimeRange={defaultTimeRange}>
         <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
-          <DashboardApp {...props}>{children}</DashboardApp>
+          <Box
+            sx={combineSx(
+              {
+                display: 'flex',
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden',
+              },
+              sx
+            )}
+            {...others}
+          >
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <DashboardApp dashboardResource={dashboardResource} />
+            </ErrorBoundary>
+          </Box>
         </TemplateVariableProvider>
       </TimeRangeProvider>
     </DashboardProvider>
