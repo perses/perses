@@ -260,8 +260,10 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
 
 function hydrateTemplateVariableStates(definitions: VariableDefinition[]): VariableStateMap {
   const state: VariableStateMap = {};
-  definitions.forEach((v) => {
-    state[v.name] = hydrateTemplateVariableState(v);
-  });
+  if (Array.isArray(definitions)) {
+    definitions.forEach((v) => {
+      state[v.name] = hydrateTemplateVariableState(v);
+    });
+  }
   return state;
 }

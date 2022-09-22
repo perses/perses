@@ -45,14 +45,15 @@ export function TemplateVariableList() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {variableDefinitions.map((v) => (
-                  <TableRow key={v.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                      {v.name}
-                    </TableCell>
-                    <TableCell align="right">{v.kind}</TableCell>
-                  </TableRow>
-                ))}
+                {Array.isArray(variableDefinitions) &&
+                  variableDefinitions.map((v) => (
+                    <TableRow key={v.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        {v.name}
+                      </TableCell>
+                      <TableCell align="right">{v.kind}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -61,11 +62,11 @@ export function TemplateVariableList() {
       </Drawer>
       <Box display={'flex'} justifyContent="space-between">
         <Stack direction={'row'} spacing={2}>
-          {variableDefinitions.map((v) => (
-            <Box key={v.name}>
-              <TemplateVariable key={v.name} name={v.name} />
-            </Box>
-          ))}
+          {Array.isArray(variableDefinitions) && variableDefinitions.map((v) => (
+              <Box key={v.name}>
+                <TemplateVariable key={v.name} name={v.name} />
+              </Box>
+            ))}
           {isEditMode && <Button onClick={() => setIsEditing(true)}>Modify Variables</Button>}
         </Stack>
       </Box>
