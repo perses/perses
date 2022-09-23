@@ -32,24 +32,28 @@ function createMarkdownPanelStyles(theme: Theme) {
     // Styles for <code>
     '& code': { fontSize: '0.85em' },
     '& :not(pre) code': {
-      padding: '.2em .4em',
+      padding: '0.2em 0.4em',
       backgroundColor: theme.palette.grey[100],
-      borderRadius: `${theme.shape.borderRadius}px`,
+      borderRadius: '4px',
     },
     '& pre': {
-      padding: theme.spacing(2),
+      padding: '1.2em',
       backgroundColor: theme.palette.grey[100],
-      borderRadius: `${theme.shape.borderRadius}px`,
+      borderRadius: '4px',
     },
     // Styles for <table>
     '& table, & th, & td': {
-      padding: theme.spacing(1),
+      padding: '0.6em',
       border: `1px solid ${theme.palette.grey[300]}`,
       borderCollapse: 'collapse',
     },
     // Styles for <li>
     '& li + li': {
       marginTop: '0.25em',
+    },
+    // Styles for <a>
+    '& a': {
+      color: theme.palette.primary.main,
     },
   };
 }
