@@ -4,13 +4,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "npm run build -w app",
+    "build": "turbo run build",
     "build:cjs": "npm run build:cjs --workspaces --if-present",
     "test": "npm test --workspaces",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
     "start": "npm run start -w app",
-    "clean": "rimraf .build-cache && npm run clean --workspaces",
+    "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install"
   },
   "workspaces": [
@@ -46,6 +46,7 @@
     "react-dom": "^18.0.0",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.5",
+    "turbo": "^1.5.2",
     "typescript": "^4.7.4"
   }
 }
