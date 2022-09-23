@@ -6,7 +6,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: ['src/index.ts'],
   sourcemap: true,
-  format: ['esm'],
+  format: ['esm', 'cjs'],
   // This does typechecking, as well as emits .d.ts and .d.ts.map files
   onSuccess: 'tsc --emitDeclarationOnly --declaration',
   outExtension({ format }) {
