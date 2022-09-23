@@ -28,7 +28,7 @@ export interface TimeRangeProviderProps {
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
 
-  const { queryString, setQueryString } = useQueryString();
+  const { setQueryString } = useQueryString();
 
   const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
     ? toAbsoluteTimeRange(initialTimeRange)
@@ -46,10 +46,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
       if (isRelativeTimeRange(value)) {
         if (setQueryString) {
-          queryString.set('start', value.pastDuration);
-          // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
-          queryString.delete('end');
-          setQueryString(queryString);
+          setQueryString(value.pastDuration);
         } else {
           setActiveTimeRange(toAbsoluteTimeRange(value));
         }
@@ -58,18 +55,13 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
       // allows app to specify whether query params should be source of truth for active time range
       if (setQueryString) {
-        // Absolute URL example) ?start=1663707045000&end=1663713330000
-        // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
         const startUnixMs = getUnixTime(value.start) * 1000;
-        const endUnixMs = getUnixTime(value.end) * 1000;
-        queryString.set('start', startUnixMs.toString());
-        queryString.set('end', endUnixMs.toString());
-        setQueryString(queryString);
+        setQueryString(startUnixMs); // TODO: also need to set end for zoom to work
       } else {
         setActiveTimeRange(value);
       }
     },
-    [queryString, setQueryString, onTimeRangeChange]
+    [setQueryString, onTimeRangeChange]
   );
 
   const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);

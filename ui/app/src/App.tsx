@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
 import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
 import { QueryStringProvider } from '@perses-dev/dashboards';
@@ -22,6 +22,7 @@ import { DataSourceRegistry } from './context/DataSourceRegistry';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
+import { useQueryStringState, stringParam } from './utils/query-string';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
@@ -30,7 +31,7 @@ const ECHARTS_THEME_OVERRIDES = {};
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useQueryStringState(stringParam('start', ''));
 
   // TODO: remove temporary location.key reload hack when routing setup properly
   const location = useLocation();
@@ -61,6 +62,7 @@ function App() {
           <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
             <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
               <DataSourceRegistry>
+                {/* <QueryStringProvider queryString={searchParams} setQueryString={setQueryStringValue}> */}
                 <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
                   {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
                   <ViewDashboard key={location.key} />

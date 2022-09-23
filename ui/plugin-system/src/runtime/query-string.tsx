@@ -14,8 +14,11 @@
 import { createContext, useContext } from 'react';
 
 export interface QueryString {
-  queryString: URLSearchParams;
-  setQueryString?: (queryString: URLSearchParams) => void;
+  // queryString: URLSearchParams;
+  // setQueryString?: (queryString: unknown) => void;
+  queryString: string;
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  setQueryString?: any;
 }
 
 export const QueryStringContext = createContext<QueryString | undefined>(undefined);

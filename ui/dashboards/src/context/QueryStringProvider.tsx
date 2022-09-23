@@ -15,8 +15,12 @@ import React, { useContext, useMemo } from 'react';
 import { QueryString, QueryStringContext } from '@perses-dev/plugin-system';
 
 export interface QueryStringProviderProps {
-  queryString: URLSearchParams;
-  setQueryString?: (queryString: URLSearchParams) => void;
+  // queryString: URLSearchParams;
+  // setQueryString?: (queryString: unknown) => void;
+  // setQueryString?: unknown;
+  queryString: string;
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  setQueryString?: any;
   children?: React.ReactNode;
 }
 
