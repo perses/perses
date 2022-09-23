@@ -14,7 +14,9 @@
       "outputs": []
     },
     "start": {
-      "dependsOn": []
+      "dependsOn": [],
+      // Don't cache the output of the dev/start task
+      "cache": false
     },
     "test": {
       "dependsOn": [],

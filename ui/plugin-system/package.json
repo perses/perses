@@ -16,8 +16,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "tsc --build",
+    "build": "tsc",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
+    "start": "tsc --watch",
     "test": "TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"

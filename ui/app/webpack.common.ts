@@ -36,7 +36,6 @@ export const commonConfig: Configuration = {
     new ForkTsCheckerWebpackPlugin({
       typescript: {
         configFile: path.resolve(__dirname, './tsconfig.json'),
-        build: true, // Since we use project references...
       },
     }),
     new ESLintWebpackPlugin({
@@ -54,7 +53,6 @@ export const commonConfig: Configuration = {
             options: {
               // Type-checking happens in separate plugin process
               transpileOnly: true,
-              projectReferences: true,
             },
           },
         ],

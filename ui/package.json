@@ -6,10 +6,10 @@
   "scripts": {
     "build": "turbo run build",
     "build:cjs": "npm run build:cjs --workspaces --if-present",
-    "test": "npm test --workspaces",
-    "lint": "npm run lint --workspaces",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
     "lint:fix": "npm run lint:fix --workspaces",
-    "start": "npm run start -w app",
+    "start": "turbo run start",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install"
   },
