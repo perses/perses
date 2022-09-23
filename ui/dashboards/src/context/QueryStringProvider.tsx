@@ -18,7 +18,9 @@ export interface QueryStringProviderProps {
   // queryString: URLSearchParams;
   // setQueryString?: (queryString: unknown) => void;
   // setQueryString?: unknown;
-  queryString: string;
+  // queryString: string;
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  queryString: any;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   setQueryString?: any;
   children?: React.ReactNode;

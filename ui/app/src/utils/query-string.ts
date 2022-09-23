@@ -47,6 +47,31 @@ export function singleParam<T>(opts: SingleParamOptions<T>): QueryStringSerializ
   };
 }
 
+export type MultipleParamsOptions<T> = {
+  [P in keyof T]: QueryStringSerializer<T[P]>;
+};
+
+/**
+ * Creates a query string param getter/setter that can get/set a value from
+ * multiple query string params. Useful for composing params.
+ */
+export function multipleParams<T>(opts: MultipleParamsOptions<T>): QueryStringSerializer<T> {
+  return {
+    getValue: (urlParams) => {
+      const value = {} as T;
+      for (const key in opts) {
+        value[key] = opts[key].getValue(urlParams);
+      }
+      return value;
+    },
+    setValue: (urlParams, value) => {
+      for (const key in opts) {
+        opts[key].setValue(urlParams, value[key]);
+      }
+    },
+  };
+}
+
 // Helper to create a string value parameter, assumes empty string is "no value"
 export function stringParam(paramName: string, nullValue = '') {
   return singleParam<string>({

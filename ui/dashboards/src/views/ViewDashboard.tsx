@@ -33,12 +33,15 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   const { queryString, setQueryString } = useQueryString();
   const dashboardDuration = spec.duration ?? '1h';
-  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString);
+  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString.start, queryString.end);
 
   // TODO: add reusable sync query string or no-op util
   useEffect(() => {
-    if (queryString === '' && setQueryString) {
-      setQueryString(dashboardDuration);
+    if (queryString.start === '' && setQueryString) {
+      setQueryString({
+        start: dashboardDuration,
+        end: 'now',
+      });
     }
   }, [dashboardDuration, queryString, setQueryString]);
 

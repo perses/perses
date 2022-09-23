@@ -42,7 +42,7 @@ export function TimeRangeControls() {
   const { dashboard } = useDashboard();
   const { queryString } = useQueryString();
 
-  const defaultTimeRange = getDefaultTimeRange(dashboard.duration, queryString);
+  const defaultTimeRange = getDefaultTimeRange(dashboard.duration, queryString.start, queryString.end);
 
   // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);

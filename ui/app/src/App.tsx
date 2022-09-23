@@ -22,16 +22,22 @@ import { DataSourceRegistry } from './context/DataSourceRegistry';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
-import { useQueryStringState, stringParam } from './utils/query-string';
+import { useQueryStringState, stringParam, multipleParams } from './utils/query-string';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
 const ECHARTS_THEME_OVERRIDES = {};
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+export const DATE_RANGE_QUERY_STRING = multipleParams<any>({
+  start: stringParam('start', ''),
+  end: stringParam('end', ''),
+});
+
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
-  const [searchParams, setSearchParams] = useQueryStringState(stringParam('start', ''));
+  const [searchParams, setSearchParams] = useQueryStringState(DATE_RANGE_QUERY_STRING);
 
   // TODO: remove temporary location.key reload hack when routing setup properly
   const location = useLocation();
