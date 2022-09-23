@@ -12,8 +12,13 @@
 // limitations under the License.
 
 import { ListVariableDefinition } from '@perses-dev/core';
+import { LegacyDatasources } from '../runtime';
 
 export type VariableOption = { label: string; value: string };
+
+interface GetVariableOptionsContext {
+  datasources: LegacyDatasources;
+}
 
 /**
  * Plugin for handling custom VariableDefinitions.
@@ -27,5 +32,6 @@ export interface VariablePlugin<Spec = unknown> {
  * definition.
  */
 export type GetVariableOptions<Spec> = (
-  definition: ListVariableDefinition<Spec>
+  definition: ListVariableDefinition<Spec>,
+  ctx: GetVariableOptionsContext
 ) => Promise<{ data: VariableOption[] }>;

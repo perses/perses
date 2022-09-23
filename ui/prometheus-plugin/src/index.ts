@@ -14,6 +14,7 @@
 import { PrometheusGraphQuery } from './plugins/graph-query';
 // @TODO: Move this to a more generic location;
 import { StaticListVariable } from './plugins/variable';
+import { PrometheusVariable } from './plugins/prometheus-variables';
 
 // Export plugins under the same name as the kinds they handle from the plugin.json
-export { PrometheusGraphQuery, StaticListVariable };
+export { PrometheusGraphQuery, StaticListVariable, PrometheusVariable };

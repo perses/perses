@@ -14,6 +14,14 @@
         }
       },
       {
+        "pluginType": "Variable",
+        "kind": "PrometheusVariable",
+        "display": {
+          "name": "PrometheusVariable",
+          "description": ""
+        }
+      },
+      {
         "pluginType": "GraphQuery",
         "kind": "PrometheusGraphQuery",
         "display": {
