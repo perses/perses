@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { PanelDefinition } from '@perses-dev/core';
-import { usePlugin } from '../components/PluginLoadingBoundary';
 import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
 
 /**
@@ -34,22 +33,3 @@ export interface PanelProps<Spec> {
     height: number;
   };
 }
-
-/**
- * Hook for using a panel plugin at runtime.
- */
-export function usePanelPlugin(kind: string): PanelPlugin {
-  const plugin = usePlugin('Panel', kind);
-  if (plugin !== undefined) {
-    return plugin;
-  }
-
-  // Return a default/placeholder plugin while loading happens
-  return defaultPanelPlugin;
-}
-
-const defaultPanelPlugin: PanelPlugin = {
-  PanelComponent: () => null,
-  OptionsEditorComponent: () => null,
-  createInitialOptions: () => ({}),
-};

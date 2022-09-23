@@ -72,7 +72,7 @@ describe('PluginRegistry', () => {
 
 // A helper component for testing the PluginRegistry by calling usePlugin to load a plugin
 const PluginConsumer = (props: { pluginType: PluginType; kind: string }) => {
-  const { plugin, isLoading, error } = usePlugin(props.pluginType, props.kind);
+  const { data: plugin, isLoading, error } = usePlugin(props.pluginType, props.kind);
   if (error) {
     return <div>Error: {(error as Error).message}</div>;
   }
@@ -84,7 +84,7 @@ const PluginConsumer = (props: { pluginType: PluginType; kind: string }) => {
 
 // A helper component for testing the PluginRegistry metadata APIs by calling useListPluginMetadata
 const MetadataConsumer = (props: { pluginType: PluginType }) => {
-  const { pluginMetadata, isLoading, error } = useListPluginMetadata(props.pluginType);
+  const { data: pluginMetadata, isLoading, error } = useListPluginMetadata(props.pluginType);
   if (error) {
     return <div>Error: {(error as Error).message}</div>;
   }

@@ -14,9 +14,15 @@
 import { useMemo } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
-import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
+import {
+  ChartsThemeProvider,
+  ErrorAlert,
+  ErrorBoundary,
+  generateChartsTheme,
+  PersesChartsTheme,
+} from '@perses-dev/components';
 import { QueryStringProvider } from '@perses-dev/dashboards';
-import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
 import { LegacyDataSourceRegistry } from './context/LegacyDataSourceRegistry';
 import Header from './components/Header';
@@ -57,18 +63,20 @@ function App() {
           overflow: 'hidden',
         }}
       >
-        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-            <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+            <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
               <LegacyDataSourceRegistry>
                 <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
-                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
-                  <ViewDashboard key={location.key} />
+                  <ErrorBoundary FallbackComponent={ErrorAlert}>
+                    {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
+                    <ViewDashboard key={location.key} />
+                  </ErrorBoundary>
                 </QueryStringProvider>
               </LegacyDataSourceRegistry>
-            </PluginBoundary>
-          </PluginRegistry>
-        </ChartsThemeProvider>
+            </PluginRegistry>
+          </ChartsThemeProvider>
+        </ErrorBoundary>
       </Box>
       <Footer />
     </Box>

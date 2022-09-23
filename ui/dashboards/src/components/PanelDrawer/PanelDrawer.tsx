@@ -24,12 +24,11 @@ import {
   Button,
   Typography,
 } from '@mui/material';
-import { Drawer, ErrorAlert } from '@perses-dev/components';
-import { PluginBoundary } from '@perses-dev/plugin-system';
+import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { OptionsEditorProps, useListPluginMetadata, usePlugin } from '@perses-dev/plugin-system';
 import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
-import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
 
 interface PanelDrawerHeaderProps {
   onClose: () => void;
@@ -53,6 +52,17 @@ const PanelDrawer = () => {
   const [panelDescription, setPanelDescription] = useState(defaultDescription);
   const [kind, setKind] = useState('');
   const [options, setOptions] = useState<unknown>({});
+
+  // TODO: What should we show if either of these error out?
+  const { data: pluginMetadata } = useListPluginMetadata('Panel');
+  const { data: plugin } = usePlugin('Panel', kind, {
+    enabled: kind !== '',
+    onSuccess: (plugin) => {
+      // Set initial options whenever plugin kind changes and a plugin is loaded
+      setOptions(plugin.createInitialOptions());
+    },
+  });
+  const OptionsEditorComponent = plugin?.OptionsEditorComponent;
 
   // TO DO: we might want to make the form a sub component we don't need this useEffect
   // currently, we need to reset the states whenever panelDrawer is reopened
@@ -91,7 +101,7 @@ const PanelDrawer = () => {
     setKind(e.target.value);
   };
 
-  const handleOptionsChange: PanelOptionsEditorProps['onChange'] = (next) => {
+  const handleOptionsChange: OptionsEditorProps<unknown>['onChange'] = (next) => {
     setOptions(next);
   };
 
@@ -184,17 +194,20 @@ const PanelDrawer = () => {
             <FormControl>
               <InputLabel id="panel-type-label">Panel Type</InputLabel>
               <Select required labelId="panel-type-label" label="Panel Type" value={kind} onChange={handleKindChange}>
-                {/* TODO: Replace this with options that come from asking the plugin system what panel plugins are available */}
-                <MenuItem value="LineChart">Line Chart</MenuItem>
-                <MenuItem value="GaugeChart">Gauge Chart</MenuItem>
-                <MenuItem value="StatChart">Stat Chart</MenuItem>
+                {pluginMetadata?.map((metadata) => (
+                  <MenuItem key={metadata.kind} value={metadata.kind}>
+                    {metadata.display.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={8}>
-            <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-              {kind !== '' && <PanelOptionsEditor kind={kind} value={options} onChange={handleOptionsChange} />}
-            </PluginBoundary>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              {OptionsEditorComponent !== undefined && (
+                <OptionsEditorComponent value={options} onChange={handleOptionsChange} />
+              )}
+            </ErrorBoundary>
           </Grid>
         </Grid>
       </form>
