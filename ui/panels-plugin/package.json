@@ -18,7 +18,7 @@
     "clean": "rimraf dist/",
     "build": "tsc",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "start": "tsc --watch",
+    "start": "tsc --watch --preserveWatchOutput",
     "test": "TZ=UTC jest",
     "test:watch": "TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",

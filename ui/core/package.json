@@ -18,7 +18,7 @@
     "clean": "rimraf dist/",
     "build": "tsc",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "start": "tsc --watch",
+    "start": "tsc --watch --preserveWatchOutput",
     "test": "echo 'no test to run' && exit 0",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
