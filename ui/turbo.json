@@ -17,7 +17,6 @@
     "start": {
       // Make sure all packages are built once before starting watch mode
       "dependsOn": ["^build"],
-      // Don't cache the output of the dev/start task
       "cache": false
     },
     "test": {
