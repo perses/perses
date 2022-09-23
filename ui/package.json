@@ -12,7 +12,7 @@
     "start": "turbo run start",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
-    "clear-cache": "rimraf node_modules/.cache/turbo"
+    "clear-turbo-cache": "rimraf node_modules/.cache/turbo"
   },
   "workspaces": [
     "app",
