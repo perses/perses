@@ -5,10 +5,9 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "build:cjs": "npm run build:cjs --workspaces --if-present",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "lint:fix": "npm run lint:fix --workspaces",
+    "lint:fix": "turbo run lint -- --fix",
     "start": "turbo run start",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
