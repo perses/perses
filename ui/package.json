@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "npm run build -w app",
+    "build": "npm run build -w app || npm run 2runBuild",
+    "2runBuild": "npm run build -w prometheus-plugin && npm run build -w app",
     "build:cjs": "npm run build:cjs --workspaces --if-present",
     "test": "npm test --workspaces",
     "lint": "npm run lint --workspaces",
