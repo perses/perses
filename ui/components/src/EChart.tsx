@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
-import debounce from 'lodash/debounce';
 import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
-import { isEqual } from 'lodash-es';
+import { isEqual, debounce } from 'lodash-es';
 import { EChartsTheme } from './model';
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
