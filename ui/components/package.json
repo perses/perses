@@ -30,6 +30,7 @@
     "date-fns": "^2.28.0",
     "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",
+    "mathjs": "^10.6.4",
     "react-error-boundary": "^3.1.4"
   },
   "peerDependencies": {
