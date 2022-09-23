@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1 / 2022-09-23
+
+- [BUGFIX] Add Dashboard ErrorBoundary, fix grid open state #562
+
 ## 0.8.0 / 2022-09-21
 
 - [FEATURE] ListVariable and TextVariable have been introduced #535
