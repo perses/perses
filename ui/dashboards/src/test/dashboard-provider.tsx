@@ -26,7 +26,7 @@ export function getTestDashboard(): DashboardResource {
 }
 
 /**
- * Test helper to create a "spy" component that will capture the DsahboardProvider's store, allowing you to inspect
+ * Test helper to create a "spy" component that will capture the DashboardProvider's store, allowing you to inspect
  * its state in tests. Be sure to render the DashboardProviderSpy component that's returned in the component test
  * underneath the DashboardProvider.
  */
