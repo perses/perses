@@ -12,10 +12,14 @@
 // limitations under the License.
 
 import path from 'path';
+import fs from 'fs';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { Configuration } from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import ESLintWebpackPlugin from 'eslint-webpack-plugin';
+
+// Use common config for swc
+const swcrc = JSON.parse(fs.readFileSync('../.swcrc', 'utf-8'));
 
 export const commonConfig: Configuration = {
   entry: path.resolve(__dirname, './src/bundle.ts'),
@@ -50,11 +54,8 @@ export const commonConfig: Configuration = {
         use: [
           {
             // Type-checking happens in separate plugin process
-            loader: 'esbuild-loader',
-            options: {
-              loader: 'tsx',
-              target: 'es2018',
-            },
+            loader: 'swc-loader',
+            options: swcrc,
           },
         ],
       },
