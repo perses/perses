@@ -49,10 +49,11 @@ export const commonConfig: Configuration = {
         test: /\.tsx?$/,
         use: [
           {
-            loader: 'ts-loader',
+            // Type-checking happens in separate plugin process
+            loader: 'esbuild-loader',
             options: {
-              // Type-checking happens in separate plugin process
-              transpileOnly: true,
+              loader: 'tsx',
+              target: 'es2018',
             },
           },
         ],
