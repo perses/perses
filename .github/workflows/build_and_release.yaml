@@ -37,10 +37,8 @@ jobs:
 
       - name: Install UI deps
         run: cd ./ui && npm install
-      - name: Build the app and ESM version of packages
+      - name: Build the app and all packages
         run: cd ./ui && npm run build
-      - name: Build CommonJS version of packages
-        run: cd ./ui && npm run build:cjs
       - name: store react production build
         uses: actions/upload-artifact@v3
         with:
