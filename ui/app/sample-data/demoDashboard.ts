@@ -31,12 +31,9 @@ const demoDashboard: DashboardResource = {
         spec: {
           name: 'job',
           plugin: {
-            kind: 'PrometheusVariable',
+            kind: 'PrometheusLabelValuesVariable',
             spec: {
-              kind: 'LabelValues',
-              spec: {
-                label: 'job',
-              },
+              label_name: 'job',
             },
           },
         },
@@ -46,13 +43,10 @@ const demoDashboard: DashboardResource = {
         spec: {
           name: 'instance',
           plugin: {
-            kind: 'PrometheusVariable',
+            kind: 'PrometheusLabelValuesVariable',
             spec: {
-              kind: 'LabelValues',
-              spec: {
-                label: 'instance',
-                query: 'up{job="node"}',
-              },
+              label_name: 'instance',
+              matchers: ['up{job="node"}'],
             },
           },
         },

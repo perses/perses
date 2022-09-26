@@ -11,27 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
+import { VariablePlugin, VariableOption, GetVariableOptionsContext } from '@perses-dev/plugin-system';
 import { labelValues, labelNames } from '../model/prometheus-client';
 
 interface PrometheusVariableOptionsBase {
   datasource?: string;
-  kind: string;
 }
 
-type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {
-  kind: 'LabelNames';
-};
+type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase;
 
 type PrometheusLabelValuesVariableOptions = PrometheusVariableOptionsBase & {
-  kind: 'LabelValues';
-  spec: {
-    label: string;
-    query?: string;
-  };
+  label_name: string;
+  matchers?: [string];
 };
-
-type PromVariableOptions = PrometheusLabelNamesVariableOptions | PrometheusLabelValuesVariableOptions;
 
 /**
  * Takes a list of strings and returns a list of VariableOptions
@@ -44,27 +36,30 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
   }));
 };
 
-export const PrometheusVariable: VariablePlugin<PromVariableOptions> = {
+function getQueryOptions(ctx: GetVariableOptionsContext) {
+  const queryOptions = {
+    // TODO: use the datasource from the definition
+    datasource: ctx.datasources.defaultDatasource,
+  };
+  return queryOptions;
+}
+
+export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
+  getVariableOptions: async (definition, ctx) => {
+    const queryOptions = getQueryOptions(ctx);
+    const { data: options } = await labelNames({}, queryOptions);
+    return {
+      data: stringArrayToVariableOptions(options),
+    };
+  },
+};
+
+export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
   getVariableOptions: async (definition, ctx) => {
     const pluginDef = definition.spec.plugin.spec;
-
-    let options;
-    const queryOptions = {
-      // TODO: use the datasource from the definition
-      datasource: ctx.datasources.defaultDatasource,
-    };
-
-    if (pluginDef.kind === 'LabelValues') {
-      const match = pluginDef.spec.query ? [pluginDef.spec.query] : undefined;
-      const { data } = await labelValues({ labelName: pluginDef.spec.label, 'match[]': match }, queryOptions);
-      options = data;
-    }
-
-    if (pluginDef.kind === 'LabelNames') {
-      const { data } = await labelNames({}, queryOptions);
-      options = data;
-    }
-
+    const queryOptions = getQueryOptions(ctx);
+    const match = pluginDef.matchers ?? undefined;
+    const { data: options } = await labelValues({ labelName: pluginDef.label_name, 'match[]': match }, queryOptions);
     return {
       data: stringArrayToVariableOptions(options),
     };

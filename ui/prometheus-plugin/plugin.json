@@ -15,9 +15,17 @@
       },
       {
         "pluginType": "Variable",
-        "kind": "PrometheusVariable",
+        "kind": "PrometheusLabelValuesVariable",
         "display": {
-          "name": "PrometheusVariable",
+          "name": "PrometheusLabelValuesVariable",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Variable",
+        "kind": "PrometheusLabelValuesVariable",
+        "display": {
+          "name": "PrometheusLabelValuesVariable",
           "description": ""
         }
       },

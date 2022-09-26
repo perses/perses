@@ -16,7 +16,7 @@ import { LegacyDatasources } from '../runtime';
 
 export type VariableOption = { label: string; value: string };
 
-interface GetVariableOptionsContext {
+export interface GetVariableOptionsContext {
   datasources: LegacyDatasources;
 }
 
