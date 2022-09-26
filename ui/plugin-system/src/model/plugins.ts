@@ -15,6 +15,7 @@ import { Metadata } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
+import { DatasourcePlugin } from './datasource';
 
 /**
  * Information about a module/package that contains plugins.
@@ -53,6 +54,7 @@ export interface SupportedPlugins {
   Variable: VariablePlugin;
   Panel: PanelPlugin;
   TimeSeriesQuery: TimeSeriesQueryPlugin;
+  Datasource: DatasourcePlugin;
 }
 
 /**
