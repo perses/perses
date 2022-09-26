@@ -21,6 +21,7 @@ const prodConfig: Configuration = {
   bail: true,
   devtool: 'source-map',
   optimization: {
+    // TODO: Could this also be replaced with swc minifier?
     minimizer: [new ESBuildMinifyPlugin({ target: 'es2018' })],
   },
 };
