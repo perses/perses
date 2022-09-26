@@ -24,8 +24,6 @@ export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProp
     value: { text },
   } = props;
 
-  console.log('in MarkdownPanelOptionsEditor');
-  console.log({ text });
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange({ text: e.target.value });
   };
