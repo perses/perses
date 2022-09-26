@@ -11,12 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './layout';
-export * from './panels';
-export * from './resource';
-export * from './time';
-export * from './time-series-queries';
-export * from './variables';
+import { DatasourceSelector } from '@perses-dev/core';
+import { createContext, useContext } from 'react';
+
+export interface DatasourcesContextType {
+  getDatasource(selector: DatasourceSelector): Promise<unknown>;
+}
+
+export const DatasourcesContext = createContext<DatasourcesContextType | undefined>(undefined);
+
+export function useDatasources() {
+  const ctx = useContext(DatasourcesContext);
+  if (ctx === undefined) {
+    throw new Error('No DatasourcesContext found. Did you forget a Provider?');
+  }
+  return ctx;
+}
