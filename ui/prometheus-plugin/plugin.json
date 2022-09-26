@@ -23,9 +23,9 @@
       },
       {
         "pluginType": "Variable",
-        "kind": "PrometheusLabelValuesVariable",
+        "kind": "PrometheusLabelNamesVariable",
         "display": {
-          "name": "PrometheusLabelValuesVariable",
+          "name": "PrometheusLabelNamesVariable",
           "description": ""
         }
       },
