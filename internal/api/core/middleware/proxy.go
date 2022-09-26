@@ -27,7 +27,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	datasourcev1 "github.com/perses/perses/pkg/model/api/v1/datasource"
+	datasourcev1 "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,6 +36,8 @@ var (
 	localProxyMatcher  = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
 )
 
+// TODO the entire implementation need to be reviewed.
+// (@nexucis: I prefere to let it like that, because not all the code needs to be changed just a piece)
 func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -43,7 +45,7 @@ func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFu
 			if err != nil {
 				return err
 			}
-			if spec == nil {
+			if spec == (v1.DatasourceSpec{}) {
 				return next(c)
 			}
 			pr, err := newProxy(spec, path)
@@ -61,7 +63,7 @@ func extractDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS glob
 	localDatasourceMatch := localProxyMatcher.MatchString(requestPath)
 	if !globalDatasourceMatch && !localDatasourceMatch {
 		// this is likely a request for the API itself
-		return nil, "", nil
+		return v1.DatasourceSpec{}, "", nil
 	}
 
 	if globalDatasourceMatch {
@@ -73,7 +75,7 @@ func extractDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS glob
 func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
 	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 1 {
-		return nil, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
 	datasourceName := matchingGroups[0][1]
 	// getting the datasource object
@@ -81,10 +83,10 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", datasourceName)
-			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
+			return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", datasourceName)
-		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
@@ -98,7 +100,7 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
 	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 2 {
-		return nil, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
 	projectName := matchingGroups[0][1]
 	datasourceName := matchingGroups[0][2]
@@ -107,10 +109,10 @@ func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.Datas
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", datasourceName, projectName)
-			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
+			return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", datasourceName)
-		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
@@ -126,12 +128,8 @@ type proxy interface {
 }
 
 func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
-	switch v := spec.(type) {
-	case *datasourcev1.Prometheus:
-		return &httpProxy{config: v.HTTP, path: path}, nil
-	default:
-		return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
-	}
+	// TODO build the HTTP proxy
+	return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
 }
 
 type httpProxy struct {

@@ -21,6 +21,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	http2 "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -58,13 +59,13 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 						Kind:    datasource.PrometheusKind,
 						Default: true,
 					},
-					HTTP: datasource.HTTPConfig{
+					HTTP: http2.HTTPConfig{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "prometheus.demo.do.prometheus.io",
 						},
 						Access: datasource.ServerHTTPAccess,
-						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
+						AllowedEndpoints: []http2.HTTPAllowedEndpoint{
 							{
 								EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 								Method:          http.MethodPost,
@@ -132,13 +133,13 @@ spec:
 						Kind:    datasource.PrometheusKind,
 						Default: true,
 					},
-					HTTP: datasource.HTTPConfig{
+					HTTP: http2.HTTPConfig{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "prometheus.demo.do.prometheus.io",
 						},
 						Access: datasource.ServerHTTPAccess,
-						AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
+						AllowedEndpoints: []http2.HTTPAllowedEndpoint{
 							{
 								EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 								Method:          http.MethodPost,

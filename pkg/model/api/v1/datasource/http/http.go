@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+package http
 
 import (
 	"encoding/json"
@@ -23,62 +23,14 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-type HTTPAccess string
-
-const (
-	BrowserHTTPAccess = "browser"
-	ServerHTTPAccess  = "server"
-)
-
-var httpAccessMap = map[HTTPAccess]bool{
-	BrowserHTTPAccess: true,
-	ServerHTTPAccess:  true,
-}
-
-func (h *HTTPAccess) UnmarshalJSON(data []byte) error {
-	var tmp HTTPAccess
-	type plain HTTPAccess
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*h = tmp
-	return nil
-}
-
-func (h *HTTPAccess) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp HTTPAccess
-	type plain HTTPAccess
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*h = tmp
-	return nil
-}
-
-func (h *HTTPAccess) validate() error {
-	if len(*h) == 0 {
-		*h = ServerHTTPAccess
-	}
-	if _, ok := httpAccessMap[*h]; !ok {
-		return fmt.Errorf("unknown http.access %q used", *h)
-	}
-	return nil
-}
-
-type HTTPAllowedEndpoint struct {
+type AllowedEndpoint struct {
 	EndpointPattern common.Regexp `json:"endpoint_pattern" yaml:"endpoint_pattern"`
 	Method          string        `json:"method" yaml:"method"`
 }
 
-func (h *HTTPAllowedEndpoint) UnmarshalJSON(data []byte) error {
-	var tmp HTTPAllowedEndpoint
-	type plain HTTPAllowedEndpoint
+func (h *AllowedEndpoint) UnmarshalJSON(data []byte) error {
+	var tmp AllowedEndpoint
+	type plain AllowedEndpoint
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -89,9 +41,9 @@ func (h *HTTPAllowedEndpoint) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (h *HTTPAllowedEndpoint) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp HTTPAllowedEndpoint
-	type plain HTTPAllowedEndpoint
+func (h *AllowedEndpoint) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp AllowedEndpoint
+	type plain AllowedEndpoint
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -102,7 +54,7 @@ func (h *HTTPAllowedEndpoint) UnmarshalYAML(unmarshal func(interface{}) error) e
 	return nil
 }
 
-func (h *HTTPAllowedEndpoint) validate() error {
+func (h *AllowedEndpoint) validate() error {
 	if len(h.Method) == 0 {
 		return fmt.Errorf("HTTP method cannot be empty")
 	}
@@ -177,16 +129,16 @@ func (b *BasicAuth) validate() error {
 	return nil
 }
 
-type HTTPAuth struct {
+type Auth struct {
 	InsecureTLS bool       `json:"insecure_tls,omitempty" yaml:"insecure_tls,omitempty"`
 	BearerToken string     `json:"bearer_token,omitempty" yaml:"bearer_token,omitempty"`
 	BasicAuth   *BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
 	CaCert      string     `json:"ca_cert,omitempty" yaml:"ca_cert,omitempty"`
 }
 
-func (b *HTTPAuth) UnmarshalJSON(data []byte) error {
-	var tmp HTTPAuth
-	type plain HTTPAuth
+func (b *Auth) UnmarshalJSON(data []byte) error {
+	var tmp Auth
+	type plain Auth
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -197,9 +149,9 @@ func (b *HTTPAuth) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (b *HTTPAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp HTTPAuth
-	type plain HTTPAuth
+func (b *Auth) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Auth
+	type plain Auth
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -210,7 +162,7 @@ func (b *HTTPAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func (b *HTTPAuth) validate() error {
+func (b *Auth) validate() error {
 	if len(b.BearerToken) == 0 && b.BasicAuth == nil && len(b.CaCert) == 0 {
 		return fmt.Errorf("no authentication choosen")
 	}
@@ -220,64 +172,58 @@ func (b *HTTPAuth) validate() error {
 	return nil
 }
 
-type HTTPConfig struct {
+type Config struct {
 	// URL is the url required to contact the datasource
 	URL *url.URL `json:"url" yaml:"url"`
-	// The way the UI will contact the datasource. Or through the Backend or directly.
-	// By default, Access is set with the value 'server'
-	Access HTTPAccess `json:"access,omitempty" yaml:"access,omitempty"`
 	// AllowedEndpoints is a list of tuple of http method and http endpoint that will be accessible.
 	// These parameters are only used when access is set to 'server'
-	AllowedEndpoints []HTTPAllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
-	// Auth is holding any security configuration for the http configuration.
-	// When defined, it's impossible to set the value of Access with 'browser'
-	Auth *HTTPAuth `json:"auth,omitempty" yaml:"auth,omitempty"`
+	AllowedEndpoints []AllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
 	// Headers can be used to provide additional header that needs to be forwarded when requesting the datasource
 	// When defined, it's impossible to set the value of Access with 'browser'
 	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
+	// Secret is the name of the secret that should be used for the proxy or discovery configuration
+	// It will contain any sensitive information such as password, token, certificate.
+	Secret string `json:"secret,omitempty" yaml:"secret,omitempty"`
 }
 
 // tmpHTTPConfig is only used to custom the json/yaml marshalling/unmarshalling step.
 // It shouldn't be used for other purpose.
 type tmpHTTPConfig struct {
-	URL              string                `json:"url" yaml:"url"`
-	Access           HTTPAccess            `json:"access,omitempty" yaml:"access,omitempty"`
-	AllowedEndpoints []HTTPAllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
-	Auth             *HTTPAuth             `json:"auth,omitempty" yaml:"auth,omitempty"`
-	Headers          map[string]string     `json:"headers,omitempty" yaml:"headers,omitempty"`
+	URL              string            `json:"url" yaml:"url"`
+	AllowedEndpoints []AllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
+	Headers          map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
+	Secret           string            `json:"secret,omitempty" yaml:"secret,omitempty"`
 }
 
-func (h *HTTPConfig) MarshalJSON() ([]byte, error) {
+func (h *Config) MarshalJSON() ([]byte, error) {
 	urlAsString := ""
 	if h.URL != nil {
 		urlAsString = h.URL.String()
 	}
 	tmp := &tmpHTTPConfig{
 		URL:              urlAsString,
-		Access:           h.Access,
 		AllowedEndpoints: h.AllowedEndpoints,
-		Auth:             h.Auth,
 		Headers:          h.Headers,
+		Secret:           h.Secret,
 	}
 	return json.Marshal(tmp)
 }
 
-func (h *HTTPConfig) MarshalYAML() (interface{}, error) {
+func (h *Config) MarshalYAML() (interface{}, error) {
 	urlAsString := ""
 	if h.URL != nil {
 		urlAsString = h.URL.String()
 	}
 	tmp := &tmpHTTPConfig{
 		URL:              urlAsString,
-		Access:           h.Access,
 		AllowedEndpoints: h.AllowedEndpoints,
-		Auth:             h.Auth,
 		Headers:          h.Headers,
+		Secret:           h.Secret,
 	}
 	return tmp, nil
 }
 
-func (h *HTTPConfig) UnmarshalJSON(data []byte) error {
+func (h *Config) UnmarshalJSON(data []byte) error {
 	var tmp tmpHTTPConfig
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
@@ -288,7 +234,7 @@ func (h *HTTPConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (h *HTTPConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (h *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var tmp tmpHTTPConfig
 	if err := unmarshal(&tmp); err != nil {
 		return err
@@ -299,30 +245,14 @@ func (h *HTTPConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func (h *HTTPConfig) validate(conf tmpHTTPConfig) error {
+func (h *Config) validate(conf tmpHTTPConfig) error {
 	u, err := url.Parse(conf.URL)
 	if err != nil {
 		return err
 	}
 	h.URL = u
-
-	if len(conf.Access) == 0 {
-		conf.Access = ServerHTTPAccess
-	}
-	if conf.Access == BrowserHTTPAccess {
-		if conf.Auth != nil {
-			return fmt.Errorf("datasource cannot be used directly from the UI when 'http.auth' is configured. Set access value with 'server' instead")
-		}
-		if len(conf.AllowedEndpoints) > 0 {
-			return fmt.Errorf("http.whitelist cannot be set when 'http.access' is set with the value 'browser'")
-		}
-		if len(conf.Headers) > 0 {
-			return fmt.Errorf("http.headers cannot be set when 'http.access' is set with the value 'browser'")
-		}
-	}
-	h.Access = conf.Access
-	h.Auth = conf.Auth
 	h.Headers = conf.Headers
 	h.AllowedEndpoints = conf.AllowedEndpoints
+	h.Secret = conf.Secret
 	return nil
 }

@@ -20,6 +20,7 @@ import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
 func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
@@ -36,7 +37,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 					Kind:    datasource.PrometheusKind,
 					Default: false,
 				},
-				HTTP: datasource.HTTPConfig{
+				HTTP: http.HTTPConfig{
 					URL:    u,
 					Access: datasource.ServerHTTPAccess,
 				},
@@ -52,7 +53,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 					Kind:    datasource.PrometheusKind,
 					Default: false,
 				},
-				HTTP: datasource.HTTPConfig{
+				HTTP: http.HTTPConfig{
 					URL:    u,
 					Access: datasource.BrowserHTTPAccess,
 				},
@@ -68,7 +69,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 					Kind:    datasource.PrometheusKind,
 					Default: false,
 				},
-				HTTP: datasource.HTTPConfig{
+				HTTP: http.HTTPConfig{
 					URL:    localURL,
 					Access: datasource.ServerHTTPAccess,
 				},

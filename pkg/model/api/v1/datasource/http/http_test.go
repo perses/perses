@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+package http
 
 import (
 	"encoding/json"
@@ -225,7 +225,6 @@ func TestUnmarshalJSONHTTPConfig(t *testing.T) {
 					Scheme: "http",
 					Host:   "localhost:9090",
 				},
-				Access: ServerHTTPAccess,
 			},
 		},
 	}
@@ -254,7 +253,6 @@ url: "http://localhost:9090"
 					Scheme: "http",
 					Host:   "localhost:9090",
 				},
-				Access: ServerHTTPAccess,
 			},
 		},
 	}

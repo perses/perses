@@ -193,6 +193,11 @@ example (like it is proposed above)
 Like the Panels, we have a common base shared by every kind of datasource:
 
 ```typescript
+interface DatasourcePlugin {
+    kind: string;
+    spec: any;
+}
+
 interface DatasourceSpec {
     kind: string; // Like 'Prometheus'
     display?: { // Totally optional
@@ -200,7 +205,7 @@ interface DatasourceSpec {
         description?: string
     };
     default: boolean // if true, then it's the default datasource
-    spec: any // here you will have the specific configuration of the datasource itself
+    plugin: DatasourcePlugin // here you will have the specific configuration of the datasource itself
 }
 ```
 
@@ -258,10 +263,12 @@ A simple Prometheus datasource would be
     "project": "perses"
   },
   "spec": {
-    "kind": "Prometheus",
     "default": true,
-    "spec": {
-      "direct_url": "https://prometheus.demo.do.prometheus.io"
+    "plugin": {
+      "kind": "Prometheus",
+      "spec": {
+        "direct_url": "https://prometheus.demo.do.prometheus.io"
+      }
     }
   }
 }
@@ -277,42 +284,44 @@ A more complex one:
     "project": "perses"
   },
   "spec": {
-    "kind": "Prometheus",
     "default": true,
-    "spec": {
-      "proxy": {
-        "kind": "HTTP",
-        "spec": {
-          "url": "https://prometheus.demo.do.prometheus.io",
-          "allowed_endpoints": [
-            {
-              "endpoint_pattern": "/api/v1/labels",
-              "method": "POST"
-            },
-            {
-              "endpoint_pattern": "/api/v1/series",
-              "method": "POST"
-            },
-            {
-              "endpoint_pattern": "/api/v1/metadata",
-              "method": "GET"
-            },
-            {
-              "endpoint_pattern": "/api/v1/query",
-              "method": "POST"
-            },
-            {
-              "endpoint_pattern": "/api/v1/query_range",
-              "method": "POST"
-            },
-            {
-              "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
-              "method": "GET"
-            }
-          ],
-          "secret": "prometheus_secret_config"
-        }
-      }
+    "plugin": {
+      "kind": "Prometheus",
+      "spec": {
+        "proxy": {
+          "kind": "HTTP",
+          "spec": {
+            "url": "https://prometheus.demo.do.prometheus.io",
+            "allowed_endpoints": [
+              {
+                "endpoint_pattern": "/api/v1/labels",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/series",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/metadata",
+                "method": "GET"
+              },
+              {
+                "endpoint_pattern": "/api/v1/query",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/query_range",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                "method": "GET"
+              }
+            ],
+            "secret": "prometheus_secret_config"
+          }
+        }}
+      
     }
   }
 }

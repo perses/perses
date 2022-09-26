@@ -65,3 +65,8 @@ func (m *ProjectMetadata) GetName() string {
 func (m *ProjectMetadata) Update(previous ProjectMetadata) {
 	m.Metadata.Update(previous.Metadata)
 }
+
+type Display struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+}
