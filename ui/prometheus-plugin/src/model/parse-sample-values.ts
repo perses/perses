@@ -40,8 +40,10 @@ export function parseSampleValue(sampleValue: ValueTuple[1]): number {
   switch (sampleValue) {
     case '+Inf':
       value = Number.POSITIVE_INFINITY;
+      break;
     case '-Inf':
       value = Number.NEGATIVE_INFINITY;
+      break;
     default:
       value = parseFloat(sampleValue);
   }
