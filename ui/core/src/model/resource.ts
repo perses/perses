@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,17 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export type ResourceSelector = Record<string, string>;
-
-// ResourceMetadata is deprecated and will be removed in favor of Metadata
-// TODO To be removed
-export type ResourceMetadata = Record<string, string> & { name: string };
-
-export type Metadata = {
+export interface Metadata {
   name: string;
   created_at: string;
   updated_at: string;
   version: number;
-};
+}
 
-export type ProjectMetadata = Metadata & { project: string };
+export interface ProjectMetadata extends Metadata {
+  project: string;
+}
