@@ -15,7 +15,8 @@
     "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "pretty": true
   },
   // For builds that use ts-node to compile the configs (e.g. webpack, jest)
   "ts-node": {
