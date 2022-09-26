@@ -34,7 +34,9 @@ function useStorage<T>(storage: Storage, key: string, initialValue: T) {
       if (json !== null) {
         return JSON.parse(json);
       }
-    } catch {}
+    } catch {
+      // No-op
+    }
 
     // Either the value isn't in storage yet or JSON parsing failed, so
     // set to the initial value in both places

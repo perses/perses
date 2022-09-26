@@ -40,6 +40,8 @@ export function replaceTemplateVariable(text: string, varName: string, templateV
   return text.replaceAll(variableTemplate, replaceString);
 }
 
+// TODO: Fix this lint eror
+// eslint-disable-next-line no-useless-escape
 const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
 
 /**

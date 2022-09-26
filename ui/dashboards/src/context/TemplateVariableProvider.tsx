@@ -194,6 +194,7 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
           varState.value = v.spec.allowMultiple ? [firstOptionValue] : firstOptionValue;
         }
       }
+      break;
     default:
       break;
   }
