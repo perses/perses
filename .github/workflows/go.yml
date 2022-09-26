@@ -53,9 +53,6 @@ jobs:
           ${{ runner.os }}-go-
     - name: test
       run: make integration-test
-    - uses: codecov/codecov-action@v3
-      with:
-        fail_ci_if_error: true
   golangci:
     name: lint
     runs-on: ubuntu-latest
