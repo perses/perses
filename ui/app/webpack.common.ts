@@ -12,10 +12,14 @@
 // limitations under the License.
 
 import path from 'path';
+import fs from 'fs';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { Configuration } from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import ESLintWebpackPlugin from 'eslint-webpack-plugin';
+
+// Use common config for swc
+const swcrc = JSON.parse(fs.readFileSync('../.swcrc', 'utf-8'));
 
 export const commonConfig: Configuration = {
   entry: path.resolve(__dirname, './src/bundle.ts'),
@@ -36,7 +40,6 @@ export const commonConfig: Configuration = {
     new ForkTsCheckerWebpackPlugin({
       typescript: {
         configFile: path.resolve(__dirname, './tsconfig.json'),
-        build: true, // Since we use project references...
       },
     }),
     new ESLintWebpackPlugin({
@@ -50,12 +53,9 @@ export const commonConfig: Configuration = {
         test: /\.tsx?$/,
         use: [
           {
-            loader: 'ts-loader',
-            options: {
-              // Type-checking happens in separate plugin process
-              transpileOnly: true,
-              projectReferences: true,
-            },
+            // Type-checking happens in separate plugin process
+            loader: 'swc-loader',
+            options: swcrc,
           },
         ],
       },

@@ -1,6 +1,6 @@
 import { Box, CircularProgress, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
-import { Github } from 'mdi-material-ui';
+import Github from 'mdi-material-ui/Github';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useHealth } from '../model/health-client';
 

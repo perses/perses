@@ -59,7 +59,7 @@ export function useDashboard() {
   return { dashboard };
 }
 
-const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
+export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
 
 export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T) {
   const store = useContext(DashboardContext);
@@ -117,6 +117,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
       };
     })
   );
+
   return (
     <DashboardContext.Provider value={dashboardStore as StoreApi<DashboardStoreState>}>
       {children}

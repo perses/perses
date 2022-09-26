@@ -3,21 +3,6 @@
   "include": ["src"],
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "tsBuildInfoFile": "../.build-cache/dashboards.tsbuildinfo"
-  },
-  "references": [
-    {
-      "path": "../components",
-      "prepend": false
-    },
-    {
-      "path": "../core",
-      "prepend": false
-    },
-    {
-      "path": "../plugin-system",
-      "prepend": false
-    }
-  ]
+    "rootDir": "./src"
+  }
 }

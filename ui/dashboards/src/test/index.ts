@@ -11,5 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './dashboard-provider';
 export * from './plugin-registry';
 export * from './render';

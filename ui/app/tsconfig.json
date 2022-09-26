@@ -2,36 +2,6 @@
   "extends": "../tsconfig.base.json",
   "include": ["src"],
   "compilerOptions": {
-    "sourceMap": true,
-    "tsBuildInfoFile": "../.build-cache/app.tsbuildinfo",
-    "incremental": true,
-    // Don't need composite since the app is an endpoint project
-    "composite": false
-  },
-  "references": [
-    {
-      "path": "../components",
-      "prepend": false
-    },
-    {
-      "path": "../core",
-      "prepend": false
-    },
-    {
-      "path": "../dashboards",
-      "prepend": false
-    },
-    {
-      "path": "../panels-plugin",
-      "prepend": false
-    },
-    {
-      "path": "../plugin-system",
-      "prepend": false
-    },
-    {
-      "path": "../prometheus-plugin",
-      "prepend": false
-    }
-  ]
+    "sourceMap": true
+  }
 }

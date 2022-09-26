@@ -16,8 +16,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "tsc --build",
-    "build:cjs": "tsc --project ./tsconfig.cjs.json",
+    "build": "concurrently \"npm:build:*\"",
+    "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist --config-file ../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --declaration --preserveWatchOutput",
+    "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "echo 'no test to run' && exit 0",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"

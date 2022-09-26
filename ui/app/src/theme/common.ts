@@ -17,7 +17,7 @@ import '@fontsource/lato/700.css';
 import '@fontsource/lato/900.css';
 import { createTheme, ThemeOptions } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-import merge from 'lodash/merge';
+import { merge } from 'lodash-es';
 import { typography } from './typography';
 
 /**

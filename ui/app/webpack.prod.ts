@@ -13,12 +13,17 @@
 
 import { Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
+import { ESBuildMinifyPlugin } from 'esbuild-loader';
 import { commonConfig } from './webpack.common';
 
 const prodConfig: Configuration = {
   mode: 'production',
   bail: true,
   devtool: 'source-map',
+  optimization: {
+    // TODO: Could this also be replaced with swc minifier?
+    minimizer: [new ESBuildMinifyPlugin({ target: 'es2018' })],
+  },
 };
 
 const merged = merge(commonConfig, prodConfig);

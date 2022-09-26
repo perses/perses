@@ -14,7 +14,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
-    "composite": true,
     "declaration": true,
     "declarationMap": true
   },
