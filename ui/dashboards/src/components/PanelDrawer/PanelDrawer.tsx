@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { OptionsEditorProps, useListPluginMetadata, usePlugin } from '@perses-dev/plugin-system';
-import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
+import { ChangeEvent, FormEvent, useState, useEffect, useMemo } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 
@@ -42,13 +42,17 @@ const PanelDrawer = () => {
 
   const panelKey = panelDrawer?.panelKey;
   const panelGroupIndex = panelDrawer?.groupIndex;
-  const panelDefinition = panelKey ? panels[panelKey] : undefined;
+  // useMemo to prevent useEffect from being called on every render (because it thinks the dependency changed)
+  // TODO: Get rid of that useEffect :)
+  const panelDefinition = useMemo(() => (panelKey ? panels[panelKey] : undefined), [panels, panelKey]);
 
   const defaultGroup = panelGroupIndex ?? 0;
   const defaultPanelName = panelDefinition?.spec.display.name ?? '';
   const defaultPanelDescription = panelDefinition?.spec.display.description ?? '';
   const defaultKind = panelDefinition?.spec.plugin.kind ?? '';
-  const defaultOptions = panelDefinition?.spec.plugin.spec;
+  // useMemo to prevent useEffect from being called on every render (because it thinks the dependency changed)
+  // TODO: Get rid of that useEffect :)
+  const defaultOptions = useMemo(() => panelDefinition?.spec.plugin.spec ?? {}, [panelDefinition]);
 
   const [group, setGroup] = useState(defaultGroup);
   const [panelName, setPanelName] = useState(defaultPanelName);
