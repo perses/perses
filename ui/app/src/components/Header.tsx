@@ -24,7 +24,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
-import { ChevronDown } from 'mdi-material-ui';
+import ChevronDown from 'mdi-material-ui/ChevronDown';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
 import { useProjectQuery } from '../model/project-client';

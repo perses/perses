@@ -36,8 +36,7 @@ const PanelGroupDialog = () => {
   const { layouts, updateLayout } = useLayouts();
   const { panelGroupDialog, closePanelGroupDialog } = useDashboardApp();
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const { groupIndex } = panelGroupDialog!; // PanelGroupDialog is only mounted if panelGroupDialog is defined
+  const groupIndex = panelGroupDialog?.groupIndex;
 
   const isEditingPanelGroup = groupIndex !== undefined;
 
