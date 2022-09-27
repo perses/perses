@@ -42,17 +42,14 @@ export interface PluginMetadata {
 }
 
 /**
- * All supported plugin type values as an array for use at runtime.
- */
-export const ALL_PLUGIN_TYPES = ['Variable', 'Panel', 'GraphQuery'] as const;
-
-/**
  * All supported plugin types.
  */
-export type PluginType = typeof ALL_PLUGIN_TYPES[number];
+export type PluginType = keyof SupportedPlugins;
 
-// Map of plugin type -> config and implementation type
-interface SupportedPlugins {
+/**
+ * Map of plugin type key/string -> implementation type
+ */
+export interface SupportedPlugins {
   Variable: VariablePlugin;
   Panel: PanelPlugin;
   GraphQuery: GraphQueryPlugin;
