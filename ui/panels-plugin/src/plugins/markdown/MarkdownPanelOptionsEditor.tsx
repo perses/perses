@@ -11,13 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ChangeEvent } from 'react';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Box } from '@mui/material';
+import { TextField } from '@mui/material';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelOptionsEditorProps = OptionsEditorProps<MarkdownPanelOptions>;
 
 export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProps) {
-  const { value } = props;
-  return <Box>{JSON.stringify(value)}</Box>;
+  const {
+    onChange,
+    value: { text },
+  } = props;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onChange({ text: e.target.value });
+  };
+
+  return <TextField label="Text" multiline maxRows={20} value={text} onChange={handleChange} />;
 }

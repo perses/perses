@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { OptionsEditorProps, useListPluginMetadata, usePlugin } from '@perses-dev/plugin-system';
-import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
+import { ChangeEvent, FormEvent, useState, useEffect, useMemo } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 
@@ -40,18 +40,29 @@ const PanelDrawer = () => {
   const { panels, updatePanel } = usePanels();
   const { panelDrawer, closePanelDrawer } = useDashboardApp();
 
-  let defaultPanelName = '';
-  let defaultDescription = '';
-  if (panelDrawer?.panelKey) {
-    // editing an existing panel
-    defaultPanelName = panels[panelDrawer.panelKey]?.spec.display.name ?? '';
-    defaultDescription = panels[panelDrawer.panelKey]?.spec.display.description ?? '';
-  }
-  const [group, setGroup] = useState(panelDrawer?.groupIndex);
+  const panelKey = panelDrawer?.panelKey;
+  const panelGroupIndex = panelDrawer?.groupIndex;
+  // useMemo to prevent useEffect from being called on every render (because it thinks the dependency changed)
+  // TODO: Get rid of that useEffect :)
+  const panelDefinition = useMemo(() => (panelKey ? panels[panelKey] : undefined), [panels, panelKey]);
+
+  const defaultGroup = panelGroupIndex ?? 0;
+  const defaultPanelName = panelDefinition?.spec.display.name ?? '';
+  const defaultPanelDescription = panelDefinition?.spec.display.description ?? '';
+  const defaultKind = panelDefinition?.spec.plugin.kind ?? '';
+  // useMemo to prevent useEffect from being called on every render (because it thinks the dependency changed)
+  // TODO: Get rid of that useEffect :)
+  const defaultOptions = useMemo(() => panelDefinition?.spec.plugin.spec ?? {}, [panelDefinition]);
+
+  const [group, setGroup] = useState(defaultGroup);
   const [panelName, setPanelName] = useState(defaultPanelName);
-  const [panelDescription, setPanelDescription] = useState(defaultDescription);
-  const [kind, setKind] = useState('');
-  const [options, setOptions] = useState<unknown>({});
+  const [panelDescription, setPanelDescription] = useState(defaultPanelDescription);
+  const [kind, setKind] = useState(defaultKind);
+  // Plugin options depends on the plugin kind ('LineChart', 'Markdown', et cetera).
+  // As the user switches between kinds, we keep track of the options
+  // so that we can go back to wherever they left off.
+  const [kindToOptions, setKindToOptions] = useState<Record<string, unknown>>({ [defaultKind]: defaultOptions });
+  const options = kindToOptions[kind];
 
   // TODO: What should we show if either of these error out?
   const { data: pluginMetadata } = useListPluginMetadata('Panel');
@@ -59,7 +70,9 @@ const PanelDrawer = () => {
     enabled: kind !== '',
     onSuccess: (plugin) => {
       // Set initial options whenever plugin kind changes and a plugin is loaded
-      setOptions(plugin.createInitialOptions());
+      if (!kindToOptions[kind]) {
+        setKindToOptions({ ...kindToOptions, [kind]: plugin.createInitialOptions() });
+      }
     },
   });
   const OptionsEditorComponent = plugin?.OptionsEditorComponent;
@@ -68,16 +81,12 @@ const PanelDrawer = () => {
   // currently, we need to reset the states whenever panelDrawer is reopened
   // since this component does not get remounted when it open/closes (otherwise we lose the animation of sliding in/out)
   useEffect(() => {
-    setGroup(panelDrawer?.groupIndex);
-    if (panelDrawer?.panelKey) {
-      // display panel name and description in text fields when editing an existing panel
-      setPanelName(panels[panelDrawer.panelKey]?.spec.display.name ?? '');
-      setPanelDescription(panels[panelDrawer.panelKey]?.spec.display.description ?? '');
-    } else {
-      setPanelName('');
-      setPanelDescription('');
-    }
-  }, [panelDrawer, panels]);
+    setGroup(defaultGroup);
+    setPanelName(defaultPanelName);
+    setPanelDescription(defaultPanelDescription);
+    setKind(defaultKind);
+    setKindToOptions({ [defaultKind]: defaultOptions });
+  }, [defaultGroup, defaultPanelName, defaultPanelDescription, defaultKind, defaultOptions]);
 
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
     const { value } = e.target;
@@ -102,7 +111,7 @@ const PanelDrawer = () => {
   };
 
   const handleOptionsChange: OptionsEditorProps<unknown>['onChange'] = (next) => {
-    setOptions(next);
+    setKindToOptions({ ...kindToOptions, [kind]: next });
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -161,6 +170,15 @@ const PanelDrawer = () => {
       <form onSubmit={handleSubmit}>
         <PanelDrawerHeader panelKey={panelDrawer?.panelKey} onClose={() => closePanelDrawer()} />
         <Grid container spacing={2}>
+          <Grid item xs={8}>
+            <TextField
+              required
+              label="Panel Name"
+              value={panelName}
+              variant="outlined"
+              onChange={handlePanelNameChange}
+            />
+          </Grid>
           <Grid item xs={4}>
             <FormControl>
               <InputLabel id="select-group">Group</InputLabel>
@@ -174,21 +192,12 @@ const PanelDrawer = () => {
             </FormControl>
           </Grid>
           <Grid item xs={8}>
-            <Stack spacing={2} sx={{ flexGrow: '1' }}>
-              <TextField
-                required
-                label="Panel Name"
-                value={panelName}
-                variant="outlined"
-                onChange={handlePanelNameChange}
-              />
-              <TextField
-                label="Description"
-                value={panelDescription}
-                variant="outlined"
-                onChange={handlePanelDescriptionChange}
-              />
-            </Stack>
+            <TextField
+              label="Panel Description"
+              value={panelDescription}
+              variant="outlined"
+              onChange={handlePanelDescriptionChange}
+            />
           </Grid>
           <Grid item xs={4}>
             <FormControl>
@@ -202,9 +211,9 @@ const PanelDrawer = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={8}>
+          <Grid item xs={12}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              {OptionsEditorComponent !== undefined && (
+              {OptionsEditorComponent !== undefined && options !== undefined && (
                 <OptionsEditorComponent value={options} onChange={handleOptionsChange} />
               )}
             </ErrorBoundary>
