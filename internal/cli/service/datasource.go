@@ -52,7 +52,7 @@ func (d *datasource) BuildMatrix(hits []modelAPI.Entity) [][]string {
 		line := []string{
 			entity.Metadata.Name,
 			entity.Metadata.Project,
-			string(entity.Spec.GetKind()),
+			entity.Spec.Plugin.Kind,
 			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)

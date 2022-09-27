@@ -51,7 +51,7 @@ func (d *globalDatasource) BuildMatrix(hits []modelAPI.Entity) [][]string {
 		entity := hit.(*modelV1.GlobalDatasource)
 		line := []string{
 			entity.Metadata.Name,
-			string(entity.Spec.GetKind()),
+			entity.Spec.Plugin.Kind,
 			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)

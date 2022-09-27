@@ -31,7 +31,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
-	http2 "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
 func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
@@ -116,38 +116,42 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 			},
 			Project: "perses",
 		},
-		Spec: &datasource.Prometheus{
-			BasicDatasource: datasource.BasicDatasource{
-				Kind:    datasource.PrometheusKind,
-				Default: false,
-			},
-			HTTP: http2.HTTPConfig{
-				URL:    promURL,
-				Access: datasource.ServerHTTPAccess,
-				AllowedEndpoints: []http2.HTTPAllowedEndpoint{
-					{
-						EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
-						Method:          http.MethodPost,
-					},
-					{
-						EndpointPattern: common.MustNewRegexp("/api/v1/series"),
-						Method:          http.MethodPost,
-					},
-					{
-						EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
-						Method:          http.MethodGet,
-					},
-					{
-						EndpointPattern: common.MustNewRegexp("/api/v1/query"),
-						Method:          http.MethodPost,
-					},
-					{
-						EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
-						Method:          http.MethodPost,
-					},
-					{
-						EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-						Method:          http.MethodGet,
+		Spec: v1.DatasourceSpec{
+			Default: false,
+			Plugin: v1.DatasourcePlugin{
+				Kind: "Prometeus",
+				Spec: &datasource.Prometheus{
+					Proxy: datasourceHTTP.Proxy{
+						Kind: "HTTP",
+						Spec: datasourceHTTP.Config{
+							URL: promURL,
+							AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
+								{
+									EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+									Method:          http.MethodPost,
+								},
+								{
+									EndpointPattern: common.MustNewRegexp("/api/v1/series"),
+									Method:          http.MethodPost,
+								},
+								{
+									EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
+									Method:          http.MethodGet,
+								},
+								{
+									EndpointPattern: common.MustNewRegexp("/api/v1/query"),
+									Method:          http.MethodPost,
+								},
+								{
+									EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
+									Method:          http.MethodPost,
+								},
+								{
+									EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+									Method:          http.MethodGet,
+								},
+							},
+						},
 					},
 				},
 			},

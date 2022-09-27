@@ -21,7 +21,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
-	http2 "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -54,41 +54,45 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 				Metadata: Metadata{
 					Name: "PrometheusDemo",
 				},
-				Spec: &datasource.Prometheus{
-					BasicDatasource: datasource.BasicDatasource{
-						Kind:    datasource.PrometheusKind,
-						Default: true,
-					},
-					HTTP: http2.HTTPConfig{
-						URL: &url.URL{
-							Scheme: "https",
-							Host:   "prometheus.demo.do.prometheus.io",
-						},
-						Access: datasource.ServerHTTPAccess,
-						AllowedEndpoints: []http2.HTTPAllowedEndpoint{
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/series"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
-								Method:          http.MethodGet,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/query"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-								Method:          http.MethodGet,
+				Spec: DatasourceSpec{
+					Default: false,
+					Plugin: DatasourcePlugin{
+						Kind: "Prometeus",
+						Spec: &datasource.Prometheus{
+							Proxy: datasourceHTTP.Proxy{
+								Kind: "HTTP",
+								Spec: datasourceHTTP.Config{
+									URL: &url.URL{
+										Scheme: "https",
+										Host:   "prometheus.demo.do.prometheus.io",
+									},
+									AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/series"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
+											Method:          http.MethodGet,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/query"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+											Method:          http.MethodGet,
+										},
+									},
+								},
 							},
 						},
 					},
@@ -128,41 +132,45 @@ spec:
 				Metadata: Metadata{
 					Name: "PrometheusDemo",
 				},
-				Spec: &datasource.Prometheus{
-					BasicDatasource: datasource.BasicDatasource{
-						Kind:    datasource.PrometheusKind,
-						Default: true,
-					},
-					HTTP: http2.HTTPConfig{
-						URL: &url.URL{
-							Scheme: "https",
-							Host:   "prometheus.demo.do.prometheus.io",
-						},
-						Access: datasource.ServerHTTPAccess,
-						AllowedEndpoints: []http2.HTTPAllowedEndpoint{
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/series"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
-								Method:          http.MethodGet,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/query"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
-								Method:          http.MethodPost,
-							},
-							{
-								EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-								Method:          http.MethodGet,
+				Spec: DatasourceSpec{
+					Default: false,
+					Plugin: DatasourcePlugin{
+						Kind: "Prometeus",
+						Spec: &datasource.Prometheus{
+							Proxy: datasourceHTTP.Proxy{
+								Kind: "HTTP",
+								Spec: datasourceHTTP.Config{
+									URL: &url.URL{
+										Scheme: "https",
+										Host:   "prometheus.demo.do.prometheus.io",
+									},
+									AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/series"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
+											Method:          http.MethodGet,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/query"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
+											Method:          http.MethodPost,
+										},
+										{
+											EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+											Method:          http.MethodGet,
+										},
+									},
+								},
 							},
 						},
 					},

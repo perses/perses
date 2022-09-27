@@ -32,14 +32,18 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusDemo",
 			},
-			Spec: &datasource.Prometheus{
-				BasicDatasource: datasource.BasicDatasource{
-					Kind:    datasource.PrometheusKind,
-					Default: false,
-				},
-				HTTP: http.HTTPConfig{
-					URL:    u,
-					Access: datasource.ServerHTTPAccess,
+			Spec: modelV1.DatasourceSpec{
+				Default: false,
+				Plugin: modelV1.DatasourcePlugin{
+					Kind: "Prometeus",
+					Spec: &datasource.Prometheus{
+						Proxy: http.Proxy{
+							Kind: "HTTP",
+							Spec: http.Config{
+								URL: u,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -48,14 +52,13 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusDemoBrowser",
 			},
-			Spec: &datasource.Prometheus{
-				BasicDatasource: datasource.BasicDatasource{
-					Kind:    datasource.PrometheusKind,
-					Default: false,
-				},
-				HTTP: http.HTTPConfig{
-					URL:    u,
-					Access: datasource.BrowserHTTPAccess,
+			Spec: modelV1.DatasourceSpec{
+				Default: false,
+				Plugin: modelV1.DatasourcePlugin{
+					Kind: "Prometeus",
+					Spec: &datasource.Prometheus{
+						DirectURL: u,
+					},
 				},
 			},
 		},
@@ -64,14 +67,18 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusLocal",
 			},
-			Spec: &datasource.Prometheus{
-				BasicDatasource: datasource.BasicDatasource{
-					Kind:    datasource.PrometheusKind,
-					Default: false,
-				},
-				HTTP: http.HTTPConfig{
-					URL:    localURL,
-					Access: datasource.ServerHTTPAccess,
+			Spec: modelV1.DatasourceSpec{
+				Default: false,
+				Plugin: modelV1.DatasourcePlugin{
+					Kind: "Prometeus",
+					Spec: &datasource.Prometheus{
+						Proxy: http.Proxy{
+							Kind: "HTTP",
+							Spec: http.Config{
+								URL: localURL,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -107,7 +114,7 @@ func (c *globalDatasource) Get(name string) (*modelV1.GlobalDatasource, error) {
 		Metadata: modelV1.Metadata{
 			Name: name,
 		},
-		Spec: nil,
+		Spec: modelV1.DatasourceSpec{},
 	}, nil
 }
 

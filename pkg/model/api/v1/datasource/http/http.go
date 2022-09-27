@@ -258,6 +258,11 @@ func (h *Config) validate(conf tmpHTTPConfig) error {
 	return nil
 }
 
+type Proxy struct {
+	Kind string `json:"kind" yaml:"kind"`
+	Spec Config `json:"spec" yaml:"spec"`
+}
+
 func doesKindConfigExist(v reflect.Value) bool {
 	for i := 0; i < v.NumField(); i++ {
 		if v.Type().Field(i).Name == "Kind" && v.Field(i).Type().Name() == "string" && v.Field(i).String() == "HTTP" {

@@ -16,15 +16,13 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/perses/perses/pkg/model/api/v1/datasource"
 )
 
 type Datasource struct {
 	// Name is the name of the datasource
 	Name string `json:"name" yaml:"name"`
 	// Kind is the datasource kind
-	Kind datasource.Kind `json:"kind" yaml:"kind"`
+	Kind string `json:"kind" yaml:"kind"`
 	// If global is true, we are referencing a global datasource.
 	// When set to false, we are referencing a datasource in the same project as the current dashboard.
 	Global bool `json:"global" yaml:"global"`

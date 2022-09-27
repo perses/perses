@@ -22,7 +22,6 @@ import (
 	"github.com/perses/perses/internal/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -51,7 +50,7 @@ func TestValidateDashboard(t *testing.T) {
 	}
 	dts := dashboard.Datasource{
 		Name: "PrometheusDemo",
-		Kind: datasource.PrometheusKind,
+		Kind: "Prometheus",
 	}
 
 	testSuite := []struct {
