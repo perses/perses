@@ -18,7 +18,7 @@ import { getTypeAndKindKey } from '../utils/cache-keys';
 
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<
-  UseQueryOptions<PluginImplementation<T, unknown>, unknown, PluginImplementation<T, unknown>, string>,
+  UseQueryOptions<PluginImplementation<T>, unknown, PluginImplementation<T>, string>,
   'queryKey' | 'queryFn'
 >;
 

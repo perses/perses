@@ -15,7 +15,7 @@ import { createContext, useContext } from 'react';
 import { PluginImplementation, PluginMetadata, PluginType } from '../../model';
 
 export interface PluginRegistryContextType {
-  getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T, unknown>>;
+  getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;
   listPluginMetadata(pluginType: PluginType): Promise<PluginMetadata[]>;
 }
 
