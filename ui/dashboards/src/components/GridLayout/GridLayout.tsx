@@ -37,7 +37,7 @@ export function GridLayout(props: GridLayoutProps) {
     ...others
   } = props;
 
-  const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
+  const [isOpen, setIsOpen] = useState(spec.display?.collapse?.open ?? true);
 
   const { isEditMode } = useEditMode();
 
