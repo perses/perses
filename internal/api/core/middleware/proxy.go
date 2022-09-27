@@ -128,8 +128,8 @@ type proxy interface {
 func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
 	cfg, err := datasourceHTTP.CheckAndValidate(spec.Plugin.Spec)
 	if err != nil {
-		logrus.WithError(err).Errorf("unable to build or find the http config in the datasource")
-		return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("unable to find the http config"))
+		logrus.WithError(err).Error("unable to build or find the http config in the datasource")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to find the http config")
 	}
 	if cfg != nil {
 		return &httpProxy{
@@ -162,9 +162,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
-	if err := h.prepareRequest(c); err != nil {
-		return err
-	}
+	h.prepareRequest(c)
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
@@ -186,7 +184,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 	return proxyErr
 }
 
-func (h *httpProxy) prepareRequest(c echo.Context) error {
+func (h *httpProxy) prepareRequest(c echo.Context) {
 	req := c.Request()
 	// We have to modify the HOST of the request in order to match the host of the targetURL
 	// So far I'm not sure to understand exactly why, but if you are going to remove it, be sure of what you are doing.
@@ -208,7 +206,6 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
-	return nil
 }
 
 func (h *httpProxy) prepareTransport() *http.Transport {
