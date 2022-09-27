@@ -27,10 +27,15 @@ const demoDashboard: DashboardResource = {
     duration: '30m',
     variables: [
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'job',
-          value: 'node',
+          plugin: {
+            kind: 'PrometheusLabelValuesVariable',
+            spec: {
+              label_name: 'job',
+            },
+          },
         },
       },
       {
@@ -38,9 +43,10 @@ const demoDashboard: DashboardResource = {
         spec: {
           name: 'instance',
           plugin: {
-            kind: 'StaticListVariable',
+            kind: 'PrometheusLabelValuesVariable',
             spec: {
-              values: ['demo.do.prometheus.io:3000', 'demo.do.prometheus.io:9100'],
+              label_name: 'instance',
+              matchers: ['up{job="node"}'],
             },
           },
         },
