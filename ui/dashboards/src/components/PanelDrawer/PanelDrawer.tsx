@@ -54,7 +54,6 @@ const PanelDrawer = () => {
   // TODO: Get rid of that useEffect :)
   const defaultOptions = useMemo(() => panelDefinition?.spec.plugin.spec ?? {}, [panelDefinition]);
 
-  console.log({ defaultGroup, defaultPanelName, defaultPanelDescription, defaultKind, defaultOptions });
   const [group, setGroup] = useState(defaultGroup);
   const [panelName, setPanelName] = useState(defaultPanelName);
   const [panelDescription, setPanelDescription] = useState(defaultPanelDescription);

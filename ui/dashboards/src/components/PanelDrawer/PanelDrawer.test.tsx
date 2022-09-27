@@ -94,7 +94,7 @@ describe('Panel Drawer', () => {
         spec: {
           display: { name: 'cpu usage', description: '' },
           plugin: {
-            kind: '',
+            kind: 'LineChart',
             spec: {},
           },
         },
