@@ -33,7 +33,7 @@ describe('PluginRegistry', () => {
 
   it('errors when plugin is not installed', async () => {
     // This plugin is not in the test metadata at all
-    renderPluginRegistry(<PluginConsumer pluginType="GraphQuery" kind="NotInstalled" />);
+    renderPluginRegistry(<PluginConsumer pluginType="TimeSeriesQuery" kind="NotInstalled" />);
 
     const error = await screen.findByText(/error:/i);
     expect(error).toBeInTheDocument();
@@ -60,8 +60,8 @@ describe('PluginRegistry', () => {
   });
 
   it('lists metadata for plugin types with no plugins available', async () => {
-    // There are no GraphQuery plugins in any of the test modules
-    renderPluginRegistry(<MetadataConsumer pluginType="GraphQuery" />);
+    // There are no TimeSeriesQuery plugins in any of the test modules
+    renderPluginRegistry(<MetadataConsumer pluginType="TimeSeriesQuery" />);
 
     const table = await screen.findByRole('table');
     expect(table).toBeInTheDocument();

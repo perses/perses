@@ -15,7 +15,7 @@ import { AbsoluteTimeRange } from '@perses-dev/core';
 import { EChartsTimeSeries } from '@perses-dev/components';
 import { GraphSeries } from '@perses-dev/plugin-system';
 import { gcd } from 'mathjs';
-import { QueryState } from '../GraphQueryRunner';
+import { QueryState } from '../TimeSeriesQueryRunner';
 import { getRandomColor } from '../utils/palette-gen';
 import { StepOptions } from '../../../model/thresholds';
 

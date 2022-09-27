@@ -17,7 +17,7 @@ import { Box, Skeleton } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { LineChart, EChartsDataFormat, UnitOptions, ZoomEventData } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { useRunningGraphQueries } from './GraphQueryRunner';
+import { useRunningGraphQueries } from './TimeSeriesQueryRunner';
 import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
 
 export const EMPTY_GRAPH_DATA = {

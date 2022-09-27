@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { GaugeSeriesOption } from 'echarts';
-import { useGraphQueryData, PanelProps } from '@perses-dev/plugin-system';
+import { useTimeSeriesQueryData, PanelProps } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeChartData } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
 import { useMemo } from 'react';
@@ -38,7 +38,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
-  const { data, loading, error } = useGraphQueryData(query, { suggestedStepMs });
+  const { data, loading, error } = useTimeSeriesQueryData(query, { suggestedStepMs });
 
   const chartData: GaugeChartData = useMemo(() => {
     if (data === undefined) return undefined;

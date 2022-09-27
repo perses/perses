@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ResourceMetadata } from '@perses-dev/core';
-import { GraphQueryPlugin } from './graph-queries';
+import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
 
@@ -52,7 +52,7 @@ export type PluginType = keyof SupportedPlugins;
 export interface SupportedPlugins {
   Variable: VariablePlugin;
   Panel: PanelPlugin;
-  GraphQuery: GraphQueryPlugin;
+  TimeSeriesQuery: TimeSeriesQueryPlugin;
 }
 
 /**

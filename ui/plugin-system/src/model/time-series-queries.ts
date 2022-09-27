@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, GraphQueryDefinition, UnixTimeMs } from '@perses-dev/core';
+import { AbsoluteTimeRange, TimeSeriesQueryDefinition, UnixTimeMs } from '@perses-dev/core';
 import { LegacyDatasources, VariableStateMap } from '../runtime';
 
 /**
  * A plugin for running graph queries.
  */
-export interface GraphQueryPlugin<Spec = unknown> {
-  getGraphData: (definition: GraphQueryDefinition<Spec>, ctx: GraphQueryContext) => Promise<GraphData>;
+export interface TimeSeriesQueryPlugin<Spec = unknown> {
+  getGraphData: (definition: TimeSeriesQueryDefinition<Spec>, ctx: TimeSeriesQueryContext) => Promise<GraphData>;
 }
 
 /**
- * Context available to GraphQuery plugins at runtime.
+ * Context available to TimeSeriesQuery plugins at runtime.
  */
-export interface GraphQueryContext {
+export interface TimeSeriesQueryContext {
   suggestedStepMs?: number;
   timeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;

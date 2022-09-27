@@ -58,10 +58,10 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
@@ -84,10 +84,10 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
@@ -96,10 +96,10 @@ const testDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
                       },
@@ -107,10 +107,10 @@ const testDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
                       },
@@ -118,10 +118,10 @@ const testDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
                       },
@@ -143,10 +143,10 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
@@ -169,10 +169,10 @@ const testDashboard: DashboardResource = {
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',

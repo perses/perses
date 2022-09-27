@@ -11,30 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GraphQueryDefinition } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useQuery } from 'react-query';
-import { GraphQueryContext } from '../model';
+import { TimeSeriesQueryContext } from '../model';
 import { useLegacyDatasources } from './datasources-old';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';
 import { usePlugin } from './plugins';
 
-type UseGraphQueryOptions = {
+type UseTimeSeriesQueryOptions = {
   suggestedStepMs?: number;
 };
 
 /**
  * Runs a Graph Query using a plugin and returns the results.
  */
-export const useGraphQueryData = (definition: GraphQueryDefinition, options?: UseGraphQueryOptions) => {
-  const { data: plugin } = usePlugin('GraphQuery', definition.spec.plugin.kind);
+export const useTimeSeriesQueryData = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
+  const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
 
   // Build the context object from data available at runtime
   const { timeRange } = useTimeRange();
   const variableState = useTemplateVariableValues();
   const datasources = useLegacyDatasources();
 
-  const context: GraphQueryContext = {
+  const context: TimeSeriesQueryContext = {
     suggestedStepMs: options?.suggestedStepMs,
     timeRange,
     variableState,

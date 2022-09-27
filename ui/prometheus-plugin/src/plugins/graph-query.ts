@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DurationString } from '@perses-dev/core';
-import { GraphData, GraphQueryPlugin } from '@perses-dev/plugin-system';
+import { GraphData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import { RangeQueryRequestParameters } from '../model/api-types';
 import { parseValueTuple } from '../model/parse-sample-values';
@@ -21,13 +21,16 @@ import { TemplateString } from '../model/templating';
 import { getDurationStringSeconds, getPrometheusTimeRange, getRangeStep } from '../model/time';
 import { replaceTemplateVariables } from '../model/utils';
 
-interface PrometheusGraphQueryOptions {
+interface PrometheusTimeSeriesQueryOptions {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
 }
 
-const getGraphData: GraphQueryPlugin<PrometheusGraphQueryOptions>['getGraphData'] = async (definition, context) => {
+const getGraphData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>['getGraphData'] = async (
+  definition,
+  context
+) => {
   const pluginSpec = definition.spec.plugin.spec;
 
   const minStep = getDurationStringSeconds(pluginSpec.min_step);
@@ -87,8 +90,8 @@ const getGraphData: GraphQueryPlugin<PrometheusGraphQueryOptions>['getGraphData'
 };
 
 /**
- * The core Prometheus GraphQuery plugin for Perses.
+ * The core Prometheus TimeSeriesQuery plugin for Perses.
  */
-export const PrometheusGraphQuery: GraphQueryPlugin<PrometheusGraphQueryOptions> = {
+export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions> = {
   getGraphData,
 };

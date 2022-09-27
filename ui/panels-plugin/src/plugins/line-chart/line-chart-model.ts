@@ -12,14 +12,14 @@
 // limitations under the License.
 
 import { UnitOptions } from '@perses-dev/components';
-import { GraphQueryDefinition } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { ThresholdOptions } from '../../model/thresholds';
 
 /**
  * The Options object supported by the LineChartPanel plugin.
  */
 export interface LineChartOptions {
-  queries: GraphQueryDefinition[];
+  queries: TimeSeriesQueryDefinition[];
   show_legend?: boolean;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
