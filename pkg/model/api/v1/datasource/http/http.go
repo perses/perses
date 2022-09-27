@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -195,7 +196,7 @@ type tmpHTTPConfig struct {
 	Secret           string            `json:"secret,omitempty" yaml:"secret,omitempty"`
 }
 
-func (h *Config) MarshalJSON() ([]byte, error) {
+func (h Config) MarshalJSON() ([]byte, error) {
 	urlAsString := ""
 	if h.URL != nil {
 		urlAsString = h.URL.String()
@@ -209,7 +210,7 @@ func (h *Config) MarshalJSON() ([]byte, error) {
 	return json.Marshal(tmp)
 }
 
-func (h *Config) MarshalYAML() (interface{}, error) {
+func (h Config) MarshalYAML() (interface{}, error) {
 	urlAsString := ""
 	if h.URL != nil {
 		urlAsString = h.URL.String()
@@ -255,4 +256,74 @@ func (h *Config) validate(conf tmpHTTPConfig) error {
 	h.AllowedEndpoints = conf.AllowedEndpoints
 	h.Secret = conf.Secret
 	return nil
+}
+
+func doesKindConfigExist(v reflect.Value) bool {
+	for i := 0; i < v.NumField(); i++ {
+		if v.Type().Field(i).Name == "Kind" && v.Field(i).Type().Name() == "string" && v.Field(i).String() == "HTTP" {
+			return true
+		}
+	}
+	return false
+}
+
+func getConfigSpec(v reflect.Value) reflect.Value {
+	for i := 0; i < v.NumField(); i++ {
+		if v.Type().Field(i).Name == "Spec" {
+			return v.Field(i)
+		}
+	}
+	return reflect.Value{}
+}
+
+func lookingForConfig(v reflect.Value, httpConfig *Config, err error, found *bool) {
+	if len(v.Type().PkgPath()) > 0 {
+		// the field is not exported, so no need to look at it as we won't be able to set it in a later stage
+		return
+	}
+	if v.Kind() == reflect.Ptr {
+		if !v.IsNil() {
+			v = v.Elem()
+		}
+	}
+
+	if v.Kind() == reflect.Struct {
+		if *found = doesKindConfigExist(v); *found {
+			// then get the spec field
+			spec := getConfigSpec(v)
+			if spec == (reflect.Value{}) {
+				return
+			}
+			if spec.Kind() == reflect.Ptr {
+				if spec.IsNil() {
+					return
+				}
+				spec = spec.Elem()
+			}
+			// Then unmarshal the proxy to validate the content
+			var data []byte
+			data, err = json.Marshal(spec.Interface().(Config))
+			if err != nil {
+				return
+			}
+			err = json.Unmarshal(data, httpConfig)
+		} else {
+			// Otherwise look deeper to find it
+			for i := 0; i < v.NumField(); i++ {
+				lookingForConfig(v.Field(i), httpConfig, err, found)
+				if *found || err != nil {
+					return
+				}
+			}
+		}
+	}
+}
+
+func CheckAndValidate(pluginSpec interface{}) (*Config, error) {
+	httpConfig := &Config{}
+	var err error
+	b := false
+	found := &b
+	lookingForConfig(reflect.ValueOf(pluginSpec), httpConfig, err, found)
+	return httpConfig, err
 }

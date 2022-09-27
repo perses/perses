@@ -21,6 +21,7 @@ import (
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
 
@@ -43,6 +44,11 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+	// In case there is a proxy defined, check if it is properly defined
+	_, err := http.CheckAndValidate(entity.Spec.Plugin.Spec)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -64,6 +70,11 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 }
 
 func (s *service) update(entity *v1.GlobalDatasource, parameters shared.Parameters) (*v1.GlobalDatasource, error) {
+	// In case there is a proxy defined, check if it is properly defined
+	_, err := http.CheckAndValidate(entity.Spec.Plugin.Spec)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)

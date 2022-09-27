@@ -27,7 +27,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	datasourcev1 "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,8 +36,6 @@ var (
 	localProxyMatcher  = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
 )
 
-// TODO the entire implementation need to be reviewed.
-// (@nexucis: I prefere to let it like that, because not all the code needs to be changed just a piece)
 func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -128,12 +126,23 @@ type proxy interface {
 }
 
 func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
+	cfg, err := datasourceHTTP.CheckAndValidate(spec.Plugin.Spec)
+	if err != nil {
+		logrus.WithError(err).Errorf("unable to build or find the http config in the datasource")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("unable to find the http config"))
+	}
+	if cfg != nil {
+		return &httpProxy{
+			config: cfg,
+			path:   path,
+		}, nil
+	}
 	// TODO build the HTTP proxy
 	return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
 }
 
 type httpProxy struct {
-	config datasourcev1.HTTPConfig
+	config *datasourceHTTP.Config
 	path   string
 }
 
@@ -199,29 +208,11 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
-	authConfig := h.config.Auth
-	if authConfig != nil {
-		if len(authConfig.BearerToken) > 0 {
-			req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", authConfig.BearerToken))
-		}
-		if authConfig.BasicAuth != nil {
-			password, err := authConfig.BasicAuth.GetPassword()
-			if err != nil {
-				logrus.WithError(err).Error("unable to retrieve the password for the basic auth")
-				return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
-			}
-			req.SetBasicAuth(authConfig.BasicAuth.Username, password)
-		}
-	}
 	return nil
 }
 
 func (h *httpProxy) prepareTransport() *http.Transport {
 	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
-	if h.config.Auth != nil {
-		tlsConfig.InsecureSkipVerify = h.config.Auth.InsecureTLS
-		// TODO use the certificate
-	}
 	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{

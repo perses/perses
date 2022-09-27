@@ -14,9 +14,7 @@
 package datasource
 
 import (
-	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -26,70 +24,6 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
-
-func doesKindProxyExist(v reflect.Value) bool {
-	for i := 0; i < v.NumField(); i++ {
-		if v.Type().Field(i).Name == "Kind" && v.Field(i).Type().Name() == "string" && v.Field(i).String() == "HTTP" {
-			return true
-		}
-	}
-	return false
-}
-
-func getHTTPProxySpec(v reflect.Value) reflect.Value {
-	for i := 0; i < v.NumField(); i++ {
-		if v.Type().Field(i).Name == "Spec" {
-			return v.Field(i)
-		}
-	}
-	return reflect.Value{}
-}
-
-func lookingForHttpProxy(v reflect.Value, httpConfig *http.Config, err error, found *bool) {
-	if len(v.Type().PkgPath()) > 0 {
-		// the field is not exported, so no need to look at it as we won't be able to set it in a later stage
-		return
-	}
-	if v.Kind() == reflect.Ptr {
-		if !v.IsNil() {
-			v = v.Elem()
-		}
-	}
-
-	if v.Kind() == reflect.Struct {
-		if *found = doesKindProxyExist(v); *found {
-			// then get the spec field
-			spec := getHTTPProxySpec(v)
-			if spec == (reflect.Value{}) {
-				return
-			}
-			// Then unmarshal the proxy to validate the content
-			var data []byte
-			data, err = json.Marshal(v.Interface())
-			if err != nil {
-				return
-			}
-			err = json.Unmarshal(data, httpConfig)
-		} else {
-			// Otherwise look deeper to find it
-			for i := 0; i < v.NumField(); i++ {
-				lookingForHttpProxy(v.Field(i), httpConfig, err, found)
-				if *found || err != nil {
-					return
-				}
-			}
-		}
-	}
-}
-
-func checkAndValidateHTTPProxy(plugin v1.DatasourcePlugin) (*http.Config, error) {
-	httpConfig := &http.Config{}
-	var err error
-	var found *bool
-	*found = false
-	lookingForHttpProxy(reflect.ValueOf(plugin.Spec), httpConfig, err, found)
-	return httpConfig, err
-}
 
 type service struct {
 	datasource.Service
@@ -111,7 +45,7 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 
 func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
 	// In case there is a proxy defined, check if it is properly defined
-	_, err := checkAndValidateHTTPProxy(entity.Spec.Plugin)
+	_, err := http.CheckAndValidate(entity.Spec.Plugin.Spec)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
@@ -137,7 +71,7 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 
 func (s *service) update(entity *v1.Datasource, parameters shared.Parameters) (*v1.Datasource, error) {
 	// In case there is a proxy defined, check if it is properly defined
-	_, err := checkAndValidateHTTPProxy(entity.Spec.Plugin)
+	_, err := http.CheckAndValidate(entity.Spec.Plugin.Spec)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
