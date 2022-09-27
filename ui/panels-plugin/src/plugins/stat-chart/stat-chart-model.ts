@@ -11,18 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
-import { GraphQueryDefinition } from '@perses-dev/plugin-system';
+import { GraphQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { ThresholdOptions } from '../../model/thresholds';
 import { CalculationType } from '../../model/calculations';
 
-export interface SparklineOptions extends JsonObject {
+export interface SparklineOptions {
   color?: string;
   width?: number;
 }
 
-export interface StatChartOptions extends JsonObject {
+export interface StatChartOptions {
   name: string;
   query: GraphQueryDefinition;
   calculation: CalculationType;
@@ -35,8 +34,13 @@ export function createInitialStatChartOptions(): StatChartOptions {
   return {
     name: '',
     query: {
-      kind: '',
-      options: {},
+      kind: 'GraphQuery',
+      spec: {
+        plugin: {
+          kind: '',
+          spec: {},
+        },
+      },
     },
     calculation: 'First',
     unit: {

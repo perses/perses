@@ -11,23 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from './definitions';
+import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
 
-export interface PanelDefinition<PluginSpec = unknown> extends Definition<PanelSpec<PluginSpec>> {
-  kind: 'Panel';
-}
+type StaticListOption = string | VariableOption;
 
-export interface PanelSpec<PluginSpec> {
-  display: {
-    name: string;
-    description?: string;
-  };
-  plugin: Definition<PluginSpec>;
-}
+type StaticListVariableOptions = {
+  values: StaticListOption[];
+};
 
-/**
- * A reference to a panel defined in the DashboardSpec.
- */
-export interface PanelRef {
-  $ref: `#/spec/panels/${string}`;
-}
+export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
+  getVariableOptions: async (definition) => {
+    const values = definition.spec.plugin.spec.values?.map((v) => {
+      if (typeof v === 'string') {
+        return { label: v, value: v };
+      }
+      return v;
+    });
+    return {
+      data: values,
+    };
+  },
+};

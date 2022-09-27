@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,9 +12,8 @@
 // limitations under the License.
 
 export * from './dashboard';
-export * from './datasource';
 export * from './definitions';
-export * from './http';
+export * from './graph-queries';
 export * from './layout';
 export * from './panels';
 export * from './resource';

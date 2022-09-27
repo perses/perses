@@ -14,9 +14,8 @@
 package text
 
 #panel: {
-	kind: "TextPanel"
+	kind: "Markdown"
 	options: {
-		mode:    "html" | "markdown"
-		content: string
+		text: string
 	}
 }

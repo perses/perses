@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasources';
+export * from './datasources-old';
+export * from './graph-queries';
+export * from './plugins';
+export * from './query-string';
 export * from './template-variables';
 export * from './time-range';
-export * from './query-string';

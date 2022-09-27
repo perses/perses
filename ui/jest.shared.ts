@@ -12,10 +12,14 @@
 // limitations under the License.
 
 import type { Config } from '@jest/types';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+const swcrcPath = resolve(__dirname, './.cjs.swcrc');
+const swcrc = JSON.parse(readFileSync(swcrcPath, 'utf-8'));
 
 // Common Jest configuration shared across packages
 const config: Config.InitialOptions = {
-  preset: 'ts-jest',
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],
   moduleNameMapper: {
@@ -29,10 +33,10 @@ const config: Config.InitialOptions = {
     // Tell Jest where other Perses packages live since it doesn't know about project references
     '^@perses-dev/(.*)$': '<rootDir>/../$1/src',
   },
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/../tsconfig.test.json',
-    },
+  transform: {
+    // This does not do type-checking and assumes that's happening elsewhere for TS test files (e.g. as part of the
+    // build process)
+    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', swcrc],
   },
 };
 

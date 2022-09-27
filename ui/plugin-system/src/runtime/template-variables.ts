@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,19 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { VariableStateMap } from '@perses-dev/core';
+import { VariableName, VariableValue } from '@perses-dev/core';
+import { VariableOption } from '../model';
+
+export const DEFAULT_ALL_VALUE = '$__all' as const;
+
+export type VariableState = {
+  value: VariableValue;
+  options?: VariableOption[];
+  loading: boolean;
+  error?: Error;
+};
+
+export type VariableStateMap = Record<VariableName, VariableState>;
 
 export type TemplateVariableSrv = {
   state: VariableStateMap;

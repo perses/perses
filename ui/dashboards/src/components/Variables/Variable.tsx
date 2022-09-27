@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useRef } from 'react';
-import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, IconButton, TextField } from '@mui/material';
-import { Reload } from 'mdi-material-ui';
-import { VariableName, ListVariableDefinition } from '@perses-dev/core';
+import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
+import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
+import { usePlugin, DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
 import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
 
 type TemplateVariableProps = {
@@ -37,42 +37,88 @@ export function TemplateVariable({ name }: TemplateVariableProps) {
 function ListVariable({ name }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name);
   const definition = ctx.definition as ListVariableDefinition;
-  const { setVariableValue, loadTemplateVariable } = useTemplateVariableActions();
-  const allowMultiple = definition?.options.allowMultiple === true;
+  const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
+
+  const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
+  const allowMultiple = definition?.spec.allowMultiple === true;
+  const allowAllValue = definition?.spec.allowAllValue === true;
+
+  const loadOptions = useCallback(async () => {
+    if (!variablePlugin) {
+      return;
+    }
+    setVariableLoading(name, true);
+    try {
+      const { data } = await variablePlugin.getVariableOptions(definition);
+      setVariableOptions(name, data);
+    } catch (e) {
+      console.error('Failed to load template variable options', e);
+    }
+    setVariableLoading(name, false);
+  }, [variablePlugin, definition, name, setVariableLoading, setVariableOptions]);
+
   useEffect(() => {
-    loadTemplateVariable(name);
-  }, [name, loadTemplateVariable]);
+    loadOptions();
+  }, [loadOptions]);
 
   let value = ctx.state?.value;
+  const options = ctx.state?.options;
+  const loading = ctx.state?.loading;
 
+  // Make sure value is an array if allowMultiple is true
   if (allowMultiple && !Array.isArray(value)) {
-    value = [];
+    value = typeof value === 'string' ? [value] : [];
   }
+
+  const finalOptions = useMemo(() => {
+    let computedOptions = options ? [...options] : [];
+
+    // Add the all value if it's allowed
+    if (allowAllValue) {
+      computedOptions = [{ value: DEFAULT_ALL_VALUE, label: 'All' }, ...computedOptions];
+    }
+    return computedOptions;
+  }, [options, allowAllValue]);
+
+  // If there is no value and there are options loaded, select the first value
+  useEffect(() => {
+    const firstOption = finalOptions?.[0];
+    if ((value === null || value?.length === 0) && firstOption) {
+      setVariableValue(name, firstOption.value);
+    }
+  }, [finalOptions, setVariableValue, value, name]);
 
   return (
     <Box display={'flex'}>
       <FormControl>
         <InputLabel id={name}>{name}</InputLabel>
         <Select
+          sx={{ minWidth: 100 }}
           id={name}
           label={name}
-          value={value}
+          value={value ?? ''}
           onChange={(e) => {
-            setVariableValue(name, e.target.value as string);
+            // Must be selected
+            if (e.target.value === null || e.target.value.length === 0) {
+              return;
+            }
+            setVariableValue(name, e.target.value as VariableValue);
           }}
           multiple={allowMultiple}
         >
-          {ctx.state?.options?.map((option) => (
+          {loading && (
+            <MenuItem value="loading" disabled>
+              Loading
+            </MenuItem>
+          )}
+          {finalOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
             </MenuItem>
           ))}
         </Select>
-        {ctx.state?.loading && <LinearProgress />}
+        {loading && <LinearProgress />}
       </FormControl>
-      <IconButton onClick={() => loadTemplateVariable(name)}>
-        <Reload />
-      </IconButton>
     </Box>
   );
 }

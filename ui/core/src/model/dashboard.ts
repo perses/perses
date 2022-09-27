@@ -17,12 +17,6 @@ import { ProjectMetadata } from './resource';
 import { DurationString } from './time';
 import { VariableDefinition } from './variables';
 
-export interface DatasourceSelector {
-  name: string;
-  kind: string;
-  global: boolean;
-}
-
 export interface DashboardResource {
   kind: 'Dashboard';
   metadata: ProjectMetadata;
@@ -30,7 +24,7 @@ export interface DashboardResource {
 }
 
 export interface DashboardSpec {
-  datasource: DatasourceSelector;
+  datasource: unknown; // TODO: Actual types for this
   duration: DurationString;
   variables: VariableDefinition[];
   layouts: LayoutDefinition[];

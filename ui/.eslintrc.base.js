@@ -14,6 +14,7 @@
 // Base eslint configuration for typescript projects
 module.exports = {
   extends: [
+    'eslint:recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
@@ -67,4 +68,6 @@ module.exports = {
     // Not necessary in React 17
     'react/react-in-jsx-scope': 'off',
   },
+
+  ignorePatterns: ['**/dist'],
 };

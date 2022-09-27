@@ -11,104 +11,84 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, JsonObject, useMemoized } from '@perses-dev/core';
-import {
-  GraphData,
-  GraphQueryDefinition,
-  GraphQueryPlugin,
-  UseGraphQueryHook,
-  UseGraphQueryHookOptions,
-} from '@perses-dev/plugin-system';
+import { DurationString } from '@perses-dev/core';
+import { GraphData, GraphQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
-import { useMemo } from 'react';
 import { RangeQueryRequestParameters } from '../model/api-types';
 import { parseValueTuple } from '../model/parse-sample-values';
-import { useRangeQuery } from '../model/prometheus-client';
-import { TemplateString, useReplaceTemplateString } from '../model/templating';
-import { getDurationStringSeconds, useDashboardPrometheusTimeRange, usePanelRangeStep } from '../model/time';
+import { rangeQuery } from '../model/prometheus-client';
+import { TemplateString } from '../model/templating';
+import { getDurationStringSeconds, getPrometheusTimeRange, getRangeStep } from '../model/time';
+import { replaceTemplateVariables } from '../model/utils';
 
-interface PrometheusGraphQueryOptions extends JsonObject {
+interface PrometheusGraphQueryOptions {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
 }
 
-function usePrometheusGraphQuery(
-  definition: GraphQueryDefinition<PrometheusGraphQueryOptions>,
-  hookOptions?: UseGraphQueryHookOptions
-): ReturnType<UseGraphQueryHook<PrometheusGraphQueryOptions>> {
-  const minStep = getDurationStringSeconds(definition.options.min_step);
-  const timeRange = useDashboardPrometheusTimeRange();
-  const step = usePanelRangeStep(timeRange, minStep, undefined, hookOptions?.suggestedStepMs);
+const getGraphData: GraphQueryPlugin<PrometheusGraphQueryOptions>['getGraphData'] = async (definition, context) => {
+  const pluginSpec = definition.spec.plugin.spec;
 
-  // Align the time range so that it's a multiple of the step (TODO: we may
-  // ultimately want to return this from the hook so that charts will know what
-  // time range was actually used?)
-  const { start, end } = useMemoized(() => {
-    const { start, end } = timeRange;
-    const utcOffsetSec = new Date().getTimezoneOffset() * 60;
+  const minStep = getDurationStringSeconds(pluginSpec.min_step);
+  const timeRange = getPrometheusTimeRange(context.timeRange);
+  const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs);
 
-    const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
-    const alignedStart = Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
+  // Align the time range so that it's a multiple of the step
+  let { start, end } = timeRange;
+  const utcOffsetSec = new Date().getTimezoneOffset() * 60;
 
-    return {
-      start: alignedStart,
-      end: alignedEnd,
-    };
-  }, [timeRange, step]);
+  const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
+  const alignedStart = Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
+  start = alignedStart;
+  end = alignedEnd;
 
-  const query = useReplaceTemplateString(definition.options.query.replace('$__rate_interval', `15s`));
+  // Replace template variable placeholders in PromQL query
+  let query = pluginSpec.query.replace('$__rate_interval', `15s`);
+  query = replaceTemplateVariables(query, context.variableState);
 
+  // Make the request to Prom
   const request: RangeQueryRequestParameters = {
     query,
     start,
     end,
     step,
   };
+  const response = await rangeQuery(request, { datasource: context.datasources.defaultDatasource });
 
-  const {
-    data: response,
-    isLoading: loading,
-    error,
-  } = useRangeQuery(request, {
-    enabled: true,
-  });
+  // TODO: What about error responses from Prom that have a response body?
+  const result = response.data?.result ?? [];
 
-  const data = useMemo(() => {
-    if (response === undefined) return undefined;
-    if (response.status === 'error') return undefined;
+  // Transform response
+  const chartData: GraphData = {
+    // Return the time range and step we actually used for the query
+    timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
+    stepMs: step * 1000,
 
     // TODO: Maybe do a proper Iterable implementation that defers some of this
     // processing until its needed
-    const chartData: GraphData = {
-      timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
-      stepMs: step * 1000,
-      series: response.data.result.map((value) => {
-        const { metric, values } = value;
+    series: result.map((value) => {
+      const { metric, values } = value;
 
-        // Name the series after the metric labels or if no metric, just use the
-        // overall query
-        let name = Object.entries(metric)
-          .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`)
-          .join(', ');
-        if (name === '') name = query;
+      // Name the series after the metric labels or if no metric, just use the
+      // overall query
+      let name = Object.entries(metric)
+        .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`)
+        .join(', ');
+      if (name === '') name = query;
 
-        return {
-          name,
-          values: values.map(parseValueTuple),
-        };
-      }),
-    };
-
-    return chartData;
-  }, [response, start, end, step, query]);
-
-  return { data, loading, error: error ?? undefined };
-}
+      return {
+        name,
+        values: values.map(parseValueTuple),
+      };
+    }),
+  };
+  return chartData;
+};
 
 /**
  * The core Prometheus GraphQuery plugin for Perses.
  */
 export const PrometheusGraphQuery: GraphQueryPlugin<PrometheusGraphQueryOptions> = {
-  useGraphQuery: usePrometheusGraphQuery,
+  getGraphData,
 };

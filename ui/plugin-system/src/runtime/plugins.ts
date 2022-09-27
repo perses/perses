@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { useQuery, UseQueryOptions } from 'react-query';
 import { usePluginRegistry } from '../components/PluginRegistry';
 import { PluginImplementation, PluginMetadata, PluginType } from '../model';
@@ -19,7 +18,7 @@ import { getTypeAndKindKey } from '../utils/cache-keys';
 
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<
-  UseQueryOptions<PluginImplementation<T, JsonObject>, unknown, PluginImplementation<T, JsonObject>, string>,
+  UseQueryOptions<PluginImplementation<T, unknown>, unknown, PluginImplementation<T, unknown>, string>,
   'queryKey' | 'queryFn'
 >;
 
@@ -29,8 +28,7 @@ type UsePluginOptions<T extends PluginType> = Omit<
 export function usePlugin<T extends PluginType>(pluginType: T, kind: string, options?: UsePluginOptions<T>) {
   const { getPlugin } = usePluginRegistry();
   const queryKey = getTypeAndKindKey(pluginType, kind);
-  const { data, isLoading, error } = useQuery(queryKey, () => getPlugin(pluginType, kind), options);
-  return { plugin: data, isLoading, error };
+  return useQuery(queryKey, () => getPlugin(pluginType, kind), options);
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
@@ -45,6 +43,5 @@ type UseListPluginMetadataOptions = Omit<
 export function useListPluginMetadata(pluginType: PluginType, options?: UseListPluginMetadataOptions) {
   const { listPluginMetadata } = usePluginRegistry();
   const queryKey: string = pluginType;
-  const { data, isLoading, error } = useQuery(queryKey, () => listPluginMetadata(pluginType), options);
-  return { pluginMetadata: data, isLoading, error };
+  return useQuery(queryKey, () => listPluginMetadata(pluginType), options);
 }

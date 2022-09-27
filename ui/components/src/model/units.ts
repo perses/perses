@@ -84,9 +84,10 @@ function formatTime(value: number, unitOptions: TimeUnitOptions): string {
     case 'Years':
       duration.years = value;
       break;
-    default:
+    default: {
       const exhaustive: never = unitOptions.kind;
       throw new Error(`Unknown time unit type ${exhaustive}`);
+    }
   }
 
   // Find the largest whole time unit we can display the value in and use it

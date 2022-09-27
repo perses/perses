@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JsonObject } from '@perses-dev/core';
 import { createContext, useContext } from 'react';
 import { PluginImplementation, PluginMetadata, PluginType } from '../../model';
 
 export interface PluginRegistryContextType {
-  getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T, JsonObject>>;
+  getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T, unknown>>;
   listPluginMetadata(pluginType: PluginType): Promise<PluginMetadata[]>;
 }
 

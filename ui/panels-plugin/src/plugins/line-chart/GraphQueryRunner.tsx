@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemoized } from '@perses-dev/core';
-import { GraphQueryDefinition, useGraphQuery } from '@perses-dev/plugin-system';
+import { useMemoized, GraphQueryDefinition } from '@perses-dev/core';
+import { useGraphQueryData } from '@perses-dev/plugin-system';
 import { createContext, useContext } from 'react';
 
-export type QueryState = ReturnType<typeof useGraphQuery>;
+export type QueryState = ReturnType<typeof useGraphQueryData>;
 
 const EMPTY_RESULTS: QueryState[] = [];
 
@@ -66,7 +66,7 @@ function RunGraphQuery(props: RunGraphQueryProps) {
     throw new Error(`No query to run at index ${index}`);
   }
 
-  const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
+  const { data, loading, error } = useGraphQueryData(query, { suggestedStepMs });
   const results = useMemoized(() => {
     return [...previousResults, { data, loading, error }];
   }, [previousResults, data, loading, error]);

@@ -4,17 +4,6 @@
   "include": ["src", "src/**/*.json"],
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "tsBuildInfoFile": "../.build-cache/plugin-system.tsbuildinfo"
-  },
-  "references": [
-    {
-      "path": "../components",
-      "prepend": false
-    },
-    {
-      "path": "../core",
-      "prepend": false
-    }
-  ]
+    "rootDir": "./src"
+  }
 }

@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableOption } from '@perses-dev/core';
-import { VariablePlugin } from '../../../../model';
+import { VariablePlugin, VariableOption } from '../../../../model';
 
 const data: VariableOption[] = [
   { label: 'Grover', value: 'Grover' },
@@ -21,5 +20,5 @@ const data: VariableOption[] = [
 
 // Dummy plugin to test loading
 export const ErnieVariable: VariablePlugin = {
-  useVariableOptions: () => ({ loading: false, error: undefined, data }),
+  getVariableOptions: async () => ({ data }),
 };

@@ -12,47 +12,45 @@
 // limitations under the License.
 
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import 'intersection-observer';
+import 'intersection-observer'; // TODO: Why do we need this side-effect? Should it be in test setup somewhere?
 import { screen } from '@testing-library/react';
-import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN } from '../../test';
-import testDashboard from '../../test/testDashboard';
-import { DashboardStoreProps } from '../../context';
+import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN, getTestDashboard } from '../../test';
+import { DashboardProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
 describe('Panel', () => {
-  let props: PanelProps;
-  let initialState: DashboardStoreProps;
-
-  beforeEach(() => {
-    props = {
+  // Helper to create panel props for rendering tests
+  const createPanelProps = (): PanelProps => {
+    return {
       definition: {
-        display: {
-          name: 'Fake Panel',
-          description: 'This is a fake panel',
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Fake Panel',
+            description: 'This is a fake panel',
+          },
+          plugin: {
+            kind: 'FakePanel',
+            spec: {},
+          },
         },
-        kind: 'FakePanel',
-        options: {},
       },
       groupIndex: 0,
       panelKey: 'panelRef',
     };
-
-    initialState = {
-      isEditMode: false,
-      dashboardSpec: testDashboard.spec,
-    };
-  });
+  };
 
   // Helper to render the panel with some context set
-  const renderPanel = (initialState?: DashboardStoreProps) => {
+  const renderPanel = (isEditMode = false) => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
     addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
 
     renderWithContext(
       <PluginRegistry {...pluginRegistryProps}>
-        <Panel {...props} />
-      </PluginRegistry>,
-      initialState
+        <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode }}>
+          <Panel {...createPanelProps()} />
+        </DashboardProvider>
+      </PluginRegistry>
     );
   };
 
@@ -62,10 +60,9 @@ describe('Panel', () => {
     screen.queryByLabelText('info-tooltip');
   });
 
-  it('should render edit icons when in edit mode', async () => {
-    initialState.isEditMode = true;
-    renderPanel(initialState);
-    await screen.queryByLabelText('drag handle');
+  it('should render edit icons when in edit mode', () => {
+    renderPanel(true);
+    screen.queryByLabelText('drag handle');
     screen.queryByLabelText('edit panel');
     screen.queryByLabelText('more');
   });

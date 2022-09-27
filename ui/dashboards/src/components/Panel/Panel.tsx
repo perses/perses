@@ -14,8 +14,7 @@
 import { useState, useMemo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { PluginBoundary } from '@perses-dev/plugin-system';
-import { ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import {
   Box,
@@ -105,7 +104,7 @@ export function Panel(props: PanelProps) {
               overflow="hidden"
               textOverflow="ellipsis"
             >
-              {definition.display.name}
+              {definition.spec.display.name}
             </Typography>
             <Box
               sx={{
@@ -114,10 +113,10 @@ export function Panel(props: PanelProps) {
                 marginLeft: 'auto',
               }}
             >
-              {!isEditMode && isHovered && definition.display.description && (
+              {!isEditMode && isHovered && definition.spec.display.description && (
                 <InfoTooltip
                   id="info-tooltip"
-                  description={definition.display.description}
+                  description={definition.spec.display.description}
                   placement={TooltipPlacement.Bottom}
                 >
                   <InformationOutlineIcon
@@ -160,9 +159,9 @@ export function Panel(props: PanelProps) {
         }}
         ref={setContentElement}
       >
-        <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
           {inView === true && <PanelContent definition={definition} contentDimensions={contentDimensions} />}
-        </PluginBoundary>
+        </ErrorBoundary>
       </CardContent>
     </Card>
   );
