@@ -15,7 +15,7 @@ A panel plugin looks like the following:
 package <panel type> // e.g package line
 
 #panel: {
-	kind:       "<Panel name>" // e.g kind: "LineChart"
+	kind:       "<Panel name>" // e.g kind: "TimeSeriesChart",
 	datasource: #datasource
 	options: {
 		queries:      [...#query]

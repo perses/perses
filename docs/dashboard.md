@@ -192,7 +192,7 @@ Here is the different attribute available:
 * `displayed_name` is the name of the panel that would be displayed by the UI.
 * `kind` is the type of chart displayed. It is an enum, and it conditions what contains the attribute `chart`. Possible
   values are :
-    * `LineChart`. It is a simple graph
+    * `TimeSeriesChart`. It is a simple graph
     * `GaugeChart`. It is the way to display a single number with different threshold. It can be used to show with
       different color if it's ok or not to have the current value displayed
 * `chart` contains the different parameters that describe a chart. It will depend on the `kind` value
@@ -204,7 +204,7 @@ Example:
   "panels": {
     "foo": {
       "name": "myPanel",
-      "kind": "LineChart",
+      "kind": "TimeSeriesChart",
       "chart": {}
     }
   }
@@ -213,7 +213,7 @@ Example:
 
 ##### LineChart
 
-A `LineChart` is a simple graph composed by a list of line. Each line is described by a PromQL expression
+A `TimeSeriesChart` is a simple graph composed by a list of line. Each line is described by a PromQL expression
 
 Example:
 
@@ -337,7 +337,7 @@ example.
     "panels": {
       "foo": {
         "name": "myGraphPanel",
-        "kind": "LineChart",
+        "kind": "TimeSeriesChart",
         "chart": {
           "lines": [
             {
@@ -543,7 +543,7 @@ curl -XPOST http://localhost:8080/api/v1/feed/panels -d '
     "panels": {
         "foo": {
             "name": "myGraphPanel",
-            "kind": "LineChart",
+            "kind": "TimeSeriesChart",
             "chart": {
                 "lines": [
                 {

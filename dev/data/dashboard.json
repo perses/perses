@@ -39,7 +39,7 @@
       },
       "panels": {
         "upByLabel": {
-          "kind": "LineChart",
+          "kind": "TimeSeriesChart",
           "displayed_name": "Line Chart using variable",
           "chart": {
             "lines": [
@@ -50,7 +50,7 @@
           }
         },
         "allUP": {
-          "kind": "LineChart",
+          "kind": "TimeSeriesChart",
           "displayed_name": "Line chart using legend template",
           "chart": {
             "show_legend": true,
