@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { render, RenderOptions } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.

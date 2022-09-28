@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetchJson, Metadata } from '@perses-dev/core';
-import { useQuery, UseQueryOptions } from 'react-query';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
 
 const resource = 'projects';
@@ -29,7 +29,7 @@ type ProjectListOptions = Omit<UseQueryOptions<ProjectModel[], Error>, 'queryKey
  */
 export function useProjectQuery(options?: ProjectListOptions) {
   return useQuery<ProjectModel[], Error>(
-    resource,
+    [resource],
     () => {
       const url = buildURL({ resource });
       return fetchJson<ProjectModel[]>(url);

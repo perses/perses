@@ -32,9 +32,9 @@
     "use-immer": "^0.7.0"
   },
   "peerDependencies": {
+    "@tanstack/react-query": "^4.7.1",
     "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0",
-    "react-query": "^3.34.16"
+    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "files": [
     "dist"
