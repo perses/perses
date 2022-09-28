@@ -94,7 +94,7 @@ function convertGraphPanel(graphPanel: GrafanaGraphPanel): PanelDefinition {
         name: graphPanel.title,
       },
       plugin: {
-        kind: 'LineChart',
+        kind: 'TimeSeriesChart',
         spec: {
           queries: graphPanel.targets.map(convertQueryTarget),
         },
