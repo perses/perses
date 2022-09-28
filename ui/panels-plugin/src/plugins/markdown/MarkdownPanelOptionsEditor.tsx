@@ -13,10 +13,13 @@
 
 import { ChangeEvent } from 'react';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { TextField } from '@mui/material';
+import { Link, Stack, TextField } from '@mui/material';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelOptionsEditorProps = OptionsEditorProps<MarkdownPanelOptions>;
+
+const MARKDOWN_GUIDE_URL = 'https://www.markdownguide.org/cheat-sheet';
+const TEXT_INPUT_NUM_ROWS = 20;
 
 export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProps) {
   const {
@@ -28,5 +31,20 @@ export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProp
     onChange({ text: e.target.value });
   };
 
-  return <TextField label="Text" multiline maxRows={20} value={text} onChange={handleChange} />;
+  return (
+    <Stack spacing={1}>
+      <Link sx={{ alignSelf: 'end', textDecoration: 'none' }} href={MARKDOWN_GUIDE_URL} target="_blank" rel="noopener">
+        Markdown Guide
+      </Link>
+      <TextField
+        label="Text"
+        // Multiline
+        multiline
+        rows={TEXT_INPUT_NUM_ROWS}
+        // Value
+        value={text}
+        onChange={handleChange}
+      />
+    </Stack>
+  );
 }
