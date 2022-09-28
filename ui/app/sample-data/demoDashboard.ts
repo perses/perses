@@ -70,7 +70,7 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: '1500+ Series', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -96,7 +96,7 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: '~130 Series', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -122,7 +122,7 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'Single Query' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -148,7 +148,7 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'Legend Example' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -208,7 +208,7 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'Thresholds Example', description: 'Description text' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -263,7 +263,7 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'CPU', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {

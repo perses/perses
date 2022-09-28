@@ -11,16 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialLineChartOptions, LineChartOptions } from './line-chart-model';
-import { LineChartOptionsEditor } from './LineChartOptionsEditor';
-import { LineChartPanel } from './LineChartPanel';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Box } from '@mui/material';
+import { TimeSeriesChartOptions } from './time-series-chart-model';
 
-/**
- * The core LineChart panel plugin for Perses.
- */
-export const LineChart: PanelPlugin<LineChartOptions> = {
-  PanelComponent: LineChartPanel,
-  OptionsEditorComponent: LineChartOptionsEditor,
-  createInitialOptions: createInitialLineChartOptions,
-};
+export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
+
+export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
+  const { value } = props;
+  return <Box>{JSON.stringify(value)}</Box>;
+}

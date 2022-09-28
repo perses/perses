@@ -52,7 +52,7 @@ func TestMarshalDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
 						{
 							"displayed_name": "simple line chart",
-							"kind": "LineChart",
+							"kind": "TimeSeriesChart",
 							"chart": {
 								"show_legend": false,
 								"lines": [
@@ -103,7 +103,7 @@ func TestMarshalDashboard(t *testing.T) {
     "panels": {
       "MyPanel": {
         "displayed_name": "simple line chart",
-        "kind": "LineChart",
+        "kind": "TimeSeriesChart",
         "chart": {
           "show_legend": false,
           "lines": [
@@ -177,7 +177,7 @@ func TestMarshalDashboard(t *testing.T) {
 					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
 						{
 							"displayed_name": "simple line chart",
-							"kind": "LineChart",
+							"kind": "TimeSeriesChart",
 							"chart": {
 								"show_legend": false,
 								"lines": [
@@ -251,7 +251,7 @@ func TestMarshalDashboard(t *testing.T) {
     "panels": {
       "MyPanel": {
         "displayed_name": "simple line chart",
-        "kind": "LineChart",
+        "kind": "TimeSeriesChart",
         "chart": {
           "show_legend": false,
           "lines": [
@@ -335,7 +335,7 @@ func TestUnmarshallDashboard(t *testing.T) {
     "panels": {
       "MyPanel": {
         "displayed_name": "simple line chart",
-        "kind": "LineChart",
+        "kind": "TimeSeriesChart",
         "chart": {
           "show_legend": false,
           "lines": [
@@ -369,7 +369,7 @@ func TestUnmarshallDashboard(t *testing.T) {
 
 	panel := json.RawMessage(`{
         "displayed_name": "simple line chart",
-        "kind": "LineChart",
+        "kind": "TimeSeriesChart",
         "chart": {
           "show_legend": false,
           "lines": [

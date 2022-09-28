@@ -54,7 +54,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'CPU' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -80,7 +80,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Memory' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -139,7 +139,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Disk I/O Utilization' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -165,7 +165,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Filesystem Fullness' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {

@@ -58,7 +58,7 @@ const PanelDrawer = () => {
   const [panelName, setPanelName] = useState(defaultPanelName);
   const [panelDescription, setPanelDescription] = useState(defaultPanelDescription);
   const [kind, setKind] = useState(defaultKind);
-  // Plugin options depends on the plugin kind ('LineChart', 'Markdown', et cetera).
+  // Plugin options depends on the plugin kind ('TimeSeriesChart', 'Markdown', et cetera).
   // As the user switches between kinds, we keep track of the options
   // so that we can go back to wherever they left off.
   const [kindToOptions, setKindToOptions] = useState<Record<string, unknown>>({ [defaultKind]: defaultOptions });
