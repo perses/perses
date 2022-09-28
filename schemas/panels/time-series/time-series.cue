@@ -18,7 +18,7 @@ import (
 )
 
 #panel: {
-	kind:       "LineChart"
+	kind:       "TimeSeriesChart"
 	datasource: #datasource
 	options: {
 		queries: [...#query]
