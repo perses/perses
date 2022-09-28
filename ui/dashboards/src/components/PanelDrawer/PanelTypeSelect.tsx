@@ -20,13 +20,11 @@ export type PanelTypeSelectProps = Omit<SelectProps<string>, 'children'>;
  * Displays a MUI Select input for selecing a Panel type. Queries the plugin system to get the list of all panel types.
  */
 export function PanelTypeSelect(props: PanelTypeSelectProps) {
-  let { value, ...others } = props;
+  const { value: propValue, ...others } = props;
   const { data, isLoading } = useListPluginMetadata('Panel');
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
-  if (value !== '' && isLoading) {
-    value = '';
-  }
+  const value = propValue !== '' && isLoading ? '' : propValue;
 
   // TODO: Does this need a loading indicator of some kind?
   return (
