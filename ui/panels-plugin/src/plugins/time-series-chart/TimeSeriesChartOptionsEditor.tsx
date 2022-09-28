@@ -15,9 +15,9 @@ import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
 
-export type LineChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
+export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
-export function TimeSeriesChartOptionsEditor(props: LineChartOptionsEditorProps) {
+export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { value } = props;
   return <Box>{JSON.stringify(value)}</Box>;
 }
