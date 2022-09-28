@@ -211,7 +211,7 @@ Example:
 }
 ```
 
-##### LineChart
+##### TimeSeriesChart
 
 A `TimeSeriesChart` is a simple graph composed by a list of line. Each line is described by a PromQL expression
 
