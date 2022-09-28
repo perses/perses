@@ -14,12 +14,11 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-// Don't retry in tests
-const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
-
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.
  */
 export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
+  // Create a new QueryClient for each test to avoid caching issues
+  const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
 }
