@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DurationString } from '@perses-dev/core';
-import { GraphData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import { RangeQueryRequestParameters } from '../model/api-types';
 import { parseValueTuple } from '../model/parse-sample-values';
@@ -27,7 +27,7 @@ interface PrometheusTimeSeriesQueryOptions {
   resolution?: number;
 }
 
-const getGraphData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>['getGraphData'] = async (
+const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>['getTimeSeriesData'] = async (
   definition,
   context
 ) => {
@@ -63,7 +63,7 @@ const getGraphData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>['get
   const result = response.data?.result ?? [];
 
   // Transform response
-  const chartData: GraphData = {
+  const chartData: TimeSeriesData = {
     // Return the time range and step we actually used for the query
     timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
     stepMs: step * 1000,
@@ -93,5 +93,5 @@ const getGraphData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>['get
  * The core Prometheus TimeSeriesQuery plugin for Perses.
  */
 export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions> = {
-  getGraphData,
+  getTimeSeriesData,
 };

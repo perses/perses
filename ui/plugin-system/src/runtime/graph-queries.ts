@@ -50,7 +50,7 @@ export const useTimeSeriesQueryData = (definition: TimeSeriesQueryDefinition, op
         throw new Error('Expected plugin to be loaded');
       }
       const [definition, context] = queryKey;
-      return plugin.getGraphData(definition, context);
+      return plugin.getTimeSeriesData(definition, context);
     },
     { enabled: plugin !== undefined }
   );

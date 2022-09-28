@@ -30,8 +30,8 @@
         }
       },
       {
-        "pluginType": "GraphQuery",
-        "kind": "PrometheusGraphQuery",
+        "pluginType": "TimeSeriesQuery",
+        "kind": "PrometheusTimeSeriesQuery",
         "display": {
           "name": "Prometheus Range Query",
           "description": ""

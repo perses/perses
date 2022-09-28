@@ -18,7 +18,10 @@ import { LegacyDatasources, VariableStateMap } from '../runtime';
  * A plugin for running graph queries.
  */
 export interface TimeSeriesQueryPlugin<Spec = unknown> {
-  getGraphData: (definition: TimeSeriesQueryDefinition<Spec>, ctx: TimeSeriesQueryContext) => Promise<GraphData>;
+  getTimeSeriesData: (
+    definition: TimeSeriesQueryDefinition<Spec>,
+    ctx: TimeSeriesQueryContext
+  ) => Promise<TimeSeriesData>;
 }
 
 /**
@@ -31,15 +34,15 @@ export interface TimeSeriesQueryContext {
   datasources: LegacyDatasources;
 }
 
-export interface GraphData {
+export interface TimeSeriesData {
   timeRange: AbsoluteTimeRange;
   stepMs: number;
-  series: Iterable<GraphSeries>;
+  series: Iterable<TimeSeries>;
 }
 
-export interface GraphSeries {
+export interface TimeSeries {
   name: string;
-  values: Iterable<GraphSeriesValueTuple>;
+  values: Iterable<TimeSeriesValueTuple>;
 }
 
-export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
+export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];

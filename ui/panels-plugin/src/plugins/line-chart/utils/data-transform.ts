@@ -13,7 +13,7 @@
 
 import { AbsoluteTimeRange } from '@perses-dev/core';
 import { EChartsTimeSeries } from '@perses-dev/components';
-import { GraphSeries } from '@perses-dev/plugin-system';
+import { TimeSeries } from '@perses-dev/plugin-system';
 import { gcd } from 'mathjs';
 import { QueryState } from '../TimeSeriesQueryRunner';
 import { getRandomColor } from '../utils/palette-gen';
@@ -93,7 +93,7 @@ export function getXValues(timeScale: TimeScale): number[] {
  * y axis of a graph, filling in any timestamps that are missing from the time
  * series data with `null` values.
  */
-export function getYValues(series: GraphSeries, timeScale: TimeScale): Array<number | null> {
+export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<number | null> {
   let timestamp = timeScale.startMs;
 
   const yValues: Array<number | null> = [];
