@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
 import { createContext, useContext } from 'react';
 
 export interface DatasourcesContextType {
-  getDatasource(selector: DatasourceSelector): Promise<unknown>;
+  getDatasource(selector: DatasourceSelector): Promise<DatasourceSpec>;
 }
 
 export const DatasourcesContext = createContext<DatasourcesContextType | undefined>(undefined);

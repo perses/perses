@@ -13,6 +13,7 @@
 
 import { DashboardResource } from '@perses-dev/core';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
+import { useDatasourcesApi } from '../model/datasources-api';
 import { useSampleData } from '../utils/temp-sample-data';
 
 const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
@@ -25,12 +26,15 @@ function ViewDashboard() {
     new URLSearchParams(window.location.search).get('dashboard') || DEFAULT_DASHBOARD_ID
   );
 
+  // TODO: Provider "current project" as argument to hook once we have proper routing
+  const datasourcesApi = useDatasourcesApi();
+
   // TODO: Loading indicator
   if (dashboard === undefined) {
     return null;
   }
 
-  return <DashboardView dashboardResource={dashboard} />;
+  return <DashboardView dashboardResource={dashboard} datasourcesApi={datasourcesApi} />;
 }
 
 export default ViewDashboard;
