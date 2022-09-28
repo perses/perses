@@ -25,7 +25,7 @@ export const EMPTY_GRAPH_DATA = {
   xAxis: [],
 };
 
-export interface LineChartContainerProps {
+export interface TimeSeriesChartContainerProps {
   width: number;
   height: number;
   show_legend?: boolean;
@@ -34,9 +34,9 @@ export interface LineChartContainerProps {
 }
 
 /**
- * Passes query data and customization options to LineChart
+ * Passes query data and customization options to individual chart from components package
  */
-export function LineChartContainer(props: LineChartContainerProps) {
+export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
   const { width, height, show_legend, thresholds } = props;
   const queries = useRunningGraphQueries();
 
