@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GraphSeriesValueTuple } from '@perses-dev/plugin-system';
+import { TimeSeriesValueTuple } from '@perses-dev/plugin-system';
 import { findLast, meanBy, sumBy } from 'lodash-es';
 
 export const CalculationsMap = {
@@ -24,33 +24,33 @@ export const CalculationsMap = {
 
 export type CalculationType = keyof typeof CalculationsMap;
 
-function first(values: GraphSeriesValueTuple[]): number | undefined {
+function first(values: TimeSeriesValueTuple[]): number | undefined {
   const tuple = values[0];
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function last(values: GraphSeriesValueTuple[]): number | undefined {
+function last(values: TimeSeriesValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
 
   const tuple = values[values.length - 1];
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function lastNumber(values: GraphSeriesValueTuple[]): number | undefined {
+function lastNumber(values: TimeSeriesValueTuple[]): number | undefined {
   const tuple = findLast(values, (tuple) => isNaN(getValue(tuple)) === false);
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function mean(values: GraphSeriesValueTuple[]): number | undefined {
+function mean(values: TimeSeriesValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
   return meanBy(values, getValue);
 }
 
-function sum(values: GraphSeriesValueTuple[]): number | undefined {
+function sum(values: TimeSeriesValueTuple[]): number | undefined {
   if (values.length <= 0) return undefined;
   return sumBy(values, getValue);
 }
 
-function getValue(valueTuple: GraphSeriesValueTuple) {
+function getValue(valueTuple: TimeSeriesValueTuple) {
   return valueTuple[1];
 }

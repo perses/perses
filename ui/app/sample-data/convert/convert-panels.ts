@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GraphQueryDefinition, PanelDefinition, DashboardSpec } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition, PanelDefinition, DashboardSpec } from '@perses-dev/core';
 import { camelCase } from 'lodash-es';
 import {
   GrafanaGaugePanel,
@@ -161,15 +161,15 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): PanelDefinit
   return convertedPanel;
 }
 
-function convertQueryTarget(target?: PromQueryTarget): GraphQueryDefinition {
+function convertQueryTarget(target?: PromQueryTarget): TimeSeriesQueryDefinition {
   const query = target?.expr ?? '';
   const min_step = target?.step === undefined ? undefined : `${target.step}s`;
 
   return {
-    kind: 'GraphQuery',
+    kind: 'TimeSeriesQuery',
     spec: {
       plugin: {
-        kind: 'PrometheusGraphQuery',
+        kind: 'PrometheusTimeSeriesQuery',
         spec: {
           query,
           min_step,

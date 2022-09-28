@@ -11,35 +11,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, GraphQueryDefinition, UnixTimeMs } from '@perses-dev/core';
+import { AbsoluteTimeRange, TimeSeriesQueryDefinition, UnixTimeMs } from '@perses-dev/core';
 import { LegacyDatasources, VariableStateMap } from '../runtime';
 
 /**
  * A plugin for running graph queries.
  */
-export interface GraphQueryPlugin<Spec = unknown> {
-  getGraphData: (definition: GraphQueryDefinition<Spec>, ctx: GraphQueryContext) => Promise<GraphData>;
+export interface TimeSeriesQueryPlugin<Spec = unknown> {
+  getTimeSeriesData: (
+    definition: TimeSeriesQueryDefinition<Spec>,
+    ctx: TimeSeriesQueryContext
+  ) => Promise<TimeSeriesData>;
 }
 
 /**
- * Context available to GraphQuery plugins at runtime.
+ * Context available to TimeSeriesQuery plugins at runtime.
  */
-export interface GraphQueryContext {
+export interface TimeSeriesQueryContext {
   suggestedStepMs?: number;
   timeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
   datasources: LegacyDatasources;
 }
 
-export interface GraphData {
+export interface TimeSeriesData {
   timeRange: AbsoluteTimeRange;
   stepMs: number;
-  series: Iterable<GraphSeries>;
+  series: Iterable<TimeSeries>;
 }
 
-export interface GraphSeries {
+export interface TimeSeries {
   name: string;
-  values: Iterable<GraphSeriesValueTuple>;
+  values: Iterable<TimeSeriesValueTuple>;
 }
 
-export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
+export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];

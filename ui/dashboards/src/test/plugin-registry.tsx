@@ -35,14 +35,10 @@ export function mockPluginRegistryProps() {
     },
   };
 
-  const mockPluginModule: Record<string, Plugin<unknown>> = {};
+  const mockPluginModule: Record<string, Plugin> = {};
 
   // Allow adding mock plugins in tests
-  const addMockPlugin = <T extends PluginType>(
-    pluginType: T,
-    kind: string,
-    plugin: PluginImplementation<T, unknown>
-  ) => {
+  const addMockPlugin = <T extends PluginType>(pluginType: T, kind: string, plugin: PluginImplementation<T>) => {
     mockPluginResource.spec.plugins.push({
       pluginType,
       kind,

@@ -13,7 +13,7 @@
 
 import { PanelProps } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
-import GraphQueryRunner from './GraphQueryRunner';
+import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
 import { LineChartOptions } from './line-chart-model';
 import { LineChartContainer } from './LineChartContainer';
 
@@ -34,7 +34,7 @@ export function LineChartPanel(props: LineChartProps) {
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
 
   return (
-    <GraphQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
+    <TimeSeriesQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
       {contentDimensions !== undefined && (
         <LineChartContainer
           width={contentDimensions.width}
@@ -44,6 +44,6 @@ export function LineChartPanel(props: LineChartProps) {
           thresholds={thresholds}
         />
       )}
-    </GraphQueryRunner>
+    </TimeSeriesQueryRunner>
   );
 }

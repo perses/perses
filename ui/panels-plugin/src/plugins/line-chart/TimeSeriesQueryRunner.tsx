@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemoized, GraphQueryDefinition } from '@perses-dev/core';
-import { useGraphQueryData } from '@perses-dev/plugin-system';
+import { useMemoized, TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { useTimeSeriesQueryData } from '@perses-dev/plugin-system';
 import { createContext, useContext } from 'react';
 
-export type QueryState = ReturnType<typeof useGraphQueryData>;
+export type QueryState = ReturnType<typeof useTimeSeriesQueryData>;
 
 const EMPTY_RESULTS: QueryState[] = [];
 
-// Context provided by the GraphQueryRunner
-const GraphQueryContext = createContext<QueryState[] | undefined>(undefined);
+// Context provided by the TimeSeriesQueryRunner
+const TimeSeriesQueryContext = createContext<QueryState[] | undefined>(undefined);
 
-export interface GraphQueryRunnerProps {
-  queries: GraphQueryDefinition[];
+export interface TimeSeriesQueryRunnerProps {
+  queries: TimeSeriesQueryDefinition[];
   suggestedStepMs: number;
   children: React.ReactNode;
 }
@@ -32,24 +32,24 @@ export interface GraphQueryRunnerProps {
  * Component that runs a list of graph queries and then provides the
  * list of results to children via context.
  */
-function GraphQueryRunner(props: GraphQueryRunnerProps) {
+function TimeSeriesQueryRunner(props: TimeSeriesQueryRunnerProps) {
   const { queries, suggestedStepMs, children } = props;
 
   if (queries.length === 0) {
-    return <GraphQueryContext.Provider value={EMPTY_RESULTS}>{children}</GraphQueryContext.Provider>;
+    return <TimeSeriesQueryContext.Provider value={EMPTY_RESULTS}>{children}</TimeSeriesQueryContext.Provider>;
   }
 
   return (
-    <RunGraphQuery queries={queries} index={0} suggestedStepMs={suggestedStepMs} previousResults={EMPTY_RESULTS}>
+    <RunTimeSeriesQuery queries={queries} index={0} suggestedStepMs={suggestedStepMs} previousResults={EMPTY_RESULTS}>
       {children}
-    </RunGraphQuery>
+    </RunTimeSeriesQuery>
   );
 }
 
-export default GraphQueryRunner;
+export default TimeSeriesQueryRunner;
 
-interface RunGraphQueryProps {
-  queries: GraphQueryDefinition[];
+interface RunTimeSeriesQueryProps {
+  queries: TimeSeriesQueryDefinition[];
   index: number;
   suggestedStepMs: number;
   previousResults: QueryState[];
@@ -58,7 +58,7 @@ interface RunGraphQueryProps {
 
 // Internal component that actually runs a query in the array and adds the
 // results of that query to the previous ones
-function RunGraphQuery(props: RunGraphQueryProps) {
+function RunTimeSeriesQuery(props: RunTimeSeriesQueryProps) {
   const { queries, index, suggestedStepMs, previousResults, children } = props;
 
   const query = queries[index];
@@ -66,7 +66,7 @@ function RunGraphQuery(props: RunGraphQueryProps) {
     throw new Error(`No query to run at index ${index}`);
   }
 
-  const { data, loading, error } = useGraphQueryData(query, { suggestedStepMs });
+  const { data, loading, error } = useTimeSeriesQueryData(query, { suggestedStepMs });
   const results = useMemoized(() => {
     return [...previousResults, { data, loading, error }];
   }, [previousResults, data, loading, error]);
@@ -74,25 +74,25 @@ function RunGraphQuery(props: RunGraphQueryProps) {
   // If we're the last query in the array...
   if (index === queries.length - 1) {
     // Provide the state for all the running queries via context
-    return <GraphQueryContext.Provider value={results}>{children}</GraphQueryContext.Provider>;
+    return <TimeSeriesQueryContext.Provider value={results}>{children}</TimeSeriesQueryContext.Provider>;
   }
 
   // Otherwise, recursively render to keep unrolling the array
   return (
-    <RunGraphQuery queries={queries} index={index + 1} suggestedStepMs={suggestedStepMs} previousResults={results}>
+    <RunTimeSeriesQuery queries={queries} index={index + 1} suggestedStepMs={suggestedStepMs} previousResults={results}>
       {children}
-    </RunGraphQuery>
+    </RunTimeSeriesQuery>
   );
 }
 
 /**
- * Allows chilren of GraphQueryRunner to get the states of all queries that
+ * Allows chilren of TimeSeriesQueryRunner to get the states of all queries that
  * have been run.
  */
 export function useRunningGraphQueries(): QueryState[] {
-  const context = useContext(GraphQueryContext);
+  const context = useContext(TimeSeriesQueryContext);
   if (context === undefined) {
-    throw new Error('No time series queries found. Did you forget GraphQueryRunner?');
+    throw new Error('No time series queries found. Did you forget TimeSeriesQueryRunner?');
   }
   return context;
 }

@@ -13,9 +13,9 @@
 
 export * from './dashboard';
 export * from './definitions';
-export * from './graph-queries';
 export * from './layout';
 export * from './panels';
 export * from './resource';
 export * from './time';
+export * from './time-series-queries';
 export * from './variables';

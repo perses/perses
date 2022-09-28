@@ -13,10 +13,10 @@
 
 import { Definition } from './definitions';
 
-export interface GraphQueryDefinition<PluginSpec = unknown> extends Definition<GraphQuerySpec<PluginSpec>> {
-  kind: 'GraphQuery';
+export interface TimeSeriesQueryDefinition<PluginSpec = unknown> extends Definition<TimeSeriesQuerySpec<PluginSpec>> {
+  kind: 'TimeSeriesQuery';
 }
 
-export interface GraphQuerySpec<PluginSpec> {
+export interface TimeSeriesQuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
 }

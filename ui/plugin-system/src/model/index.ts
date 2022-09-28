@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph-queries';
 export * from './panels';
 export * from './plugins';
+export * from './time-series-queries';
 export * from './variables';
 export * from './visual-editing';
