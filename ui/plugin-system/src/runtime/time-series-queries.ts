@@ -14,10 +14,10 @@
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useQuery } from 'react-query';
 import { TimeSeriesQueryContext } from '../model';
-import { useLegacyDatasources } from './datasources-old';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';
 import { usePlugin } from './plugins';
+import { useDatasources } from './datasources';
 
 type UseTimeSeriesQueryOptions = {
   suggestedStepMs?: number;
@@ -32,7 +32,7 @@ export const useTimeSeriesQueryData = (definition: TimeSeriesQueryDefinition, op
   // Build the context object from data available at runtime
   const { timeRange } = useTimeRange();
   const variableState = useTemplateVariableValues();
-  const datasources = useLegacyDatasources();
+  const datasources = useDatasources();
 
   const context: TimeSeriesQueryContext = {
     suggestedStepMs: options?.suggestedStepMs,

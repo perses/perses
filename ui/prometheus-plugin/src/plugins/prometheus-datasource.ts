@@ -11,17 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PrometheusTimeSeriesQuery } from './plugins/time-series-query';
-// @TODO: Move this to a more generic location;
-import { StaticListVariable } from './plugins/variable';
-import { PrometheusLabelNamesVariable, PrometheusLabelValuesVariable } from './plugins/prometheus-variables';
-import { PrometheusDatasource } from './plugins/prometheus-datasource';
+import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import { PrometheusDatasourceSpec } from '../model/prometheus-client';
 
-// Export plugins under the same name as the kinds they handle from the plugin.json
-export {
-  PrometheusTimeSeriesQuery,
-  StaticListVariable,
-  PrometheusLabelNamesVariable,
-  PrometheusLabelValuesVariable,
-  PrometheusDatasource,
+export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec> = {
+  OptionsEditorComponent: () => null,
+  createInitialOptions: () => ({ url: '' }),
 };

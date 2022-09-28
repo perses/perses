@@ -16,7 +16,8 @@ import { DatasourcesProviderProps } from '@perses-dev/dashboards';
 export function useDatasourcesApi(/* project: string */): DatasourcesProviderProps['datasourcesApi'] {
   return {
     getDatasource: async (/*selector*/) => {
-      // TODO: Convert selector to appropriate request params and fetchJson to get it from backend
+      // TODO: Convert selector to appropriate request params and fetchJson to get it from backend using project
+      // argument passed in
       return undefined;
     },
     getGlobalDatasource: async (selector) => {
