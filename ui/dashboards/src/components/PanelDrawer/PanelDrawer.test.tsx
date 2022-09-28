@@ -28,7 +28,7 @@ import PanelDrawer from './PanelDrawer';
 describe('Panel Drawer', () => {
   const renderPanelDrawer = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
+    addMockPlugin('Panel', 'LineChart', FAKE_PANEL_PLUGIN);
 
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 

@@ -25,10 +25,11 @@ import {
   Typography,
 } from '@mui/material';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { OptionsEditorProps, useListPluginMetadata, usePlugin } from '@perses-dev/plugin-system';
+import { OptionsEditorProps, usePlugin } from '@perses-dev/plugin-system';
 import { ChangeEvent, FormEvent, useState, useEffect, useMemo } from 'react';
 import { useDashboardApp, useLayouts, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
+import { PanelTypeSelect } from './PanelTypeSelect';
 
 interface PanelDrawerHeaderProps {
   onClose: () => void;
@@ -65,7 +66,6 @@ const PanelDrawer = () => {
   const options = kindToOptions[kind];
 
   // TODO: What should we show if either of these error out?
-  const { data: pluginMetadata } = useListPluginMetadata('Panel');
   const { data: plugin } = usePlugin('Panel', kind, {
     enabled: kind !== '',
     onSuccess: (plugin) => {
@@ -202,13 +202,13 @@ const PanelDrawer = () => {
           <Grid item xs={4}>
             <FormControl>
               <InputLabel id="panel-type-label">Panel Type</InputLabel>
-              <Select required labelId="panel-type-label" label="Panel Type" value={kind} onChange={handleKindChange}>
-                {pluginMetadata?.map((metadata) => (
-                  <MenuItem key={metadata.kind} value={metadata.kind}>
-                    {metadata.display.name}
-                  </MenuItem>
-                ))}
-              </Select>
+              <PanelTypeSelect
+                required
+                labelId="panel-type-label"
+                label="Panel Type"
+                value={kind}
+                onChange={handleKindChange}
+              />
             </FormControl>
           </Grid>
           <Grid item xs={12}>
