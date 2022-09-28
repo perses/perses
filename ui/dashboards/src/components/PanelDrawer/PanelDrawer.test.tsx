@@ -23,7 +23,7 @@ import {
   renderWithContext,
 } from '../../test';
 import { DashboardProvider } from '../../context/DashboardProvider';
-import PanelDrawer from './PanelDrawer';
+import { PanelDrawer } from './PanelDrawer';
 
 describe('Panel Drawer', () => {
   const renderPanelDrawer = () => {

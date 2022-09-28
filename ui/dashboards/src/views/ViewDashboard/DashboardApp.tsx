@@ -16,7 +16,7 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { TemplateVariableList, Dashboard } from '../../components';
 import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
-import PanelDrawer from '../../components/PanelDrawer/PanelDrawer';
+import { PanelDrawer } from '../../components/PanelDrawer';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
 import { useDashboard, useDashboardApp } from '../../context';
 
