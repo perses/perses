@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/core';
-import { useQuery, UseQueryOptions } from 'react-query';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
 
 const resource = 'health';
@@ -30,7 +30,7 @@ type HealthOptions = Omit<UseQueryOptions<HealthModel, Error>, 'queryKey' | 'que
  */
 export function useHealth(options?: HealthOptions) {
   return useQuery<HealthModel, Error>(
-    resource,
+    [resource],
     () => {
       const url = buildURL({ resource });
       return fetchJson<HealthModel>(url);
