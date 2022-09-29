@@ -14,7 +14,7 @@
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { TemplateVariableList, Dashboard } from '../../components';
+import { Dashboard } from '../../components';
 import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
 import PanelDrawer from '../../components/PanelDrawer/PanelDrawer';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
@@ -31,7 +31,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
   return (
     <Box
       sx={{
-        padding: (theme) => theme.spacing(1, 2),
+        padding: (theme) => theme.spacing(1, 0),
         flexGrow: 1,
         overflowX: 'hidden',
         overflowY: 'auto',
@@ -40,14 +40,13 @@ export const DashboardApp = (props: DashboardAppProps) => {
       }}
     >
       <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <TemplateVariableList />
-      </ErrorBoundary>
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <Dashboard spec={dashboard} />
-      </ErrorBoundary>
-      <PanelDrawer />
-      {panelGroupDialog && <PanelGroupDialog />}
+      <Box sx={{ padding: (theme) => theme.spacing(2) }}>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <Dashboard spec={dashboard} />
+        </ErrorBoundary>
+        <PanelDrawer />
+        {panelGroupDialog && <PanelGroupDialog />}
+      </Box>
     </Box>
   );
 };

@@ -33,7 +33,7 @@ export function TemplateVariableList() {
   const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
   return (
-    <Box m={2}>
+    <>
       <Drawer anchor={'right'} open={isEditing} onClose={() => setIsEditing(false)}>
         <Box width={900} p={4}>
           <TableContainer component={Paper}>
@@ -69,6 +69,6 @@ export function TemplateVariableList() {
           {isEditMode && <Button onClick={() => setIsEditing(true)}>Modify Variables</Button>}
         </Stack>
       </Box>
-    </Box>
+    </>
   );
 }
