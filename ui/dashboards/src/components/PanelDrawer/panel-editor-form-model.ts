@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo } from 'react';
+import { usePlugin } from '@perses-dev/plugin-system';
+import { useImmer } from 'use-immer';
 import { useDashboardApp, usePanels } from '../../context';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 
@@ -38,7 +41,7 @@ export function usePanelDrawerModel(): PanelDrawerModel | undefined {
   const { panelDrawer } = useDashboardApp();
   const { panels, updatePanel } = usePanels();
 
-  // If we're closed, no mode to return
+  // If we're closed, no model to return
   if (panelDrawer === undefined) {
     return undefined;
   }
@@ -115,5 +118,33 @@ export function usePanelDrawerModel(): PanelDrawerModel | undefined {
         // TO DO: need to move panel if panel group changes
       }
     },
+  };
+}
+
+/**
+ * Manages panel plugin spec state. The spec will be undefined while a plugin is being loaded.
+ */
+export function usePanelSpecState(panelPluginKind: string, initialState: unknown) {
+  const [specByKind, setSpecByKind] = useImmer<Record<string, unknown>>({ [panelPluginKind]: initialState });
+  const { data: plugin } = usePlugin('Panel', panelPluginKind, { enabled: panelPluginKind !== '' });
+
+  // Initial spec value from the plugin or undefined when it's loading
+  const pluginInitialSpec = useMemo(() => plugin?.createInitialOptions(), [plugin]);
+
+  // The current state value for spec is either what's in specByKind, or if that isn't set yet, the initial value from
+  // the plugin, which could still be undefined while it's loading
+  const spec = specByKind[panelPluginKind] ?? pluginInitialSpec;
+
+  // TODO: Do we want to expose more of a immer style API to plugin authors for managing their state, rather than the
+  // current "onChange" API?
+  const onSpecChange = (next: unknown) => {
+    setSpecByKind((draft) => {
+      draft[panelPluginKind] = next;
+    });
+  };
+
+  return {
+    spec,
+    onSpecChange,
   };
 }

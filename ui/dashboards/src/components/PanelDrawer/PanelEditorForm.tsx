@@ -15,8 +15,8 @@ import { FormEventHandler, useState } from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useLayouts } from '../../context';
-import { PanelEditorFormValues } from './panel-editor-form-model';
-import { PanelTypeSelect, PanelTypeSelectProps } from './PanelTypeSelect';
+import { PanelEditorFormValues, usePanelSpecState } from './panel-editor-form-model';
+import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelSpecEditor } from './PanelSpecEditor';
 
 export interface PanelEditorFormProps {
@@ -33,7 +33,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const [description, setDescription] = useState(initialValues.description);
   const [group, setGroup] = useState(initialValues.group);
   const [kind, setKind] = useState(initialValues.kind);
-  const [spec, setSpec] = useState(initialValues.spec);
+  const { spec, onSpecChange } = usePanelSpecState(kind, initialValues.spec);
 
   // Ignore string values (which would be an "empty" value from the Select) since we don't allow them to unset it
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
@@ -42,11 +42,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
       return;
     }
     setGroup(value);
-  };
-
-  const handleKindChange: PanelTypeSelectProps['onChange'] = (e) => {
-    // TODO: Kind change flow?
-    setKind(e.target.value);
   };
 
   const handleSubmit: FormEventHandler = (e) => {
@@ -95,13 +90,13 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
               labelId="panel-type-label"
               label="Panel Type"
               value={kind}
-              onChange={handleKindChange}
+              onChange={(e) => setKind(e.target.value)}
             />
           </FormControl>
         </Grid>
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <PanelSpecEditor panelPluginKind={kind} value={spec} onChange={setSpec} />
+            {spec !== undefined && <PanelSpecEditor panelPluginKind={kind} value={spec} onChange={onSpecChange} />}
           </ErrorBoundary>
         </Grid>
       </Grid>
