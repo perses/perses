@@ -57,7 +57,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               </Stack>
             </Box>
           </Box>
-
           <Box
             sx={{
               display: 'flex',
