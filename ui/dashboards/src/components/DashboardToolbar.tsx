@@ -42,11 +42,10 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
       disableGutters
       sx={{
         display: 'block',
-        borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
       }}
     >
       {isEditMode ? (
-        <>
+        <Stack spacing={2}>
           <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
             <Box padding={2} display="flex">
               <Typography variant="h2">Edit {dashboardName}</Typography>
@@ -59,7 +58,14 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', width: '100%', padding: (theme) => theme.spacing(2) }}>
+          <Box
+            sx={{
+              display: 'flex',
+              width: '100%',
+              padding: (theme) => theme.spacing(2),
+              transition: 'top 1s cubic-bezier(0.17, 0.04, 0.03, 0.94)',
+            }}
+          >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <TemplateVariableList />
             </ErrorBoundary>
@@ -73,9 +79,9 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               <TimeRangeControls />
             </Stack>
           </Box>
-        </>
+        </Stack>
       ) : (
-        <Box padding={2}>
+        <Stack spacing={2} padding={2}>
           <Box sx={{ display: 'flex', width: '100%' }}>
             <Typography variant="h2">{dashboardName}</Typography>
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
@@ -90,12 +96,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               </Button>
             </Stack>
           </Box>
-          <Box paddingY={1}>
+          <Box paddingY={2}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <TemplateVariableList />
             </ErrorBoundary>
           </Box>
-        </Box>
+        </Stack>
       )}
     </Toolbar>
   );
