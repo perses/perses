@@ -11,29 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Drawer as MuiDrawer } from '@mui/material';
+import { Drawer as MuiDrawer, DrawerProps as MuiDrawerProps } from '@mui/material';
+import { combineSx } from '../utils';
 
-interface DrawerProps {
+export interface DrawerProps extends MuiDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   anchor?: 'left' | 'right';
-  children?: React.ReactNode;
 }
 
 const DRAWER_DEFAULT_WIDTH = 900;
 
-export const Drawer = ({ anchor = 'right', isOpen, onClose, children }: DrawerProps) => {
+export const Drawer = ({ anchor = 'right', isOpen, onClose, PaperProps, children, ...rest }: DrawerProps) => {
   return (
     <MuiDrawer
+      {...rest}
       open={isOpen}
       onClose={onClose}
       anchor={anchor}
       PaperProps={{
-        sx: {
-          width: `${DRAWER_DEFAULT_WIDTH}px`,
-          padding: (theme) => theme.spacing(2),
-          overflow: 'hidden',
-        },
+        ...PaperProps,
+        sx: combineSx(
+          {
+            width: `${DRAWER_DEFAULT_WIDTH}px`,
+            padding: (theme) => theme.spacing(2),
+            overflow: 'hidden',
+          },
+          PaperProps?.sx
+        ),
       }}
     >
       {children}
