@@ -18,6 +18,9 @@ import { useDashboardApp } from '../../context';
 import { usePanelDrawerModel } from './panel-editor-form-model';
 import { PanelEditorForm, panelEditorFormId, PanelEditorFormProps } from './PanelEditorForm';
 
+/**
+ * The Add/Edit panel drawer for editing a panel's options.
+ */
 export const PanelDrawer = () => {
   const { closePanelDrawer } = useDashboardApp();
   const model = usePanelDrawerModel();
@@ -60,7 +63,7 @@ export const PanelDrawer = () => {
           >
             <Typography variant="h2">{model.drawerTitle}</Typography>
             <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-              {/** Using the 'form' attribute lets us have a submit button outside the form element */}
+              {/* Using the 'form' attribute lets us have a submit button like this outside the form element */}
               <Button type="submit" variant="contained" form={panelEditorFormId}>
                 {model.submitButtonText}
               </Button>

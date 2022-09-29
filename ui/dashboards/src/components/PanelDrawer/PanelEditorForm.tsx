@@ -109,4 +109,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   );
 }
 
+/**
+ * The `id` attribute added to the `PanelEditorForm` component, allowing submit buttons to live outside the form.
+ */
 export const panelEditorFormId = 'panel-editor-form';
