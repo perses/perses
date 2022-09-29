@@ -31,4 +31,5 @@ export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
       data: values,
     };
   },
+  dependsOn: () => [],
 };

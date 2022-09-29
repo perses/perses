@@ -11,10 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
 import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
-import { usePlugin, DEFAULT_ALL_VALUE, useLegacyDatasources } from '@perses-dev/plugin-system';
+import {
+  usePlugin,
+  DEFAULT_ALL_VALUE,
+  useLegacyDatasources,
+  useTemplateVariableValues,
+  VariableStateMap,
+} from '@perses-dev/plugin-system';
+import { useQuery } from 'react-query';
 import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
 
 type TemplateVariableProps = {
@@ -34,33 +41,53 @@ export function TemplateVariable({ name }: TemplateVariableProps) {
   return <div>Unsupported Variable Kind: ${kind}</div>;
 }
 
+/**
+ * Returns a serialized string of the current state of variable values.
+ */
+function getVariableValuesKey(v: VariableStateMap) {
+  return Object.values(v)
+    .map((v) => JSON.stringify(v.value))
+    .join(',');
+}
+
 function ListVariable({ name }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name);
   const definition = ctx.definition as ListVariableDefinition;
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
-
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
   const datasources = useLegacyDatasources();
+
+  let dependsOnVariables: string[] | undefined;
+  if (variablePlugin?.dependsOn) {
+    dependsOnVariables = variablePlugin.dependsOn(definition);
+  }
+
+  const variables = useTemplateVariableValues(dependsOnVariables);
   const allowMultiple = definition?.spec.allowMultiple === true;
   const allowAllValue = definition?.spec.allowAllValue === true;
 
-  const loadOptions = useCallback(async () => {
-    if (!variablePlugin) {
-      return;
-    }
-    setVariableLoading(name, true);
-    try {
-      const { data } = await variablePlugin.getVariableOptions(definition, { datasources });
-      setVariableOptions(name, data);
-    } catch (e) {
-      console.error('Failed to load template variable options', e);
-    }
-    setVariableLoading(name, false);
-  }, [variablePlugin, definition, name, setVariableLoading, setVariableOptions, datasources]);
+  let waitToLoad = false;
+  if (dependsOnVariables) {
+    waitToLoad = dependsOnVariables.some((v) => variables[v]?.loading);
+  }
+
+  const variablesValueKey = getVariableValuesKey(variables);
+
+  const variablesOptionsQuery = useQuery(
+    [name, definition, variablesValueKey],
+    async () => {
+      const resp = await variablePlugin?.getVariableOptions(definition, { datasources, variables });
+      return resp?.data ?? [];
+    },
+    { enabled: !!variablePlugin || waitToLoad }
+  );
 
   useEffect(() => {
-    loadOptions();
-  }, [loadOptions]);
+    setVariableLoading(name, variablesOptionsQuery.isFetching);
+    if (variablesOptionsQuery.data) {
+      setVariableOptions(name, variablesOptionsQuery.data);
+    }
+  }, [variablesOptionsQuery, name, setVariableLoading, setVariableOptions]);
 
   let value = ctx.state?.value;
   const options = ctx.state?.options;
@@ -81,26 +108,43 @@ function ListVariable({ name }: TemplateVariableProps) {
     return computedOptions;
   }, [options, allowAllValue]);
 
-  // If there is no value and there are options loaded, select the first value
   useEffect(() => {
     const firstOption = finalOptions?.[0];
-    if ((value === null || value?.length === 0) && firstOption) {
+    const valueIsInOptions = Boolean(
+      finalOptions.find((v) => {
+        if (allowMultiple) {
+          return (value as string[]).includes(v.value);
+        }
+        return value === v.value;
+      })
+    );
+
+    // If there is no value but there are options, set the value to the first option.
+    if (!value && firstOption) {
       setVariableValue(name, firstOption.value);
     }
-  }, [finalOptions, setVariableValue, value, name]);
+
+    // If there is a value but it's not in the options, select the first value or set to null
+    if (value && !valueIsInOptions && !definition.spec.defaultValue) {
+      setVariableValue(name, firstOption?.value || null);
+    }
+  }, [finalOptions, setVariableValue, value, name, allowMultiple]);
 
   return (
     <Box display={'flex'}>
       <FormControl>
         <InputLabel id={name}>{name}</InputLabel>
         <Select
-          sx={{ minWidth: 100 }}
+          sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
           label={name}
           value={value ?? ''}
           onChange={(e) => {
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {
+              if (allowAllValue) {
+                setVariableValue(name, DEFAULT_ALL_VALUE);
+              }
               return;
             }
             setVariableValue(name, e.target.value as VariableValue);

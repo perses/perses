@@ -11,7 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseTemplateVariables, replaceTemplateVariable, replaceTemplateVariables } from './utils';
+import {
+  parseTemplateVariables,
+  replaceTemplateVariable,
+  replaceTemplateVariables,
+  replaceTemplateVariablesInObject,
+} from './utils';
 
 describe('parseTemplateVariables()', () => {
   const tests = [
@@ -86,6 +91,41 @@ describe('replaceTemplateVariables()', () => {
   tests.forEach(({ text, state, expected }) => {
     it(`replaces ${text} ${JSON.stringify(state)}`, () => {
       expect(replaceTemplateVariables(text, state)).toEqual(expected);
+    });
+  });
+});
+
+describe('replaceTemplateVariablesInObject()', () => {
+  const tests = [
+    {
+      obj: {
+        hello: '$var1',
+      },
+      state: {
+        var1: { value: 'world', loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: {
+        hello: 'world',
+      },
+    },
+    {
+      obj: {
+        query: ['$var1', 'foo', '$var2'],
+      },
+      state: {
+        var1: { value: 'world', loading: false },
+        var2: { value: 'world2', loading: false },
+      },
+      expected: {
+        query: ['world', 'foo', 'world2'],
+      },
+    },
+  ];
+
+  tests.forEach(({ obj, state, expected }) => {
+    it(`replaces ${JSON.stringify(obj)} ${JSON.stringify(state)}`, () => {
+      expect(replaceTemplateVariablesInObject(obj, state)).toEqual(expected);
     });
   });
 });

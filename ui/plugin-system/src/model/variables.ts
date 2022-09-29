@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { ListVariableDefinition } from '@perses-dev/core';
-import { LegacyDatasources } from '../runtime';
+import { LegacyDatasources, VariableStateMap } from '../runtime';
 
 export type VariableOption = { label: string; value: string };
 
 export interface GetVariableOptionsContext {
   datasources: LegacyDatasources;
+  variables: VariableStateMap;
 }
 
 /**
@@ -25,6 +26,9 @@ export interface GetVariableOptionsContext {
  */
 export interface VariablePlugin<Spec = unknown> {
   getVariableOptions: GetVariableOptions<Spec>;
+
+  /** Returns a list of variables name this variable depends on. Used to optimize fetching */
+  dependsOn?: (definition: ListVariableDefinition<Spec>) => string[];
 }
 
 /**

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
 import {
   ChartsThemeProvider,
@@ -36,10 +36,7 @@ const ECHARTS_THEME_OVERRIDES = {};
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // TODO: remove temporary location.key reload hack when routing setup properly
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
@@ -67,10 +64,10 @@ function App() {
           <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
             <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
               <LegacyDataSourceRegistry>
-                <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
+                <QueryStringProvider queryString={searchParams}>
                   <ErrorBoundary FallbackComponent={ErrorAlert}>
                     {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
-                    <ViewDashboard key={location.key} />
+                    <ViewDashboard />
                   </ErrorBoundary>
                 </QueryStringProvider>
               </LegacyDataSourceRegistry>

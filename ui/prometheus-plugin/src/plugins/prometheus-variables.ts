@@ -13,6 +13,8 @@
 
 import { VariablePlugin, VariableOption, GetVariableOptionsContext } from '@perses-dev/plugin-system';
 import { labelValues, labelNames } from '../model/prometheus-client';
+import { replaceTemplateVariablesInObject } from '../model/utils';
+import { parseTemplateVariables } from './../model/utils';
 
 interface PrometheusVariableOptionsBase {
   datasource?: string;
@@ -44,6 +46,15 @@ function getQueryOptions(ctx: GetVariableOptionsContext) {
   return queryOptions;
 }
 
+function interpolatePluginDefinition(def: object, ctx: GetVariableOptionsContext) {
+  return replaceTemplateVariablesInObject(def, ctx.variables);
+}
+
+const dependsOn: VariablePlugin['dependsOn'] = (definition) => {
+  const stringDefinition = JSON.stringify(definition.spec.plugin.spec);
+  return parseTemplateVariables(stringDefinition);
+};
+
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (definition, ctx) => {
     const queryOptions = getQueryOptions(ctx);
@@ -52,11 +63,12 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
       data: stringArrayToVariableOptions(options),
     };
   },
+  dependsOn,
 };
 
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
   getVariableOptions: async (definition, ctx) => {
-    const pluginDef = definition.spec.plugin.spec;
+    const pluginDef = interpolatePluginDefinition(definition.spec.plugin.spec, ctx);
     const queryOptions = getQueryOptions(ctx);
     const match = pluginDef.matchers ?? undefined;
     const { data: options } = await labelValues({ labelName: pluginDef.label_name, 'match[]': match }, queryOptions);
@@ -64,4 +76,5 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
       data: stringArrayToVariableOptions(options),
     };
   },
+  dependsOn,
 };
