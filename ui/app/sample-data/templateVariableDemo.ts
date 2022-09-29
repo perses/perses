@@ -100,14 +100,14 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'Prom HTTP Requests', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'irate(prometheus_http_requests_total{job=~"$job", handler=~"$handler", code=~"$code"}[$interval])',
