@@ -125,14 +125,13 @@ export function usePanelDrawerModel(): PanelDrawerModel | undefined {
  * Manages panel plugin spec state. The spec will be undefined while a plugin is being loaded.
  */
 export function usePanelSpecState(panelPluginKind: string, initialState: unknown) {
+  // Keeping track of spec values by kind allows users to switch between panel types and come back with their old
+  // values intact from before the switch
   const [specByKind, setSpecByKind] = useImmer<Record<string, unknown>>({ [panelPluginKind]: initialState });
   const { data: plugin } = usePlugin('Panel', panelPluginKind, { enabled: panelPluginKind !== '' });
-
-  // Initial spec value from the plugin or undefined when it's loading
   const pluginInitialSpec = useMemo(() => plugin?.createInitialOptions(), [plugin]);
 
-  // The current state value for spec is either what's in specByKind, or if that isn't set yet, the initial value from
-  // the plugin, which could still be undefined while it's loading
+  // Use the value in specByKind or if unset, use the initial values from the plugin (which could still be undefined)
   const spec = specByKind[panelPluginKind] ?? pluginInitialSpec;
 
   // TODO: Do we want to expose more of a immer style API to plugin authors for managing their state, rather than the

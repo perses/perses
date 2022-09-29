@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { Stack, Box, Button, Typography } from '@mui/material';
 import { Drawer } from '@perses-dev/components';
 import { useDashboardApp } from '../../context';
-import { usePanelDrawerModel } from './panel-editor-form-model';
+import { usePanelDrawerModel } from './panel-editor-model';
 import { PanelEditorForm, panelEditorFormId, PanelEditorFormProps } from './PanelEditorForm';
 
 /**
@@ -49,7 +49,7 @@ export const PanelDrawer = () => {
 
   return (
     <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }}>
-      {/* When the drawer is opened, we should have a model */}
+      {/* When the drawer is opened, we should have a model (this also ensures the form state gets reset between opens) */}
       {model !== undefined && (
         <>
           <Box

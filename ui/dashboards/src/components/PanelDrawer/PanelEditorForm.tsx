@@ -15,7 +15,7 @@ import { FormEventHandler, useState } from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useLayouts } from '../../context';
-import { PanelEditorFormValues, usePanelSpecState } from './panel-editor-form-model';
+import { PanelEditorFormValues, usePanelSpecState } from './panel-editor-model';
 import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelSpecEditor } from './PanelSpecEditor';
 
@@ -96,6 +96,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
+            {/* Wait until we have some proper initial spec values before rendering the editor */}
             {spec !== undefined && <PanelSpecEditor panelPluginKind={kind} value={spec} onChange={onSpecChange} />}
           </ErrorBoundary>
         </Grid>
