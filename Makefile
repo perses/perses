@@ -112,7 +112,7 @@ cross-build: ## Cross build binaries for all platforms (Use "make build" in deve
 
 .PHONY: cross-release
 cross-release:
-	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL}
+	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL} --release-notes GENERATED_CHANGELOG.md
 
 .PHONY: build
 build: build-ui build-api build-cli
@@ -135,9 +135,14 @@ build-cli:
 generate: assets-compress
 	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./internal/api
 
+.PHONY: generate-changelog
+generate-changelog:
+	$(GO) run ./scripts/generate_changelog.go --version="${VERSION}"
+
 .PHONY: clean
 clean:
 	rm -rf ./bin
+	rm GENERATED_CHANGELOG.md
 	./scripts/ui_release.sh --clean
 	cd ./ui && npm run clean
 
