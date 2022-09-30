@@ -11,17 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
+import { DatasourceSelector } from '@perses-dev/core';
 
 /**
- * Plugin that defines options for an external system that Perses talks to for data.
+ * DatasourceSelector for Prom Datasources.
  */
-export interface DatasourcePlugin<Spec = unknown, Client = unknown> {
-  createClient: (spec: Spec, options: DatasourceClientOptions) => Client;
-  OptionsEditorComponent: OptionsEditor<Spec>;
-  createInitialOptions: InitialOptionsCallback<Spec>;
+export interface PrometheusDatasourceSelector extends DatasourceSelector {
+  kind: 'PrometheusDatasource';
 }
 
-export interface DatasourceClientOptions {
-  proxyUrl?: string;
-}
+/**
+ * A default selector that asks for the default Prom Datasource.
+ */
+export const DEFAULT_PROM: PrometheusDatasourceSelector = { kind: 'PrometheusDatasource' };

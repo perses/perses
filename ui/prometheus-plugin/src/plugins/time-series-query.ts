@@ -14,17 +14,17 @@
 import { DurationString } from '@perses-dev/core';
 import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
-import { RangeQueryRequestParameters } from '../model/api-types';
-import { parseValueTuple } from '../model/parse-sample-values';
 import {
-  PrometheusDatasourceSpec,
-  QueryOptions,
-  rangeQuery,
+  parseValueTuple,
   PrometheusDatasourceSelector,
-} from '../model/prometheus-client';
-import { TemplateString } from '../model/templating';
-import { getDurationStringSeconds, getPrometheusTimeRange, getRangeStep } from '../model/time';
-import { replaceTemplateVariables } from '../model/utils';
+  PrometheusClient,
+  TemplateString,
+  getDurationStringSeconds,
+  getPrometheusTimeRange,
+  getRangeStep,
+  replaceTemplateVariables,
+  DEFAULT_PROM,
+} from '../model';
 
 interface PrometheusTimeSeriesQuerySpec {
   query: TemplateString;
@@ -55,20 +55,15 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['g
   query = replaceTemplateVariables(query, context.variableState);
 
   // Get the datasource, using the default Prom Datasource if one isn't specified in the query
-  const datasourceSelector = spec.datasource ?? { kind: 'PrometheusDatasource' };
-  const datasource = await context.datasourceStore.getDatasource(datasourceSelector);
-  const queryOptions: QueryOptions = {
-    datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
-  };
+  const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
 
   // Make the request to Prom
-  const request: RangeQueryRequestParameters = {
+  const response = await client.rangeQuery({
     query,
     start,
     end,
     step,
-  };
-  const response = await rangeQuery(request, queryOptions);
+  });
 
   // TODO: What about error responses from Prom that have a response body?
   const result = response.data?.result ?? [];
