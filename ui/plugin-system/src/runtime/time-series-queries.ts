@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { TimeSeriesQueryContext } from '../model';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';

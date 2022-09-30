@@ -14,12 +14,12 @@
 import { PanelProps } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
 import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
-import { LineChartOptions } from './line-chart-model';
-import { LineChartContainer } from './LineChartContainer';
+import { TimeSeriesChartOptions } from './time-series-chart-model';
+import { TimeSeriesChartContainer } from './TimeSeriesChartContainer';
 
-export type LineChartProps = PanelProps<LineChartOptions>;
+export type LineChartProps = PanelProps<TimeSeriesChartOptions>;
 
-export function LineChartPanel(props: LineChartProps) {
+export function TimeSeriesChartPanel(props: LineChartProps) {
   const {
     definition: {
       spec: {
@@ -36,7 +36,7 @@ export function LineChartPanel(props: LineChartProps) {
   return (
     <TimeSeriesQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
       {contentDimensions !== undefined && (
-        <LineChartContainer
+        <TimeSeriesChartContainer
           width={contentDimensions.width}
           height={contentDimensions.height}
           unit={unit}

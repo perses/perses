@@ -13,9 +13,9 @@
 
 import { EmptyChart } from './plugins/empty-chart';
 import { GaugeChart } from './plugins/gauge-chart';
-import { LineChart } from './plugins/line-chart';
+import { TimeSeriesChart } from './plugins/time-series-chart';
 import { Markdown } from './plugins/markdown';
 import { StatChart } from './plugins/stat-chart';
 
 // Just export the plugins under the same name as the kinds they handle from the plugin.json
-export { LineChart, GaugeChart, EmptyChart, StatChart, Markdown };
+export { TimeSeriesChart, GaugeChart, EmptyChart, StatChart, Markdown };

@@ -23,12 +23,12 @@ import {
   renderWithContext,
 } from '../../test';
 import { DashboardProvider } from '../../context/DashboardProvider';
-import PanelDrawer from './PanelDrawer';
+import { PanelDrawer } from './PanelDrawer';
 
 describe('Panel Drawer', () => {
   const renderPanelDrawer = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
+    addMockPlugin('Panel', 'LineChart', FAKE_PANEL_PLUGIN);
 
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
@@ -94,7 +94,7 @@ describe('Panel Drawer', () => {
         spec: {
           display: { name: 'cpu usage', description: '' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {},
           },
         },

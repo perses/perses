@@ -7,9 +7,9 @@
     "plugins": [
       {
         "pluginType": "Panel",
-        "kind": "LineChart",
+        "kind": "TimeSeriesChart",
         "display": {
-          "name": "Line Chart",
+          "name": "Time Series Chart",
           "description": ""
         }
       },

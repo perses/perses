@@ -11,25 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnitOptions } from '@perses-dev/components';
-import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { ThresholdOptions } from '../../model/thresholds';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
+import { TimeSeriesChartOptionsEditor } from './TimeSeriesChartOptionsEditor';
+import { TimeSeriesChartPanel } from './TimeSeriesChartPanel';
 
 /**
- * The Options object supported by the LineChartPanel plugin.
+ * The core TimeSeriesChart panel plugin for Perses.
  */
-export interface LineChartOptions {
-  queries: TimeSeriesQueryDefinition[];
-  show_legend?: boolean;
-  unit?: UnitOptions;
-  thresholds?: ThresholdOptions;
-}
-
-/**
- * Creates an initial/empty options object for the LineChartPanel.
- */
-export function createInitialLineChartOptions(): LineChartOptions {
-  return {
-    queries: [],
-  };
-}
+export const TimeSeriesChart: PanelPlugin<TimeSeriesChartOptions> = {
+  PanelComponent: TimeSeriesChartPanel,
+  OptionsEditorComponent: TimeSeriesChartOptionsEditor,
+  createInitialOptions: createInitialTimeSeriesChartOptions,
+};

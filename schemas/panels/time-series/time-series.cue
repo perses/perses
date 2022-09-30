@@ -11,13 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Box } from '@mui/material';
-import { LineChartOptions } from './line-chart-model';
+package line
 
-export type LineChartOptionsEditorProps = OptionsEditorProps<LineChartOptions>;
+import (
+	"github.com/perses/perses/schemas/common"
+)
 
-export function LineChartOptionsEditor(props: LineChartOptionsEditorProps) {
-  const { value } = props;
-  return <Box>{JSON.stringify(value)}</Box>;
+#panel: {
+	kind:       "TimeSeriesChart"
+	datasource: #datasource
+	options: {
+		queries: [...#query]
+		show_legend?: bool
+		unit?:        common.#unit
+		thresholds?:  common.#thresholds
+	}
 }
+
+#datasource: _
+#query:      _

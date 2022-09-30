@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -53,7 +53,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'CPU' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -79,7 +79,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Memory' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -138,7 +138,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Disk I/O Utilization' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
@@ -164,7 +164,7 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Filesystem Fullness' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {

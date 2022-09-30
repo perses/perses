@@ -10,6 +10,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.15.0
 	github.com/prometheus/common v0.37.0
+	github.com/prometheus/common/assets v0.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0

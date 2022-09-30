@@ -11,22 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package line
+package ui
 
 import (
-	"github.com/perses/perses/schemas/common"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	echoUtils "github.com/perses/common/echo"
+	"github.com/prometheus/common/assets"
 )
 
-#panel: {
-	kind:       "LineChart"
-	datasource: #datasource
-	options: {
-		queries: [...#query]
-		show_legend?: bool
-		unit?:        common.#unit
-		thresholds?:  common.#thresholds
-	}
+var asts = http.FS(assets.New(embedFS))
+
+type frontend struct {
+	echoUtils.Register
 }
 
-#datasource: _
-#query:      _
+func NewPersesFrontend() echoUtils.Register {
+	return &frontend{}
+}
+
+func (f *frontend) RegisterRoute(e *echo.Echo) {
+	contentHandler := echo.WrapHandler(http.FileServer(asts))
+	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
+	e.GET("/*", contentHandler, contentRewrite)
+}
