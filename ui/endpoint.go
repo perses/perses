@@ -22,7 +22,7 @@ import (
 	"github.com/prometheus/common/assets"
 )
 
-var asts = http.FS(assets.New(EmbedFS))
+var asts = http.FS(assets.New(embedFS))
 
 type frontend struct {
 	echoUtils.Register

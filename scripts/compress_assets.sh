@@ -34,4 +34,4 @@ fi
 
 find app/dist -type f -name '*.gz' -delete
 find app/dist -type f -exec gzip $GZIP_OPTS '{}' \; -print0 | xargs -0 -I % echo %.gz | xargs echo //go:embed >> embed.go
-echo var EmbedFS embed.FS >> embed.go
+echo var embedFS embed.FS >> embed.go
