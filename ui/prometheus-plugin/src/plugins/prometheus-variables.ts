@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { VariablePlugin, VariableOption, GetVariableOptionsContext } from '@perses-dev/plugin-system';
-import { labelValues, labelNames } from '../model/prometheus-client';
 import { replaceTemplateVariables, parseTemplateVariables } from '../model/utils';
+import { labelValues, labelNames, PrometheusDatasourceSpec, QueryOptions } from '../model/prometheus-client';
 
 interface PrometheusVariableOptionsBase {
   datasource?: string;
@@ -37,17 +37,18 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
   }));
 };
 
-function getQueryOptions(ctx: GetVariableOptionsContext) {
+async function getQueryOptions(ctx: GetVariableOptionsContext): Promise<QueryOptions> {
+  // TODO: Use a selector from JSON instead of a hardcoded one
+  const datasource = await ctx.datasourceStore.getDatasource({ kind: 'PrometheusDatasource' });
   const queryOptions = {
-    // TODO: use the datasource from the definition
-    datasource: ctx.datasources.defaultDatasource,
+    datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
   };
   return queryOptions;
 }
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
-    const queryOptions = getQueryOptions(ctx);
+    const queryOptions = await getQueryOptions(ctx);
     const { data: options } = await labelNames({}, queryOptions);
     return {
       data: stringArrayToVariableOptions(options),
@@ -59,7 +60,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
     const pluginDef = spec;
-    const queryOptions = getQueryOptions(ctx);
+    const queryOptions = await getQueryOptions(ctx);
     const match = pluginDef.matchers
       ? pluginDef.matchers.map((m) => replaceTemplateVariables(m, ctx.variables))
       : undefined;

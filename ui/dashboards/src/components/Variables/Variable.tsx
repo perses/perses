@@ -17,9 +17,9 @@ import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev
 import {
   usePlugin,
   DEFAULT_ALL_VALUE,
-  useLegacyDatasources,
   useTemplateVariableValues,
   VariableStateMap,
+  useDatasourceStore,
 } from '@perses-dev/plugin-system';
 import { useQuery } from 'react-query';
 import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
@@ -55,7 +55,8 @@ function ListVariable({ name }: TemplateVariableProps) {
   const definition = ctx.definition as ListVariableDefinition;
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
-  const datasources = useLegacyDatasources();
+  const datasourceStore = useDatasourceStore();
+
   const spec = definition.spec.plugin.spec;
 
   let dependsOnVariables: string[] | undefined;
@@ -77,7 +78,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   const variablesOptionsQuery = useQuery(
     [name, definition, variablesValueKey],
     async () => {
-      const resp = await variablePlugin?.getVariableOptions(spec, { datasources, variables });
+      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables });
       return resp?.data ?? [];
     },
     { enabled: !!variablePlugin || waitToLoad }

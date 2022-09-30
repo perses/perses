@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegacyDatasources, VariableStateMap } from '../runtime';
+import { VariableStateMap } from '../runtime';
+import { DatasourceStore } from '../runtime';
 
 export type VariableOption = { label: string; value: string };
 
 export interface GetVariableOptionsContext {
-  datasources: LegacyDatasources;
   variables: VariableStateMap;
+  datasourceStore: DatasourceStore;
 }
 
 /**

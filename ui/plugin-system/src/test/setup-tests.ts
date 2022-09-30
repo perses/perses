@@ -11,15 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { setLogger } from 'react-query';
-
 // Add testing library assertions
 import '@testing-library/jest-dom/extend-expect';
-
-setLogger({
-  log: console.log,
-  warn: console.warn,
-  error: () => {
-    // Don't log network errors to the console during tests
-  },
-});

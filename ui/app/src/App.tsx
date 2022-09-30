@@ -24,7 +24,6 @@ import {
 import { QueryStringProvider } from '@perses-dev/dashboards';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
-import { LegacyDataSourceRegistry } from './context/LegacyDataSourceRegistry';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
@@ -63,14 +62,12 @@ function App() {
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
             <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-              <LegacyDataSourceRegistry>
-                <QueryStringProvider queryString={searchParams}>
-                  <ErrorBoundary FallbackComponent={ErrorAlert}>
-                    {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
-                    <ViewDashboard />
-                  </ErrorBoundary>
-                </QueryStringProvider>
-              </LegacyDataSourceRegistry>
+              <QueryStringProvider queryString={searchParams}>
+                <ErrorBoundary FallbackComponent={ErrorAlert}>
+                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
+                  <ViewDashboard />
+                </ErrorBoundary>
+              </QueryStringProvider>
             </PluginRegistry>
           </ChartsThemeProvider>
         </ErrorBoundary>

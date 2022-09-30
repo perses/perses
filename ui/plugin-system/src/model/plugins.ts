@@ -11,17 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ResourceMetadata } from '@perses-dev/core';
+import { Metadata } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
+import { DatasourcePlugin } from './datasource';
 
 /**
  * Information about a module/package that contains plugins.
  */
 export interface PluginModuleResource {
   kind: 'PluginModule';
-  metadata: ResourceMetadata;
+  metadata: Metadata;
   spec: PluginSpec;
 }
 
@@ -53,6 +54,7 @@ export interface SupportedPlugins {
   Variable: VariablePlugin;
   Panel: PanelPlugin;
   TimeSeriesQuery: TimeSeriesQueryPlugin;
+  Datasource: DatasourcePlugin;
 }
 
 /**

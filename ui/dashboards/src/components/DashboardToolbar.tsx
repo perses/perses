@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Toolbar, Typography, Stack, Button, Box } from '@mui/material';
+import { Typography, Stack, Button, Box } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
-import AddIcon from 'mdi-material-ui/Plus';
+import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
+import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
+import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { useDashboardApp, useEditMode } from '../context';
-import { TimeRangeControls } from '../components';
+import { TemplateVariableList, TimeRangeControls } from '../components';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -36,48 +38,64 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   };
 
   return (
-    <Toolbar disableGutters sx={{ display: 'block', padding: (theme) => theme.spacing(2, 0) }}>
+    <>
       {isEditMode ? (
-        <>
-          <Box sx={{ display: 'flex', width: '100%' }}>
-            <Typography variant="h2">Edit {dashboardName}</Typography>
-            <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-              <TimeRangeControls />
-              <Button variant="outlined" onClick={onCancelButtonClick}>
-                Cancel
+        <Stack spacing={2}>
+          <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
+            <Box padding={2} display="flex">
+              <Typography variant="h2">Edit {dashboardName}</Typography>
+              <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+                <Button variant="contained">Save</Button>
+                <Button variant="outlined" onClick={onCancelButtonClick}>
+                  Cancel
+                </Button>
+              </Stack>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              width: '100%',
+              padding: (theme) => theme.spacing(2),
+            }}
+          >
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <TemplateVariableList />
+            </ErrorBoundary>
+            <Stack direction={'row'} spacing={1} sx={{ marginLeft: 'auto' }}>
+              <Button startIcon={<AddPanelGroupIcon />} onClick={() => openPanelGroupDialog()}>
+                Add Panel Group
               </Button>
-              <Button variant="contained">Save</Button>
+              <Button startIcon={<AddPanelIcon />} onClick={() => openPanelDrawer({ groupIndex: 0 })}>
+                Add Panel
+              </Button>
+              <TimeRangeControls />
             </Stack>
           </Box>
-          <Stack
-            direction={'row'}
-            spacing={1}
-            sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding: (theme) => theme.spacing(2, 0) }}
-          >
-            <Button startIcon={<AddIcon />} onClick={() => openPanelGroupDialog()}>
-              Add Group
-            </Button>
-            <Button startIcon={<AddIcon />} onClick={() => openPanelDrawer({ groupIndex: 0 })}>
-              Add Panel
-            </Button>
-          </Stack>
-        </>
+        </Stack>
       ) : (
-        <Box sx={{ display: 'flex', width: '100%' }}>
-          <Typography variant="h2">{dashboardName}</Typography>
-          <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
-            <TimeRangeControls />
-            <Button
-              variant="contained"
-              startIcon={<PencilIcon />}
-              onClick={onEditButtonClick}
-              sx={{ marginLeft: 'auto' }}
-            >
-              Edit
-            </Button>
-          </Stack>
-        </Box>
+        <Stack spacing={2} padding={2}>
+          <Box sx={{ display: 'flex', width: '100%' }}>
+            <Typography variant="h2">{dashboardName}</Typography>
+            <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
+              <TimeRangeControls />
+              <Button
+                variant="outlined"
+                startIcon={<PencilIcon />}
+                onClick={onEditButtonClick}
+                sx={{ marginLeft: 'auto' }}
+              >
+                Edit
+              </Button>
+            </Stack>
+          </Box>
+          <Box paddingY={2}>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <TemplateVariableList />
+            </ErrorBoundary>
+          </Box>
+        </Stack>
       )}
-    </Toolbar>
+    </>
   );
 };
