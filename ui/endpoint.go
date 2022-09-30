@@ -28,7 +28,7 @@ type frontend struct {
 	echoUtils.Register
 }
 
-func NewPersesFrontend() *frontend {
+func NewPersesFrontend() echoUtils.Register {
 	return &frontend{}
 }
 
