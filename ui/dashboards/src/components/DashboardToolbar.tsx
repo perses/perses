@@ -62,7 +62,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               display: 'flex',
               width: '100%',
               padding: (theme) => theme.spacing(2),
-              transition: 'top 1s cubic-bezier(0.17, 0.04, 0.03, 0.94)',
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
