@@ -80,7 +80,7 @@ export function usePanelDrawerModel(): PanelDrawerModel | undefined {
     };
   }
 
-  // Otherwise we don't have a panel key, so we're trying to edit an existing panel
+  // Otherwise we have a panel key, so we're trying to edit an existing panel
   const existingPanel = panels[panelKey];
 
   // TODO: Can we better express this via the type system on the dashboard store to avoid these states?
