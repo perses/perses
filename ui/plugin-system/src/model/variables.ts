@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListVariableDefinition } from '@perses-dev/core';
+import { VariableStateMap } from '../runtime';
 import { DatasourceStore } from '../runtime';
 
 export type VariableOption = { label: string; value: string };
 
 export interface GetVariableOptionsContext {
+  variables: VariableStateMap;
   datasourceStore: DatasourceStore;
 }
 
@@ -25,6 +26,9 @@ export interface GetVariableOptionsContext {
  */
 export interface VariablePlugin<Spec = unknown> {
   getVariableOptions: GetVariableOptions<Spec>;
+
+  /** Returns a list of variables name this variable depends on. Used to optimize fetching */
+  dependsOn?: (definition: Spec) => string[];
 }
 
 /**
@@ -32,6 +36,6 @@ export interface VariablePlugin<Spec = unknown> {
  * definition.
  */
 export type GetVariableOptions<Spec> = (
-  definition: ListVariableDefinition<Spec>,
+  definition: Spec,
   ctx: GetVariableOptionsContext
 ) => Promise<{ data: VariableOption[] }>;

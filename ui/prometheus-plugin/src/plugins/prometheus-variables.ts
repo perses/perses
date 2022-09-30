@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { VariablePlugin, VariableOption, GetVariableOptionsContext } from '@perses-dev/plugin-system';
+import { replaceTemplateVariables, parseTemplateVariables } from '../model/utils';
 import { labelValues, labelNames, PrometheusDatasourceSpec, QueryOptions } from '../model/prometheus-client';
 
 interface PrometheusVariableOptionsBase {
@@ -46,23 +47,29 @@ async function getQueryOptions(ctx: GetVariableOptionsContext): Promise<QueryOpt
 }
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
-  getVariableOptions: async (definition, ctx) => {
+  getVariableOptions: async (spec, ctx) => {
     const queryOptions = await getQueryOptions(ctx);
     const { data: options } = await labelNames({}, queryOptions);
     return {
       data: stringArrayToVariableOptions(options),
     };
   },
+  dependsOn: () => [],
 };
 
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
-  getVariableOptions: async (definition, ctx) => {
-    const pluginDef = definition.spec.plugin.spec;
+  getVariableOptions: async (spec, ctx) => {
+    const pluginDef = spec;
     const queryOptions = await getQueryOptions(ctx);
-    const match = pluginDef.matchers ?? undefined;
+    const match = pluginDef.matchers
+      ? pluginDef.matchers.map((m) => replaceTemplateVariables(m, ctx.variables))
+      : undefined;
     const { data: options } = await labelValues({ labelName: pluginDef.label_name, 'match[]': match }, queryOptions);
     return {
       data: stringArrayToVariableOptions(options),
     };
+  },
+  dependsOn: (spec) => {
+    return spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [];
   },
 };

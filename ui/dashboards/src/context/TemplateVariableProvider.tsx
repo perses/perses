@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
@@ -100,7 +100,24 @@ export function useTemplateVariableStore() {
 }
 
 function PluginProvider({ children }: { children: React.ReactNode }) {
-  const values = useTemplateVariableValues();
+  const originalValues = useTemplateVariableValues();
+
+  const values = useMemo(() => {
+    const contextValues: VariableStateMap = {};
+
+    // This will loop through all the current variables values
+    // and update any variables that have ALL_VALUE as their current value
+    // to include all options.
+    Object.keys(originalValues).forEach((name) => {
+      const v = { ...originalValues[name] } as VariableState;
+      if (v.value === ALL_VALUE) {
+        v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
+      }
+      contextValues[name] = v;
+    });
+    return contextValues;
+  }, [originalValues]);
+
   return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
 }
 
@@ -165,7 +182,7 @@ export function TemplateVariableProvider({
   children: React.ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
 }) {
-  const store = createTemplateVariableSrvStore({ initialVariableDefinitions });
+  const [store] = useState(createTemplateVariableSrvStore({ initialVariableDefinitions }));
 
   return (
     <TemplateVariableStoreContext.Provider value={store}>
@@ -179,7 +196,7 @@ export function TemplateVariableProvider({
 function hydrateTemplateVariableState(definition: VariableDefinition) {
   const v = definition;
   const varState: VariableState = {
-    value: null,
+    value: v.spec.defaultValue ?? null,
     loading: false,
   };
   switch (v.kind) {
