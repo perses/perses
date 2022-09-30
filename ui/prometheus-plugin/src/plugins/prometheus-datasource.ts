@@ -15,7 +15,6 @@ import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
 
 export interface PrometheusDatasourceSpec {
-  // TODO: Make optional for proxy scenario
   direct_url?: string;
 }
 
@@ -29,7 +28,7 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
   const datasourceUrl = direct_url ?? proxyUrl ?? window.location.origin;
 
-  // TODO: Could think about this maybe becoming a class, although it definitely doesn't have to be
+  // Could think about this becoming a class, although it definitely doesn't have to be
   return {
     instantQuery: (params) => instantQuery(params, { datasourceUrl }),
     rangeQuery: (params) => rangeQuery(params, { datasourceUrl }),

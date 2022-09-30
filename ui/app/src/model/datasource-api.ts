@@ -25,26 +25,30 @@ export function useDatasourceApi(): DatasourceStoreProviderProps['datasourceApi'
 
       // Just resolve a default PrometheusDatasource right now
       if (selector.kind === 'PrometheusDatasource' && selector.name === undefined) {
+        const name = 'PrometheusDemo';
         return {
-          kind: 'GlobalDatasource',
-          metadata: {
-            name: 'PrometheusDemo',
-            created_at: '',
-            updated_at: '',
-            version: 0,
-          },
-          spec: {
-            default: true,
-            display: {
-              name: 'Prometheus Demo',
+          resource: {
+            kind: 'GlobalDatasource',
+            metadata: {
+              name,
+              created_at: '',
+              updated_at: '',
+              version: 0,
             },
-            plugin: {
-              kind: 'PrometheusDatasource',
-              spec: {
-                direct_url: 'https://prometheus.demo.do.prometheus.io',
+            spec: {
+              default: true,
+              display: {
+                name: 'Prometheus Demo',
+              },
+              plugin: {
+                kind: 'PrometheusDatasource',
+                spec: {
+                  direct_url: 'https://prometheus.demo.do.prometheus.io',
+                },
               },
             },
           },
+          proxyUrl: `/proxy/globaldatasources/${encodeURIComponent(name)}`,
         };
       }
       return undefined;

@@ -31,8 +31,14 @@ export interface DatasourceStoreProviderProps {
 
 // The external API for fetching datasource resources
 export interface DatasourceApi {
-  getDatasource: (project: string, selector: DatasourceSelector) => Promise<Datasource | undefined>;
-  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasource | undefined>;
+  getDatasource: (
+    project: string,
+    selector: DatasourceSelector
+  ) => Promise<{ resource: Datasource; proxyUrl: string } | undefined>;
+
+  getGlobalDatasource: (
+    selector: DatasourceSelector
+  ) => Promise<{ resource: GlobalDatasource; proxyUrl: string } | undefined>;
 }
 
 /**
@@ -55,13 +61,13 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     const { project } = dashboardResource.metadata;
     const datasource = await datasourceApi.getDatasource(project, selector);
     if (datasource !== undefined) {
-      return { spec: datasource.spec, proxyUrl: '' };
+      return { spec: datasource.resource.spec, proxyUrl: datasource.proxyUrl };
     }
 
     // Try to find it at the global level as a GlobalDatasource resource
     const globalDatasource = await datasourceApi.getGlobalDatasource(selector);
     if (globalDatasource !== undefined) {
-      return { spec: globalDatasource.spec, proxyUrl: '' };
+      return { spec: globalDatasource.resource.spec, proxyUrl: globalDatasource.proxyUrl };
     }
 
     throw new Error(`No datasource found for kind '${selector.kind}' and name '${selector.name}'`);
