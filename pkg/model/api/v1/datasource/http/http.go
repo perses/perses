@@ -281,7 +281,7 @@ func getConfigSpec(v reflect.Value) reflect.Value {
 	return reflect.Value{}
 }
 
-func lookingForConfig(v reflect.Value, httpConfig *Config, err error, found *bool) {
+func lookingForConfig(v reflect.Value, httpConfig *Config, err *error, found *bool) {
 	if len(v.Type().PkgPath()) > 0 {
 		// the field is not exported, so no need to look at it as we won't be able to set it in a later stage
 		return
@@ -307,11 +307,11 @@ func lookingForConfig(v reflect.Value, httpConfig *Config, err error, found *boo
 			}
 			// Then unmarshal the proxy to validate the content
 			var data []byte
-			data, err = json.Marshal(spec.Interface().(Config))
-			if err != nil {
+			data, *err = json.Marshal(spec.Interface().(Config))
+			if *err != nil {
 				return
 			}
-			err = json.Unmarshal(data, httpConfig)
+			*err = json.Unmarshal(data, httpConfig)
 		} else {
 			// Otherwise look deeper to find it
 			for i := 0; i < v.NumField(); i++ {
@@ -329,6 +329,6 @@ func CheckAndValidate(pluginSpec interface{}) (*Config, error) {
 	var err error
 	b := false
 	found := &b
-	lookingForConfig(reflect.ValueOf(pluginSpec), httpConfig, err, found)
+	lookingForConfig(reflect.ValueOf(pluginSpec), httpConfig, &err, found)
 	return httpConfig, err
 }
