@@ -36,6 +36,14 @@
           "name": "Prometheus Range Query",
           "description": ""
         }
+      },
+      {
+        "pluginType": "Datasource",
+        "kind": "PrometheusDatasource",
+        "display": {
+          "name": "Prometheus Datasource",
+          "description": ""
+        }
       }
     ]
   }

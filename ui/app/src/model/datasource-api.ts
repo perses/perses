@@ -41,7 +41,7 @@ export function useDatasourceApi(): DatasourceStoreProviderProps['datasourceApi'
             plugin: {
               kind: 'PrometheusDatasource',
               spec: {
-                url: 'https://prometheus.demo.do.prometheus.io',
+                direct_url: 'https://prometheus.demo.do.prometheus.io',
               },
             },
           },

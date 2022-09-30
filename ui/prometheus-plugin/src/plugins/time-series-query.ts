@@ -16,24 +16,28 @@ import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system
 import { fromUnixTime } from 'date-fns';
 import { RangeQueryRequestParameters } from '../model/api-types';
 import { parseValueTuple } from '../model/parse-sample-values';
-import { PrometheusDatasourceSpec, QueryOptions, rangeQuery } from '../model/prometheus-client';
+import {
+  PrometheusDatasourceSpec,
+  QueryOptions,
+  rangeQuery,
+  PrometheusDatasourceSelector,
+} from '../model/prometheus-client';
 import { TemplateString } from '../model/templating';
 import { getDurationStringSeconds, getPrometheusTimeRange, getRangeStep } from '../model/time';
 import { replaceTemplateVariables } from '../model/utils';
 
-interface PrometheusTimeSeriesQueryOptions {
+interface PrometheusTimeSeriesQuerySpec {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
+  datasource?: PrometheusDatasourceSelector;
 }
 
-const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>['getTimeSeriesData'] = async (
-  definition,
+const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
+  spec,
   context
 ) => {
-  const pluginSpec = definition.spec.plugin.spec;
-
-  const minStep = getDurationStringSeconds(pluginSpec.min_step);
+  const minStep = getDurationStringSeconds(spec.min_step);
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs);
 
@@ -47,11 +51,12 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>
   end = alignedEnd;
 
   // Replace template variable placeholders in PromQL query
-  let query = pluginSpec.query.replace('$__rate_interval', `15s`);
+  let query = spec.query.replace('$__rate_interval', `15s`);
   query = replaceTemplateVariables(query, context.variableState);
 
-  // Get the datasource (TODO: Use selector from JSON instead of hardcoded one)
-  const datasource = await context.datasourceStore.getDatasource({ kind: 'PrometheusDatasource' });
+  // Get the datasource, using the default Prom Datasource if one isn't specified in the query
+  const datasourceSelector = spec.datasource ?? { kind: 'PrometheusDatasource' };
+  const datasource = await context.datasourceStore.getDatasource(datasourceSelector);
   const queryOptions: QueryOptions = {
     datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
   };
@@ -98,6 +103,6 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>
 /**
  * The core Prometheus TimeSeriesQuery plugin for Perses.
  */
-export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions> = {
+export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec> = {
   getTimeSeriesData,
 };

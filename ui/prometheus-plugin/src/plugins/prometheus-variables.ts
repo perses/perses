@@ -13,10 +13,16 @@
 
 import { VariablePlugin, VariableOption, GetVariableOptionsContext } from '@perses-dev/plugin-system';
 import { replaceTemplateVariables, parseTemplateVariables } from '../model/utils';
-import { labelValues, labelNames, PrometheusDatasourceSpec, QueryOptions } from '../model/prometheus-client';
+import {
+  labelValues,
+  labelNames,
+  PrometheusDatasourceSpec,
+  QueryOptions,
+  PrometheusDatasourceSelector,
+} from '../model/prometheus-client';
 
 interface PrometheusVariableOptionsBase {
-  datasource?: string;
+  datasource?: PrometheusDatasourceSelector;
 }
 
 type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase;
@@ -37,9 +43,13 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
   }));
 };
 
-async function getQueryOptions(ctx: GetVariableOptionsContext): Promise<QueryOptions> {
-  // TODO: Use a selector from JSON instead of a hardcoded one
-  const datasource = await ctx.datasourceStore.getDatasource({ kind: 'PrometheusDatasource' });
+async function getQueryOptions(
+  ctx: GetVariableOptionsContext,
+  spec: PrometheusVariableOptionsBase
+): Promise<QueryOptions> {
+  // Just use the default Prom datatsource if not specified in variable's spec
+  const datasourceSelector = spec.datasource ?? { kind: 'PrometheusDatasource' };
+  const datasource = await ctx.datasourceStore.getDatasource(datasourceSelector);
   const queryOptions = {
     datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
   };
@@ -48,7 +58,7 @@ async function getQueryOptions(ctx: GetVariableOptionsContext): Promise<QueryOpt
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
-    const queryOptions = await getQueryOptions(ctx);
+    const queryOptions = await getQueryOptions(ctx, spec);
     const { data: options } = await labelNames({}, queryOptions);
     return {
       data: stringArrayToVariableOptions(options),
@@ -60,7 +70,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
     const pluginDef = spec;
-    const queryOptions = await getQueryOptions(ctx);
+    const queryOptions = await getQueryOptions(ctx, spec);
     const match = pluginDef.matchers
       ? pluginDef.matchers.map((m) => replaceTemplateVariables(m, ctx.variables))
       : undefined;
