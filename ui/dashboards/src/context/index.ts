@@ -13,7 +13,7 @@
 
 export * from './DashboardAppSlice';
 export * from './DashboardProvider';
-export * from './DatasourcesProvider';
+export * from './DatasourceProvider';
 export * from './LayoutsSlice';
 export * from './QueryStringProvider';
 export * from './TemplateVariableProvider';

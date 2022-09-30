@@ -20,21 +20,21 @@ import {
   TimeRangeProvider,
   TemplateVariableProvider,
   DashboardProvider,
-  DatasourcesProviderProps,
-  DatasourcesProvider,
+  DatasourceProviderProps,
+  DatasourceProvider,
 } from '../../context';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
-  datasourcesApi: DatasourcesProviderProps['datasourcesApi'];
+  datasourceApi: DatasourceProviderProps['datasourceApi'];
 }
 
 /**
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
 export function ViewDashboard(props: ViewDashboardProps) {
-  const { dashboardResource, datasourcesApi, sx, ...others } = props;
+  const { dashboardResource, datasourceApi, sx, ...others } = props;
   const { spec } = dashboardResource;
 
   const { queryString, setQueryString } = useQueryString();
@@ -53,7 +53,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   }, [dashboardDuration, queryString, setQueryString]);
 
   return (
-    <DatasourcesProvider dashboardDatasources={spec.datasources} datasourcesApi={datasourcesApi}>
+    <DatasourceProvider dashboardDatasources={spec.datasources} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardSpec: spec }}>
         <TimeRangeProvider initialTimeRange={defaultTimeRange}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
@@ -77,6 +77,6 @@ export function ViewDashboard(props: ViewDashboardProps) {
           </TemplateVariableProvider>
         </TimeRangeProvider>
       </DashboardProvider>
-    </DatasourcesProvider>
+    </DatasourceProvider>
   );
 }

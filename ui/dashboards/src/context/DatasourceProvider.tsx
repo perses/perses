@@ -20,25 +20,25 @@ import {
   GlobalDatasource,
   useEvent,
 } from '@perses-dev/core';
-import { DatasourcesContext, DatasourcesContextType } from '@perses-dev/plugin-system';
+import { DatasourceContext, DatasourceContextType } from '@perses-dev/plugin-system';
 
-export interface DatasourcesProviderProps {
+export interface DatasourceProviderProps {
   dashboardDatasources: DashboardSpec['datasources'];
-  datasourcesApi: DatasourcesApi;
+  datasourceApi: DatasourceApi;
   children?: React.ReactNode;
 }
 
 // The external API for fetching datasource resources
-export interface DatasourcesApi {
+export interface DatasourceApi {
   getDatasource: (selector: DatasourceSelector) => Promise<Datasource | undefined>;
   getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasource | undefined>;
 }
 
 /**
- * A `DatasourcesContext` provider that uses an external API to resolve datasource selectors.
+ * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
-export function DatasourcesProvider(props: DatasourcesProviderProps) {
-  const { dashboardDatasources, datasourcesApi, children } = props;
+export function DatasourceProvider(props: DatasourceProviderProps) {
+  const { dashboardDatasources, datasourceApi, children } = props;
 
   const getDatasource = useEvent(async (selector: DatasourceSelector): Promise<DatasourceSpec> => {
     // Try to find it in dashboard spec
@@ -48,13 +48,13 @@ export function DatasourcesProvider(props: DatasourcesProviderProps) {
     }
 
     // Try to find it at the project level as a Datasource resource
-    const datasource = await datasourcesApi.getDatasource(selector);
+    const datasource = await datasourceApi.getDatasource(selector);
     if (datasource !== undefined) {
       return datasource.spec;
     }
 
     // Try to find it at the global level as a GlobalDatasource resource
-    const globalDatasource = await datasourcesApi.getGlobalDatasource(selector);
+    const globalDatasource = await datasourceApi.getGlobalDatasource(selector);
     if (globalDatasource !== undefined) {
       return globalDatasource.spec;
     }
@@ -62,14 +62,14 @@ export function DatasourcesProvider(props: DatasourcesProviderProps) {
     throw new Error(`No datasource found for kind '${selector.kind}' and name '${selector.name}'`);
   });
 
-  const ctxValue: DatasourcesContextType = useMemo(
+  const ctxValue: DatasourceContextType = useMemo(
     () => ({
       getDatasource,
     }),
     [getDatasource]
   );
 
-  return <DatasourcesContext.Provider value={ctxValue}>{children}</DatasourcesContext.Provider>;
+  return <DatasourceContext.Provider value={ctxValue}>{children}</DatasourceContext.Provider>;
 }
 
 // Helper to find a datasource in the list embedded in a dashboard spec
