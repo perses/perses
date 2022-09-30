@@ -1,11 +1,8 @@
-name: build_and_release
+name: ci
 on:
   pull_request:
   push:
-    branches:
-      - main
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
+
 jobs:
   build-frontend:
     name: "build-frontend"
@@ -13,16 +10,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install nodejs
-        uses: actions/setup-node@v3
+      - uses: ./.github/actions/setup_environment
         with:
-          node-version-file: "ui/.nvmrc"
-      - uses: actions/cache@v3.0.8
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          enable_npm: true
 
       - name: Check Tag
         ## This step is verifying that the tag follow the semver
@@ -54,11 +44,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install nodejs
-        uses: actions/setup-node@v3
+      - uses: ./.github/actions/setup_environment
         with:
-          node-version-file: "ui/.nvmrc"
-          registry-url: "https://registry.npmjs.org"
+          enable_npm: true
       - name: Download react build
         uses: actions/download-artifact@v3
         with:
@@ -77,12 +65,10 @@ jobs:
           # as the placeholder for the auth token
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  go-build-and-release:
+  build:
     name: "go and github release"
     needs: "build-frontend"
     runs-on: ubuntu-latest
-    env:
-      GORELEASER_PARALLEL: 1
     permissions:
       contents: write
     steps:
@@ -90,16 +76,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Install Go
-        uses: actions/setup-go@v3
+      - uses: ./.github/actions/setup_environment
         with:
-          go-version: 1.19.x
-      - uses: actions/cache@v3.0.8
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          enable_go: true
       - name: Download react build
         uses: actions/download-artifact@v3
         with:
