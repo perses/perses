@@ -11,28 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
 import { createContext, useContext } from 'react';
 
-export interface LegacyDatasources {
-  defaultDatasource: {
-    spec: {
-      kind: 'Prometheus';
-      http: {
-        url: string;
-      };
-    };
-  };
+export interface DatasourceStore {
+  getDatasource(selector: DatasourceSelector): Promise<DatasourceSpec>;
 }
 
-export const LegacyDatasourcesContext = createContext<LegacyDatasources | undefined>(undefined);
+export const DatasourceStoreContext = createContext<DatasourceStore | undefined>(undefined);
 
-/**
- * Gets the Datasources at runtime.
- */
-export function useLegacyDatasources(): LegacyDatasources {
-  const ctx = useContext(LegacyDatasourcesContext);
+export function useDatasourceStore() {
+  const ctx = useContext(DatasourceStoreContext);
   if (ctx === undefined) {
-    throw new Error('No DatasourcesContext found. Did you forget a Provider?');
+    throw new Error('No DatasourceStoreContext found. Did you forget a Provider?');
   }
   return ctx;
 }

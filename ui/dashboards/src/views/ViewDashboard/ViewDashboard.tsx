@@ -16,18 +16,25 @@ import { Box, BoxProps } from '@mui/material';
 import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
 import { useQueryString } from '@perses-dev/plugin-system';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
-import { TimeRangeProvider, TemplateVariableProvider, DashboardProvider } from '../../context';
+import {
+  TimeRangeProvider,
+  TemplateVariableProvider,
+  DashboardProvider,
+  DatasourceStoreProviderProps,
+  DatasourceStoreProvider,
+} from '../../context';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
+  datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
 }
 
 /**
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
 export function ViewDashboard(props: ViewDashboardProps) {
-  const { dashboardResource, sx, ...others } = props;
+  const { dashboardResource, datasourceApi, sx, ...others } = props;
   const { spec } = dashboardResource;
 
   const { queryString, setQueryString } = useQueryString();
@@ -46,28 +53,30 @@ export function ViewDashboard(props: ViewDashboardProps) {
   }, [dashboardDuration, queryString, setQueryString]);
 
   return (
-    <DashboardProvider initialState={{ dashboardSpec: spec }}>
-      <TimeRangeProvider initialTimeRange={defaultTimeRange}>
-        <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
-          <Box
-            sx={combineSx(
-              {
-                display: 'flex',
-                width: '100%',
-                height: '100%',
-                position: 'relative',
-                overflow: 'hidden',
-              },
-              sx
-            )}
-            {...others}
-          >
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardApp dashboardResource={dashboardResource} />
-            </ErrorBoundary>
-          </Box>
-        </TemplateVariableProvider>
-      </TimeRangeProvider>
-    </DashboardProvider>
+    <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
+      <DashboardProvider initialState={{ dashboardSpec: spec }}>
+        <TimeRangeProvider initialTimeRange={defaultTimeRange}>
+          <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
+            <Box
+              sx={combineSx(
+                {
+                  display: 'flex',
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative',
+                  overflow: 'hidden',
+                },
+                sx
+              )}
+              {...others}
+            >
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <DashboardApp dashboardResource={dashboardResource} />
+              </ErrorBoundary>
+            </Box>
+          </TemplateVariableProvider>
+        </TimeRangeProvider>
+      </DashboardProvider>
+    </DatasourceStoreProvider>
   );
 }

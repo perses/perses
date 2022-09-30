@@ -29,6 +29,9 @@ export function mockPluginRegistryProps() {
     kind: 'PluginModule',
     metadata: {
       name: 'Fake Plugin Module for Tests',
+      created_at: '',
+      updated_at: '',
+      version: 0,
     },
     spec: {
       plugins: [],

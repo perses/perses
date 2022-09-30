@@ -16,7 +16,7 @@ import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system
 import { fromUnixTime } from 'date-fns';
 import { RangeQueryRequestParameters } from '../model/api-types';
 import { parseValueTuple } from '../model/parse-sample-values';
-import { rangeQuery } from '../model/prometheus-client';
+import { PrometheusDatasourceSpec, QueryOptions, rangeQuery } from '../model/prometheus-client';
 import { TemplateString } from '../model/templating';
 import { getDurationStringSeconds, getPrometheusTimeRange, getRangeStep } from '../model/time';
 import { replaceTemplateVariables } from '../model/utils';
@@ -50,6 +50,12 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>
   let query = pluginSpec.query.replace('$__rate_interval', `15s`);
   query = replaceTemplateVariables(query, context.variableState);
 
+  // Get the datasource (TODO: Use selector from JSON instead of hardcoded one)
+  const datasource = await context.datasourceStore.getDatasource({ kind: 'PrometheusDatasource' });
+  const queryOptions: QueryOptions = {
+    datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
+  };
+
   // Make the request to Prom
   const request: RangeQueryRequestParameters = {
     query,
@@ -57,7 +63,7 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>
     end,
     step,
   };
-  const response = await rangeQuery(request, { datasource: context.datasources.defaultDatasource });
+  const response = await rangeQuery(request, queryOptions);
 
   // TODO: What about error responses from Prom that have a response body?
   const result = response.data?.result ?? [];

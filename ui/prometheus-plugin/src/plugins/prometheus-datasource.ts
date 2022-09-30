@@ -11,13 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface Metadata {
-  name: string;
-  created_at: string;
-  updated_at: string;
-  version: number;
-}
+import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import { PrometheusDatasourceSpec } from '../model/prometheus-client';
 
-export interface ProjectMetadata extends Metadata {
-  project: string;
-}
+export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec> = {
+  OptionsEditorComponent: () => null,
+  createInitialOptions: () => ({ url: '' }),
+};

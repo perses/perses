@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { ListVariableDefinition } from '@perses-dev/core';
-import { LegacyDatasources } from '../runtime';
+import { DatasourceStore } from '../runtime';
 
 export type VariableOption = { label: string; value: string };
 
 export interface GetVariableOptionsContext {
-  datasources: LegacyDatasources;
+  datasourceStore: DatasourceStore;
 }
 
 /**

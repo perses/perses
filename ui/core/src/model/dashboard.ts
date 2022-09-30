@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DatasourceSpec } from './datasource';
 import { LayoutDefinition } from './layout';
 import { PanelDefinition } from './panels';
 import { ProjectMetadata } from './resource';
@@ -24,7 +25,7 @@ export interface DashboardResource {
 }
 
 export interface DashboardSpec {
-  datasource: unknown; // TODO: Actual types for this
+  datasources?: Record<string, DatasourceSpec>;
   duration: DurationString;
   variables: VariableDefinition[];
   layouts: LayoutDefinition[];

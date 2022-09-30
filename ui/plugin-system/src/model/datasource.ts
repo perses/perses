@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface Metadata {
-  name: string;
-  created_at: string;
-  updated_at: string;
-  version: number;
-}
+import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
 
-export interface ProjectMetadata extends Metadata {
-  project: string;
+/**
+ * Plugin that defines options for an external system that Perses talks to for data.
+ */
+export interface DatasourcePlugin<Spec = unknown> {
+  OptionsEditorComponent: OptionsEditor<Spec>;
+  createInitialOptions: InitialOptionsCallback<Spec>;
 }

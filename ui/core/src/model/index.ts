@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './dashboard';
+export * from './datasource';
 export * from './definitions';
 export * from './layout';
 export * from './panels';

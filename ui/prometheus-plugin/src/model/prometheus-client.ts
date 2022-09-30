@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/core';
-import { LegacyDatasources } from '@perses-dev/plugin-system';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -24,9 +23,13 @@ import {
   RangeQueryResponse,
 } from './api-types';
 
-export type QueryOptions = {
-  datasource: LegacyDatasources['defaultDatasource'];
-};
+export interface QueryOptions {
+  datasource: PrometheusDatasourceSpec;
+}
+
+export interface PrometheusDatasourceSpec {
+  url: string;
+}
 
 /**
  * Calls the `/api/v1/query` endpoint to get metrics data.
@@ -60,11 +63,7 @@ export function labelValues(params: LabelValuesRequestParameters, queryOptions: 
 
 function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
   const {
-    datasource: {
-      spec: {
-        http: { url: datasourceURL },
-      },
-    },
+    datasource: { url: datasourceURL },
   } = queryOptions;
 
   let url = `${datasourceURL}${apiURI}`;
@@ -77,11 +76,7 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, par
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
   const {
-    datasource: {
-      spec: {
-        http: { url: datasourceURL },
-      },
-    },
+    datasource: { url: datasourceURL },
   } = queryOptions;
 
   const url = `${datasourceURL}${apiURI}`;

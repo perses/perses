@@ -23,7 +23,6 @@ const testDashboard: DashboardResource = {
     version: 0,
   },
   spec: {
-    datasource: { kind: 'Prometheus', global: true, name: 'Public Prometheus Demo Server' },
     duration: '24h',
     variables: [
       {
