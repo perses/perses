@@ -11,16 +11,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-      - name: install nodejs
-        uses: actions/setup-node@v3
+      - uses: ./.github/actions/setup_environment
         with:
-          node-version-file: "ui/.nvmrc"
-      - uses: actions/cache@v3.0.8
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          enable_npm: true
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run lint
@@ -30,16 +23,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-      - name: install nodejs
-        uses: actions/setup-node@v3
+      - uses: ./.github/actions/setup_environment
         with:
-          node-version-file: "ui/.nvmrc"
-      - uses: actions/cache@v3.0.8
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          enable_npm: true
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run test
