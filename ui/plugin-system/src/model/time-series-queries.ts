@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange, TimeSeriesQueryDefinition, UnixTimeMs } from '@perses-dev/core';
-import { DatasourcesContextType, VariableStateMap } from '../runtime';
+import { DatasourceStore, VariableStateMap } from '../runtime';
 
 /**
  * A plugin for running graph queries.
@@ -31,7 +31,7 @@ export interface TimeSeriesQueryContext {
   suggestedStepMs?: number;
   timeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
-  datasources: DatasourcesContextType;
+  datasourceStore: DatasourceStore;
 }
 
 export interface TimeSeriesData {

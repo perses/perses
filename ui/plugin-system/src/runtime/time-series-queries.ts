@@ -17,7 +17,7 @@ import { TimeSeriesQueryContext } from '../model';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';
 import { usePlugin } from './plugins';
-import { useDatasources } from './datasources';
+import { useDatasourceStore } from './datasources';
 
 type UseTimeSeriesQueryOptions = {
   suggestedStepMs?: number;
@@ -32,13 +32,13 @@ export const useTimeSeriesQueryData = (definition: TimeSeriesQueryDefinition, op
   // Build the context object from data available at runtime
   const { timeRange } = useTimeRange();
   const variableState = useTemplateVariableValues();
-  const datasources = useDatasources();
+  const datasourceStore = useDatasourceStore();
 
   const context: TimeSeriesQueryContext = {
     suggestedStepMs: options?.suggestedStepMs,
     timeRange,
     variableState,
-    datasources,
+    datasourceStore,
   };
 
   const key = [definition, context] as const;

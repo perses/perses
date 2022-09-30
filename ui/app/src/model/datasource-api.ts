@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceProviderProps } from '@perses-dev/dashboards';
+import { DatasourceStoreProviderProps } from '@perses-dev/dashboards';
 
-export function useDatasourceApi(/* project: string */): DatasourceProviderProps['datasourceApi'] {
+export function useDatasourceApi(/* project: string */): DatasourceStoreProviderProps['datasourceApi'] {
   return {
     getDatasource: async (/*selector*/) => {
       // TODO: Convert selector to appropriate request params and fetchJson to get it from backend using project

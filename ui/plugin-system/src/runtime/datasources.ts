@@ -14,16 +14,16 @@
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
 import { createContext, useContext } from 'react';
 
-export interface DatasourceContextType {
+export interface DatasourceStore {
   getDatasource(selector: DatasourceSelector): Promise<DatasourceSpec>;
 }
 
-export const DatasourceContext = createContext<DatasourceContextType | undefined>(undefined);
+export const DatasourceStoreContext = createContext<DatasourceStore | undefined>(undefined);
 
-export function useDatasources() {
-  const ctx = useContext(DatasourceContext);
+export function useDatasourceStore() {
+  const ctx = useContext(DatasourceStoreContext);
   if (ctx === undefined) {
-    throw new Error('No DatasourcesContext found. Did you forget a Provider?');
+    throw new Error('No DatasourceStoreContext found. Did you forget a Provider?');
   }
   return ctx;
 }

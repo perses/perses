@@ -20,9 +20,9 @@ import {
   GlobalDatasource,
   useEvent,
 } from '@perses-dev/core';
-import { DatasourceContext, DatasourceContextType } from '@perses-dev/plugin-system';
+import { DatasourceStoreContext, DatasourceStore } from '@perses-dev/plugin-system';
 
-export interface DatasourceProviderProps {
+export interface DatasourceStoreProviderProps {
   dashboardDatasources: DashboardSpec['datasources'];
   datasourceApi: DatasourceApi;
   children?: React.ReactNode;
@@ -37,7 +37,7 @@ export interface DatasourceApi {
 /**
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
-export function DatasourceProvider(props: DatasourceProviderProps) {
+export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const { dashboardDatasources, datasourceApi, children } = props;
 
   const getDatasource = useEvent(async (selector: DatasourceSelector): Promise<DatasourceSpec> => {
@@ -62,14 +62,14 @@ export function DatasourceProvider(props: DatasourceProviderProps) {
     throw new Error(`No datasource found for kind '${selector.kind}' and name '${selector.name}'`);
   });
 
-  const ctxValue: DatasourceContextType = useMemo(
+  const ctxValue: DatasourceStore = useMemo(
     () => ({
       getDatasource,
     }),
     [getDatasource]
   );
 
-  return <DatasourceContext.Provider value={ctxValue}>{children}</DatasourceContext.Provider>;
+  return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;
 }
 
 // Helper to find a datasource in the list embedded in a dashboard spec

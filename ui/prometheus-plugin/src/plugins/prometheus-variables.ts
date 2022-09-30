@@ -38,7 +38,7 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
 
 async function getQueryOptions(ctx: GetVariableOptionsContext): Promise<QueryOptions> {
   // TODO: Use a selector from JSON instead of a hardcoded one
-  const datasource = await ctx.datasources.getDatasource({ kind: 'PrometheusDatasource' });
+  const datasource = await ctx.datasourceStore.getDatasource({ kind: 'PrometheusDatasource' });
   const queryOptions = {
     datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
   };

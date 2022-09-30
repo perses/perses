@@ -51,7 +51,7 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>
   query = replaceTemplateVariables(query, context.variableState);
 
   // Get the datasource (TODO: Use selector from JSON instead of hardcoded one)
-  const datasource = await context.datasources.getDatasource({ kind: 'PrometheusDatasource' });
+  const datasource = await context.datasourceStore.getDatasource({ kind: 'PrometheusDatasource' });
   const queryOptions: QueryOptions = {
     datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
   };
