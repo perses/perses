@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,27 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package front
+package ui
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
+	"github.com/prometheus/common/assets"
 )
 
-type endpoint interface {
-	RegisterRoutes(g *echo.Group)
-}
+var asts = http.FS(assets.New(EmbedFS))
 
 type frontend struct {
 	echoUtils.Register
-	endpoint endpoint
 }
 
-func NewPersesFrontend() echoUtils.Register {
-	return &frontend{endpoint: &Endpoint{}}
+func NewPersesFrontend() *frontend {
+	return &frontend{}
 }
 
-func (a *frontend) RegisterRoute(e *echo.Echo) {
-	frontGroup := e.Group("")
-	a.endpoint.RegisterRoutes(frontGroup)
+func (f *frontend) RegisterRoute(e *echo.Echo) {
+	contentHandler := echo.WrapHandler(http.FileServer(asts))
+	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
+	e.GET("/*", contentHandler, contentRewrite)
 }

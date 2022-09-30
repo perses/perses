@@ -20,9 +20,9 @@ import (
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/front"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/ui"
 	"github.com/sirupsen/logrus"
 )
 
@@ -57,7 +57,7 @@ func main() {
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
 	persesAPI := core.NewPersesAPI(serviceManager)
-	persesFrontend := front.NewPersesFrontend()
+	persesFrontend := ui.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
 	// enable hot reload of CUE schemas for dashboards validation:
