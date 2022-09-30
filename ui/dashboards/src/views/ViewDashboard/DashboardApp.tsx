@@ -14,9 +14,8 @@
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { Dashboard } from '../../components';
+import { PanelDrawer, Dashboard } from '../../components';
 import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
-import PanelDrawer from '../../components/PanelDrawer/PanelDrawer';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
 import { useDashboard, useDashboardApp } from '../../context';
 
