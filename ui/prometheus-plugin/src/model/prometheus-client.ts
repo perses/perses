@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson } from '@perses-dev/core';
+import { DatasourceSelector, fetchJson } from '@perses-dev/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -28,7 +28,12 @@ export interface QueryOptions {
 }
 
 export interface PrometheusDatasourceSpec {
-  url: string;
+  // TODO: Make optional for proxy scenario
+  direct_url: string;
+}
+
+export interface PrometheusDatasourceSelector extends DatasourceSelector {
+  kind: 'PrometheusDatasource';
 }
 
 /**
@@ -63,7 +68,7 @@ export function labelValues(params: LabelValuesRequestParameters, queryOptions: 
 
 function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
   const {
-    datasource: { url: datasourceURL },
+    datasource: { direct_url: datasourceURL },
   } = queryOptions;
 
   let url = `${datasourceURL}${apiURI}`;
@@ -76,7 +81,7 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, par
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
   const {
-    datasource: { url: datasourceURL },
+    datasource: { direct_url: datasourceURL },
   } = queryOptions;
 
   const url = `${datasourceURL}${apiURI}`;

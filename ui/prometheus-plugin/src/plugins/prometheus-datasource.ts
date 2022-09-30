@@ -16,5 +16,5 @@ import { PrometheusDatasourceSpec } from '../model/prometheus-client';
 
 export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec> = {
   OptionsEditorComponent: () => null,
-  createInitialOptions: () => ({ url: '' }),
+  createInitialOptions: () => ({ direct_url: '' }),
 };

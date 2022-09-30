@@ -16,7 +16,12 @@ import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system
 import { fromUnixTime } from 'date-fns';
 import { RangeQueryRequestParameters } from '../model/api-types';
 import { parseValueTuple } from '../model/parse-sample-values';
-import { PrometheusDatasourceSpec, QueryOptions, rangeQuery } from '../model/prometheus-client';
+import {
+  PrometheusDatasourceSpec,
+  QueryOptions,
+  rangeQuery,
+  PrometheusDatasourceSelector,
+} from '../model/prometheus-client';
 import { TemplateString } from '../model/templating';
 import { getDurationStringSeconds, getPrometheusTimeRange, getRangeStep } from '../model/time';
 import { replaceTemplateVariables } from '../model/utils';
@@ -25,6 +30,7 @@ interface PrometheusTimeSeriesQuerySpec {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
+  datasource?: PrometheusDatasourceSelector;
 }
 
 const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
@@ -48,8 +54,9 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['g
   let query = spec.query.replace('$__rate_interval', `15s`);
   query = replaceTemplateVariables(query, context.variableState);
 
-  // Get the datasource (TODO: Use selector from JSON instead of hardcoded one)
-  const datasource = await context.datasourceStore.getDatasource({ kind: 'PrometheusDatasource' });
+  // Get the datasource, using the default Prom Datasource if one isn't specified in the query
+  const datasourceSelector = spec.datasource ?? { kind: 'PrometheusDatasource' };
+  const datasource = await context.datasourceStore.getDatasource(datasourceSelector);
   const queryOptions: QueryOptions = {
     datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
   };
