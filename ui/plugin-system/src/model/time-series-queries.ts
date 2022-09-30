@@ -11,17 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeSeriesQueryDefinition, UnixTimeMs } from '@perses-dev/core';
+import { AbsoluteTimeRange, UnixTimeMs } from '@perses-dev/core';
 import { DatasourceStore, VariableStateMap } from '../runtime';
 
 /**
  * A plugin for running graph queries.
  */
 export interface TimeSeriesQueryPlugin<Spec = unknown> {
-  getTimeSeriesData: (
-    definition: TimeSeriesQueryDefinition<Spec>,
-    ctx: TimeSeriesQueryContext
-  ) => Promise<TimeSeriesData>;
+  getTimeSeriesData: (spec: Spec, ctx: TimeSeriesQueryContext) => Promise<TimeSeriesData>;
 }
 
 /**

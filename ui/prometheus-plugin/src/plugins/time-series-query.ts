@@ -21,19 +21,17 @@ import { TemplateString } from '../model/templating';
 import { getDurationStringSeconds, getPrometheusTimeRange, getRangeStep } from '../model/time';
 import { replaceTemplateVariables } from '../model/utils';
 
-interface PrometheusTimeSeriesQueryOptions {
+interface PrometheusTimeSeriesQuerySpec {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
 }
 
-const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>['getTimeSeriesData'] = async (
-  definition,
+const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
+  spec,
   context
 ) => {
-  const pluginSpec = definition.spec.plugin.spec;
-
-  const minStep = getDurationStringSeconds(pluginSpec.min_step);
+  const minStep = getDurationStringSeconds(spec.min_step);
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs);
 
@@ -47,7 +45,7 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>
   end = alignedEnd;
 
   // Replace template variable placeholders in PromQL query
-  let query = pluginSpec.query.replace('$__rate_interval', `15s`);
+  let query = spec.query.replace('$__rate_interval', `15s`);
   query = replaceTemplateVariables(query, context.variableState);
 
   // Get the datasource (TODO: Use selector from JSON instead of hardcoded one)
@@ -98,6 +96,6 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions>
 /**
  * The core Prometheus TimeSeriesQuery plugin for Perses.
  */
-export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryOptions> = {
+export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec> = {
   getTimeSeriesData,
 };
