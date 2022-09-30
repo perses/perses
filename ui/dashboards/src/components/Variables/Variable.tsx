@@ -21,7 +21,7 @@ import {
   VariableStateMap,
   useDatasourceStore,
 } from '@perses-dev/plugin-system';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
 
 type TemplateVariableProps = {
