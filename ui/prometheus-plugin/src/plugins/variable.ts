@@ -20,8 +20,8 @@ type StaticListVariableOptions = {
 };
 
 export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
-  getVariableOptions: async (definition) => {
-    const values = definition.spec.plugin.spec.values?.map((v) => {
+  getVariableOptions: async (spec) => {
+    const values = spec.values?.map((v) => {
       if (typeof v === 'string') {
         return { label: v, value: v };
       }

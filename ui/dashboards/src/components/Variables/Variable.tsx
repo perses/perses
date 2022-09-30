@@ -56,10 +56,11 @@ function ListVariable({ name }: TemplateVariableProps) {
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
   const datasources = useLegacyDatasources();
+  const spec = definition.spec.plugin.spec;
 
   let dependsOnVariables: string[] | undefined;
   if (variablePlugin?.dependsOn) {
-    dependsOnVariables = variablePlugin.dependsOn(definition);
+    dependsOnVariables = variablePlugin.dependsOn(spec);
   }
 
   const variables = useTemplateVariableValues(dependsOnVariables);
@@ -76,7 +77,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   const variablesOptionsQuery = useQuery(
     [name, definition, variablesValueKey],
     async () => {
-      const resp = await variablePlugin?.getVariableOptions(definition, { datasources, variables });
+      const resp = await variablePlugin?.getVariableOptions(spec, { datasources, variables });
       return resp?.data ?? [];
     },
     { enabled: !!variablePlugin || waitToLoad }

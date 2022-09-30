@@ -13,8 +13,7 @@
 
 import { VariablePlugin, VariableOption, GetVariableOptionsContext } from '@perses-dev/plugin-system';
 import { labelValues, labelNames } from '../model/prometheus-client';
-import { replaceTemplateVariablesInObject } from '../model/utils';
-import { parseTemplateVariables } from './../model/utils';
+import { replaceTemplateVariables, parseTemplateVariables } from '../model/utils';
 
 interface PrometheusVariableOptionsBase {
   datasource?: string;
@@ -46,35 +45,30 @@ function getQueryOptions(ctx: GetVariableOptionsContext) {
   return queryOptions;
 }
 
-function interpolatePluginDefinition(def: object, ctx: GetVariableOptionsContext) {
-  return replaceTemplateVariablesInObject(def, ctx.variables);
-}
-
-const dependsOn: VariablePlugin['dependsOn'] = (definition) => {
-  const stringDefinition = JSON.stringify(definition.spec.plugin.spec);
-  return parseTemplateVariables(stringDefinition);
-};
-
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
-  getVariableOptions: async (definition, ctx) => {
+  getVariableOptions: async (spec, ctx) => {
     const queryOptions = getQueryOptions(ctx);
     const { data: options } = await labelNames({}, queryOptions);
     return {
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn,
+  dependsOn: () => [],
 };
 
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
-  getVariableOptions: async (definition, ctx) => {
-    const pluginDef = interpolatePluginDefinition(definition.spec.plugin.spec, ctx);
+  getVariableOptions: async (spec, ctx) => {
+    const pluginDef = spec;
     const queryOptions = getQueryOptions(ctx);
-    const match = pluginDef.matchers ?? undefined;
+    const match = pluginDef.matchers
+      ? pluginDef.matchers.map((m) => replaceTemplateVariables(m, ctx.variables))
+      : undefined;
     const { data: options } = await labelValues({ labelName: pluginDef.label_name, 'match[]': match }, queryOptions);
     return {
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn,
+  dependsOn: (spec) => {
+    return spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [];
+  },
 };

@@ -62,12 +62,3 @@ export const parseTemplateVariables = (text: string) => {
   // return unique matches
   return Array.from(new Set(matches));
 };
-
-export function replaceTemplateVariablesInObject(obj: object, variables: VariableStateMap) {
-  // TODO: This is a simple way of interpolating. Technically, this will interpolate property names as well
-  // but this shouldn't happen since no properties should have a $ in them. If this is the case,
-  // we should modify this function to only interpolate allowed values.
-  const str = JSON.stringify(obj);
-  const interpolatedStr = replaceTemplateVariables(str, variables);
-  return JSON.parse(interpolatedStr);
-}
