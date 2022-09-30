@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Toolbar, Typography, Stack, Button, Box } from '@mui/material';
+import { Typography, Stack, Button, Box } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
@@ -38,12 +38,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   };
 
   return (
-    <Toolbar
-      disableGutters
-      sx={{
-        display: 'block',
-      }}
-    >
+    <>
       {isEditMode ? (
         <Stack spacing={2}>
           <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
@@ -101,6 +96,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
         </Stack>
       )}
-    </Toolbar>
+    </>
   );
 };
