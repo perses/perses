@@ -26,7 +26,6 @@ function ViewDashboard() {
     new URLSearchParams(window.location.search).get('dashboard') || DEFAULT_DASHBOARD_ID
   );
 
-  // TODO: Provider "current project" as argument to hook once we have proper routing
   const datasourceApi = useDatasourceApi();
 
   // TODO: Loading indicator

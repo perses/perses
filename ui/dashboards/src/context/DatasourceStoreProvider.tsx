@@ -13,6 +13,7 @@
 
 import { useMemo } from 'react';
 import {
+  DashboardResource,
   DashboardSpec,
   Datasource,
   DatasourceSelector,
@@ -23,14 +24,14 @@ import {
 import { DatasourceStoreContext, DatasourceStore } from '@perses-dev/plugin-system';
 
 export interface DatasourceStoreProviderProps {
-  dashboardDatasources: DashboardSpec['datasources'];
+  dashboardResource: DashboardResource;
   datasourceApi: DatasourceApi;
   children?: React.ReactNode;
 }
 
 // The external API for fetching datasource resources
 export interface DatasourceApi {
-  getDatasource: (selector: DatasourceSelector) => Promise<Datasource | undefined>;
+  getDatasource: (project: string, selector: DatasourceSelector) => Promise<Datasource | undefined>;
   getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasource | undefined>;
 }
 
@@ -38,17 +39,19 @@ export interface DatasourceApi {
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
-  const { dashboardDatasources, datasourceApi, children } = props;
+  const { dashboardResource, datasourceApi, children } = props;
 
   const getDatasource = useEvent(async (selector: DatasourceSelector): Promise<DatasourceSpec> => {
     // Try to find it in dashboard spec
-    const dashboardDatasource = findDashboardDatasource(dashboardDatasources, selector);
+    const { datasources } = dashboardResource.spec;
+    const dashboardDatasource = findDashboardDatasource(datasources, selector);
     if (dashboardDatasource !== undefined) {
       return dashboardDatasource;
     }
 
     // Try to find it at the project level as a Datasource resource
-    const datasource = await datasourceApi.getDatasource(selector);
+    const { project } = dashboardResource.metadata;
+    const datasource = await datasourceApi.getDatasource(project, selector);
     if (datasource !== undefined) {
       return datasource.spec;
     }
