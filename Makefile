@@ -92,10 +92,17 @@ test: generate
 integration-test: generate
 	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
+.PHONY: coverage-html
 coverage-html: integration-test
 	@echo ">> Print test coverage"
 	$(GO) tool cover -html=$(COVER_PROFILE)
 
+.PHONY: assets-compress
+assets-compress:
+	@echo '>> compressing assets'
+	scripts/compress_assets.sh
+
+## Cross build binaries for all platforms (Use "make build" in development)
 .PHONY: cross-build
 cross-build: ## Cross build binaries for all platforms (Use "make build" in development)
 	goreleaser release --snapshot --rm-dist --parallelism ${GORELEASER_PARALLEL}
@@ -122,9 +129,8 @@ build-cli:
 	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
 
 .PHONY: generate
-generate:
+generate: assets-compress
 	$(GO) generate ./internal/api
-	$(GO) generate ./internal/api/front
 
 .PHONY: clean
 clean:
