@@ -30,18 +30,10 @@ function tag() {
   git tag -s "${tag}" -m "${tag}"
 }
 
-function extractChangelog() {
-  sed -n '/^##/,/^##/{/^##/!{/^##/!p;};}' CHANGELOG.md > GENERATED_CHANGELOG.md
-}
-
 if [[ $1 == "--check-version" ]]; then
   checkVersion "${@:2}"
 fi
 
 if [[ $1 == "--tag" ]]; then
   tag "${@:2}"
-fi
-
-if [[ $1 == "--extract-changelog" ]]; then
-  extractChangelog
 fi
