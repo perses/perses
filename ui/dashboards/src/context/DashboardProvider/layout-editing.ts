@@ -27,7 +27,7 @@ export interface LayoutEditorSlice {
   /**
    * Given a LayoutItem location, returns the panel's unique key at that location.
    */
-  getPanelKey: (location: LayoutLocation) => string;
+  getPanelKey: (layoutItem: LayoutItem) => string;
 
   /**
    * Add a panel with the specified key to an existing group.
@@ -37,13 +37,13 @@ export interface LayoutEditorSlice {
   /**
    * Move an existing Panel to a new panel group.
    */
-  movePanelToGroup: (currentLocation: LayoutLocation, newGroupIndex: number) => void;
+  movePanelToGroup: (layoutItem: LayoutItem, newGroupIndex: number) => void;
 }
 
 /**
  * The location of an item (e.g. a Panel) in layouts.
  */
-export interface LayoutLocation {
+export interface LayoutItem {
   groupIndex: number;
   itemIndex: number;
 }

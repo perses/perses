@@ -14,4 +14,4 @@
 /**
  * The middleware applied to the DashboardStore (can be used as generic argument in StoreCreator).
  */
-export type Middleware = [['zustand/devtools', never], ['zustand/immer', never]];
+export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];
