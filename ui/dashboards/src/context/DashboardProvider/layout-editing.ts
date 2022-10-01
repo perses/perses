@@ -38,6 +38,11 @@ export interface LayoutEditorSlice {
    * Move an existing Panel to a new panel group.
    */
   movePanelToGroup: (layoutItem: LayoutItem, newGroupIndex: number) => void;
+
+  /**
+   * Updates an existing panel group to, for example, change its display properties.
+   */
+  updatePanelGroup: (layout: LayoutDefinition, index?: number) => void;
 }
 
 /**
@@ -103,6 +108,17 @@ export function createLayoutEditorSlice(
           height: item.height,
           content: item.content,
         });
+      });
+    },
+
+    // TODO: Maybe combine this into some kind of groupEditor state
+    updatePanelGroup(next, groupIndex) {
+      set((state) => {
+        if (groupIndex === undefined) {
+          state.layouts.unshift(next);
+        } else {
+          state.layouts[groupIndex] = next;
+        }
       });
     },
   });

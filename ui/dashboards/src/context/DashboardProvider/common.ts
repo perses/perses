@@ -12,6 +12,6 @@
 // limitations under the License.
 
 /**
- * The middleware applied to the DashboardStore (can be used as generic argument in StoreCreator).
+ * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
  */
 export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];

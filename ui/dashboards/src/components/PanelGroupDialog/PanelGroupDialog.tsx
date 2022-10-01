@@ -33,7 +33,7 @@ import CloseIcon from 'mdi-material-ui/Close';
 import { useDashboardApp, useLayouts } from '../../context';
 
 const PanelGroupDialog = () => {
-  const { layouts, updateLayout } = useLayouts();
+  const { layouts, updatePanelGroup } = useLayouts();
   const { panelGroupDialog, closePanelGroupDialog } = useDashboardApp();
 
   const groupIndex = panelGroupDialog?.groupIndex;
@@ -59,7 +59,7 @@ const PanelGroupDialog = () => {
         items: groupIndex === undefined ? [] : layouts[groupIndex]?.spec.items ?? [],
       },
     };
-    updateLayout(newLayout, groupIndex);
+    updatePanelGroup(newLayout, groupIndex);
     closePanelGroupDialog();
   };
 
