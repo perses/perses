@@ -25,7 +25,6 @@ import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing';
 
 export interface DashboardStoreState extends DashboardAppSlice, LayoutEditorSlice, PanelEditorSlice {
   dashboard: DashboardSpec;
-  panels: Record<string, PanelDefinition>;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
 }
