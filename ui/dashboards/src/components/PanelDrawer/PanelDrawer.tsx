@@ -14,16 +14,15 @@
 import { useState } from 'react';
 import { Stack, Box, Button, Typography } from '@mui/material';
 import { Drawer } from '@perses-dev/components';
-import { useDashboardApp } from '../../context';
-import { usePanelDrawerModel } from './panel-editor-model';
+import { PanelDefinition } from '@perses-dev/core';
+import { usePanels } from '../../context';
 import { PanelEditorForm, panelEditorFormId, PanelEditorFormProps } from './PanelEditorForm';
 
 /**
  * The Add/Edit panel drawer for editing a panel's options.
  */
 export const PanelDrawer = () => {
-  const { closePanelDrawer } = useDashboardApp();
-  const model = usePanelDrawerModel();
+  const { panelEditor } = usePanels();
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);
@@ -31,26 +30,39 @@ export const PanelDrawer = () => {
 
   // Don't call closeDrawer on the store until the Drawer has completely transitioned out
   const handleExited = () => {
-    closePanelDrawer();
+    panelEditor?.close();
     setIsClosing(false);
   };
 
   // Drawer is open if we have a model and we're not transitioning out
-  const isOpen = model !== undefined && isClosing === false;
+  const isOpen = panelEditor !== undefined && isClosing === false;
 
   const handleSubmit: PanelEditorFormProps['onSubmit'] = (values) => {
     // This shouldn't happen since we don't render the submit button until we have a model, but check to make TS happy
-    if (model === undefined) {
+    if (panelEditor === undefined) {
       throw new Error('Cannot apply changes');
     }
-    model.applyChanges(values);
+    const newDefinition: PanelDefinition = {
+      kind: 'Panel',
+      spec: {
+        display: {
+          name: values.name,
+          description: values.description !== '' ? values.description : undefined,
+        },
+        plugin: {
+          kind: values.kind,
+          spec: values.spec,
+        },
+      },
+    };
+    panelEditor.applyChanges(newDefinition, values.group);
     handleClose();
   };
 
   return (
     <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }}>
-      {/* When the drawer is opened, we should have a model (this also ensures the form state gets reset between opens) */}
-      {model !== undefined && (
+      {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
+      {panelEditor !== undefined && (
         <>
           <Box
             sx={{
@@ -61,18 +73,22 @@ export const PanelDrawer = () => {
               borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
             }}
           >
-            <Typography variant="h2">{model.drawerTitle}</Typography>
+            <Typography variant="h2">{panelEditor.mode} Panel</Typography>
             <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
               {/* Using the 'form' attribute lets us have a submit button like this outside the form element */}
               <Button type="submit" variant="contained" form={panelEditorFormId}>
-                {model.submitButtonText}
+                {panelEditor.mode === 'Add' ? 'Add Panel' : 'Apply'}
               </Button>
               <Button variant="outlined" onClick={handleClose}>
                 Cancel
               </Button>
             </Stack>
           </Box>
-          <PanelEditorForm onSubmit={handleSubmit} initialValues={model.initialValues} />
+          <PanelEditorForm
+            onSubmit={handleSubmit}
+            initialGroup={panelEditor.initialGroup}
+            initialDefinition={panelEditor.initialDefinition}
+          />
         </>
       )}
     </Drawer>

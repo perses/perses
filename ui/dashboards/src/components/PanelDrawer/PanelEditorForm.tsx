@@ -15,25 +15,27 @@ import { FormEventHandler, useState } from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useLayouts } from '../../context';
+import { PanelEditorState } from '../../context/DashboardProvider/panel-editing';
 import { PanelEditorFormValues, usePanelSpecState } from './panel-editor-model';
 import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelSpecEditor } from './PanelSpecEditor';
 
 export interface PanelEditorFormProps {
-  initialValues: PanelEditorFormValues;
+  initialDefinition: PanelEditorState['initialDefinition'];
+  initialGroup: PanelEditorState['initialGroup'];
   onSubmit: (values: PanelEditorFormValues) => void;
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps) {
-  const { initialValues, onSubmit } = props;
+  const { initialDefinition, initialGroup, onSubmit } = props;
 
   const { layouts } = useLayouts();
 
-  const [name, setName] = useState(initialValues.name);
-  const [description, setDescription] = useState(initialValues.description);
-  const [group, setGroup] = useState(initialValues.group);
-  const [kind, setKind] = useState(initialValues.kind);
-  const { spec, onSpecChange } = usePanelSpecState(kind, initialValues.spec);
+  const [name, setName] = useState(initialDefinition.spec.display.name);
+  const [description, setDescription] = useState(initialDefinition.spec.display.name ?? '');
+  const [group, setGroup] = useState(initialGroup);
+  const [kind, setKind] = useState(initialDefinition.spec.plugin.kind);
+  const { spec, onSpecChange } = usePanelSpecState(kind, initialDefinition.spec.plugin.spec);
 
   // Ignore string values (which would be an "empty" value from the Select) since we don't allow them to unset it
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {

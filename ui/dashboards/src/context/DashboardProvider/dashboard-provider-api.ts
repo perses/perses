@@ -21,3 +21,12 @@ export function useLayouts() {
     updatePanelGroup,
   }));
 }
+
+export function usePanels() {
+  return useDashboardStore(({ panels, panelEditor, addPanel, editPanel }) => ({
+    panels,
+    panelEditor,
+    addPanel,
+    editPanel,
+  }));
+}
