@@ -100,4 +100,4 @@ release:
   ids:
     - "default"
   prerelease: auto
-  name_template: "{{ .Tag }}/{{ .Date }}"
+  name_template: "{{ .Version }} / {{ .Env.Date }}"
