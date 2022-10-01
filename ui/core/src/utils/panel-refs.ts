@@ -25,3 +25,17 @@ export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
   }
   return { panelDefinition, panelsKey };
 }
+
+/**
+ * Gets the unique key for a panel from a PanelRef.
+ */
+export function getPanelKeyFromRef(panelRef: PanelRef) {
+  return panelRef.$ref.substring(14);
+}
+
+/**
+ * Creates a PanelRef for a panel with the given key.
+ */
+export function createPanelRef(panelKey: string): PanelRef {
+  return { $ref: `#/spec/panels/${panelKey}` };
+}
