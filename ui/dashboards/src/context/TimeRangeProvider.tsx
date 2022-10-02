@@ -11,9 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { getUnixTime } from 'date-fns';
-import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
+import {
+  TimeRangeValue,
+  AbsoluteTimeRange,
+  toAbsoluteTimeRange,
+  isRelativeTimeRange,
+  isDurationString,
+  RelativeTimeRange,
+  DurationString,
+} from '@perses-dev/core';
 import { TimeRange, TimeRangeContext, useQueryString, useTimeRange } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
@@ -22,10 +30,39 @@ export interface TimeRangeProviderProps {
   onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
+export function useInitialTimeRange(dashboardDuration: DurationString) {
+  const { queryString, setQueryString } = useQueryString();
+
+  const startParam = queryString.get('start');
+  // const endParam = queryString.get('end');
+
+  let defaultTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
+
+  useEffect(() => {
+    if (startParam === null) {
+      if (setQueryString) {
+        queryString.set('start', dashboardDuration);
+        queryString.delete('end');
+        setQueryString(queryString);
+      }
+    }
+  }, [startParam, dashboardDuration, queryString, setQueryString]);
+
+  if (startParam === null) {
+    return { defaultTimeRange };
+  }
+
+  const startParamString = startParam?.toString() ?? '';
+  if (isDurationString(startParamString)) {
+    defaultTimeRange = { pastDuration: startParamString } as RelativeTimeRange;
+  }
+  return { defaultTimeRange };
+}
+
 export function useSyncTimeRangeParams() {
-  // const [coords, setCoords] = useState<CursorData['coords']>(null);
   const { queryString, setQueryString } = useQueryString();
   const { timeRange } = useTimeRange();
+  const lastParamSync = useRef<{ [k: string]: string }>();
 
   useEffect(() => {
     // TODO (sjcobb): how to tell whether resolved timeRange was originally relative?
@@ -48,7 +85,8 @@ export function useSyncTimeRangeParams() {
       const endUnixMs = getUnixTime(timeRange.end) * 1000;
       queryString.set('start', startUnixMs.toString());
       queryString.set('end', endUnixMs.toString());
-      setQueryString(queryString);
+      setQueryString(queryString); // TODO (sjcobb); only re-set start query param when it changes
+      lastParamSync.current = Object.fromEntries([...queryString]);
     }
 
     // return () => {
@@ -62,8 +100,6 @@ export function useSyncTimeRangeParams() {
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
-
-  const { queryString, setQueryString } = useQueryString();
 
   const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
     ? toAbsoluteTimeRange(initialTimeRange)
@@ -79,48 +115,16 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
         return;
       }
 
+      // convert to absolute time range if relative time shortcut passed from TimeRangeControls
       if (isRelativeTimeRange(value)) {
-        if (setQueryString) {
-          setActiveTimeRange(toAbsoluteTimeRange(value));
-        } else {
-          setActiveTimeRange(toAbsoluteTimeRange(value));
-        }
+        setActiveTimeRange(toAbsoluteTimeRange(value));
         return;
       }
 
-      // allows app to specify whether query params should be source of truth for active time range
-      if (setQueryString) {
-        setActiveTimeRange(value);
-      } else {
-        setActiveTimeRange(value);
-      }
-
-      // if (isRelativeTimeRange(value)) {
-      //   if (setQueryString) {
-      //     queryString.set('start', value.pastDuration);
-      //     // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
-      //     queryString.delete('end');
-      //     setQueryString(queryString);
-      //   } else {
-      //     setActiveTimeRange(toAbsoluteTimeRange(value));
-      //   }
-      //   return;
-      // }
-
-      // // allows app to specify whether query params should be source of truth for active time range
-      // if (setQueryString) {
-      //   // Absolute URL example) ?start=1663707045000&end=1663713330000
-      //   // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
-      //   const startUnixMs = getUnixTime(value.start) * 1000;
-      //   const endUnixMs = getUnixTime(value.end) * 1000;
-      //   queryString.set('start', startUnixMs.toString());
-      //   queryString.set('end', endUnixMs.toString());
-      //   setQueryString(queryString);
-      // } else {
-      //   setActiveTimeRange(value);
-      // }
+      // assume value was already absolute
+      setActiveTimeRange(value);
     },
-    [queryString, setQueryString, onTimeRangeChange]
+    [onTimeRangeChange]
   );
 
   const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);

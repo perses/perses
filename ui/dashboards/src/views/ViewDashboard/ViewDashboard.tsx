@@ -19,6 +19,7 @@ import { DashboardResource } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProvider,
+  useInitialTimeRange,
   TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
@@ -37,24 +38,8 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
 export function ViewDashboard(props: ViewDashboardProps) {
   const { dashboardResource, datasourceApi, sx, ...others } = props;
   const { spec } = dashboardResource;
-
-  const defaultTimeRange = { pastDuration: spec.duration };
-
-  // TODO (sjcobb); create useInitialTimeRange hook to use in addition to useSyncTimeRangeParams
-  // const { queryString, setQueryString } = useQueryString();
-  // const dashboardDuration = spec.duration ?? '1h';
-  // const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString);
-
-  // // TODO: add reusable sync query string or no-op util
-  // useEffect(() => {
-  //   const currentParams = Object.fromEntries([...queryString]);
-  //   // if app does not provide query string implementation, setTimeRange is used instead
-  //   if (!currentParams.start && setQueryString) {
-  //     // default to duration in dashboard definition if start param is not already set
-  //     queryString.set('start', dashboardDuration);
-  //     setQueryString(queryString);
-  //   }
-  // }, [dashboardDuration, queryString, setQueryString]);
+  const dashboardDuration = spec.duration ?? '1h';
+  const { defaultTimeRange } = useInitialTimeRange(dashboardDuration);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
