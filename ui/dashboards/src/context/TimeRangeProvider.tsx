@@ -11,15 +11,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { getUnixTime } from 'date-fns';
 import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext, useQueryString } from '@perses-dev/plugin-system';
+import { TimeRange, TimeRangeContext, useQueryString, useTimeRange } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
   children?: React.ReactNode;
   onTimeRangeChange?: (e: TimeRangeValue) => void;
+}
+
+export function useSyncTimeRangeParams() {
+  // const [coords, setCoords] = useState<CursorData['coords']>(null);
+  const { queryString, setQueryString } = useQueryString();
+  const { timeRange } = useTimeRange();
+
+  useEffect(() => {
+    // TODO (sjcobb): how to tell whether resolved timeRange was originally relative?
+    // if (isRelativeTimeRange(value)) {
+    //   if (setQueryString) {
+    //     queryString.set('start', value.pastDuration);
+    //     // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
+    //     queryString.delete('end');
+    //     setQueryString(queryString);
+    //   } else {
+    //     setActiveTimeRange(toAbsoluteTimeRange(value));
+    //   }
+    //   return;
+    // }
+
+    if (setQueryString) {
+      // Absolute URL example) ?start=1663707045000&end=1663713330000
+      // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
+      const startUnixMs = getUnixTime(timeRange.start) * 1000;
+      const endUnixMs = getUnixTime(timeRange.end) * 1000;
+      queryString.set('start', startUnixMs.toString());
+      queryString.set('end', endUnixMs.toString());
+      setQueryString(queryString);
+    }
+
+    // return () => {
+    //   // TODO (sjcobb): cleanup
+    // };
+  }, [timeRange, queryString, setQueryString]);
 }
 
 /**
@@ -46,10 +81,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
       if (isRelativeTimeRange(value)) {
         if (setQueryString) {
-          queryString.set('start', value.pastDuration);
-          // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
-          queryString.delete('end');
-          setQueryString(queryString);
+          setActiveTimeRange(toAbsoluteTimeRange(value));
         } else {
           setActiveTimeRange(toAbsoluteTimeRange(value));
         }
@@ -58,16 +90,35 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
       // allows app to specify whether query params should be source of truth for active time range
       if (setQueryString) {
-        // Absolute URL example) ?start=1663707045000&end=1663713330000
-        // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
-        const startUnixMs = getUnixTime(value.start) * 1000;
-        const endUnixMs = getUnixTime(value.end) * 1000;
-        queryString.set('start', startUnixMs.toString());
-        queryString.set('end', endUnixMs.toString());
-        setQueryString(queryString);
+        setActiveTimeRange(value);
       } else {
         setActiveTimeRange(value);
       }
+
+      // if (isRelativeTimeRange(value)) {
+      //   if (setQueryString) {
+      //     queryString.set('start', value.pastDuration);
+      //     // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
+      //     queryString.delete('end');
+      //     setQueryString(queryString);
+      //   } else {
+      //     setActiveTimeRange(toAbsoluteTimeRange(value));
+      //   }
+      //   return;
+      // }
+
+      // // allows app to specify whether query params should be source of truth for active time range
+      // if (setQueryString) {
+      //   // Absolute URL example) ?start=1663707045000&end=1663713330000
+      //   // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
+      //   const startUnixMs = getUnixTime(value.start) * 1000;
+      //   const endUnixMs = getUnixTime(value.end) * 1000;
+      //   queryString.set('start', startUnixMs.toString());
+      //   queryString.set('end', endUnixMs.toString());
+      //   setQueryString(queryString);
+      // } else {
+      //   setActiveTimeRange(value);
+      // }
     },
     [queryString, setQueryString, onTimeRangeChange]
   );

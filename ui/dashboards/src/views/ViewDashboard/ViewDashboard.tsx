@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 import { Box, BoxProps } from '@mui/material';
-import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
-import { useQueryString } from '@perses-dev/plugin-system';
+import { DashboardResource } from '@perses-dev/core';
+// import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
+// import { useQueryString } from '@perses-dev/plugin-system';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProvider,
@@ -37,20 +38,23 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const { dashboardResource, datasourceApi, sx, ...others } = props;
   const { spec } = dashboardResource;
 
-  const { queryString, setQueryString } = useQueryString();
-  const dashboardDuration = spec.duration ?? '1h';
-  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString);
+  const defaultTimeRange = { pastDuration: spec.duration };
 
-  // TODO: add reusable sync query string or no-op util
-  useEffect(() => {
-    const currentParams = Object.fromEntries([...queryString]);
-    // if app does not provide query string implementation, setTimeRange is used instead
-    if (!currentParams.start && setQueryString) {
-      // default to duration in dashboard definition if start param is not already set
-      queryString.set('start', dashboardDuration);
-      setQueryString(queryString);
-    }
-  }, [dashboardDuration, queryString, setQueryString]);
+  // TODO (sjcobb); create useInitialTimeRange hook to use in addition to useSyncTimeRangeParams
+  // const { queryString, setQueryString } = useQueryString();
+  // const dashboardDuration = spec.duration ?? '1h';
+  // const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString);
+
+  // // TODO: add reusable sync query string or no-op util
+  // useEffect(() => {
+  //   const currentParams = Object.fromEntries([...queryString]);
+  //   // if app does not provide query string implementation, setTimeRange is used instead
+  //   if (!currentParams.start && setQueryString) {
+  //     // default to duration in dashboard definition if start param is not already set
+  //     queryString.set('start', dashboardDuration);
+  //     setQueryString(queryString);
+  //   }
+  // }, [dashboardDuration, queryString, setQueryString]);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>

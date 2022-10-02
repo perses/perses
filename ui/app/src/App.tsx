@@ -35,7 +35,7 @@ const ECHARTS_THEME_OVERRIDES = {};
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
@@ -62,7 +62,7 @@ function App() {
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
             <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-              <QueryStringProvider queryString={searchParams}>
+              <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
                 <ErrorBoundary FallbackComponent={ErrorAlert}>
                   {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
                   <ViewDashboard />
