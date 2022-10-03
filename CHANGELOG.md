@@ -5,12 +5,12 @@
 - [FEATURE] New ListVariable plugin for StaticListVariables #547
 - [FEATURE] New Prometheus plugin for ListVariable (LabelName, LabelValues) #565
 - [FEATURE] Variable chaining support for Prometheus variables #579
-- [FEATURE] New editable Markdown panel #553, #555, #563
-- [FEATURE] New datasource spec implemented #554, #577
+- [FEATURE] Visual editor for markdown panel #555, #574
+- [FEATURE] Cuelang schema for markdown panel #553
 - [ENHANCEMENT] Upgrade react-query to v4 #578
 - [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #583, #585, #586
 - [ENHANCEMENT] Update Perses Header, refactor embeddable components #580, 583
-- [ENHANCEMENT] Markdown editor includes link to markdown cheatsheet #574
+- [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553, #563
 - [ENHANCEMENT] Add optional Datasource selector spec to Prom variables and queries #587
 - [BUGFIX] Fix overlapping header issue #580
 - [BREAKINGCHANGE] Initial Datasources v2 spec support in UI #577
