@@ -1,11 +1,30 @@
 # Changelog
 
+# 0.9.0 / 2022-10-04
+
+- [FEATURE] new datasource spec implemented #554, #577
+- [FEATURE] new editable Markdown panel #541, #553, #555, #563, #574
+- [FEATURE] New ListVariable plugin for StaticListVariables #547
+- [FEATURE] New Prometheus plugin for ListVariable (LabelName, LabelValues) #565
+- [FEATURE] Variable chaining support for Prometheus variables #579
+- [ENHANCEMENT] upgrade go version on gitpod #550
+- [ENHANCEMENT] monorepo / build tooling improvements #567, #585, #586
+- [ENHANCEMENT] Integrate new PluginRegistry, remove legacy code #559
+- [ENHANCEMENT] Upgrade to react-query v4, clean-up test logs #578
+- [ENHANCEMENT] Update Perses Header, refactor embeddable components #580, 583
+- [BUGFIX] fix overlapping header issue #580
+- [BREAKINGCHANGE] Rename `GraphQuery` to `TimeSeriesQuery` #573
+- [BREAKINGCHANGE] Rename `LineChart` panel to `TimeSeriesChart` #575
+- [BREAKINGCHANGE] Be consistent with kind and spec in our API #549
+- [BREAKINGCHANGE] Switch GraphQuery plugin API to be Promise-based #556
+
 ## 0.8.1 / 2022-09-23
 
 - [BUGFIX] Add Dashboard ErrorBoundary, fix grid open state #562
 
 ## 0.8.0 / 2022-09-21
 
+- [FEATURE] Add and edit panel groups #546
 - [FEATURE] ListVariable and TextVariable have been introduced #535
 - [FEATURE] Add a panel that supports markdown (no editing capabilities yet) #532, #541
 - [FEATURE] time range selection shareable URLs #530
