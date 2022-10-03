@@ -15,7 +15,7 @@ import { PanelDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
-import { LayoutEditorSlice, LayoutItem } from './layout-editing';
+import { LayoutSlice, LayoutItem } from './layout-slice';
 
 export interface PanelEditorSlice {
   panels: Record<string, PanelDefinition>;
@@ -73,7 +73,7 @@ export interface PanelEditorValues {
  */
 export function createPanelEditorSlice(
   panels: PanelEditorSlice['panels']
-): StateCreator<PanelEditorSlice & LayoutEditorSlice, Middleware, [], PanelEditorSlice> {
+): StateCreator<PanelEditorSlice & LayoutSlice, Middleware, [], PanelEditorSlice> {
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
     panels,

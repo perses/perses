@@ -21,7 +21,7 @@ import {
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 
-export interface LayoutEditorSlice {
+export interface LayoutSlice {
   layouts: LayoutDefinition[];
 
   /**
@@ -56,9 +56,7 @@ export interface LayoutItem {
 /**
  * Curried function for creating a LayoutEditorSlice.
  */
-export function createLayoutEditorSlice(
-  layouts: LayoutDefinition[]
-): StateCreator<LayoutEditorSlice, Middleware, [], LayoutEditorSlice> {
+export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<LayoutSlice, Middleware, [], LayoutSlice> {
   // Return the state creator function for Zustand that uses the layouts provided as initial state
   return (set, get) => ({
     layouts,

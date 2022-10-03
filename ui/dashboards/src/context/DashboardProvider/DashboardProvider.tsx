@@ -20,10 +20,10 @@ import { createContext, useContext } from 'react';
 import produce from 'immer';
 import { DashboardSpec } from '@perses-dev/core';
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
-import { createLayoutEditorSlice, LayoutEditorSlice } from './layout-editing';
+import { createLayoutSlice, LayoutSlice } from './layout-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing';
 
-export interface DashboardStoreState extends DashboardAppSlice, LayoutEditorSlice, PanelEditorSlice {
+export interface DashboardStoreState extends DashboardAppSlice, LayoutSlice, PanelEditorSlice {
   dashboard: DashboardSpec;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
@@ -78,7 +78,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
         const [set] = args;
         return {
           ...createDashboardAppSlice(...args),
-          ...createLayoutEditorSlice(layouts)(...args),
+          ...createLayoutSlice(layouts)(...args),
           ...createPanelEditorSlice(panels)(...args),
           dashboard: dashboardSpec,
           isEditMode: !!isEditMode,
