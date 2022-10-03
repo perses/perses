@@ -2,20 +2,19 @@
 
 # 0.9.0 / 2022-10-04
 
-- [FEATURE] new datasource spec implemented #554, #577
-- [FEATURE] new editable Markdown panel #541, #553, #555, #563, #574
 - [FEATURE] New ListVariable plugin for StaticListVariables #547
 - [FEATURE] New Prometheus plugin for ListVariable (LabelName, LabelValues) #565
 - [FEATURE] Variable chaining support for Prometheus variables #579
-- [ENHANCEMENT] upgrade go version on gitpod #550
-- [ENHANCEMENT] monorepo / build tooling improvements #567, #585, #586
-- [ENHANCEMENT] Integrate new PluginRegistry, remove legacy code #559
-- [ENHANCEMENT] Upgrade to react-query v4, clean-up test logs #578
+- [FEATURE] New editable Markdown panel #541, #553, #555, #563, #574
+- [FEATURE] New datasource spec implemented #554, #577
+- [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #578, #585, #586
 - [ENHANCEMENT] Update Perses Header, refactor embeddable components #580, 583
-- [BUGFIX] fix overlapping header issue #580
+- [BUGFIX] Fix overlapping header issue #580
+- [BREAKINGCHANGE] Many changes to implement newest specs for datasources, template variables
+- [BREAKINGCHANGE] Integrate new PluginRegistry, remove legacy code #559
 - [BREAKINGCHANGE] Rename `GraphQuery` to `TimeSeriesQuery` #573
 - [BREAKINGCHANGE] Rename `LineChart` panel to `TimeSeriesChart` #575
-- [BREAKINGCHANGE] Be consistent with kind and spec in our API #549
+- [BREAKINGCHANGE] Be consistent with kind and spec in our API, remove `options` #549
 - [BREAKINGCHANGE] Switch GraphQuery plugin API to be Promise-based #556
 
 ## 0.8.1 / 2022-09-23
