@@ -7,11 +7,13 @@
 - [FEATURE] Variable chaining support for Prometheus variables #579
 - [FEATURE] New editable Markdown panel #553, #555, #563
 - [FEATURE] New datasource spec implemented #554, #577
-- [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #578, #585, #586
+- [ENHANCEMENT] Upgrade react-query to v4 #578
+- [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #583, #585, #586
 - [ENHANCEMENT] Update Perses Header, refactor embeddable components #580, 583
 - [ENHANCEMENT] Markdown editor includes link to markdown cheatsheet #574
+- [ENHANCEMENT] Add optional Datasource selector spec to Prom variables and queries #587
 - [BUGFIX] Fix overlapping header issue #580
-- [BREAKINGCHANGE] Many changes to implement newest specs for datasources, template variables
+- [BREAKINGCHANGE] Initial Datasources v2 spec support in UI #577
 - [BREAKINGCHANGE] Integrate new PluginRegistry, remove legacy code #559
 - [BREAKINGCHANGE] Rename `GraphQuery` to `TimeSeriesQuery` #573
 - [BREAKINGCHANGE] Rename `LineChart` panel to `TimeSeriesChart` #575
@@ -31,7 +33,7 @@
 - [FEATURE] zoom event on a line chart panel updates the dashboard active time range #530
 - [ENHANCEMENT] QueryStringProvider allows apps to pass their own utils to update the URL #530
 - [ENHANCEMENT] DashboardProvider improvements #540
-- [ENHANCEMENT] Governance process changes #431 #522 #523 
+- [ENHANCEMENT] Governance process changes #431 #522 #523
 - [ENHANCEMENT] Use React 18 for development, allow React 17 backward compatability #533
 - [ENHANCEMENT] upgrade go to 1.19 #543
 - [ENHANCEMENT] build process improvements #489, #490, #491 #515
