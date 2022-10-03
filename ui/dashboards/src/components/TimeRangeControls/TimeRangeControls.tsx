@@ -47,16 +47,19 @@ export function TimeRangeControls() {
   // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
 
+  // ensure URL params match selected time range
   useSyncTimeRangeParams(selectedTimeRange);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
 
-  // updates selectedTimeRange when zoom event has fired
+  // TODO: better approach to update selectedTimeRange on zoom
   useEffect(() => {
     const convertedTimeRange = isRelativeTimeRange(selectedTimeRange)
       ? toAbsoluteTimeRange(selectedTimeRange)
       : selectedTimeRange;
+    // determines whether timeRange has changed since last call to setSelectedTimeRange
+    // which means zoom event has been triggered
     if (timeRange.start > convertedTimeRange.start) {
       setSelectedTimeRange(timeRange);
     }

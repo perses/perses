@@ -31,6 +31,9 @@ export interface TimeRangeProviderProps {
   onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
+/**
+ * Gets the initial time range taking into account URL params and dashboard JSON duration
+ */
 export function useInitialTimeRange(dashboardDuration: DurationString) {
   const { queryString } = useQueryString();
   const startParam = queryString.get('start');
@@ -50,11 +53,14 @@ export function useInitialTimeRange(dashboardDuration: DurationString) {
   return { defaultTimeRange };
 }
 
+/**
+ * Set initial start and end URL params and update when selected time range changes
+ */
 export function useSyncTimeRangeParams(selectedTimeRange: TimeRangeValue) {
   const { queryString, setQueryString } = useQueryString();
   const { dashboard } = useDashboard();
   const dashboardDuration = dashboard.duration;
-  const lastParamSync = useRef<{ [k: string]: string }>();
+  const lastParamSync = useRef<{ [param: string]: string }>();
 
   useEffect(() => {
     if (setQueryString) {
