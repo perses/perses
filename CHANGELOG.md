@@ -1,18 +1,39 @@
 # Changelog
 
+# 0.9.0 / 2022-10-04
+
+- [FEATURE] New ListVariable plugin for StaticListVariables #547
+- [FEATURE] New Prometheus plugin for ListVariable (LabelName, LabelValues) #565
+- [FEATURE] Variable chaining support for Prometheus variables #579
+- [FEATURE] Visual editor for markdown panel #555, #574
+- [FEATURE] Cuelang schema for markdown panel #553
+- [ENHANCEMENT] Upgrade react-query to v4 #578
+- [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #583, #585, #586
+- [ENHANCEMENT] Update Perses Header, refactor embeddable components #580
+- [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553, #563
+- [ENHANCEMENT] Add optional Datasource selector spec to Prom variables and queries #587
+- [BUGFIX] Fix overlapping header issue #580
+- [BREAKINGCHANGE] Initial Datasources v2 spec support in UI #577
+- [BREAKINGCHANGE] Integrate new PluginRegistry, remove legacy code #559
+- [BREAKINGCHANGE] Rename `GraphQuery` to `TimeSeriesQuery` #573
+- [BREAKINGCHANGE] Rename `LineChart` panel to `TimeSeriesChart` #575
+- [BREAKINGCHANGE] Be consistent with kind and spec in our API, remove `options` #549
+- [BREAKINGCHANGE] Switch GraphQuery plugin API to be Promise-based #556
+
 ## 0.8.1 / 2022-09-23
 
 - [BUGFIX] Add Dashboard ErrorBoundary, fix grid open state #562
 
 ## 0.8.0 / 2022-09-21
 
+- [FEATURE] Add and edit panel groups #546
 - [FEATURE] ListVariable and TextVariable have been introduced #535
 - [FEATURE] Add a panel that supports markdown (no editing capabilities yet) #532, #541
 - [FEATURE] time range selection shareable URLs #530
 - [FEATURE] zoom event on a line chart panel updates the dashboard active time range #530
 - [ENHANCEMENT] QueryStringProvider allows apps to pass their own utils to update the URL #530
 - [ENHANCEMENT] DashboardProvider improvements #540
-- [ENHANCEMENT] Governance process changes #431 #522 #523 
+- [ENHANCEMENT] Governance process changes #431 #522 #523
 - [ENHANCEMENT] Use React 18 for development, allow React 17 backward compatability #533
 - [ENHANCEMENT] upgrade go to 1.19 #543
 - [ENHANCEMENT] build process improvements #489, #490, #491 #515
