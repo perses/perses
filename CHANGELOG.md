@@ -9,7 +9,7 @@
 - [FEATURE] Cuelang schema for markdown panel #553
 - [ENHANCEMENT] Upgrade react-query to v4 #578
 - [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #583, #585, #586
-- [ENHANCEMENT] Update Perses Header, refactor embeddable components #580, 583
+- [ENHANCEMENT] Update Perses Header, refactor embeddable components #580
 - [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553, #563
 - [ENHANCEMENT] Add optional Datasource selector spec to Prom variables and queries #587
 - [BUGFIX] Fix overlapping header issue #580
