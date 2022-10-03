@@ -24,13 +24,13 @@ const demoDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '30m',
-    // variables: [],
+    duration: '5m',
     variables: [
       {
         kind: 'ListVariable',
         spec: {
           name: 'job',
+          defaultValue: 'node',
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
@@ -205,7 +205,36 @@ const demoDashboard: DashboardResource = {
           },
         },
       },
-      doubleQueriesAlt: {
+      testNodeQuery: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Test Query', description: 'Description text' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        query: 'node_load15{instance=~"$instance",job="node"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              show_legend: false,
+              unit: {
+                kind: 'PercentDecimal',
+                decimal_places: 1,
+              },
+            },
+          },
+        },
+      },
+      doubleQueries: {
         kind: 'Panel',
         spec: {
           display: { name: 'Thresholds Example', description: 'Description text' },
@@ -224,61 +253,6 @@ const demoDashboard: DashboardResource = {
                     },
                   },
                 },
-                // {
-                //   kind: 'TimeSeriesQuery',
-                //   spec: {
-                //     plugin: {
-                //       kind: 'PrometheusTimeSeriesQuery',
-                //       spec: {
-                //         query: 'node_load1{instance=~"$instance",job="node"}',
-                //       },
-                //     },
-                //   },
-                // },
-              ],
-              show_legend: false,
-              unit: {
-                kind: 'PercentDecimal',
-                decimal_places: 1,
-              },
-              thresholds: {
-                // default_color: '#000', // optional
-                steps: [
-                  {
-                    value: 0.4,
-                    name: 'Alert: Warning condition example',
-                    // color: '#FFFFFF',
-                  },
-                  {
-                    value: 0.75,
-                    name: 'Alert: Critical condition example',
-                    // color: '#0000FF', // blue
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-      doubleQueries: {
-        kind: 'Panel',
-        spec: {
-          display: { name: 'Thresholds Example', description: 'Description text' },
-          plugin: {
-            kind: 'TimeSeriesChart',
-            spec: {
-              queries: [
-                // {
-                //   kind: 'TimeSeriesQuery',
-                //   spec: {
-                //     plugin: {
-                //       kind: 'PrometheusTimeSeriesQuery',
-                //       spec: {
-                //         query: 'node_load15{instance=~"$instance",job="node"}',
-                //       },
-                //     },
-                //   },
-                // },
                 {
                   kind: 'TimeSeriesQuery',
                   spec: {
@@ -669,7 +643,7 @@ const demoDashboard: DashboardResource = {
               width: 12,
               height: 6,
               // content: { $ref: '#/spec/panels/cpu' },
-              content: { $ref: '#/spec/panels/doubleQueriesAlt' },
+              content: { $ref: '#/spec/panels/testNodeQuery' },
             },
             {
               x: 12,
