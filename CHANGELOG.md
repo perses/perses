@@ -5,10 +5,11 @@
 - [FEATURE] New ListVariable plugin for StaticListVariables #547
 - [FEATURE] New Prometheus plugin for ListVariable (LabelName, LabelValues) #565
 - [FEATURE] Variable chaining support for Prometheus variables #579
-- [FEATURE] New editable Markdown panel #541, #553, #555, #563, #574
+- [FEATURE] New editable Markdown panel #553, #555, #563
 - [FEATURE] New datasource spec implemented #554, #577
 - [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #578, #585, #586
 - [ENHANCEMENT] Update Perses Header, refactor embeddable components #580, 583
+- [ENHANCEMENT] Markdown editor includes link to markdown cheatsheet #574
 - [BUGFIX] Fix overlapping header issue #580
 - [BREAKINGCHANGE] Many changes to implement newest specs for datasources, template variables
 - [BREAKINGCHANGE] Integrate new PluginRegistry, remove legacy code #559
