@@ -22,7 +22,7 @@ import {
   getDefaultTimeRange,
 } from '@perses-dev/core';
 import { useTimeRange, useQueryString } from '@perses-dev/plugin-system';
-import { useDashboard } from '../../context';
+import { useDashboard, useSyncTimeRangeParams } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -46,6 +46,8 @@ export function TimeRangeControls() {
 
   // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
+
+  useSyncTimeRangeParams(selectedTimeRange);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
