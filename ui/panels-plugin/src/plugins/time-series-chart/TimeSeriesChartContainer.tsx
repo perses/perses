@@ -38,6 +38,7 @@ export interface TimeSeriesChartContainerProps {
  */
 export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
   const { width, height, show_legend, thresholds } = props;
+
   const queries = useRunningGraphQueries();
 
   const { setTimeRange } = useTimeRange();

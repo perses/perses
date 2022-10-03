@@ -31,25 +31,12 @@ export interface TimeRangeProviderProps {
   onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
-export function useInitialTimeRange(dashboardDuration: DurationString) {
-  // const { queryString, setQueryString } = useQueryString();
+export function useInitialTimeRange(dashboardDuration: DurationString) {;
   const { queryString } = useQueryString();
-
   const startParam = queryString.get('start');
-  // const endParam = queryString.get('end');
+  const endParam = queryString.get('end');
 
   let defaultTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
-
-  // useEffect(() => {
-  //   if (startParam === null) {
-  //     if (setQueryString) {
-  //       queryString.set('start', dashboardDuration);
-  //       queryString.delete('end');
-  //       setQueryString(queryString);
-  //     }
-  //   }
-  // }, [startParam, dashboardDuration, queryString, setQueryString]);
-
   if (startParam === null) {
     return { defaultTimeRange };
   }
@@ -57,50 +44,43 @@ export function useInitialTimeRange(dashboardDuration: DurationString) {
   const startParamString = startParam?.toString() ?? '';
   if (isDurationString(startParamString)) {
     defaultTimeRange = { pastDuration: startParamString } as RelativeTimeRange;
+  } else {
+    defaultTimeRange = { start: new Date(Number(startParam)), end: new Date(Number(endParam)) };
   }
+
   return { defaultTimeRange };
 }
 
 export function useSyncTimeRangeParams(selectedTimeRange: TimeRangeValue) {
+  const { timeRange } = useTimeRange();
   const { queryString, setQueryString } = useQueryString();
   const { dashboard } = useDashboard();
-  const { timeRange } = useTimeRange();
-  const lastParamSync = useRef<{ [k: string]: string }>();
-
   const dashboardDuration = dashboard.duration;
-  const startParam = queryString.get('start');
-  // const endParam = queryString.get('end');
-  // const startParamString = startParam?.toString() ?? '';
+  const lastParamSync = useRef<{ [k: string]: string }>();
 
   useEffect(() => {
     if (setQueryString) {
-      if (startParam === null) {
-        // queryString.set('start', dashboardDuration);
-        // queryString.delete('end');
-        // setQueryString(queryString);
-      } else {
-        if (isRelativeTimeRange(selectedTimeRange)) {
+      if (isRelativeTimeRange(selectedTimeRange)) {
+        const startParam = queryString.get('start');
+        // const lastStartParam = lastParamSync.current?.start ?? '';
+        if (startParam !== selectedTimeRange.pastDuration) {
           queryString.set('start', selectedTimeRange.pastDuration);
           // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
           queryString.delete('end');
           setQueryString(queryString);
-        } else {
-          // Absolute URL example) ?start=1663707045000&end=1663713330000
-          // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
-          const startUnixMs = getUnixTime(timeRange.start) * 1000;
-          const endUnixMs = getUnixTime(timeRange.end) * 1000;
-          queryString.set('start', startUnixMs.toString());
-          queryString.set('end', endUnixMs.toString());
-          setQueryString(queryString); // TODO (sjcobb); only re-set start query param when it changes
           lastParamSync.current = Object.fromEntries([...queryString]);
         }
+      } else {
+        // currently set from AbsoluteTimePicker, or LineChart panel onDataZoom
+        const startUnixMs = getUnixTime(timeRange.start) * 1000;
+        const endUnixMs = getUnixTime(timeRange.end) * 1000;
+        queryString.set('start', startUnixMs.toString());
+        queryString.set('end', endUnixMs.toString());
+        setQueryString(queryString); // TODO (sjcobb); only re-set start query param when it changes
+        lastParamSync.current = Object.fromEntries([...queryString]);
       }
     }
-
-    // return () => {
-    //   // TODO (sjcobb): cleanup
-    // };
-  }, [timeRange, selectedTimeRange, dashboardDuration, startParam, queryString, setQueryString]);
+  }, [timeRange, selectedTimeRange, dashboardDuration, queryString, setQueryString]);
 }
 
 /**

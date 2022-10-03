@@ -25,47 +25,47 @@ const demoDashboard: DashboardResource = {
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
     duration: '30m',
-    variables: [],
-    // variables: [
-    //   {
-    //     kind: 'ListVariable',
-    //     spec: {
-    //       name: 'job',
-    //       plugin: {
-    //         kind: 'PrometheusLabelValuesVariable',
-    //         spec: {
-    //           label_name: 'job',
-    //         },
-    //       },
-    //     },
-    //   },
-    //   {
-    //     kind: 'ListVariable',
-    //     spec: {
-    //       name: 'instance',
-    //       allowAllValue: true,
-    //       plugin: {
-    //         kind: 'PrometheusLabelValuesVariable',
-    //         spec: {
-    //           label_name: 'instance',
-    //           matchers: ['up{job="$job"}'],
-    //         },
-    //       },
-    //     },
-    //   },
-    //   {
-    //     kind: 'ListVariable',
-    //     spec: {
-    //       name: 'interval',
-    //       plugin: {
-    //         kind: 'StaticListVariable',
-    //         spec: {
-    //           values: ['1m', '5m'],
-    //         },
-    //       },
-    //     },
-    //   },
-    // ],
+    // variables: [],
+    variables: [
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'job',
+          plugin: {
+            kind: 'PrometheusLabelValuesVariable',
+            spec: {
+              label_name: 'job',
+            },
+          },
+        },
+      },
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'instance',
+          allowAllValue: true,
+          plugin: {
+            kind: 'PrometheusLabelValuesVariable',
+            spec: {
+              label_name: 'instance',
+              matchers: ['up{job="$job"}'],
+            },
+          },
+        },
+      },
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'interval',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['1m', '5m'],
+            },
+          },
+        },
+      },
+    ],
     panels: {
       seriesTest: {
         kind: 'Panel',
@@ -659,18 +659,18 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 2',
             collapse: {
-              open: false,
+              open: true,
             },
           },
           items: [
-            // {
-            //   x: 0,
-            //   y: 0,
-            //   width: 12,
-            //   height: 6,
-            //   // content: { $ref: '#/spec/panels/cpu' },
-            //   content: { $ref: '#/spec/panels/doubleQueriesAlt' },
-            // },
+            {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 6,
+              // content: { $ref: '#/spec/panels/cpu' },
+              content: { $ref: '#/spec/panels/doubleQueriesAlt' },
+            },
             {
               x: 12,
               y: 0,

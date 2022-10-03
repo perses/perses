@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
@@ -19,10 +19,12 @@ import {
   RelativeTimeRange,
   AbsoluteTimeRange,
   TimeRangeValue,
-  getDefaultTimeRange,
+  isRelativeTimeRange,
+  toAbsoluteTimeRange,
+  // getDefaultTimeRange,
 } from '@perses-dev/core';
-import { useTimeRange, useQueryString } from '@perses-dev/plugin-system';
-import { useDashboard, useSyncTimeRangeParams } from '../../context';
+import { useTimeRange } from '@perses-dev/plugin-system';
+import { useDashboard, useSyncTimeRangeParams, useInitialTimeRange } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -40,9 +42,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useTimeRange();
   const { dashboard } = useDashboard();
-  const { queryString } = useQueryString();
-
-  const defaultTimeRange = getDefaultTimeRange(dashboard.duration, queryString);
+  const { defaultTimeRange } = useInitialTimeRange(dashboard.duration);
 
   // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
@@ -51,6 +51,16 @@ export function TimeRangeControls() {
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
+
+  // updates selectedTimeRange when zoom event has fired
+  useEffect(() => {
+    const prevTimeRange = isRelativeTimeRange(selectedTimeRange)
+      ? toAbsoluteTimeRange(selectedTimeRange)
+      : selectedTimeRange;
+    if (timeRange.start > prevTimeRange.start) {
+      setSelectedTimeRange(timeRange);
+    }
+  }, [timeRange, selectedTimeRange]);
 
   return (
     <Stack direction="row" spacing={1}>
