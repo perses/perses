@@ -11,11 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { useEffect } from 'react';
 import { Box, BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-// import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
-// import { useQueryString } from '@perses-dev/plugin-system';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProvider,

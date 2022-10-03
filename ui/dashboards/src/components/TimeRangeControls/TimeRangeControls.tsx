@@ -21,7 +21,6 @@ import {
   TimeRangeValue,
   isRelativeTimeRange,
   toAbsoluteTimeRange,
-  // getDefaultTimeRange,
 } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useDashboard, useSyncTimeRangeParams, useInitialTimeRange } from '../../context';
