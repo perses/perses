@@ -14,7 +14,6 @@
 import { useState } from 'react';
 import { Stack, Box, Button, Typography } from '@mui/material';
 import { Drawer } from '@perses-dev/components';
-import { PanelDefinition } from '@perses-dev/core';
 import { usePanels } from '../../context';
 import { PanelEditorForm, panelEditorFormId, PanelEditorFormProps } from './PanelEditorForm';
 
@@ -42,20 +41,7 @@ export const PanelDrawer = () => {
     if (panelEditor === undefined) {
       throw new Error('Cannot apply changes');
     }
-    const newDefinition: PanelDefinition = {
-      kind: 'Panel',
-      spec: {
-        display: {
-          name: values.name,
-          description: values.description !== '' ? values.description : undefined,
-        },
-        plugin: {
-          kind: values.kind,
-          spec: values.spec,
-        },
-      },
-    };
-    panelEditor.applyChanges(newDefinition, values.group);
+    panelEditor.applyChanges(values);
     handleClose();
   };
 
@@ -84,11 +70,7 @@ export const PanelDrawer = () => {
               </Button>
             </Stack>
           </Box>
-          <PanelEditorForm
-            onSubmit={handleSubmit}
-            initialGroup={panelEditor.initialGroup}
-            initialDefinition={panelEditor.initialDefinition}
-          />
+          <PanelEditorForm onSubmit={handleSubmit} initialValues={panelEditor.initialValues} />
         </>
       )}
     </Drawer>

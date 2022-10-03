@@ -15,14 +15,6 @@ import { useMemo } from 'react';
 import { usePlugin } from '@perses-dev/plugin-system';
 import { useImmer } from 'use-immer';
 
-export interface PanelEditorFormValues {
-  name: string;
-  description: string;
-  group: number;
-  kind: string;
-  spec: unknown;
-}
-
 /**
  * Manages panel plugin spec state. The spec will be undefined while a plugin is being loaded.
  */

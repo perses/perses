@@ -42,24 +42,30 @@ export interface PanelEditorState {
   mode: 'Add' | 'Edit';
 
   /**
-   * The intial PanelGroup that the panel being added/edited is in.
+   * Initial values for the things that can be edited about a panel.
    */
-  initialGroup: number;
-
-  /**
-   * The initial values for the PanelDefinition being added/edited.
-   */
-  initialDefinition: PanelDefinition;
+  initialValues: PanelEditorValues;
 
   /**
    * Applies changes, but doesn't close the editor.
    */
-  applyChanges: (next: PanelDefinition, group: number) => void;
+  applyChanges: (next: PanelEditorValues) => void;
 
   /**
    * Close the editor.
    */
   close: () => void;
+}
+
+/**
+ * Panel values that can be edited in the panel editor.
+ */
+export interface PanelEditorValues {
+  name: string;
+  description: string;
+  groupIndex: number;
+  kind: string;
+  spec: unknown;
 }
 
 /**
@@ -88,16 +94,22 @@ export function createPanelEditorSlice(
 
       const editorState: PanelEditorState = {
         mode: 'Edit',
-        initialGroup: item.groupIndex,
-        initialDefinition: panelToEdit,
-        applyChanges: (next, group) => {
+        initialValues: {
+          name: panelToEdit.spec.display.name,
+          description: panelToEdit.spec.display.description ?? '',
+          groupIndex: item.groupIndex,
+          kind: panelToEdit.spec.plugin.kind,
+          spec: panelToEdit.spec.plugin.spec,
+        },
+        applyChanges: (next) => {
+          const panelDefinititon = createPanelDefinitionFromEditorValues(next);
           set((state) => {
-            state.panels[panelKey] = next;
+            state.panels[panelKey] = panelDefinititon;
           });
 
           // Move the panel to another group if it changed
-          if (group !== item.groupIndex) {
-            get().movePanelToGroup(item, group);
+          if (next.groupIndex !== item.groupIndex) {
+            get().movePanelToGroup(item, next.groupIndex);
           }
         },
         close: () => {
@@ -116,28 +128,22 @@ export function createPanelEditorSlice(
     addPanel(initialGroup) {
       const editorState: PanelEditorState = {
         mode: 'Add',
-        initialGroup,
-        initialDefinition: {
-          kind: 'Panel',
-          spec: {
-            display: {
-              name: '',
-              description: undefined,
-            },
-            // TODO: If we knew what plugins were available (and how to create the initial spec), we might be able to
-            // set a smarter default here?
-            plugin: {
-              kind: '',
-              spec: {},
-            },
-          },
+        initialValues: {
+          name: '',
+          description: '',
+          groupIndex: initialGroup,
+          // TODO: If we knew what plugins were available (and how to create the initial spec), we might be able to
+          // set a smarter default here?
+          kind: '',
+          spec: {},
         },
-        applyChanges: (next, group) => {
-          const panelKey = removeWhiteSpacesAndSpecialCharacters(next.spec.display.name);
+        applyChanges: (next) => {
+          const panelDef = createPanelDefinitionFromEditorValues(next);
+          const panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
           set((state) => {
-            state.panels[panelKey] = next;
+            state.panels[panelKey] = panelDef;
           });
-          get().addPanelToGroup(panelKey, group);
+          get().addPanelToGroup(panelKey, next.groupIndex);
         },
         close: () => {
           set((state) => {
@@ -152,4 +158,21 @@ export function createPanelEditorSlice(
       });
     },
   });
+}
+
+// Helper to create PanelDefinitions when saving
+function createPanelDefinitionFromEditorValues(editorValues: PanelEditorValues): PanelDefinition {
+  return {
+    kind: 'Panel',
+    spec: {
+      display: {
+        name: editorValues.name,
+        description: editorValues.description !== '' ? editorValues.description : undefined,
+      },
+      plugin: {
+        kind: editorValues.kind,
+        spec: editorValues.spec,
+      },
+    },
+  };
 }
