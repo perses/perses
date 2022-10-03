@@ -39,18 +39,18 @@ export function useInitialTimeRange(dashboardDuration: DurationString) {
   const startParam = queryString.get('start');
   const endParam = queryString.get('end');
 
-  let defaultTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
+  let initialTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
   if (startParam === null) {
-    return { defaultTimeRange };
+    return { initialTimeRange };
   }
 
   if (isDurationString(startParam.toString())) {
-    defaultTimeRange = { pastDuration: startParam } as RelativeTimeRange;
+    initialTimeRange = { pastDuration: startParam } as RelativeTimeRange;
   } else {
-    defaultTimeRange = { start: new Date(Number(startParam)), end: new Date(Number(endParam)) };
+    initialTimeRange = { start: new Date(Number(startParam)), end: new Date(Number(endParam)) };
   }
 
-  return { defaultTimeRange };
+  return { initialTimeRange };
 }
 
 /**

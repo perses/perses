@@ -42,10 +42,10 @@ export const TIME_OPTIONS: TimeOption[] = [
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useTimeRange();
   const { dashboard } = useDashboard();
-  const { defaultTimeRange } = useInitialTimeRange(dashboard.duration);
+  const { initialTimeRange } = useInitialTimeRange(dashboard.duration);
 
   // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialTimeRange);
 
   // ensure URL params match selected time range
   useSyncTimeRangeParams(selectedTimeRange);

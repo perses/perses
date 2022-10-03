@@ -39,12 +39,12 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const { dashboardResource, datasourceApi, sx, ...others } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
-  const { defaultTimeRange } = useInitialTimeRange(dashboardDuration);
+  const { initialTimeRange } = useInitialTimeRange(dashboardDuration);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardSpec: spec }}>
-        <TimeRangeProvider initialTimeRange={defaultTimeRange}>
+        <TimeRangeProvider initialTimeRange={initialTimeRange}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
               sx={combineSx(
