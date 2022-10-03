@@ -65,8 +65,8 @@ function ListVariable({ name }: TemplateVariableProps) {
   }
 
   const variables = useTemplateVariableValues(dependsOnVariables);
-  const allowMultiple = definition?.spec.allowMultiple === true;
-  const allowAllValue = definition?.spec.allowAllValue === true;
+  const allowMultiple = definition?.spec.allow_multiple === true;
+  const allowAllValue = definition?.spec.allow_all_value === true;
 
   let waitToLoad = false;
   if (dependsOnVariables) {
@@ -127,7 +127,7 @@ function ListVariable({ name }: TemplateVariableProps) {
     }
 
     // If there is a value but it's not in the options, select the first value or set to null
-    if (value && !valueIsInOptions && !definition.spec.defaultValue) {
+    if (value && !valueIsInOptions && !definition.spec.default_value) {
       setVariableValue(name, firstOption?.value || null);
     }
   }, [finalOptions, setVariableValue, value, name, allowMultiple]);

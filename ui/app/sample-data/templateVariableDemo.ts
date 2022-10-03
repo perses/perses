@@ -30,7 +30,7 @@ const demoDashboard: DashboardResource = {
         kind: 'ListVariable',
         spec: {
           name: 'job',
-          allowAllValue: true,
+          allow_all_value: true,
           defaultValue: 'prometheus',
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
@@ -44,8 +44,8 @@ const demoDashboard: DashboardResource = {
         kind: 'ListVariable',
         spec: {
           name: 'handler',
-          allowMultiple: true,
-          allowAllValue: true,
+          allow_multiple: true,
+          allow_all_value: true,
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
@@ -59,7 +59,7 @@ const demoDashboard: DashboardResource = {
         kind: 'ListVariable',
         spec: {
           name: 'code',
-          allowAllValue: true,
+          allow_all_value: true,
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
@@ -86,7 +86,7 @@ const demoDashboard: DashboardResource = {
         kind: 'ListVariable',
         spec: {
           name: 'labelNames',
-          allowMultiple: true,
+          allow_multiple: true,
           plugin: {
             kind: 'PrometheusLabelNamesVariable',
             spec: {},
