@@ -30,20 +30,20 @@ import {
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import { useDashboardApp, useEditMode } from '../../context';
+import { usePanels, useEditMode } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
   groupIndex: number;
-  panelKey: string;
+  itemIndex: number;
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, groupIndex, panelKey, ...others } = props;
+  const { definition, groupIndex, itemIndex, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -66,10 +66,10 @@ export function Panel(props: PanelProps) {
 
   const { isEditMode } = useEditMode();
 
-  const { openPanelDrawer } = useDashboardApp();
+  const { editPanel } = usePanels();
 
   const handleEditButtonClick = () => {
-    openPanelDrawer({ groupIndex, panelKey });
+    editPanel({ groupIndex, itemIndex });
   };
 
   return (

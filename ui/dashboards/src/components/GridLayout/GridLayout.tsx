@@ -23,7 +23,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 export interface GridLayoutProps extends BoxProps {
   groupIndex: number;
   definition: GridDefinition;
-  renderGridItemContent: (definition: GridItemDefinition, groupIndex: number) => React.ReactNode;
+  renderGridItemContent: (definition: GridItemDefinition, itemIndex: number) => React.ReactNode;
 }
 
 /**
@@ -43,12 +43,12 @@ export function GridLayout(props: GridLayoutProps) {
 
   const gridItems: React.ReactNode[] = [];
 
-  spec.items.forEach((item, idx) => {
+  spec.items.forEach((item, itemIndex) => {
     const { x, y, width: w, height: h } = item;
 
     gridItems.push(
-      <div key={idx} data-grid={{ x, y, w, h }}>
-        {renderGridItemContent(item, groupIndex)}
+      <div key={itemIndex} data-grid={{ x, y, w, h }}>
+        {renderGridItemContent(item, itemIndex)}
       </div>
     );
   });

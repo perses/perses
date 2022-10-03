@@ -98,7 +98,7 @@ export function createLayoutEditorSlice(
 
       set((state) => {
         // Remove the item from its current group
-        state.layouts[groupIndex]?.spec.items.splice(itemIndex);
+        state.layouts[groupIndex]?.spec.items.splice(itemIndex, 1);
 
         // Add a new item to the new group
         state.layouts[newGroupIndex]?.spec.items.push({

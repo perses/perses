@@ -23,7 +23,7 @@ export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
   if (panelDefinition === undefined) {
     throw new Error(`Could not resolve panels reference ${panelRef.$ref}`);
   }
-  return { panelDefinition, panelsKey };
+  return panelDefinition;
 }
 
 /**

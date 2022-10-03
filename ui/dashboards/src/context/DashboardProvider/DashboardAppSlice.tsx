@@ -15,35 +15,17 @@ import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 import { useDashboardStore } from './DashboardProvider';
 
-interface PanelDrawer {
-  groupIndex?: number;
-  panelKey?: string;
-}
 interface PanelGroupDialog {
   groupIndex?: number;
 }
 
 export interface DashboardAppSlice {
-  panelDrawer?: PanelDrawer;
-  openPanelDrawer: (panelDrawer: PanelDrawer) => void;
-  closePanelDrawer: () => void;
   panelGroupDialog?: PanelGroupDialog;
   openPanelGroupDialog: (groupIndex?: number) => void;
   closePanelGroupDialog: () => void;
 }
 
 export const createDashboardAppSlice: StateCreator<DashboardAppSlice, Middleware, [], DashboardAppSlice> = (set) => ({
-  openPanelDrawer: ({ groupIndex, panelKey }: PanelDrawer) =>
-    set((state) => {
-      state.panelDrawer = {
-        groupIndex,
-        panelKey,
-      };
-    }),
-  closePanelDrawer: () =>
-    set((state) => {
-      state.panelDrawer = undefined;
-    }),
   openPanelGroupDialog: (groupIndex?: number) =>
     set((state) => {
       state.panelGroupDialog = { groupIndex };
@@ -55,21 +37,9 @@ export const createDashboardAppSlice: StateCreator<DashboardAppSlice, Middleware
 });
 
 export function useDashboardApp() {
-  return useDashboardStore(
-    ({
-      panelDrawer,
-      openPanelDrawer,
-      closePanelDrawer,
-      panelGroupDialog,
-      openPanelGroupDialog,
-      closePanelGroupDialog,
-    }) => ({
-      panelDrawer,
-      openPanelDrawer,
-      closePanelDrawer,
-      panelGroupDialog,
-      openPanelGroupDialog,
-      closePanelGroupDialog,
-    })
-  );
+  return useDashboardStore(({ panelGroupDialog, openPanelGroupDialog, closePanelGroupDialog }) => ({
+    panelGroupDialog,
+    openPanelGroupDialog,
+    closePanelGroupDialog,
+  }));
 }

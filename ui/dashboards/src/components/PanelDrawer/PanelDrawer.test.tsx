@@ -28,7 +28,7 @@ import { PanelDrawer } from './PanelDrawer';
 describe('Panel Drawer', () => {
   const renderPanelDrawer = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin('Panel', 'LineChart', FAKE_PANEL_PLUGIN);
+    addMockPlugin('Panel', 'TimeSeriesChart', FAKE_PANEL_PLUGIN);
 
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
@@ -53,7 +53,7 @@ describe('Panel Drawer', () => {
     const storeApi = renderPanelDrawer();
 
     // Open the drawer for a new panel (i.e. no panel key)
-    act(() => storeApi.getState().openPanelDrawer({ groupIndex: 0 }));
+    act(() => storeApi.getState().addPanel(0));
 
     const nameInput = await screen.findByLabelText(/Panel Name/);
     userEvent.type(nameInput, 'New Panel');
@@ -66,7 +66,7 @@ describe('Panel Drawer', () => {
       NewPanel: {
         kind: 'Panel',
         spec: {
-          display: { name: 'New Panel', description: '' },
+          display: { name: 'New Panel' },
           plugin: {
             kind: '',
             spec: {},
@@ -80,7 +80,7 @@ describe('Panel Drawer', () => {
     const storeApi = renderPanelDrawer();
 
     // Open the drawer for an existing panel
-    act(() => storeApi.getState().openPanelDrawer({ groupIndex: 0, panelKey: 'cpu' }));
+    act(() => storeApi.getState().editPanel({ groupIndex: 0, itemIndex: 0 }));
 
     const nameInput = await screen.findByLabelText(/Panel Name/);
     userEvent.clear(nameInput);
@@ -92,7 +92,7 @@ describe('Panel Drawer', () => {
       cpu: {
         kind: 'Panel',
         spec: {
-          display: { name: 'cpu usage', description: '' },
+          display: { name: 'cpu usage' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {},

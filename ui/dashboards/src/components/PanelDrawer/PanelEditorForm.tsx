@@ -15,13 +15,14 @@ import { FormEventHandler, useState } from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useLayouts } from '../../context';
-import { PanelEditorFormValues, usePanelSpecState } from './panel-editor-model';
+import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing';
+import { usePanelSpecState } from './panel-editor-model';
 import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelSpecEditor } from './PanelSpecEditor';
 
 export interface PanelEditorFormProps {
-  initialValues: PanelEditorFormValues;
-  onSubmit: (values: PanelEditorFormValues) => void;
+  initialValues: PanelEditorValues;
+  onSubmit: (values: PanelEditorValues) => void;
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps) {
@@ -31,7 +32,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   const [name, setName] = useState(initialValues.name);
   const [description, setDescription] = useState(initialValues.description);
-  const [group, setGroup] = useState(initialValues.group);
+  const [groupIndex, setGroupIndex] = useState(initialValues.groupIndex);
   const [kind, setKind] = useState(initialValues.kind);
   const { spec, onSpecChange } = usePanelSpecState(kind, initialValues.spec);
 
@@ -41,12 +42,12 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     if (typeof value === 'string') {
       return;
     }
-    setGroup(value);
+    setGroupIndex(value);
   };
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
-    const values: PanelEditorFormValues = { name, description, group, kind, spec };
+    const values: PanelEditorValues = { name, description, groupIndex, kind, spec };
     onSubmit(values);
   };
 
@@ -65,7 +66,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         <Grid item xs={4}>
           <FormControl>
             <InputLabel id="select-group">Group</InputLabel>
-            <Select required labelId="select-group" label="Group" value={group ?? 0} onChange={handleGroupChange}>
+            <Select required labelId="select-group" label="Group" value={groupIndex ?? 0} onChange={handleGroupChange}>
               {layouts.map((layout, index) => (
                 <MenuItem key={index} value={index}>
                   {layout.spec.display?.title ?? `Group ${index + 1}`}

@@ -17,7 +17,7 @@ import CollapsedIcon from 'mdi-material-ui/ChevronDown';
 import AddIcon from 'mdi-material-ui/Plus';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { useState } from 'react';
-import { useDashboardApp, useEditMode } from '../../context';
+import { useDashboardApp, useEditMode, usePanels } from '../../context';
 
 export interface GridTitleProps {
   groupIndex: number;
@@ -36,7 +36,8 @@ export function GridTitle(props: GridTitleProps) {
   const { groupIndex, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { openPanelDrawer, openPanelGroupDialog } = useDashboardApp();
+  const { openPanelGroupDialog } = useDashboardApp();
+  const { addPanel } = usePanels();
   const { isEditMode } = useEditMode();
 
   const text = (
@@ -65,7 +66,7 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && isHovered && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton onClick={() => openPanelDrawer({ groupIndex })}>
+              <IconButton onClick={() => addPanel(groupIndex)}>
                 <AddIcon />
               </IconButton>
               <IconButton onClick={() => openPanelGroupDialog(groupIndex)}>
