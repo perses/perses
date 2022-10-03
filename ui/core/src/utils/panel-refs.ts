@@ -18,7 +18,7 @@ import { DashboardSpec, PanelRef } from '../model';
  * a PanelDefinition.
  */
 export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
-  const panelsKey = panelRef.$ref.substring(14);
+  const panelsKey = getPanelKeyFromRef(panelRef);
   const panelDefinition = spec.panels[panelsKey];
   if (panelDefinition === undefined) {
     throw new Error(`Could not resolve panels reference ${panelRef.$ref}`);
@@ -26,11 +26,15 @@ export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
   return panelDefinition;
 }
 
+// Currently, panel refs are prefixed with `#/spec/panels/`. If that format changes, we'll definitely need to update
+// the code in here relying on it being that format.
+const REF_PREFIX_LENGTH = 14;
+
 /**
  * Gets the unique key for a panel from a PanelRef.
  */
 export function getPanelKeyFromRef(panelRef: PanelRef) {
-  return panelRef.$ref.substring(14);
+  return panelRef.$ref.substring(REF_PREFIX_LENGTH);
 }
 
 /**
