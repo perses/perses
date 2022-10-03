@@ -11,8 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DashboardProvider';
-export * from './DatasourceStoreProvider';
-export * from './QueryStringProvider';
-export * from './TemplateVariableProvider';
-export * from './TimeRangeProvider';
+import { useDashboardStore } from './DashboardProvider';
+
+export function useLayouts() {
+  return useDashboardStore(({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup }) => ({
+    layouts,
+    addPanelToGroup,
+    movePanelToGroup,
+    updatePanelGroup,
+  }));
+}
+
+export function usePanels() {
+  return useDashboardStore(({ panels, panelEditor, addPanel, editPanel }) => ({
+    panels,
+    panelEditor,
+    addPanel,
+    editPanel,
+  }));
+}

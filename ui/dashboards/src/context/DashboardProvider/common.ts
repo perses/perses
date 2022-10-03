@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DashboardProvider';
-export * from './DatasourceStoreProvider';
-export * from './QueryStringProvider';
-export * from './TemplateVariableProvider';
-export * from './TimeRangeProvider';
+/**
+ * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
+ */
+export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];

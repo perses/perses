@@ -13,19 +13,18 @@
 
 import { createStore, useStore } from 'zustand';
 import type { StoreApi } from 'zustand';
+import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
 import produce from 'immer';
-import { DashboardSpec, GridItemDefinition, LayoutDefinition, PanelDefinition } from '@perses-dev/core';
+import { DashboardSpec } from '@perses-dev/core';
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
-import { LayoutsSlice, createLayoutsSlice } from './LayoutsSlice';
+import { createLayoutSlice, LayoutSlice } from './layout-slice';
+import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing';
 
-export interface DashboardStoreState extends DashboardAppSlice, LayoutsSlice {
+export interface DashboardStoreState extends DashboardAppSlice, LayoutSlice, PanelEditorSlice {
   dashboard: DashboardSpec;
-  layouts: LayoutDefinition[];
-  panels: Record<string, PanelDefinition>;
-  updatePanel: (name: string, panel: PanelDefinition, groupIndex?: number) => void;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
 }
@@ -37,10 +36,6 @@ export interface DashboardStoreProps {
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
   children?: React.ReactNode;
-}
-
-export function usePanels() {
-  return useDashboardStore(({ panels, updatePanel }) => ({ panels, updatePanel }));
 }
 
 export function useEditMode() {
@@ -78,44 +73,19 @@ export function DashboardProvider(props: DashboardProviderProps) {
   const { layouts, panels } = dashboardSpec;
 
   const dashboardStore = createStore<DashboardStoreState>()(
-    immer((set, get, api) => {
-      return {
-        ...(createDashboardAppSlice(set, get, api, []) as unknown as DashboardAppSlice),
-        ...(createLayoutsSlice(set, get, api, []) as unknown as LayoutsSlice),
-        layouts,
-        panels,
-        dashboard: dashboardSpec,
-        updatePanel: (name: string, panel: PanelDefinition, groupIndex = 0) =>
-          set((state) => {
-            // add new panel to layouts if panels[name] is undefined
-            if (state.panels[name] === undefined) {
-              // find maximum y so new panel is added to the end of the grid
-              let maxY = 0;
-              state.layouts[groupIndex]?.spec.items.forEach((layout) => {
-                if (layout.y > maxY) {
-                  maxY = layout.y;
-                }
-              });
-              const panelLayout: GridItemDefinition = {
-                x: 0,
-                y: maxY + 1,
-                width: 12,
-                height: 6,
-                content: { $ref: `#/spec/panels/${name}` },
-              };
-              const layouts = state.layouts;
-              if (layouts && layouts[groupIndex]) {
-                layouts[groupIndex]?.spec.items.push(panelLayout);
-              }
-            }
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            state.panels[name] = panel as any;
-          }),
-        isEditMode: !!isEditMode,
-        setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-      };
-    })
+    immer(
+      devtools((...args) => {
+        const [set] = args;
+        return {
+          ...createDashboardAppSlice(...args),
+          ...createLayoutSlice(layouts)(...args),
+          ...createPanelEditorSlice(panels)(...args),
+          dashboard: dashboardSpec,
+          isEditMode: !!isEditMode,
+          setEditMode: (isEditMode: boolean) => set({ isEditMode }),
+        };
+      })
+    )
   );
 
   return (

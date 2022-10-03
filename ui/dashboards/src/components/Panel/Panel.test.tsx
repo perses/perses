@@ -36,7 +36,7 @@ describe('Panel', () => {
         },
       },
       groupIndex: 0,
-      panelKey: 'panelRef',
+      itemIndex: 0,
     };
   };
 

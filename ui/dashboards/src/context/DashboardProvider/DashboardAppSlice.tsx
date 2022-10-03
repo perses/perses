@@ -11,38 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { immer } from 'zustand/middleware/immer';
+import { StateCreator } from 'zustand';
+import { Middleware } from './common';
 import { useDashboardStore } from './DashboardProvider';
 
-interface PanelDrawer {
-  groupIndex?: number;
-  panelKey?: string;
-}
 interface PanelGroupDialog {
   groupIndex?: number;
 }
 
 export interface DashboardAppSlice {
-  panelDrawer?: PanelDrawer;
-  openPanelDrawer: (panelDrawer: PanelDrawer) => void;
-  closePanelDrawer: () => void;
   panelGroupDialog?: PanelGroupDialog;
   openPanelGroupDialog: (groupIndex?: number) => void;
   closePanelGroupDialog: () => void;
 }
 
-export const createDashboardAppSlice = immer<DashboardAppSlice>((set) => ({
-  openPanelDrawer: ({ groupIndex, panelKey }: PanelDrawer) =>
-    set((state) => {
-      state.panelDrawer = {
-        groupIndex,
-        panelKey,
-      };
-    }),
-  closePanelDrawer: () =>
-    set((state) => {
-      state.panelDrawer = undefined;
-    }),
+export const createDashboardAppSlice: StateCreator<DashboardAppSlice, Middleware, [], DashboardAppSlice> = (set) => ({
   openPanelGroupDialog: (groupIndex?: number) =>
     set((state) => {
       state.panelGroupDialog = { groupIndex };
@@ -51,24 +34,12 @@ export const createDashboardAppSlice = immer<DashboardAppSlice>((set) => ({
     set((state) => {
       state.panelGroupDialog = undefined;
     }),
-}));
+});
 
 export function useDashboardApp() {
-  return useDashboardStore(
-    ({
-      panelDrawer,
-      openPanelDrawer,
-      closePanelDrawer,
-      panelGroupDialog,
-      openPanelGroupDialog,
-      closePanelGroupDialog,
-    }) => ({
-      panelDrawer,
-      openPanelDrawer,
-      closePanelDrawer,
-      panelGroupDialog,
-      openPanelGroupDialog,
-      closePanelGroupDialog,
-    })
-  );
+  return useDashboardStore(({ panelGroupDialog, openPanelGroupDialog, closePanelGroupDialog }) => ({
+    panelGroupDialog,
+    openPanelGroupDialog,
+    closePanelGroupDialog,
+  }));
 }
