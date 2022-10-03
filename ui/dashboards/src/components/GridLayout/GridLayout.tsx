@@ -43,12 +43,12 @@ export function GridLayout(props: GridLayoutProps) {
 
   const gridItems: React.ReactNode[] = [];
 
-  spec.items.forEach((item, idx) => {
+  spec.items.forEach((item, itemIndex) => {
     const { x, y, width: w, height: h } = item;
 
     gridItems.push(
-      <div key={idx} data-grid={{ x, y, w, h }}>
-        {renderGridItemContent(item, idx)}
+      <div key={itemIndex} data-grid={{ x, y, w, h }}>
+        {renderGridItemContent(item, itemIndex)}
       </div>
     );
   });
