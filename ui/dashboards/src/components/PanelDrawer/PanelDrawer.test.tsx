@@ -28,7 +28,7 @@ import { PanelDrawer } from './PanelDrawer';
 describe('Panel Drawer', () => {
   const renderPanelDrawer = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin('Panel', 'LineChart', FAKE_PANEL_PLUGIN);
+    addMockPlugin('Panel', 'TimeSeriesChart', FAKE_PANEL_PLUGIN);
 
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
@@ -66,7 +66,7 @@ describe('Panel Drawer', () => {
       NewPanel: {
         kind: 'Panel',
         spec: {
-          display: { name: 'New Panel', description: '' },
+          display: { name: 'New Panel' },
           plugin: {
             kind: '',
             spec: {},
@@ -92,7 +92,7 @@ describe('Panel Drawer', () => {
       cpu: {
         kind: 'Panel',
         spec: {
-          display: { name: 'cpu usage', description: '' },
+          display: { name: 'cpu usage' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {},

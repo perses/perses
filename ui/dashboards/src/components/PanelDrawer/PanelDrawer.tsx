@@ -77,7 +77,7 @@ export const PanelDrawer = () => {
             <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
               {/* Using the 'form' attribute lets us have a submit button like this outside the form element */}
               <Button type="submit" variant="contained" form={panelEditorFormId}>
-                {panelEditor.mode === 'Add' ? 'Add Panel' : 'Apply'}
+                {panelEditor.mode === 'Add' ? 'Add' : 'Apply'}
               </Button>
               <Button variant="outlined" onClick={handleClose}>
                 Cancel

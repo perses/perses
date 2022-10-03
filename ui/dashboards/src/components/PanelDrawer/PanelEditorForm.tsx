@@ -32,7 +32,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const { layouts } = useLayouts();
 
   const [name, setName] = useState(initialDefinition.spec.display.name);
-  const [description, setDescription] = useState(initialDefinition.spec.display.name ?? '');
+  const [description, setDescription] = useState(initialDefinition.spec.display.description ?? '');
   const [group, setGroup] = useState(initialGroup);
   const [kind, setKind] = useState(initialDefinition.spec.plugin.kind);
   const { spec, onSpecChange } = usePanelSpecState(kind, initialDefinition.spec.plugin.spec);
