@@ -42,7 +42,7 @@ const demoDashboard: DashboardResource = {
         kind: 'ListVariable',
         spec: {
           name: 'instance',
-          allowAllValue: true,
+          allow_all_value: true,
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {

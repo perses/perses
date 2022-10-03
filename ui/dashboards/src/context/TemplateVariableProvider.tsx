@@ -196,7 +196,7 @@ export function TemplateVariableProvider({
 function hydrateTemplateVariableState(definition: VariableDefinition) {
   const v = definition;
   const varState: VariableState = {
-    value: v.spec.defaultValue ?? null,
+    value: v.spec.default_value ?? null,
     loading: false,
   };
   switch (v.kind) {
@@ -208,7 +208,7 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {
-          varState.value = v.spec.allowMultiple ? [firstOptionValue] : firstOptionValue;
+          varState.value = v.spec.allow_multiple ? [firstOptionValue] : firstOptionValue;
         }
       }
       break;
