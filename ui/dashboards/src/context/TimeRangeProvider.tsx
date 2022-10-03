@@ -22,7 +22,7 @@ import {
   RelativeTimeRange,
   DurationString,
 } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext, useQueryString, useTimeRange } from '@perses-dev/plugin-system';
+import { TimeRange, TimeRangeContext, useQueryString } from '@perses-dev/plugin-system';
 import { useDashboard } from './DashboardProvider';
 
 export interface TimeRangeProviderProps {
@@ -31,7 +31,7 @@ export interface TimeRangeProviderProps {
   onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
-export function useInitialTimeRange(dashboardDuration: DurationString) {;
+export function useInitialTimeRange(dashboardDuration: DurationString) {
   const { queryString } = useQueryString();
   const startParam = queryString.get('start');
   const endParam = queryString.get('end');
@@ -41,9 +41,8 @@ export function useInitialTimeRange(dashboardDuration: DurationString) {;
     return { defaultTimeRange };
   }
 
-  const startParamString = startParam?.toString() ?? '';
-  if (isDurationString(startParamString)) {
-    defaultTimeRange = { pastDuration: startParamString } as RelativeTimeRange;
+  if (isDurationString(startParam.toString())) {
+    defaultTimeRange = { pastDuration: startParam } as RelativeTimeRange;
   } else {
     defaultTimeRange = { start: new Date(Number(startParam)), end: new Date(Number(endParam)) };
   }
@@ -52,7 +51,6 @@ export function useInitialTimeRange(dashboardDuration: DurationString) {;
 }
 
 export function useSyncTimeRangeParams(selectedTimeRange: TimeRangeValue) {
-  const { timeRange } = useTimeRange();
   const { queryString, setQueryString } = useQueryString();
   const { dashboard } = useDashboard();
   const dashboardDuration = dashboard.duration;
@@ -60,10 +58,10 @@ export function useSyncTimeRangeParams(selectedTimeRange: TimeRangeValue) {
 
   useEffect(() => {
     if (setQueryString) {
+      const lastStartParam = lastParamSync.current?.start ?? '';
       if (isRelativeTimeRange(selectedTimeRange)) {
         const startParam = queryString.get('start');
-        // const lastStartParam = lastParamSync.current?.start ?? '';
-        if (startParam !== selectedTimeRange.pastDuration) {
+        if (startParam !== selectedTimeRange.pastDuration && selectedTimeRange.pastDuration !== lastStartParam) {
           queryString.set('start', selectedTimeRange.pastDuration);
           // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
           queryString.delete('end');
@@ -71,16 +69,17 @@ export function useSyncTimeRangeParams(selectedTimeRange: TimeRangeValue) {
           lastParamSync.current = Object.fromEntries([...queryString]);
         }
       } else {
-        // currently set from AbsoluteTimePicker, or LineChart panel onDataZoom
-        const startUnixMs = getUnixTime(timeRange.start) * 1000;
-        const endUnixMs = getUnixTime(timeRange.end) * 1000;
-        queryString.set('start', startUnixMs.toString());
-        queryString.set('end', endUnixMs.toString());
-        setQueryString(queryString); // TODO (sjcobb); only re-set start query param when it changes
-        lastParamSync.current = Object.fromEntries([...queryString]);
+        const startUnixMs = (getUnixTime(selectedTimeRange.start) * 1000).toString();
+        const endUnixMs = (getUnixTime(selectedTimeRange.end) * 1000).toString();
+        if (startUnixMs !== lastStartParam) {
+          queryString.set('start', startUnixMs);
+          queryString.set('end', endUnixMs);
+          setQueryString(queryString);
+          lastParamSync.current = Object.fromEntries([...queryString]);
+        }
       }
     }
-  }, [timeRange, selectedTimeRange, dashboardDuration, queryString, setQueryString]);
+  }, [selectedTimeRange, dashboardDuration, queryString, setQueryString]);
 }
 
 /**

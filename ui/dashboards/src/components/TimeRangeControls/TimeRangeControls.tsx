@@ -54,10 +54,10 @@ export function TimeRangeControls() {
 
   // updates selectedTimeRange when zoom event has fired
   useEffect(() => {
-    const prevTimeRange = isRelativeTimeRange(selectedTimeRange)
+    const convertedTimeRange = isRelativeTimeRange(selectedTimeRange)
       ? toAbsoluteTimeRange(selectedTimeRange)
       : selectedTimeRange;
-    if (timeRange.start > prevTimeRange.start) {
+    if (timeRange.start > convertedTimeRange.start) {
       setSelectedTimeRange(timeRange);
     }
   }, [timeRange, selectedTimeRange]);
