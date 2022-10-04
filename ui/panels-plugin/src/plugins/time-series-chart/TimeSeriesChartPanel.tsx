@@ -17,9 +17,9 @@ import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
 import { TimeSeriesChartContainer } from './TimeSeriesChartContainer';
 
-export type LineChartProps = PanelProps<TimeSeriesChartOptions>;
+export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
-export function TimeSeriesChartPanel(props: LineChartProps) {
+export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
     definition: {
       spec: {
