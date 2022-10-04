@@ -26,7 +26,10 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
-  const datasourceUrl = direct_url ?? proxyUrl ?? window.location.origin;
+  const datasourceUrl = direct_url ?? proxyUrl;
+  if (datasourceUrl === undefined) {
+    throw new Error('No URL specified for Prometheus client. You can use direct_url in the spec to configure it.');
+  }
 
   // Could think about this becoming a class, although it definitely doesn't have to be
   return {
