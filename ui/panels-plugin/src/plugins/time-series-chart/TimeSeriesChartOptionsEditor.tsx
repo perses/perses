@@ -12,12 +12,38 @@
 // limitations under the License.
 
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Box } from '@mui/material';
+import { Stack, Box } from '@mui/material';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
+import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { value } = props;
-  return <Box>{JSON.stringify(value)}</Box>;
+
+  const panelPreviewProps: TimeSeriesChartProps = {
+    definition: {
+      kind: 'Panel',
+      spec: {
+        display: { name: 'Single Query' },
+        plugin: {
+          kind: 'TimeSeriesChart',
+          spec: {
+            ...value,
+          },
+        },
+      },
+    },
+    contentDimensions: { width: 500, height: 250 },
+  };
+
+  return (
+    <>
+      <TimeSeriesChartPanel {...panelPreviewProps} />
+      <Stack spacing={1}>
+        <Box>{JSON.stringify(value)}</Box>
+        {/* TODO: add form controls to edit panel options */}
+      </Stack>
+    </>
+  );
 }
