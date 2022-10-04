@@ -17,7 +17,6 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
-import produce from 'immer';
 import { DashboardSpec, DurationString } from '@perses-dev/core';
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
 import { createLayoutSlice, LayoutSlice } from './layout-slice';

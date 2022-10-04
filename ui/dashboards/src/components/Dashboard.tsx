@@ -13,30 +13,25 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardSpec } from '@perses-dev/core';
-import { GridLayout, GridItemContent } from './GridLayout';
+import { useLayouts } from '../context';
+import { GridLayout } from './GridLayout';
 
-export interface DashboardProps extends BoxProps {
-  spec: DashboardSpec;
-}
+export type DashboardProps = BoxProps;
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
  */
 export function Dashboard(props: DashboardProps) {
-  const { spec, ...others } = props;
-
+  const { layouts } = useLayouts();
   return (
-    <Box {...others}>
+    <Box {...props}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        {spec.layouts.map((layout, groupIndex) => (
+        {layouts.map((layout, groupIndex) => (
           <GridLayout
-            key={`${JSON.stringify(spec.layouts)} ${groupIndex}`} // reset grid layout states when spec.layout changes
+            // TODO: Better data structure with actual keys for grids?
+            key={groupIndex}
             groupIndex={groupIndex}
             definition={layout}
-            renderGridItemContent={(definition, itemIndex) => (
-              <GridItemContent content={definition.content} spec={spec} groupIndex={groupIndex} itemIndex={itemIndex} />
-            )}
           />
         ))}
       </ErrorBoundary>
