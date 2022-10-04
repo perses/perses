@@ -24,19 +24,12 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    definition: {
-      spec: {
-        display: { name },
-        plugin: {
-          spec: { query, calculation, unit, sparkline },
-        },
-      },
-    },
+    spec: { query, calculation, unit, sparkline },
     contentDimensions,
   } = props;
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, loading, error } = useTimeSeriesQueryData(query, { suggestedStepMs });
-  const chartData = useChartData(data, calculation, name);
+  const chartData = useChartData(data, calculation);
   const chartsTheme = useChartsTheme();
 
   if (error) throw error;
@@ -66,7 +59,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   );
 }
 
-const useChartData = (data: TimeSeriesData | undefined, calculation: CalculationType, name: string): StatChartData => {
+const useChartData = (data: TimeSeriesData | undefined, calculation: CalculationType): StatChartData => {
   return useMemo(() => {
     const loadingData = {
       calculatedValue: undefined,
@@ -81,9 +74,10 @@ const useChartData = (data: TimeSeriesData | undefined, calculation: Calculation
     return {
       calculatedValue,
       seriesData,
-      name,
+      // TODO: How is this name used in StatChart? Do we really need it? Should it be a chart spec option?
+      name: 'StatChart',
     };
-  }, [data, calculation, name]);
+  }, [data, calculation]);
 };
 
 export function convertSparkline(

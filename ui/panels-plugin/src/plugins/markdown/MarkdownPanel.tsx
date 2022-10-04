@@ -70,13 +70,7 @@ function sanitizeHTML(html: string): string {
 
 export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
-    definition: {
-      spec: {
-        plugin: {
-          spec: { text },
-        },
-      },
-    },
+    spec: { text },
   } = props;
 
   const html = useMemo(() => convertTextToHTML(text), [text]);

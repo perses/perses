@@ -160,7 +160,13 @@ export function Panel(props: PanelProps) {
         ref={setContentElement}
       >
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          {inView === true && <PanelContent definition={definition} contentDimensions={contentDimensions} />}
+          {inView === true && (
+            <PanelContent
+              panelPluginKind={definition.spec.plugin.kind}
+              spec={definition.spec.plugin.spec}
+              contentDimensions={contentDimensions}
+            />
+          )}
         </ErrorBoundary>
       </CardContent>
     </Card>

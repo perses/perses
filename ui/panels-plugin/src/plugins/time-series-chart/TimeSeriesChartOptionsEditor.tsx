@@ -22,18 +22,8 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   const { value } = props;
 
   const panelPreviewProps: TimeSeriesChartProps = {
-    definition: {
-      kind: 'Panel',
-      spec: {
-        // TODO: how to exlude display (display.name is required but gets overriden)
-        display: { name: 'Temp Name' },
-        plugin: {
-          kind: 'TimeSeriesChart',
-          spec: {
-            ...value,
-          },
-        },
-      },
+    spec: {
+      ...value,
     },
     contentDimensions: { width: 500, height: 250 },
   };
