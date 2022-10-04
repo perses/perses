@@ -3,7 +3,7 @@
   "pipeline": {
     // The build task depends on all its upstream dependencies build tasks being run first
     "build": {
-      "dependsOn": ["^build", "clean"],
+      "dependsOn": ["clean", "^build"],
       "outputs": ["dist/**"]
     },
     "clean": {
