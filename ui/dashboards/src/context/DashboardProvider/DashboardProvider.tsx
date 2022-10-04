@@ -17,14 +17,13 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
-import produce from 'immer';
-import { DashboardSpec } from '@perses-dev/core';
+import { DashboardSpec, DurationString } from '@perses-dev/core';
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
 import { createLayoutSlice, LayoutSlice } from './layout-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing';
 
 export interface DashboardStoreState extends DashboardAppSlice, LayoutSlice, PanelEditorSlice {
-  dashboard: DashboardSpec;
+  defaultTimeRange: DurationString;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
 }
@@ -33,6 +32,7 @@ export interface DashboardStoreProps {
   dashboardSpec: DashboardSpec;
   isEditMode?: boolean;
 }
+
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
   children?: React.ReactNode;
@@ -40,18 +40,6 @@ export interface DashboardProviderProps {
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
-}
-
-export function useDashboard() {
-  const selectDashboardSpec = (state: DashboardStoreState) => {
-    return produce(state.dashboard, (draftState) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      draftState.panels = state.panels as any;
-      draftState.layouts = state.layouts;
-    });
-  };
-  const dashboard = useDashboardStore(selectDashboardSpec);
-  return { dashboard };
 }
 
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
@@ -80,7 +68,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
           ...createDashboardAppSlice(...args),
           ...createLayoutSlice(layouts)(...args),
           ...createPanelEditorSlice(panels)(...args),
-          dashboard: dashboardSpec,
+          defaultTimeRange: dashboardSpec.duration,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
         };

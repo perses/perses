@@ -13,17 +13,18 @@
 import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
-import { GridDefinition, GridItemDefinition } from '@perses-dev/core';
+import { GridDefinition } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { styles } from '../../css/styles';
 import { useEditMode } from '../../context';
 import { GridTitle } from './GridTitle';
+import { GridItemContent } from './GridItemContent';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
   groupIndex: number;
   definition: GridDefinition;
-  renderGridItemContent: (definition: GridItemDefinition, itemIndex: number) => React.ReactNode;
 }
 
 /**
@@ -33,25 +34,11 @@ export function GridLayout(props: GridLayoutProps) {
   const {
     groupIndex,
     definition: { spec },
-    renderGridItemContent,
     ...others
   } = props;
 
   const [isOpen, setIsOpen] = useState(spec.display?.collapse?.open ?? true);
-
   const { isEditMode } = useEditMode();
-
-  const gridItems: React.ReactNode[] = [];
-
-  spec.items.forEach((item, itemIndex) => {
-    const { x, y, width: w, height: h } = item;
-
-    gridItems.push(
-      <div key={itemIndex} data-grid={{ x, y, w, h }}>
-        {renderGridItemContent(item, itemIndex)}
-      </div>
-    );
-  });
 
   return (
     <>
@@ -79,7 +66,13 @@ export function GridLayout(props: GridLayoutProps) {
             isDraggable={isEditMode}
             isResizable={isEditMode}
           >
-            {gridItems}
+            {spec.items.map(({ x, y, width, height, content }, itemIndex) => (
+              <div key={itemIndex} data-grid={{ x, y, w: width, h: height }}>
+                <ErrorBoundary FallbackComponent={ErrorAlert}>
+                  <GridItemContent groupIndex={groupIndex} itemIndex={itemIndex} content={content} />
+                </ErrorBoundary>
+              </div>
+            ))}
           </ResponsiveGridLayout>
         </Collapse>
       </Box>

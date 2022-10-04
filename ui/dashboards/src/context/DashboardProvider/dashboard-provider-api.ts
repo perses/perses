@@ -30,3 +30,7 @@ export function usePanels() {
     editPanel,
   }));
 }
+
+export function useDefaultTimeRange() {
+  return useDashboardStore((state) => state.defaultTimeRange);
+}
