@@ -24,14 +24,7 @@ import { GaugeChartOptions } from './gauge-chart-model';
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
-  const {
-    definition: {
-      spec: {
-        plugin: { spec: pluginSpec },
-      },
-    },
-    contentDimensions,
-  } = props;
+  const { spec: pluginSpec, contentDimensions } = props;
   const { query, calculation, max } = pluginSpec;
 
   const unit = pluginSpec.unit ?? { kind: 'PercentDecimal', decimal_places: 1 };

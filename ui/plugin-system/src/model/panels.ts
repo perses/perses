@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition } from '@perses-dev/core';
 import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
 
 /**
@@ -27,7 +26,7 @@ export interface PanelPlugin<Spec = unknown> {
  * The props provided by Perses to a panel plugin's PanelComponent.
  */
 export interface PanelProps<Spec> {
-  definition: PanelDefinition<Spec>;
+  spec: Spec;
   contentDimensions?: {
     width: number;
     height: number;

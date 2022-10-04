@@ -21,13 +21,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    definition: {
-      spec: {
-        plugin: {
-          spec: { queries, show_legend, thresholds, unit },
-        },
-      },
-    },
+    spec: { queries, show_legend, thresholds, unit },
     contentDimensions,
   } = props;
 
