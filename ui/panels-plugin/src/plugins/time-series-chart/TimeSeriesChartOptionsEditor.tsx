@@ -25,7 +25,8 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     definition: {
       kind: 'Panel',
       spec: {
-        display: { name: 'Single Query' },
+        // TODO: how to exlude display (display.name is required but gets overriden)
+        display: { name: 'Temp Name' },
         plugin: {
           kind: 'TimeSeriesChart',
           spec: {
