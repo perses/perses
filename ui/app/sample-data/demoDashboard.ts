@@ -160,7 +160,7 @@ const demoDashboard: DashboardResource = {
                       spec: {
                         query:
                           '1 - node_filesystem_free_bytes{job="node",instance=~"$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance=~"$instance"}',
-                        legendFormat: '{{instance}} {{job}}', // figure this syntax out with Shan / Luke
+                        legend_format: '{{instance}} {{job}}', // figure this syntax out with Shan / Luke
                       },
                     },
                   },
@@ -207,7 +207,6 @@ const demoDashboard: DashboardResource = {
                   },
                 },
               ],
-              show_legend: false,
               unit: {
                 kind: 'PercentDecimal',
                 decimal_places: 1,
@@ -256,7 +255,6 @@ const demoDashboard: DashboardResource = {
                 kind: 'Decimal',
                 decimal_places: 2,
               },
-              show_legend: true,
             },
           },
         },
