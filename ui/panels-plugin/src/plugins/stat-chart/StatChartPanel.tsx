@@ -15,7 +15,7 @@ import { StatChart, StatChartData, useChartsTheme, PersesChartsTheme } from '@pe
 import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
-import { TimeSeriesData, useTimeSeriesQueryData, PanelProps } from '@perses-dev/plugin-system';
+import { TimeSeriesData, useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { useSuggestedStepMs } from '../../model/time';
 import { SparklineOptions, StatChartOptions } from './stat-chart-model';
@@ -28,7 +28,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
     contentDimensions,
   } = props;
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
-  const { data, loading, error } = useTimeSeriesQueryData(query, { suggestedStepMs });
+  const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
   const chartData = useChartData(data, calculation);
   const chartsTheme = useChartsTheme();
 
@@ -36,7 +36,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
 
   if (contentDimensions === undefined) return null;
 
-  if (loading === true) {
+  if (isLoading === true) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}

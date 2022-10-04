@@ -17,8 +17,7 @@ import { Box, Skeleton } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { LineChart, EChartsDataFormat, UnitOptions, ZoomEventData } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { useRunningGraphQueries } from './TimeSeriesQueryRunner';
-import { getLineSeries, getCommonTimeScale, getYValues, getXValues } from './utils/data-transform';
+import { getLineSeries, getCommonTimeScale, getYValues, getXValues, RunningQueriesState } from './utils/data-transform';
 
 export const EMPTY_GRAPH_DATA = {
   timeSeries: [],
@@ -31,24 +30,24 @@ export interface TimeSeriesChartContainerProps {
   show_legend?: boolean;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
+  queryResults: RunningQueriesState;
 }
 
 /**
  * Passes query data and customization options to individual chart from components package
  */
 export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
-  const { width, height, show_legend, thresholds } = props;
-  const queries = useRunningGraphQueries();
+  const { width, height, show_legend, thresholds, queryResults } = props;
 
   const { setTimeRange } = useTimeRange();
 
   // populate series data based on query results
   const { graphData, loading } = useMemo(() => {
-    const timeScale = getCommonTimeScale(queries);
+    const timeScale = getCommonTimeScale(queryResults);
     if (timeScale === undefined) {
-      for (const query of queries) {
+      for (const query of queryResults) {
         // does not show error message if any query is successful (due to timeScale check)
-        if (query.error !== undefined) throw query.error;
+        if (query.error) throw query.error;
       }
       return {
         graphData: EMPTY_GRAPH_DATA,
@@ -60,9 +59,9 @@ export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
     const xAxisData = [...getXValues(timeScale)];
 
     let queriesFinished = 0;
-    for (const query of queries) {
+    for (const query of queryResults) {
       // Skip queries that are still loading and don't have data
-      if (query.loading || query.data === undefined) continue;
+      if (query.isLoading || query.data === undefined) continue;
 
       for (const timeSeries of query.data.series) {
         const yValues = getYValues(timeSeries, timeScale);
@@ -92,9 +91,9 @@ export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
     return {
       graphData,
       loading: queriesFinished === 0,
-      allQueriesLoaded: queriesFinished === queries.length,
+      allQueriesLoaded: queriesFinished === queryResults.length,
     };
-  }, [queries, thresholds]);
+  }, [queryResults, thresholds]);
 
   if (loading === true) {
     return (

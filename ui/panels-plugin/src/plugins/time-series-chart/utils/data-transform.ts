@@ -13,9 +13,8 @@
 
 import { AbsoluteTimeRange } from '@perses-dev/core';
 import { EChartsTimeSeries } from '@perses-dev/components';
-import { TimeSeries } from '@perses-dev/plugin-system';
+import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from 'mathjs';
-import { QueryState } from '../TimeSeriesQueryRunner';
 import { getRandomColor } from '../utils/palette-gen';
 import { StepOptions } from '../../../model/thresholds';
 
@@ -27,16 +26,18 @@ export interface TimeScale {
 
 export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
+export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
+
 /**
  * Given a list of running queries, calculates a common time scale for use on
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScale(queries: QueryState[]): TimeScale | undefined {
+export function getCommonTimeScale(queryResults: RunningQueriesState): TimeScale | undefined {
   let timeRange: AbsoluteTimeRange | undefined = undefined;
   const steps: number[] = [];
-  for (const { loading, data } of queries) {
-    if (loading || data === undefined) continue;
+  for (const { isLoading, data } of queryResults) {
+    if (isLoading || data === undefined) continue;
 
     // Keep track of query steps so we can calculate a common one for the graph
     steps.push(data.stepMs);
