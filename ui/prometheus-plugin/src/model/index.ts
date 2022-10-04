@@ -11,17 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
-
-/**
- * Plugin that defines options for an external system that Perses talks to for data.
- */
-export interface DatasourcePlugin<Spec = unknown, Client = unknown> {
-  createClient: (spec: Spec, options: DatasourceClientOptions) => Client;
-  OptionsEditorComponent: OptionsEditor<Spec>;
-  createInitialOptions: InitialOptionsCallback<Spec>;
-}
-
-export interface DatasourceClientOptions {
-  proxyUrl?: string;
-}
+export * from './api-types';
+export * from './parse-sample-values';
+export * from './prometheus-client';
+export * from './prometheus-selectors';
+export * from './templating';
+export * from './time';
+export * from './utils';

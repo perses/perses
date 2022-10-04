@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariablePlugin, VariableOption, GetVariableOptionsContext } from '@perses-dev/plugin-system';
-import { replaceTemplateVariables, parseTemplateVariables } from '../model/utils';
+import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
+import {} from '../model/utils';
 import {
-  labelValues,
-  labelNames,
-  PrometheusDatasourceSpec,
-  QueryOptions,
+  replaceTemplateVariables,
+  parseTemplateVariables,
+  PrometheusClient,
+  DEFAULT_PROM,
   PrometheusDatasourceSelector,
-} from '../model/prometheus-client';
+} from '../model';
 
 interface PrometheusVariableOptionsBase {
   datasource?: PrometheusDatasourceSelector;
@@ -43,23 +43,10 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
   }));
 };
 
-async function getQueryOptions(
-  ctx: GetVariableOptionsContext,
-  spec: PrometheusVariableOptionsBase
-): Promise<QueryOptions> {
-  // Just use the default Prom datatsource if not specified in variable's spec
-  const datasourceSelector = spec.datasource ?? { kind: 'PrometheusDatasource' };
-  const datasource = await ctx.datasourceStore.getDatasource(datasourceSelector);
-  const queryOptions = {
-    datasource: datasource.plugin.spec as PrometheusDatasourceSpec,
-  };
-  return queryOptions;
-}
-
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
-    const queryOptions = await getQueryOptions(ctx, spec);
-    const { data: options } = await labelNames({}, queryOptions);
+    const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
+    const { data: options } = await client.labelNames({});
     return {
       data: stringArrayToVariableOptions(options),
     };
@@ -70,11 +57,11 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
     const pluginDef = spec;
-    const queryOptions = await getQueryOptions(ctx, spec);
+    const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
     const match = pluginDef.matchers
       ? pluginDef.matchers.map((m) => replaceTemplateVariables(m, ctx.variables))
       : undefined;
-    const { data: options } = await labelValues({ labelName: pluginDef.label_name, 'match[]': match }, queryOptions);
+    const { data: options } = await client.labelValues({ labelName: pluginDef.label_name, 'match[]': match });
     return {
       data: stringArrayToVariableOptions(options),
     };

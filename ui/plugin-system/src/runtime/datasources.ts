@@ -15,7 +15,13 @@ import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
 import { createContext, useContext } from 'react';
 
 export interface DatasourceStore {
+  // TODO: Do we even need this method?
   getDatasource(selector: DatasourceSelector): Promise<DatasourceSpec>;
+
+  /**
+   * Given a DatasourceSelector, gets a `Client` object from the corresponding Datasource plugin.
+   */
+  getDatasourceClient<Client>(selector: DatasourceSelector): Promise<Client>;
 }
 
 export const DatasourceStoreContext = createContext<DatasourceStore | undefined>(undefined);

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
@@ -21,7 +21,7 @@ import {
   GlobalDatasource,
   useEvent,
 } from '@perses-dev/core';
-import { DatasourceStoreContext, DatasourceStore } from '@perses-dev/plugin-system';
+import { DatasourceStoreContext, DatasourceStore, usePluginRegistry } from '@perses-dev/plugin-system';
 
 export interface DatasourceStoreProviderProps {
   dashboardResource: DashboardResource;
@@ -31,8 +31,14 @@ export interface DatasourceStoreProviderProps {
 
 // The external API for fetching datasource resources
 export interface DatasourceApi {
-  getDatasource: (project: string, selector: DatasourceSelector) => Promise<Datasource | undefined>;
-  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasource | undefined>;
+  getDatasource: (
+    project: string,
+    selector: DatasourceSelector
+  ) => Promise<{ resource: Datasource; proxyUrl: string } | undefined>;
+
+  getGlobalDatasource: (
+    selector: DatasourceSelector
+  ) => Promise<{ resource: GlobalDatasource; proxyUrl: string } | undefined>;
 }
 
 /**
@@ -41,35 +47,57 @@ export interface DatasourceApi {
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const { dashboardResource, datasourceApi, children } = props;
 
-  const getDatasource = useEvent(async (selector: DatasourceSelector): Promise<DatasourceSpec> => {
+  const { getPlugin } = usePluginRegistry();
+
+  const findDatasource = useEvent(async (selector: DatasourceSelector) => {
     // Try to find it in dashboard spec
     const { datasources } = dashboardResource.spec;
     const dashboardDatasource = findDashboardDatasource(datasources, selector);
     if (dashboardDatasource !== undefined) {
-      return dashboardDatasource;
+      return { spec: dashboardDatasource, proxyUrl: undefined };
     }
 
     // Try to find it at the project level as a Datasource resource
     const { project } = dashboardResource.metadata;
     const datasource = await datasourceApi.getDatasource(project, selector);
     if (datasource !== undefined) {
-      return datasource.spec;
+      return { spec: datasource.resource.spec, proxyUrl: datasource.proxyUrl };
     }
 
     // Try to find it at the global level as a GlobalDatasource resource
     const globalDatasource = await datasourceApi.getGlobalDatasource(selector);
     if (globalDatasource !== undefined) {
-      return globalDatasource.spec;
+      return { spec: globalDatasource.resource.spec, proxyUrl: globalDatasource.proxyUrl };
     }
 
     throw new Error(`No datasource found for kind '${selector.kind}' and name '${selector.name}'`);
   });
 
+  // Gets a datasource spec for a given selector
+  const getDatasource = useCallback(
+    async (selector: DatasourceSelector): Promise<DatasourceSpec> => {
+      const { spec } = await findDatasource(selector);
+      return spec;
+    },
+    [findDatasource]
+  );
+
+  // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
+  const getDatasourceClient = useCallback(
+    async function getClient<Client>(selector: DatasourceSelector): Promise<Client> {
+      const { kind } = selector;
+      const [{ spec, proxyUrl }, plugin] = await Promise.all([findDatasource(selector), getPlugin('Datasource', kind)]);
+      return plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
+    },
+    [findDatasource, getPlugin]
+  );
+
   const ctxValue: DatasourceStore = useMemo(
     () => ({
       getDatasource,
+      getDatasourceClient,
     }),
-    [getDatasource]
+    [getDatasource, getDatasourceClient]
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;

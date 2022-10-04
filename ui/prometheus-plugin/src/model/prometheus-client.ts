@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector, fetchJson } from '@perses-dev/core';
+import { fetchJson } from '@perses-dev/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -23,17 +23,15 @@ import {
   RangeQueryResponse,
 } from './api-types';
 
+export interface PrometheusClient {
+  instantQuery(params: InstantQueryRequestParameters): Promise<InstantQueryResponse>;
+  rangeQuery(params: RangeQueryRequestParameters): Promise<RangeQueryResponse>;
+  labelNames(params: LabelNamesRequestParameters): Promise<LabelNamesResponse>;
+  labelValues(params: LabelValuesRequestParameters): Promise<LabelValuesResponse>;
+}
+
 export interface QueryOptions {
-  datasource: PrometheusDatasourceSpec;
-}
-
-export interface PrometheusDatasourceSpec {
-  // TODO: Make optional for proxy scenario
-  direct_url: string;
-}
-
-export interface PrometheusDatasourceSelector extends DatasourceSelector {
-  kind: 'PrometheusDatasource';
+  datasourceUrl: string;
 }
 
 /**
@@ -67,11 +65,9 @@ export function labelValues(params: LabelValuesRequestParameters, queryOptions: 
 }
 
 function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
-  const {
-    datasource: { direct_url: datasourceURL },
-  } = queryOptions;
+  const { datasourceUrl } = queryOptions;
 
-  let url = `${datasourceURL}${apiURI}`;
+  let url = `${datasourceUrl}${apiURI}`;
   const urlParams = createSearchParams(params).toString();
   if (urlParams !== '') {
     url += `?${urlParams}`;
@@ -80,11 +76,9 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, par
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
-  const {
-    datasource: { direct_url: datasourceURL },
-  } = queryOptions;
+  const { datasourceUrl } = queryOptions;
 
-  const url = `${datasourceURL}${apiURI}`;
+  const url = `${datasourceUrl}${apiURI}`;
   const init = {
     method: 'POST',
     headers: {

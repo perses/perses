@@ -12,9 +12,36 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { PrometheusDatasourceSpec } from '../model/prometheus-client';
+import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
 
-export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec> = {
+export interface PrometheusDatasourceSpec {
+  direct_url?: string;
+}
+
+/**
+ * Creates a PrometheusClient for a specific datasource spec.
+ */
+const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
+  const { direct_url } = spec;
+  const { proxyUrl } = options;
+
+  // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
+  const datasourceUrl = direct_url ?? proxyUrl;
+  if (datasourceUrl === undefined) {
+    throw new Error('No URL specified for Prometheus client. You can use direct_url in the spec to configure it.');
+  }
+
+  // Could think about this becoming a class, although it definitely doesn't have to be
+  return {
+    instantQuery: (params) => instantQuery(params, { datasourceUrl }),
+    rangeQuery: (params) => rangeQuery(params, { datasourceUrl }),
+    labelNames: (params) => labelNames(params, { datasourceUrl }),
+    labelValues: (params) => labelValues(params, { datasourceUrl }),
+  };
+};
+
+export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient> = {
+  createClient,
   OptionsEditorComponent: () => null,
   createInitialOptions: () => ({ direct_url: '' }),
 };
