@@ -159,47 +159,19 @@ const demoDashboard: DashboardResource = {
                       kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
-                          'node_memory_MemTotal_bytes{job="node",instance=~"$instance"} - node_memory_MemFree_bytes{job="node",instance=~"$instance"} - node_memory_Buffers_bytes{job="node",instance=~"$instance"} - node_memory_Cached_bytes{job="node",instance=~"$instance"}',
-                      },
-                    },
-                  },
-                },
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'node_memory_Buffers_bytes{job="node",instance=~"$instance"}',
-                      },
-                    },
-                  },
-                },
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'node_memory_Cached_bytes{job="node",instance=~"$instance"}',
-                      },
-                    },
-                  },
-                },
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'node_memory_MemFree_bytes{job="node",instance=~"$instance"}',
+                          '1 - node_filesystem_free_bytes{job="node",instance=~"$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance=~"$instance"}',
+                        legendFormat: '{{instance}} {{job}}', // figure this syntax out with Shan / Luke
                       },
                     },
                   },
                 },
               ],
-              show_legend: true,
-              unit: { kind: 'Bytes' },
+              legend: {
+                show: true,
+                type: 'compact', // optional, eventually we'll have 'table' in addtition to default 'compact'
+                position: 'bottom', // optional, defaults to bottom
+              },
+              unit: { kind: 'Percent' },
             },
           },
         },
