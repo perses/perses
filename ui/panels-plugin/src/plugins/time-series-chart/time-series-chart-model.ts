@@ -30,6 +30,23 @@ export interface TimeSeriesChartOptions {
  */
 export function createInitialTimeSeriesChartOptions(): TimeSeriesChartOptions {
   return {
-    queries: [],
+    queries: [
+      {
+        kind: 'TimeSeriesQuery',
+        spec: {
+          plugin: {
+            kind: 'PrometheusTimeSeriesQuery',
+            spec: {
+              query: 'up',
+            },
+          },
+        },
+      },
+    ],
+    // TODO: configurable legend, change from show_legend to legend.show
+    show_legend: true,
+    unit: {
+      kind: 'Decimal',
+    },
   };
 }
