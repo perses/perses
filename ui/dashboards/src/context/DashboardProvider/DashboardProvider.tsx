@@ -20,7 +20,7 @@ import { createContext, useContext } from 'react';
 import { DashboardSpec, DurationString } from '@perses-dev/core';
 import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
 import { createLayoutSlice, LayoutSlice } from './layout-slice';
-import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing';
+import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing-slice';
 
 export interface DashboardStoreState extends DashboardAppSlice, LayoutSlice, PanelEditorSlice {
   defaultTimeRange: DurationString;

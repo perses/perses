@@ -15,7 +15,7 @@ import { FormEventHandler, useState } from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useLayouts } from '../../context';
-import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing';
+import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
 import { usePanelSpecState } from './panel-editor-model';
 import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelSpecEditor } from './PanelSpecEditor';
