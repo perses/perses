@@ -16,10 +16,10 @@ import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useLayouts } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing';
-import { Panel, PanelProps } from '../Panel';
 import { usePanelSpecState } from './panel-editor-model';
 import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelSpecEditor } from './PanelSpecEditor';
+import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
@@ -50,24 +50,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     e.preventDefault();
     const values: PanelEditorValues = { name, description, groupIndex, kind, spec };
     onSubmit(values);
-  };
-
-  const panelPreviewProps: PanelProps = {
-    definition: {
-      kind: 'Panel',
-      spec: {
-        display: {
-          name,
-          description,
-        },
-        plugin: {
-          kind,
-          spec,
-        },
-      },
-    },
-    groupIndex,
-    itemIndex: 0, // TODO: what should itemIndex be?
   };
 
   return (
@@ -116,10 +98,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={12}>
           {kind !== '' && (
-            <Box height={300}>
-              {/* TODO: break out into separate preview component */}
-              <Panel {...panelPreviewProps} />
-            </Box>
+            <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
           )}
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             {/* Wait until we have some proper initial spec values before rendering the editor */}
