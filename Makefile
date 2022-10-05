@@ -29,6 +29,7 @@ LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDF
 GORELEASER_PARALLEL   ?= 0
 
 export LDFLAGS
+export DATE
 
 all: clean build
 
