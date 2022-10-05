@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing';
+import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
 import { Panel, PanelProps } from '../Panel';
 
 export function PanelPreview({ name, description, kind, spec, groupIndex }: PanelEditorValues) {
