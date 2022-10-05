@@ -43,7 +43,7 @@ export function GridTitle(props: GridTitleProps) {
   const { openPanelGroupDialog } = useDashboardApp();
   const { addPanel } = usePanels();
   const { isEditMode } = useEditMode();
-  const { swapPanelGroups } = useLayouts();
+  const { layouts, swapPanelGroups } = useLayouts();
 
   const text = (
     <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
@@ -80,10 +80,15 @@ export function GridTitle(props: GridTitleProps) {
               <IconButton>
                 <DeleteIcon />
               </IconButton>
-              <IconButton onClick={() => swapPanelGroups(groupIndex, groupIndex + 1)}>
+
+              <IconButton
+                disabled={groupIndex === layouts.length - 1}
+                onClick={() => swapPanelGroups(groupIndex, groupIndex + 1)}
+              >
                 <ArrowDownIcon />
               </IconButton>
-              <IconButton onClick={() => swapPanelGroups(groupIndex, groupIndex - 1)}>
+
+              <IconButton disabled={groupIndex === 0} onClick={() => swapPanelGroups(groupIndex, groupIndex - 1)}>
                 <ArrowUpIcon />
               </IconButton>
             </Stack>
