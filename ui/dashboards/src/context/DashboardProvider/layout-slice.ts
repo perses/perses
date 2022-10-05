@@ -22,7 +22,7 @@ import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 
 export interface LayoutSlice {
-  layouts: PanelGroup[];
+  layouts: PanelGroupDefinition[];
 
   /**
    * Given a LayoutItem location, returns the panel's unique key at that location.
@@ -50,7 +50,7 @@ export interface LayoutSlice {
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
 }
 
-interface PanelGroup extends LayoutDefinition {
+export interface PanelGroupDefinition extends LayoutDefinition {
   id: number;
 }
 
@@ -75,10 +75,13 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
   }
 
   return (set, get) => ({
-    layouts: layouts.map((layout) => ({
-      ...layout,
-      id: createPanelGroupId(),
-    })),
+    layouts: layouts.map(
+      (layout) =>
+        ({
+          ...layout,
+          id: createPanelGroupId(),
+        } as PanelGroupDefinition)
+    ),
 
     getPanelKey({ groupIndex, itemIndex }) {
       const { layouts } = get();
