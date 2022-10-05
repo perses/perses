@@ -14,11 +14,11 @@
 import { FormEventHandler, useState } from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { PluginSpecEditor } from '@perses-dev/plugin-system';
 import { useLayouts } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
 import { usePanelSpecState } from './panel-editor-model';
 import { PanelTypeSelect } from './PanelTypeSelect';
-import { PanelSpecEditor } from './PanelSpecEditor';
 import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
@@ -105,7 +105,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
               <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
             )}
             {/* Wait until we have some proper initial spec values before rendering the editor */}
-            {spec !== undefined && <PanelSpecEditor panelPluginKind={kind} value={spec} onChange={onSpecChange} />}
+            {spec !== undefined && (
+              <PluginSpecEditor pluginType="Panel" pluginKind={kind} value={spec} onChange={onSpecChange} />
+            )}
           </ErrorBoundary>
         </Grid>
       </Grid>

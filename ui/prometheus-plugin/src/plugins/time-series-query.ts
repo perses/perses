@@ -25,8 +25,9 @@ import {
   replaceTemplateVariables,
   DEFAULT_PROM,
 } from '../model';
+import { PrometheusTimeSeriesQueryEditor } from './PrometheusTimeSeriesQueryEditor';
 
-interface PrometheusTimeSeriesQuerySpec {
+export interface PrometheusTimeSeriesQuerySpec {
   query: TemplateString;
   min_step?: DurationString;
   resolution?: number;
@@ -100,4 +101,8 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['g
  */
 export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec> = {
   getTimeSeriesData,
+  OptionsEditorComponent: PrometheusTimeSeriesQueryEditor,
+  createInitialOptions: () => ({
+    query: '',
+  }),
 };

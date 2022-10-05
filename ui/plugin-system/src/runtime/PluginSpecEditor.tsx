@@ -14,15 +14,16 @@
 import { UnknownSpec } from '@perses-dev/core';
 import { OptionsEditorProps, usePlugin } from '@perses-dev/plugin-system';
 
-export interface PanelSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
-  panelPluginKind: string;
+export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
+  pluginType: 'Panel' | 'TimeSeriesQuery';
+  pluginKind: string;
 }
 
-export function PanelSpecEditor(props: PanelSpecEditorProps) {
-  const { panelPluginKind, ...others } = props;
-  const { data: plugin, isLoading } = usePlugin('Panel', panelPluginKind, {
+export function PluginSpecEditor(props: PluginSpecEditorProps) {
+  const { pluginType, pluginKind, ...others } = props;
+  const { data: plugin, isLoading } = usePlugin(pluginType, pluginKind, {
     useErrorBoundary: true,
-    enabled: panelPluginKind !== '',
+    enabled: pluginKind !== '',
   });
 
   // TODO: Proper loading indicator
@@ -31,7 +32,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   }
 
   if (plugin === undefined) {
-    throw new Error(`Missing OptionsEditorComponent for Panel plugin with kind '${panelPluginKind}'`);
+    throw new Error(`Missing OptionsEditorComponent for ${pluginType} plugin with kind '${pluginKind}'`);
   }
 
   const { OptionsEditorComponent } = plugin;

@@ -11,18 +11,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Stack, Box } from '@mui/material';
+import produce from 'immer';
+import { Stack, Typography } from '@mui/material';
+import { PluginSpecEditor, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
+
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
-  const { value } = props;
+  const { onChange, value } = props;
+  const { queries } = value;
+
+  const handleQueryPluginSpecChange = (index: number, pluginSpec: unknown) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        if (draft.queries[index]?.spec?.plugin?.spec) {
+          draft.queries[index].spec.plugin.spec = pluginSpec;
+        }
+      })
+    );
+  };
 
   return (
     <Stack spacing={1}>
-      <Box>{JSON.stringify(value)}</Box>
-      {/* TODO: add form controls to edit panel options */}
+      {/* TODO: Deal with user deleting all queries */}
+      {queries.map(({ spec: { plugin } }, i) => (
+        <>
+          <Typography variant="overline">Query {i + 1}</Typography>
+          {plugin && (
+            <PluginSpecEditor
+              pluginType="TimeSeriesQuery"
+              pluginKind={plugin.kind}
+              value={plugin.spec}
+              onChange={(next: unknown) => handleQueryPluginSpecChange(i, next)}
+            />
+          )}
+        </>
+      ))}
     </Stack>
   );
 }
