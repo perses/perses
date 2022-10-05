@@ -56,7 +56,7 @@ export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, sparkline } = props;
   const chartsTheme = useChartsTheme();
 
-  const formattedValue = data.calculatedValue === undefined ? 'No data' : formatValue(data.calculatedValue, unit);
+  const formattedValue = data.calculatedValue === undefined ? '' : formatValue(data.calculatedValue, unit);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return chartsTheme.noDataOption;
