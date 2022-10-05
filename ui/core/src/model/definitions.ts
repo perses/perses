@@ -18,3 +18,9 @@ export interface Definition<Spec> {
   kind: string;
   spec: Spec;
 }
+
+/**
+ * Type to represent specs at runtime in framework code where we don't know the spec's real type, probably because it's
+ * part of a plugin.
+ */
+export type UnknownSpec = Record<string, unknown>;

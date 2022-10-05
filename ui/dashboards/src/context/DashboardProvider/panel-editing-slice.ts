@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition } from '@perses-dev/core';
+import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
@@ -65,7 +65,7 @@ export interface PanelEditorValues {
   description: string;
   groupIndex: number;
   kind: string;
-  spec: unknown;
+  spec: UnknownSpec;
 }
 
 /**

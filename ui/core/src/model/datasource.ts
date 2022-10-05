@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from './definitions';
+import { Definition, UnknownSpec } from './definitions';
 import { Metadata, ProjectMetadata } from './resource';
 
 /**
@@ -32,7 +32,7 @@ export interface Datasource {
   spec: DatasourceSpec;
 }
 
-export interface DatasourceSpec<PluginSpec = unknown> {
+export interface DatasourceSpec<PluginSpec = UnknownSpec> {
   display?: {
     name: string;
     description?: string;

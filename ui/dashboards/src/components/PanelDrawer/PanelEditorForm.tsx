@@ -48,6 +48,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
+    if (spec === undefined) {
+      throw new Error('Cannot submit without a plugin spec');
+    }
     const values: PanelEditorValues = { name, description, groupIndex, kind, spec };
     onSubmit(values);
   };
