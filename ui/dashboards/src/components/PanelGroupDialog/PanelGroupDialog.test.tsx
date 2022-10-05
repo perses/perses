@@ -50,6 +50,7 @@ describe('Add Panel Group', () => {
 
     const layouts = storeApi.getState().layouts;
     expect(layouts).toContainEqual({
+      id: 3,
       kind: 'Grid',
       spec: {
         display: {
@@ -76,6 +77,7 @@ describe('Add Panel Group', () => {
 
     const layouts = storeApi.getState().layouts;
     expect(layouts).toContainEqual({
+      id: 0,
       kind: 'Grid',
       spec: {
         display: {

@@ -14,11 +14,12 @@
 import { useDashboardStore } from './DashboardProvider';
 
 export function useLayouts() {
-  return useDashboardStore(({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup }) => ({
+  return useDashboardStore(({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups }) => ({
     layouts,
     addPanelToGroup,
     movePanelToGroup,
     updatePanelGroup,
+    swapPanelGroups,
   }));
 }
 

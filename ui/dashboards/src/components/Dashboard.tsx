@@ -27,12 +27,7 @@ export function Dashboard(props: DashboardProps) {
     <Box {...props}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {layouts.map((layout, groupIndex) => (
-          <GridLayout
-            // TODO: Better data structure with actual keys for grids?
-            key={groupIndex}
-            groupIndex={groupIndex}
-            definition={layout}
-          />
+          <GridLayout key={layout.id} groupIndex={groupIndex} definition={layout} />
         ))}
       </ErrorBoundary>
     </Box>
