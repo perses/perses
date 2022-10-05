@@ -98,7 +98,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            {kind && (
+            {spec !== undefined && kind && (
               <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
             )}
             {/* Wait until we have some proper initial spec values before rendering the editor */}
