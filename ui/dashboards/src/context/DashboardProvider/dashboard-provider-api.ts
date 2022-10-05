@@ -13,6 +13,10 @@
 
 import { useDashboardStore } from './DashboardProvider';
 
+export function useEditMode() {
+  return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
+}
+
 export function useLayouts() {
   return useDashboardStore(({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups }) => ({
     layouts,
@@ -20,6 +24,14 @@ export function useLayouts() {
     movePanelToGroup,
     updatePanelGroup,
     swapPanelGroups,
+  }));
+}
+
+export function usePanelGroupDialog() {
+  return useDashboardStore(({ panelGroupDialog, openPanelGroupDialog, closePanelGroupDialog }) => ({
+    panelGroupDialog,
+    openPanelGroupDialog,
+    closePanelGroupDialog,
   }));
 }
 

@@ -18,11 +18,11 @@ import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
 import { DashboardSpec, DurationString } from '@perses-dev/core';
-import { DashboardAppSlice, createDashboardAppSlice } from './DashboardAppSlice';
+import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createLayoutSlice, LayoutSlice } from './layout-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing-slice';
 
-export interface DashboardStoreState extends DashboardAppSlice, LayoutSlice, PanelEditorSlice {
+export interface DashboardStoreState extends PanelGroupSlice, LayoutSlice, PanelEditorSlice {
   defaultTimeRange: DurationString;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
@@ -36,10 +36,6 @@ export interface DashboardStoreProps {
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
   children?: React.ReactNode;
-}
-
-export function useEditMode() {
-  return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
 }
 
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
@@ -65,7 +61,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
       devtools((...args) => {
         const [set] = args;
         return {
-          ...createDashboardAppSlice(...args),
+          ...createPanelGroupSlice(...args),
           ...createLayoutSlice(layouts)(...args),
           ...createPanelEditorSlice(panels)(...args),
           defaultTimeRange: dashboardSpec.duration,

@@ -13,10 +13,10 @@
 import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
-import { GridDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { styles } from '../../css/styles';
 import { useEditMode } from '../../context';
+import { GroupDefinition } from '../../context/DashboardProvider/layout-slice';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 
@@ -24,32 +24,28 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
   groupIndex: number;
-  definition: GridDefinition;
+  groupDefinition: GroupDefinition;
 }
 
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
 export function GridLayout(props: GridLayoutProps) {
-  const {
-    groupIndex,
-    definition: { spec },
-    ...others
-  } = props;
+  const { groupIndex, groupDefinition, ...others } = props;
 
-  const [isOpen, setIsOpen] = useState(spec.display?.collapse?.open ?? true);
+  const [isOpen, setIsOpen] = useState(groupDefinition.isOpen ?? true);
   const { isEditMode } = useEditMode();
 
   return (
     <>
       <GlobalStyles styles={styles} />
       <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
-        {spec.display !== undefined && (
+        {groupDefinition.title !== undefined && (
           <GridTitle
             groupIndex={groupIndex}
-            title={spec.display.title}
+            title={groupDefinition.title}
             collapse={
-              spec.display.collapse === undefined
+              groupDefinition.isOpen === undefined
                 ? undefined
                 : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
             }
@@ -66,7 +62,7 @@ export function GridLayout(props: GridLayoutProps) {
             isDraggable={isEditMode}
             isResizable={isEditMode}
           >
-            {spec.items.map(({ x, y, width, height, content }, itemIndex) => (
+            {groupDefinition.items.map(({ x, y, width, height, content }, itemIndex) => (
               <div key={itemIndex} data-grid={{ x, y, w: width, h: height }}>
                 <ErrorBoundary FallbackComponent={ErrorAlert}>
                   <GridItemContent groupIndex={groupIndex} itemIndex={itemIndex} content={content} />

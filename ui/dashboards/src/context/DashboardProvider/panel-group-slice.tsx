@@ -13,19 +13,18 @@
 
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { useDashboardStore } from './DashboardProvider';
 
-interface PanelGroupDialog {
+export interface PanelGroupDialog {
   groupIndex?: number;
 }
 
-export interface DashboardAppSlice {
+export interface PanelGroupSlice {
   panelGroupDialog?: PanelGroupDialog;
   openPanelGroupDialog: (groupIndex?: number) => void;
   closePanelGroupDialog: () => void;
 }
 
-export const createDashboardAppSlice: StateCreator<DashboardAppSlice, Middleware, [], DashboardAppSlice> = (set) => ({
+export const createPanelGroupSlice: StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> = (set) => ({
   openPanelGroupDialog: (groupIndex?: number) =>
     set((state) => {
       state.panelGroupDialog = { groupIndex };
@@ -35,11 +34,3 @@ export const createDashboardAppSlice: StateCreator<DashboardAppSlice, Middleware
       state.panelGroupDialog = undefined;
     }),
 });
-
-export function useDashboardApp() {
-  return useDashboardStore(({ panelGroupDialog, openPanelGroupDialog, closePanelGroupDialog }) => ({
-    panelGroupDialog,
-    openPanelGroupDialog,
-    closePanelGroupDialog,
-  }));
-}

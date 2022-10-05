@@ -38,7 +38,7 @@ describe('Add Panel Group', () => {
   };
 
   it('should add new panel group', async () => {
-    // jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue(dashboardApp);
+    // jest.spyOn(dashboardAppSlice, 'usePanelGroupDialog').mockReturnValue(dashboardApp);
     const storeApi = renderDialog();
 
     // Open the dialog for a new panel group
@@ -51,16 +51,9 @@ describe('Add Panel Group', () => {
     const layouts = storeApi.getState().layouts;
     expect(layouts).toContainEqual({
       id: 3,
-      kind: 'Grid',
-      spec: {
-        display: {
-          title: 'New Panel Group',
-          collapse: {
-            open: true,
-          },
-        },
-        items: [],
-      },
+      title: 'New Panel Group',
+      isOpen: true,
+      items: [],
     });
   });
 
@@ -78,16 +71,9 @@ describe('Add Panel Group', () => {
     const layouts = storeApi.getState().layouts;
     expect(layouts).toContainEqual({
       id: 0,
-      kind: 'Grid',
-      spec: {
-        display: {
-          title: 'New Name',
-          collapse: {
-            open: true,
-          },
-        },
-        items: [{ content: { $ref: '#/spec/panels/cpu' }, height: 4, width: 12, x: 0, y: 0 }],
-      },
+      title: 'New Name',
+      isOpen: true,
+      items: [{ content: { $ref: '#/spec/panels/cpu' }, height: 4, width: 12, x: 0, y: 0 }],
     });
   });
 });
