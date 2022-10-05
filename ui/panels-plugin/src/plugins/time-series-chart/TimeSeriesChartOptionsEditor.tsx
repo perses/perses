@@ -26,9 +26,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   const handleQueryPluginSpecChange = (index: number, pluginSpec: UnknownSpec) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        if (draft.queries.length && draft.queries[index]?.spec?.plugin?.spec) {
-          draft.queries[index].spec.plugin.spec = pluginSpec;
-        }
+        draft.queries[index].spec.plugin.spec = pluginSpec;
       })
     );
   };
