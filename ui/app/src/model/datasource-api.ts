@@ -51,7 +51,7 @@ export function useDatasourceApi(): DatasourceStoreProviderProps['datasourceApi'
 function getProxyUrl(datasource: Datasource | GlobalDatasource) {
   let url = `/proxy`;
   if (datasource.kind === 'Datasource') {
-    url += `/project/${encodeURIComponent(datasource.metadata.project)}`;
+    url += `/projects/${encodeURIComponent(datasource.metadata.project)}`;
   }
   url += `/${datasource.kind.toLowerCase()}s/${encodeURIComponent(datasource.metadata.name)}`;
   return url;
