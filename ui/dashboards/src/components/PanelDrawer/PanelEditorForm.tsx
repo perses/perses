@@ -97,10 +97,10 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           </FormControl>
         </Grid>
         <Grid item xs={12}>
-          {kind !== '' && (
-            <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
-          )}
           <ErrorBoundary FallbackComponent={ErrorAlert}>
+            {kind && (
+              <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
+            )}
             {/* Wait until we have some proper initial spec values before rendering the editor */}
             {spec !== undefined && <PanelSpecEditor panelPluginKind={kind} value={spec} onChange={onSpecChange} />}
           </ErrorBoundary>
