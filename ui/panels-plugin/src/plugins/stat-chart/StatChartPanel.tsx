@@ -71,12 +71,7 @@ const useChartData = (data: TimeSeriesData | undefined, calculation: Calculation
     const calculate = CalculationsMap[calculation];
     const calculatedValue = seriesData !== undefined ? calculate(Array.from(seriesData.values)) : undefined;
 
-    return {
-      calculatedValue,
-      seriesData,
-      // TODO: How is this name used in StatChart? Do we really need it? Should it be a chart spec option?
-      name: 'StatChart',
-    };
+    return { calculatedValue, seriesData };
   }, [data, calculation]);
 };
 
