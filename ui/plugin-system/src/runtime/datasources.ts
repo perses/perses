@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
+import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
 export interface DatasourceStore {
@@ -26,7 +27,7 @@ export interface DatasourceStore {
   /**
    * Gets a list of datasource metadata for a plugin kind.
    */
-  listDatasourceMetadata(pluginKind: string): Promise<DatasourceMetadata[]>;
+  listDatasourceMetadata(datasourcePluginKind: string): Promise<DatasourceMetadata[]>;
 }
 
 export interface DatasourceMetadata {
@@ -42,4 +43,13 @@ export function useDatasourceStore() {
     throw new Error('No DatasourceStoreContext found. Did you forget a Provider?');
   }
   return ctx;
+}
+
+/**
+ * Lists all available Datasource instances for a given datasource plugin kind. Returns a list with the name of that
+ * instance, as well as its DatasourceSelector for referencing it.
+ */
+export function useListDatasources(datasourcePluginKind: string) {
+  const { listDatasourceMetadata } = useDatasourceStore();
+  return useQuery(['listDatasourceMetadata', datasourcePluginKind], () => listDatasourceMetadata(datasourcePluginKind));
 }

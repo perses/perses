@@ -101,17 +101,17 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     [findDatasource, getPlugin]
   );
 
-  const listDatasourceMetadata = useEvent(async (pluginKind: string): Promise<DatasourceMetadata[]> => {
+  const listDatasourceMetadata = useEvent(async (datasourcePluginKind: string): Promise<DatasourceMetadata[]> => {
     const [pluginMetadata, datasources, globalDatasources] = await Promise.all([
       listPluginMetadata('Datasource'),
-      datasourceApi.listDatasources(project, pluginKind),
-      datasourceApi.listGlobalDatasources(pluginKind),
+      datasourceApi.listDatasources(project, datasourcePluginKind),
+      datasourceApi.listGlobalDatasources(datasourcePluginKind),
     ]);
 
     // Find the metadata for the plugin type they asked for so we can use it for the name of the default datasource
-    const datasourcePluginMetadata = pluginMetadata.find((metadata) => metadata.kind === pluginKind);
+    const datasourcePluginMetadata = pluginMetadata.find((metadata) => metadata.kind === datasourcePluginKind);
     if (datasourcePluginMetadata === undefined) {
-      throw new Error(`Could not find a Datasource plugin with kind '${pluginKind}'`);
+      throw new Error(`Could not find a Datasource plugin with kind '${datasourcePluginKind}'`);
     }
 
     // Get helper for de-duping results properly
@@ -121,7 +121,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     if (dashboardResource.spec.datasources !== undefined) {
       for (const selectorName in dashboardResource.spec.datasources) {
         const spec = dashboardResource.spec.datasources[selectorName];
-        if (spec === undefined || spec.plugin.kind !== pluginKind) continue;
+        if (spec === undefined || spec.plugin.kind !== datasourcePluginKind) continue;
         addResult(spec, selectorName);
       }
     }
