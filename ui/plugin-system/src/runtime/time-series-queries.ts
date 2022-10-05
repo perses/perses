@@ -12,37 +12,27 @@
 // limitations under the License.
 
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { TimeSeriesQueryContext } from '../model';
+import { usePluginRegistry } from '../components';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';
 import { usePlugin } from './plugins';
 import { useDatasourceStore } from './datasources';
 
-type UseTimeSeriesQueryOptions = {
+export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
-};
+}
 
 /**
- * Runs a Graph Query using a plugin and returns the results.
+ * Runs a time series query using a plugin and returns the results.
  */
-export const useTimeSeriesQueryData = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
+export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
-
-  // Build the context object from data available at runtime
-  const { timeRange } = useTimeRange();
-  const variableState = useTemplateVariableValues();
-  const datasourceStore = useDatasourceStore();
-
-  const context: TimeSeriesQueryContext = {
-    suggestedStepMs: options?.suggestedStepMs,
-    timeRange,
-    variableState,
-    datasourceStore,
-  };
+  const context = useTimeSeriesQueryContext(options);
 
   const key = [definition, context] as const;
-  const { data, isLoading, error } = useQuery(
+  return useQuery(
     key,
     ({ queryKey }) => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
@@ -54,7 +44,37 @@ export const useTimeSeriesQueryData = (definition: TimeSeriesQueryDefinition, op
     },
     { enabled: plugin !== undefined }
   );
-
-  // TODO: Stop aliasing fields, just return the hook results directly once we clean up query running in panels
-  return { data, loading: isLoading, error: error ?? undefined };
 };
+
+/**
+ * Runs multiple time series queries using plugins and returns the results.
+ */
+export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], options?: UseTimeSeriesQueryOptions) {
+  const { getPlugin } = usePluginRegistry();
+  const context = useTimeSeriesQueryContext(options);
+
+  return useQueries({
+    queries: definitions.map((definition) => ({
+      queryKey: [definition, context] as const,
+      queryFn: async () => {
+        const plugin = await getPlugin('TimeSeriesQuery', definition.spec.plugin.kind);
+        const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context);
+        return data;
+      },
+    })),
+  });
+}
+
+function useTimeSeriesQueryContext(options?: UseTimeSeriesQueryOptions): TimeSeriesQueryContext {
+  // Build the context object from data available at runtime
+  const { timeRange } = useTimeRange();
+  const variableState = useTemplateVariableValues();
+  const datasourceStore = useDatasourceStore();
+
+  return {
+    suggestedStepMs: options?.suggestedStepMs,
+    timeRange,
+    variableState,
+    datasourceStore,
+  };
+}

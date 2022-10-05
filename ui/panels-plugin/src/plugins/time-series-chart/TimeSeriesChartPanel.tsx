@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps } from '@perses-dev/plugin-system';
+import { PanelProps, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
-import TimeSeriesQueryRunner from './TimeSeriesQueryRunner';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
 import { TimeSeriesChartContainer } from './TimeSeriesChartContainer';
 
@@ -26,18 +25,21 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
+  const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
 
+  if (contentDimensions === undefined) {
+    return null;
+  }
+
+  // TODO: Do we need this container component any more now that we can run multiple queries here?
   return (
-    <TimeSeriesQueryRunner queries={queries} suggestedStepMs={suggestedStepMs}>
-      {contentDimensions !== undefined && (
-        <TimeSeriesChartContainer
-          width={contentDimensions.width}
-          height={contentDimensions.height}
-          unit={unit}
-          show_legend={show_legend}
-          thresholds={thresholds}
-        />
-      )}
-    </TimeSeriesQueryRunner>
+    <TimeSeriesChartContainer
+      width={contentDimensions.width}
+      height={contentDimensions.height}
+      unit={unit}
+      show_legend={show_legend}
+      thresholds={thresholds}
+      queryResults={queryResults}
+    />
   );
 }
