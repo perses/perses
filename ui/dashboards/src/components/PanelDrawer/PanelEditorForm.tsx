@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { FormEventHandler, useState } from 'react';
-import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps, Box } from '@mui/material';
+import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useLayouts } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing';
@@ -107,7 +107,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
       </Grid>
     </form>
-);
+  );
 }
 
 /**
