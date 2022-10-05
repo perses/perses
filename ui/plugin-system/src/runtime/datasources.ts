@@ -22,6 +22,16 @@ export interface DatasourceStore {
    * Given a DatasourceSelector, gets a `Client` object from the corresponding Datasource plugin.
    */
   getDatasourceClient<Client>(selector: DatasourceSelector): Promise<Client>;
+
+  /**
+   * Gets a list of datasource metadata for a plugin kind.
+   */
+  listDatasourceMetadata(pluginKind: string): Promise<DatasourceMetadata[]>;
+}
+
+export interface DatasourceMetadata {
+  name: string;
+  selector: DatasourceSelector;
 }
 
 export const DatasourceStoreContext = createContext<DatasourceStore | undefined>(undefined);
