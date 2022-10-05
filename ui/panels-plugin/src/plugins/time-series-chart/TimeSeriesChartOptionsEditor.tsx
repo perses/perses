@@ -13,6 +13,7 @@
 
 import produce from 'immer';
 import { Stack, Typography } from '@mui/material';
+import { UnknownSpec } from '@perses-dev/core';
 import { PluginSpecEditor, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
 
@@ -22,10 +23,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   const { onChange, value } = props;
   const { queries } = value;
 
-  const handleQueryPluginSpecChange = (index: number, pluginSpec: unknown) => {
+  const handleQueryPluginSpecChange = (index: number, pluginSpec: UnknownSpec) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        if (draft.queries[index]?.spec?.plugin?.spec) {
+        if (draft.queries.length && draft.queries[index]?.spec?.plugin?.spec) {
           draft.queries[index].spec.plugin.spec = pluginSpec;
         }
       })
@@ -43,7 +44,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
               pluginType="TimeSeriesQuery"
               pluginKind={plugin.kind}
               value={plugin.spec}
-              onChange={(next: unknown) => handleQueryPluginSpecChange(i, next)}
+              onChange={(next: UnknownSpec) => handleQueryPluginSpecChange(i, next)}
             />
           )}
         </>

@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/core';
-import { OptionsEditorProps, usePlugin } from '@perses-dev/plugin-system';
+import { OptionsEditorProps } from '../model/visual-editing';
+import { usePlugin } from './plugins';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: 'Panel' | 'TimeSeriesQuery';
