@@ -14,27 +14,15 @@
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Stack, Box } from '@mui/material';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
-import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
-
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { value } = props;
 
-  const panelPreviewProps: TimeSeriesChartProps = {
-    spec: {
-      ...value,
-    },
-    contentDimensions: { width: 500, height: 250 },
-  };
-
   return (
-    <>
-      <TimeSeriesChartPanel {...panelPreviewProps} />
-      <Stack spacing={1}>
-        <Box>{JSON.stringify(value)}</Box>
-        {/* TODO: add form controls to edit panel options */}
-      </Stack>
-    </>
+    <Stack spacing={1}>
+      <Box>{JSON.stringify(value)}</Box>
+      {/* TODO: add form controls to edit panel options */}
+    </Stack>
   );
 }

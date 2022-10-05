@@ -19,6 +19,7 @@ import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing
 import { usePanelSpecState } from './panel-editor-model';
 import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelSpecEditor } from './PanelSpecEditor';
+import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
@@ -97,6 +98,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
+            {spec !== undefined && kind && (
+              <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
+            )}
             {/* Wait until we have some proper initial spec values before rendering the editor */}
             {spec !== undefined && <PanelSpecEditor panelPluginKind={kind} value={spec} onChange={onSpecChange} />}
           </ErrorBoundary>
