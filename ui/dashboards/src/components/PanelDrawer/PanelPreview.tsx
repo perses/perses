@@ -15,10 +15,8 @@ import { Box } from '@mui/material';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing';
 import { Panel, PanelProps } from '../Panel';
 
-export function PanelPreview(props: PanelEditorValues) {
-  const { name, description, kind, spec, groupIndex } = props;
-
-  const panelPreviewProps: PanelProps = {
+export function PanelPreview({ name, description, kind, spec, groupIndex }: PanelEditorValues) {
+  const previewValues: PanelProps = {
     definition: {
       kind: 'Panel',
       spec: {
@@ -38,7 +36,7 @@ export function PanelPreview(props: PanelEditorValues) {
 
   return (
     <Box height={300}>
-      <Panel {...panelPreviewProps} />
+      <Panel {...previewValues} />
     </Box>
   );
 }
