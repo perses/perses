@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from './definitions';
+import { Definition, UnknownSpec } from './definitions';
 
-export interface TimeSeriesQueryDefinition<PluginSpec = unknown> extends Definition<TimeSeriesQuerySpec<PluginSpec>> {
+export interface TimeSeriesQueryDefinition<PluginSpec = UnknownSpec>
+  extends Definition<TimeSeriesQuerySpec<PluginSpec>> {
   kind: 'TimeSeriesQuery';
 }
 

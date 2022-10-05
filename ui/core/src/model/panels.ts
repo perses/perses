@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from './definitions';
+import { Definition, UnknownSpec } from './definitions';
 
-export interface PanelDefinition<PluginSpec = unknown> extends Definition<PanelSpec<PluginSpec>> {
+export interface PanelDefinition<PluginSpec = UnknownSpec> extends Definition<PanelSpec<PluginSpec>> {
   kind: 'Panel';
 }
 

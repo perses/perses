@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from './definitions';
+import { Definition, UnknownSpec } from './definitions';
 
 export type VariableName = string;
 
@@ -34,7 +34,7 @@ export interface TextVariableSpec extends VariableSpec {
   value: string;
 }
 
-export interface ListVariableDefinition<PluginSpec = unknown> extends Definition<ListVariableSpec<PluginSpec>> {
+export interface ListVariableDefinition<PluginSpec = UnknownSpec> extends Definition<ListVariableSpec<PluginSpec>> {
   kind: 'ListVariable';
 }
 

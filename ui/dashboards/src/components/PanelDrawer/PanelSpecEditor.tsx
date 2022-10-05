@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { UnknownSpec } from '@perses-dev/core';
 import { OptionsEditorProps, usePlugin } from '@perses-dev/plugin-system';
 
-export interface PanelSpecEditorProps extends OptionsEditorProps<unknown> {
+export interface PanelSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   panelPluginKind: string;
 }
 

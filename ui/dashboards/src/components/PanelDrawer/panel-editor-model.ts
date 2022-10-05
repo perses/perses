@@ -14,14 +14,15 @@
 import { useMemo } from 'react';
 import { usePlugin } from '@perses-dev/plugin-system';
 import { useImmer } from 'use-immer';
+import { UnknownSpec } from '@perses-dev/core';
 
 /**
  * Manages panel plugin spec state. The spec will be undefined while a plugin is being loaded.
  */
-export function usePanelSpecState(panelPluginKind: string, initialState: unknown) {
+export function usePanelSpecState(panelPluginKind: string, initialState: UnknownSpec) {
   // Keeping track of spec values by kind allows users to switch between panel types and come back with their old
   // values intact from before the switch
-  const [specByKind, setSpecByKind] = useImmer<Record<string, unknown>>({ [panelPluginKind]: initialState });
+  const [specByKind, setSpecByKind] = useImmer<Record<string, UnknownSpec>>({ [panelPluginKind]: initialState });
   const { data: plugin } = usePlugin('Panel', panelPluginKind, { enabled: panelPluginKind !== '' });
   const pluginInitialSpec = useMemo(() => plugin?.createInitialOptions(), [plugin]);
 
@@ -30,7 +31,7 @@ export function usePanelSpecState(panelPluginKind: string, initialState: unknown
 
   // TODO: Do we want to expose more of a immer style API to plugin authors for managing their state, rather than the
   // current "onChange" API?
-  const onSpecChange = (next: unknown) => {
+  const onSpecChange = (next: UnknownSpec) => {
     setSpecByKind((draft) => {
       draft[panelPluginKind] = next;
     });

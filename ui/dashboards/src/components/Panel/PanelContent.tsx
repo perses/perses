@@ -13,8 +13,9 @@
 
 import { usePlugin, PanelProps } from '@perses-dev/plugin-system';
 import { Skeleton } from '@mui/material';
+import { UnknownSpec } from '@perses-dev/core';
 
-export interface PanelContentProps extends PanelProps<unknown> {
+export interface PanelContentProps extends PanelProps<UnknownSpec> {
   panelPluginKind: string;
 }
 
