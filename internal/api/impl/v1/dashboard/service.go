@@ -17,11 +17,10 @@ import (
 	"fmt"
 
 	"github.com/perses/common/etcd"
-	"github.com/perses/perses/internal/api/config"
-	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -29,14 +28,14 @@ import (
 
 type service struct {
 	dashboard.Service
-	dao       dashboard.DAO
-	validator schemas.Validator
+	dao dashboard.DAO
+	sch schemas.Schemas
 }
 
-func NewService(dao dashboard.DAO, conf config.Config) dashboard.Service {
+func NewService(dao dashboard.DAO, sch schemas.Schemas) dashboard.Service {
 	return &service{
-		dao:       dao,
-		validator: schemas.NewValidator(conf.Schemas),
+		dao: dao,
+		sch: sch,
 	}
 }
 
@@ -57,7 +56,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	}
 
 	// verify this new dashboard passes the validation
-	err := s.validator.Validate(entity.Spec.Panels)
+	err := s.sch.ValidatePanels(entity.Spec.Panels)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
@@ -98,7 +97,7 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// verify the updated version of the dashboard passes the validation
-	err := s.validator.Validate(entity.Spec.Panels)
+	err := s.sch.ValidatePanels(entity.Spec.Panels)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
@@ -143,8 +142,4 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 
 func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
-}
-
-func (s *service) GetValidator() schemas.Validator {
-	return s.validator
 }

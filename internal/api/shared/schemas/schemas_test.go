@@ -632,14 +632,15 @@ func TestValidateDashboard(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			validator := NewValidator(config.Schemas{
+			schema := New(config.Schemas{
 				PanelsPath:  "testdata/panels",
 				QueriesPath: "testdata/queries",
 			})
-			validator.LoadPanels()
-			validator.LoadQueries()
+			for _, l := range schema.GetLoaders() {
+				assert.NoError(t, l.Load())
+			}
 
-			err := validator.Validate(test.dashboard.Spec.Panels)
+			err := schema.ValidatePanels(test.dashboard.Spec.Panels)
 			errString := ""
 			if err != nil {
 				errString = err.Error()
