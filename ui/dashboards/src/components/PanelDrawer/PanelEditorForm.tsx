@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { FormEventHandler, useState } from 'react';
-import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, SelectProps } from '@mui/material';
+import { FormControl, Grid, InputLabel, MenuItem, Select, SelectProps, TextField, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginSpecEditor } from '@perses-dev/plugin-system';
 import { useLayouts } from '../../context';
@@ -59,13 +59,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     <form id={panelEditorFormId} onSubmit={handleSubmit}>
       <Grid container spacing={2}>
         <Grid item xs={8}>
-          <TextField
-            required
-            label="Panel Name"
-            value={name}
-            variant="outlined"
-            onChange={(e) => setName(e.target.value)}
-          />
+          <TextField required label="Name" value={name} variant="outlined" onChange={(e) => setName(e.target.value)} />
         </Grid>
         <Grid item xs={4}>
           <FormControl>
@@ -81,7 +75,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={8}>
           <TextField
-            label="Panel Description"
+            label="Description"
             value={description}
             variant="outlined"
             onChange={(e) => setDescription(e.target.value)}
@@ -89,21 +83,28 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={4}>
           <FormControl>
-            <InputLabel id="panel-type-label">Panel Type</InputLabel>
+            <InputLabel id="panel-type-label">Type</InputLabel>
             <PanelTypeSelect
               required
               labelId="panel-type-label"
-              label="Panel Type"
+              label="Type"
               value={kind}
               onChange={(e) => setKind(e.target.value)}
             />
           </FormControl>
         </Grid>
         <Grid item xs={12}>
+          <Typography variant="h4" marginBottom={1}>
+            Preview
+          </Typography>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             {spec !== undefined && kind && (
               <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
             )}
+          </ErrorBoundary>
+        </Grid>
+        <Grid item xs={12}>
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
             {/* Wait until we have some proper initial spec values before rendering the editor */}
             {spec !== undefined && (
               <PluginSpecEditor pluginType="Panel" pluginKind={kind} value={spec} onChange={onSpecChange} />
