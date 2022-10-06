@@ -13,16 +13,16 @@
 
 package second
 
-#panel: {
-	kind:       "SecondChart"
-	datasource: #datasource
-	options: {
-		a: string
+#panel: spec: plugin: {
+	kind: "SecondChart"
+
+	spec: {
+		query: #ts_query
+		a:     string
 		b: {
 			c?: bool
 			d: [...#e]
 		}
-		query: #query
 	}
 }
 
@@ -30,5 +30,4 @@ package second
 	f: number
 }
 
-#datasource: _
-#query:      _
+#ts_query: _

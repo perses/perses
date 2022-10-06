@@ -13,13 +13,14 @@
 
 package custom
 
-#datasource: {
-	kind: "CustomDatasource"
-}
-
-#query: {
-	kind: "CustomGraphQuery"
-	options: {
-		custom: bool
+spec: {
+	plugin: {
+		kind: "CustomGraphQuery"
+		spec: {
+			datasource: {
+				kind: "CustomDatasource"
+			}
+			custom: bool
+		}
 	}
 }

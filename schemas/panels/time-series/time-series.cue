@@ -11,22 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package line
+package timeserie
 
 import (
 	"github.com/perses/perses/schemas/common"
 )
 
-#panel: {
-	kind:       "TimeSeriesChart"
-	datasource: #datasource
-	options: {
-		queries: [...#query]
+#panel: spec: plugin: {
+	kind: "TimeSeriesChart"
+
+	spec: {
+		queries: [...#ts_query]
 		show_legend?: bool
 		unit?:        common.#unit
 		thresholds?:  common.#thresholds
 	}
 }
 
-#datasource: _
-#query:      _
+#ts_query: _

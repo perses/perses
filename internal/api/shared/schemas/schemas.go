@@ -21,17 +21,9 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
+	"cuelang.org/go/cue/errors"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/sirupsen/logrus"
-)
-
-const (
-	kindField           = "kind"
-	datasourceField     = "datasource"
-	panelDefPath        = "#panel"
-	panelDatasourcePath = panelDefPath + "." + datasourceField
-	datasourceDefPath   = "#" + datasourceField
-	queryDefPath        = "#query"
 )
 
 //go:embed base_def_panel.cue
@@ -39,6 +31,9 @@ var basePanelDef []byte
 
 //go:embed base_def_query.cue
 var baseQueryDef []byte
+
+//go:embed query_disjunction_generator.cue
+var queryDisjunctionGenerator []byte
 
 // retrieveSchemaForKind returns the schema corresponding to the provided kind
 func retrieveSchemaForKind(panelName string, panelVal cue.Value, kindPath string, schemasMap *sync.Map) (cue.Value, error) {
@@ -80,14 +75,18 @@ func New(conf config.Schemas) Schemas {
 			baseDef:     basePanelDefVal,
 			schemas:     &sync.Map{},
 			schemasPath: conf.PanelsPath,
-			kindCuePath: fmt.Sprintf("%s.%s", panelDefPath, kindField),
+			kindCuePath: "#panel.spec.plugin.kind",
 		},
-		queries: &cueDefs{
-			context:     ctx,
-			baseDef:     baseQueryDefVal,
-			schemas:     &sync.Map{},
-			schemasPath: conf.QueriesPath,
-			kindCuePath: fmt.Sprintf("%s.%s", datasourceDefPath, kindField),
+		queries: &cueDefsWithDisjunction{
+			cueDefs: cueDefs{
+				context:     ctx,
+				baseDef:     baseQueryDefVal,
+				schemas:     &sync.Map{},
+				schemasPath: conf.QueriesPath,
+				kindCuePath: "spec.plugin.kind",
+			},
+			disjSchema: cue.Value{},
+			mapID:      "#query_types",
 		},
 	}
 }
@@ -95,7 +94,7 @@ func New(conf config.Schemas) Schemas {
 type sch struct {
 	context *cue.Context
 	panels  *cueDefs
-	queries *cueDefs
+	queries *cueDefsWithDisjunction
 }
 
 func (s *sch) GetLoaders() []Loader {
@@ -115,32 +114,20 @@ func (s *sch) ValidatePanels(panels map[string]json.RawMessage) error {
 		value := s.context.CompileBytes(panelJSON)
 
 		// retrieve the corresponding panel schema
-		panelSchema, err := retrieveSchemaForKind(panelName, value, kindField, s.panels.schemas)
+		panelSchema, err := retrieveSchemaForKind(panelName, value, "spec.plugin.kind", s.panels.schemas)
 		if err != nil {
 			return err
 		}
-		logrus.Tracef("Panel schema to use: %+v", panelSchema.LookupPath(cue.ParsePath(panelDefPath)))
-		finalSchema := panelSchema
 
-		// retrieve the corresponding query schema
-		// the wrapping `if` tackles the particular case of panels without a datasource (e.g text panel)
-		if lookupPathErr := panelSchema.LookupPath(cue.ParsePath(panelDatasourcePath)).Err(); lookupPathErr == nil {
-			querySchema, retrieveErr := retrieveSchemaForKind(panelName, value, fmt.Sprintf("%s.%s", datasourceField, kindField), s.queries.schemas)
-			if retrieveErr != nil {
-				return retrieveErr
-			}
-			logrus.Tracef("Query schema to use: %+v", querySchema.LookupPath(cue.ParsePath(queryDefPath)))
-
-			// unify panel and query schemas
-			finalSchema = panelSchema.Unify(querySchema)
-			if finalSchema.Err() != nil {
-				logrus.WithError(finalSchema.Err()).Errorf("Error unifying panel and query schemas to validate panel %s", panelName)
-				continue
-			}
+		// Then merge with the queries disjunction schema
+		panelSchema = panelSchema.Unify(s.queries.disjSchema)
+		if panelSchema.Err() != nil {
+			logrus.WithError(panelSchema.Err()).Error("Error unifying panel schema with queries schema")
+			return panelSchema.Err()
 		}
 
-		// do the validation using the main #panel def of the schema
-		unified := value.Unify(finalSchema.LookupPath(cue.ParsePath(panelDefPath)))
+		// do the validation using the main #panel def of the schema as entrypoint
+		unified := value.Unify(panelSchema.LookupPath(cue.ParsePath("#panel")))
 		opts := []cue.Option{
 			cue.Concrete(true),
 			cue.Attributes(true),
@@ -149,8 +136,9 @@ func (s *sch) ValidatePanels(panels map[string]json.RawMessage) error {
 		}
 		err = unified.Validate(opts...)
 		if err != nil {
+			logrus.Debug(errors.Details(err, nil))
+			//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
 			err = fmt.Errorf("invalid panel %s: %s", panelName, err) // enrich the error message returned by cue lib
-			logrus.Debug(err)
 			return err
 		}
 	}

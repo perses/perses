@@ -13,15 +13,16 @@
 
 package sql
 
-#datasource: {
-	kind: "SQLDatasource"
-}
-
-#query: {
-	kind: "SQLGraphQuery"
-	options: {
-		select: string
-		from:   string
-		where?: string
+spec: {
+	plugin: {
+		kind: "SQLGraphQuery"
+		spec: {
+			datasource: {
+				kind: "SQLDatasource"
+			}
+			select: string
+			from:   string
+			where?: string
+		}
 	}
 }

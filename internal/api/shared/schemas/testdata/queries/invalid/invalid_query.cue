@@ -11,18 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package base
+package invalid
 
-#panel: close({
-	kind: "Panel"
-	spec: close({
-		display: close({
-			name:         string
-			description?: string
-		})
-		plugin: close({
-			kind: string
-			spec: _
-		})
-	})
-})
+spec: {
+	plugin: {
+		kind:    "InvalidQuery"
+		invalid: true
+		spec: {
+			datasource: {
+				kind: "PrometheusDatasource"
+			}
+		}
+	}
+}
