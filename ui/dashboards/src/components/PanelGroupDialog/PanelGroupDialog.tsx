@@ -30,7 +30,7 @@ import {
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { usePanelGroupDialog, useLayouts } from '../../context';
-import { GroupDefinition } from '../../context/DashboardProvider/layout-slice';
+import { PanelGroupDefinition } from '../../context/DashboardProvider/layout-slice';
 
 const PanelGroupDialog = () => {
   const { layouts, updatePanelGroup } = useLayouts();
@@ -40,14 +40,14 @@ const PanelGroupDialog = () => {
 
   const isEditingPanelGroup = groupIndex !== undefined;
 
-  const [isCollapsed, setIsCollapsed] = useState(isEditingPanelGroup && !layouts[groupIndex]?.isOpen);
+  const [isCollapsed, setIsCollapsed] = useState(isEditingPanelGroup && layouts[groupIndex]?.isCollapsed);
   const [name, setName] = useState(isEditingPanelGroup ? layouts[groupIndex]?.title : '');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const newGroup: Omit<GroupDefinition, 'id'> = {
+    const newGroup: Omit<PanelGroupDefinition, 'id'> = {
+      isCollapsed,
       title: name ?? '',
-      isOpen: !isCollapsed,
       items: groupIndex === undefined ? [] : layouts[groupIndex]?.items ?? [],
     };
     updatePanelGroup(newGroup, groupIndex);

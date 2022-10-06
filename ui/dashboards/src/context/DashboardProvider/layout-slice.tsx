@@ -16,7 +16,7 @@ import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 
 export interface LayoutSlice {
-  layouts: GroupDefinition[];
+  layouts: PanelGroupDefinition[];
 
   /**
    * Given a LayoutItem location, returns the panel's unique key at that location.
@@ -36,7 +36,7 @@ export interface LayoutSlice {
   /**
    * Updates an existing panel group to, for example, change its display properties.
    */
-  updatePanelGroup: (layout: Omit<GroupDefinition, 'id'>, groupIndex?: number) => void;
+  updatePanelGroup: (layout: Omit<PanelGroupDefinition, 'id'>, groupIndex?: number) => void;
 
   /**
    * Rearrange the order of panel groups by swapping the positions
@@ -44,10 +44,10 @@ export interface LayoutSlice {
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
 }
 
-export interface GroupDefinition {
+export interface PanelGroupDefinition {
   id: number;
   items: GridItemDefinition[];
-  isOpen?: boolean;
+  isCollapsed?: boolean;
   title?: string;
 }
 
@@ -76,7 +76,7 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
       ...layout,
       id: createPanelGroupId(),
       title: layout.spec.display?.title,
-      isOpen: layout.spec.display?.collapse?.open ?? true,
+      isCollapsed: !layout.spec.display?.collapse?.open ?? false,
       items: layout.spec.items,
     })),
 
@@ -162,7 +162,7 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
 }
 
 // Helper to find a group and throw if not found
-function findGroup(layouts: GroupDefinition[], groupIndex: number) {
+function findGroup(layouts: PanelGroupDefinition[], groupIndex: number) {
   const group = layouts[groupIndex];
   if (group === undefined) {
     throw new Error(`No layout at index ${groupIndex}`);
@@ -171,7 +171,7 @@ function findGroup(layouts: GroupDefinition[], groupIndex: number) {
 }
 
 // Helper to get an item in a group and throw if not found
-function findItem(group: GroupDefinition, itemIndex: number) {
+function findItem(group: PanelGroupDefinition, itemIndex: number) {
   const item = group.items[itemIndex];
   if (item === undefined) {
     throw new Error(`No grid item found at position ${itemIndex}`);
@@ -180,7 +180,7 @@ function findItem(group: GroupDefinition, itemIndex: number) {
 }
 
 // Given a Grid, will find the Y coordinate for adding a new row to the grid, taking into account the items present
-function getYForNewRow(group: GroupDefinition) {
+function getYForNewRow(group: PanelGroupDefinition) {
   let newRowY = 0;
   for (const item of group.items) {
     const itemMaxY = item.y + item.height;

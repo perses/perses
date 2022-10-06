@@ -16,7 +16,7 @@ import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { styles } from '../../css/styles';
 import { useEditMode } from '../../context';
-import { GroupDefinition } from '../../context/DashboardProvider/layout-slice';
+import { PanelGroupDefinition } from '../../context/DashboardProvider/layout-slice';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 
@@ -24,7 +24,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
   groupIndex: number;
-  groupDefinition: GroupDefinition;
+  groupDefinition: PanelGroupDefinition;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface GridLayoutProps extends BoxProps {
 export function GridLayout(props: GridLayoutProps) {
   const { groupIndex, groupDefinition, ...others } = props;
 
-  const [isOpen, setIsOpen] = useState(groupDefinition.isOpen ?? true);
+  const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
   const { isEditMode } = useEditMode();
 
   return (
@@ -45,7 +45,7 @@ export function GridLayout(props: GridLayoutProps) {
             groupIndex={groupIndex}
             title={groupDefinition.title}
             collapse={
-              groupDefinition.isOpen === undefined
+              groupDefinition.isCollapsed === undefined
                 ? undefined
                 : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
             }

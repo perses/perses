@@ -38,7 +38,6 @@ describe('Add Panel Group', () => {
   };
 
   it('should add new panel group', async () => {
-    // jest.spyOn(dashboardAppSlice, 'usePanelGroupDialog').mockReturnValue(dashboardApp);
     const storeApi = renderDialog();
 
     // Open the dialog for a new panel group
@@ -52,7 +51,7 @@ describe('Add Panel Group', () => {
     expect(layouts).toContainEqual({
       id: 3,
       title: 'New Panel Group',
-      isOpen: true,
+      isCollapsed: false,
       items: [],
     });
   });
@@ -72,7 +71,7 @@ describe('Add Panel Group', () => {
     expect(layouts).toContainEqual({
       id: 0,
       title: 'New Name',
-      isOpen: true,
+      isCollapsed: false,
       items: [{ content: { $ref: '#/spec/panels/cpu' }, height: 4, width: 12, x: 0, y: 0 }],
     });
   });
