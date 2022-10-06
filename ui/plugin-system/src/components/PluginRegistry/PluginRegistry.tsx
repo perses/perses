@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEvent } from '@perses-dev/core';
+import { UnknownSpec, useEvent } from '@perses-dev/core';
 import { useRef, useCallback, useMemo } from 'react';
-import { PluginModuleResource, PluginType, PluginImplementation } from '../../model';
+import { PluginModuleResource, PluginType, PluginImplementation, Plugin } from '../../model';
 import { getTypeAndKindKey } from '../../utils/cache-keys';
 import { GetInstalledPlugins, usePluginIndexes } from './plugin-indexes';
 import { PluginRegistryContext } from './plugin-registry-model';
@@ -63,7 +63,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
       }
 
       // Treat the plugin module as a bunch of named exports that have plugins
-      const pluginModule = (await loadPluginModule(resource)) as Record<string, unknown>;
+      const pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
 
       // We currently assume that plugin modules will have named exports that match the kinds they handle
       const plugin = pluginModule[kind];

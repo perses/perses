@@ -10,13 +10,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import { UnknownSpec } from '@perses-dev/core';
 import {
   PluginRegistryProps,
   PluginModuleResource,
   PluginImplementation,
   PluginType,
-  Plugin,
   PanelPlugin,
+  Plugin,
 } from '@perses-dev/plugin-system';
 
 /**
@@ -38,7 +39,7 @@ export function mockPluginRegistryProps() {
     },
   };
 
-  const mockPluginModule: Record<string, unknown> = {};
+  const mockPluginModule: Record<string, Plugin<UnknownSpec>> = {};
 
   // Allow adding mock plugins in tests
   const addMockPlugin = <T extends PluginType>(pluginType: T, kind: string, plugin: PluginImplementation<T>) => {
