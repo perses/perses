@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/core';
-import { OptionsEditorProps } from '../model/visual-editing';
+import { OptionsEditorProps } from '../model';
 import { usePlugin } from './plugins';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {

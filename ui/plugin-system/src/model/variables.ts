@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/core';
-import { VariableStateMap } from '../runtime';
-import { DatasourceStore } from '../runtime';
+import { VariableStateMap, DatasourceStore } from '../runtime';
+import { Plugin } from './plugin-base';
 
 export type VariableOption = { label: string; value: string };
 
@@ -25,10 +25,12 @@ export interface GetVariableOptionsContext {
 /**
  * Plugin for handling custom VariableDefinitions.
  */
-export interface VariablePlugin<Spec = UnknownSpec> {
+export interface VariablePlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getVariableOptions: GetVariableOptions<Spec>;
 
-  /** Returns a list of variables name this variable depends on. Used to optimize fetching */
+  /**
+   * Returns a list of variables name this variable depends on. Used to optimize fetching
+   */
   dependsOn?: (definition: Spec) => string[];
 }
 

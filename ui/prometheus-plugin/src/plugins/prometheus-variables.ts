@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
-import {} from '../model/utils';
 import {
   replaceTemplateVariables,
   parseTemplateVariables,
@@ -52,6 +51,8 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
     };
   },
   dependsOn: () => [],
+  OptionsEditorComponent: () => null,
+  createInitialOptions: () => ({}),
 };
 
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
@@ -69,4 +70,6 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
   dependsOn: (spec) => {
     return spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [];
   },
+  OptionsEditorComponent: () => null,
+  createInitialOptions: () => ({ label_name: '' }),
 };

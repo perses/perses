@@ -14,6 +14,21 @@
 import React from 'react';
 
 /**
+ * Base type of all plugin implementations.
+ */
+export interface Plugin<Spec> {
+  /**
+   * React component for editing the plugin's options in the UI.
+   */
+  OptionsEditorComponent: OptionsEditor<Spec>;
+
+  /**
+   * Callback for creating the initial options for the plugin.
+   */
+  createInitialOptions: InitialOptionsCallback<Spec>;
+}
+
+/**
  * A component for visual editing of a plugin's options.
  */
 export type OptionsEditor<Spec> = React.ComponentType<OptionsEditorProps<Spec>>;

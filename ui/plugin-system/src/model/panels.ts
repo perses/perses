@@ -12,15 +12,13 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/core';
-import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
+import { Plugin } from './plugin-base';
 
 /**
  * Plugin the provides custom visualizations inside of a Panel.
  */
-export interface PanelPlugin<Spec = UnknownSpec> {
+export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   PanelComponent: React.ComponentType<PanelProps<Spec>>;
-  OptionsEditorComponent: OptionsEditor<Spec>;
-  createInitialOptions: InitialOptionsCallback<Spec>;
 }
 
 /**

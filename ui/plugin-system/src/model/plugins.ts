@@ -58,13 +58,6 @@ export interface SupportedPlugins {
 }
 
 /**
- * Union type of all available plugin implementations.
- */
-export type Plugin = {
-  [Type in PluginType]: PluginImplementation<Type>;
-}[PluginType];
-
-/**
  * The implementation for a given plugin type.
  */
 export type PluginImplementation<Type extends PluginType> = SupportedPlugins[Type];
