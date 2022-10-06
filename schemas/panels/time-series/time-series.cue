@@ -17,15 +17,12 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
-#panel: spec: plugin: {
-	kind: "TimeSeriesChart"
-
-	spec: {
-		queries: [...#ts_query]
-		show_legend?: bool
-		unit?:        common.#unit
-		thresholds?:  common.#thresholds
-	}
+kind: "TimeSeriesChart"
+spec: {
+	queries: [...#ts_query]
+	show_legend?: bool
+	unit?:        common.#unit
+	thresholds?:  common.#thresholds
 }
 
 #ts_query: _

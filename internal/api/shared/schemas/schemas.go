@@ -15,7 +15,6 @@ package schemas
 
 import (
 	_ "embed"
-	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -23,11 +22,9 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
 	"github.com/perses/perses/internal/api/config"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
-
-//go:embed base_def_panel.cue
-var basePanelDef []byte
 
 //go:embed base_def_query.cue
 var baseQueryDef []byte
@@ -57,7 +54,7 @@ func retrieveSchemaForKind(panelName string, panelVal cue.Value, kindPath string
 }
 
 type Schemas interface {
-	ValidatePanels(panels map[string]json.RawMessage) error
+	ValidatePanels(panels map[string]*modelV1.Panel) error
 	GetLoaders() []Loader
 }
 
@@ -65,22 +62,20 @@ func New(conf config.Schemas) Schemas {
 	ctx := cuecontext.New()
 
 	// compile the base definitions
-	basePanelDefVal := ctx.CompileBytes(basePanelDef)
 	baseQueryDefVal := ctx.CompileBytes(baseQueryDef)
 
 	return &sch{
 		context: ctx,
 		panels: &cueDefs{
 			context:     ctx,
-			baseDef:     basePanelDefVal,
 			schemas:     &sync.Map{},
 			schemasPath: conf.PanelsPath,
-			kindCuePath: "#panel.spec.plugin.kind",
+			kindCuePath: "kind",
 		},
 		queries: &cueDefsWithDisjunction{
 			cueDefs: cueDefs{
 				context:     ctx,
-				baseDef:     baseQueryDefVal,
+				baseDef:     &baseQueryDefVal,
 				schemas:     &sync.Map{},
 				schemasPath: conf.QueriesPath,
 				kindCuePath: "spec.plugin.kind",
@@ -104,17 +99,21 @@ func (s *sch) GetLoaders() []Loader {
 // ValidatePanels verify a list of panels.
 // The panels are matched against the known list of CUE definitions (schemas).
 // If no schema matches for at least 1 panel, the validation fails.
-func (s *sch) ValidatePanels(panels map[string]json.RawMessage) error {
+func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
 	// go through the panels list
 	// the processing stops as soon as it detects an invalid panel -> TODO: improve this to return a list of all the errors encountered ?
-	for panelName, panelJSON := range panels {
-		logrus.Tracef("Panel to validate: %s", string(panelJSON))
-
-		// compile the JSON panel into a CUE Value
-		value := s.context.CompileBytes(panelJSON)
+	for panelName, panel := range panels {
+		logrus.Tracef("Panel to validate: %s", panelName)
+		panelPluginByte, err := panel.Spec.Plugin.JSONMarshal()
+		if err != nil {
+			logrus.WithError(err).Debugf("unable to marshal the panel plugin %q", panel.Spec.Plugin.Kind)
+			return err
+		}
+		// compile the JSON panel plugin into a CUE Value
+		value := s.context.CompileBytes(panelPluginByte)
 
 		// retrieve the corresponding panel schema
-		panelSchema, err := retrieveSchemaForKind(panelName, value, "spec.plugin.kind", s.panels.schemas)
+		panelSchema, err := retrieveSchemaForKind(panelName, value, s.panels.kindCuePath, s.panels.schemas)
 		if err != nil {
 			return err
 		}
@@ -127,7 +126,7 @@ func (s *sch) ValidatePanels(panels map[string]json.RawMessage) error {
 		}
 
 		// do the validation using the main #panel def of the schema as entrypoint
-		unified := value.Unify(panelSchema.LookupPath(cue.ParsePath("#panel")))
+		unified := value.Unify(panelSchema.LookupPath(cue.ParsePath("")))
 		opts := []cue.Option{
 			cue.Concrete(true),
 			cue.Attributes(true),

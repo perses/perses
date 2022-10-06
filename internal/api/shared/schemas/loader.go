@@ -36,52 +36,14 @@ type Loader interface {
 type cueDefs struct {
 	Loader
 	context     *cue.Context
-	baseDef     cue.Value
+	baseDef     *cue.Value
 	schemas     *sync.Map
 	schemasPath string
 	kindCuePath string
 }
 
-type cueDefsWithDisjunction struct {
-	cueDefs
-	disjSchema cue.Value
-	// mapID is the identifier of the intermediary map used to build the disjunction schema (e.g #query_types).
-	// It should be filled with the same identifier used in the generator schema.
-	mapID string
-}
-
 func (c *cueDefs) GetSchemaPath() string {
 	return c.schemasPath
-}
-
-// Load the list of available plugins as CUE schemas + build a disjunction from it
-func (c *cueDefsWithDisjunction) Load() error {
-	if err := c.cueDefs.Load(); err != nil {
-		return err
-	}
-
-	// build a CUE value representing a disjunction of all the possible schemas (A or B or C ...)
-	disjSchema := c.context.CompileBytes(queryDisjunctionGenerator)
-	c.schemas.Range(func(name any, schema any) bool {
-		backup := disjSchema // save current state of disjSchema in case the current schema turns out to be invalid
-		disjSchema = disjSchema.FillPath(
-			cue.ParsePath(fmt.Sprintf("%s.%s", c.mapID, name)),
-			schema.(cue.Value),
-		)
-
-		// in case of failure, don't include the faulty schema & continue iterating
-		// NB: should not happen since the bad schemas should be filtered out during cueDefs.Load()
-		if disjSchema.Err() != nil {
-			logrus.WithError(disjSchema.Err()).Errorf("Error injecting schema %s for disjunction", name)
-			disjSchema = backup
-		}
-
-		return true
-	})
-	logrus.Tracef("Final disjunction schema: %#v", disjSchema)
-	c.disjSchema = disjSchema
-
-	return nil
 }
 
 // Load the list of available plugins as CUE schemas
@@ -126,21 +88,22 @@ func (c *cueDefs) Load() error {
 			continue
 		}
 
-		// unify with the base def to complete defaults + check if the plugin fulfils the base requirements
-		finalSchema := c.baseDef.Unify(schema)
-		if finalSchema.Err() != nil {
-			logrus.WithError(finalSchema.Err()).Errorf("Error during schema validation for %s, skipping this schema", schemaPath)
-			continue
+		if c.baseDef != nil {
+			// unify with the base def to complete defaults + check if the plugin fulfils the base requirements
+			schema = c.baseDef.Unify(schema)
+			if schema.Err() != nil {
+				logrus.WithError(schema.Err()).Errorf("Error during schema validation for %s, skipping this schema", schemaPath)
+				continue
+			}
 		}
-
 		// check if another schema for the same Kind was already registered
-		kind, _ := finalSchema.LookupPath(cue.ParsePath(c.kindCuePath)).String()
+		kind, _ := schema.LookupPath(cue.ParsePath(c.kindCuePath)).String()
 		if _, ok := newSchemas[kind]; ok {
 			logrus.Warningf("Conflict caused by %s: a schema already exists for kind %s, skipping this schema", schemaPath, kind)
 			continue
 		}
 
-		newSchemas[kind] = finalSchema
+		newSchemas[kind] = schema
 		logrus.Debugf("Loaded schema %s from file %s", kind, schemaPath)
 	}
 
@@ -155,6 +118,48 @@ func (c *cueDefs) Load() error {
 		return true
 	})
 	logrus.Debugf("Schemas at %s (re)loaded", c.schemasPath)
+	return nil
+}
+
+type cueDefsWithDisjunction struct {
+	cueDefs
+	disjSchema cue.Value
+	// mapID is the identifier of the intermediary map used to build the disjunction schema (e.g #query_types).
+	// It should be filled with the same identifier used in the generator schema.
+	mapID string
+}
+
+func (c *cueDefsWithDisjunction) GetSchemaPath() string {
+	return c.schemasPath
+}
+
+// Load the list of available plugins as CUE schemas + build a disjunction from it
+func (c *cueDefsWithDisjunction) Load() error {
+	if err := c.cueDefs.Load(); err != nil {
+		return err
+	}
+
+	// build a CUE value representing a disjunction of all the possible schemas (A or B or C ...)
+	disjSchema := c.context.CompileBytes(queryDisjunctionGenerator)
+	c.schemas.Range(func(name any, schema any) bool {
+		backup := disjSchema // save current state of disjSchema in case the current schema turns out to be invalid
+		disjSchema = disjSchema.FillPath(
+			cue.ParsePath(fmt.Sprintf("%s.%s", c.mapID, name)),
+			schema.(cue.Value),
+		)
+
+		// in case of failure, don't include the faulty schema & continue iterating
+		// NB: should not happen since the bad schemas should be filtered out during cueDefs.Load()
+		if disjSchema.Err() != nil {
+			logrus.WithError(disjSchema.Err()).Errorf("Error injecting schema %s for disjunction", name)
+			disjSchema = backup
+		}
+
+		return true
+	})
+	logrus.Tracef("Final disjunction schema: %#v", disjSchema)
+	c.disjSchema = disjSchema
+
 	return nil
 }
 

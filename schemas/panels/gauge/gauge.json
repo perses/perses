@@ -1,43 +1,34 @@
 {
-  "kind": "Panel",
+  "kind": "GaugeChart",
   "spec": {
-    "display": {
-      "name": "CPU Busy",
-      "description": "This is a gauge chart"
-    },
-    "plugin": {
-      "kind": "GaugeChart",
+    "query": {
+      "kind": "TimeSeriesQuery",
       "spec": {
-        "query": {
-          "kind": "TimeSeriesQuery",
+        "plugin": {
+          "kind": "PrometheusTimeSeriesQuery",
           "spec": {
-            "plugin": {
-              "kind": "PrometheusTimeSeriesQuery",
-              "spec": {
-                "datasource": {
-                  "kind": "PrometheusDatasource"
-                },
-                "query": "(((count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',job='node',instance='$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))"
-              }
-            }
-          }
-        },
-        "calculation": "LastNumber",
-        "unit": {
-          "kind": "Percent",
-          "decimal_places": 2
-        },
-        "thresholds": {
-          "steps": [
-            {
-              "value": 85
+            "datasource": {
+              "kind": "PrometheusDatasource"
             },
-            {
-              "value": 95
-            }
-          ]
+            "query": "(((count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',job='node',instance='$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))"
+          }
         }
       }
+    },
+    "calculation": "LastNumber",
+    "unit": {
+      "kind": "Percent",
+      "decimal_places": 2
+    },
+    "thresholds": {
+      "steps": [
+        {
+          "value": 85
+        },
+        {
+          "value": 95
+        }
+      ]
     }
   }
 }

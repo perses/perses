@@ -13,16 +13,13 @@
 
 package second
 
-#panel: spec: plugin: {
-	kind: "SecondChart"
-
-	spec: {
-		query: #ts_query
-		a:     string
-		b: {
-			c?: bool
-			d: [...#e]
-		}
+kind: "SecondChart"
+spec: {
+	query: #ts_query
+	a:     string
+	b: {
+		c?: bool
+		d: [...#e]
 	}
 }
 

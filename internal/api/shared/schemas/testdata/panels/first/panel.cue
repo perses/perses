@@ -13,15 +13,12 @@
 
 package first
 
-#panel: spec: plugin: {
-	kind: "FirstChart"
-
-	spec: {
-		queries: [...#ts_query]
-		a: string
-		b: {
-			c: [...#d]
-		}
+kind: "FirstChart"
+spec: {
+	queries: [...#ts_query]
+	a: string
+	b: {
+		c: [...#d]
 	}
 }
 

@@ -30,6 +30,16 @@ func GenerateDashboardID(project string, name string) string {
 	return generateProjectResourceID("dashboards", project, name)
 }
 
+type PanelSpec struct {
+	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
+	Plugin  Plugin   `json:"plugin" yaml:"plugin"`
+}
+
+type Panel struct {
+	Kind string    `json:"kind" yaml:"kind"`
+	Spec PanelSpec `json:"spec" yaml:"spec"`
+}
+
 type DashboardSpec struct {
 	// Datasource is a set of values that will be used to find the datasource definition.
 	Datasource dashboard.Datasource `json:"datasource" yaml:"datasource"`
@@ -37,7 +47,7 @@ type DashboardSpec struct {
 	// dashboard
 	Duration  model.Duration                 `json:"duration" yaml:"duration"`
 	Variables map[string]*dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Panels    map[string]json.RawMessage     `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
+	Panels    map[string]*Panel              `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
 	Layouts   []dashboard.Layout             `json:"layouts" yaml:"layouts"`
 }
 

@@ -1,15 +1,7 @@
 {
-    "kind": "Panel",
-    "spec": {
-        "display": {
-            "name": "simple third chart"
-        },
-        "plugin": {
-            "kind": "ThirdChart",
-            "spec": {
-                "a": "yes",
-                "b": "no"
-            }
-        }
-    }
+  "kind": "ThirdChart",
+  "spec": {
+    "a": "yes",
+    "b": "no"
+  }
 }
