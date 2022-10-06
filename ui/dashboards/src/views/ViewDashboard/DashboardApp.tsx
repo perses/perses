@@ -17,7 +17,7 @@ import { DashboardResource } from '@perses-dev/core';
 import { PanelDrawer, Dashboard } from '../../components';
 import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
-import { useDashboardApp } from '../../context';
+import { usePanelGroupDialog } from '../../context';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
@@ -25,7 +25,7 @@ export interface DashboardAppProps {
 
 export const DashboardApp = (props: DashboardAppProps) => {
   const { dashboardResource } = props;
-  const { panelGroupDialog } = useDashboardApp();
+  const { panelGroupDialog } = usePanelGroupDialog();
   return (
     <Box
       sx={{

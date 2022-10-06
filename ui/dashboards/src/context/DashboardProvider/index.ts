@@ -12,5 +12,4 @@
 // limitations under the License.
 
 export * from './dashboard-provider-api';
-export * from './DashboardAppSlice';
 export * from './DashboardProvider';

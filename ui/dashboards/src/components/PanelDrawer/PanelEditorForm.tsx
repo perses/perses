@@ -67,7 +67,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             <Select required labelId="select-group" label="Group" value={groupIndex ?? 0} onChange={handleGroupChange}>
               {layouts.map((layout, index) => (
                 <MenuItem key={index} value={index}>
-                  {layout.spec.display?.title ?? `Group ${index + 1}`}
+                  {layout.title ?? `Group ${index + 1}`}
                 </MenuItem>
               ))}
             </Select>

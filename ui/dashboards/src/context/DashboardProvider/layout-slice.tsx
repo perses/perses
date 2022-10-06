@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  createPanelRef,
-  getPanelKeyFromRef,
-  GridDefinition,
-  GridItemDefinition,
-  LayoutDefinition,
-} from '@perses-dev/core';
+import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 
@@ -42,7 +36,7 @@ export interface LayoutSlice {
   /**
    * Updates an existing panel group to, for example, change its display properties.
    */
-  updatePanelGroup: (layout: LayoutDefinition, groupIndex?: number) => void;
+  updatePanelGroup: (layout: Omit<PanelGroupDefinition, 'id'>, groupIndex?: number) => void;
 
   /**
    * Rearrange the order of panel groups by swapping the positions
@@ -50,8 +44,11 @@ export interface LayoutSlice {
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
 }
 
-export interface PanelGroupDefinition extends LayoutDefinition {
+export interface PanelGroupDefinition {
   id: number;
+  items: GridItemDefinition[];
+  isCollapsed?: boolean;
+  title?: string;
 }
 
 /**
@@ -75,13 +72,13 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
   }
 
   return (set, get) => ({
-    layouts: layouts.map(
-      (layout) =>
-        ({
-          ...layout,
-          id: createPanelGroupId(),
-        } as PanelGroupDefinition)
-    ),
+    layouts: layouts.map((layout) => ({
+      ...layout,
+      id: createPanelGroupId(),
+      title: layout.spec.display?.title,
+      isCollapsed: !layout.spec.display?.collapse?.open ?? false,
+      items: layout.spec.items,
+    })),
 
     getPanelKey({ groupIndex, itemIndex }) {
       const { layouts } = get();
@@ -101,7 +98,7 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
         content: createPanelRef(panelKey),
       };
       set((state) => {
-        state.layouts[groupIndex]?.spec.items.push(gridItem);
+        state.layouts[groupIndex]?.items.push(gridItem);
       });
     },
 
@@ -118,10 +115,10 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
 
       set((state) => {
         // Remove the item from its current group
-        state.layouts[groupIndex]?.spec.items.splice(itemIndex, 1);
+        state.layouts[groupIndex]?.items.splice(itemIndex, 1);
 
         // Add a new item to the new group
-        state.layouts[newGroupIndex]?.spec.items.push({
+        state.layouts[newGroupIndex]?.items.push({
           x: 0,
           y: newGroupY,
           width: item.width,
@@ -165,7 +162,7 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
 }
 
 // Helper to find a group and throw if not found
-function findGroup(layouts: LayoutDefinition[], groupIndex: number) {
+function findGroup(layouts: PanelGroupDefinition[], groupIndex: number) {
   const group = layouts[groupIndex];
   if (group === undefined) {
     throw new Error(`No layout at index ${groupIndex}`);
@@ -174,8 +171,8 @@ function findGroup(layouts: LayoutDefinition[], groupIndex: number) {
 }
 
 // Helper to get an item in a group and throw if not found
-function findItem(group: GridDefinition, itemIndex: number) {
-  const item = group.spec.items[itemIndex];
+function findItem(group: PanelGroupDefinition, itemIndex: number) {
+  const item = group.items[itemIndex];
   if (item === undefined) {
     throw new Error(`No grid item found at position ${itemIndex}`);
   }
@@ -183,9 +180,9 @@ function findItem(group: GridDefinition, itemIndex: number) {
 }
 
 // Given a Grid, will find the Y coordinate for adding a new row to the grid, taking into account the items present
-function getYForNewRow(grid: GridDefinition) {
+function getYForNewRow(group: PanelGroupDefinition) {
   let newRowY = 0;
-  for (const item of grid.spec.items) {
+  for (const item of group.items) {
     const itemMaxY = item.y + item.height;
     if (itemMaxY > newRowY) {
       newRowY = itemMaxY;

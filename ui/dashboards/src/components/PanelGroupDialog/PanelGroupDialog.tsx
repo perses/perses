@@ -28,38 +28,29 @@ import {
   SelectChangeEvent,
   MenuItem,
 } from '@mui/material';
-import { LayoutDefinition } from '@perses-dev/core';
 import CloseIcon from 'mdi-material-ui/Close';
-import { useDashboardApp, useLayouts } from '../../context';
+import { usePanelGroupDialog, useLayouts } from '../../context';
+import { PanelGroupDefinition } from '../../context/DashboardProvider/layout-slice';
 
 const PanelGroupDialog = () => {
   const { layouts, updatePanelGroup } = useLayouts();
-  const { panelGroupDialog, closePanelGroupDialog } = useDashboardApp();
+  const { panelGroupDialog, closePanelGroupDialog } = usePanelGroupDialog();
 
   const groupIndex = panelGroupDialog?.groupIndex;
 
   const isEditingPanelGroup = groupIndex !== undefined;
 
-  const [isCollapsed, setIsCollapsed] = useState(
-    isEditingPanelGroup && !layouts[groupIndex]?.spec.display?.collapse?.open
-  );
-  const [name, setName] = useState(isEditingPanelGroup ? layouts[groupIndex]?.spec.display?.title : '');
+  const [isCollapsed, setIsCollapsed] = useState(isEditingPanelGroup && layouts[groupIndex]?.isCollapsed);
+  const [name, setName] = useState(isEditingPanelGroup ? layouts[groupIndex]?.title : '');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const newLayout: LayoutDefinition = {
-      kind: 'Grid',
-      spec: {
-        display: {
-          title: name ?? '',
-          collapse: {
-            open: !isCollapsed,
-          },
-        },
-        items: groupIndex === undefined ? [] : layouts[groupIndex]?.spec.items ?? [],
-      },
+    const newGroup: Omit<PanelGroupDefinition, 'id'> = {
+      isCollapsed,
+      title: name ?? '',
+      items: groupIndex === undefined ? [] : layouts[groupIndex]?.items ?? [],
     };
-    updatePanelGroup(newLayout, groupIndex);
+    updatePanelGroup(newGroup, groupIndex);
     closePanelGroupDialog();
   };
 

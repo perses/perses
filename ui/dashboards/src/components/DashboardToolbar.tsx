@@ -16,7 +16,7 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { useDashboardApp, useEditMode, usePanels } from '../context';
+import { usePanelGroupDialog, useEditMode, usePanels } from '../context';
 import { TemplateVariableList, TimeRangeControls } from '../components';
 
 export interface DashboardToolbarProps {
@@ -27,7 +27,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { openPanelGroupDialog } = useDashboardApp();
+  const { openPanelGroupDialog } = usePanelGroupDialog();
   const { addPanel } = usePanels();
 
   const onEditButtonClick = () => {

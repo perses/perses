@@ -21,7 +21,7 @@ import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 
-import { useDashboardApp, useEditMode, useLayouts, usePanels } from '../../context';
+import { usePanelGroupDialog, useEditMode, useLayouts, usePanels } from '../../context';
 
 export interface GridTitleProps {
   groupIndex: number;
@@ -40,7 +40,7 @@ export function GridTitle(props: GridTitleProps) {
   const { groupIndex, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { openPanelGroupDialog } = useDashboardApp();
+  const { openPanelGroupDialog } = usePanelGroupDialog();
   const { addPanel } = usePanels();
   const { isEditMode } = useEditMode();
   const { layouts, swapPanelGroups } = useLayouts();
