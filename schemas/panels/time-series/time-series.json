@@ -1,34 +1,45 @@
 {
-  "kind": "TimeSeriesChart",
-  "display": {
-    "name": "CPU",
-    "description": "This is a line" 
-  },
-  "options": {
-    "queries": [
-      {
-        "kind": "PrometheusGraphQuery",
-        "options": {
-          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='node',instance='$instance',mode!='idle'}[$interval]))"
+  "kind": "Panel",
+  "spec": {
+    "display": {
+      "name": "CPU",
+      "description": "This is a line"
+    },
+    "plugin": {
+      "kind": "TimeSeriesChart",
+      "spec": {
+        "queries": [{
+          "kind": "TimeSeriesQuery",
+          "spec": {
+            "plugin": {
+              "kind": "PrometheusTimeSeriesQuery",
+              "spec": {
+                "datasource": {
+                  "kind": "PrometheusDatasource",
+                  "name": "MyPromDatasource"
+                },
+                "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='node',instance='$instance',mode!='idle'}[$interval]))"
+              }
+            }
+          }
+        }],
+        "unit": {
+          "kind": "Decimal",
+          "decimal_places": 2
+        },
+        "show_legend": true,
+        "thresholds": {
+          "steps": [{
+              "value": 0.6,
+              "name": "Alert: Warning condition example"
+            },
+            {
+              "value": 0.80,
+              "name": "Alert: Critical condition example"
+            }
+          ]
         }
       }
-    ],
-    "unit": {
-      "kind": "Decimal",
-      "decimal_places": 2
-    },
-    "show_legend": true,
-    "thresholds": {
-      "steps": [
-        {
-          "value": 0.6,
-          "name": "Alert: Warning condition example"
-        },
-        {
-          "value": 0.80,
-          "name": "Alert: Critical condition example"
-        }
-      ]
     }
   }
 }

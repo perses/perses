@@ -13,15 +13,15 @@
 
 package first
 
-#panel: {
-	kind:       "FirstChart"
-	datasource: #datasource
-	options: {
+#panel: spec: plugin: {
+	kind: "FirstChart"
+
+	spec: {
+		queries: [...#ts_query]
 		a: string
 		b: {
 			c: [...#d]
 		}
-		queries: [...#query]
 	}
 }
 
@@ -30,5 +30,4 @@ package first
 	f?: string
 }
 
-#datasource: _
-#query:      _
+#ts_query: _

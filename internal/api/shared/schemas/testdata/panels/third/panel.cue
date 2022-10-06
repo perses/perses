@@ -13,9 +13,10 @@
 
 package third
 
-#panel: {
-	kind: "ThirdPanel"
-	options: {
+#panel: spec: plugin: {
+	kind: "ThirdChart"
+
+	spec: {
 		a: string
 		b: string
 	}

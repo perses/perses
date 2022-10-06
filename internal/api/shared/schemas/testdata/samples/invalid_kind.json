@@ -1,0 +1,39 @@
+{
+    "kind": "Panel",
+    "spec": {
+        "display": {
+            "name": "simple unknown chart"
+        },
+        "plugin": {
+            "kind": "UnknownChart",
+            "spec": {
+                "queries": [ 
+                    {
+                        "kind": "TimeSeriesQuery",
+                        "spec": {
+                            "plugin": {
+                                "kind": "CustomGraphQuery",
+                                "spec": {
+                                    "datasource": {
+                                        "kind": "CustomDatasource",
+                                        "name": "MyCustomDatasource"
+                                    },
+                                    "custom": true
+                                }
+                            }
+                        }
+                    }
+                ],
+                "a": "no",
+                "b": {
+                    "c": [
+                        {
+                            "e": "up",
+                            "f": "the up metric"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

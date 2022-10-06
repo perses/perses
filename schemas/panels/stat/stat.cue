@@ -17,22 +17,21 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
-#panel: {
-	kind:       "StatChart"
-	datasource: #datasource
-	options: {
-		query:       #query
+#panel: spec: plugin: {
+	kind: "StatChart"
+
+	spec: {
+		query:       #ts_query
 		calculation: common.#calculation
 		unit:        common.#unit
 		thresholds?: common.#thresholds
 		sparkline?:  #sparkline
+
+		#sparkline: {
+			color?: string
+			width?: number
+		}
 	}
 }
 
-#sparkline: {
-	color?: string
-	width?: number
-}
-
-#datasource: _
-#query:      _
+#ts_query: _

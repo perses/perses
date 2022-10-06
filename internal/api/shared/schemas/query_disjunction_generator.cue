@@ -11,18 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package base
+// the package name doesn't really matter here, we use "generator" to make a difference with the "base" definitions of panels, queries etc.
+package generator
 
-#panel: close({
-	kind: "Panel"
-	spec: close({
-		display: close({
-			name:         string
-			description?: string
-		})
-		plugin: close({
-			kind: string
-			spec: _
-		})
-	})
-})
+#ts_query: or([ for _, query_type in #query_types {query_type}])
+
+#query_types: _

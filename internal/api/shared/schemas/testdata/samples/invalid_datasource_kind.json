@@ -1,0 +1,39 @@
+{
+    "kind": "Panel",
+    "spec": {
+        "display": {
+            "name": "simple first chart"
+        },
+        "plugin": {
+            "kind": "FirstChart",
+            "spec": {
+                "queries": [ 
+                    {
+                        "kind": "TimeSeriesQuery",
+                        "spec": {
+                            "plugin": {
+                                "kind": "CustomGraphQuery",
+                                "spec": {
+                                    "datasource": {
+                                        "kind": "UnknownDatasource",
+                                        "name": "MyUnknownDatasource"
+                                    },
+                                    "custom": true
+                                }
+                            }
+                        }
+                    }
+                ],
+                "a": "no",
+                "b": {
+                    "c": [
+                        {
+                            "e": "up",
+                            "f": "the up metric"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -17,11 +17,11 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
-#panel: {
-	kind:       "GaugeChart"
-	datasource: #datasource
-	options: {
-		query:       #query
+#panel: spec: plugin: {
+	kind: "GaugeChart"
+
+	spec: {
+		query:       #ts_query
 		calculation: common.#calculation
 		unit?:       common.#unit
 		thresholds?: common.#thresholds
@@ -29,5 +29,4 @@ import (
 	}
 }
 
-#datasource: _
-#query:      _
+#ts_query: _
