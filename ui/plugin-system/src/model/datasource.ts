@@ -12,15 +12,13 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/core';
-import { InitialOptionsCallback, OptionsEditor } from './visual-editing';
+import { Plugin } from './plugin-base';
 
 /**
  * Plugin that defines options for an external system that Perses talks to for data.
  */
-export interface DatasourcePlugin<Spec = UnknownSpec, Client = unknown> {
+export interface DatasourcePlugin<Spec = UnknownSpec, Client = unknown> extends Plugin<Spec> {
   createClient: (spec: Spec, options: DatasourceClientOptions) => Client;
-  OptionsEditorComponent: OptionsEditor<Spec>;
-  createInitialOptions: InitialOptionsCallback<Spec>;
 }
 
 export interface DatasourceClientOptions {

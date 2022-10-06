@@ -21,4 +21,6 @@ const data: VariableOption[] = [
 // Dummy plugin to test loading
 export const ErnieVariable: VariablePlugin = {
   getVariableOptions: async () => ({ data }),
+  OptionsEditorComponent: () => null,
+  createInitialOptions: () => ({}),
 };

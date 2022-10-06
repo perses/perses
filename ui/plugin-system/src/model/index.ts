@@ -16,4 +16,4 @@ export * from './panels';
 export * from './plugins';
 export * from './time-series-queries';
 export * from './variables';
-export * from './visual-editing';
+export * from './plugin-base';
