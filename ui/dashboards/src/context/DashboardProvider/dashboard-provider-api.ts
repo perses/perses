@@ -18,21 +18,36 @@ export function useEditMode() {
 }
 
 export function useLayouts() {
-  return useDashboardStore(({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups }) => ({
-    layouts,
-    addPanelToGroup,
-    movePanelToGroup,
-    updatePanelGroup,
-    swapPanelGroups,
-  }));
+  return useDashboardStore(
+    ({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups, deletePanelGroup }) => ({
+      layouts,
+      addPanelToGroup,
+      movePanelToGroup,
+      updatePanelGroup,
+      swapPanelGroups,
+      deletePanelGroup,
+    })
+  );
 }
 
 export function usePanelGroupDialog() {
-  return useDashboardStore(({ panelGroupDialog, openPanelGroupDialog, closePanelGroupDialog }) => ({
-    panelGroupDialog,
-    openPanelGroupDialog,
-    closePanelGroupDialog,
-  }));
+  return useDashboardStore(
+    ({
+      panelGroupDialog,
+      openPanelGroupDialog,
+      closePanelGroupDialog,
+      deletePanelGroupDialog,
+      openDeletePanelGroupDialog,
+      closeDeletePanelGroupDialog,
+    }) => ({
+      panelGroupDialog,
+      openPanelGroupDialog,
+      closePanelGroupDialog,
+      deletePanelGroupDialog,
+      openDeletePanelGroupDialog,
+      closeDeletePanelGroupDialog,
+    })
+  );
 }
 
 export function usePanels() {

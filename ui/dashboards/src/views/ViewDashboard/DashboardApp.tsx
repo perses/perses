@@ -18,6 +18,7 @@ import { PanelDrawer, Dashboard } from '../../components';
 import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
 import { usePanelGroupDialog } from '../../context';
+import DeletePanelGroupDialog from '../../components/PanelGroupDialog/DeletePanelGroupDialog';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
@@ -25,7 +26,7 @@ export interface DashboardAppProps {
 
 export const DashboardApp = (props: DashboardAppProps) => {
   const { dashboardResource } = props;
-  const { panelGroupDialog } = usePanelGroupDialog();
+  const { panelGroupDialog, deletePanelGroupDialog } = usePanelGroupDialog();
   return (
     <Box
       sx={{
@@ -44,6 +45,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         </ErrorBoundary>
         <PanelDrawer />
         {panelGroupDialog && <PanelGroupDialog />}
+        {deletePanelGroupDialog && <DeletePanelGroupDialog />}
       </Box>
     </Box>
   );

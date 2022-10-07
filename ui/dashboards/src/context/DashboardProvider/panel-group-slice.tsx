@@ -22,6 +22,9 @@ export interface PanelGroupSlice {
   panelGroupDialog?: PanelGroupDialog;
   openPanelGroupDialog: (groupIndex?: number) => void;
   closePanelGroupDialog: () => void;
+  deletePanelGroupDialog?: PanelGroupDialog;
+  openDeletePanelGroupDialog: (groupIndex: number) => void;
+  closeDeletePanelGroupDialog: () => void;
 }
 
 export const createPanelGroupSlice: StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> = (set) => ({
@@ -32,5 +35,13 @@ export const createPanelGroupSlice: StateCreator<PanelGroupSlice, Middleware, []
   closePanelGroupDialog: () =>
     set((state) => {
       state.panelGroupDialog = undefined;
+    }),
+  openDeletePanelGroupDialog: (groupIndex: number) =>
+    set((state) => {
+      state.deletePanelGroupDialog = { groupIndex };
+    }),
+  closeDeletePanelGroupDialog: () =>
+    set((state) => {
+      state.deletePanelGroupDialog = undefined;
     }),
 });

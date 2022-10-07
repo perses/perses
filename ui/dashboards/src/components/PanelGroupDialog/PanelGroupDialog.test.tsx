@@ -16,6 +16,7 @@ import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { DashboardProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
+import testDashboard from '../../test/testDashboard';
 import PanelGroupDialog from './PanelGroupDialog';
 
 describe('Add Panel Group', () => {
@@ -72,7 +73,7 @@ describe('Add Panel Group', () => {
       id: 0,
       title: 'New Name',
       isCollapsed: false,
-      items: [{ content: { $ref: '#/spec/panels/cpu' }, height: 4, width: 12, x: 0, y: 0 }],
+      items: testDashboard.spec.layouts[0]?.spec.items,
     });
   });
 });
