@@ -118,8 +118,8 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 		},
 		Spec: v1.DatasourceSpec{
 			Default: false,
-			Plugin: v1.DatasourcePlugin{
-				Kind: "Prometeus",
+			Plugin: v1.Plugin{
+				Kind: "PrometheusDatasource",
 				Spec: &datasource.Prometheus{
 					Proxy: datasourceHTTP.Proxy{
 						Kind: "HTTP",
