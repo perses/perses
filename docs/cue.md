@@ -14,26 +14,22 @@ A panel plugin looks like the following:
 ```cue
 package <panel type> // e.g package timeserie
 
-#panel: spec: plugin: {
-	kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
-
-	spec: {
-		queries: [...#ts_query]
-		show_legend?: bool
-		unit?:        common.#unit
-		thresholds?:  common.#thresholds
-	}
+kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
+spec: {
+	queries: [...#ts_query]
+	show_legend?: bool
+	unit?:        common.#unit
+	thresholds?:  common.#thresholds
 }
 
 #ts_query: _
 ```
 it should contain:
 - a package name.
-- a `#panel` definition that holds (under `spec.plugin`) :
-  - the panel's `kind`.
-  - the panel's `spec` containing:
-    - \* a field that maps to the `#ts_query` definition (like `queries: [...#ts_query]`,  `query: #ts_query` etc.)
-    - any other field you want for this panel plugin.
+- the panel's `kind`.
+- the panel's `spec` containing:
+  - \* a field that maps to the `#ts_query` definition (like `queries: [...#ts_query]`,  `query: #ts_query` etc.)
+  - any other field you want for this panel plugin.
 - \* a placeholder value `_` for `#ts_query`. _This is mandatory to pass the initial "compilation" of the plugin, then when it will be used to validate a panel the relevant definitions will be injected at runtime._
 
 _* guidelines that apply if your panel defines a query & a datasource (e.g TimeseriesChart), otherwise don't apply (e.g TextPanel)_

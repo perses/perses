@@ -1,15 +1,6 @@
 {
-  "kind": "Panel",
+  "kind": "Markdown",
   "spec": {
-    "display": {
-      "name": "Dashboard Overview",
-      "description": "This is a markdown panel"
-    },
-    "plugin": {
-      "kind": "Markdown",
-      "spec": {
-        "text": "## Some charts!\nOn this page, you'll find charts.\n\nGo to [Google](https://www.google.com)"
-      }
-    }
+    "text": "## Some charts!\nOn this page, you'll find charts.\n\nGo to [Google](https://www.google.com)"
   }
 }

@@ -13,10 +13,7 @@
 
 package text
 
-#panel: spec: plugin: {
-	kind: "Markdown"
-
-	spec: {
-		text: string
-	}
+kind: "Markdown"
+spec: {
+	text: string
 }

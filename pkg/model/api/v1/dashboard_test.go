@@ -26,6 +26,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TimeSeriesSpec struct {
+	ShowLegend bool     `json:"show_legend" yaml:"show_legend"`
+	Lines      []string `json:"lines" yaml:"lines"`
+}
+
 func TestMarshalDashboard(t *testing.T) {
 	testSuite := []struct {
 		title     string
@@ -49,20 +54,22 @@ func TestMarshalDashboard(t *testing.T) {
 					},
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
-					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
-						{
-							"displayed_name": "simple line chart",
-							"kind": "TimeSeriesChart",
-							"chart": {
-								"show_legend": false,
-								"lines": [
-									{
-										"expr": "up"
-									}
-								]
-							}
-						}
-					`),
+					Panels: map[string]*Panel{
+						"MyPanel": {
+							Kind: "Panel",
+							Spec: PanelSpec{
+								Display: &Display{
+									Name: "simple line chart",
+								},
+								Plugin: Plugin{
+									Kind: "TimeSeriesChart",
+									Spec: TimeSeriesSpec{
+										ShowLegend: false,
+										Lines:      []string{"up"},
+									},
+								},
+							},
+						},
 					},
 					Layouts: []dashboard.Layout{
 						{
@@ -102,15 +109,20 @@ func TestMarshalDashboard(t *testing.T) {
     "duration": "6h",
     "panels": {
       "MyPanel": {
-        "displayed_name": "simple line chart",
-        "kind": "TimeSeriesChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "simple line chart"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "show_legend": false,
+              "lines": [
+                "up"
+              ]
             }
-          ]
+          }
         }
       }
     },
@@ -174,20 +186,22 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
-						{
-							"displayed_name": "simple line chart",
-							"kind": "TimeSeriesChart",
-							"chart": {
-								"show_legend": false,
-								"lines": [
-									{
-										"expr": "up"
-									}
-								]
-							}
-						}
-					`),
+					Panels: map[string]*Panel{
+						"MyPanel": {
+							Kind: "Panel",
+							Spec: PanelSpec{
+								Display: &Display{
+									Name: "simple line chart",
+								},
+								Plugin: Plugin{
+									Kind: "TimeSeriesChart",
+									Spec: TimeSeriesSpec{
+										ShowLegend: false,
+										Lines:      []string{"up"},
+									},
+								},
+							},
+						},
 					},
 					Layouts: []dashboard.Layout{
 						{
@@ -250,15 +264,20 @@ func TestMarshalDashboard(t *testing.T) {
     },
     "panels": {
       "MyPanel": {
-        "displayed_name": "simple line chart",
-        "kind": "TimeSeriesChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "simple line chart"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "show_legend": false,
+              "lines": [
+                "up"
+              ]
             }
-          ]
+          }
         }
       }
     },
@@ -334,15 +353,20 @@ func TestUnmarshallDashboard(t *testing.T) {
     },
     "panels": {
       "MyPanel": {
-        "displayed_name": "simple line chart",
-        "kind": "TimeSeriesChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "simple line chart"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "show_legend": false,
+              "lines": [
+                "up"
+              ]
             }
-          ]
+          }
         }
       }
     },
@@ -367,18 +391,23 @@ func TestUnmarshallDashboard(t *testing.T) {
   }
 }`
 
-	panel := json.RawMessage(`{
-        "displayed_name": "simple line chart",
-        "kind": "TimeSeriesChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
-            }
-          ]
-        }
-      }`)
+	panel := &Panel{
+		Kind: "Panel",
+		Spec: PanelSpec{
+			Display: &Display{
+				Name: "simple line chart",
+			},
+			Plugin: Plugin{
+				Kind: "TimeSeriesChart",
+				Spec: map[string]interface{}{
+					"lines": []interface{}{
+						"up",
+					},
+					"show_legend": false,
+				},
+			},
+		},
+	}
 	expected := &Dashboard{
 		Kind: KindDashboard,
 		Metadata: ProjectMetadata{
@@ -416,7 +445,7 @@ func TestUnmarshallDashboard(t *testing.T) {
 					},
 				},
 			},
-			Panels: map[string]json.RawMessage{"MyPanel": panel},
+			Panels: map[string]*Panel{"MyPanel": panel},
 			Layouts: []dashboard.Layout{
 				{
 					Kind: dashboard.KindGridLayout,

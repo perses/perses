@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package base
+package v1
 
-#panel: close({
-	kind: "Panel"
-	spec: close({
-		display: close({
-			name:         string
-			description?: string
-		})
-		plugin: close({
-			kind: string
-			spec: _
-		})
-	})
-})
+import "encoding/json"
+
+type Plugin struct {
+	Kind string      `json:"kind" yaml:"kind"`
+	Spec interface{} `json:"spec" yaml:"spec"`
+}
+
+func (p Plugin) JSONMarshal() ([]byte, error) {
+	return json.Marshal(p)
+}
+
+type Display struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+}
