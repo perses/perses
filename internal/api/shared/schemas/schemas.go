@@ -71,22 +71,20 @@ func New(conf config.Schemas) Schemas {
 
 	// compile the base definitions
 	baseQueryDefVal := ctx.CompileBytes(baseQueryDef)
-
-	return &sch{
-		context: ctx,
-		panels: &cueDefs{
+	s := &sch{context: ctx}
+	var loaders []Loader
+	if len(conf.PanelsPath) != 0 {
+		panels := &cueDefs{
 			context:     ctx,
 			schemas:     &sync.Map{},
 			schemasPath: conf.PanelsPath,
 			kindCuePath: "kind",
-		},
-		dts: &cueDefs{
-			context:     ctx,
-			schemas:     &sync.Map{},
-			schemasPath: conf.DatasourcesPath,
-			kindCuePath: "kind",
-		},
-		queries: &cueDefsWithDisjunction{
+		}
+		loaders = append(loaders, panels)
+		s.panels = panels
+	}
+	if len(conf.QueriesPath) != 0 {
+		queries := &cueDefsWithDisjunction{
 			cueDefs: cueDefs{
 				context:     ctx,
 				baseDef:     &baseQueryDefVal,
@@ -96,8 +94,23 @@ func New(conf config.Schemas) Schemas {
 			},
 			disjSchema: cue.Value{},
 			mapID:      "#query_types",
-		},
+		}
+		loaders = append(loaders, queries)
+		s.queries = queries
 	}
+	if len(conf.DatasourcesPath) != 0 {
+		dts := &cueDefs{
+			context:     ctx,
+			schemas:     &sync.Map{},
+			schemasPath: conf.DatasourcesPath,
+			kindCuePath: "kind",
+		}
+		loaders = append(loaders, dts)
+		s.dts = dts
+	}
+	s.loaders = loaders
+
+	return s
 }
 
 type sch struct {
@@ -105,13 +118,18 @@ type sch struct {
 	panels  *cueDefs
 	dts     *cueDefs
 	queries *cueDefsWithDisjunction
+	loaders []Loader
 }
 
 func (s *sch) GetLoaders() []Loader {
-	return []Loader{s.panels, s.queries, s.dts}
+	return s.loaders
 }
 
 func (s *sch) ValidateDatasource(plugin modelV1.Plugin) error {
+	if s.dts == nil {
+		logrus.Warning("datasource schemas are not loaded")
+		return nil
+	}
 	return s.validatePlugin(plugin, "datasource", "", s.dts, func(originalValue cue.Value) cue.Value {
 		return originalValue
 	})
@@ -121,12 +139,19 @@ func (s *sch) ValidateDatasource(plugin modelV1.Plugin) error {
 // The panels are matched against the known list of CUE definitions (schemas).
 // If no schema matches for at least 1 panel, the validation fails.
 func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
+	if s.panels == nil {
+		logrus.Warning("panel schemas are not loaded")
+		return nil
+	}
 	// go through the panels list
 	// the processing stops as soon as it detects an invalid panel -> TODO: improve this to return a list of all the errors encountered ?
 	for panelName, panel := range panels {
 		logrus.Tracef("Panel to validate: %s", panelName)
 		if err := s.validatePlugin(panel.Spec.Plugin, "panel", panelName, s.panels, func(originalValue cue.Value) cue.Value {
-			return originalValue.Unify(s.queries.disjSchema)
+			if s.queries != nil {
+				return originalValue.Unify(s.queries.disjSchema)
+			}
+			return originalValue
 		}); err != nil {
 			return err
 		}

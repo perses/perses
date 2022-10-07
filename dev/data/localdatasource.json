@@ -6,38 +6,43 @@
       "project": "perses"
     },
     "spec": {
-      "kind": "Prometheus",
       "default": false,
-      "http": {
-        "url": "https://prometheus.demo.do.prometheus.io",
-        "access": "server",
-        "allowed_endpoints": [
-          {
-            "endpoint_pattern": "/api/v1/labels",
-            "method": "POST"
-          },
-          {
-            "endpoint_pattern": "/api/v1/series",
-            "method": "POST"
-          },
-          {
-            "endpoint_pattern": "/api/v1/metadata",
-            "method": "GET"
-          },
-          {
-            "endpoint_pattern": "/api/v1/query",
-            "method": "POST"
-          },
-          {
-            "endpoint_pattern": "/api/v1/query_range",
-            "method": "POST"
-          },
-          {
-            "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
-            "method": "GET"
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "https://prometheus.demo.do.prometheus.io",
+              "allowed_endpoints": [
+                {
+                  "endpoint_pattern": "/api/v1/labels",
+                  "method": "POST"
+                },
+                {
+                  "endpoint_pattern": "/api/v1/series",
+                  "method": "POST"
+                },
+                {
+                  "endpoint_pattern": "/api/v1/metadata",
+                  "method": "GET"
+                },
+                {
+                  "endpoint_pattern": "/api/v1/query",
+                  "method": "POST"
+                },
+                {
+                  "endpoint_pattern": "/api/v1/query_range",
+                  "method": "POST"
+                },
+                {
+                  "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                  "method": "GET"
+                }
+              ]
+            }
           }
-        ],
-        "Headers": null
+        }
       }
     }
   }
