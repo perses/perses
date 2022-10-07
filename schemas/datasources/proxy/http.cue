@@ -26,7 +26,7 @@ package proxy
 		url: string
 		// allowed_endpoints is a list of tuples of http methods and http endpoints that will be accessible.
 		// Leave it empty if you don't want to restrict the access to the datasource.
-		allowed_endpoints?: [ ...HTTPAllowedEndpoint]
+		allowed_endpoints?: [ ...#HTTPAllowedEndpoint]
 		// headers can be used to provide additional headers that need to be forwarded when requesting the datasource
 		headers?: {[string]: string}
 		// secret is the name of the secret that should be used for the proxy or discovery configuration

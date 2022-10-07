@@ -34,11 +34,11 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			},
 			Spec: modelV1.DatasourceSpec{
 				Default: false,
-				Plugin: modelV1.DatasourcePlugin{
+				Plugin: modelV1.Plugin{
 					Kind: "Prometeus",
 					Spec: &datasource.Prometheus{
 						Proxy: http.Proxy{
-							Kind: "HTTP",
+							Kind: "HTTPProxy",
 							Spec: http.Config{
 								URL: u,
 							},
@@ -54,7 +54,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			},
 			Spec: modelV1.DatasourceSpec{
 				Default: false,
-				Plugin: modelV1.DatasourcePlugin{
+				Plugin: modelV1.Plugin{
 					Kind: "Prometeus",
 					Spec: &datasource.Prometheus{
 						DirectURL: u,
@@ -69,11 +69,11 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			},
 			Spec: modelV1.DatasourceSpec{
 				Default: false,
-				Plugin: modelV1.DatasourcePlugin{
+				Plugin: modelV1.Plugin{
 					Kind: "Prometeus",
 					Spec: &datasource.Prometheus{
 						Proxy: http.Proxy{
-							Kind: "HTTP",
+							Kind: "HTTPProxy",
 							Spec: http.Config{
 								URL: localURL,
 							},
