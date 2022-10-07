@@ -19,6 +19,7 @@ import (
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
@@ -28,11 +29,13 @@ import (
 type service struct {
 	datasource.Service
 	dao datasource.DAO
+	sch schemas.Schemas
 }
 
-func NewService(dao datasource.DAO) datasource.Service {
+func NewService(dao datasource.DAO, sch schemas.Schemas) datasource.Service {
 	return &service{
 		dao: dao,
+		sch: sch,
 	}
 }
 
@@ -44,10 +47,8 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
-	// In case there is a proxy defined, check if it is properly defined
-	_, err := http.CheckAndValidate(entity.Spec.Plugin.Spec)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	if err := s.validate(entity.Spec.Plugin); err != nil {
+		return nil, err
 	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
@@ -70,10 +71,8 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 }
 
 func (s *service) update(entity *v1.Datasource, parameters shared.Parameters) (*v1.Datasource, error) {
-	// In case there is a proxy defined, check if it is properly defined
-	_, err := http.CheckAndValidate(entity.Spec.Plugin.Spec)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	if err := s.validate(entity.Spec.Plugin); err != nil {
+		return nil, err
 	}
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
@@ -126,4 +125,13 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 
 func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
+}
+
+func (s *service) validate(plugin v1.Plugin) error {
+	// In case there is a proxy defined, check if it is properly defined
+	_, err := http.CheckAndValidate(plugin.Spec)
+	if err != nil {
+		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
+	return s.sch.ValidateDatasource(plugin)
 }

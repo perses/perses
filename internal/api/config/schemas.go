@@ -16,15 +16,17 @@ package config
 import "time"
 
 const (
-	defaultPanelsPath  = "schemas/panels"
-	defaultQueriesPath = "schemas/queries"
-	defaultInterval    = 1 * time.Hour
+	defaultPanelsPath      = "schemas/panels"
+	defaultQueriesPath     = "schemas/queries"
+	defaultDatasourcesPath = "schemas/datasources"
+	defaultInterval        = 1 * time.Hour
 )
 
 type Schemas struct {
-	PanelsPath  string        `yaml:"panels_path,omitempty"`
-	QueriesPath string        `yaml:"queries_path,omitempty"`
-	Interval    time.Duration `yaml:"interval,omitempty"`
+	PanelsPath      string        `yaml:"panels_path,omitempty"`
+	QueriesPath     string        `yaml:"queries_path,omitempty"`
+	DatasourcesPath string        `yaml:"datasources_path,omitempty"`
+	Interval        time.Duration `yaml:"interval,omitempty"`
 }
 
 func (s *Schemas) Verify() error {
@@ -33,6 +35,9 @@ func (s *Schemas) Verify() error {
 	}
 	if len(s.QueriesPath) == 0 {
 		s.QueriesPath = defaultQueriesPath
+	}
+	if len(s.DatasourcesPath) == 0 {
+		s.DatasourcesPath = defaultDatasourcesPath
 	}
 	if s.Interval <= 0 {
 		s.Interval = defaultInterval

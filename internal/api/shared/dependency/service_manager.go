@@ -58,14 +58,14 @@ type service struct {
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManager {
-	datasourceService := datasourceImpl.NewService(dao.GetDatasource())
+	schemasService := schemas.New(conf.Schemas)
+	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService)
+	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
 	folderService := folderImpl.NewService(dao.GetFolder())
-	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource())
+	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject())
-	schemasService := schemas.New(conf.Schemas)
 	userService := userImpl.NewService(dao.GetUser())
-	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService)
 	return &service{
 		dashboard:        dashboardService,
 		datasource:       datasourceService,

@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package proxy
+
 #HTTPAllowedEndpoint: {
 	endpoint_pattern: string
 	method:           'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'
 }
 
 #HTTPPRoxy: {
-	kind: "HTTP"
+	kind: "HTTPProxy"
 	spec: {
 		// url is the url of the datasource. It is not the url of the proxy.
 		// The Perses server is the proxy, so it needs to know where to redirect the request.
