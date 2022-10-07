@@ -32,7 +32,7 @@ var baseQueryDef []byte
 //go:embed query_disjunction_generator.cue
 var queryDisjunctionGenerator []byte
 
-var cueOption = []cue.Option{
+var cueValidationOptions = []cue.Option{
 	cue.Concrete(true),
 	cue.Attributes(true),
 	cue.Definitions(true),
@@ -149,6 +149,7 @@ func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
 		logrus.Tracef("Panel to validate: %s", panelName)
 		if err := s.validatePlugin(panel.Spec.Plugin, "panel", panelName, s.panels, func(originalValue cue.Value) cue.Value {
 			if s.queries != nil {
+				// Then merge with the queries disjunction schema
 				return originalValue.Unify(s.queries.disjSchema)
 			}
 			return originalValue
@@ -175,16 +176,14 @@ func (s *sch) validatePlugin(plugin modelV1.Plugin, modelKind string, modelName 
 		return err
 	}
 
-	// Then merge with the queries disjunction schema
 	pluginSchema = enrichSchema(pluginSchema)
 	if pluginSchema.Err() != nil {
 		logrus.WithError(pluginSchema.Err()).Errorf("Error enriching %s schema", modelKind)
 		return pluginSchema.Err()
 	}
 
-	// do the validation using the main #panel def of the schema as entrypoint
-	unified := value.Unify(pluginSchema.LookupPath(cue.ParsePath("")))
-	err = unified.Validate(cueOption...)
+	unified := value.Unify(pluginSchema)
+	err = unified.Validate(cueValidationOptions...)
 	if err != nil {
 		logrus.Debug(errors.Details(err, nil))
 		//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
