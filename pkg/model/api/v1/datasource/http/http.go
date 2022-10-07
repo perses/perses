@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"os"
 	"reflect"
+	"strings"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -263,72 +264,146 @@ type Proxy struct {
 	Spec Config `json:"spec" yaml:"spec"`
 }
 
-func doesKindConfigExist(v reflect.Value) bool {
+const (
+	httpProxyKindField = "kind"
+	httpProxyKindName  = "httpproxy"
+	httpProxySpec      = "spec"
+)
+
+func CheckAndValidate(pluginSpec interface{}) (*Config, error) {
+	finder := &configFinder{}
+	finder.find(reflect.ValueOf(pluginSpec))
+	return finder.config, finder.err
+}
+
+type configFinder struct {
+	err    error
+	found  bool
+	config *Config
+}
+
+func (c *configFinder) find(v reflect.Value) {
+	if len(v.Type().PkgPath()) > 0 {
+		// the field is not exported, so no need to look at it as we won't be able to set it in a later stage
+		return
+	}
+	v = getNextElem(v)
+
+	switch v.Kind() {
+	case reflect.Struct:
+		c.findInStruct(v)
+	case reflect.Map:
+		c.findInMap(v)
+	}
+}
+
+// findInStruct assumed that v is of type reflect.Struct
+func (c *configFinder) findInStruct(v reflect.Value) {
+	// first look at the field and find if we have the good kind
+	c.found = doesKindInStructExists(v)
+	if c.found {
+		// then get the spec field
+		spec := getConfigSpecInStruct(v)
+		// Then unmarshal the proxy to validate the content
+		c.unmarshalConfig(spec)
+	} else {
+		// Otherwise look deeper to find it
+		for i := 0; i < v.NumField(); i++ {
+			c.find(v.Field(i))
+			if c.found || c.err != nil {
+				return
+			}
+		}
+	}
+}
+
+// findInMap assumed that v is of type reflect.Map
+func (c *configFinder) findInMap(v reflect.Value) {
+	keyType := v.Type().Key()
+	if keyType.Kind() != reflect.String {
+		return
+	}
+	c.found = doesKindInMapExists(v)
+	if c.found {
+		// then get the spec field
+		spec := getConfigSpecInMap(v)
+		// Then unmarshal the proxy to validate the content
+		c.unmarshalConfig(spec)
+	} else {
+		// Otherwise look deeper to find it
+		for _, key := range v.MapKeys() {
+			c.find(v.MapIndex(key))
+			if c.found || c.err != nil {
+				return
+			}
+		}
+	}
+}
+
+func (c *configFinder) unmarshalConfig(spec reflect.Value) {
+	if spec == (reflect.Value{}) {
+		return
+	}
+	spec = getNextElem(spec)
+	var data []byte
+	if spec.Kind() == reflect.Struct {
+		data, c.err = json.Marshal(spec.Interface().(Config))
+	} else {
+		data, c.err = json.Marshal(spec.Interface())
+	}
+	if c.err != nil {
+		return
+	}
+	c.config = &Config{}
+	c.err = json.Unmarshal(data, c.config)
+}
+
+func doesKindInStructExists(v reflect.Value) bool {
 	for i := 0; i < v.NumField(); i++ {
-		if v.Type().Field(i).Name == "Kind" && v.Field(i).Type().Name() == "string" && v.Field(i).String() == "HTTP" {
+		if strings.ToLower(v.Type().Field(i).Name) == httpProxyKindField &&
+			v.Field(i).Type().Kind() == reflect.String &&
+			strings.ToLower(v.Field(i).String()) == httpProxyKindName {
 			return true
 		}
 	}
 	return false
 }
 
-func getConfigSpec(v reflect.Value) reflect.Value {
+func doesKindInMapExists(v reflect.Value) bool {
+	for _, key := range v.MapKeys() {
+		if key.String() == httpProxyKindField {
+			value := v.MapIndex(key)
+			value = getNextElem(value)
+			if value.Kind() == reflect.String &&
+				strings.ToLower(value.String()) == httpProxyKindName {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func getConfigSpecInStruct(v reflect.Value) reflect.Value {
 	for i := 0; i < v.NumField(); i++ {
-		if v.Type().Field(i).Name == "Spec" {
+		if strings.ToLower(v.Type().Field(i).Name) == httpProxySpec {
 			return v.Field(i)
 		}
 	}
 	return reflect.Value{}
 }
 
-func lookingForConfig(v reflect.Value, httpConfig *Config, err *error, found *bool) {
-	if len(v.Type().PkgPath()) > 0 {
-		// the field is not exported, so no need to look at it as we won't be able to set it in a later stage
-		return
-	}
-	if v.Kind() == reflect.Ptr {
-		if !v.IsNil() {
-			v = v.Elem()
+func getConfigSpecInMap(v reflect.Value) reflect.Value {
+	for _, key := range v.MapKeys() {
+		if key.String() == httpProxySpec {
+			return v.MapIndex(key)
 		}
 	}
-
-	if v.Kind() == reflect.Struct {
-		if *found = doesKindConfigExist(v); *found {
-			// then get the spec field
-			spec := getConfigSpec(v)
-			if spec == (reflect.Value{}) {
-				return
-			}
-			if spec.Kind() == reflect.Ptr {
-				if spec.IsNil() {
-					return
-				}
-				spec = spec.Elem()
-			}
-			// Then unmarshal the proxy to validate the content
-			var data []byte
-			data, *err = json.Marshal(spec.Interface().(Config))
-			if *err != nil {
-				return
-			}
-			*err = json.Unmarshal(data, httpConfig)
-		} else {
-			// Otherwise look deeper to find it
-			for i := 0; i < v.NumField(); i++ {
-				lookingForConfig(v.Field(i), httpConfig, err, found)
-				if *found || err != nil {
-					return
-				}
-			}
-		}
-	}
+	return reflect.Value{}
 }
 
-func CheckAndValidate(pluginSpec interface{}) (*Config, error) {
-	httpConfig := &Config{}
-	var err error
-	b := false
-	found := &b
-	lookingForConfig(reflect.ValueOf(pluginSpec), httpConfig, &err, found)
-	return httpConfig, err
+func getNextElem(v reflect.Value) reflect.Value {
+	if v.Kind() == reflect.Interface || (v.Kind() == reflect.Ptr && !v.IsNil()) {
+		return v.Elem()
+	}
+	return v
 }

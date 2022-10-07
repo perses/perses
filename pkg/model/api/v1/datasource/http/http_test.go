@@ -420,6 +420,7 @@ method: POST
 }
 
 func TestCheckAndValidate(t *testing.T) {
+	// Check and Validate HTTPProxy contained in a proper struct
 	type aStruct struct {
 		A struct {
 			B struct {
@@ -440,10 +441,24 @@ func TestCheckAndValidate(t *testing.T) {
 		}{B: struct {
 			Kind string
 			Spec *Config
-		}{Kind: "HTTP", Spec: &Config{URL: u}}},
+		}{Kind: "HTTPProxy", Spec: &Config{URL: u}}},
 	}
 
 	c, err := CheckAndValidate(b)
+	assert.NoError(t, err)
+	assert.Equal(t, &Config{URL: u}, c)
+
+	// Check and Validate HTTPProxy when it is hidden in a map of interface
+	uglyStruct := map[string]interface{}{
+		"direct_url": "",
+		"proxy": map[string]interface{}{
+			"kind": "HTTPProxy",
+			"spec": map[string]interface{}{
+				"url": "http://localhost:8080",
+			},
+		},
+	}
+	c, err = CheckAndValidate(uglyStruct)
 	assert.NoError(t, err)
 	assert.Equal(t, &Config{URL: u}, c)
 }
