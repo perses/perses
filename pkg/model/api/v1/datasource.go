@@ -27,17 +27,12 @@ func GenerateDatasourceID(project string, name string) string {
 	return generateProjectResourceID("datasources", project, name)
 }
 
-type DatasourcePlugin struct {
-	Kind string      `json:"kind" yaml:"kind"`
-	Spec interface{} `json:"spec" yaml:"spec"`
-}
-
 type DatasourceSpec struct {
 	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
 	Default bool     `json:"default" yaml:"default"`
 	// Plugin will contain the datasource configuration.
 	// The data typed is available in Cue.
-	Plugin DatasourcePlugin `json:"plugin" yaml:"plugin"`
+	Plugin Plugin `json:"plugin" yaml:"plugin"`
 }
 
 // GlobalDatasource is the struct representing the datasource shared to everybody.

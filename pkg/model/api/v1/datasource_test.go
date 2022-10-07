@@ -56,7 +56,7 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 				},
 				Spec: DatasourceSpec{
 					Default: false,
-					Plugin: DatasourcePlugin{
+					Plugin: Plugin{
 						Kind: "Prometeus",
 						Spec: &datasource.Prometheus{
 							Proxy: datasourceHTTP.Proxy{
@@ -134,7 +134,7 @@ spec:
 				},
 				Spec: DatasourceSpec{
 					Default: false,
-					Plugin: DatasourcePlugin{
+					Plugin: Plugin{
 						Kind: "Prometeus",
 						Spec: &datasource.Prometheus{
 							Proxy: datasourceHTTP.Proxy{
