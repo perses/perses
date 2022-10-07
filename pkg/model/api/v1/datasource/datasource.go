@@ -22,6 +22,6 @@ import (
 // Prometheus is only used for testing purpose.
 // It doesn't reflect the nature of the actual prometheus datasource
 type Prometheus struct {
-	DirectURL *url.URL   `json:"direct_url"`
-	Proxy     http.Proxy `json:"proxy"`
+	DirectURL *url.URL   `json:"direct_url,omitempty" yaml:"direct_url,omitempty"`
+	Proxy     http.Proxy `json:"proxy" yaml:"proxy"`
 }

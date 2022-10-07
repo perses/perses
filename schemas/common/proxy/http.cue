@@ -15,10 +15,10 @@ package proxy
 
 #HTTPAllowedEndpoint: {
 	endpoint_pattern: string
-	method:           'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'
+	method:           "POST" | "PUT" | "PATCH" | "GET" | "DELETE"
 }
 
-#HTTPPRoxy: {
+#HTTPProxy: {
 	kind: "HTTPProxy"
 	spec: {
 		// url is the url of the datasource. It is not the url of the proxy.

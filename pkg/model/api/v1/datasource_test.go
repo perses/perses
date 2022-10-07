@@ -15,11 +15,9 @@ package v1
 
 import (
 	"encoding/json"
-	"net/http"
 	"net/url"
 	"testing"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/stretchr/testify/assert"
@@ -27,6 +25,23 @@ import (
 )
 
 func TestUnmarshalJSONDatasource(t *testing.T) {
+	u, _ := url.Parse("https://prometheus.demo.do.prometheus.io")
+	pluginSpec := &datasource.Prometheus{
+		Proxy: datasourceHTTP.Proxy{
+			Kind: "HTTPProxy",
+			Spec: datasourceHTTP.Config{
+				URL: u,
+			},
+		},
+	}
+	data, err := json.Marshal(pluginSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pluginSpecAsMapInterface map[string]interface{}
+	if err := json.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
+		t.Fatal(err)
+	}
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -41,10 +56,17 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
     "name": "PrometheusDemo"
   },
   "spec": {
-    "kind": "Prometheus",
     "default": true,
-    "http": {
-      "url": "https://prometheus.demo.do.prometheus.io"
+    "plugin": {
+      "kind": "PrometheusDatasource",
+      "spec": {
+        "proxy": {
+          "kind": "HTTPProxy",
+          "spec": {
+            "url": "https://prometheus.demo.do.prometheus.io"
+          }
+        }
+      }
     }
   }
 }
@@ -55,46 +77,10 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 					Name: "PrometheusDemo",
 				},
 				Spec: DatasourceSpec{
-					Default: false,
+					Default: true,
 					Plugin: Plugin{
-						Kind: "Prometeus",
-						Spec: &datasource.Prometheus{
-							Proxy: datasourceHTTP.Proxy{
-								Kind: "HTTP",
-								Spec: datasourceHTTP.Config{
-									URL: &url.URL{
-										Scheme: "https",
-										Host:   "prometheus.demo.do.prometheus.io",
-									},
-									AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/series"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
-											Method:          http.MethodGet,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/query"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-											Method:          http.MethodGet,
-										},
-									},
-								},
-							},
-						},
+						Kind: "PrometheusDatasource",
+						Spec: pluginSpecAsMapInterface,
 					},
 				},
 			},
@@ -110,6 +96,23 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 }
 
 func TestUnmarshalYAMLLayout(t *testing.T) {
+	u, _ := url.Parse("https://prometheus.demo.do.prometheus.io")
+	pluginSpec := &datasource.Prometheus{
+		Proxy: datasourceHTTP.Proxy{
+			Kind: "HTTPProxy",
+			Spec: datasourceHTTP.Config{
+				URL: u,
+			},
+		},
+	}
+	data, err := yaml.Marshal(pluginSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pluginSpecAsMapInterface map[interface{}]interface{}
+	if err := yaml.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
+		t.Fatal(err)
+	}
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -118,14 +121,19 @@ func TestUnmarshalYAMLLayout(t *testing.T) {
 		{
 			title: "simple Prometheus datasource",
 			yamele: `
-kind: GlobalDatasource
+kind: "GlobalDatasource"
 metadata:
-  name: "PrometheusDemo" 
+  name: "PrometheusDemo"
 spec:
-  kind: Prometheus
   default: true
-  http:
-    url: "https://prometheus.demo.do.prometheus.io"
+  plugin:
+    kind: PrometheusDatasource
+    spec:
+      proxy:
+        kind: "HTTPProxy"
+        spec:
+          url: "https://prometheus.demo.do.prometheus.io"
+
 `,
 			result: GlobalDatasource{
 				Kind: KindGlobalDatasource,
@@ -133,46 +141,10 @@ spec:
 					Name: "PrometheusDemo",
 				},
 				Spec: DatasourceSpec{
-					Default: false,
+					Default: true,
 					Plugin: Plugin{
-						Kind: "Prometeus",
-						Spec: &datasource.Prometheus{
-							Proxy: datasourceHTTP.Proxy{
-								Kind: "HTTP",
-								Spec: datasourceHTTP.Config{
-									URL: &url.URL{
-										Scheme: "https",
-										Host:   "prometheus.demo.do.prometheus.io",
-									},
-									AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/series"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
-											Method:          http.MethodGet,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/query"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
-											Method:          http.MethodPost,
-										},
-										{
-											EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-											Method:          http.MethodGet,
-										},
-									},
-								},
-							},
-						},
+						Kind: "PrometheusDatasource",
+						Spec: pluginSpecAsMapInterface,
 					},
 				},
 			},

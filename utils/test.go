@@ -17,9 +17,13 @@
 package utils
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os/exec"
+	"strings"
 	"testing"
 	"time"
 
@@ -108,6 +112,48 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 	if err != nil {
 		t.Fatal(err)
 	}
+	pluginSpec := &datasource.Prometheus{
+		Proxy: datasourceHTTP.Proxy{
+			Kind: "HTTPProxy",
+			Spec: datasourceHTTP.Config{
+				URL: promURL,
+				AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
+					{
+						EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
+						Method:          http.MethodPost,
+					},
+					{
+						EndpointPattern: common.MustNewRegexp("/api/v1/series"),
+						Method:          http.MethodPost,
+					},
+					{
+						EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
+						Method:          http.MethodGet,
+					},
+					{
+						EndpointPattern: common.MustNewRegexp("/api/v1/query"),
+						Method:          http.MethodPost,
+					},
+					{
+						EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
+						Method:          http.MethodPost,
+					},
+					{
+						EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
+						Method:          http.MethodGet,
+					},
+				},
+			},
+		},
+	}
+	data, err := json.Marshal(pluginSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pluginSpecAsMapInterface map[string]interface{}
+	if err := json.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
+		t.Fatal(err)
+	}
 	entity := &v1.Datasource{
 		Kind: v1.KindDatasource,
 		Metadata: v1.ProjectMetadata{
@@ -120,40 +166,7 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 			Default: false,
 			Plugin: v1.Plugin{
 				Kind: "PrometheusDatasource",
-				Spec: &datasource.Prometheus{
-					Proxy: datasourceHTTP.Proxy{
-						Kind: "HTTP",
-						Spec: datasourceHTTP.Config{
-							URL: promURL,
-							AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
-								{
-									EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
-									Method:          http.MethodPost,
-								},
-								{
-									EndpointPattern: common.MustNewRegexp("/api/v1/series"),
-									Method:          http.MethodPost,
-								},
-								{
-									EndpointPattern: common.MustNewRegexp("/api/v1/metadata"),
-									Method:          http.MethodGet,
-								},
-								{
-									EndpointPattern: common.MustNewRegexp("/api/v1/query"),
-									Method:          http.MethodPost,
-								},
-								{
-									EndpointPattern: common.MustNewRegexp("/api/v1/query_range"),
-									Method:          http.MethodPost,
-								},
-								{
-									EndpointPattern: common.MustNewRegexp("/api/v1/label/([a-zA-Z0-9_-]+)/values"),
-									Method:          http.MethodGet,
-								},
-							},
-						},
-					},
-				},
+				Spec: pluginSpecAsMapInterface,
 			},
 		},
 	}
@@ -185,14 +198,34 @@ func defaultFileConfig() *config.File {
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
-	handler := echo.New()
-	persistenceManager, err := dependency.NewPersistenceManager(config.Database{
-		File: defaultFileConfig(),
-	})
+	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, config.Config{})
+	projectPath := strings.TrimSpace(string(projectPathByte))
+	handler := echo.New()
+	conf := config.Config{
+		Database: config.Database{
+			File: defaultFileConfig(),
+		},
+		Schemas: config.Schemas{
+			PanelsPath:      fmt.Sprintf("%s/schemas/panels", projectPath),
+			QueriesPath:     fmt.Sprintf("%s/schemas/queries", projectPath),
+			DatasourcesPath: fmt.Sprintf("%s/schemas/datasources", projectPath),
+			Interval:        0,
+		},
+	}
+	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
+	// Load every cue schemas
+	for _, loader := range serviceManager.GetSchemas().GetLoaders() {
+		if err := loader.Load(); err != nil {
+			t.Fatal(err)
+		}
+	}
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
 	return httptest.NewServer(handler), persistenceManager

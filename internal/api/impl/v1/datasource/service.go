@@ -48,7 +48,7 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 
 func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
 	if err := s.validate(entity.Spec.Plugin); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
@@ -72,7 +72,7 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 
 func (s *service) update(entity *v1.Datasource, parameters shared.Parameters) (*v1.Datasource, error) {
 	if err := s.validate(entity.Spec.Plugin); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
@@ -131,7 +131,7 @@ func (s *service) validate(plugin v1.Plugin) error {
 	// In case there is a proxy defined, check if it is properly defined
 	_, err := http.CheckAndValidate(plugin.Spec)
 	if err != nil {
-		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
+		return err
 	}
 	return s.sch.ValidateDatasource(plugin)
 }

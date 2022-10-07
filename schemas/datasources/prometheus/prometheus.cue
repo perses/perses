@@ -14,38 +14,40 @@
 package prometheus
 
 import (
-	"github.com/perses/perses/schemas/datasources/proxy"
+	commonProxy "github.com/perses/perses/schemas/common/proxy"
 )
 
 kind: "PrometheusDatasource"
 spec: {
-	direct_url: string
-	proxy?:     proxy.#HTTPPRoxy & {
-		allowed_endpoints: [
-			{
-				endpoint_pattern: "/api/v1/labels"
-				method:           "POST"
-			},
-			{
-				endpoint_pattern: "/api/v1/series"
-				method:           "POST"
-			},
-			{
-				endpoint_pattern: "/api/v1/metadata"
-				method:           "GET"
-			},
-			{
-				endpoint_pattern: "/api/v1/query"
-				method:           "POST"
-			},
-			{
-				endpoint_pattern: "/api/v1/query_range"
-				method:           "POST"
-			},
-			{
-				endpoint_pattern: "/api/v1/label/([a-zA-Z0-9_-]+)/values"
-				method:           "GET"
-			},
-		]
+	direct_url?: string
+	proxy?:      commonProxy.#HTTPProxy & {
+		spec: {
+			allowed_endpoints: [
+				{
+					endpoint_pattern: "/api/v1/labels"
+					method:           "POST"
+				},
+				{
+					endpoint_pattern: "/api/v1/series"
+					method:           "POST"
+				},
+				{
+					endpoint_pattern: "/api/v1/metadata"
+					method:           "GET"
+				},
+				{
+					endpoint_pattern: "/api/v1/query"
+					method:           "POST"
+				},
+				{
+					endpoint_pattern: "/api/v1/query_range"
+					method:           "POST"
+				},
+				{
+					endpoint_pattern: "/api/v1/label/([a-zA-Z0-9_-]+)/values"
+					method:           "GET"
+				},
+			]
+		}
 	}
 }
