@@ -32,12 +32,19 @@ var baseQueryDef []byte
 //go:embed query_disjunction_generator.cue
 var queryDisjunctionGenerator []byte
 
+var cueValidationOptions = []cue.Option{
+	cue.Concrete(true),
+	cue.Attributes(true),
+	cue.Definitions(true),
+	cue.Hidden(true),
+}
+
 // retrieveSchemaForKind returns the schema corresponding to the provided kind
-func retrieveSchemaForKind(panelName string, panelVal cue.Value, kindPath string, schemasMap *sync.Map) (cue.Value, error) {
+func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, kindPath string, schemasMap *sync.Map) (cue.Value, error) {
 	// retrieve the value of the Kind field
 	kind, err := panelVal.LookupPath(cue.ParsePath(kindPath)).String()
 	if err != nil {
-		err = fmt.Errorf("invalid panel %s: %s", panelName, err) // enrich the error message returned by cue lib
+		err = fmt.Errorf("invalid %s %s: %s", modelKind, modelName, err) // enrich the error message returned by cue lib
 		logrus.Debug(err)
 		return cue.Value{}, err
 	}
@@ -45,7 +52,7 @@ func retrieveSchemaForKind(panelName string, panelVal cue.Value, kindPath string
 	// retrieve the corresponding schema
 	schema, ok := schemasMap.Load(kind)
 	if !ok {
-		err := fmt.Errorf("invalid panel %s: Unknown %s %s", panelName, kindPath, kind)
+		err := fmt.Errorf("invalid %s %s: Unknown %s %s", modelKind, modelName, kindPath, kind)
 		logrus.Debug(err)
 		return cue.Value{}, err
 	}
@@ -54,6 +61,7 @@ func retrieveSchemaForKind(panelName string, panelVal cue.Value, kindPath string
 }
 
 type Schemas interface {
+	ValidateDatasource(plugin modelV1.Plugin) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
 	GetLoaders() []Loader
 }
@@ -63,16 +71,20 @@ func New(conf config.Schemas) Schemas {
 
 	// compile the base definitions
 	baseQueryDefVal := ctx.CompileBytes(baseQueryDef)
-
-	return &sch{
-		context: ctx,
-		panels: &cueDefs{
+	s := &sch{context: ctx}
+	var loaders []Loader
+	if len(conf.PanelsPath) != 0 {
+		panels := &cueDefs{
 			context:     ctx,
 			schemas:     &sync.Map{},
 			schemasPath: conf.PanelsPath,
 			kindCuePath: "kind",
-		},
-		queries: &cueDefsWithDisjunction{
+		}
+		loaders = append(loaders, panels)
+		s.panels = panels
+	}
+	if len(conf.QueriesPath) != 0 {
+		queries := &cueDefsWithDisjunction{
 			cueDefs: cueDefs{
 				context:     ctx,
 				baseDef:     &baseQueryDefVal,
@@ -82,65 +94,101 @@ func New(conf config.Schemas) Schemas {
 			},
 			disjSchema: cue.Value{},
 			mapID:      "#query_types",
-		},
+		}
+		loaders = append(loaders, queries)
+		s.queries = queries
 	}
+	if len(conf.DatasourcesPath) != 0 {
+		dts := &cueDefs{
+			context:     ctx,
+			schemas:     &sync.Map{},
+			schemasPath: conf.DatasourcesPath,
+			kindCuePath: "kind",
+		}
+		loaders = append(loaders, dts)
+		s.dts = dts
+	}
+	s.loaders = loaders
+
+	return s
 }
 
 type sch struct {
 	context *cue.Context
 	panels  *cueDefs
+	dts     *cueDefs
 	queries *cueDefsWithDisjunction
+	loaders []Loader
 }
 
 func (s *sch) GetLoaders() []Loader {
-	return []Loader{s.panels, s.queries}
+	return s.loaders
+}
+
+func (s *sch) ValidateDatasource(plugin modelV1.Plugin) error {
+	if s.dts == nil {
+		logrus.Warning("datasource schemas are not loaded")
+		return nil
+	}
+	return s.validatePlugin(plugin, "datasource", "", s.dts, func(originalValue cue.Value) cue.Value {
+		return originalValue
+	})
 }
 
 // ValidatePanels verify a list of panels.
 // The panels are matched against the known list of CUE definitions (schemas).
 // If no schema matches for at least 1 panel, the validation fails.
 func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
+	if s.panels == nil {
+		logrus.Warning("panel schemas are not loaded")
+		return nil
+	}
 	// go through the panels list
 	// the processing stops as soon as it detects an invalid panel -> TODO: improve this to return a list of all the errors encountered ?
 	for panelName, panel := range panels {
 		logrus.Tracef("Panel to validate: %s", panelName)
-		panelPluginByte, err := panel.Spec.Plugin.JSONMarshal()
-		if err != nil {
-			logrus.WithError(err).Debugf("unable to marshal the panel plugin %q", panel.Spec.Plugin.Kind)
-			return err
-		}
-		// compile the JSON panel plugin into a CUE Value
-		value := s.context.CompileBytes(panelPluginByte)
-
-		// retrieve the corresponding panel schema
-		panelSchema, err := retrieveSchemaForKind(panelName, value, s.panels.kindCuePath, s.panels.schemas)
-		if err != nil {
-			return err
-		}
-
-		// Then merge with the queries disjunction schema
-		panelSchema = panelSchema.Unify(s.queries.disjSchema)
-		if panelSchema.Err() != nil {
-			logrus.WithError(panelSchema.Err()).Error("Error unifying panel schema with queries schema")
-			return panelSchema.Err()
-		}
-
-		// do the validation using the main #panel def of the schema as entrypoint
-		unified := value.Unify(panelSchema.LookupPath(cue.ParsePath("")))
-		opts := []cue.Option{
-			cue.Concrete(true),
-			cue.Attributes(true),
-			cue.Definitions(true),
-			cue.Hidden(true),
-		}
-		err = unified.Validate(opts...)
-		if err != nil {
-			logrus.Debug(errors.Details(err, nil))
-			//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
-			err = fmt.Errorf("invalid panel %s: %s", panelName, err) // enrich the error message returned by cue lib
+		if err := s.validatePlugin(panel.Spec.Plugin, "panel", panelName, s.panels, func(originalValue cue.Value) cue.Value {
+			if s.queries != nil {
+				// Then merge with the queries disjunction schema
+				return originalValue.Unify(s.queries.disjSchema)
+			}
+			return originalValue
+		}); err != nil {
 			return err
 		}
 	}
 	logrus.Debug("All panels are valid")
+	return nil
+}
+
+func (s *sch) validatePlugin(plugin modelV1.Plugin, modelKind string, modelName string, cueDefs *cueDefs, enrichSchema func(originalValue cue.Value) cue.Value) error {
+	pluginData, err := plugin.JSONMarshal()
+	if err != nil {
+		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
+		return err
+	}
+	// compile the JSON plugin into a CUE Value
+	value := s.context.CompileBytes(pluginData)
+
+	// retrieve the corresponding schema
+	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.kindCuePath, cueDefs.schemas)
+	if err != nil {
+		return err
+	}
+
+	pluginSchema = enrichSchema(pluginSchema)
+	if pluginSchema.Err() != nil {
+		logrus.WithError(pluginSchema.Err()).Errorf("Error enriching %s schema", modelKind)
+		return pluginSchema.Err()
+	}
+
+	unified := value.Unify(pluginSchema)
+	err = unified.Validate(cueValidationOptions...)
+	if err != nil {
+		logrus.Debug(errors.Details(err, nil))
+		//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
+		err = fmt.Errorf("invalid %s %s: %s", modelKind, modelName, err) // enrich the error message returned by cue lib
+		return err
+	}
 	return nil
 }

@@ -14,12 +14,9 @@
 package v1
 
 import (
-	"encoding/json"
 	"fmt"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	"github.com/perses/perses/pkg/model/api/v1/datasource"
-	"gopkg.in/yaml.v2"
 )
 
 func GenerateGlobalDatasourceID(name string) string {
@@ -30,34 +27,12 @@ func GenerateDatasourceID(project string, name string) string {
 	return generateProjectResourceID("datasources", project, name)
 }
 
-type DatasourceSpec interface {
-	GetKind() datasource.Kind
-}
-
-func unmarshalDatasourceSpec(spec map[string]interface{}, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) (DatasourceSpec, error) {
-	specKind, ok := spec["kind"]
-	if !ok {
-		return nil, fmt.Errorf("attribute 'kind' not found in 'datasource.spec'")
-	}
-	rawSpec, err := staticMarshal(spec)
-	if err != nil {
-		return nil, err
-	}
-	var result DatasourceSpec
-	switch specKind {
-	case string(datasource.PrometheusKind):
-		result = &datasource.Prometheus{}
-	}
-	if err := staticUnmarshal(rawSpec, result); err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-type tmpGlobalDatasource struct {
-	Kind     Kind                   `json:"kind" yaml:"kind"`
-	Metadata Metadata               `json:"metadata" yaml:"metadata"`
-	Spec     map[string]interface{} `json:"spec" yaml:"spec"`
+type DatasourceSpec struct {
+	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
+	Default bool     `json:"default" yaml:"default"`
+	// Plugin will contain the datasource configuration.
+	// The data typed is available in Cue.
+	Plugin Plugin `json:"plugin" yaml:"plugin"`
 }
 
 // GlobalDatasource is the struct representing the datasource shared to everybody.
@@ -80,41 +55,6 @@ func (d *GlobalDatasource) GetKind() string {
 	return string(d.Kind)
 }
 
-func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
-	jsonUnmarshalFunc := func(spec interface{}) error {
-		return json.Unmarshal(data, spec)
-	}
-	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
-}
-
-func (d *GlobalDatasource) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
-}
-
-func (d *GlobalDatasource) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
-	var tmp tmpGlobalDatasource
-	if err := unmarshal(&tmp); err != nil {
-		return err
-	}
-	if tmp.Kind != KindGlobalDatasource {
-		return fmt.Errorf("invalid kind: %q for a GlobalDatasource type", tmp.Kind)
-	}
-	d.Kind = tmp.Kind
-	d.Metadata = tmp.Metadata
-	spec, err := unmarshalDatasourceSpec(tmp.Spec, staticMarshal, staticUnmarshal)
-	if err != nil {
-		return err
-	}
-	d.Spec = spec
-	return nil
-}
-
-type tmpDatasource struct {
-	Kind     Kind                   `json:"kind" yaml:"kind"`
-	Metadata ProjectMetadata        `json:"metadata" yaml:"metadata"`
-	Spec     map[string]interface{} `json:"spec" yaml:"spec"`
-}
-
 // Datasource will be the datasource you can define in your project/namespace
 // This is a resource that won't be shared across projects.
 // A Dashboard can use it only if it is in the same project.
@@ -134,33 +74,4 @@ func (d *Datasource) GetMetadata() modelAPI.Metadata {
 
 func (d *Datasource) GetKind() string {
 	return string(d.Kind)
-}
-
-func (d *Datasource) UnmarshalJSON(data []byte) error {
-	jsonUnmarshalFunc := func(spec interface{}) error {
-		return json.Unmarshal(data, spec)
-	}
-	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
-}
-
-func (d *Datasource) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
-}
-
-func (d *Datasource) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
-	var tmp tmpDatasource
-	if err := unmarshal(&tmp); err != nil {
-		return err
-	}
-	if tmp.Kind != KindDatasource {
-		return fmt.Errorf("invalid kind: %q for a Datasource type", tmp.Kind)
-	}
-	d.Kind = tmp.Kind
-	d.Metadata = tmp.Metadata
-	spec, err := unmarshalDatasourceSpec(tmp.Spec, staticMarshal, staticUnmarshal)
-	if err != nil {
-		return err
-	}
-	d.Spec = spec
-	return nil
 }

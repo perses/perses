@@ -5,10 +5,17 @@
       "name": "PrometheusDemo"
     },
     "spec": {
-      "kind": "Prometheus",
       "default": true,
-      "http": {
-        "url": "https://prometheus.demo.do.prometheus.io"
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "https://prometheus.demo.do.prometheus.io"
+            }
+          }
+        }
       }
     }
   },
@@ -18,11 +25,12 @@
       "name": "PrometheusDemoBrowser"
     },
     "spec": {
-      "kind": "Prometheus",
-      "default": false,
-      "http": {
-        "access": "browser",
-        "url": "https://prometheus.demo.do.prometheus.io"
+      "default": true,
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "direct_url": "https://prometheus.demo.do.prometheus.io"
+        }
       }
     }
   },
@@ -32,10 +40,17 @@
       "name": "PrometheusLocal"
     },
     "spec": {
-      "kind": "Prometheus",
-      "default": false,
-      "http": {
-        "url": "http://localhost:9090"
+      "default": true,
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "http://localhost:9090"
+            }
+          }
+        }
       }
     }
   }

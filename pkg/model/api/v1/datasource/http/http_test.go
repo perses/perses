@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+package http
 
 import (
 	"encoding/json"
@@ -104,11 +104,11 @@ password_file: "./test/password_file.txt"
 	}
 }
 
-func TestUnmarshalJSONHTTPAuth(t *testing.T) {
+func TestUnmarshalJSONAuth(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
-		result HTTPAuth
+		result Auth
 	}{
 		{
 			title: "Bearer Token",
@@ -117,7 +117,7 @@ func TestUnmarshalJSONHTTPAuth(t *testing.T) {
   "bearer_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 }
 `,
-			result: HTTPAuth{
+			result: Auth{
 				BearerToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
 			},
 		},
@@ -131,7 +131,7 @@ func TestUnmarshalJSONHTTPAuth(t *testing.T) {
   }
 }
 `,
-			result: HTTPAuth{
+			result: Auth{
 				BasicAuth: &BasicAuth{
 					Username: "john",
 					Password: "doe",
@@ -145,32 +145,32 @@ func TestUnmarshalJSONHTTPAuth(t *testing.T) {
   "ca_cert": "certificate"
 }
 `,
-			result: HTTPAuth{
+			result: Auth{
 				CaCert: "certificate",
 			},
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := HTTPAuth{}
+			result := Auth{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
 			assert.Equal(t, test.result, result)
 		})
 	}
 }
 
-func TestUnmarshalYAMLHTTPAuth(t *testing.T) {
+func TestUnmarshalYAMLAuth(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
-		result HTTPAuth
+		result Auth
 	}{
 		{
 			title: "Bearer Token",
 			yamele: `
 bearer_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 `,
-			result: HTTPAuth{
+			result: Auth{
 				BearerToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
 			},
 		},
@@ -181,7 +181,7 @@ basic_auth:
   username: "john"
   password: "doe"
 `,
-			result: HTTPAuth{
+			result: Auth{
 				BasicAuth: &BasicAuth{
 					Username: "john",
 					Password: "doe",
@@ -193,25 +193,25 @@ basic_auth:
 			yamele: `
 ca_cert: "certificate"
 `,
-			result: HTTPAuth{
+			result: Auth{
 				CaCert: "certificate",
 			},
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := HTTPAuth{}
+			result := Auth{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
 		})
 	}
 }
 
-func TestUnmarshalJSONHTTPConfig(t *testing.T) {
+func TestUnmarshalJSONConfig(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
-		result HTTPConfig
+		result Config
 	}{
 		{
 			title: "basic config",
@@ -220,58 +220,56 @@ func TestUnmarshalJSONHTTPConfig(t *testing.T) {
   "url": "http://localhost:9090"
 }
 `,
-			result: HTTPConfig{
+			result: Config{
 				URL: &url.URL{
 					Scheme: "http",
 					Host:   "localhost:9090",
 				},
-				Access: ServerHTTPAccess,
 			},
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := HTTPConfig{}
+			result := Config{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
 			assert.Equal(t, test.result, result)
 		})
 	}
 }
 
-func TestUnmarshalYAMLHTTPConfig(t *testing.T) {
+func TestUnmarshalYAMLConfig(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
-		result HTTPConfig
+		result Config
 	}{
 		{
 			title: "basic config",
 			yamele: `
 url: "http://localhost:9090"
 `,
-			result: HTTPConfig{
+			result: Config{
 				URL: &url.URL{
 					Scheme: "http",
 					Host:   "localhost:9090",
 				},
-				Access: ServerHTTPAccess,
 			},
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := HTTPConfig{}
+			result := Config{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
 		})
 	}
 }
 
-func TestUnmarshalJSONHTTPAllowedEndpoint(t *testing.T) {
+func TestUnmarshalJSONAllowedEndpoint(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
-		result HTTPAllowedEndpoint
+		result AllowedEndpoint
 	}{
 		{
 			title: "simple endpoint",
@@ -281,7 +279,7 @@ func TestUnmarshalJSONHTTPAllowedEndpoint(t *testing.T) {
   "method": "POST"
 }
 `,
-			result: HTTPAllowedEndpoint{
+			result: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 				Method:          http.MethodPost,
 			},
@@ -294,7 +292,7 @@ func TestUnmarshalJSONHTTPAllowedEndpoint(t *testing.T) {
   "method": "POST"
 }
 `,
-			result: HTTPAllowedEndpoint{
+			result: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
 				Method:          http.MethodPost,
 			},
@@ -302,18 +300,18 @@ func TestUnmarshalJSONHTTPAllowedEndpoint(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := HTTPAllowedEndpoint{}
+			result := AllowedEndpoint{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
 			assert.Equal(t, test.result, result)
 		})
 	}
 }
 
-func TestUnmarshalYAMLHTTPAllowedEndpoint(t *testing.T) {
+func TestUnmarshalYAMLAllowedEndpoint(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		yamele string
-		result HTTPAllowedEndpoint
+		result AllowedEndpoint
 	}{
 		{
 			title: "simple endpoint",
@@ -321,7 +319,7 @@ func TestUnmarshalYAMLHTTPAllowedEndpoint(t *testing.T) {
 endpoint_pattern: "/api/v1/labels"
 method: "POST"
 `,
-			result: HTTPAllowedEndpoint{
+			result: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 				Method:          http.MethodPost,
 			},
@@ -332,7 +330,7 @@ method: "POST"
 endpoint_pattern: "^/?api/v./[a-zA-Z0-9]$"
 method: "POST"
 `,
-			result: HTTPAllowedEndpoint{
+			result: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
 				Method:          http.MethodPost,
 			},
@@ -340,22 +338,22 @@ method: "POST"
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := HTTPAllowedEndpoint{}
+			result := AllowedEndpoint{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &result))
 			assert.Equal(t, test.result, result)
 		})
 	}
 }
 
-func TestMarshalJSONHTTPAllowedEndpoint(t *testing.T) {
+func TestMarshalJSONAllowedEndpoint(t *testing.T) {
 	testSuite := []struct {
 		title           string
-		allowedEndpoint HTTPAllowedEndpoint
+		allowedEndpoint AllowedEndpoint
 		result          string
 	}{
 		{
 			title: "simple endpoint",
-			allowedEndpoint: HTTPAllowedEndpoint{
+			allowedEndpoint: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 				Method:          http.MethodPost,
 			},
@@ -366,7 +364,7 @@ func TestMarshalJSONHTTPAllowedEndpoint(t *testing.T) {
 		},
 		{
 			title: "complex endpoint patter",
-			allowedEndpoint: HTTPAllowedEndpoint{
+			allowedEndpoint: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
 				Method:          http.MethodPost,
 			},
@@ -385,15 +383,15 @@ func TestMarshalJSONHTTPAllowedEndpoint(t *testing.T) {
 	}
 }
 
-func TestMarshalYAMLHTTPAllowedEndpoint(t *testing.T) {
+func TestMarshalYAMLAllowedEndpoint(t *testing.T) {
 	testSuite := []struct {
 		title           string
-		allowedEndpoint HTTPAllowedEndpoint
+		allowedEndpoint AllowedEndpoint
 		result          string
 	}{
 		{
 			title: "simple endpoint",
-			allowedEndpoint: HTTPAllowedEndpoint{
+			allowedEndpoint: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 				Method:          http.MethodPost,
 			},
@@ -403,7 +401,7 @@ method: POST
 		},
 		{
 			title: "complex endpoint patter",
-			allowedEndpoint: HTTPAllowedEndpoint{
+			allowedEndpoint: AllowedEndpoint{
 				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
 				Method:          http.MethodPost,
 			},
@@ -419,4 +417,48 @@ method: POST
 			assert.Equal(t, test.result, string(data))
 		})
 	}
+}
+
+func TestCheckAndValidate(t *testing.T) {
+	// Check and Validate HTTPProxy contained in a proper struct
+	type aStruct struct {
+		A struct {
+			B struct {
+				Kind string
+				Spec *Config
+			}
+		}
+	}
+
+	u, _ := url.Parse("http://localhost:8080")
+
+	b := &aStruct{
+		A: struct {
+			B struct {
+				Kind string
+				Spec *Config
+			}
+		}{B: struct {
+			Kind string
+			Spec *Config
+		}{Kind: "HTTPProxy", Spec: &Config{URL: u}}},
+	}
+
+	c, err := CheckAndValidate(b)
+	assert.NoError(t, err)
+	assert.Equal(t, &Config{URL: u}, c)
+
+	// Check and Validate HTTPProxy when it is hidden in a map of interface
+	uglyStruct := map[string]interface{}{
+		"direct_url": "",
+		"proxy": map[string]interface{}{
+			"kind": "HTTPProxy",
+			"spec": map[string]interface{}{
+				"url": "http://localhost:8080",
+			},
+		},
+	}
+	c, err = CheckAndValidate(uglyStruct)
+	assert.NoError(t, err)
+	assert.Equal(t, &Config{URL: u}, c)
 }

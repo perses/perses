@@ -20,6 +20,7 @@ import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
 func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
@@ -31,14 +32,18 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusDemo",
 			},
-			Spec: &datasource.Prometheus{
-				BasicDatasource: datasource.BasicDatasource{
-					Kind:    datasource.PrometheusKind,
-					Default: false,
-				},
-				HTTP: datasource.HTTPConfig{
-					URL:    u,
-					Access: datasource.ServerHTTPAccess,
+			Spec: modelV1.DatasourceSpec{
+				Default: false,
+				Plugin: modelV1.Plugin{
+					Kind: "PrometheusDatasource",
+					Spec: &datasource.Prometheus{
+						Proxy: http.Proxy{
+							Kind: "HTTPProxy",
+							Spec: http.Config{
+								URL: u,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -47,14 +52,13 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusDemoBrowser",
 			},
-			Spec: &datasource.Prometheus{
-				BasicDatasource: datasource.BasicDatasource{
-					Kind:    datasource.PrometheusKind,
-					Default: false,
-				},
-				HTTP: datasource.HTTPConfig{
-					URL:    u,
-					Access: datasource.BrowserHTTPAccess,
+			Spec: modelV1.DatasourceSpec{
+				Default: false,
+				Plugin: modelV1.Plugin{
+					Kind: "PrometheusDatasource",
+					Spec: &datasource.Prometheus{
+						DirectURL: u,
+					},
 				},
 			},
 		},
@@ -63,14 +67,18 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusLocal",
 			},
-			Spec: &datasource.Prometheus{
-				BasicDatasource: datasource.BasicDatasource{
-					Kind:    datasource.PrometheusKind,
-					Default: false,
-				},
-				HTTP: datasource.HTTPConfig{
-					URL:    localURL,
-					Access: datasource.ServerHTTPAccess,
+			Spec: modelV1.DatasourceSpec{
+				Default: false,
+				Plugin: modelV1.Plugin{
+					Kind: "PrometheusDatasource",
+					Spec: &datasource.Prometheus{
+						Proxy: http.Proxy{
+							Kind: "HTTPProxy",
+							Spec: http.Config{
+								URL: localURL,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -106,7 +114,7 @@ func (c *globalDatasource) Get(name string) (*modelV1.GlobalDatasource, error) {
 		Metadata: modelV1.Metadata{
 			Name: name,
 		},
-		Spec: nil,
+		Spec: modelV1.DatasourceSpec{},
 	}, nil
 }
 

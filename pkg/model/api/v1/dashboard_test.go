@@ -21,7 +21,6 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,7 +49,7 @@ func TestMarshalDashboard(t *testing.T) {
 				Spec: DashboardSpec{
 					Datasource: dashboard.Datasource{
 						Name: "PrometheusDemo",
-						Kind: datasource.PrometheusKind,
+						Kind: "Prometheus",
 					},
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
@@ -160,7 +159,7 @@ func TestMarshalDashboard(t *testing.T) {
 				Spec: DashboardSpec{
 					Datasource: dashboard.Datasource{
 						Name: "PrometheusDemo",
-						Kind: datasource.PrometheusKind,
+						Kind: "Prometheus",
 					},
 					Duration: model.Duration(6 * time.Hour),
 					Variables: map[string]*dashboard.Variable{
@@ -419,7 +418,7 @@ func TestUnmarshallDashboard(t *testing.T) {
 		Spec: DashboardSpec{
 			Datasource: dashboard.Datasource{
 				Name: "PrometheusDemo",
-				Kind: datasource.PrometheusKind,
+				Kind: "Prometheus",
 			},
 			Duration: model.Duration(6 * time.Hour),
 			Variables: map[string]*dashboard.Variable{
