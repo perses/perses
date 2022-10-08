@@ -63,6 +63,7 @@ func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, kind
 type Schemas interface {
 	ValidateDatasource(plugin modelV1.Plugin) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
+	ValidatePanel(plugin modelV1.Plugin, panelName string) error
 	GetLoaders() []Loader
 }
 
@@ -147,18 +148,22 @@ func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
 	// the processing stops as soon as it detects an invalid panel -> TODO: improve this to return a list of all the errors encountered ?
 	for panelName, panel := range panels {
 		logrus.Tracef("Panel to validate: %s", panelName)
-		if err := s.validatePlugin(panel.Spec.Plugin, "panel", panelName, s.panels, func(originalValue cue.Value) cue.Value {
-			if s.queries != nil {
-				// Then merge with the queries disjunction schema
-				return originalValue.Unify(s.queries.disjSchema)
-			}
-			return originalValue
-		}); err != nil {
+		if err := s.ValidatePanel(panel.Spec.Plugin, panelName); err != nil {
 			return err
 		}
 	}
 	logrus.Debug("All panels are valid")
 	return nil
+}
+
+func (s *sch) ValidatePanel(plugin modelV1.Plugin, panelName string) error {
+	return s.validatePlugin(plugin, "panel", panelName, s.panels, func(originalValue cue.Value) cue.Value {
+		if s.queries != nil {
+			// Then merge with the queries disjunction schema
+			return originalValue.Unify(s.queries.disjSchema)
+		}
+		return originalValue
+	})
 }
 
 func (s *sch) validatePlugin(plugin modelV1.Plugin, modelKind string, modelName string, cueDefs *cueDefs, enrichSchema func(originalValue cue.Value) cue.Value) error {

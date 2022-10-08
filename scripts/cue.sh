@@ -4,16 +4,6 @@
 
 set -e
 
-function test() {
-  cd schemas/panels
-  for d in *; do
-    if [ -d "${d}" ]; then
-      echo "testing charts ${d}"
-      cue vet "${d}/${d}.json" "${d}/${d}.cue"
-    fi
-  done
-}
-
 function fmt() {
   find ./internal ./pkg ./schemas -name "*.cue" -exec cue fmt {} \;
 }
@@ -29,8 +19,4 @@ fi
 
 if [[ "$1" == "--checkformat" ]]; then
   checkfmt
-fi
-
-if [[ $1 == "--test" ]]; then
-  test
 fi
