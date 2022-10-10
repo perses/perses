@@ -15,6 +15,7 @@ import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, LayoutDefinitio
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 import { DashboardStoreState } from './DashboardProvider';
+import { PanelEditorSlice } from './panel-editing-slice';
 
 export interface LayoutSlice {
   layouts: PanelGroupDefinition[];
@@ -68,7 +69,9 @@ export interface LayoutItem {
 /**
  * Curried function for creating a LayoutEditorSlice.
  */
-export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<LayoutSlice, Middleware, [], LayoutSlice> {
+export function createLayoutSlice(
+  layouts: LayoutDefinition[]
+): StateCreator<LayoutSlice & PanelEditorSlice, Middleware, [], LayoutSlice> {
   // Return the state creator function for Zustand that uses the layouts provided as initial state
   let id = -1;
 
@@ -171,9 +174,9 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
         const deletedPanelGroup = state.layouts.splice(groupIndex, 1);
 
         // build an object that maps each panel to the groups it belongs
-        const panels = (get() as DashboardStoreState).panels;
+        const panels = get().panels;
         const groups = get().layouts;
-        const map: Record<string, PanelGroupDefinition['id'][]> = mapPanelGroupToPanel(groups);
+        const map: Record<string, PanelGroupDefinition['id'][]> = mapPanelToPanelGroups(groups);
         // for each panel in the deleted panel group, remove panel in state.panels as well
         const panelsCopy = { ...panels };
         deletedPanelGroup[0]?.items.forEach((panel) => {
@@ -187,7 +190,7 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
             delete panelsCopy[panelKey];
           }
         });
-        (state as DashboardStoreState).panels = panelsCopy;
+        state.panels = panelsCopy;
       });
     },
   });
@@ -224,7 +227,7 @@ function getYForNewRow(group: PanelGroupDefinition) {
 }
 
 // Return an object that maps each panel to the groups it belongs
-function mapPanelGroupToPanel(groups: PanelGroupDefinition[]) {
+function mapPanelToPanelGroups(groups: PanelGroupDefinition[]) {
   const map: Record<string, PanelGroupDefinition['id'][]> = {}; // { panel key: [group ids] }
   groups.forEach((group) => {
     // for each panel in a group, add the group id to map[panelKey]

@@ -17,7 +17,6 @@ import { DashboardResource } from '@perses-dev/core';
 import { PanelDrawer, Dashboard } from '../../components';
 import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
-import { usePanelGroupDialog } from '../../context';
 import DeletePanelGroupDialog from '../../components/PanelGroupDialog/DeletePanelGroupDialog';
 
 export interface DashboardAppProps {
@@ -26,7 +25,6 @@ export interface DashboardAppProps {
 
 export const DashboardApp = (props: DashboardAppProps) => {
   const { dashboardResource } = props;
-  const { panelGroupDialog, deletePanelGroupDialog } = usePanelGroupDialog();
   return (
     <Box
       sx={{
@@ -44,8 +42,8 @@ export const DashboardApp = (props: DashboardAppProps) => {
           <Dashboard />
         </ErrorBoundary>
         <PanelDrawer />
-        {panelGroupDialog && <PanelGroupDialog />}
-        {deletePanelGroupDialog && <DeletePanelGroupDialog />}
+        <PanelGroupDialog />
+        <DeletePanelGroupDialog />
       </Box>
     </Box>
   );

@@ -32,7 +32,7 @@ const DeletePanelGroupDialog = () => {
   };
 
   return (
-    <Dialog open>
+    <Dialog open={deletePanelGroupDialog !== undefined}>
       <DialogTitle>Delete Panel Group</DialogTitle>
       <IconButton
         aria-label="Close"
