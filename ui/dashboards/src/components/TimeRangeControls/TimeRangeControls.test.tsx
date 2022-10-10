@@ -13,7 +13,7 @@
 
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { renderWithContext } from '../../test';
+import { renderWithHistory } from '../../test';
 import testDashboard from '../../test/testDashboard';
 import { DashboardProvider, DashboardStoreProps, TimeRangeProvider } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
@@ -30,7 +30,7 @@ describe('TimeRangeControls', () => {
   });
 
   const renderTimeRangeControls = () => {
-    renderWithContext(
+    renderWithHistory(
       <DashboardProvider initialState={initialState}>
         <TimeRangeProvider initialTimeRange={testDefaultTimeRange}>
           <TimeRangeControls />

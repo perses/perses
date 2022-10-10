@@ -12,6 +12,10 @@
 // limitations under the License.
 
 import { render, RenderOptions } from '@testing-library/react';
+import { unstable_HistoryRouter } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 /**
@@ -21,4 +25,26 @@ export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderO
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
+}
+
+/**
+ * Similar to renderWithContext test helper but with routing to test
+ * see: https://github.com/pbeshai/use-query-params/blob/master/packages/use-query-params-adapter-react-router-6/src/__tests__/react-router-6.test.tsx
+ */
+export function renderWithHistory(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
+  // use this router so we can pass our own history to inspect
+  const HistoryRouter = unstable_HistoryRouter;
+  const history = createMemoryHistory({ initialEntries: ['/'] });
+
+  // Create a new QueryClient for each test to avoid caching issues
+  const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
+
+  return render(
+    <HistoryRouter history={history}>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>{ui}</QueryParamProvider>
+      </QueryClientProvider>
+    </HistoryRouter>,
+    options
+  );
 }
