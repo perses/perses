@@ -71,6 +71,7 @@ export function TimeRangeControls() {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {
                 pastDuration: duration as DurationString,
+                end: new Date(),
               };
               setTimeRange(relativeTimeInput);
               setShowCustomDateSelector(false);

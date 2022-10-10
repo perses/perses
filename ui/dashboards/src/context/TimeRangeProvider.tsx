@@ -45,20 +45,22 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
         return;
       }
 
+      // needed for TimeRangeControls since absolute time calendar and relative time shortcuts supported
       setSelectedTimeRange(value);
 
-      // convert to absolute time range if relative time shortcut passed from TimeRangeControls
+      // convert to absolute time range if relative time shortcut passed
       if (isRelativeTimeRange(value)) {
         setActiveTimeRange(toAbsoluteTimeRange(value));
         return;
       }
 
-      // assume value was already absolute
+      // resolved time, assume value was already absolute
       setActiveTimeRange(value);
     },
     [onTimeRangeChange, setSelectedTimeRange]
   );
 
+  // ensure time range updates when back btn pressed
   useSyncActiveTimeRange(setActiveTimeRange);
 
   const ctx = useMemo(
