@@ -13,12 +13,16 @@
 
 package prometheus
 
+import (
+	"github.com/perses/perses/schemas/datasources/prometheus"
+)
+
 spec: {
 	plugin: {
 		kind: "PrometheusTimeSeriesQuery"
 		spec: {
 			datasource: {
-				kind: "PrometheusDatasource"
+				kind: prometheus.kind
 			}
 			query:       string
 			min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
