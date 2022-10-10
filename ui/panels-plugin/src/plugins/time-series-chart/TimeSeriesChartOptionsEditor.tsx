@@ -12,14 +12,9 @@
 // limitations under the License.
 
 import produce from 'immer';
-import { Stack, Box, Typography, FormControl, InputLabel } from '@mui/material';
-import { UnknownSpec } from '@perses-dev/core';
-import {
-  PluginKindSelect,
-  PluginSpecEditor,
-  OptionsEditorProps,
-  PluginKindSelectProps,
-} from '@perses-dev/plugin-system';
+import { Stack, Box, Typography } from '@mui/material';
+import { TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { OptionsEditorProps, TimeSeriesQueryEditor } from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -28,17 +23,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   const { onChange, value } = props;
   const { queries } = value;
 
-  const handleQueryPluginKindChange: PluginKindSelectProps['onChange'] = () => {
-    // TODO: Need to make "remember state" stuff reusable?
-  };
-
-  const handleQueryPluginSpecChange = (index: number, pluginSpec: UnknownSpec) => {
+  const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        const timeSeriesQuery = draft.queries[index];
-        if (timeSeriesQuery) {
-          timeSeriesQuery.spec.plugin.spec = pluginSpec;
-        }
+        draft.queries[index] = queryDef;
       })
     );
   };
@@ -46,29 +34,12 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   return (
     <Stack spacing={1}>
       {/* TODO: Deal with user deleting all queries */}
-      {queries.map(({ spec: { plugin } }, i) => (
+      {queries.map((query, i) => (
         <Box key={i}>
           <Typography variant="overline" component="h3">
             Query {i + 1}
           </Typography>
-          <FormControl margin="dense" fullWidth={false}>
-            <InputLabel id={`query-type-label-${i}`}>Query Type</InputLabel>
-            <PluginKindSelect
-              labelId={`query-type-label-${i}`}
-              label="Query Type"
-              pluginType="TimeSeriesQuery"
-              value={plugin.kind}
-              onChange={handleQueryPluginKindChange}
-            />
-          </FormControl>
-          {plugin && (
-            <PluginSpecEditor
-              pluginType="TimeSeriesQuery"
-              pluginKind={plugin.kind}
-              value={plugin.spec}
-              onChange={(next: UnknownSpec) => handleQueryPluginSpecChange(i, next)}
-            />
-          )}
+          <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
         </Box>
       ))}
     </Stack>
