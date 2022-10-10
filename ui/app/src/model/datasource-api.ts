@@ -25,7 +25,10 @@ export function useDatasourceApi(): DatasourceStoreProviderProps['datasourceApi'
       // TODO: Convert selector to appropriate request params and fetchJson to get it from backend
 
       // Just resolve a default PrometheusDatasource right now
-      if (selector.kind === tempDatasource.spec.plugin.kind && selector.name === undefined) {
+      if (
+        selector.kind === tempDatasource.spec.plugin.kind &&
+        (selector.name === undefined || selector.name === tempDatasource.metadata.name)
+      ) {
         return {
           resource: tempDatasource,
           proxyUrl: getProxyUrl(tempDatasource),

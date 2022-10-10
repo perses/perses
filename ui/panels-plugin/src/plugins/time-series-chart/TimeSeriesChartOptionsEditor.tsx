@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Fragment } from 'react';
 import produce from 'immer';
 import { Stack, Typography } from '@mui/material';
 import { UnknownSpec } from '@perses-dev/core';
@@ -38,7 +39,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     <Stack spacing={1}>
       {/* TODO: Deal with user deleting all queries */}
       {queries.map(({ spec: { plugin } }, i) => (
-        <>
+        <Fragment key={i}>
           <Typography variant="overline">Query {i + 1}</Typography>
           {plugin && (
             <PluginSpecEditor
@@ -48,7 +49,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
               onChange={(next: UnknownSpec) => handleQueryPluginSpecChange(i, next)}
             />
           )}
-        </>
+        </Fragment>
       ))}
     </Stack>
   );
