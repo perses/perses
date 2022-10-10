@@ -85,7 +85,7 @@ cue-eval:
 .PHONY: cue-test
 cue-test:
 	@echo ">> test cue schemas with json data"
-	./scripts/cue.sh --test
+	$(GO) run ./scripts/cue-test/cue-test.go
 
 .PHONY: test
 test: generate
@@ -138,7 +138,7 @@ generate: assets-compress
 
 .PHONY: generate-changelog
 generate-changelog:
-	$(GO) run ./scripts/generate_changelog.go --version="${VERSION}"
+	$(GO) run ./scripts/generate-changelog/generate-changelog.go --version="${VERSION}"
 
 .PHONY: clean
 clean:
