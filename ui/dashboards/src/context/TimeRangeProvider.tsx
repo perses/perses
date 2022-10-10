@@ -33,7 +33,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
     ? toAbsoluteTimeRange(initialTimeRange)
     : initialTimeRange;
 
-  const { selectedTimeRange, setSelectedTimeRange } = useSelectedTimeRange();
+  const { setSelectedTimeRange } = useSelectedTimeRange();
 
   const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
