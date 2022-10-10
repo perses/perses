@@ -17,6 +17,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { Configuration } from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import ESLintWebpackPlugin from 'eslint-webpack-plugin';
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 // Use common config for swc
 const swcrc = JSON.parse(fs.readFileSync('../.swcrc', 'utf-8'));
@@ -45,6 +46,10 @@ export const commonConfig: Configuration = {
     new ESLintWebpackPlugin({
       threads: true,
       files: '../*/src/**/*.{ts,tsx,js,jsx}',
+    }),
+    new CircularDependencyPlugin({
+      exclude: /node_modules/,
+      failOnError: true,
     }),
   ],
   module: {
