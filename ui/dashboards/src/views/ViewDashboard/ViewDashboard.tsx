@@ -18,12 +18,12 @@ import { DashboardResource } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProvider,
-  useInitialTimeRange,
   TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
 } from '../../context';
+import { useInitialTimeRange } from '../../utils';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
