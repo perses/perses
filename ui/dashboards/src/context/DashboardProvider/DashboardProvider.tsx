@@ -81,10 +81,3 @@ export function DashboardProvider(props: DashboardProviderProps) {
     </DashboardContext.Provider>
   );
 }
-
-export function useSelectedTimeRangeStore() {
-  return useDashboardStore(({ selectedTimeRange, setSelectedTimeRange }) => ({
-    selectedTimeRange,
-    setSelectedTimeRange,
-  }));
-}

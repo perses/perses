@@ -28,7 +28,7 @@ export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderO
 }
 
 /**
- * Similar to renderWithContext test helper but with routing to test
+ * Similar to renderWithContext test helper but to test routing / query param functionality
  * see: https://github.com/pbeshai/use-query-params/blob/master/packages/use-query-params-adapter-react-router-6/src/__tests__/react-router-6.test.tsx
  */
 export function renderWithHistory(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {

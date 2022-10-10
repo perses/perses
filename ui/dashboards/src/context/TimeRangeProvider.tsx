@@ -26,7 +26,7 @@ import {
   parseDurationString,
 } from '@perses-dev/core';
 import { TimeRange, TimeRangeContext } from '@perses-dev/plugin-system';
-import { useSelectedTimeRangeStore } from './DashboardProvider';
+import { useSelectedTimeRange } from './DashboardProvider';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
@@ -69,7 +69,7 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
  * Set initial start and end URL params and update when selected time range changes
  */
 export function useSyncTimeRange() {
-  const { selectedTimeRange } = useSelectedTimeRangeStore();
+  const { selectedTimeRange } = useSelectedTimeRange();
   const [query, setQuery] = useQueryParams(queryConfig);
   const lastParamSync = useRef<DecodedValueMap<typeof queryConfig>>();
 
@@ -126,7 +126,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
     ? toAbsoluteTimeRange(initialTimeRange)
     : initialTimeRange;
 
-  const { selectedTimeRange, setSelectedTimeRange } = useSelectedTimeRangeStore();
+  const { selectedTimeRange, setSelectedTimeRange } = useSelectedTimeRange();
 
   const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 

@@ -43,3 +43,10 @@ export function usePanels() {
     editPanel,
   }));
 }
+
+export function useSelectedTimeRange() {
+  return useDashboardStore(({ selectedTimeRange, setSelectedTimeRange }) => ({
+    selectedTimeRange,
+    setSelectedTimeRange,
+  }));
+}

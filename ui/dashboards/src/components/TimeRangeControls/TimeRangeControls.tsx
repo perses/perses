@@ -16,7 +16,7 @@ import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import { DurationString, RelativeTimeRange, AbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useSyncTimeRange, useSelectedTimeRangeStore } from '../../context';
+import { useSyncTimeRange, useSelectedTimeRange } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -33,7 +33,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useTimeRange();
-  const { selectedTimeRange } = useSelectedTimeRangeStore();
+  const { selectedTimeRange } = useSelectedTimeRange();
   useSyncTimeRange();
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
