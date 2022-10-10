@@ -63,10 +63,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
   // ensure time range updates when back btn pressed
   useSyncActiveTimeRange(setActiveTimeRange);
 
-  const ctx = useMemo(
-    () => ({ timeRange, selectedTimeRange, setTimeRange }),
-    [timeRange, selectedTimeRange, setTimeRange]
-  );
+  const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }

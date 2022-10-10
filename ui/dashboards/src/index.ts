@@ -13,5 +13,5 @@
 
 export * from './components';
 export * from './context';
+export * from './utils';
 export * from './views';
-export * from './utils/time-range-params';
