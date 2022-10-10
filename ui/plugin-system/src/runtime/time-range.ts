@@ -15,26 +15,19 @@ import { createContext, useContext } from 'react';
 import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
 
 export interface TimeRange {
-  // TODO (sjcobb): move selectedTimeRange to store
-  selectedTimeRange: TimeRangeValue; // includes relative time shortcuts
-  timeRange: AbsoluteTimeRange; // resolved time
+  timeRange: AbsoluteTimeRange;
   setTimeRange: (value: TimeRangeValue) => void;
 }
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);
 
-function useTimeRangeContext() {
+/**
+ * Gets the current TimeRange at runtime.
+ */
+export function useTimeRange(): TimeRange {
   const ctx = useContext(TimeRangeContext);
   if (ctx === undefined) {
     throw new Error('No TimeRangeContext found. Did you forget a Provider?');
   }
   return ctx;
-}
-
-/**
- * Gets the current TimeRange at runtime.
- */
-export function useTimeRange() {
-  const { timeRange, setTimeRange } = useTimeRangeContext();
-  return { timeRange, setTimeRange };
 }

@@ -13,8 +13,6 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-// import { QueryParamProvider } from 'use-query-params';
-// import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProvider,
