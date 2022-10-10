@@ -14,7 +14,6 @@
 import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { DashboardStoreState } from './DashboardProvider';
 import { PanelEditorSlice } from './panel-editing-slice';
 
 export interface LayoutSlice {
