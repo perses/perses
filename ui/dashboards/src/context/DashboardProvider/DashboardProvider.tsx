@@ -17,20 +17,22 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
-import { DashboardSpec, DurationString } from '@perses-dev/core';
+import { DashboardSpec, TimeRangeValue } from '@perses-dev/core';
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createLayoutSlice, LayoutSlice } from './layout-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing-slice';
 
 export interface DashboardStoreState extends PanelGroupSlice, LayoutSlice, PanelEditorSlice {
-  defaultTimeRange: DurationString;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
+  selectedTimeRange: TimeRangeValue;
+  setSelectedTimeRange: (value: TimeRangeValue) => void;
 }
 
 export interface DashboardStoreProps {
   dashboardSpec: DashboardSpec;
   isEditMode?: boolean;
+  selectedTimeRange?: TimeRangeValue;
 }
 
 export interface DashboardProviderProps {
@@ -51,7 +53,7 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 export function DashboardProvider(props: DashboardProviderProps) {
   const {
     children,
-    initialState: { dashboardSpec, isEditMode },
+    initialState: { dashboardSpec, isEditMode, selectedTimeRange },
   } = props;
 
   const { layouts, panels } = dashboardSpec;
@@ -64,7 +66,8 @@ export function DashboardProvider(props: DashboardProviderProps) {
           ...createPanelGroupSlice(...args),
           ...createLayoutSlice(layouts)(...args),
           ...createPanelEditorSlice(panels)(...args),
-          defaultTimeRange: dashboardSpec.duration,
+          selectedTimeRange: selectedTimeRange ?? { pastDuration: dashboardSpec.duration },
+          setSelectedTimeRange: (selectedTimeRange: TimeRangeValue) => set({ selectedTimeRange }),
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
         };
@@ -77,4 +80,11 @@ export function DashboardProvider(props: DashboardProviderProps) {
       {children}
     </DashboardContext.Provider>
   );
+}
+
+export function useSelectedTimeRangeStore() {
+  return useDashboardStore(({ selectedTimeRange, setSelectedTimeRange }) => ({
+    selectedTimeRange,
+    setSelectedTimeRange,
+  }));
 }

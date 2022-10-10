@@ -11,15 +11,109 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { getUnixTime } from 'date-fns';
-import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext, useQueryString } from '@perses-dev/plugin-system';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useQueryParams, DecodedValueMap, StringParam } from 'use-query-params';
+import { getUnixTime, sub } from 'date-fns';
+import {
+  TimeRangeValue,
+  AbsoluteTimeRange,
+  toAbsoluteTimeRange,
+  isRelativeTimeRange,
+  isDurationString,
+  RelativeTimeRange,
+  DurationString,
+  isAbsoluteTimeRange,
+  parseDurationString,
+} from '@perses-dev/core';
+import { TimeRange, TimeRangeContext } from '@perses-dev/plugin-system';
+import { useSelectedTimeRangeStore } from './DashboardProvider';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
   children?: React.ReactNode;
   onTimeRangeChange?: (e: TimeRangeValue) => void;
+}
+
+const queryConfig = {
+  start: StringParam,
+  end: StringParam,
+};
+
+/**
+ * Gets the initial time range taking into account URL params and dashboard JSON duration
+ */
+export function useInitialTimeRange(dashboardDuration: DurationString): TimeRangeValue {
+  const [query, setQuery] = useQueryParams(queryConfig);
+  const { start, end } = query;
+
+  return useMemo(() => {
+    let initialTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
+    if (!start) {
+      setQuery({ start: dashboardDuration });
+      return initialTimeRange;
+    }
+
+    if (isDurationString(start.toString())) {
+      initialTimeRange = { pastDuration: start } as RelativeTimeRange;
+    } else {
+      initialTimeRange = {
+        start: new Date(Number(start)),
+        end: end ? new Date(Number(end)) : new Date(),
+      };
+    }
+    return initialTimeRange;
+  }, [start, end, dashboardDuration, setQuery]);
+}
+
+/**
+ * Set initial start and end URL params and update when selected time range changes
+ */
+export function useSyncTimeRange() {
+  const { selectedTimeRange } = useSelectedTimeRangeStore();
+  const [query, setQuery] = useQueryParams(queryConfig);
+  const lastParamSync = useRef<DecodedValueMap<typeof queryConfig>>();
+
+  useEffect(() => {
+    const lastStart = (lastParamSync.current && lastParamSync.current.start) ?? '';
+    if (isRelativeTimeRange(selectedTimeRange)) {
+      // back btn not pressed, set new time range params
+      if (lastStart !== selectedTimeRange.pastDuration) {
+        setQuery({ start: selectedTimeRange.pastDuration, end: undefined });
+        lastParamSync.current = query;
+      }
+    } else if (isAbsoluteTimeRange(selectedTimeRange)) {
+      const lastStartFormatted = isDurationString(lastStart)
+        ? sub(selectedTimeRange.end, parseDurationString(lastStart)) // in case previous timeRange was relative
+        : new Date(Number(lastStart));
+      // back button not pressed, set new params
+      if (getUnixTime(lastStartFormatted) !== getUnixTime(selectedTimeRange.start)) {
+        const startUnixMs = (getUnixTime(selectedTimeRange.start) * 1000).toString();
+        const endUnixMs = (getUnixTime(selectedTimeRange.end) * 1000).toString();
+        setQuery({ start: startUnixMs, end: endUnixMs });
+        lastParamSync.current = query;
+      }
+    }
+  }, [query, setQuery, selectedTimeRange]);
+}
+
+/**
+ * Ensure dashboard time range matches query params, needed for back button to work
+ */
+export function useSyncActiveTimeRange(setActiveTimeRange: (value: AbsoluteTimeRange) => void) {
+  const [query] = useQueryParams({
+    start: '',
+    end: '',
+  });
+  const { start, end } = query;
+
+  useEffect(() => {
+    if (start && isDurationString(start)) {
+      const convertedTime = toAbsoluteTimeRange({ pastDuration: start });
+      setActiveTimeRange(convertedTime);
+    } else {
+      setActiveTimeRange({ start: new Date(Number(start)), end: new Date(Number(end)) });
+    }
+  }, [start, end, setActiveTimeRange]);
 }
 
 /**
@@ -28,11 +122,11 @@ export interface TimeRangeProviderProps {
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
 
-  const { queryString, setQueryString } = useQueryString();
-
   const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
     ? toAbsoluteTimeRange(initialTimeRange)
     : initialTimeRange;
+
+  const { selectedTimeRange, setSelectedTimeRange } = useSelectedTimeRangeStore();
 
   const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
@@ -44,35 +138,26 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
         return;
       }
 
+      setSelectedTimeRange(value);
+
+      // convert to absolute time range if relative time shortcut passed from TimeRangeControls
       if (isRelativeTimeRange(value)) {
-        if (setQueryString) {
-          queryString.set('start', value.pastDuration);
-          // end not required for relative time but may have been set by AbsoluteTimePicker or zoom
-          queryString.delete('end');
-          setQueryString(queryString);
-        } else {
-          setActiveTimeRange(toAbsoluteTimeRange(value));
-        }
+        setActiveTimeRange(toAbsoluteTimeRange(value));
         return;
       }
 
-      // allows app to specify whether query params should be source of truth for active time range
-      if (setQueryString) {
-        // Absolute URL example) ?start=1663707045000&end=1663713330000
-        // currently set from ViewDashboard initial queryString, AbsoluteTimePicker, or LineChart panel onDataZoom
-        const startUnixMs = getUnixTime(value.start) * 1000;
-        const endUnixMs = getUnixTime(value.end) * 1000;
-        queryString.set('start', startUnixMs.toString());
-        queryString.set('end', endUnixMs.toString());
-        setQueryString(queryString);
-      } else {
-        setActiveTimeRange(value);
-      }
+      // assume value was already absolute
+      setActiveTimeRange(value);
     },
-    [queryString, setQueryString, onTimeRangeChange]
+    [onTimeRangeChange, setSelectedTimeRange]
   );
 
-  const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
+  useSyncActiveTimeRange(setActiveTimeRange);
+
+  const ctx = useMemo(
+    () => ({ timeRange, selectedTimeRange, setTimeRange }),
+    [timeRange, selectedTimeRange, setTimeRange]
+  );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }

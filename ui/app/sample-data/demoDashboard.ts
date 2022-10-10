@@ -24,12 +24,15 @@ const demoDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '30m',
+    duration: '15m',
     variables: [
       {
         kind: 'ListVariable',
         spec: {
           name: 'job',
+          allow_multiple: true,
+          allow_all_value: true,
+          default_value: 'node',
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
@@ -200,6 +203,35 @@ const demoDashboard: DashboardResource = {
               ],
               show_legend: true,
               unit: { kind: 'Bytes' },
+            },
+          },
+        },
+      },
+      testNodeQuery: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Test Query', description: 'Description text' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        query: 'node_load15{instance=~"$instance",job="node"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              show_legend: false,
+              unit: {
+                kind: 'PercentDecimal',
+                decimal_places: 1,
+              },
             },
           },
         },
@@ -612,7 +644,8 @@ const demoDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/cpu' },
+              // content: { $ref: '#/spec/panels/cpu' },
+              content: { $ref: '#/spec/panels/testNodeQuery' },
             },
             {
               x: 12,

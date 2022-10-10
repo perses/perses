@@ -12,33 +12,30 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { getDefaultTimeRange } from '@perses-dev/core';
 import { screen } from '@testing-library/react';
 import { renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import { DashboardProvider, DashboardStoreProps, TimeRangeProvider, QueryStringProvider } from '../../context';
+import { DashboardProvider, DashboardStoreProps, TimeRangeProvider } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
 
 describe('TimeRangeControls', () => {
   let initialState: DashboardStoreProps;
+  const testDefaultTimeRange = { pastDuration: testDashboard.spec.duration };
 
   beforeEach(() => {
     initialState = {
       dashboardSpec: testDashboard.spec,
+      selectedTimeRange: testDefaultTimeRange,
     };
   });
 
   const renderTimeRangeControls = () => {
-    const queryString = new URLSearchParams();
-    const defaultTimeRange = getDefaultTimeRange(initialState.dashboardSpec.duration, queryString);
     renderWithContext(
-      <QueryStringProvider queryString={queryString}>
-        <DashboardProvider initialState={initialState}>
-          <TimeRangeProvider initialTimeRange={defaultTimeRange}>
-            <TimeRangeControls />
-          </TimeRangeProvider>
-        </DashboardProvider>
-      </QueryStringProvider>
+      <DashboardProvider initialState={initialState}>
+        <TimeRangeProvider initialTimeRange={testDefaultTimeRange}>
+          <TimeRangeControls />
+        </TimeRangeProvider>
+      </DashboardProvider>
     );
   };
 

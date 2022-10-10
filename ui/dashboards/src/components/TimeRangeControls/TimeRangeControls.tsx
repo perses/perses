@@ -14,15 +14,9 @@
 import { useRef, useState } from 'react';
 import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
-import {
-  DurationString,
-  RelativeTimeRange,
-  AbsoluteTimeRange,
-  TimeRangeValue,
-  getDefaultTimeRange,
-} from '@perses-dev/core';
-import { useTimeRange, useQueryString } from '@perses-dev/plugin-system';
-import { useDefaultTimeRange } from '../../context';
+import { DurationString, RelativeTimeRange, AbsoluteTimeRange } from '@perses-dev/core';
+import { useTimeRange } from '@perses-dev/plugin-system';
+import { useSyncTimeRange, useSelectedTimeRangeStore } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -39,13 +33,8 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useTimeRange();
-  const dashboardDefaultTimeRange = useDefaultTimeRange();
-  const { queryString } = useQueryString();
-
-  const defaultTimeRange = getDefaultTimeRange(dashboardDefaultTimeRange, queryString);
-
-  // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
+  const { selectedTimeRange } = useSelectedTimeRangeStore();
+  useSyncTimeRange();
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -68,7 +57,6 @@ export function TimeRangeControls() {
           initialTimeRange={timeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
             setTimeRange(timeRange);
-            setSelectedTimeRange(timeRange);
             setShowCustomDateSelector(false);
           }}
         />
@@ -82,10 +70,8 @@ export function TimeRangeControls() {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {
                 pastDuration: duration as DurationString,
-                end: new Date(),
               };
               setTimeRange(relativeTimeInput);
-              setSelectedTimeRange(relativeTimeInput);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {

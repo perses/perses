@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect } from 'react';
 import { Box, BoxProps } from '@mui/material';
-import { DashboardResource, getDefaultTimeRange } from '@perses-dev/core';
-import { useQueryString } from '@perses-dev/plugin-system';
+import { DashboardResource } from '@perses-dev/core';
+// import { QueryParamProvider } from 'use-query-params';
+// import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProvider,
+  useInitialTimeRange,
   TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
@@ -36,26 +37,13 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
 export function ViewDashboard(props: ViewDashboardProps) {
   const { dashboardResource, datasourceApi, sx, ...others } = props;
   const { spec } = dashboardResource;
-
-  const { queryString, setQueryString } = useQueryString();
   const dashboardDuration = spec.duration ?? '1h';
-  const defaultTimeRange = getDefaultTimeRange(dashboardDuration, queryString);
-
-  // TODO: add reusable sync query string or no-op util
-  useEffect(() => {
-    const currentParams = Object.fromEntries([...queryString]);
-    // if app does not provide query string implementation, setTimeRange is used instead
-    if (!currentParams.start && setQueryString) {
-      // default to duration in dashboard definition if start param is not already set
-      queryString.set('start', dashboardDuration);
-      setQueryString(queryString);
-    }
-  }, [dashboardDuration, queryString, setQueryString]);
+  const initialTimeRange = useInitialTimeRange(dashboardDuration);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardSpec: spec }}>
-        <TimeRangeProvider initialTimeRange={defaultTimeRange}>
+      <DashboardProvider initialState={{ dashboardSpec: spec, selectedTimeRange: initialTimeRange }}>
+        <TimeRangeProvider initialTimeRange={initialTimeRange}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
               sx={combineSx(

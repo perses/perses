@@ -13,6 +13,5 @@
 
 export * from './DashboardProvider';
 export * from './DatasourceStoreProvider';
-export * from './QueryStringProvider';
 export * from './TemplateVariableProvider';
 export * from './TimeRangeProvider';
