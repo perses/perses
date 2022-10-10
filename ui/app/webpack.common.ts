@@ -17,7 +17,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { Configuration } from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import ESLintWebpackPlugin from 'eslint-webpack-plugin';
-const CircularDependencyPlugin = require('circular-dependency-plugin');
+import CircularDependencyPlugin from 'circular-dependency-plugin';
 
 // Use common config for swc
 const swcrc = JSON.parse(fs.readFileSync('../.swcrc', 'utf-8'));
