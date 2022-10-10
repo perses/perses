@@ -11,11 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Fragment } from 'react';
 import produce from 'immer';
-import { Stack, Typography } from '@mui/material';
+import { Stack, Box, Typography, FormControl, InputLabel } from '@mui/material';
 import { UnknownSpec } from '@perses-dev/core';
-import { PluginSpecEditor, OptionsEditorProps } from '@perses-dev/plugin-system';
+import {
+  PluginKindSelect,
+  PluginSpecEditor,
+  OptionsEditorProps,
+  PluginKindSelectProps,
+} from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -23,6 +27,10 @@ export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesCha
 export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
   const { queries } = value;
+
+  const handleQueryPluginKindChange: PluginKindSelectProps['onChange'] = () => {
+    // TODO: Need to make "remember state" stuff reusable?
+  };
 
   const handleQueryPluginSpecChange = (index: number, pluginSpec: UnknownSpec) => {
     onChange(
@@ -39,8 +47,20 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     <Stack spacing={1}>
       {/* TODO: Deal with user deleting all queries */}
       {queries.map(({ spec: { plugin } }, i) => (
-        <Fragment key={i}>
-          <Typography variant="overline">Query {i + 1}</Typography>
+        <Box key={i}>
+          <Typography variant="overline" component="h3">
+            Query {i + 1}
+          </Typography>
+          <FormControl margin="dense" fullWidth={false}>
+            <InputLabel id={`query-type-label-${i}`}>Query Type</InputLabel>
+            <PluginKindSelect
+              labelId={`query-type-label-${i}`}
+              label="Query Type"
+              pluginType="TimeSeriesQuery"
+              value={plugin.kind}
+              onChange={handleQueryPluginKindChange}
+            />
+          </FormControl>
           {plugin && (
             <PluginSpecEditor
               pluginType="TimeSeriesQuery"
@@ -49,7 +69,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
               onChange={(next: UnknownSpec) => handleQueryPluginSpecChange(i, next)}
             />
           )}
-        </Fragment>
+        </Box>
       ))}
     </Stack>
   );
