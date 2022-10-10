@@ -12,5 +12,6 @@
 // limitations under the License.
 
 export * from './PluginRegistry';
+export * from './DatasourceSelect';
 export * from './PluginKindSelect';
 export * from './PluginSpecEditor';
