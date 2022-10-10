@@ -34,6 +34,7 @@ const timeRangeQueryConfig = {
 
 /**
  * Gets the initial time range taking into account URL params and dashboard JSON duration
+ * Sets start query param if it is empty on page load
  */
 export function useInitialTimeRange(dashboardDuration: DurationString): TimeRangeValue {
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
@@ -61,7 +62,7 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
 /**
  * Set start and end URL params and update when selected time range changes
  */
-export function useSyncTimeRange() {
+export function useSyncTimeRangeParams() {
   const { selectedTimeRange } = useSelectedTimeRange();
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
   const lastParamSync = useRef<DecodedValueMap<typeof timeRangeQueryConfig>>();
@@ -90,7 +91,7 @@ export function useSyncTimeRange() {
 }
 
 /**
- * Ensure dashboard time range matches query params, needed for back button to work
+ * Ensure resolved absolute dashboard time range matches query params (needed for back button to work)
  */
 export function useSyncActiveTimeRange(setActiveTimeRange: (value: AbsoluteTimeRange) => void) {
   const [query] = useQueryParams({

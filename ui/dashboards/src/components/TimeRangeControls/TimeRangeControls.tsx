@@ -17,7 +17,7 @@ import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/c
 import { DurationString, RelativeTimeRange, AbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useSelectedTimeRange } from '../../context';
-import { useSyncTimeRange } from '../../utils';
+import { useSyncTimeRangeParams } from '../../utils';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -35,7 +35,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useTimeRange();
   const { selectedTimeRange } = useSelectedTimeRange();
-  useSyncTimeRange();
+  useSyncTimeRangeParams();
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
