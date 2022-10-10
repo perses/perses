@@ -14,11 +14,10 @@
 import { FormEventHandler, useState } from 'react';
 import { FormControl, Grid, InputLabel, MenuItem, Select, SelectProps, TextField, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginSpecEditor } from '@perses-dev/plugin-system';
+import { PluginKindSelect, PluginSpecEditor } from '@perses-dev/plugin-system';
 import { useLayouts } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
 import { usePanelSpecState } from './panel-editor-model';
-import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
@@ -84,7 +83,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         <Grid item xs={4}>
           <FormControl>
             <InputLabel id="panel-type-label">Type</InputLabel>
-            <PanelTypeSelect
+            <PluginKindSelect
+              pluginType="Panel"
               required
               labelId="panel-type-label"
               label="Type"
