@@ -13,7 +13,7 @@
 
 import { UnknownSpec } from '@perses-dev/core';
 import { OptionsEditorProps, PluginType } from '../model';
-import { usePlugin } from './plugins';
+import { usePlugin } from '../runtime/plugins';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: PluginType;
