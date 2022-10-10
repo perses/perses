@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata } from '@perses-dev/core';
+import { Metadata, UnknownSpec } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
 import { DatasourcePlugin } from './datasource';
+import { Plugin } from './plugin-base';
 
 /**
  * Information about a module/package that contains plugins.
@@ -43,12 +44,17 @@ export interface PluginMetadata {
 }
 
 /**
- * All supported plugin types.
+ * All supported plugin types. A plugin's implementation must extend from `Plugin<UnknownSpec>` to be considered a valid
+ * `PluginType`.
  */
-export type PluginType = keyof SupportedPlugins;
+export type PluginType = {
+  // Filter out implementations on SupportedPlugins that don't extend `Plugin<UnknownSpec>`
+  [K in keyof SupportedPlugins]: SupportedPlugins[K] extends Plugin<UnknownSpec> ? K : never;
+}[keyof SupportedPlugins];
 
 /**
- * Map of plugin type key/string -> implementation type
+ * Map of plugin type key/string -> implementation type. Use Typescript module augmentation to extend the plugin system
+ * with new plugin types.
  */
 export interface SupportedPlugins {
   Variable: VariablePlugin;
