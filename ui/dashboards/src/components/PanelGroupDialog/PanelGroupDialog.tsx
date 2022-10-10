@@ -60,7 +60,7 @@ const PanelGroupDialog = () => {
   };
 
   return (
-    <Dialog open>
+    <Dialog open={panelGroupDialog !== undefined}>
       <DialogTitle>Panel Group</DialogTitle>
       <IconButton
         aria-label="Close"
