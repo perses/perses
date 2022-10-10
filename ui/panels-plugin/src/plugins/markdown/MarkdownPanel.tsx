@@ -12,69 +12,82 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import * as DOMPurify from 'dompurify';
-import { marked } from 'marked';
-import { Box, Theme } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import { Box, Link, Paper, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 
-function createMarkdownPanelStyles(theme: Theme) {
+function createMarkdownPanelStyles() {
   return {
     // Make the content scrollable
     height: '100%',
     overflowY: 'auto',
-    // Ignore first margin
+    // Ignore initial margin
     '& :first-child': {
       marginTop: 0,
     },
-    // Styles for <code>
+    // <code>
     '& code': { fontSize: '0.85em' },
     '& :not(pre) code': {
       padding: '0.2em 0.4em',
-      backgroundColor: theme.palette.grey[100],
+      backgroundColor: '#f5f5f5',
       borderRadius: '4px',
     },
     '& pre': {
       padding: '1.2em',
-      backgroundColor: theme.palette.grey[100],
+      backgroundColor: '#f5f5f5',
       borderRadius: '4px',
     },
-    // Styles for <table>
-    '& table, & th, & td': {
-      padding: '0.6em',
-      border: `1px solid ${theme.palette.grey[300]}`,
-      borderCollapse: 'collapse',
+    // <table>
+    '& table tr:last-child td': {
+      borderBottom: 0,
     },
-    // Styles for <li>
+    // <li>
     '& li + li': {
       marginTop: '0.25em',
-    },
-    // Styles for <a>
-    '& a': {
-      color: theme.palette.primary.main,
     },
   };
 }
 
-// Convert markdown text to HTML, with support for original markdown and Github Flavored Markdown
-function convertTextToHTML(text: string): string {
-  return marked.parse(text, { gfm: true });
-}
-
-// Sanitize HTML (i.e. prevent XSS attacks by removing the vectors for these attacks)
-function sanitizeHTML(html: string): string {
-  return DOMPurify.sanitize(html);
-}
-
+// ReactMarkdown: Convert markdown text to HTML
+// remarkGfm: Support Github Flavored Markdown (in addition to original markdown syntax)
+// rehypeRaw: Allow HTML to be embedded in the markdown text
+// rehypeSanitize: Sanitize the HTML, i.e. prevent XSS attacks by removing the vectors for these attacks
 export function MarkdownPanel(props: MarkdownPanelProps) {
-  const {
-    spec: { text },
-  } = props;
+  const { spec } = props;
+  const { text } = spec;
 
-  const html = useMemo(() => convertTextToHTML(text), [text]);
-  const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
+  const memoizedComponent = useMemo(() => {
+    return (
+      <Box sx={createMarkdownPanelStyles}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw, rehypeSanitize]}
+          /* eslint-disable @typescript-eslint/no-unused-vars */
+          components={{
+            a: ({ node, ...props }) => <Link {...props} />,
+            table: ({ node, ...props }) => (
+              <Paper variant="outlined" sx={{ width: 'fit-content' }}>
+                <Table size="small" sx={{ width: 'fit-content' }} {...props} />
+              </Paper>
+            ),
+            thead: ({ node, ...props }) => <TableHead {...props} />,
+            tbody: ({ node, ...props }) => <TableBody {...props} />,
+            tr: ({ node, ...props }) => <TableRow {...props} />,
+            th: ({ style, children }) => <TableCell sx={style}>{children}</TableCell>,
+            td: ({ style, children }) => <TableCell sx={style}>{children}</TableCell>,
+          }}
+        >
+          {text}
+        </ReactMarkdown>
+      </Box>
+    );
+  }, [text]);
 
-  return <Box sx={createMarkdownPanelStyles} dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
+  return memoizedComponent;
 }
