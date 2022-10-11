@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { renderWithContext } from '../test';
 import { PluginSpecEditor, PluginSpecEditorProps } from './PluginSpecEditor';
@@ -22,8 +23,18 @@ describe('PluginSpecEditor', () => {
 
   it('shows the options editor component for a plugin', async () => {
     renderComponent({ pluginType: 'Panel', pluginKind: 'BertPanel1', value: {}, onChange: jest.fn() });
-    const editor = await screen.findByText('BertPanel1 editor');
+    const editor = await screen.findByLabelText('BertPanel1 editor');
     expect(editor).toBeInTheDocument();
+  });
+
+  it('propagates value changes', async () => {
+    const onChange = jest.fn();
+    renderComponent({ pluginType: 'Panel', pluginKind: 'BertPanel1', value: { option1: 'Option1Value' }, onChange });
+
+    const editor = await screen.findByLabelText('BertPanel1 editor');
+    expect(editor).toHaveValue('Option1Value');
+    userEvent.clear(editor);
+    expect(onChange).toHaveBeenCalledWith({ option1: '' });
   });
 
   it('shows an error if plugin fails to load', async () => {
