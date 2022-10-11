@@ -21,7 +21,8 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  * that's common in our JSON specs where a user selects a plugin `kind` and then edits the `spec` via that plugin's
  * editor component. It takes care of transitioning from one plugin kind to another "all at once" so that when the
  * plugin's kind changes, the spec is also changed at the same time so those options editor components don't see a
- * previous plugin's spec state.
+ * previous plugin's spec state. If you just want this behavior, but in a different UI layout from this, try the
+ * `usePluginEditor` hook that powers this component.
  */
 export function PluginEditor(props: PluginEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
