@@ -25,7 +25,7 @@ import {
   isAbsoluteTimeRange,
   parseDurationString,
 } from '@perses-dev/core';
-import { useSelectedTimeRange } from '../context';
+import { useTimeRange } from '../context';
 
 const timeRangeQueryConfig = {
   start: StringParam,
@@ -63,7 +63,7 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
  * Set start and end URL params and update when selected time range changes
  */
 export function useSyncTimeRangeParams() {
-  const { selectedTimeRange } = useSelectedTimeRange();
+  const { selectedTimeRange } = useTimeRange();
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
   const lastParamSync = useRef<DecodedValueMap<typeof timeRangeQueryConfig>>();
 

@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useMemo, useCallback, useContext } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext } from '@perses-dev/plugin-system';
+import { TimeRange, TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
 import { useSyncActiveTimeRange } from '../utils/time-range-params';
 
 export interface TimeRangeProviderProps {
@@ -63,25 +63,17 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
   useSyncActiveTimeRange(setActiveTimeRange);
 
   const ctx = useMemo(
-    () => ({ timeRange, setTimeRange, selectedTimeRange, setSelectedTimeRange }),
-    [timeRange, setTimeRange, selectedTimeRange, setSelectedTimeRange]
+    () => ({ timeRange, setTimeRange, selectedTimeRange, initialTimeRange }),
+    [timeRange, setTimeRange, selectedTimeRange, initialTimeRange]
   );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }
 
 /**
- * Gets the current selected time range
+ * Internal version of time range hook to get all supported values
  */
-function useTimeRangeContext() {
-  const ctx = useContext(TimeRangeContext);
-  if (ctx === undefined) {
-    throw new Error('No TimeRangeContext found. Did you forget a Provider?');
-  }
-  return ctx;
-}
-
-export function useSelectedTimeRange() {
-  const { selectedTimeRange, setSelectedTimeRange } = useTimeRangeContext();
-  return { selectedTimeRange, setSelectedTimeRange };
+export function useTimeRange() {
+  const { initialTimeRange, selectedTimeRange, timeRange, setTimeRange } = useTimeRangeContext();
+  return { initialTimeRange, selectedTimeRange, timeRange, setTimeRange };
 }

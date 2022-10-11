@@ -24,7 +24,7 @@ const demoDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '15m',
+    duration: '5m',
     variables: [
       {
         kind: 'ListVariable',
