@@ -67,6 +67,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   const variables = useTemplateVariableValues(dependsOnVariables);
   const allowMultiple = definition?.spec.allow_multiple === true;
   const allowAllValue = definition?.spec.allow_all_value === true;
+  const label = definition?.spec.display?.label ?? name;
 
   let waitToLoad = false;
   if (dependsOnVariables) {
@@ -135,7 +136,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   return (
     <Box display={'flex'}>
       <FormControl>
-        <InputLabel id={name}>{name}</InputLabel>
+        <InputLabel id={name}>{label}</InputLabel>
         <Select
           sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
@@ -177,7 +178,8 @@ function TextVariable({ name }: TemplateVariableProps) {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <TextField
-      ref={ref}
+      inputRef={ref}
+      key={(state?.value as string) ?? ''}
       defaultValue={state?.value}
       onBlur={(e) => setVariableValue(name, e.target.value)}
       placeholder={name}

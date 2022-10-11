@@ -24,51 +24,197 @@ import {
   Table,
   Paper,
   TableHead,
+  Switch,
+  Typography,
+  IconButton,
 } from '@mui/material';
-import { useTemplateVariableDefinitions, useEditMode } from '../../context';
+import { VariableDefinition } from '@perses-dev/core';
+import { useImmer } from 'use-immer';
+import EyeIcon from 'mdi-material-ui/Eye';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import TrashIcon from 'mdi-material-ui/TrashCan';
+
+import { useTemplateVariableDefinitions, useEditMode, useTemplateVariableActions } from '../../context';
 import { TemplateVariable } from './Variable';
+import { VariableEditForm } from './VariableEditorForm';
+
+function VariableEditor(props: {
+  variableDefinitions: VariableDefinition[];
+  onChange: (variableDefinitions: VariableDefinition[]) => void;
+  onCancel: () => void;
+}) {
+  const [variableDefinitions, setVariableDefinitions] = useImmer(props.variableDefinitions);
+  const [variableEditIdx, setVariableEditIdx] = useState<number | null>(null);
+  const isEditingVariable = variableEditIdx !== null;
+
+  const removeVariable = (index: number) => {
+    setVariableDefinitions((draft) => {
+      draft.splice(index, 1);
+    });
+  };
+
+  const addVariable = () => {
+    setVariableDefinitions((draft) => {
+      draft.push({
+        kind: 'TextVariable',
+        spec: {
+          name: 'New Variable',
+          value: '',
+        },
+      });
+    });
+  };
+
+  const toggleVariableVisibility = (index: number, visible: boolean) => {
+    setVariableDefinitions((draft) => {
+      const v = draft[index];
+      if (!v) {
+        return;
+      }
+      if (!v.spec.display) {
+        v.spec.display = {
+          hidden: false,
+        };
+      }
+      v.spec.display.hidden = visible === false;
+    });
+  };
+
+  return (
+    <Box p={4}>
+      {isEditingVariable && (
+        <>
+          <Typography variant="h3" mb={2}>
+            Edit Variable
+          </Typography>
+          <VariableEditForm
+            initialVariableDefinition={variableDefinitions[variableEditIdx] as VariableDefinition}
+            onChange={(definition) => {
+              setVariableDefinitions((draft) => {
+                draft[variableEditIdx] = definition;
+                setVariableEditIdx(null);
+              });
+            }}
+            onCancel={() => setVariableEditIdx(null)}
+          />
+        </>
+      )}
+      {!isEditingVariable && (
+        <>
+          <Stack direction="row" spacing={1} justifyContent="end">
+            <Button
+              onClick={() => {
+                props.onCancel();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={props.variableDefinitions === variableDefinitions}
+              variant="contained"
+              onClick={() => {
+                props.onChange(variableDefinitions);
+              }}
+            >
+              Apply Changes
+            </Button>
+          </Stack>
+          <Typography variant="h3" mb={2}>
+            Variable List
+          </Typography>
+          <Stack spacing={2}>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Visibility</TableCell>
+                    <TableCell>Variable Name</TableCell>
+                    <TableCell>Variable Type</TableCell>
+                    <TableCell align="right">Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {variableDefinitions.map((v, idx) => (
+                    <TableRow key={v.spec.name}>
+                      <TableCell component="th" scope="row">
+                        <Switch
+                          checked={v.spec.display?.hidden !== true}
+                          onChange={(e) => {
+                            toggleVariableVisibility(idx, e.target.checked);
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        {v.spec.name}
+                      </TableCell>
+                      <TableCell>{v.kind}</TableCell>
+                      <TableCell align="right">
+                        <IconButton onClick={() => setVariableEditIdx(idx)}>
+                          <PencilIcon />
+                        </IconButton>
+                        <IconButton onClick={() => removeVariable(idx)}>
+                          <TrashIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box display="flex">
+              <Button onClick={addVariable} variant="contained">
+                Add New Variable
+              </Button>
+            </Box>
+          </Stack>
+        </>
+      )}
+    </Box>
+  );
+}
 
 export function TemplateVariableList() {
   const [isEditing, setIsEditing] = useState(false);
   const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
+  const [showVariablesInEditMode, setShowVariablesInEditMode] = useState(true);
+  const showVariables = isEditMode ? showVariablesInEditMode : true;
+  const { setVariableDefinitions } = useTemplateVariableActions();
+
   return (
-    <>
-      <Drawer anchor={'right'} open={isEditing} onClose={() => setIsEditing(false)}>
-        <Box width={900} p={4}>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Variable Name</TableCell>
-                  <TableCell align="right">Type</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {variableDefinitions.map((v) => (
-                  <TableRow key={v.spec.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                      {v.spec.name}
-                    </TableCell>
-                    <TableCell align="right">{v.kind}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <pre>{JSON.stringify(variableDefinitions, null, 2)}</pre>
-        </Box>
+    <Box m={2}>
+      <Drawer anchor={'right'} open={isEditing}>
+        <VariableEditor
+          onCancel={() => {
+            setIsEditing(false);
+          }}
+          variableDefinitions={variableDefinitions}
+          onChange={(v) => {
+            setVariableDefinitions(v);
+            setIsEditing(false);
+          }}
+        />
       </Drawer>
+      {isEditMode && (
+        <Box pb={2}>
+          <Button onClick={() => setShowVariablesInEditMode(!showVariablesInEditMode)} startIcon={<EyeIcon />}>
+            {showVariablesInEditMode ? 'Hide' : 'Show'} Variables
+          </Button>
+          <Button onClick={() => setIsEditing(true)} startIcon={<PencilIcon />}>
+            Edit Variables
+          </Button>
+        </Box>
+      )}
       <Box display={'flex'} justifyContent="space-between">
         <Stack direction={'row'} spacing={2}>
-          {variableDefinitions.map((v) => (
-            <Box key={v.spec.name}>
-              <TemplateVariable key={v.spec.name} name={v.spec.name} />
-            </Box>
-          ))}
-          {isEditMode && <Button onClick={() => setIsEditing(true)}>Modify Variables</Button>}
+          {showVariables &&
+            variableDefinitions.map((v) => (
+              <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>
+                <TemplateVariable key={v.spec.name} name={v.spec.name} />
+              </Box>
+            ))}
         </Stack>
       </Box>
-    </>
+    </Box>
   );
 }

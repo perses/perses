@@ -10,7 +10,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
 import {
   replaceTemplateVariables,
@@ -19,6 +18,7 @@ import {
   DEFAULT_PROM,
   PrometheusDatasourceSelector,
 } from '../model';
+import { JSONSpecEditor } from './JSONSpecEditor';
 
 interface PrometheusVariableOptionsBase {
   datasource?: PrometheusDatasourceSelector;
@@ -51,7 +51,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
     };
   },
   dependsOn: () => [],
-  OptionsEditorComponent: () => null,
+  OptionsEditorComponent: JSONSpecEditor,
   createInitialOptions: () => ({}),
 };
 
@@ -70,6 +70,6 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
   dependsOn: (spec) => {
     return spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [];
   },
-  OptionsEditorComponent: () => null,
+  OptionsEditorComponent: JSONSpecEditor,
   createInitialOptions: () => ({ label_name: '' }),
 };
