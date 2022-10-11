@@ -14,17 +14,11 @@
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { renderWithContext } from '../test';
-import { PluginRegistry } from './PluginRegistry';
-import { testRegistryProps } from './PluginRegistry/test-plugins';
 import { PluginKindSelect, PluginKindSelectProps } from './PluginKindSelect';
 
 describe('PluginKindSelect', () => {
   const renderComponent = (props: PluginKindSelectProps) => {
-    return renderWithContext(
-      <PluginRegistry {...testRegistryProps}>
-        <PluginKindSelect {...props} />
-      </PluginRegistry>
-    );
+    return renderWithContext(<PluginKindSelect {...props} />);
   };
 
   // Opens the select and waits for loading to finish (i.e. options to appear)

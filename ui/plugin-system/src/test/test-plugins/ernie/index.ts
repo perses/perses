@@ -11,17 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '../../../../model';
+import { VariablePlugin, VariableOption } from '../../../model';
 
-// Dummy plugins to test loading
-export const BertPanel1: PanelPlugin = {
-  PanelComponent: () => null,
-  OptionsEditorComponent: () => null,
-  createInitialOptions: () => ({}),
-};
+const data: VariableOption[] = [
+  { label: 'Grover', value: 'Grover' },
+  { label: 'Snuffleupagus', value: 'Snuffleupagus' },
+];
 
-export const BertPanel2: PanelPlugin = {
-  PanelComponent: () => null,
+// Dummy plugin to test loading
+export const ErnieVariable: VariablePlugin = {
+  getVariableOptions: async () => ({ data }),
   OptionsEditorComponent: () => null,
   createInitialOptions: () => ({}),
 };
