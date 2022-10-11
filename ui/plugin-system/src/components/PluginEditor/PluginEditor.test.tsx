@@ -13,21 +13,25 @@
 
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import { renderWithContext } from '../../test';
 import { PluginEditor } from './PluginEditor';
 import { PluginEditorProps } from './plugin-editor-api';
 
 describe('PluginEditor', () => {
   const renderComponent = () => {
-    const onChange: jest.Mocked<PluginEditorProps['onChange']> = jest.fn();
-    renderWithContext(
-      <PluginEditor
-        pluginType="Panel"
-        pluginKindLabel="Panel Type"
-        value={{ kind: 'BertPanel1', spec: { option1: 'Option1Value' } }}
-        onChange={onChange}
-      />
-    );
+    const testValue: PluginEditorProps['value'] = { kind: 'BertPanel1', spec: { option1: 'Option1Value' } };
+
+    // A test helper component that includes the state that's controlled from outside
+    let onChange: jest.Mocked<PluginEditorProps['onChange']> = jest.fn();
+    function TestHelperForm() {
+      const [value, setValue] = useState(testValue);
+      onChange = jest.fn((v) => setValue(v));
+
+      return <PluginEditor pluginType="Panel" pluginKindLabel="Panel Type" value={value} onChange={onChange} />;
+    }
+
+    renderWithContext(<TestHelperForm />);
     return { onChange };
   };
 
@@ -56,10 +60,38 @@ describe('PluginEditor', () => {
     const newPluginKind = screen.getByRole('option', { name: 'Bert Panel 2' });
     userEvent.click(newPluginKind);
 
-    // Make sure onChange was only called once (i.e. initializes both kind and spec at the same time)
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledTimes(1);
-    });
+    // Wait for the editor of the other plugin
+    const newEditor = await screen.findByLabelText('BertPanel2 editor');
+    expect(newEditor).toBeInTheDocument();
+    expect(newEditor).toHaveValue('');
+
+    // Make sure onChange was only called once (i.e. initializes both kind and spec at the same time
+    expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith({ kind: 'BertPanel2', spec: { option2: '' } });
+  });
+
+  it('remembers previous spec values', async () => {
+    renderComponent();
+
+    // Use the current editor to make a change to the spec value
+    let editor = await screen.findByLabelText('BertPanel1 editor');
+    userEvent.clear(editor);
+    userEvent.type(editor, 'MyNewValue');
+
+    // Switch to a new plugin kind
+    await openPluginKind();
+    const newPluginKind = screen.getByRole('option', { name: 'Bert Panel 2' });
+    userEvent.click(newPluginKind);
+
+    // Wait for the other editor to appear, then switch back
+    const newEditor = await screen.findByLabelText('BertPanel2 editor');
+    expect(newEditor).toHaveValue('');
+    await openPluginKind();
+    const oldPluginKind = screen.getByRole('option', { name: 'Bert Panel 1' });
+    userEvent.click(oldPluginKind);
+
+    // Make sure the editor from the first plugin appears and has our modified value from before the switch
+    editor = await screen.findByLabelText('BertPanel1 editor');
+    expect(editor).toHaveValue('MyNewValue');
   });
 });
