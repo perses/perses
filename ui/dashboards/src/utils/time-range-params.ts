@@ -62,7 +62,7 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
  * Set start and end URL params and update when selected time range changes
  */
 export function useSyncTimeRangeParams(enabled: boolean) {
-  const { selectedTimeRange } = useDashboardTimeRange();
+  const { timeRange } = useDashboardTimeRange();
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
   const lastParamSync = useRef<DecodedValueMap<typeof timeRangeQueryConfig>>();
 
@@ -71,31 +71,31 @@ export function useSyncTimeRangeParams(enabled: boolean) {
       return;
     }
     const lastStart = (lastParamSync.current && lastParamSync.current.start) ?? '';
-    if (isRelativeTimeRange(selectedTimeRange)) {
+    if (isRelativeTimeRange(timeRange)) {
       // back btn not pressed, set new time range params
-      if (lastStart !== selectedTimeRange.pastDuration) {
-        setQuery({ start: selectedTimeRange.pastDuration, end: undefined });
+      if (lastStart !== timeRange.pastDuration) {
+        setQuery({ start: timeRange.pastDuration, end: undefined });
         lastParamSync.current = query;
       }
-    } else if (isAbsoluteTimeRange(selectedTimeRange)) {
+    } else if (isAbsoluteTimeRange(timeRange)) {
       const lastStartFormatted = isDurationString(lastStart)
-        ? sub(selectedTimeRange.end, parseDurationString(lastStart)) // in case previous timeRange was relative
+        ? sub(timeRange.end, parseDurationString(lastStart)) // in case previous timeRange was relative
         : new Date(Number(lastStart));
       // back button not pressed, set new params
-      if (getUnixTime(lastStartFormatted) !== getUnixTime(selectedTimeRange.start)) {
-        const startUnixMs = (getUnixTime(selectedTimeRange.start) * 1000).toString();
-        const endUnixMs = (getUnixTime(selectedTimeRange.end) * 1000).toString();
+      if (getUnixTime(lastStartFormatted) !== getUnixTime(timeRange.start)) {
+        const startUnixMs = (getUnixTime(timeRange.start) * 1000).toString();
+        const endUnixMs = (getUnixTime(timeRange.end) * 1000).toString();
         setQuery({ start: startUnixMs, end: endUnixMs });
         lastParamSync.current = query;
       }
     }
-  }, [query, setQuery, selectedTimeRange, enabled]);
+  }, [query, setQuery, timeRange, enabled]);
 }
 
 /**
  * Ensure resolved absolute dashboard time range matches query params (needed for back button to work)
  */
-export function useSyncActiveTimeRange(enabled: boolean, setActiveTimeRange: (value: AbsoluteTimeRange) => void) {
+export function useSyncActiveTimeRange(enabled: boolean, setActiveTimeRange: (value: TimeRangeValue) => void) {
   const [query] = useQueryParams({
     start: '',
     end: '',
@@ -106,11 +106,12 @@ export function useSyncActiveTimeRange(enabled: boolean, setActiveTimeRange: (va
     if (!enabled) {
       return;
     }
-    if (start && isDurationString(start)) {
-      const convertedTime = toAbsoluteTimeRange({ pastDuration: start });
-      setActiveTimeRange(convertedTime);
-    } else {
-      setActiveTimeRange({ start: new Date(Number(start)), end: new Date(Number(end)) });
+    if (start) {
+      if (isDurationString(start)) {
+        setActiveTimeRange({ pastDuration: start, end: new Date() });
+      } else {
+        setActiveTimeRange({ start: new Date(Number(start)), end: new Date(Number(end)) });
+      }
     }
   }, [start, end, setActiveTimeRange, enabled]);
 }

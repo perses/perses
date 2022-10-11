@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
+import { TimeRangeValue } from '@perses-dev/core';
 import { TimeRange, TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
 import { useSyncActiveTimeRange } from '../utils/time-range-params';
 
@@ -28,13 +28,7 @@ export interface TimeRangeProviderProps {
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { initialTimeRange, children, onTimeRangeChange } = props;
 
-  const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
-    ? toAbsoluteTimeRange(initialTimeRange)
-    : initialTimeRange;
-
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialTimeRange);
-
-  const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
+  const [timeRange, setActiveTimeRange] = useState<TimeRangeValue>(initialTimeRange);
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
@@ -43,28 +37,17 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
         onTimeRangeChange(value);
         return;
       }
-
-      // needed for TimeRangeControls since absolute time calendar and relative time shortcuts supported
-      setSelectedTimeRange(value);
-
-      // convert to absolute time range if relative time shortcut passed
-      if (isRelativeTimeRange(value)) {
-        setActiveTimeRange(toAbsoluteTimeRange(value));
-        return;
-      }
-
-      // resolved time, assume value was already absolute
       setActiveTimeRange(value);
     },
-    [onTimeRangeChange, setSelectedTimeRange]
+    [onTimeRangeChange]
   );
 
   // ensure time range updates when back btn pressed
   useSyncActiveTimeRange(true, setActiveTimeRange);
 
   const ctx = useMemo(
-    () => ({ timeRange, setTimeRange, selectedTimeRange, initialTimeRange }),
-    [timeRange, setTimeRange, selectedTimeRange, initialTimeRange]
+    () => ({ timeRange, setTimeRange, initialTimeRange }),
+    [timeRange, setTimeRange, initialTimeRange]
   );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
@@ -74,6 +57,6 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
  * Internal version of time range hook to get all supported values
  */
 export function useDashboardTimeRange() {
-  const { initialTimeRange, selectedTimeRange, timeRange, setTimeRange } = useTimeRangeContext();
-  return { initialTimeRange, selectedTimeRange, timeRange, setTimeRange };
+  const { initialTimeRange, timeRange, setTimeRange } = useTimeRangeContext();
+  return { initialTimeRange, timeRange, setTimeRange };
 }

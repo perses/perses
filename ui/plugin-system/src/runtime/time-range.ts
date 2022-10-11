@@ -11,14 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext } from 'react';
-import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
+import { createContext, useContext, useMemo } from 'react';
+import { AbsoluteTimeRange, TimeRangeValue, isRelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 
 export interface TimeRange {
   initialTimeRange: TimeRangeValue; // value from query string or dashboard spec
-  selectedTimeRange: TimeRangeValue; // includes relative time shortcuts
-  timeRange: AbsoluteTimeRange; // resolved absolute time
+  timeRange: TimeRangeValue; // resolved absolute time
   setTimeRange: (value: TimeRangeValue) => void;
+}
+
+export interface ResolvedTimeRange {
+  timeRange: AbsoluteTimeRange;
+  setTimeRange: (value: AbsoluteTimeRange) => void;
 }
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);
@@ -34,7 +38,10 @@ export function useTimeRangeContext() {
 /**
  * Get and set the current resolved time range at runtime.
  */
-export function useTimeRange() {
+export function useTimeRange(): ResolvedTimeRange {
   const { timeRange, setTimeRange } = useTimeRangeContext();
-  return { timeRange, setTimeRange };
+  const resolvedTimeRange = useMemo(() => {
+    return isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+  }, [timeRange]);
+  return { timeRange: resolvedTimeRange, setTimeRange };
 }

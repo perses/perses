@@ -11,10 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
-import { DurationString, RelativeTimeRange, AbsoluteTimeRange } from '@perses-dev/core';
+import {
+  DurationString,
+  RelativeTimeRange,
+  AbsoluteTimeRange,
+  isRelativeTimeRange,
+  toAbsoluteTimeRange,
+} from '@perses-dev/core';
 import { useSyncTimeRangeParams } from '../../utils';
 import { useDashboardTimeRange } from '../../context';
 
@@ -32,11 +38,15 @@ export const TIME_OPTIONS: TimeOption[] = [
 ];
 
 export function TimeRangeControls() {
-  const { initialTimeRange, timeRange, setTimeRange } = useDashboardTimeRange();
+  const { timeRange, setTimeRange } = useDashboardTimeRange();
   useSyncTimeRangeParams(true);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
+
+  const convertedTimeRange = useMemo(() => {
+    return isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+  }, [timeRange]);
 
   return (
     <Stack direction="row" spacing={1}>
@@ -53,7 +63,7 @@ export function TimeRangeControls() {
         })}
       >
         <AbsoluteTimePicker
-          initialTimeRange={timeRange}
+          initialTimeRange={convertedTimeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
             setTimeRange(timeRange);
             setShowCustomDateSelector(false);
@@ -64,7 +74,7 @@ export function TimeRangeControls() {
         <Box ref={anchorEl}>
           <TimeRangeSelector
             timeOptions={TIME_OPTIONS}
-            value={initialTimeRange}
+            value={timeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {

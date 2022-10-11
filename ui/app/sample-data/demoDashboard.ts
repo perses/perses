@@ -236,7 +236,7 @@ const demoDashboard: DashboardResource = {
           },
         },
       },
-      doubleQueries: {
+      testQueryAlt: {
         kind: 'Panel',
         spec: {
           display: { name: 'Thresholds Example', description: 'Description text' },
@@ -652,7 +652,7 @@ const demoDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/doubleQueries' },
+              content: { $ref: '#/spec/panels/testQueryAlt' },
             },
           ],
         },
