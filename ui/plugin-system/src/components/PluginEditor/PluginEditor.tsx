@@ -37,7 +37,7 @@ export function PluginEditor(props: PluginEditorProps) {
           value={pendingKind !== '' ? pendingKind : value.kind}
           onChange={onKindChange}
         />
-        <FormHelperText>{error !== null ? error.message : ''}</FormHelperText>
+        <FormHelperText>{error?.message ?? ''}</FormHelperText>
       </FormControl>
 
       <PluginSpecEditor pluginType={pluginType} pluginKind={value.kind} value={value.spec} onChange={onSpecChange} />

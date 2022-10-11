@@ -65,7 +65,8 @@ export function usePluginEditor(props: UsePluginEditorProps) {
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
   const [pendingKind, setPendingKind] = useState('');
-  const { data: plugin, isFetching, error } = usePlugin(pluginType, pendingKind, { enabled: pendingKind !== '' });
+  const { data: plugin, isFetching, error } = usePlugin(pluginType, pendingKind);
+
   useEffect(() => {
     // Nothing to do if no new plugin kind is pending
     if (pendingKind === '') return;

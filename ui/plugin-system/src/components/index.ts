@@ -13,6 +13,7 @@
 
 export * from './PluginRegistry';
 export * from './DatasourceSelect';
+export * from './PluginEditor';
 export * from './PluginKindSelect';
 export * from './PluginSpecEditor';
 export * from './TimeSeriesQueryEditor';
