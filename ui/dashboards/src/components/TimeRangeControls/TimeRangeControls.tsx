@@ -33,7 +33,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { initialTimeRange, timeRange, setTimeRange } = useDashboardTimeRange();
-  useSyncTimeRangeParams();
+  useSyncTimeRangeParams(true);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();

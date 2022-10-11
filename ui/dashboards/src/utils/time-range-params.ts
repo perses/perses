@@ -37,18 +37,17 @@ const timeRangeQueryConfig = {
  * Sets start query param if it is empty on page load
  */
 export function useInitialTimeRange(dashboardDuration: DurationString): TimeRangeValue {
-  const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
+  const [query] = useQueryParams(timeRangeQueryConfig);
   const { start, end } = query;
 
   return useMemo(() => {
     let initialTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
     if (!start) {
-      setQuery({ start: dashboardDuration });
       return initialTimeRange;
     }
 
     if (isDurationString(start.toString())) {
-      initialTimeRange = { pastDuration: start } as RelativeTimeRange;
+      initialTimeRange = { pastDuration: start, end: new Date() } as RelativeTimeRange;
     } else {
       initialTimeRange = {
         start: new Date(Number(start)),
@@ -56,18 +55,21 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
       };
     }
     return initialTimeRange;
-  }, [start, end, dashboardDuration, setQuery]);
+  }, [start, end, dashboardDuration]);
 }
 
 /**
  * Set start and end URL params and update when selected time range changes
  */
-export function useSyncTimeRangeParams() {
+export function useSyncTimeRangeParams(enabled: boolean) {
   const { selectedTimeRange } = useDashboardTimeRange();
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
   const lastParamSync = useRef<DecodedValueMap<typeof timeRangeQueryConfig>>();
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     const lastStart = (lastParamSync.current && lastParamSync.current.start) ?? '';
     if (isRelativeTimeRange(selectedTimeRange)) {
       // back btn not pressed, set new time range params
@@ -87,13 +89,13 @@ export function useSyncTimeRangeParams() {
         lastParamSync.current = query;
       }
     }
-  }, [query, setQuery, selectedTimeRange]);
+  }, [query, setQuery, selectedTimeRange, enabled]);
 }
 
 /**
  * Ensure resolved absolute dashboard time range matches query params (needed for back button to work)
  */
-export function useSyncActiveTimeRange(setActiveTimeRange: (value: AbsoluteTimeRange) => void) {
+export function useSyncActiveTimeRange(enabled: boolean, setActiveTimeRange: (value: AbsoluteTimeRange) => void) {
   const [query] = useQueryParams({
     start: '',
     end: '',
@@ -101,11 +103,14 @@ export function useSyncActiveTimeRange(setActiveTimeRange: (value: AbsoluteTimeR
   const { start, end } = query;
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     if (start && isDurationString(start)) {
       const convertedTime = toAbsoluteTimeRange({ pastDuration: start });
       setActiveTimeRange(convertedTime);
     } else {
       setActiveTimeRange({ start: new Date(Number(start)), end: new Date(Number(end)) });
     }
-  }, [start, end, setActiveTimeRange]);
+  }, [start, end, setActiveTimeRange, enabled]);
 }
