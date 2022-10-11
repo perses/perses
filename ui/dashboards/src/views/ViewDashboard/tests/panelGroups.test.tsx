@@ -64,18 +64,30 @@ describe('Panel Groups', () => {
     userEvent.click(deleteButton);
 
     const layouts = storeApi.getState().layouts;
-    const deletedPanel = {
-      x: 0,
-      y: 0,
-      width: 12,
-      height: 4,
-      content: { $ref: '#/spec/panels/cpu' },
-    };
+    const deletedPanel = testDashboard.spec.panels['cpu'];
     expect(layouts[0]?.items).toEqual(expect.not.objectContaining(deletedPanel));
 
     const panels = storeApi.getState().panels;
     // should remove cpu from state.panels since it's not used anymore
     expect(panels).toEqual(expect.not.objectContaining({ cpu: testDashboard.spec.panels['cpu'] }));
+  });
+
+  it('should only delete panel from panel group if panel is referenced more than once', () => {
+    const storeApi = renderDashboard();
+    const panel = screen.getByText('Disk I/O Utilization');
+    userEvent.hover(panel);
+    const deletePanelButton = screen.getByLabelText('delete panel');
+    userEvent.click(deletePanelButton);
+    screen.getByText('Delete Panel');
+    const deleteButton = screen.getByText('Delete');
+    userEvent.click(deleteButton);
+    const layouts = storeApi.getState().layouts;
+    const deletedPanel = testDashboard.spec.panels['diskIO'];
+    expect(layouts[0]?.items).toEqual(expect.not.objectContaining(deletedPanel));
+
+    const panels = storeApi.getState().panels;
+    // should NOT remove diskIO from state.panels since it's used in another panel group
+    expect(panels).toEqual(expect.objectContaining({ diskIO: testDashboard.spec.panels['diskIO'] }));
   });
 
   it('should swap panels', () => {

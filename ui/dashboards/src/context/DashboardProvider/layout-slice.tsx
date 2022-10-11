@@ -45,7 +45,7 @@ export interface LayoutSlice {
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
 
   /**
-   * Delete panel group
+   * Delete panel group and all the panels within the group
    */
   deletePanelGroup: (groupIndex: number) => void;
 
@@ -177,12 +177,11 @@ export function createLayoutSlice(
       });
     },
 
-    // delete panel in panel group
     deletePanelInPanelGroup({ groupIndex, itemIndex }) {
       set((state) => {
         const group = state.layouts[groupIndex];
         if (group === undefined) {
-          throw new Error(`Group is undefined: ${groupIndex}`);
+          throw new Error(`No panel group found: ${groupIndex}`);
         }
         // remove panel from panel group
         group.items.splice(itemIndex, 1);
@@ -193,14 +192,16 @@ export function createLayoutSlice(
       const { layouts, deletePanels } = get();
       const group = layouts[groupIndex];
       if (group === undefined) {
-        throw new Error();
+        throw new Error(`No panel group found: ${groupIndex}`);
       }
+
       // remove panels from group first
       const panelsToBeDeleted: LayoutItem[] = [];
       for (let i = 0; i < group.items.length; i++) {
         panelsToBeDeleted.push({ groupIndex, itemIndex: i });
       }
       deletePanels(panelsToBeDeleted);
+
       // remove group from state.layouts
       set((state) => {
         state.layouts.splice(groupIndex, 1);
