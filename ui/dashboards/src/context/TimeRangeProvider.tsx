@@ -14,7 +14,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { TimeRangeValue } from '@perses-dev/core';
 import { TimeRange, TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
-import { useSyncActiveTimeRange } from '../utils/time-range-params';
+// import { useSyncActiveTimeRange } from '../utils/time-range-params';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
@@ -42,8 +42,9 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
     [onTimeRangeChange]
   );
 
+  // TODO: fix back button
   // ensure time range updates when back btn pressed
-  useSyncActiveTimeRange(true, setActiveTimeRange);
+  // useSyncActiveTimeRange(true, setActiveTimeRange);
 
   const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
 
