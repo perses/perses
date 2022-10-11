@@ -193,6 +193,9 @@ const testDashboard: DashboardResource = {
         spec: {
           display: {
             title: 'CPU Stats',
+            collapse: {
+              open: true,
+            },
           },
           items: [
             // First Row

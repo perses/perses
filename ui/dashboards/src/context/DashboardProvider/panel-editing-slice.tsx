@@ -19,6 +19,7 @@ import { LayoutSlice, LayoutItem } from './layout-slice';
 
 export interface PanelEditorSlice {
   panels: Record<string, PanelDefinition>;
+  deletePanelDialog?: DeletePanelDialog;
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
@@ -33,6 +34,27 @@ export interface PanelEditorSlice {
    * Add a new Panel to a panel group.
    */
   addPanel: (initialGroup: number) => void;
+
+  /**
+   * Delete panels
+   */
+  deletePanels: (panels: LayoutItem[]) => void;
+
+  /**
+   * Open delete panel dialog
+   */
+  openDeletePanelDialog: (item: LayoutItem) => void;
+
+  /**
+   * Close delete panel dialog
+   */
+  closeDeletePanelDialog: () => void;
+}
+
+export interface DeletePanelDialog {
+  panelKey: string;
+  panelName: string;
+  layoutItem: LayoutItem;
 }
 
 export interface PanelEditorState {
@@ -155,6 +177,42 @@ export function createPanelEditorSlice(
       // Open the editor with the new state
       set((state) => {
         state.panelEditor = editorState;
+      });
+    },
+
+    deletePanels(items: LayoutItem[]) {
+      const { mapPanelToPanelGroups, deletePanelInPanelGroup, getPanelKey } = get();
+      const map = mapPanelToPanelGroups();
+      // get panel key first before deleting panel from panel group since getPanelKey relies on index
+      const panels = items.map((panel) => {
+        return { ...panel, panelKey: getPanelKey(panel) };
+      });
+      panels.forEach(({ panelKey, ...panel }) => {
+        deletePanelInPanelGroup(panel);
+        // make sure panel is only referenced in one panel group before deleting it from state.panels
+        if (map[panelKey] && map[panelKey]?.length === 1) {
+          set((state) => {
+            delete state.panels[panelKey];
+          });
+        }
+      });
+    },
+
+    openDeletePanelDialog(item: LayoutItem) {
+      set((state) => {
+        const { panels, getPanelKey } = get();
+        const panelKey = getPanelKey(item);
+        state.deletePanelDialog = {
+          panelKey,
+          panelName: panels[panelKey]?.spec.display.name ?? '',
+          layoutItem: item,
+        };
+      });
+    },
+
+    closeDeletePanelDialog() {
+      set((state) => {
+        state.deletePanelDialog = undefined;
       });
     },
   });

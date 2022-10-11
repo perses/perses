@@ -48,6 +48,16 @@ export interface LayoutSlice {
    * Delete panel group
    */
   deletePanelGroup: (groupIndex: number) => void;
+
+  /**
+   * Delete panel in panel group
+   */
+  deletePanelInPanelGroup: (layoutItem: LayoutItem) => void;
+
+  /**
+   * Map panel to panel groups
+   */
+  mapPanelToPanelGroups: () => Record<string, PanelGroupDefinition['id'][]>;
 }
 
 export interface PanelGroupDefinition {
@@ -167,30 +177,51 @@ export function createLayoutSlice(
       });
     },
 
-    deletePanelGroup(groupIndex) {
+    // delete panel in panel group
+    deletePanelInPanelGroup({ groupIndex, itemIndex }) {
       set((state) => {
-        // remove group from state.layouts
-        const deletedPanelGroup = state.layouts.splice(groupIndex, 1);
+        const group = state.layouts[groupIndex];
+        if (group === undefined) {
+          throw new Error(`Group is undefined: ${groupIndex}`);
+        }
+        // remove panel from panel group
+        group.items.splice(itemIndex, 1);
+      });
+    },
 
-        // build an object that maps each panel to the groups it belongs
-        const panels = get().panels;
-        const groups = get().layouts;
-        const map: Record<string, PanelGroupDefinition['id'][]> = mapPanelToPanelGroups(groups);
-        // for each panel in the deleted panel group, remove panel in state.panels as well
-        const panelsCopy = { ...panels };
-        deletedPanelGroup[0]?.items.forEach((panel) => {
+    deletePanelGroup(groupIndex) {
+      const { layouts, deletePanels } = get();
+      const group = layouts[groupIndex];
+      if (group === undefined) {
+        throw new Error();
+      }
+      // remove panels from group first
+      const panelsToBeDeleted: LayoutItem[] = [];
+      for (let i = 0; i < group.items.length; i++) {
+        panelsToBeDeleted.push({ groupIndex, itemIndex: i });
+      }
+      deletePanels(panelsToBeDeleted);
+      // remove group from state.layouts
+      set((state) => {
+        state.layouts.splice(groupIndex, 1);
+      });
+    },
+
+    // Return an object that maps each panel to the groups it belongs
+    mapPanelToPanelGroups() {
+      const map: Record<string, PanelGroupDefinition['id'][]> = {}; // { panel key: [group ids] }
+      get().layouts.forEach((group) => {
+        // for each panel in a group, add the group id to map[panelKey]
+        group.items.forEach((panel) => {
           const panelKey = getPanelKeyFromRef(panel.content);
-          const groups = map[panelKey];
-          if (groups === undefined) {
-            throw new Error(`Panel is undefined: ${panelKey}`);
-          }
-          // make sure panel is not referenced in another group before deleting it from state.panels
-          if (groups.length === 1 && groups[0] === deletedPanelGroup[0]?.id) {
-            delete panelsCopy[panelKey];
+          if (map[panelKey]) {
+            map[panelKey]?.push(group.id);
+          } else {
+            map[panelKey] = [group.id];
           }
         });
-        state.panels = panelsCopy;
       });
+      return map;
     },
   });
 }
@@ -223,21 +254,4 @@ function getYForNewRow(group: PanelGroupDefinition) {
     }
   }
   return newRowY;
-}
-
-// Return an object that maps each panel to the groups it belongs
-function mapPanelToPanelGroups(groups: PanelGroupDefinition[]) {
-  const map: Record<string, PanelGroupDefinition['id'][]> = {}; // { panel key: [group ids] }
-  groups.forEach((group) => {
-    // for each panel in a group, add the group id to map[panelKey]
-    group.items.forEach((panel) => {
-      const panelKey = getPanelKeyFromRef(panel.content);
-      if (map[panelKey]) {
-        map[panelKey]?.push(group.id);
-      } else {
-        map[panelKey] = [group.id];
-      }
-    });
-  });
-  return map;
 }
