@@ -16,13 +16,13 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
-import { Box, Link, Paper, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
+import { Box, Link, Paper, Table, TableHead, TableBody, TableRow, TableCell, Theme } from '@mui/material';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 
-function createMarkdownPanelStyles() {
+function createMarkdownPanelStyles(theme: Theme) {
   return {
     // Make the content scrollable
     height: '100%',
@@ -35,12 +35,12 @@ function createMarkdownPanelStyles() {
     '& code': { fontSize: '0.85em' },
     '& :not(pre) code': {
       padding: '0.2em 0.4em',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2c2c2c',
       borderRadius: '4px',
     },
     '& pre': {
       padding: '1.2em',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2c2c2c',
       borderRadius: '4px',
     },
     // <table>
