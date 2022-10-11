@@ -73,7 +73,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 /**
  * Internal version of time range hook to get all supported values
  */
-export function useTimeRange() {
+export function useDashboardTimeRange() {
   const { initialTimeRange, selectedTimeRange, timeRange, setTimeRange } = useTimeRangeContext();
   return { initialTimeRange, selectedTimeRange, timeRange, setTimeRange };
 }
