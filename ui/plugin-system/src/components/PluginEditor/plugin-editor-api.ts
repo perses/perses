@@ -40,7 +40,9 @@ export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value
 
 /**
  * Returns the state/handlers that power the `PluginEditor` component. Useful for custom components that want to provide
- * a different UI, but want the same behavior.
+ * a different UI, but want the same behavior of changing `kind` and `spec` together on plugin kind changes. Also
+ * remembers previous `spec` values that it's seen, allowing and restores those values if a user switches the plugin
+ * kind back.
  */
 export function usePluginEditor(props: UsePluginEditorProps) {
   const { pluginType, value } = props;

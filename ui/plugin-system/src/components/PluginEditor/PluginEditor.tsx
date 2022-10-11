@@ -17,8 +17,11 @@ import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
 
 /**
- * A combination PluginKindSelect and PluginSpecEditor component, meant for editing the common pattern in our specs of
- * a `plugin` property with a `Definition` object attached to it.
+ * A combination `PluginKindSelect` and `PluginSpecEditor` component. This is meant for editing the `plugin` property
+ * that's common in our JSON specs where a user selects a plugin `kind` and then edits the `spec` via that plugin's
+ * editor component. It takes care of transitioning from one plugin kind to another "all at once" so that when the
+ * plugin's kind changes, the spec is also changed at the same time so those options editor components don't see a
+ * previous plugin's spec state.
  */
 export function PluginEditor(props: PluginEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
