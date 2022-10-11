@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps, FormControl, InputLabel } from '@mui/material';
+import { Box, BoxProps } from '@mui/material';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { produce } from 'immer';
-import { PluginKindSelect, PluginKindSelectProps } from './PluginKindSelect';
-import { PluginSpecEditor, PluginSpecEditorProps } from './PluginSpecEditor';
+import { PluginEditor, PluginEditorProps } from './PluginEditor';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
@@ -35,18 +34,10 @@ export function TimeSeriesQueryEditor(props: TimeSeriesQueryEditorProps) {
     spec: { plugin },
   } = value;
 
-  const handlePluginKindChange: PluginKindSelectProps['onChange'] = (e) => {
+  const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
-        draft.spec.plugin.kind = e.target.value;
-      })
-    );
-  };
-
-  const handlePluginSpecChange: PluginSpecEditorProps['onChange'] = (next) => {
-    onChange(
-      produce(value, (draft) => {
-        draft.spec.plugin.spec = next;
+        draft.spec.plugin = next;
       })
     );
   };
@@ -54,24 +45,11 @@ export function TimeSeriesQueryEditor(props: TimeSeriesQueryEditorProps) {
   return (
     <Box {...others}>
       {/* If TimeSeriesQuery plugins ever have common props on the definition, the inputs could go here */}
-
-      <FormControl margin="dense" fullWidth={false}>
-        {/* TODO: How to ensure ids are unique? */}
-        <InputLabel id="query-type-label">Query Type</InputLabel>
-        <PluginKindSelect
-          labelId="query-type-label"
-          label="Query Type"
-          pluginType="TimeSeriesQuery"
-          value={plugin.kind}
-          onChange={handlePluginKindChange}
-        />
-      </FormControl>
-
-      <PluginSpecEditor
+      <PluginEditor
         pluginType="TimeSeriesQuery"
-        pluginKind={plugin.kind}
-        value={plugin.spec}
-        onChange={handlePluginSpecChange}
+        pluginKindLabel="Query Type"
+        value={plugin}
+        onChange={handlePluginChange}
       />
     </Box>
   );

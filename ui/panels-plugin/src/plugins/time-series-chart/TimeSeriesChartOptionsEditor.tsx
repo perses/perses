@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import produce from 'immer';
+import { produce } from 'immer';
 import { Stack, Box, Typography } from '@mui/material';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { OptionsEditorProps, TimeSeriesQueryEditor } from '@perses-dev/plugin-system';

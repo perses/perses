@@ -17,7 +17,6 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginKindSelect, PluginSpecEditor } from '@perses-dev/plugin-system';
 import { useLayouts } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
-import { usePanelSpecState } from './panel-editor-model';
 import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
@@ -34,7 +33,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const [description, setDescription] = useState(initialValues.description);
   const [groupIndex, setGroupIndex] = useState(initialValues.groupIndex);
   const [kind, setKind] = useState(initialValues.kind);
-  const { spec, onSpecChange } = usePanelSpecState(kind, initialValues.spec);
+  const [spec, setSpec] = useState(initialValues.spec);
 
   // Ignore string values (which would be an "empty" value from the Select) since we don't allow them to unset it
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
@@ -107,7 +106,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             {/* Wait until we have some proper initial spec values before rendering the editor */}
             {spec !== undefined && (
-              <PluginSpecEditor pluginType="Panel" pluginKind={kind} value={spec} onChange={onSpecChange} />
+              <PluginSpecEditor pluginType="Panel" pluginKind={kind} value={spec} onChange={setSpec} />
             )}
           </ErrorBoundary>
         </Grid>
