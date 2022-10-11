@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useContext } from 'react';
 import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
 import { TimeRange, TimeRangeContext } from '@perses-dev/plugin-system';
 import { useSyncActiveTimeRange } from '../utils/time-range-params';
-import { useSelectedTimeRange } from './DashboardProvider';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
@@ -33,7 +32,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
     ? toAbsoluteTimeRange(initialTimeRange)
     : initialTimeRange;
 
-  const { setSelectedTimeRange } = useSelectedTimeRange();
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(initialTimeRange);
 
   const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
 
@@ -63,7 +62,26 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
   // ensure time range updates when back btn pressed
   useSyncActiveTimeRange(setActiveTimeRange);
 
-  const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
+  const ctx = useMemo(
+    () => ({ timeRange, setTimeRange, selectedTimeRange, setSelectedTimeRange }),
+    [timeRange, setTimeRange, selectedTimeRange, setSelectedTimeRange]
+  );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
+}
+
+/**
+ * Gets the current selected time range
+ */
+function useTimeRangeContext() {
+  const ctx = useContext(TimeRangeContext);
+  if (ctx === undefined) {
+    throw new Error('No TimeRangeContext found. Did you forget a Provider?');
+  }
+  return ctx;
+}
+
+export function useSelectedTimeRange() {
+  const { selectedTimeRange, setSelectedTimeRange } = useTimeRangeContext();
+  return { selectedTimeRange, setSelectedTimeRange };
 }

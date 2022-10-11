@@ -44,9 +44,6 @@ export function usePanels() {
   }));
 }
 
-export function useSelectedTimeRange() {
-  return useDashboardStore(({ selectedTimeRange, setSelectedTimeRange }) => ({
-    selectedTimeRange,
-    setSelectedTimeRange,
-  }));
+export function useDefaultTimeRange() {
+  return useDashboardStore((state) => state.defaultTimeRange);
 }
