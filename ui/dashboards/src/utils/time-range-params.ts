@@ -16,8 +16,6 @@ import { useQueryParams, DecodedValueMap, StringParam } from 'use-query-params';
 import { getUnixTime, sub } from 'date-fns';
 import {
   TimeRangeValue,
-  AbsoluteTimeRange,
-  toAbsoluteTimeRange,
   isRelativeTimeRange,
   isDurationString,
   RelativeTimeRange,

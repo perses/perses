@@ -15,13 +15,12 @@ import { createContext, useContext, useMemo } from 'react';
 import { AbsoluteTimeRange, TimeRangeValue, isRelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 
 export interface TimeRange {
-  initialTimeRange: TimeRangeValue; // value from query string or dashboard spec
-  timeRange: TimeRangeValue; // resolved absolute time
+  timeRange: TimeRangeValue; // relative and absolute time supported
   setTimeRange: (value: TimeRangeValue) => void;
 }
 
 export interface ResolvedTimeRange {
-  timeRange: AbsoluteTimeRange;
+  timeRange: AbsoluteTimeRange; // resolved absolute time for plugins to use
   setTimeRange: (value: AbsoluteTimeRange) => void;
 }
 

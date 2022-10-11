@@ -45,10 +45,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
   // ensure time range updates when back btn pressed
   useSyncActiveTimeRange(true, setActiveTimeRange);
 
-  const ctx = useMemo(
-    () => ({ timeRange, setTimeRange, initialTimeRange }),
-    [timeRange, setTimeRange, initialTimeRange]
-  );
+  const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }
@@ -57,6 +54,6 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
  * Internal version of time range hook to get all supported values
  */
 export function useDashboardTimeRange() {
-  const { initialTimeRange, timeRange, setTimeRange } = useTimeRangeContext();
-  return { initialTimeRange, timeRange, setTimeRange };
+  const { timeRange, setTimeRange } = useTimeRangeContext();
+  return { timeRange, setTimeRange };
 }
