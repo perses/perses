@@ -11,59 +11,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { TimeRangeValue, AbsoluteTimeRange, toAbsoluteTimeRange, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext } from '@perses-dev/plugin-system';
-import { useSyncActiveTimeRange } from '../utils/time-range-params';
-import { useSelectedTimeRange } from './DashboardProvider';
+import React, { useMemo } from 'react';
+import { TimeRangeValue } from '@perses-dev/core';
+import { TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
-  initialTimeRange: TimeRangeValue;
+  timeRange: TimeRangeValue;
+  setTimeRange?: (value: TimeRangeValue) => void;
   children?: React.ReactNode;
-  onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
 /**
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { initialTimeRange, children, onTimeRangeChange } = props;
+  const { timeRange, children, setTimeRange } = props;
 
-  const defaultTimeRange: AbsoluteTimeRange = isRelativeTimeRange(initialTimeRange)
-    ? toAbsoluteTimeRange(initialTimeRange)
-    : initialTimeRange;
-
-  const { setSelectedTimeRange } = useSelectedTimeRange();
-
-  const [timeRange, setActiveTimeRange] = useState<AbsoluteTimeRange>(defaultTimeRange);
-
-  const setTimeRange: TimeRange['setTimeRange'] = useCallback(
-    (value: TimeRangeValue) => {
-      if (onTimeRangeChange !== undefined) {
-        // optional callback to override default behavior
-        onTimeRangeChange(value);
-        return;
-      }
-
-      // needed for TimeRangeControls since absolute time calendar and relative time shortcuts supported
-      setSelectedTimeRange(value);
-
-      // convert to absolute time range if relative time shortcut passed
-      if (isRelativeTimeRange(value)) {
-        setActiveTimeRange(toAbsoluteTimeRange(value));
-        return;
-      }
-
-      // resolved time, assume value was already absolute
-      setActiveTimeRange(value);
-    },
-    [onTimeRangeChange, setSelectedTimeRange]
+  const ctx = useMemo(
+    () => ({
+      timeRange,
+      setTimeRange:
+        setTimeRange ??
+        (() => {
+          /* no-op */
+        }),
+    }),
+    [timeRange, setTimeRange]
   );
 
-  // ensure time range updates when back btn pressed
-  useSyncActiveTimeRange(setActiveTimeRange);
-
-  const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
-
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
+}
+
+/**
+ * Internal version of time range hook to get all supported values
+ */
+export function useDashboardTimeRange() {
+  const { timeRange, setTimeRange } = useTimeRangeContext();
+  return { timeRange, setTimeRange };
 }

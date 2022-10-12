@@ -20,18 +20,13 @@ export interface Plugin<Spec> {
   /**
    * React component for editing the plugin's options in the UI.
    */
-  OptionsEditorComponent: OptionsEditor<Spec>;
+  OptionsEditorComponent: React.ComponentType<OptionsEditorProps<Spec>>;
 
   /**
    * Callback for creating the initial options for the plugin.
    */
-  createInitialOptions: InitialOptionsCallback<Spec>;
+  createInitialOptions: () => Spec;
 }
-
-/**
- * A component for visual editing of a plugin's options.
- */
-export type OptionsEditor<Spec> = React.ComponentType<OptionsEditorProps<Spec>>;
 
 /**
  * Common props passed to options editor components.
@@ -42,8 +37,3 @@ export interface OptionsEditorProps<Spec> {
   value: Spec;
   onChange: (next: Spec) => void;
 }
-
-/**
- * Callback for creating initial/empty options for a plugin.
- */
-export type InitialOptionsCallback<Spec> = () => Spec;

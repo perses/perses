@@ -21,7 +21,7 @@ import {
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
 } from '../../context';
-import { useInitialTimeRange } from '../../utils';
+import { useInitialTimeRange, useSetTimeRangeParams } from '../../utils';
 import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
@@ -37,11 +37,12 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
+  const { timeRange, setTimeRange } = useSetTimeRangeParams(initialTimeRange, true);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardSpec: spec, selectedTimeRange: initialTimeRange }}>
-        <TimeRangeProvider initialTimeRange={initialTimeRange}>
+      <DashboardProvider initialState={{ dashboardSpec: spec }}>
+        <TimeRangeProvider timeRange={timeRange} setTimeRange={setTimeRange}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
               sx={combineSx(

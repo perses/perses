@@ -15,13 +15,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { PluginType } from '../../model';
 import { useListPluginMetadata, usePlugin } from '../../runtime/plugins';
-import { renderWithContext } from '../../test/render';
-import { PluginRegistry } from './PluginRegistry';
-import { testRegistryProps } from './test-plugins';
+import { renderWithContext } from '../../test';
 
 describe('PluginRegistry', () => {
   const renderPluginRegistry = (children: React.ReactNode) => {
-    renderWithContext(<PluginRegistry {...testRegistryProps}>{children}</PluginRegistry>);
+    renderWithContext(children);
   };
 
   it('can load a plugin that exists', async () => {

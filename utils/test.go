@@ -12,17 +12,16 @@
 // limitations under the License.
 
 //go:build integration
-// +build integration
 
 package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -209,9 +208,9 @@ func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager
 			File: defaultFileConfig(),
 		},
 		Schemas: config.Schemas{
-			PanelsPath:      fmt.Sprintf("%s/schemas/panels", projectPath),
-			QueriesPath:     fmt.Sprintf("%s/schemas/queries", projectPath),
-			DatasourcesPath: fmt.Sprintf("%s/schemas/datasources", projectPath),
+			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
+			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
+			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
 			Interval:        0,
 		},
 	}

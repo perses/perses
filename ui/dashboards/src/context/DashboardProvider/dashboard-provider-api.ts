@@ -18,35 +18,62 @@ export function useEditMode() {
 }
 
 export function useLayouts() {
-  return useDashboardStore(({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups }) => ({
-    layouts,
-    addPanelToGroup,
-    movePanelToGroup,
-    updatePanelGroup,
-    swapPanelGroups,
-  }));
+  return useDashboardStore(
+    ({ layouts, addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups, deletePanelGroup }) => ({
+      layouts,
+      addPanelToGroup,
+      movePanelToGroup,
+      updatePanelGroup,
+      swapPanelGroups,
+      deletePanelGroup,
+    })
+  );
 }
 
 export function usePanelGroupDialog() {
-  return useDashboardStore(({ panelGroupDialog, openPanelGroupDialog, closePanelGroupDialog }) => ({
-    panelGroupDialog,
-    openPanelGroupDialog,
-    closePanelGroupDialog,
-  }));
+  return useDashboardStore(
+    ({
+      panelGroupDialog,
+      openPanelGroupDialog,
+      closePanelGroupDialog,
+      deletePanelGroupDialog,
+      openDeletePanelGroupDialog,
+      closeDeletePanelGroupDialog,
+    }) => ({
+      panelGroupDialog,
+      openPanelGroupDialog,
+      closePanelGroupDialog,
+      deletePanelGroupDialog,
+      openDeletePanelGroupDialog,
+      closeDeletePanelGroupDialog,
+    })
+  );
 }
 
 export function usePanels() {
-  return useDashboardStore(({ panels, panelEditor, addPanel, editPanel }) => ({
-    panels,
-    panelEditor,
-    addPanel,
-    editPanel,
-  }));
+  return useDashboardStore(
+    ({
+      panels,
+      panelEditor,
+      addPanel,
+      editPanel,
+      deletePanelDialog,
+      deletePanels,
+      openDeletePanelDialog,
+      closeDeletePanelDialog,
+    }) => ({
+      panels,
+      panelEditor,
+      addPanel,
+      editPanel,
+      deletePanels,
+      deletePanelDialog,
+      openDeletePanelDialog,
+      closeDeletePanelDialog,
+    })
+  );
 }
 
-export function useSelectedTimeRange() {
-  return useDashboardStore(({ selectedTimeRange, setSelectedTimeRange }) => ({
-    selectedTimeRange,
-    setSelectedTimeRange,
-  }));
+export function useDefaultTimeRange() {
+  return useDashboardStore((state) => state.defaultTimeRange);
 }

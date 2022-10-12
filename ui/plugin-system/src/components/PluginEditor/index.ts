@@ -11,8 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Add testing library assertions
-import '@testing-library/jest-dom/extend-expect';
-
-// Always mock e-charts during tests since we don't have a proper canvas in jsdom
-jest.mock('echarts/core');
+export * from './PluginEditor';
+export * from './plugin-editor-api';

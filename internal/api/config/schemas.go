@@ -16,9 +16,9 @@ package config
 import "time"
 
 const (
-	defaultPanelsPath      = "schemas/panels"
-	defaultQueriesPath     = "schemas/queries"
-	defaultDatasourcesPath = "schemas/datasources"
+	DefaultPanelsPath      = "schemas/panels"
+	DefaultQueriesPath     = "schemas/queries"
+	DefaultDatasourcesPath = "schemas/datasources"
 	defaultInterval        = 1 * time.Hour
 )
 
@@ -31,13 +31,13 @@ type Schemas struct {
 
 func (s *Schemas) Verify() error {
 	if len(s.PanelsPath) == 0 {
-		s.PanelsPath = defaultPanelsPath
+		s.PanelsPath = DefaultPanelsPath
 	}
 	if len(s.QueriesPath) == 0 {
-		s.QueriesPath = defaultQueriesPath
+		s.QueriesPath = DefaultQueriesPath
 	}
 	if len(s.DatasourcesPath) == 0 {
-		s.DatasourcesPath = defaultDatasourcesPath
+		s.DatasourcesPath = DefaultDatasourcesPath
 	}
 	if s.Interval <= 0 {
 		s.Interval = defaultInterval

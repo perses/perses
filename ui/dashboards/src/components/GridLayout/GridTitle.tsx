@@ -40,7 +40,7 @@ export function GridTitle(props: GridTitleProps) {
   const { groupIndex, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { openPanelGroupDialog } = usePanelGroupDialog();
+  const { openPanelGroupDialog, openDeletePanelGroupDialog } = usePanelGroupDialog();
   const { addPanel } = usePanels();
   const { isEditMode } = useEditMode();
   const { layouts, swapPanelGroups } = useLayouts();
@@ -71,24 +71,27 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && isHovered && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton onClick={() => addPanel(groupIndex)}>
+              <IconButton aria-label="add panel to group" onClick={() => addPanel(groupIndex)}>
                 <AddIcon />
               </IconButton>
-              <IconButton onClick={() => openPanelGroupDialog(groupIndex)}>
+              <IconButton aria-label="edit group" onClick={() => openPanelGroupDialog(groupIndex)}>
                 <PencilIcon />
               </IconButton>
-              <IconButton>
+              <IconButton aria-label="delete group" onClick={() => openDeletePanelGroupDialog(groupIndex)}>
                 <DeleteIcon />
               </IconButton>
-
               <IconButton
+                aria-label="move group down"
                 disabled={groupIndex === layouts.length - 1}
                 onClick={() => swapPanelGroups(groupIndex, groupIndex + 1)}
               >
                 <ArrowDownIcon />
               </IconButton>
-
-              <IconButton disabled={groupIndex === 0} onClick={() => swapPanelGroups(groupIndex, groupIndex - 1)}>
+              <IconButton
+                aria-label="move group up"
+                disabled={groupIndex === 0}
+                onClick={() => swapPanelGroups(groupIndex, groupIndex - 1)}
+              >
                 <ArrowUpIcon />
               </IconButton>
             </Stack>

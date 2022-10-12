@@ -24,50 +24,51 @@ const demoDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '15m',
-    variables: [
-      {
-        kind: 'ListVariable',
-        spec: {
-          name: 'job',
-          allow_multiple: true,
-          allow_all_value: true,
-          default_value: 'node',
-          plugin: {
-            kind: 'PrometheusLabelValuesVariable',
-            spec: {
-              label_name: 'job',
-            },
-          },
-        },
-      },
-      {
-        kind: 'ListVariable',
-        spec: {
-          name: 'instance',
-          allow_all_value: true,
-          plugin: {
-            kind: 'PrometheusLabelValuesVariable',
-            spec: {
-              label_name: 'instance',
-              matchers: ['up{job="$job"}'],
-            },
-          },
-        },
-      },
-      {
-        kind: 'ListVariable',
-        spec: {
-          name: 'interval',
-          plugin: {
-            kind: 'StaticListVariable',
-            spec: {
-              values: ['1m', '5m'],
-            },
-          },
-        },
-      },
-    ],
+    duration: '5m',
+    variables: [],
+    // variables: [
+    //   {
+    //     kind: 'ListVariable',
+    //     spec: {
+    //       name: 'job',
+    //       allow_multiple: true,
+    //       allow_all_value: true,
+    //       default_value: 'node',
+    //       plugin: {
+    //         kind: 'PrometheusLabelValuesVariable',
+    //         spec: {
+    //           label_name: 'job',
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     kind: 'ListVariable',
+    //     spec: {
+    //       name: 'instance',
+    //       allow_all_value: true,
+    //       plugin: {
+    //         kind: 'PrometheusLabelValuesVariable',
+    //         spec: {
+    //           label_name: 'instance',
+    //           matchers: ['up{job="$job"}'],
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     kind: 'ListVariable',
+    //     spec: {
+    //       name: 'interval',
+    //       plugin: {
+    //         kind: 'StaticListVariable',
+    //         spec: {
+    //           values: ['1m', '5m'],
+    //         },
+    //       },
+    //     },
+    //   },
+    // ],
     panels: {
       seriesTest: {
         kind: 'Panel',
@@ -221,7 +222,8 @@ const demoDashboard: DashboardResource = {
                     plugin: {
                       kind: 'PrometheusTimeSeriesQuery',
                       spec: {
-                        query: 'node_load15{instance=~"$instance",job="node"}',
+                        // query: 'node_load15{instance=~"$instance",job="node"}',
+                        query: 'node_load15{instance=~"(demo.do.prometheus.io:9100)",job="node"}', // instance=~"(demo.do.prometheus.io:9100)"
                       },
                     },
                   },
@@ -236,32 +238,33 @@ const demoDashboard: DashboardResource = {
           },
         },
       },
-      doubleQueries: {
+      testQueryAlt: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Thresholds Example', description: 'Description text' },
+          display: { name: 'Test Query Alt', description: 'Description text' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
               queries: [
+                // {
+                //   kind: 'TimeSeriesQuery',
+                //   spec: {
+                //     plugin: {
+                //       kind: 'PrometheusTimeSeriesQuery',
+                //       spec: {
+                //         query: 'node_load15{instance=~"$instance",job="node"}',
+                //       },
+                //     },
+                //   },
+                // },
                 {
                   kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
                       kind: 'PrometheusTimeSeriesQuery',
                       spec: {
-                        query: 'node_load15{instance=~"$instance",job="node"}',
-                      },
-                    },
-                  },
-                },
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'node_load1{instance=~"$instance",job="node"}',
+                        // query: 'node_load1{instance=~"$instance",job="node"}',
+                        query: 'node_load1{instance=~"(demo.do.prometheus.io:9100)",job="node"}',
                       },
                     },
                   },
@@ -652,7 +655,7 @@ const demoDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/doubleQueries' },
+              content: { $ref: '#/spec/panels/testQueryAlt' },
             },
           ],
         },

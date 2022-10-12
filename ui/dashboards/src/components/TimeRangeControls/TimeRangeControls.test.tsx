@@ -25,14 +25,18 @@ describe('TimeRangeControls', () => {
   beforeEach(() => {
     initialState = {
       dashboardSpec: testDashboard.spec,
-      selectedTimeRange: testDefaultTimeRange,
     };
   });
 
   const renderTimeRangeControls = () => {
     renderWithHistory(
       <DashboardProvider initialState={initialState}>
-        <TimeRangeProvider initialTimeRange={testDefaultTimeRange}>
+        <TimeRangeProvider
+          timeRange={testDefaultTimeRange}
+          setTimeRange={() => {
+            return; // TODO: fix no-op condition
+          }}
+        >
           <TimeRangeControls />
         </TimeRangeProvider>
       </DashboardProvider>
@@ -41,7 +45,7 @@ describe('TimeRangeControls', () => {
 
   it('should render correct initial relative time shortcut', async () => {
     renderTimeRangeControls();
-    expect(screen.getByText('Last 1 day')).toBeInTheDocument();
+    expect(screen.getByText('Last 5 minutes')).toBeInTheDocument();
   });
 
   it('should be able to select the first option', () => {
