@@ -43,16 +43,6 @@ describe('Panel Groups', () => {
     return storeApi;
   };
 
-  beforeEach(() => {
-    const mockIntersectionObserver = jest.fn();
-    mockIntersectionObserver.mockReturnValue({
-      observe: () => null,
-      unobserve: () => null,
-      disconnect: () => null,
-    });
-    window.IntersectionObserver = mockIntersectionObserver;
-  });
-
   it('should delete panel', () => {
     const storeApi = renderDashboard();
     const panel = screen.getByText('CPU');
