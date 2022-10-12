@@ -128,7 +128,6 @@ export function useDeletePanelGroupDialog() {
 export function usePanels() {
   return useDashboardStore(
     ({
-      panels,
       panelEditor,
       addPanel,
       editPanel,
@@ -137,7 +136,6 @@ export function usePanels() {
       openDeletePanelDialog,
       closeDeletePanelDialog,
     }) => ({
-      panels,
       panelEditor,
       addPanel,
       editPanel,
