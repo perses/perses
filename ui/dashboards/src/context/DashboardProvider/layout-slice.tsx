@@ -57,7 +57,7 @@ export interface LayoutSlice {
   /**
    * Map panel to panel groups
    */
-  mapPanelToPanelGroups: () => Record<string, PanelGroupDefinition['id'][]>;
+  mapPanelToPanelGroups: () => Record<string, Array<PanelGroupDefinition['id']>>;
 }
 
 export interface PanelGroupDefinition {
@@ -210,7 +210,7 @@ export function createLayoutSlice(
 
     // Return an object that maps each panel to the groups it belongs
     mapPanelToPanelGroups() {
-      const map: Record<string, PanelGroupDefinition['id'][]> = {}; // { panel key: [group ids] }
+      const map: Record<string, Array<PanelGroupDefinition['id']>> = {}; // { panel key: [group ids] }
       get().layouts.forEach((group) => {
         // for each panel in a group, add the group id to map[panelKey]
         group.items.forEach((panel) => {
