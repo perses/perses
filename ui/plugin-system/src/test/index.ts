@@ -11,17 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '../../../../model';
-
-// Dummy plugins to test loading
-export const BertPanel1: PanelPlugin = {
-  PanelComponent: () => null,
-  OptionsEditorComponent: () => null,
-  createInitialOptions: () => ({}),
-};
-
-export const BertPanel2: PanelPlugin = {
-  PanelComponent: () => null,
-  OptionsEditorComponent: () => null,
-  createInitialOptions: () => ({}),
-};
+export * from './render';

@@ -193,6 +193,9 @@ const testDashboard: DashboardResource = {
         spec: {
           display: {
             title: 'CPU Stats',
+            collapse: {
+              open: true,
+            },
           },
           items: [
             // First Row
@@ -202,6 +205,13 @@ const testDashboard: DashboardResource = {
               width: 12,
               height: 4,
               content: { $ref: '#/spec/panels/cpu' },
+            },
+            {
+              x: 0,
+              y: 5,
+              width: 6,
+              height: 2,
+              content: { $ref: '#/spec/panels/diskIO' },
             },
           ],
         },

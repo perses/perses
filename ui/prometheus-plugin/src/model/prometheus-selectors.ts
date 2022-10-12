@@ -13,14 +13,30 @@
 
 import { DatasourceSelector } from '@perses-dev/core';
 
+const PROM_DATASOURCE_KIND = 'PrometheusDatasource' as const;
+
 /**
  * DatasourceSelector for Prom Datasources.
  */
 export interface PrometheusDatasourceSelector extends DatasourceSelector {
-  kind: 'PrometheusDatasource';
+  kind: typeof PROM_DATASOURCE_KIND;
 }
 
 /**
  * A default selector that asks for the default Prom Datasource.
  */
-export const DEFAULT_PROM: PrometheusDatasourceSelector = { kind: 'PrometheusDatasource' };
+export const DEFAULT_PROM: PrometheusDatasourceSelector = { kind: PROM_DATASOURCE_KIND };
+
+/**
+ * Returns true if the provided PrometheusDatasourceSelector is the default one.
+ */
+export function isDefaultPromSelector(selector: PrometheusDatasourceSelector) {
+  return selector.name === undefined;
+}
+
+/**
+ * Type guard to make sure a DatasourceSelector is a Prometheus one.
+ */
+export function isPrometheusDatasourceSelector(selector: DatasourceSelector): selector is PrometheusDatasourceSelector {
+  return selector.kind === PROM_DATASOURCE_KIND;
+}

@@ -13,23 +13,55 @@
 
 import { ChangeEvent } from 'react';
 import produce from 'immer';
-import { TextField } from '@mui/material';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Box, TextField, FormControl, InputLabel } from '@mui/material';
+import { OptionsEditorProps, DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector } from '../model';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query';
 
 export type PrometheusTimeSeriesQueryEditorProps = OptionsEditorProps<PrometheusTimeSeriesQuerySpec>;
 
 export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps) {
   const { onChange, value } = props;
-  const { query } = value;
+  const { query, datasource } = value;
 
   const handleQueryChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(
-      produce(value, (draft: PrometheusTimeSeriesQuerySpec) => {
+      produce(value, (draft) => {
         draft.query = e.target.value;
       })
     );
   };
 
-  return <TextField label="Query" value={query} onChange={handleQueryChange} />;
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
+    if (isPrometheusDatasourceSelector(next)) {
+      onChange(
+        produce(value, (draft) => {
+          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+          const nextDatasource = isDefaultPromSelector(next) ? undefined : next;
+          draft.datasource = nextDatasource;
+        })
+      );
+      return;
+    }
+
+    throw new Error('Got unexpected non-Prometheus datasource selector');
+  };
+
+  return (
+    <Box>
+      <TextField label="Query" value={query} onChange={handleQueryChange} margin="dense" />
+      <FormControl margin="dense" fullWidth={false}>
+        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
+            maintain 17 compatibility somehow with a polyfill/shim? */}
+        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
+        <DatasourceSelect
+          datasourcePluginKind="PrometheusDatasource"
+          value={datasource ?? DEFAULT_PROM}
+          onChange={handleDatasourceChange}
+          labelId="prom-datasource-label"
+          label="Prometheus Datasource"
+        />
+      </FormControl>
+    </Box>
+  );
 }

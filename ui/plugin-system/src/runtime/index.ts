@@ -13,7 +13,6 @@
 
 export * from './datasources';
 export * from './plugins';
-export * from './PluginSpecEditor';
 export * from './template-variables';
 export * from './time-range';
 export * from './time-series-queries';

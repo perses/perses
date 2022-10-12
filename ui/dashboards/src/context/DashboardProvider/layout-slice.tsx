@@ -14,6 +14,7 @@
 import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
+import { PanelEditorSlice } from './panel-editing-slice';
 
 export interface LayoutSlice {
   layouts: PanelGroupDefinition[];
@@ -42,6 +43,21 @@ export interface LayoutSlice {
    * Rearrange the order of panel groups by swapping the positions
    */
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
+
+  /**
+   * Delete panel group and all the panels within the group
+   */
+  deletePanelGroup: (groupIndex: number) => void;
+
+  /**
+   * Delete panel in panel group
+   */
+  deletePanelInPanelGroup: (layoutItem: LayoutItem) => void;
+
+  /**
+   * Map panel to panel groups
+   */
+  mapPanelToPanelGroups: () => Record<string, PanelGroupDefinition['id'][]>;
 }
 
 export interface PanelGroupDefinition {
@@ -62,7 +78,9 @@ export interface LayoutItem {
 /**
  * Curried function for creating a LayoutEditorSlice.
  */
-export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<LayoutSlice, Middleware, [], LayoutSlice> {
+export function createLayoutSlice(
+  layouts: LayoutDefinition[]
+): StateCreator<LayoutSlice & PanelEditorSlice, Middleware, [], LayoutSlice> {
   // Return the state creator function for Zustand that uses the layouts provided as initial state
   let id = -1;
 
@@ -157,6 +175,54 @@ export function createLayoutSlice(layouts: LayoutDefinition[]): StateCreator<Lay
         // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
         [state.layouts[x], state.layouts[y]] = [yPanelGroup, xPanelGroup];
       });
+    },
+
+    deletePanelInPanelGroup({ groupIndex, itemIndex }) {
+      set((state) => {
+        const group = state.layouts[groupIndex];
+        if (group === undefined) {
+          throw new Error(`No panel group found: ${groupIndex}`);
+        }
+        // remove panel from panel group
+        group.items.splice(itemIndex, 1);
+      });
+    },
+
+    deletePanelGroup(groupIndex) {
+      const { layouts, deletePanels } = get();
+      const group = layouts[groupIndex];
+      if (group === undefined) {
+        throw new Error(`No panel group found: ${groupIndex}`);
+      }
+
+      // remove panels from group first
+      const panelsToBeDeleted: LayoutItem[] = [];
+      for (let i = 0; i < group.items.length; i++) {
+        panelsToBeDeleted.push({ groupIndex, itemIndex: i });
+      }
+      deletePanels(panelsToBeDeleted);
+
+      // remove group from state.layouts
+      set((state) => {
+        state.layouts.splice(groupIndex, 1);
+      });
+    },
+
+    // Return an object that maps each panel to the groups it belongs
+    mapPanelToPanelGroups() {
+      const map: Record<string, PanelGroupDefinition['id'][]> = {}; // { panel key: [group ids] }
+      get().layouts.forEach((group) => {
+        // for each panel in a group, add the group id to map[panelKey]
+        group.items.forEach((panel) => {
+          const panelKey = getPanelKeyFromRef(panel.content);
+          if (map[panelKey]) {
+            map[panelKey]?.push(group.id);
+          } else {
+            map[panelKey] = [group.id];
+          }
+        });
+      });
+      return map;
     },
   });
 }

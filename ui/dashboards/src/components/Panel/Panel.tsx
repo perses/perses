@@ -29,6 +29,7 @@ import {
 } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import { usePanels, useEditMode } from '../../context';
 import { PanelContent } from './PanelContent';
@@ -66,7 +67,7 @@ export function Panel(props: PanelProps) {
 
   const { isEditMode } = useEditMode();
 
-  const { editPanel } = usePanels();
+  const { editPanel, openDeletePanelDialog } = usePanels();
 
   const handleEditButtonClick = () => {
     editPanel({ groupIndex, itemIndex });
@@ -131,6 +132,13 @@ export function Panel(props: PanelProps) {
                 <Stack direction="row" alignItems="center" spacing={0.5}>
                   <IconButton aria-label="edit panel" size="small" onClick={handleEditButtonClick}>
                     <PencilIcon />
+                  </IconButton>
+                  <IconButton
+                    aria-label="delete panel"
+                    size="small"
+                    onClick={() => openDeletePanelDialog({ groupIndex, itemIndex })}
+                  >
+                    <DeleteIcon />
                   </IconButton>
                   <IconButton aria-label="drag handle" size="small">
                     <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />

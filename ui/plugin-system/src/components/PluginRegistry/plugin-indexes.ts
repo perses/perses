@@ -13,7 +13,7 @@
 
 import { useEvent } from '@perses-dev/core';
 import { useCallback, useRef } from 'react';
-import { PluginMetadata, PluginModuleResource } from '../../model';
+import { PluginMetadata, PluginModuleResource, PluginType } from '../../model';
 import { getTypeAndKindKey } from '../../utils/cache-keys';
 
 export type GetInstalledPlugins = () => Promise<PluginModuleResource[]>;
@@ -22,7 +22,7 @@ export interface PluginIndexes {
   // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)
   pluginResourcesByTypeAndKind: Map<string, PluginModuleResource>;
   // Plugin metadata by plugin type
-  pluginMetadataByType: Map<string, PluginMetadata[]>;
+  pluginMetadataByType: Map<PluginType, PluginMetadata[]>;
 }
 
 /**
@@ -36,7 +36,7 @@ export function usePluginIndexes(getInstalledPlugins: GetInstalledPlugins) {
 
     // Create the two indexes from the installed plugins
     const pluginResourcesByTypeAndKind = new Map<string, PluginModuleResource>();
-    const pluginMetadataByType = new Map<string, PluginMetadata[]>();
+    const pluginMetadataByType = new Map<PluginType, PluginMetadata[]>();
 
     for (const resource of installedPlugins) {
       for (const pluginMetadata of resource.spec.plugins) {
