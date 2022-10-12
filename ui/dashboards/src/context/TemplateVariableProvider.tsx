@@ -30,6 +30,7 @@ type TemplateVariableStore = {
   setVariableValue: (variableName: VariableName, value: VariableValue) => void;
   setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
   setVariableLoading: (name: VariableName, loading: boolean) => void;
+  setVariableDefinitions: (definitions: VariableDefinition[]) => void;
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -85,6 +86,7 @@ export function useTemplateVariableActions() {
       setVariableValue: s.setVariableValue,
       setVariableLoading: s.setVariableLoading,
       setVariableOptions: s.setVariableOptions,
+      setVariableDefinitions: s.setVariableDefinitions,
     };
   });
 }
@@ -131,6 +133,12 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: Tem
       immer((set) => ({
         variableState: hydrateTemplateVariableStates(initialVariableDefinitions),
         variableDefinitions: initialVariableDefinitions,
+        setVariableDefinitions(definitions: VariableDefinition[]) {
+          set((state) => {
+            state.variableDefinitions = definitions;
+            state.variableState = hydrateTemplateVariableStates(definitions);
+          });
+        },
         setVariableOptions(name, options) {
           set((state) => {
             const varState = state.variableState[name];
