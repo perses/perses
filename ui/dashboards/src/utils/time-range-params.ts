@@ -11,10 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useQueryParams, QueryParamConfig } from 'use-query-params';
 import { getUnixTime, isDate } from 'date-fns';
-import { TimeRangeValue, isDurationString, DurationString, AbsoluteTimeRange } from '@perses-dev/core';
+import {
+  TimeRangeValue,
+  isRelativeTimeRange,
+  isDurationString,
+  DurationString,
+  AbsoluteTimeRange,
+} from '@perses-dev/core';
+import { TimeRange } from '@perses-dev/plugin-system';
 
 export type TimeOptionValue = Date | DurationString | null | undefined;
 
@@ -104,4 +111,42 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
     }
     return initialTimeRange;
   }, [start, end, dashboardDuration]);
+}
+
+/**
+ * Gets the initial time range taking into account URL params and dashboard JSON duration
+ * Sets start query param if it is empty on page load
+ */
+export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEnabled = true): TimeRange {
+  const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
+
+  // fallback when app does not want query string as source of truth
+  const [timeRangeState, setTimeRangeState] = useState<TimeRangeValue>(initialTimeRange);
+
+  const { start } = query;
+
+  // set start param on page load if empty
+  if (paramsEnabled === true && start === undefined) {
+    setQuery({ start: '30m', end: undefined });
+  }
+
+  const setTimeRange: TimeRange['setTimeRange'] = useCallback(
+    (value: TimeRangeValue) => {
+      if (paramsEnabled === false) {
+        console.warn('Time range URL params disabled.');
+        return;
+      }
+      if (isRelativeTimeRange(value)) {
+        setQuery({ start: value.pastDuration, end: undefined });
+      } else {
+        setQuery(value);
+      }
+    },
+    [setQuery, paramsEnabled]
+  );
+
+  if (paramsEnabled === false) {
+    return { timeRange: timeRangeState, setTimeRange: setTimeRangeState };
+  }
+  return { timeRange: initialTimeRange, setTimeRange: setTimeRange };
 }

@@ -13,7 +13,7 @@
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DashboardProvider, QueryStringProvider, TemplateVariableProvider, TimeRangeProvider } from '../../../context';
+import { DashboardProvider, TemplateVariableProvider, TimeRangeProvider } from '../../../context';
 import { PanelGroupDefinition } from '../../../context/DashboardProvider/layout-slice';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../../test';
 import testDashboard from '../../../test/testDashboard';
@@ -23,16 +23,14 @@ describe('Panel Groups', () => {
   const renderDashboard = () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
     renderWithContext(
-      <QueryStringProvider queryString={new URLSearchParams('https://localhost:3000/')}>
-        <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
-          <TemplateVariableProvider>
-            <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
-              <DashboardProviderSpy />
-              <DashboardApp dashboardResource={getTestDashboard()} />
-            </DashboardProvider>
-          </TemplateVariableProvider>
-        </TimeRangeProvider>
-      </QueryStringProvider>
+      <TimeRangeProvider timeRange={{ pastDuration: '30m' }}>
+        <TemplateVariableProvider>
+          <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
+            <DashboardProviderSpy />
+            <DashboardApp dashboardResource={getTestDashboard()} />
+          </DashboardProvider>
+        </TemplateVariableProvider>
+      </TimeRangeProvider>
     );
 
     const { value: storeApi } = store;

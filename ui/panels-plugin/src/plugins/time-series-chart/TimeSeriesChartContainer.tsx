@@ -120,8 +120,9 @@ export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
 
   const handleDataZoom = (event: ZoomEventData) => {
     // TODO: add ECharts transition animation on zoom
-    // absolute time range query string update is handled inside TimeRangeProvider
-    setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
+    if (setTimeRange) {
+      setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
+    }
   };
 
   return (

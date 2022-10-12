@@ -11,50 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo, useCallback } from 'react';
-import { TimeRangeValue, isRelativeTimeRange } from '@perses-dev/core';
-import { TimeRange, TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
-import { useQueryParams } from 'use-query-params';
-import { timeRangeQueryConfig } from '../utils/time-range-params';
+import React, { useMemo } from 'react';
+import { TimeRangeValue } from '@perses-dev/core';
+import { TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
 
 export interface TimeRangeProviderProps {
   timeRange: TimeRangeValue;
+  setTimeRange?: (value: TimeRangeValue) => void;
   children?: React.ReactNode;
-  paramsEnabled?: boolean;
-  onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
 /**
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { timeRange, children, onTimeRangeChange, paramsEnabled } = props;
-
-  const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
-  const { start } = query;
-  if (start === undefined) {
-    setQuery({ start: '30m', end: undefined });
-  }
-
-  // TODO (sjcobb): pass setTimeRange as prop, support no-op
-  const setTimeRange: TimeRange['setTimeRange'] = useCallback(
-    (value: TimeRangeValue) => {
-      if (onTimeRangeChange !== undefined) {
-        // optional callback to override default behavior
-        onTimeRangeChange(value);
-        return;
-      }
-
-      if (paramsEnabled === true) {
-        if (isRelativeTimeRange(value)) {
-          setQuery({ start: value.pastDuration, end: undefined });
-        } else {
-          setQuery(value);
-        }
-      }
-    },
-    [paramsEnabled, setQuery, onTimeRangeChange]
-  );
+  const { timeRange, children, setTimeRange } = props;
 
   const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
 
