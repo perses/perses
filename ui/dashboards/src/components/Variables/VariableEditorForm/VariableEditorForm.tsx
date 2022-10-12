@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import React from 'react';
 import {
   Box,
   Typography,
@@ -27,75 +28,10 @@ import {
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { useListPluginMetadata, PluginSpecEditor, usePluginRegistry } from '@perses-dev/plugin-system';
-import { VariableDefinition, TextVariableDefinition, ListVariableDefinition } from '@perses-dev/core';
-import React from 'react';
+import { VariableDefinition } from '@perses-dev/core';
+import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
 const VARIABLE_TYPES = ['ListVariable', 'TextVariable'] as const;
-
-function getInitialState(initialVariableDefinition: VariableDefinition) {
-  const textVariableFields = {
-    value: (initialVariableDefinition as TextVariableDefinition).spec.value ?? '',
-  };
-
-  const listVariableFields = {
-    allowMultiple: false,
-    allowAll: false,
-    plugin: {
-      kind: '',
-      spec: {},
-    },
-  };
-  if (initialVariableDefinition.kind === 'ListVariable') {
-    listVariableFields.allowMultiple = initialVariableDefinition.spec.allow_all_value ?? false;
-    listVariableFields.allowAll = initialVariableDefinition.spec.allow_all_value ?? false;
-    listVariableFields.plugin = initialVariableDefinition.spec.plugin;
-  }
-
-  return {
-    name: initialVariableDefinition.spec.name,
-    label: initialVariableDefinition.spec.display?.label,
-    kind: initialVariableDefinition.kind,
-    description: '',
-    listVariableFields,
-    textVariableFields,
-  };
-}
-
-type VariableEditorState = ReturnType<typeof getInitialState>;
-
-function getVariableDefinitionFromState(state: VariableEditorState): VariableDefinition {
-  const { name, label, kind } = state;
-
-  const commonSpec = {
-    name,
-    display: {
-      label,
-    },
-  };
-
-  if (kind === 'TextVariable') {
-    return {
-      kind,
-      spec: {
-        ...commonSpec,
-        ...state.textVariableFields,
-      },
-    } as TextVariableDefinition;
-  }
-
-  if (kind === 'ListVariable') {
-    return {
-      kind,
-      spec: {
-        ...commonSpec,
-        allow_multiple: state.listVariableFields.allowMultiple,
-        allow_all_value: state.listVariableFields.allowAll,
-        plugin: state.listVariableFields.plugin,
-      },
-    } as ListVariableDefinition;
-  }
-  throw new Error(`Unknown variable kind: ${kind}`);
-}
 
 const SectionHeader = ({ children }: React.PropsWithChildren) => (
   <Typography pb={2} variant="subtitle1">

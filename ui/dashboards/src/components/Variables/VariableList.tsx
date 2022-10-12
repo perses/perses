@@ -45,7 +45,8 @@ function VariableEditor(props: {
 }) {
   const [variableDefinitions, setVariableDefinitions] = useImmer(props.variableDefinitions);
   const [variableEditIdx, setVariableEditIdx] = useState<number | null>(null);
-  const isEditingVariable = variableEditIdx !== null;
+
+  const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
 
   const removeVariable = (index: number) => {
     setVariableDefinitions((draft) => {
@@ -58,7 +59,7 @@ function VariableEditor(props: {
       draft.push({
         kind: 'TextVariable',
         spec: {
-          name: 'New Variable',
+          name: 'NewVariable',
           value: '',
         },
       });
@@ -82,13 +83,13 @@ function VariableEditor(props: {
 
   return (
     <Box p={4}>
-      {isEditingVariable && (
+      {currentEditingVariableDefinition && (
         <>
           <Typography variant="h3" mb={2}>
             Edit Variable
           </Typography>
           <VariableEditForm
-            initialVariableDefinition={variableDefinitions[variableEditIdx] as VariableDefinition}
+            initialVariableDefinition={currentEditingVariableDefinition}
             onChange={(definition) => {
               setVariableDefinitions((draft) => {
                 draft[variableEditIdx] = definition;
@@ -99,7 +100,7 @@ function VariableEditor(props: {
           />
         </>
       )}
-      {!isEditingVariable && (
+      {!currentEditingVariableDefinition && (
         <>
           <Stack direction="row" spacing={1} justifyContent="end">
             <Button

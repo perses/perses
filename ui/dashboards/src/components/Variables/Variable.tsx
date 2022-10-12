@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
 import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
 import {
@@ -22,7 +22,7 @@ import {
   useDatasourceStore,
 } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
-import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
+import { useTemplateVariable, useTemplateVariableActions } from '../../context';
 
 type TemplateVariableProps = {
   name: VariableName;
@@ -173,15 +173,18 @@ function ListVariable({ name }: TemplateVariableProps) {
 
 function TextVariable({ name }: TemplateVariableProps) {
   const { state } = useTemplateVariable(name);
-  const s = useTemplateVariableStore();
-  const setVariableValue = s.setVariableValue;
-  const ref = useRef<HTMLInputElement>(null);
+  const [tempValue, setTempValue] = useState(state?.value ?? '');
+  const { setVariableValue } = useTemplateVariableActions();
+
+  useEffect(() => {
+    setTempValue(state?.value ?? '');
+  }, [state?.value]);
+
   return (
     <TextField
-      inputRef={ref}
-      key={(state?.value as string) ?? ''}
-      defaultValue={state?.value}
-      onBlur={(e) => setVariableValue(name, e.target.value)}
+      value={tempValue}
+      onChange={(e) => setTempValue(e.target.value)}
+      onBlur={() => setVariableValue(name, tempValue)}
       placeholder={name}
       label={name}
     />
