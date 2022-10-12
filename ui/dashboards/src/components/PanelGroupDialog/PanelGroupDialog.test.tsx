@@ -48,12 +48,15 @@ describe('Add Panel Group', () => {
     userEvent.type(nameInput, 'New Panel Group');
     userEvent.click(screen.getByText('Add'));
 
+    // TODO: Figure out how to test this without coupling to the store state
     const panelGroups = storeApi.getState().panelGroups;
-    expect(panelGroups).toContainEqual({
-      id: 3,
-      title: 'New Panel Group',
-      isCollapsed: false,
-      items: [],
+    expect(panelGroups).toMatchObject({
+      '3': {
+        id: 3,
+        title: 'New Panel Group',
+        isCollapsed: false,
+        items: [],
+      },
     });
   });
 
@@ -68,12 +71,15 @@ describe('Add Panel Group', () => {
     userEvent.type(nameInput, 'New Name');
     userEvent.click(screen.getByText('Apply'));
 
+    // TODO: Figure out how to test this without coupling to the store state
     const panelGroups = storeApi.getState().panelGroups;
-    expect(panelGroups).toContainEqual({
-      id: 0,
-      title: 'New Name',
-      isCollapsed: false,
-      items: testDashboard.spec.layouts[0]?.spec.items,
+    expect(panelGroups).toMatchObject({
+      '0': {
+        id: 0,
+        title: 'New Name',
+        isCollapsed: false,
+        items: testDashboard.spec.layouts[0]?.spec.items,
+      },
     });
   });
 });
