@@ -32,7 +32,7 @@ export function PluginKindSelect(props: PluginKindSelectProps) {
 
   // TODO: Does this need a loading indicator of some kind?
   return (
-    <Select {...others} value={value}>
+    <Select sx={{ minWidth: 120 }} {...others} value={value}>
       {data?.map((metadata) => (
         <MenuItem key={metadata.kind} value={metadata.kind}>
           {metadata.display.name}

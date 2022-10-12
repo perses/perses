@@ -24,10 +24,9 @@ import {
   Select,
   Button,
   Stack,
-  Tooltip,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
-import { useListPluginMetadata, PluginSpecEditor, usePluginRegistry } from '@perses-dev/plugin-system';
+import { PluginEditor } from '@perses-dev/plugin-system';
 import { VariableDefinition } from '@perses-dev/core';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
@@ -48,17 +47,7 @@ export function VariableEditForm({
   onChange: (def: VariableDefinition) => void;
   onCancel: () => void;
 }) {
-  const { data: pluginList } = useListPluginMetadata('Variable');
-  const { getPlugin } = usePluginRegistry();
   const [state, setState] = useImmer(getInitialState(initialVariableDefinition));
-
-  const updatePluginKind = async (kind: string) => {
-    const p = await getPlugin('Variable', kind);
-    setState((draft) => {
-      draft.listVariableFields.plugin.kind = kind;
-      draft.listVariableFields.plugin.spec = p.createInitialOptions();
-    });
-  };
 
   return (
     <Box>
@@ -145,49 +134,17 @@ export function VariableEditForm({
           <SectionHeader>List Options</SectionHeader>
           <Grid container spacing={2} mb={2}>
             <Grid item xs={6}>
-              <FormControl fullWidth>
-                <InputLabel id="variable-source-select-label">Source</InputLabel>
-                <Select
-                  label="Source"
-                  labelId="variable-type-select-label"
-                  id="variable-source-select"
-                  value={state.listVariableFields.plugin.kind}
-                  onChange={(v) => updatePluginKind(v.target.value as string)}
-                >
-                  {pluginList?.map((v) => (
-                    <MenuItem key={v.kind} value={v.kind}>
-                      {v.kind}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12}>
-              {state.listVariableFields.plugin.kind && (
-                <>
-                  <Box mb={2}>Query</Box>
-                  <Box display="flex">
-                    <Box flexGrow={1}>
-                      <PluginSpecEditor
-                        pluginKind={state.listVariableFields.plugin.kind}
-                        pluginType="Variable"
-                        value={state.listVariableFields.plugin.spec}
-                        onChange={(val) => {
-                          setState((draft) => {
-                            draft.listVariableFields.plugin.spec = val;
-                          });
-                        }}
-                      />
-                    </Box>
-                    <Tooltip title="Coming Soon!" placement="top">
-                      <span>
-                        <Button disabled>Test Query</Button>
-                      </span>
-                    </Tooltip>
-                  </Box>
-                </>
-              )}
+              <PluginEditor
+                width={500}
+                pluginType="Variable"
+                pluginKindLabel="Source"
+                value={state.listVariableFields.plugin}
+                onChange={(val) => {
+                  setState((draft) => {
+                    draft.listVariableFields.plugin = val;
+                  });
+                }}
+              />
             </Grid>
           </Grid>
 
