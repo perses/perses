@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { TimeRangeValue } from '@perses-dev/core';
+import React, { useMemo, useCallback } from 'react';
+import { TimeRangeValue, isRelativeTimeRange } from '@perses-dev/core';
 import { TimeRange, TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
-// import { useSyncActiveTimeRange } from '../utils/time-range-params';
+import { useQueryParams } from 'use-query-params';
+import { timeRangeQueryConfig } from '../utils/time-range-params';
 
 export interface TimeRangeProviderProps {
-  initialTimeRange: TimeRangeValue;
+  timeRange: TimeRangeValue;
   children?: React.ReactNode;
+  paramsEnabled?: boolean;
   onTimeRangeChange?: (e: TimeRangeValue) => void;
 }
 
@@ -26,10 +28,15 @@ export interface TimeRangeProviderProps {
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { initialTimeRange, children, onTimeRangeChange } = props;
+  const { timeRange, children, onTimeRangeChange, paramsEnabled } = props;
 
-  const [timeRange, setActiveTimeRange] = useState<TimeRangeValue>(initialTimeRange);
+  const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
+  const { start } = query;
+  if (start === undefined) {
+    setQuery({ start: '30m', end: undefined });
+  }
 
+  // TODO (sjcobb): pass setTimeRange as prop, support no-op
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
       if (onTimeRangeChange !== undefined) {
@@ -37,14 +44,17 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
         onTimeRangeChange(value);
         return;
       }
-      setActiveTimeRange(value);
-    },
-    [onTimeRangeChange]
-  );
 
-  // TODO: fix back button
-  // ensure time range updates when back btn pressed
-  // useSyncActiveTimeRange(true, setActiveTimeRange);
+      if (paramsEnabled === true) {
+        if (isRelativeTimeRange(value)) {
+          setQuery({ start: value.pastDuration, end: undefined });
+        } else {
+          setQuery(value);
+        }
+      }
+    },
+    [paramsEnabled, setQuery, onTimeRangeChange]
+  );
 
   const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
 

@@ -11,23 +11,77 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useEffect, useRef } from 'react';
-import { useQueryParams, DecodedValueMap, StringParam } from 'use-query-params';
-import { getUnixTime, sub } from 'date-fns';
-import {
-  TimeRangeValue,
-  isRelativeTimeRange,
-  isDurationString,
-  RelativeTimeRange,
-  DurationString,
-  isAbsoluteTimeRange,
-  parseDurationString,
-} from '@perses-dev/core';
-import { useDashboardTimeRange } from '../context';
+import { useMemo } from 'react';
+import { useQueryParams, QueryParamConfig } from 'use-query-params';
+import { getUnixTime, isDate } from 'date-fns';
+import { TimeRangeValue, isDurationString, DurationString, AbsoluteTimeRange } from '@perses-dev/core';
 
-const timeRangeQueryConfig = {
-  start: StringParam,
-  end: StringParam,
+export type TimeOptionValue = Date | DurationString | null | undefined;
+
+/* Interprets an encoded string and returns either the string or null/undefined if not available */
+function getEncodedValue(
+  input: string | Array<string | null> | null | undefined,
+  allowEmptyString?: boolean
+): string | null | undefined {
+  if (input == null) {
+    return input;
+  }
+  // '' or []
+  if (input.length === 0 && (!allowEmptyString || (allowEmptyString && input !== ''))) {
+    return null;
+  }
+
+  const str = input instanceof Array ? input[0] : input;
+  if (str == null) {
+    return str;
+  }
+  if (!allowEmptyString && str === '') {
+    return null;
+  }
+
+  return str;
+}
+
+/* Encodes individual TimeRangeValue as a string, depends on whether start is relative or absolute */
+export function encodeTimeRangeValue(timeOptionValue: TimeOptionValue): string | null | undefined {
+  if (!timeOptionValue) {
+    return timeOptionValue;
+  }
+
+  if (typeof timeOptionValue === 'string') {
+    if (isDurationString(timeOptionValue)) {
+      return timeOptionValue;
+    }
+  }
+  return (getUnixTime(timeOptionValue) * 1000).toString();
+}
+
+/* Converts param input to supported relative or absolute time range format */
+export function decodeTimeRangeValue(
+  input: string | Array<string | null> | null | undefined
+): Date | DurationString | null | undefined {
+  const paramString = getEncodedValue(input);
+  if (paramString == null) return paramString;
+  return isDurationString(paramString) ? paramString : new Date(Number(paramString));
+}
+
+/**
+ * Custom TimeRangeValue param type
+ * See: https://github.com/pbeshai/use-query-params/tree/master/packages/serialize-query-params#param-types
+ */
+export const TimeRangeParam: QueryParamConfig<TimeOptionValue, TimeOptionValue> = {
+  encode: encodeTimeRangeValue,
+  decode: decodeTimeRangeValue,
+  equals: (valueA: TimeOptionValue, valueB: TimeOptionValue) => {
+    if (valueA === valueB) return true;
+    if (valueA == null || valueB == null) return valueA === valueB;
+    return valueA.valueOf() === valueB.valueOf();
+  },
+};
+
+export const timeRangeQueryConfig = {
+  start: TimeRangeParam,
+  end: TimeRangeParam,
 };
 
 /**
@@ -37,79 +91,17 @@ const timeRangeQueryConfig = {
 export function useInitialTimeRange(dashboardDuration: DurationString): TimeRangeValue {
   const [query] = useQueryParams(timeRangeQueryConfig);
   const { start, end } = query;
-
   return useMemo(() => {
     let initialTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
     if (!start) {
       return initialTimeRange;
     }
-
-    if (isDurationString(start.toString())) {
-      initialTimeRange = { pastDuration: start, end: new Date() } as RelativeTimeRange;
-    } else {
-      initialTimeRange = {
-        start: new Date(Number(start)),
-        end: end ? new Date(Number(end)) : new Date(),
-      };
+    const startStr = start.toString();
+    if (isDurationString(startStr)) {
+      initialTimeRange = { pastDuration: startStr };
+    } else if (isDate(start) && isDate(end)) {
+      initialTimeRange = { start: start, end: end } as AbsoluteTimeRange;
     }
     return initialTimeRange;
   }, [start, end, dashboardDuration]);
-}
-
-/**
- * Set start and end URL params and update when selected time range changes
- */
-export function useSyncTimeRangeParams(enabled: boolean) {
-  const { timeRange } = useDashboardTimeRange();
-  const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
-  const lastParamSync = useRef<DecodedValueMap<typeof timeRangeQueryConfig>>();
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    const lastStart = (lastParamSync.current && lastParamSync.current.start) ?? '';
-    if (isRelativeTimeRange(timeRange)) {
-      // back btn not pressed, set new time range params
-      if (lastStart !== timeRange.pastDuration) {
-        setQuery({ start: timeRange.pastDuration, end: undefined });
-        lastParamSync.current = query;
-      }
-    } else if (isAbsoluteTimeRange(timeRange)) {
-      const lastStartFormatted = isDurationString(lastStart)
-        ? sub(timeRange.end, parseDurationString(lastStart)) // in case previous timeRange was relative
-        : new Date(Number(lastStart));
-      // back button not pressed, set new params
-      if (getUnixTime(lastStartFormatted) !== getUnixTime(timeRange.start)) {
-        const startUnixMs = (getUnixTime(timeRange.start) * 1000).toString();
-        const endUnixMs = (getUnixTime(timeRange.end) * 1000).toString();
-        setQuery({ start: startUnixMs, end: endUnixMs });
-        lastParamSync.current = query;
-      }
-    }
-  }, [query, setQuery, timeRange, enabled]);
-}
-
-/**
- * Ensure resolved absolute dashboard time range matches query params (needed for back button to work)
- */
-export function useSyncActiveTimeRange(enabled: boolean, setActiveTimeRange: (value: TimeRangeValue) => void) {
-  const [query] = useQueryParams({
-    start: '',
-    end: '',
-  });
-  const { start, end } = query;
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    if (start) {
-      if (isDurationString(start)) {
-        setActiveTimeRange({ pastDuration: start, end: new Date() });
-      } else {
-        setActiveTimeRange({ start: new Date(Number(start)), end: new Date(Number(end)) });
-      }
-    }
-  }, [start, end, setActiveTimeRange, enabled]);
 }

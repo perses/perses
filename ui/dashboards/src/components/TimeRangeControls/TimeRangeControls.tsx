@@ -21,7 +21,6 @@ import {
   isRelativeTimeRange,
   toAbsoluteTimeRange,
 } from '@perses-dev/core';
-import { useSyncTimeRangeParams } from '../../utils';
 import { useDashboardTimeRange } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
@@ -39,7 +38,6 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useDashboardTimeRange();
-  useSyncTimeRangeParams(true);
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();

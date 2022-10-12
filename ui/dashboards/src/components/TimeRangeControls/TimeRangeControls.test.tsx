@@ -32,7 +32,7 @@ describe('TimeRangeControls', () => {
   const renderTimeRangeControls = () => {
     renderWithHistory(
       <DashboardProvider initialState={initialState}>
-        <TimeRangeProvider initialTimeRange={testDefaultTimeRange}>
+        <TimeRangeProvider timeRange={testDefaultTimeRange}>
           <TimeRangeControls />
         </TimeRangeProvider>
       </DashboardProvider>
