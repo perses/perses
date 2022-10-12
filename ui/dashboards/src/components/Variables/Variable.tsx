@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
 import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
 import {
@@ -22,7 +22,7 @@ import {
   useDatasourceStore,
 } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
-import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
+import { useTemplateVariable, useTemplateVariableActions } from '../../context';
 
 type TemplateVariableProps = {
   name: VariableName;
@@ -67,6 +67,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   const variables = useTemplateVariableValues(dependsOnVariables);
   const allowMultiple = definition?.spec.allow_multiple === true;
   const allowAllValue = definition?.spec.allow_all_value === true;
+  const label = definition?.spec.display?.label ?? name;
 
   let waitToLoad = false;
   if (dependsOnVariables) {
@@ -135,7 +136,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   return (
     <Box display={'flex'}>
       <FormControl>
-        <InputLabel id={name}>{name}</InputLabel>
+        <InputLabel id={name}>{label}</InputLabel>
         <Select
           sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
@@ -172,14 +173,18 @@ function ListVariable({ name }: TemplateVariableProps) {
 
 function TextVariable({ name }: TemplateVariableProps) {
   const { state } = useTemplateVariable(name);
-  const s = useTemplateVariableStore();
-  const setVariableValue = s.setVariableValue;
-  const ref = useRef<HTMLInputElement>(null);
+  const [tempValue, setTempValue] = useState(state?.value ?? '');
+  const { setVariableValue } = useTemplateVariableActions();
+
+  useEffect(() => {
+    setTempValue(state?.value ?? '');
+  }, [state?.value]);
+
   return (
     <TextField
-      ref={ref}
-      defaultValue={state?.value}
-      onBlur={(e) => setVariableValue(name, e.target.value)}
+      value={tempValue}
+      onChange={(e) => setTempValue(e.target.value)}
+      onBlur={() => setVariableValue(name, tempValue)}
       placeholder={name}
       label={name}
     />
