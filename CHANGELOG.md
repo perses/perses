@@ -10,6 +10,7 @@
 - [FEATURE] Add visual editing for template variables #627
 - [ENHANCEMENT] Add functionality to DashboardProvider api #590, #598
 - [ENHANCEMENT] Add clean as dependency in build script #597
+- [ENHANCEMENT] Create initial panel preview component #604
 - [ENHANCEMENT] Add an UnknownSpec type for framework code at runtime #609
 - [ENHANCEMENT] Implement latest version of panel and query datamodel #614
 - [ENHANCEMENT] Simplify cue definitions and use internal schema libs to test all cue schemas #616, #620
