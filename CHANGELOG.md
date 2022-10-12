@@ -1,6 +1,6 @@
 # Changelog
 
-# 0.10.0 / 2022-10-12
+## 0.10.0 / 2022-10-12
 
 - [FEATURE] Implement new datasource format #570
 - [FEATURE] Add PluginSpecEditor to support a query input and static panel options for TimeSeriesChart #596, #612
@@ -17,7 +17,7 @@
 - [ENHANCEMENT] New common UI components for working with the plugin system #624
 - [BUGFIX] Fix redundant no data in StatChart #606
 
-# 0.9.0 / 2022-10-04
+## 0.9.0 / 2022-10-04
 
 - [FEATURE] New ListVariable plugin for StaticListVariables #547
 - [FEATURE] New Prometheus plugin for ListVariable (LabelName, LabelValues) #565
