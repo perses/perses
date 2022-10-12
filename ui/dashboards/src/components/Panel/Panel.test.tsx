@@ -36,8 +36,7 @@ describe('Panel', () => {
           },
         },
       },
-      groupIndex: 0,
-      itemIndex: 0,
+      panelGroupItemId: { panelGroupId: 0, itemIndex: 0 },
     };
   };
 

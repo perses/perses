@@ -67,7 +67,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               <Button startIcon={<AddPanelGroupIcon />} onClick={() => openPanelGroupDialog()}>
                 Add Panel Group
               </Button>
-              <Button startIcon={<AddPanelIcon />} onClick={() => addPanel(0)}>
+              <Button startIcon={<AddPanelIcon />} onClick={() => addPanel()}>
                 Add Panel
               </Button>
               <TimeRangeControls />

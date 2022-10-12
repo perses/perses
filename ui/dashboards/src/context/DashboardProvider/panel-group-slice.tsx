@@ -13,33 +13,48 @@
 
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
+import { LayoutSlice, PanelGroupId } from './layout-slice';
 
 export interface PanelGroupDialog {
-  groupIndex?: number;
+  panelGroupId?: PanelGroupId;
+}
+
+export interface DeletePanelGroupDialog {
+  panelGroupId: PanelGroupId;
+  panelGroupName?: string;
 }
 
 export interface PanelGroupSlice {
   panelGroupDialog?: PanelGroupDialog;
-  openPanelGroupDialog: (groupIndex?: number) => void;
+  openPanelGroupDialog: (panelGroupId?: PanelGroupId) => void;
   closePanelGroupDialog: () => void;
-  deletePanelGroupDialog?: PanelGroupDialog;
-  openDeletePanelGroupDialog: (groupIndex: number) => void;
+
+  deletePanelGroupDialog?: DeletePanelGroupDialog;
+  openDeletePanelGroupDialog: (panelGroupId: PanelGroupId) => void;
   closeDeletePanelGroupDialog: () => void;
 }
 
-export const createPanelGroupSlice: StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> = (set) => ({
-  openPanelGroupDialog: (groupIndex?: number) =>
+export const createPanelGroupSlice: StateCreator<PanelGroupSlice & LayoutSlice, Middleware, [], PanelGroupSlice> = (
+  set,
+  get
+) => ({
+  openPanelGroupDialog: (panelGroupId) =>
     set((state) => {
-      state.panelGroupDialog = { groupIndex };
+      state.panelGroupDialog = { panelGroupId };
     }),
   closePanelGroupDialog: () =>
     set((state) => {
       state.panelGroupDialog = undefined;
     }),
-  openDeletePanelGroupDialog: (groupIndex: number) =>
+  openDeletePanelGroupDialog: (panelGroupId) => {
+    const panelGroup = get().panelGroups[panelGroupId];
+    if (panelGroup === undefined) {
+      throw new Error(`Panel group with Id ${panelGroupId} not found`);
+    }
     set((state) => {
-      state.deletePanelGroupDialog = { groupIndex };
-    }),
+      state.deletePanelGroupDialog = { panelGroupId, panelGroupName: panelGroup.title };
+    });
+  },
   closeDeletePanelGroupDialog: () =>
     set((state) => {
       state.deletePanelGroupDialog = undefined;

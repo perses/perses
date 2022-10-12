@@ -29,28 +29,27 @@ import {
   MenuItem,
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { usePanelGroupDialog, useLayouts } from '../../context';
-import { PanelGroupDefinition } from '../../context/DashboardProvider/layout-slice';
+import { usePanelGroupDialog, useLayouts, PanelGroupDefinition } from '../../context';
 
-const PanelGroupDialog = () => {
-  const { layouts, updatePanelGroup } = useLayouts();
-  const { panelGroupDialog, closePanelGroupDialog } = usePanelGroupDialog();
+export function PanelGroupDialog() {
+  const { updatePanelGroup } = useLayouts();
+  const { panelGroups, panelGroupDialog, closePanelGroupDialog } = usePanelGroupDialog();
 
-  const groupIndex = panelGroupDialog?.groupIndex;
+  const panelGroupId = panelGroupDialog?.panelGroupId;
 
-  const isEditingPanelGroup = groupIndex !== undefined;
+  const isEditingPanelGroup = panelGroupId !== undefined;
 
-  const [isCollapsed, setIsCollapsed] = useState(isEditingPanelGroup && layouts[groupIndex]?.isCollapsed);
-  const [name, setName] = useState(isEditingPanelGroup ? layouts[groupIndex]?.title : '');
+  const [isCollapsed, setIsCollapsed] = useState(isEditingPanelGroup && panelGroups[panelGroupId]?.isCollapsed);
+  const [name, setName] = useState(isEditingPanelGroup ? panelGroups[panelGroupId]?.title : '');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const newGroup: Omit<PanelGroupDefinition, 'id'> = {
-      isCollapsed,
+      isCollapsed: isCollapsed ?? false,
       title: name ?? '',
-      items: groupIndex === undefined ? [] : layouts[groupIndex]?.items ?? [],
+      items: panelGroupId === undefined ? [] : panelGroups[panelGroupId]?.items ?? [],
     };
-    updatePanelGroup(newGroup, groupIndex);
+    updatePanelGroup(newGroup, panelGroupId);
     closePanelGroupDialog();
   };
 
@@ -114,6 +113,4 @@ const PanelGroupDialog = () => {
       </form>
     </Dialog>
   );
-};
-
-export default PanelGroupDialog;
+}

@@ -15,5 +15,6 @@ export * from './Dashboard';
 export * from './GridLayout';
 export * from './Panel';
 export * from './PanelDrawer';
+export * from './PanelGroupDialog';
 export * from './TimeRangeControls';
 export * from './Variables';

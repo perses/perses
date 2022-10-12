@@ -15,7 +15,7 @@ import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
-import { LayoutSlice, LayoutItem } from './layout-slice';
+import { LayoutSlice, LayoutItem, PanelGroupId } from './layout-slice';
 
 export interface PanelEditorSlice {
   panels: Record<string, PanelDefinition>;
@@ -33,7 +33,7 @@ export interface PanelEditorSlice {
   /**
    * Add a new Panel to a panel group.
    */
-  addPanel: (initialGroup: number) => void;
+  addPanel: (panelGroupId?: PanelGroupId) => void;
 
   /**
    * Delete panels
@@ -52,9 +52,9 @@ export interface PanelEditorSlice {
 }
 
 export interface DeletePanelDialog {
-  panelKey: string;
+  panelGroupItemId: LayoutItem;
   panelName: string;
-  layoutItem: LayoutItem;
+  panelGroupName: string;
 }
 
 export interface PanelEditorState {
@@ -85,7 +85,7 @@ export interface PanelEditorState {
 export interface PanelEditorValues {
   name: string;
   description: string;
-  groupIndex: number;
+  groupId: PanelGroupId;
   kind: string;
   spec: UnknownSpec;
 }
@@ -119,7 +119,7 @@ export function createPanelEditorSlice(
         initialValues: {
           name: panelToEdit.spec.display.name,
           description: panelToEdit.spec.display.description ?? '',
-          groupIndex: item.groupIndex,
+          groupId: item.panelGroupId,
           kind: panelToEdit.spec.plugin.kind,
           spec: panelToEdit.spec.plugin.spec,
         },
@@ -130,8 +130,8 @@ export function createPanelEditorSlice(
           });
 
           // Move the panel to another group if it changed
-          if (next.groupIndex !== item.groupIndex) {
-            get().movePanelToGroup(item, next.groupIndex);
+          if (next.groupId !== item.panelGroupId) {
+            get().movePanelToGroup(item, next.groupId);
           }
         },
         close: () => {
@@ -147,13 +147,22 @@ export function createPanelEditorSlice(
       });
     },
 
-    addPanel(initialGroup) {
+    addPanel(panelGroupId) {
+      // If a panel group isn't supplied, add to the first group
+      if (panelGroupId === undefined) {
+        const firstGroupId = get().panelGroupIdOrder[0];
+        if (firstGroupId === undefined) {
+          throw new Error('No panel groups to add a panel to');
+        }
+        panelGroupId = firstGroupId;
+      }
+
       const editorState: PanelEditorState = {
         mode: 'Add',
         initialValues: {
           name: '',
           description: '',
-          groupIndex: initialGroup,
+          groupId: panelGroupId,
           // TODO: If we knew what plugins were available (and how to create the initial spec), we might be able to
           // set a smarter default here?
           kind: '',
@@ -165,7 +174,7 @@ export function createPanelEditorSlice(
           set((state) => {
             state.panels[panelKey] = panelDef;
           });
-          get().addPanelToGroup(panelKey, next.groupIndex);
+          get().addPanelToGroup(panelKey, next.groupId);
         },
         close: () => {
           set((state) => {
@@ -199,13 +208,13 @@ export function createPanelEditorSlice(
     },
 
     openDeletePanelDialog(item: LayoutItem) {
+      const { panels, getPanelKey, panelGroups } = get();
+      const panelKey = getPanelKey(item);
       set((state) => {
-        const { panels, getPanelKey } = get();
-        const panelKey = getPanelKey(item);
         state.deletePanelDialog = {
-          panelKey,
+          panelGroupItemId: item,
           panelName: panels[panelKey]?.spec.display.name ?? '',
-          layoutItem: item,
+          panelGroupName: panelGroups[item.panelGroupId]?.title ?? '',
         };
       });
     },

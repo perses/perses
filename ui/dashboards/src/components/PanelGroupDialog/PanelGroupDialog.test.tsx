@@ -17,7 +17,7 @@ import { act } from 'react-dom/test-utils';
 import { DashboardProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import PanelGroupDialog from './PanelGroupDialog';
+import { PanelGroupDialog } from './PanelGroupDialog';
 
 describe('Add Panel Group', () => {
   const renderDialog = () => {
@@ -48,8 +48,8 @@ describe('Add Panel Group', () => {
     userEvent.type(nameInput, 'New Panel Group');
     userEvent.click(screen.getByText('Add'));
 
-    const layouts = storeApi.getState().layouts;
-    expect(layouts).toContainEqual({
+    const panelGroups = storeApi.getState().panelGroups;
+    expect(panelGroups).toContainEqual({
       id: 3,
       title: 'New Panel Group',
       isCollapsed: false,
@@ -68,8 +68,8 @@ describe('Add Panel Group', () => {
     userEvent.type(nameInput, 'New Name');
     userEvent.click(screen.getByText('Apply'));
 
-    const layouts = storeApi.getState().layouts;
-    expect(layouts).toContainEqual({
+    const panelGroups = storeApi.getState().panelGroups;
+    expect(panelGroups).toContainEqual({
       id: 0,
       title: 'New Name',
       isCollapsed: false,

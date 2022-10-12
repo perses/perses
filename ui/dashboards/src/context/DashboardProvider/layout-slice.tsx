@@ -25,7 +25,7 @@ export interface LayoutSlice {
   /**
    * An array of panel group IDs, representing their order in the dashboard.
    */
-  panelGroupOrder: PanelGroupId[];
+  panelGroupIdOrder: PanelGroupId[];
 
   /**
    * Given a LayoutItem location, returns the panel's unique key at that location.
@@ -73,7 +73,7 @@ export type PanelGroupId = number;
 export interface PanelGroupDefinition {
   id: PanelGroupId;
   items: GridItemDefinition[];
-  isCollapsed?: boolean;
+  isCollapsed: boolean;
   title?: string;
 }
 
@@ -100,7 +100,7 @@ export function createLayoutSlice(
 
   // Convert the initial layouts from the JSON to panel groups and keep track of the order
   const panelGroups: LayoutSlice['panelGroups'] = {};
-  const panelGroupOrder: LayoutSlice['panelGroupOrder'] = [];
+  const panelGroupIdOrder: LayoutSlice['panelGroupIdOrder'] = [];
   for (const layout of layouts) {
     const id = createPanelGroupId();
     panelGroups[id] = {
@@ -109,13 +109,13 @@ export function createLayoutSlice(
       isCollapsed: layout.spec.display?.collapse?.open === false,
       title: layout.spec.display?.title,
     };
-    panelGroupOrder.push(id);
+    panelGroupIdOrder.push(id);
   }
 
   // Return the state creator function for Zustand
   return (set, get) => ({
     panelGroups,
-    panelGroupOrder,
+    panelGroupIdOrder,
 
     getPanelKey({ panelGroupId, itemIndex }) {
       const { panelGroups } = get();
@@ -173,7 +173,7 @@ export function createLayoutSlice(
           const id = createPanelGroupId();
           const newPanelGroup = { ...panelGroup, id };
           state.panelGroups[id] = newPanelGroup;
-          state.panelGroupOrder.unshift(id);
+          state.panelGroupIdOrder.unshift(id);
           return;
         }
 
@@ -187,17 +187,17 @@ export function createLayoutSlice(
 
     swapPanelGroups(x, y) {
       set((state) => {
-        if (x < 0 || x >= state.panelGroupOrder.length || y < 0 || y >= state.panelGroupOrder.length) {
+        if (x < 0 || x >= state.panelGroupIdOrder.length || y < 0 || y >= state.panelGroupIdOrder.length) {
           throw new Error('index out of bound');
         }
-        const xPanelGroup = state.panelGroupOrder[x];
-        const yPanelGroup = state.panelGroupOrder[y];
+        const xPanelGroup = state.panelGroupIdOrder[x];
+        const yPanelGroup = state.panelGroupIdOrder[y];
 
         if (xPanelGroup === undefined || yPanelGroup === undefined) {
           throw new Error('panel group is undefined');
         }
         // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
-        [state.panelGroupOrder[x], state.panelGroupOrder[y]] = [yPanelGroup, xPanelGroup];
+        [state.panelGroupIdOrder[x], state.panelGroupIdOrder[y]] = [yPanelGroup, xPanelGroup];
       });
     },
 
@@ -213,7 +213,7 @@ export function createLayoutSlice(
     },
 
     deletePanelGroup(panelGroupId) {
-      const { panelGroups, panelGroupOrder, deletePanels } = get();
+      const { panelGroups, panelGroupIdOrder: panelGroupOrder, deletePanels } = get();
       const group = findGroup(panelGroups, panelGroupId);
       const orderIdx = panelGroupOrder.findIndex((id) => id === panelGroupId);
       if (orderIdx === -1) {
@@ -229,7 +229,7 @@ export function createLayoutSlice(
 
       // remove group from both panelGroups and panelGroupOrder
       set((state) => {
-        state.panelGroupOrder.splice(orderIdx, 1);
+        state.panelGroupIdOrder.splice(orderIdx, 1);
         delete state.panelGroups[panelGroupId];
       });
     },
@@ -237,7 +237,7 @@ export function createLayoutSlice(
     // Return an object that maps each panel to the groups it belongs
     mapPanelToPanelGroups() {
       const map: Record<string, Array<PanelGroupDefinition['id']>> = {}; // { panel key: [group ids] }
-      get().layouts.forEach((group) => {
+      Object.values(get().panelGroups).forEach((group) => {
         // for each panel in a group, add the group id to map[panelKey]
         group.items.forEach((panel) => {
           const panelKey = getPanelKeyFromRef(panel.content);
