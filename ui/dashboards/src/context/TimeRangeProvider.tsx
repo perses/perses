@@ -17,7 +17,7 @@ import { TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system
 
 export interface TimeRangeProviderProps {
   timeRange: TimeRangeValue;
-  setTimeRange: (value: TimeRangeValue) => void;
+  setTimeRange?: (value: TimeRangeValue) => void;
   children?: React.ReactNode;
 }
 
@@ -27,7 +27,17 @@ export interface TimeRangeProviderProps {
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { timeRange, children, setTimeRange } = props;
 
-  const ctx = useMemo(() => ({ timeRange, setTimeRange }), [timeRange, setTimeRange]);
+  const ctx = useMemo(
+    () => ({
+      timeRange,
+      setTimeRange:
+        setTimeRange ??
+        (() => {
+          /* no-op */
+        }),
+    }),
+    [timeRange, setTimeRange]
+  );
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }
