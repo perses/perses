@@ -30,7 +30,7 @@ export interface LayoutSlice {
   /**
    * Given a LayoutItem location, returns the panel's unique key at that location.
    */
-  getPanelKey: (layoutItem: LayoutItem) => string;
+  getPanelKey: (layoutItem: PanelGroupItemId) => string;
 
   /**
    * Add a panel with the specified key to an existing group.
@@ -40,7 +40,7 @@ export interface LayoutSlice {
   /**
    * Move an existing Panel to a new panel group.
    */
-  movePanelToGroup: (layoutItem: LayoutItem, newPanelGroupId: PanelGroupId) => void;
+  movePanelToGroup: (layoutItem: PanelGroupItemId, newPanelGroupId: PanelGroupId) => void;
 
   /**
    * Updates an existing panel group to, for example, change its display properties.
@@ -60,7 +60,7 @@ export interface LayoutSlice {
   /**
    * Delete panel in panel group
    */
-  deletePanelInPanelGroup: (layoutItem: LayoutItem) => void;
+  deletePanelInPanelGroup: (layoutItem: PanelGroupItemId) => void;
 
   /**
    * Map panel to panel groups
@@ -78,9 +78,9 @@ export interface PanelGroupDefinition {
 }
 
 /**
- * The location of an item (e.g. a Panel) in a panel group.
+ * Uniquely identifies an item in a PanelGroup.
  */
-export interface LayoutItem {
+export interface PanelGroupItemId {
   panelGroupId: PanelGroupId;
   itemIndex: number;
 }
@@ -221,7 +221,7 @@ export function createLayoutSlice(
       }
 
       // remove panels from group first
-      const panelsToBeDeleted: LayoutItem[] = [];
+      const panelsToBeDeleted: PanelGroupItemId[] = [];
       for (let i = 0; i < group.items.length; i++) {
         panelsToBeDeleted.push({ panelGroupId, itemIndex: i });
       }

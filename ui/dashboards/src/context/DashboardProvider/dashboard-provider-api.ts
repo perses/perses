@@ -14,7 +14,7 @@
 import { getPanelKeyFromRef } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useDashboardStore } from './DashboardProvider';
-import { LayoutItem, PanelGroupId } from './layout-slice';
+import { PanelGroupItemId, PanelGroupId } from './layout-slice';
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
@@ -79,7 +79,7 @@ export function useMovePanelGroup(panelGroupId: PanelGroupId) {
 /**
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
-export function usePanel(panelGroupItemId: LayoutItem) {
+export function usePanel(panelGroupItemId: PanelGroupItemId) {
   const { panelGroupId, itemIndex } = panelGroupItemId;
 
   const panel = useDashboardStore((store) => {

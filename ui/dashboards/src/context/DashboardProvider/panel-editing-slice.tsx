@@ -15,7 +15,7 @@ import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
-import { LayoutSlice, LayoutItem, PanelGroupId } from './layout-slice';
+import { LayoutSlice, PanelGroupItemId, PanelGroupId } from './layout-slice';
 
 export interface PanelEditorSlice {
   panels: Record<string, PanelDefinition>;
@@ -28,7 +28,7 @@ export interface PanelEditorSlice {
   /**
    * Edit an existing panel by providing its layout coordinates.
    */
-  editPanel: (item: LayoutItem) => void;
+  editPanel: (item: PanelGroupItemId) => void;
 
   /**
    * Add a new Panel to a panel group.
@@ -38,12 +38,12 @@ export interface PanelEditorSlice {
   /**
    * Delete panels
    */
-  deletePanels: (panels: LayoutItem[]) => void;
+  deletePanels: (panels: PanelGroupItemId[]) => void;
 
   /**
    * Open delete panel dialog
    */
-  openDeletePanelDialog: (item: LayoutItem) => void;
+  openDeletePanelDialog: (item: PanelGroupItemId) => void;
 
   /**
    * Close delete panel dialog
@@ -52,7 +52,7 @@ export interface PanelEditorSlice {
 }
 
 export interface DeletePanelDialog {
-  panelGroupItemId: LayoutItem;
+  panelGroupItemId: PanelGroupItemId;
   panelName: string;
   panelGroupName: string;
 }
@@ -189,7 +189,7 @@ export function createPanelEditorSlice(
       });
     },
 
-    deletePanels(items: LayoutItem[]) {
+    deletePanels(items: PanelGroupItemId[]) {
       const { mapPanelToPanelGroups, deletePanelInPanelGroup, getPanelKey } = get();
       const map = mapPanelToPanelGroups();
       // get panel key first before deleting panel from panel group since getPanelKey relies on index
@@ -207,7 +207,7 @@ export function createPanelEditorSlice(
       });
     },
 
-    openDeletePanelDialog(item: LayoutItem) {
+    openDeletePanelDialog(item: PanelGroupItemId) {
       const { panels, getPanelKey, panelGroups } = get();
       const panelKey = getPanelKey(item);
       set((state) => {
