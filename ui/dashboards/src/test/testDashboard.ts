@@ -133,6 +133,7 @@ const testDashboard: DashboardResource = {
           },
         },
       },
+      // This panel is referenced in more than one layout below
       diskIO: {
         kind: 'Panel',
         spec: {
