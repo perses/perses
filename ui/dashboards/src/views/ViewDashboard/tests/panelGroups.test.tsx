@@ -43,6 +43,53 @@ describe('Panel Groups', () => {
     return storeApi;
   };
 
+  beforeEach(() => {
+    const mockIntersectionObserver = jest.fn();
+    mockIntersectionObserver.mockReturnValue({
+      observe: () => null,
+      unobserve: () => null,
+      disconnect: () => null,
+    });
+    window.IntersectionObserver = mockIntersectionObserver;
+  });
+
+  it('should delete panel', () => {
+    const storeApi = renderDashboard();
+    const panel = screen.getByText('CPU');
+    userEvent.hover(panel);
+    const deletePanelButton = screen.getByLabelText('delete panel');
+    userEvent.click(deletePanelButton);
+    screen.getByText('Delete Panel');
+    const deleteButton = screen.getByText('Delete');
+    userEvent.click(deleteButton);
+
+    const layouts = storeApi.getState().layouts;
+    const deletedPanel = testDashboard.spec.panels['cpu'];
+    expect(layouts[0]?.items).toEqual(expect.not.objectContaining(deletedPanel));
+
+    const panels = storeApi.getState().panels;
+    // should remove cpu from state.panels since it's not used anymore
+    expect(panels).toEqual(expect.not.objectContaining({ cpu: testDashboard.spec.panels['cpu'] }));
+  });
+
+  it('should only delete panel from panel group if panel is referenced more than once', () => {
+    const storeApi = renderDashboard();
+    const panel = screen.getByText('Disk I/O Utilization');
+    userEvent.hover(panel);
+    const deletePanelButton = screen.getByLabelText('delete panel');
+    userEvent.click(deletePanelButton);
+    screen.getByText('Delete Panel');
+    const deleteButton = screen.getByText('Delete');
+    userEvent.click(deleteButton);
+    const layouts = storeApi.getState().layouts;
+    const deletedPanel = testDashboard.spec.panels['diskIO'];
+    expect(layouts[0]?.items).toEqual(expect.not.objectContaining(deletedPanel));
+
+    const panels = storeApi.getState().panels;
+    // should NOT remove diskIO from state.panels since it's used in another panel group
+    expect(panels).toEqual(expect.objectContaining({ diskIO: testDashboard.spec.panels['diskIO'] }));
+  });
+
   it('should swap panels', () => {
     const storeApi = renderDashboard();
     // should move panel down
