@@ -114,8 +114,7 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
 }
 
 /**
- * Gets the initial time range taking into account URL params and dashboard JSON duration
- * Sets start query param if it is empty on page load
+ * Returns time range getter and setter, set paramsEnabled to false to disable query string serialization
  */
 export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEnabled = true): TimeRange {
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
@@ -132,17 +131,13 @@ export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEn
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
-      if (paramsEnabled === false) {
-        console.warn('Time range URL params disabled.');
-        return;
-      }
       if (isRelativeTimeRange(value)) {
         setQuery({ start: value.pastDuration, end: undefined });
       } else {
         setQuery(value);
       }
     },
-    [setQuery, paramsEnabled]
+    [setQuery]
   );
 
   if (paramsEnabled === false) {
