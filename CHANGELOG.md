@@ -1,5 +1,22 @@
 # Changelog
 
+# 0.10.0 / 2022-10-12
+
+- [FEATURE] Implement new datasource format #570
+- [FEATURE] Add PluginSpecEditor to support a query input and static panel options for TimeSeriesChart #596, #612
+- [FEATURE] Add sorting to panel groups #602
+- [FEATURE] Delete panel group #617
+- [FEATURE] Delete panel #625
+- [FEATURE] Add visual editing for template variables #627
+- [ENHANCEMENT] Add functionality to DashboardProvider api #590, #598
+- [ENHANCEMENT] Add clean as dependency in build script #597
+- [ENHANCEMENT] Create initial panel preview component #604
+- [ENHANCEMENT] Add an UnknownSpec type for framework code at runtime #609
+- [ENHANCEMENT] Implement latest version of panel and query datamodel #614
+- [ENHANCEMENT] Simplify cue definitions and use internal schema libs to test all cue schemas #616, #620
+- [ENHANCEMENT] New common UI components for working with the plugin system #624
+- [BUGFIX] Fix redundant no data in StatChart #606
+
 # 0.9.0 / 2022-10-04
 
 - [FEATURE] New ListVariable plugin for StaticListVariables #547
