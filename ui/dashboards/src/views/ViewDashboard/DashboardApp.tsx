@@ -18,6 +18,7 @@ import { PanelDrawer, Dashboard } from '../../components';
 import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
 import DeletePanelGroupDialog from '../../components/PanelGroupDialog/DeletePanelGroupDialog';
+import DeletePanelDialog from '../../components/Panel/DeletePanelDialog';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
@@ -44,6 +45,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <PanelDrawer />
         <PanelGroupDialog />
         <DeletePanelGroupDialog />
+        <DeletePanelDialog />
       </Box>
     </Box>
   );

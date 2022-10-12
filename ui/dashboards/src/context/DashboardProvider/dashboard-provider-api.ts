@@ -51,12 +51,27 @@ export function usePanelGroupDialog() {
 }
 
 export function usePanels() {
-  return useDashboardStore(({ panels, panelEditor, addPanel, editPanel }) => ({
-    panels,
-    panelEditor,
-    addPanel,
-    editPanel,
-  }));
+  return useDashboardStore(
+    ({
+      panels,
+      panelEditor,
+      addPanel,
+      editPanel,
+      deletePanelDialog,
+      deletePanels,
+      openDeletePanelDialog,
+      closeDeletePanelDialog,
+    }) => ({
+      panels,
+      panelEditor,
+      addPanel,
+      editPanel,
+      deletePanels,
+      deletePanelDialog,
+      openDeletePanelDialog,
+      closeDeletePanelDialog,
+    })
+  );
 }
 
 export function useDefaultTimeRange() {

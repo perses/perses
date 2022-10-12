@@ -24,7 +24,9 @@ interface PrometheusVariableOptionsBase {
   datasource?: PrometheusDatasourceSelector;
 }
 
-type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase;
+type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {
+  matchers?: [string];
+};
 
 type PrometheusLabelValuesVariableOptions = PrometheusVariableOptionsBase & {
   label_name: string;
@@ -45,7 +47,8 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
-    const { data: options } = await client.labelNames({});
+    const match = spec.matchers ? spec.matchers.map((m) => replaceTemplateVariables(m, ctx.variables)) : undefined;
+    const { data: options } = await client.labelNames({ 'match[]': match });
     return {
       data: stringArrayToVariableOptions(options),
     };
