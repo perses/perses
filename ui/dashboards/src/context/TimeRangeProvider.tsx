@@ -17,7 +17,7 @@ import { TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system
 
 export interface TimeRangeProviderProps {
   timeRange: TimeRangeValue;
-  setTimeRange?: (value: TimeRangeValue) => void;
+  setTimeRange: (value: TimeRangeValue) => void;
   children?: React.ReactNode;
 }
 

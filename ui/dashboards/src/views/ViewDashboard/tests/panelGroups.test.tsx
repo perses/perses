@@ -23,7 +23,12 @@ describe('Panel Groups', () => {
   const renderDashboard = () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
     renderWithContext(
-      <TimeRangeProvider timeRange={{ pastDuration: '30m' }}>
+      <TimeRangeProvider
+        timeRange={{ pastDuration: '30m' }}
+        setTimeRange={() => {
+          return; // TODO: fix no-op condition
+        }}
+      >
         <TemplateVariableProvider>
           <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
             <DashboardProviderSpy />

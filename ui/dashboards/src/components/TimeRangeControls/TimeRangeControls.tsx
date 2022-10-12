@@ -63,9 +63,7 @@ export function TimeRangeControls() {
         <AbsoluteTimePicker
           initialTimeRange={convertedTimeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
-            if (setTimeRange) {
-              setTimeRange(timeRange);
-            }
+            setTimeRange(timeRange);
             setShowCustomDateSelector(false);
           }}
         />
@@ -81,9 +79,7 @@ export function TimeRangeControls() {
                 pastDuration: duration as DurationString,
                 end: new Date(),
               };
-              if (setTimeRange) {
-                setTimeRange(relativeTimeInput);
-              }
+              setTimeRange(relativeTimeInput);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {
