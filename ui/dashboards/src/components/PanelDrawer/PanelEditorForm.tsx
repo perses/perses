@@ -12,13 +12,21 @@
 // limitations under the License.
 
 import { FormEventHandler, useState } from 'react';
-import { FormControl, Grid, InputLabel, MenuItem, Select, SelectProps, TextField, Typography } from '@mui/material';
+import {
+  FormControl,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectProps,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginSpecEditor } from '@perses-dev/plugin-system';
+import { PluginKindSelect, PluginSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
 import { useLayouts } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
-import { usePanelSpecState } from './panel-editor-model';
-import { PanelTypeSelect } from './PanelTypeSelect';
 import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
@@ -35,7 +43,17 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const [description, setDescription] = useState(initialValues.description);
   const [groupIndex, setGroupIndex] = useState(initialValues.groupIndex);
   const [kind, setKind] = useState(initialValues.kind);
-  const { spec, onSpecChange } = usePanelSpecState(kind, initialValues.spec);
+  const [spec, setSpec] = useState(initialValues.spec);
+
+  // Use common plugin editor logic even though we've split the inputs up in this form
+  const pluginEditor = usePluginEditor({
+    pluginType: 'Panel',
+    value: { kind, spec },
+    onChange: (plugin) => {
+      setKind(plugin.kind);
+      setSpec(plugin.spec);
+    },
+  });
 
   // Ignore string values (which would be an "empty" value from the Select) since we don't allow them to unset it
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
@@ -82,33 +100,30 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           />
         </Grid>
         <Grid item xs={4}>
-          <FormControl>
+          <FormControl disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
             <InputLabel id="panel-type-label">Type</InputLabel>
-            <PanelTypeSelect
+            <PluginKindSelect
+              pluginType="Panel"
               required
               labelId="panel-type-label"
               label="Type"
-              value={kind}
-              onChange={(e) => setKind(e.target.value)}
+              value={pluginEditor.pendingKind ? pluginEditor.pendingKind : kind}
+              onChange={pluginEditor.onKindChange}
             />
           </FormControl>
+          <FormHelperText>{pluginEditor.error?.message ?? ''}</FormHelperText>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="h4" marginBottom={1}>
             Preview
           </Typography>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            {spec !== undefined && kind && (
-              <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
-            )}
+            <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
           </ErrorBoundary>
         </Grid>
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            {/* Wait until we have some proper initial spec values before rendering the editor */}
-            {spec !== undefined && (
-              <PluginSpecEditor pluginType="Panel" pluginKind={kind} value={spec} onChange={onSpecChange} />
-            )}
+            <PluginSpecEditor pluginType="Panel" pluginKind={kind} value={spec} onChange={pluginEditor.onSpecChange} />
           </ErrorBoundary>
         </Grid>
       </Grid>

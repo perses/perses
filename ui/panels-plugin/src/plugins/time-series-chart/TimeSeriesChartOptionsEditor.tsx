@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import produce from 'immer';
-import { Stack, Typography } from '@mui/material';
-import { UnknownSpec } from '@perses-dev/core';
-import { PluginSpecEditor, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import { Stack, Box, Typography } from '@mui/material';
+import { TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { OptionsEditorProps, TimeSeriesQueryEditor } from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -23,13 +23,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   const { onChange, value } = props;
   const { queries } = value;
 
-  const handleQueryPluginSpecChange = (index: number, pluginSpec: UnknownSpec) => {
+  const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        const timeSeriesQuery = draft.queries[index];
-        if (timeSeriesQuery) {
-          timeSeriesQuery.spec.plugin.spec = pluginSpec;
-        }
+        draft.queries[index] = queryDef;
       })
     );
   };
@@ -37,18 +34,13 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   return (
     <Stack spacing={1}>
       {/* TODO: Deal with user deleting all queries */}
-      {queries.map(({ spec: { plugin } }, i) => (
-        <>
-          <Typography variant="overline">Query {i + 1}</Typography>
-          {plugin && (
-            <PluginSpecEditor
-              pluginType="TimeSeriesQuery"
-              pluginKind={plugin.kind}
-              value={plugin.spec}
-              onChange={(next: UnknownSpec) => handleQueryPluginSpecChange(i, next)}
-            />
-          )}
-        </>
+      {queries.map((query, i) => (
+        <Box key={i}>
+          <Typography variant="overline" component="h3">
+            Query {i + 1}
+          </Typography>
+          <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
+        </Box>
       ))}
     </Stack>
   );

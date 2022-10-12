@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginModuleResource } from '../../../model';
-import { PluginRegistryProps } from '../PluginRegistry';
+import { PluginModuleResource } from '../../model';
+import { PluginRegistryProps } from '../../components/PluginRegistry/PluginRegistry';
 import bertResource from './bert/plugin.json';
 import ernieResource from './ernie/plugin.json';
 

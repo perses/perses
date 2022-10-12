@@ -17,7 +17,7 @@ import { PluginImplementation, PluginMetadata, PluginType } from '../model';
 
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<
-  UseQueryOptions<PluginImplementation<T>, unknown, PluginImplementation<T>, [PluginType, string]>,
+  UseQueryOptions<PluginImplementation<T>, Error, PluginImplementation<T>, [string, PluginType, string]>,
   'queryKey' | 'queryFn'
 >;
 
@@ -25,13 +25,18 @@ type UsePluginOptions<T extends PluginType> = Omit<
  * Loads a plugin and returns the plugin implementation, along with loading/error state.
  */
 export function usePlugin<T extends PluginType>(pluginType: T, kind: string, options?: UsePluginOptions<T>) {
+  // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
+  options = {
+    ...options,
+    enabled: (options?.enabled ?? true) && kind !== '',
+  };
   const { getPlugin } = usePluginRegistry();
-  return useQuery([pluginType, kind], () => getPlugin(pluginType, kind), options);
+  return useQuery(['getPlugin', pluginType, kind], () => getPlugin(pluginType, kind), options);
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
 type UseListPluginMetadataOptions = Omit<
-  UseQueryOptions<PluginMetadata[], unknown, PluginMetadata[], [PluginType]>,
+  UseQueryOptions<PluginMetadata[], Error, PluginMetadata[], [string, PluginType]>,
   'queryKey' | 'queryFn'
 >;
 
@@ -40,5 +45,5 @@ type UseListPluginMetadataOptions = Omit<
  */
 export function useListPluginMetadata(pluginType: PluginType, options?: UseListPluginMetadataOptions) {
   const { listPluginMetadata } = usePluginRegistry();
-  return useQuery([pluginType], () => listPluginMetadata(pluginType), options);
+  return useQuery(['listPluginMetadata', pluginType], () => listPluginMetadata(pluginType), options);
 }
