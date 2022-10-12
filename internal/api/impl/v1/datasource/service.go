@@ -22,6 +22,7 @@ import (
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
@@ -127,7 +128,7 @@ func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) validate(plugin v1.Plugin) error {
+func (s *service) validate(plugin common.Plugin) error {
 	// In case there is a proxy defined, check if it is properly defined
 	_, err := http.CheckAndValidate(plugin.Spec)
 	if err != nil {

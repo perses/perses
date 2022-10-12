@@ -163,7 +163,7 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 		},
 		Spec: v1.DatasourceSpec{
 			Default: false,
-			Plugin: v1.Plugin{
+			Plugin: common.Plugin{
 				Kind: "PrometheusDatasource",
 				Spec: pluginSpecAsMapInterface,
 			},
