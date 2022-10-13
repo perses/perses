@@ -22,7 +22,6 @@ import (
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
@@ -48,7 +47,7 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
-	if err := s.validate(entity.Spec.Plugin); err != nil {
+	if err := s.validate(entity); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// Update the time contains in the entity
@@ -72,7 +71,7 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 }
 
 func (s *service) update(entity *v1.GlobalDatasource, parameters shared.Parameters) (*v1.GlobalDatasource, error) {
-	if err := s.validate(entity.Spec.Plugin); err != nil {
+	if err := s.validate(entity); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	if entity.Metadata.Name != parameters.Name {
@@ -122,11 +121,34 @@ func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) validate(plugin common.Plugin) error {
+func (s *service) validate(entity *v1.GlobalDatasource) error {
 	// In case there is a proxy defined, check if it is properly defined
-	_, err := http.CheckAndValidate(plugin.Spec)
-	if err != nil {
+	plugin := entity.Spec.Plugin
+	if _, err := http.CheckAndValidate(plugin.Spec); err != nil {
+		return err
+	}
+	if err := s.validateUnicityOfDefaultDTS(entity); err != nil {
 		return err
 	}
 	return s.sch.ValidateDatasource(plugin)
+}
+
+func (s *service) validateUnicityOfDefaultDTS(entity *v1.GlobalDatasource) error {
+	// Since the entity is not supposed to be a default datasource, no need to verify if there is another one already defined as default
+	if !entity.Spec.Default {
+		return nil
+	}
+	// return the full list of dts
+	list, err := s.dao.List(&globaldatasource.Query{})
+	if err != nil {
+		logrus.WithError(err).Errorf("unable to get the list of the global datasource")
+		return err
+	}
+	entityPluginKind := entity.Spec.Plugin.Kind
+	for _, dts := range list {
+		if dts.Spec.Default && dts.Spec.Plugin.Kind == entityPluginKind {
+			return fmt.Errorf("datasource %q cannot be a default %q because there is already one defined named %q", entity.Metadata.Name, entityPluginKind, dts.Metadata.Name)
+		}
+	}
+	return nil
 }
