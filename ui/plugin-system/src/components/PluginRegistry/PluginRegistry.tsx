@@ -14,8 +14,7 @@
 import { UnknownSpec, useEvent } from '@perses-dev/core';
 import { useRef, useCallback, useMemo } from 'react';
 import { PluginModuleResource, PluginType, PluginImplementation, Plugin } from '../../model';
-import { getTypeAndKindKey } from '../../utils/cache-keys';
-import { GetInstalledPlugins, usePluginIndexes } from './plugin-indexes';
+import { GetInstalledPlugins, usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
 import { PluginRegistryContext } from './plugin-registry-model';
 
 export interface PluginRegistryProps {
