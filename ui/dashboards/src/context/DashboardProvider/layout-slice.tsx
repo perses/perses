@@ -27,6 +27,9 @@ export interface LayoutSlice {
    */
   panelGroupIdOrder: PanelGroupId[];
 
+  // TODO: Remove this
+  createPanelGroupId: () => PanelGroupId;
+
   /**
    * Given a LayoutItem location, returns the panel's unique key at that location.
    */
@@ -116,6 +119,9 @@ export function createLayoutSlice(
   return (set, get) => ({
     panelGroups,
     panelGroupIdOrder,
+
+    // TODO: Reorder init logic so this isn't exposed
+    createPanelGroupId,
 
     getPanelKey({ panelGroupId, itemIndex }) {
       const { panelGroups } = get();
