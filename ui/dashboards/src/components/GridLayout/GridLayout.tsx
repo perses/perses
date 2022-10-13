@@ -15,23 +15,22 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { styles } from '../../css/styles';
-import { useEditMode } from '../../context';
-import { PanelGroupDefinition } from '../../context/DashboardProvider/layout-slice';
+import { useEditMode, usePanelGroup, PanelGroupId } from '../../context';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
-  groupIndex: number;
-  groupDefinition: PanelGroupDefinition;
+  panelGroupId: PanelGroupId;
 }
 
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
 export function GridLayout(props: GridLayoutProps) {
-  const { groupIndex, groupDefinition, ...others } = props;
+  const { panelGroupId, ...others } = props;
+  const groupDefinition = usePanelGroup(panelGroupId);
 
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
   const { isEditMode } = useEditMode();
@@ -42,7 +41,7 @@ export function GridLayout(props: GridLayoutProps) {
       <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
         {groupDefinition.title !== undefined && (
           <GridTitle
-            groupIndex={groupIndex}
+            panelGroupId={panelGroupId}
             title={groupDefinition.title}
             collapse={
               groupDefinition.isCollapsed === undefined
@@ -62,10 +61,10 @@ export function GridLayout(props: GridLayoutProps) {
             isDraggable={isEditMode}
             isResizable={isEditMode}
           >
-            {groupDefinition.items.map(({ x, y, width, height, content }, itemIndex) => (
+            {groupDefinition.items.map(({ x, y, width, height }, itemIndex) => (
               <div key={itemIndex} data-grid={{ x, y, w: width, h: height }}>
                 <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <GridItemContent groupIndex={groupIndex} itemIndex={itemIndex} content={content} />
+                  <GridItemContent panelGroupItemId={{ panelGroupId, itemIndex }} />
                 </ErrorBoundary>
               </div>
             ))}

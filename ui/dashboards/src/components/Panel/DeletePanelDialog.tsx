@@ -14,7 +14,7 @@
 import { FormEvent } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { usePanels, useLayouts } from '../../context';
+import { usePanels } from '../../context';
 import { DeletePanelDialog } from '../../context/DashboardProvider/panel-editing-slice';
 
 const DeletePanelDialog = () => {
@@ -44,20 +44,20 @@ interface DeletePanelFormProps {
 }
 
 const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
-  const { layouts } = useLayouts();
   const { deletePanels, closeDeletePanelDialog } = usePanels();
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault();
-    const { layoutItem } = deletePanelDialog;
-    deletePanels([layoutItem]);
+    const { panelGroupItemId } = deletePanelDialog;
+    deletePanels([panelGroupItemId]);
     closeDeletePanelDialog();
   };
   return (
     <form onSubmit={handleDelete}>
-      <DialogContent sx={{ width: '500px' }}>{`Are you sure you want to delete ${deletePanelDialog.panelName} from ${
-        layouts[deletePanelDialog.layoutItem.groupIndex]?.title
-      }? This action cannot be undone.`}</DialogContent>
+      <DialogContent sx={{ width: '500px' }}>
+        Are you sure you want to delete {deletePanelDialog.panelName} from {deletePanelDialog.panelGroupName}? This
+        action cannot be undone.
+      </DialogContent>
       <DialogActions>
         <Button variant="contained" type="submit">
           Delete

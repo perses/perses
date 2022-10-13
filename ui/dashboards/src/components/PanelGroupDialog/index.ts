@@ -11,18 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LayoutItem, usePanel } from '../../context';
-import { Panel } from '../Panel/Panel';
-
-export interface GridItemContentProps {
-  panelGroupItemId: LayoutItem;
-}
-
-/**
- * Resolves the reference to panel content in a GridItemDefinition and renders the panel.
- */
-export function GridItemContent(props: GridItemContentProps) {
-  const { panelGroupItemId } = props;
-  const panelDefinition = usePanel(panelGroupItemId);
-  return <Panel definition={panelDefinition} panelGroupItemId={panelGroupItemId} />;
-}
+export * from './PanelGroupDialog';
+export * from './DeletePanelGroupDialog';
