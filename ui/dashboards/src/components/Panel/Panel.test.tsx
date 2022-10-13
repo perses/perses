@@ -12,14 +12,23 @@
 // limitations under the License.
 
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import 'intersection-observer'; // TODO: Why do we need this side-effect? Should it be in test setup somewhere?
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN, getTestDashboard } from '../../test';
+import {
+  renderWithContext,
+  mockPluginRegistryProps,
+  FAKE_PANEL_PLUGIN,
+  getTestDashboard,
+  setupIntersectionObserverMock,
+} from '../../test';
 import { DashboardProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
 describe('Panel', () => {
+  beforeEach(() => {
+    setupIntersectionObserverMock();
+  });
+
   // Helper to create panel props for rendering tests
   const createPanelProps = (): PanelProps => {
     return {

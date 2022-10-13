@@ -11,12 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { generatePath } from 'react-router';
+import { createMemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { renderWithHistory } from '../../test';
+import { renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
 import { DashboardProvider, DashboardStoreProps, TimeRangeProvider } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
+
+const history = createMemoryHistory({
+  initialEntries: [generatePath('/dashboards/:id', { id: 'test' })],
+});
 
 describe('TimeRangeControls', () => {
   let initialState: DashboardStoreProps;
@@ -29,17 +35,14 @@ describe('TimeRangeControls', () => {
   });
 
   const renderTimeRangeControls = () => {
-    renderWithHistory(
+    renderWithContext(
       <DashboardProvider initialState={initialState}>
-        <TimeRangeProvider
-          timeRange={testDefaultTimeRange}
-          setTimeRange={() => {
-            return; // TODO: fix no-op condition
-          }}
-        >
+        <TimeRangeProvider timeRange={testDefaultTimeRange}>
           <TimeRangeControls />
         </TimeRangeProvider>
-      </DashboardProvider>
+      </DashboardProvider>,
+      undefined,
+      history
     );
   };
 
@@ -48,6 +51,7 @@ describe('TimeRangeControls', () => {
     expect(screen.getByText('Last 5 minutes')).toBeInTheDocument();
   });
 
+  // TODO: fix setTimeRange no-op, test query params
   it('should be able to select the first option', () => {
     renderTimeRangeControls();
     const dateButton = screen.getByRole('button');

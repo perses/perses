@@ -11,5 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './render';
-export * from './theme';
+import { PersesChartsTheme } from '../';
+
+export const testChartsTheme: PersesChartsTheme = {
+  themeName: 'perses',
+  echartsTheme: {},
+  noDataOption: {},
+  sparkline: {
+    width: 1,
+    color: '#000000',
+  },
+};
