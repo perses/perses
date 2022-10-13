@@ -17,8 +17,7 @@ import CloseIcon from 'mdi-material-ui/Close';
 import { useDeletePanelGroupDialog, useLayouts } from '../../context';
 
 export const DeletePanelGroupDialog = () => {
-  const { deletePanelGroup } = useLayouts();
-  const { deletePanelGroupDialog, closeDeletePanelGroupDialog } = useDeletePanelGroupDialog();
+  const { deletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup } = useDeletePanelGroupDialog();
 
   const panelGroupId = deletePanelGroupDialog?.panelGroupId;
 

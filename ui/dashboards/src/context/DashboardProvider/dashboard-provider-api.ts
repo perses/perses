@@ -133,24 +133,15 @@ export function usePanelGroupEditor() {
   return useDashboardStore((store) => store.panelGroupEditor);
 }
 
-export function useLayouts() {
+export function useDeletePanelGroupDialog() {
   return useDashboardStore(
-    ({ addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups, deletePanelGroup }) => ({
-      addPanelToGroup,
-      movePanelToGroup,
-      updatePanelGroup,
-      swapPanelGroups,
+    ({ deletePanelGroupDialog, openDeletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup }) => ({
+      deletePanelGroupDialog,
+      openDeletePanelGroupDialog,
+      closeDeletePanelGroupDialog,
       deletePanelGroup,
     })
   );
-}
-
-export function useDeletePanelGroupDialog() {
-  return useDashboardStore(({ deletePanelGroupDialog, openDeletePanelGroupDialog, closeDeletePanelGroupDialog }) => ({
-    deletePanelGroupDialog,
-    openDeletePanelGroupDialog,
-    closeDeletePanelGroupDialog,
-  }));
 }
 
 export function usePanels() {
