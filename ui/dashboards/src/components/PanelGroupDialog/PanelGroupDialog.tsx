@@ -11,106 +11,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEvent, useState } from 'react';
-import {
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  FormControl,
-  InputLabel,
-  TextField,
-  Stack,
-  Box,
-  DialogActions,
-  Button,
-  Select,
-  SelectChangeEvent,
-  MenuItem,
-} from '@mui/material';
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { usePanelGroupDialog, useLayouts, PanelGroupDefinition } from '../../context';
+import { useState } from 'react';
+import { usePanelGroupEditor } from '../../context';
+import { PanelGroupEditorForm, panelGroupEditorFormId, PanelGroupEditorFormProps } from './PanelGroupEditorForm';
 
+/**
+ * A dialog for adding or editing a Panel Group. Open and initial state is controlled by the DashboardStore.
+ */
 export function PanelGroupDialog() {
-  const { updatePanelGroup } = useLayouts();
-  const { panelGroups, panelGroupDialog, closePanelGroupDialog } = usePanelGroupDialog();
+  const panelGroupEditor = usePanelGroupEditor();
 
-  const panelGroupId = panelGroupDialog?.panelGroupId;
+  // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
+  const [isClosing, setIsClosing] = useState(false);
+  const handleClose = () => setIsClosing(true);
 
-  const isEditingPanelGroup = panelGroupId !== undefined;
-
-  const [isCollapsed, setIsCollapsed] = useState(isEditingPanelGroup && panelGroups[panelGroupId]?.isCollapsed);
-  const [name, setName] = useState(isEditingPanelGroup ? panelGroups[panelGroupId]?.title : '');
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    const newGroup: Omit<PanelGroupDefinition, 'id'> = {
-      isCollapsed: isCollapsed ?? false,
-      title: name ?? '',
-      items: panelGroupId === undefined ? [] : panelGroups[panelGroupId]?.items ?? [],
-    };
-    updatePanelGroup(newGroup, panelGroupId);
-    closePanelGroupDialog();
+  // Don't call close on the store until the Dialog has completely transitioned out
+  const handleExited = () => {
+    panelGroupEditor?.close();
+    setIsClosing(false);
   };
 
-  const handleSelectCollapsedStateChange = (e: SelectChangeEvent<string>) => {
-    const isCollapsed = e.target.value === 'Close';
-    setIsCollapsed(isCollapsed);
+  // Dialog is open if we have a model and we're not transitioning out
+  const isOpen = panelGroupEditor !== undefined && isClosing === false;
+
+  const handleSubmit: PanelGroupEditorFormProps['onSubmit'] = (values) => {
+    // This shouldn't happen since we don't render the submit button until we have a model, but check to make TS happy
+    if (panelGroupEditor === undefined) {
+      throw new Error('Cannot apply changes');
+    }
+    panelGroupEditor.applyChanges(values);
+    handleClose();
   };
 
   return (
-    <Dialog open={panelGroupDialog !== undefined}>
-      <DialogTitle>Panel Group</DialogTitle>
-      <IconButton
-        aria-label="Close"
-        onClick={() => closePanelGroupDialog()}
-        sx={(theme) => ({
-          position: 'absolute',
-          top: theme.spacing(0.5),
-          right: theme.spacing(0.5),
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
-      <form onSubmit={handleSubmit}>
-        <DialogContent sx={{ width: '500px' }}>
-          <Stack spacing={2}>
-            <FormControl>
-              <TextField
-                required
-                label="Name"
-                variant="outlined"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </FormControl>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-              <InputLabel>Collapse State</InputLabel>
-              <Select
-                required
-                displayEmpty
-                labelId="select-collapse-state"
-                size="small"
-                value={isCollapsed ? 'Close' : 'Open'}
-                onChange={handleSelectCollapsedStateChange}
-              >
-                <MenuItem key={'open'} value={'Open'}>
-                  Open
-                </MenuItem>
-                <MenuItem key={'close'} value={'Close'}>
-                  Close
-                </MenuItem>
-              </Select>
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" type="submit">
-            {isEditingPanelGroup ? 'Apply' : 'Add'}
-          </Button>
-          <Button onClick={() => closePanelGroupDialog()}>Cancel</Button>
-        </DialogActions>
-      </form>
+    <Dialog open={isOpen} TransitionProps={{ onExited: handleExited }}>
+      {panelGroupEditor !== undefined && (
+        <>
+          <DialogTitle>{panelGroupEditor.mode} Panel Group</DialogTitle>
+          <IconButton
+            aria-label="Close"
+            onClick={panelGroupEditor.close}
+            sx={(theme) => ({
+              position: 'absolute',
+              top: theme.spacing(0.5),
+              right: theme.spacing(0.5),
+            })}
+          >
+            <CloseIcon />
+          </IconButton>
+          <DialogContent sx={{ width: '500px' }}>
+            <PanelGroupEditorForm initialValues={panelGroupEditor.initialValues} onSubmit={handleSubmit} />
+          </DialogContent>
+          <DialogActions>
+            <Button variant="contained" type="submit" form={panelGroupEditorFormId}>
+              {panelGroupEditor.mode === 'Edit' ? 'Apply' : 'Add'}
+            </Button>
+            <Button onClick={panelGroupEditor.close}>Cancel</Button>
+          </DialogActions>
+        </>
+      )}
     </Dialog>
   );
 }
