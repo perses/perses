@@ -27,6 +27,7 @@ export interface TimeRangeProviderProps {
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { timeRange, children, setTimeRange } = props;
 
+  // TODO: fix no-op, pass paramsEnabled as false in useSetTimeRangeParams as workaround
   const ctx = useMemo(
     () => ({
       timeRange,

@@ -17,7 +17,7 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
-import { DashboardSpec, TimeRangeValue, RelativeTimeRange } from '@perses-dev/core';
+import { DashboardSpec, RelativeTimeRange } from '@perses-dev/core';
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createLayoutSlice, LayoutSlice } from './layout-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing-slice';
@@ -31,7 +31,6 @@ export interface DashboardStoreState extends PanelGroupSlice, LayoutSlice, Panel
 export interface DashboardStoreProps {
   dashboardSpec: DashboardSpec;
   isEditMode?: boolean;
-  selectedTimeRange?: TimeRangeValue;
 }
 
 export interface DashboardProviderProps {
