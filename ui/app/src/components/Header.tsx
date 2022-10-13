@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -94,6 +95,7 @@ const style: SxProps<Theme> = {
 };
 
 export default function Header(): JSX.Element {
+  const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
   const handleDarkModeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,9 +110,21 @@ export default function Header(): JSX.Element {
     <AppBar position="relative">
       <Toolbar>
         <Box sx={style} flexGrow={1}>
-          <Typography variant="h1" sx={{ marginRight: '1rem' }}>
-            Perses
-          </Typography>
+          <Button
+            onClick={() => {
+              navigate('/');
+            }}
+          >
+            <Typography
+              variant="h1"
+              sx={(theme) => ({
+                marginRight: '1rem',
+                color: theme.palette.common.white,
+              })}
+            >
+              Perses
+            </Typography>
+          </Button>
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>

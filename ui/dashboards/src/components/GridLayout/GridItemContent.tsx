@@ -11,28 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getPanelKeyFromRef, GridItemDefinition } from '@perses-dev/core';
-import { usePanels } from '../../context';
+import { LayoutItem, usePanel } from '../../context';
 import { Panel } from '../Panel/Panel';
 
 export interface GridItemContentProps {
-  groupIndex: number;
-  itemIndex: number;
-  content: GridItemDefinition['content'];
+  panelGroupItemId: LayoutItem;
 }
 
 /**
  * Resolves the reference to panel content in a GridItemDefinition and renders the panel.
  */
 export function GridItemContent(props: GridItemContentProps) {
-  const { content, groupIndex, itemIndex } = props;
-
-  // Find the panel referenced in content in the store
-  const { panels } = usePanels();
-  const panelKey = getPanelKeyFromRef(content);
-  const panelDefinition = panels[panelKey];
-  if (panelDefinition === undefined) {
-    throw new Error(`Panel with key '${panelKey}' was not found`);
-  }
-  return <Panel definition={panelDefinition} groupIndex={groupIndex} itemIndex={itemIndex} />;
+  const { panelGroupItemId } = props;
+  const panelDefinition = usePanel(panelGroupItemId);
+  return <Panel definition={panelDefinition} panelGroupItemId={panelGroupItemId} />;
 }

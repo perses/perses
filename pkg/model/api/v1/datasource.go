@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func GenerateGlobalDatasourceID(name string) string {
@@ -27,12 +28,17 @@ func GenerateDatasourceID(project string, name string) string {
 	return generateProjectResourceID("datasources", project, name)
 }
 
+type DatasourceInterface interface {
+	GetMetadata() modelAPI.Metadata
+	GetSpec() DatasourceSpec
+}
+
 type DatasourceSpec struct {
-	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
-	Default bool     `json:"default" yaml:"default"`
+	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
+	Default bool            `json:"default" yaml:"default"`
 	// Plugin will contain the datasource configuration.
 	// The data typed is available in Cue.
-	Plugin Plugin `json:"plugin" yaml:"plugin"`
+	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 // GlobalDatasource is the struct representing the datasource shared to everybody.
@@ -55,6 +61,10 @@ func (d *GlobalDatasource) GetKind() string {
 	return string(d.Kind)
 }
 
+func (d *GlobalDatasource) GetSpec() DatasourceSpec {
+	return d.Spec
+}
+
 // Datasource will be the datasource you can define in your project/namespace
 // This is a resource that won't be shared across projects.
 // A Dashboard can use it only if it is in the same project.
@@ -74,4 +84,8 @@ func (d *Datasource) GetMetadata() modelAPI.Metadata {
 
 func (d *Datasource) GetKind() string {
 	return string(d.Kind)
+}
+
+func (d *Datasource) GetSpec() DatasourceSpec {
+	return d.Spec
 }

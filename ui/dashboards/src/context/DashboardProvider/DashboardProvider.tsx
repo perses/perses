@@ -17,15 +17,15 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
-import { DashboardSpec, DurationString } from '@perses-dev/core';
+import { DashboardSpec, RelativeTimeRange } from '@perses-dev/core';
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createLayoutSlice, LayoutSlice } from './layout-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing-slice';
 
 export interface DashboardStoreState extends PanelGroupSlice, LayoutSlice, PanelEditorSlice {
-  defaultTimeRange: DurationString;
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
+  defaultTimeRange: RelativeTimeRange;
 }
 
 export interface DashboardStoreProps {
@@ -64,7 +64,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
           ...createPanelGroupSlice(...args),
           ...createLayoutSlice(layouts)(...args),
           ...createPanelEditorSlice(panels)(...args),
-          defaultTimeRange: dashboardSpec.duration,
+          defaultTimeRange: { pastDuration: dashboardSpec.duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
         };

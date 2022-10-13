@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariablePlugin, VariableOption } from '../../../../model';
+import { VariablePlugin, VariableOption } from '../../../model';
 
 const data: VariableOption[] = [
   { label: 'Grover', value: 'Grover' },
@@ -19,8 +19,20 @@ const data: VariableOption[] = [
 ];
 
 // Dummy plugin to test loading
-export const ErnieVariable: VariablePlugin = {
+export const ErnieVariable: VariablePlugin<{ variableOption: string }> = {
   getVariableOptions: async () => ({ data }),
-  OptionsEditorComponent: () => null,
-  createInitialOptions: () => ({}),
+  OptionsEditorComponent: function ErnieVariableEditor({ value, onChange }) {
+    return (
+      <div>
+        <label htmlFor="editor-input">ErnieVariable editor</label>
+        <input
+          type="text"
+          id="editor-input"
+          value={value.variableOption}
+          onChange={(e) => onChange({ ...value, variableOption: e.target.value })}
+        />
+      </div>
+    );
+  },
+  createInitialOptions: () => ({ variableOption: '' }),
 };

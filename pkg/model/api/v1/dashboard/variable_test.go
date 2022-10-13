@@ -16,9 +16,9 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -30,44 +30,21 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 		result *Variable
 	}{
 		{
-			title: "simple ConstantVariable",
+			title: "simple TextVariable",
 			jason: `
 {
-  "kind": "Constant",
-  "displayed_name": "my awesome variable",
-  "parameter": {
-    "values": [
-      "myVariable"
-    ]
+  "kind": "TextVariable",
+  "spec": {
+    "name": "SimpleText",
+    "value": "value"
   }
 }
 `,
 			result: &Variable{
-				Kind:          KindConstantVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &ConstantVariableParameter{
-					Values: []string{"myVariable"},
-				},
-			},
-		},
-		{
-			title: "simple ConstantVariable hide",
-			jason: `
-{
-  "kind": "Constant",
-  "hide": true,
-  "parameter": {
-    "values": [
-      "myVariable"
-    ]
-  }
-}
-`,
-			result: &Variable{
-				Kind: KindConstantVariable,
-				Hide: true,
-				Parameter: &ConstantVariableParameter{
-					Values: []string{"myVariable"},
+				Kind: TextVariable,
+				Spec: &TextVariableSpec{
+					Name:  "SimpleText",
+					Value: "value",
 				},
 			},
 		},
@@ -75,18 +52,30 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			title: "query variable by label_names",
 			jason: `
 {
-  "kind": "LabelNamesQuery",
-  "displayed_name": "my awesome variable",
-  "parameter": {
-    "capturing_regexp": ".*"
+  "kind": "ListVariable",
+  "spec": {
+    "name": "MyList",
+    "display": {
+      "name": "my awesome variable"
+    },
+    "plugin": {
+      "kind": "PrometheusLabelNamesVariable",
+      "spec": {}
+    }
   }
 }
 `,
 			result: &Variable{
-				Kind:          KindLabelNamesQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &LabelNamesQueryVariableParameter{
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					Name: "MyList",
+					Display: &common.Display{
+						Name: "my awesome variable",
+					},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelNamesVariable",
+						Spec: map[string]interface{}{},
+					},
 				},
 			},
 		},
@@ -94,22 +83,36 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			title: "query variable by label_names with matcher",
 			jason: `
 {
-  "kind": "LabelNamesQuery",
-  "displayed_name": "my awesome variable",
-  "parameter": { 
-    "matchers": [
-      "up"
-    ],
-    "capturing_regexp": ".*"
+  "kind": "ListVariable",
+  "spec": {
+    "name": "MyList",
+    "display": {
+      "name": "my awesome variable"
+    },
+    "plugin": {
+      "kind": "PrometheusLabelNamesVariable",
+      "spec": {
+        "matchers": [
+          "up"
+        ]
+      }
+    }
   }
 }
 `,
 			result: &Variable{
-				Kind:          KindLabelNamesQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &LabelNamesQueryVariableParameter{
-					Matchers:        []string{"up"},
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					Name: "MyList",
+					Display: &common.Display{
+						Name: "my awesome variable",
+					},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelNamesVariable",
+						Spec: map[string]interface{}{
+							"matchers": []interface{}{"up"},
+						},
+					},
 				},
 			},
 		},
@@ -117,47 +120,38 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			title: "query variable with label_values and matcher",
 			jason: `
 {
-  "kind": "LabelValuesQuery",
-  "displayed_name": "my awesome variable",
-  "parameter": {
-    "label_name": "instance",
-    "matchers": [
-      "up"
-    ],
-    "capturing_regexp": ".*"
+  "kind": "ListVariable",
+  "spec": {
+    "name": "MyList",
+    "display": {
+      "name": "my awesome variable"
+    },
+    "plugin": {
+      "kind": "PrometheusLabelValuesVariable",
+      "spec": {
+        "label_name": "instance",
+        "matchers": [
+          "up"
+        ]
+      }
+    }
   }
 }
 `,
 			result: &Variable{
-				Kind:          KindLabelValuesQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &LabelValuesQueryVariableParameter{
-					LabelName:       "instance",
-					Matchers:        []string{"up"},
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
-				},
-			},
-		},
-		{
-			title: "query variable with expr",
-			jason: `
-{
-  "kind": "PromQLQuery",
-  "displayed_name": "my awesome variable",
-  "parameter": {
-    "expr": "up{instance='localhost:8080'}",
-    "label_name": "instance",
-    "capturing_regexp": ".*"
-  }
-}
-`,
-			result: &Variable{
-				Kind:          KindPromQLQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &PromQLQueryVariableParameter{
-					Expr:            "up{instance='localhost:8080'}",
-					LabelName:       "instance",
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					Name: "MyList",
+					Display: &common.Display{
+						Name: "my awesome variable",
+					},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelValuesVariable",
+						Spec: map[string]interface{}{
+							"label_name": "instance",
+							"matchers":   []interface{}{"up"},
+						},
+					},
 				},
 			},
 		},
@@ -178,112 +172,104 @@ func TestUnmarshalYAMLVariable(t *testing.T) {
 		result *Variable
 	}{
 		{
-			title: "simple ConstantVariable",
+			title: "simple TextVariable",
 			yamele: `
-kind: "Constant"
-displayed_name: "my awesome variable"
-parameter:
-  values:
-  - "myVariable"
+kind: "TextVariable"
+spec:
+  name: "SimpleText"
+  value: "value"
 `,
 			result: &Variable{
-				Kind:          KindConstantVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &ConstantVariableParameter{
-					Values: []string{"myVariable"},
-				},
-			},
-		},
-		{
-			title: "simple ConstantVariable hide",
-			yamele: `
-kind: "Constant"
-hide: true
-parameter:
-  values:
-  - "myVariable"
-`,
-			result: &Variable{
-				Kind: KindConstantVariable,
-				Hide: true,
-				Parameter: &ConstantVariableParameter{
-					Values: []string{"myVariable"},
+				Kind: TextVariable,
+				Spec: &TextVariableSpec{
+					Name:  "SimpleText",
+					Value: "value",
 				},
 			},
 		},
 		{
 			title: "query variable by label_names",
 			yamele: `
-kind: "LabelNamesQuery"
-displayed_name: "my awesome variable"
-parameter:
-  capturing_regexp: ".*"
+kind: "ListVariable"
+spec:
+  name: "MyList"
+  display:
+    name: "my awesome variable"
+  plugin:
+    kind: "PrometheusLabelNamesVariable"
 `,
 			result: &Variable{
-				Kind:          KindLabelNamesQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &LabelNamesQueryVariableParameter{
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					Name: "MyList",
+					Display: &common.Display{
+						Name: "my awesome variable",
+					},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelNamesVariable",
+					},
 				},
 			},
 		},
 		{
 			title: "query variable by label_names with matcher",
 			yamele: `
-kind: "LabelNamesQuery"
-displayed_name: "my awesome variable"
-parameter:
-  matchers:
-  - "up"
-  capturing_regexp: ".*"
+kind: "ListVariable"
+spec:
+  name: "MyList"
+  display:
+    name: "my awesome variable"
+  plugin:
+    kind: "PrometheusLabelNamesVariable"
+    spec:
+      matchers:
+        - "up"
 `,
 			result: &Variable{
-				Kind:          KindLabelNamesQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &LabelNamesQueryVariableParameter{
-					Matchers:        []string{"up"},
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					Name: "MyList",
+					Display: &common.Display{
+						Name: "my awesome variable",
+					},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelNamesVariable",
+						Spec: map[interface{}]interface{}{
+							"matchers": []interface{}{"up"},
+						},
+					},
 				},
 			},
 		},
 		{
 			title: "query variable with label_values and matcher",
 			yamele: `
-kind: "LabelValuesQuery"
-displayed_name: "my awesome variable"
-parameter:
-  label_name: "instance"
-  matchers:
-  - "up"
-  capturing_regexp: ".*"
+kind: "ListVariable"
+spec:
+  name: "MyList"
+  display:
+    name: "my awesome variable"
+  plugin:
+    kind: "PrometheusLabelValuesVariable"
+    spec:
+      label_name: "instance"
+      matchers:
+        - "up"
 `,
 			result: &Variable{
-				Kind:          KindLabelValuesQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &LabelValuesQueryVariableParameter{
-					LabelName:       "instance",
-					Matchers:        []string{"up"},
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
-				},
-			},
-		},
-		{
-			title: "query variable with expr",
-			yamele: `
-kind: "PromQLQuery"
-displayed_name: "my awesome variable"
-parameter:
-  expr: "up{instance='localhost:8080'}"
-  label_name: "instance"
-  capturing_regexp: ".*"
-`,
-			result: &Variable{
-				Kind:          KindPromQLQueryVariable,
-				DisplayedName: "my awesome variable",
-				Parameter: &PromQLQueryVariableParameter{
-					Expr:            "up{instance='localhost:8080'}",
-					LabelName:       "instance",
-					CapturingRegexp: (*CapturingRegexp)(regexp.MustCompile(`.*`)),
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					Name: "MyList",
+					Display: &common.Display{
+						Name: "my awesome variable",
+					},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelValuesVariable",
+						Spec: map[interface{}]interface{}{
+							"label_name": "instance",
+							"matchers":   []interface{}{"up"},
+						},
+					},
 				},
 			},
 		},
@@ -308,107 +294,44 @@ func TestUnmarshalVariableError(t *testing.T) {
 			jsone: `
 {
   "kind": "Awkward",
-  "parameter": "insane"
+  "spec": "insane"
 }
 `,
-			err: fmt.Errorf("unknown variable.kind \"Awkward\" used"),
+			err: fmt.Errorf(`unknown variable.kind "Awkward" used`),
 		},
 		{
-			title: "no displayed name provided",
+			title: "TextVariable with no name",
 			jsone: `
 {
-  "kind": "Constant",
-  "parameter": {}
-}
-`,
-			err: fmt.Errorf("variable.displayed_name cannot be empty if the variable is not hidden"),
-		},
-		{
-			title: "constant variable with no values",
-			jsone: `
-{
-  "kind": "Constant",
-  "hide": true,
-  "parameter": {}
-}
-`,
-			err: fmt.Errorf("parameter.values cannot be empty for a constant variable"),
-		},
-		{
-			title: "label names query variable with no regexp",
-			jsone: `
-{
-  "kind": "LabelNamesQuery",
-  "hide": true,
-  "parameter": {}
-}
-`,
-			err: fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a LabelNamesQuery"),
-		},
-		{
-			title: "LabelValuesQuery variable with empty label_name",
-			jsone: `
-{
-  "kind": "LabelValuesQuery",
-  "hide": true,
-  "parameter": {
-    "capturing_regexp": ".*"
+  "kind": "TextVariable",
+  "spec": {
   }
 }
 `,
-			err: fmt.Errorf("'parameter.label_name' cannot be empty for a LabelValuesQuery"),
+			err: fmt.Errorf(`name cannot be empty`),
 		},
 		{
-			title: "LabelValuesQuery variable with empty regexp",
+			title: "TextVariable with no values",
 			jsone: `
 {
-  "kind": "LabelValuesQuery",
-  "hide": true,
-  "parameter": {
-    "label_name": "test"
+  "kind": "TextVariable",
+  "spec": {
+    "name": "hogwarts"
   }
 }
 `,
-			err: fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a LabelValuesQuery"),
+			err: fmt.Errorf(`value for the variable "hogwarts" cannot be empty`),
 		},
 		{
-			title: "PromQLQuery variable with empty expr",
+			title: "ListVariable with no name",
 			jsone: `
 {
-  "kind": "PromQLQuery",
-  "hide": true,
-  "parameter": {
+  "kind": "ListVariable",
+  "spec": {
   }
 }
 `,
-			err: fmt.Errorf("parameter.expr cannot be empty for a PromQLQuery"),
-		},
-		{
-			title: "PromQLQuery variable with empty label_name filter",
-			jsone: `
-{
-  "kind": "PromQLQuery",
-  "hide": true,
-  "parameter": {
-    "expr": "1"
-  }
-}
-`,
-			err: fmt.Errorf("parameter.label_name cannot be empty for a PromQLQuery"),
-		},
-		{
-			title: "PromQLQuery variable with empty label_value regexp",
-			jsone: `
-{
-  "kind": "PromQLQuery",
-  "hide": true,
-  "parameter": {
-    "expr": "1",
-    "label_name" :"test"
-  }
-}
-`,
-			err: fmt.Errorf("parameter.capturing_regexp cannot be empty for a PromQLQuery"),
+			err: fmt.Errorf(`name cannot be empty`),
 		},
 	}
 	for _, test := range testSuite {

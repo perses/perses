@@ -20,9 +20,9 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/shared/validate"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,7 +47,7 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
-	if err := s.validate(entity.Spec.Plugin); err != nil {
+	if err := s.validate(entity); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// Update the time contains in the entity
@@ -71,7 +71,7 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 }
 
 func (s *service) update(entity *v1.GlobalDatasource, parameters shared.Parameters) (*v1.GlobalDatasource, error) {
-	if err := s.validate(entity.Spec.Plugin); err != nil {
+	if err := s.validate(entity); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	if entity.Metadata.Name != parameters.Name {
@@ -121,11 +121,15 @@ func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) validate(plugin v1.Plugin) error {
-	// In case there is a proxy defined, check if it is properly defined
-	_, err := http.CheckAndValidate(plugin.Spec)
-	if err != nil {
-		return err
+func (s *service) validate(entity *v1.GlobalDatasource) error {
+	var list []*v1.GlobalDatasource
+	if entity.Spec.Default {
+		var err error
+		list, err = s.dao.List(&globaldatasource.Query{})
+		if err != nil {
+			logrus.WithError(err).Errorf("unable to get the list of the global datasource")
+			return err
+		}
 	}
-	return s.sch.ValidateDatasource(plugin)
+	return validate.Datasource(entity, list, s.sch)
 }

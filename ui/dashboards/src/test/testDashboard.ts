@@ -23,7 +23,7 @@ const testDashboard: DashboardResource = {
     version: 0,
   },
   spec: {
-    duration: '24h',
+    duration: '5m',
     variables: [
       {
         kind: 'TextVariable',
@@ -133,6 +133,7 @@ const testDashboard: DashboardResource = {
           },
         },
       },
+      // This panel is referenced in more than one layout below
       diskIO: {
         kind: 'Panel',
         spec: {
@@ -193,6 +194,9 @@ const testDashboard: DashboardResource = {
         spec: {
           display: {
             title: 'CPU Stats',
+            collapse: {
+              open: true,
+            },
           },
           items: [
             // First Row
@@ -219,6 +223,13 @@ const testDashboard: DashboardResource = {
         spec: {
           items: [
             {
+              x: 0,
+              y: 0,
+              width: 6,
+              height: 2,
+              content: { $ref: '#/spec/panels/diskIO' },
+            },
+            {
               x: 8,
               y: 0,
               width: 8,
@@ -239,13 +250,6 @@ const testDashboard: DashboardResource = {
             },
           },
           items: [
-            {
-              x: 0,
-              y: 0,
-              width: 6,
-              height: 2,
-              content: { $ref: '#/spec/panels/diskIO' },
-            },
             {
               x: 18,
               y: 0,

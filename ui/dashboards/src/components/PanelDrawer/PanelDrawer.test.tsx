@@ -80,7 +80,7 @@ describe('Panel Drawer', () => {
     const storeApi = renderPanelDrawer();
 
     // Open the drawer for an existing panel
-    act(() => storeApi.getState().editPanel({ groupIndex: 0, itemIndex: 0 }));
+    act(() => storeApi.getState().editPanel({ panelGroupId: 0, itemIndex: 0 }));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);

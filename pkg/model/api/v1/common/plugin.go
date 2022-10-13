@@ -11,9 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1
+package common
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type Plugin struct {
 	Kind string      `json:"kind" yaml:"kind"`
@@ -24,7 +27,35 @@ func (p Plugin) JSONMarshal() ([]byte, error) {
 	return json.Marshal(p)
 }
 
-type Display struct {
-	Name        string `json:"name" yaml:"name"`
-	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+func (p *Plugin) UnmarshalJSON(data []byte) error {
+	var tmp Plugin
+	type plain Plugin
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Plugin
+	type plain Plugin
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *Plugin) validate() error {
+	if len(p.Kind) == 0 {
+		return fmt.Errorf("kind cannot be empty")
+	}
+	return nil
 }

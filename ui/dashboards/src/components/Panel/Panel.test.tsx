@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import 'intersection-observer'; // TODO: Why do we need this side-effect? Should it be in test setup somewhere?
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN, getTestDashboard } from '../../test';
 import { DashboardProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
@@ -35,8 +35,7 @@ describe('Panel', () => {
           },
         },
       },
-      groupIndex: 0,
-      itemIndex: 0,
+      panelGroupItemId: { panelGroupId: 0, itemIndex: 0 },
     };
   };
 
@@ -62,8 +61,10 @@ describe('Panel', () => {
 
   it('should render edit icons when in edit mode', () => {
     renderPanel(true);
-    screen.queryByLabelText('drag handle');
-    screen.queryByLabelText('edit panel');
-    screen.queryByLabelText('more');
+    const panelTitle = screen.getByText('Fake Panel');
+    userEvent.hover(panelTitle);
+    screen.getByLabelText('drag handle');
+    screen.getByLabelText('edit panel');
+    screen.getByLabelText('delete panel');
   });
 });

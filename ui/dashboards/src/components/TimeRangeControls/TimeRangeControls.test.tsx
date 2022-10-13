@@ -11,16 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { generatePath } from 'react-router';
+import { createMemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
-import { getDefaultTimeRange } from '@perses-dev/core';
 import { screen } from '@testing-library/react';
 import { renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import { DashboardProvider, DashboardStoreProps, TimeRangeProvider, QueryStringProvider } from '../../context';
+import { DashboardProvider, DashboardStoreProps, TimeRangeProvider } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
+
+const history = createMemoryHistory({
+  initialEntries: [generatePath('/dashboards/:id', { id: 'test' })],
+});
 
 describe('TimeRangeControls', () => {
   let initialState: DashboardStoreProps;
+  const testDefaultTimeRange = { pastDuration: testDashboard.spec.duration };
 
   beforeEach(() => {
     initialState = {
@@ -29,24 +35,23 @@ describe('TimeRangeControls', () => {
   });
 
   const renderTimeRangeControls = () => {
-    const queryString = new URLSearchParams();
-    const defaultTimeRange = getDefaultTimeRange(initialState.dashboardSpec.duration, queryString);
     renderWithContext(
-      <QueryStringProvider queryString={queryString}>
-        <DashboardProvider initialState={initialState}>
-          <TimeRangeProvider initialTimeRange={defaultTimeRange}>
-            <TimeRangeControls />
-          </TimeRangeProvider>
-        </DashboardProvider>
-      </QueryStringProvider>
+      <DashboardProvider initialState={initialState}>
+        <TimeRangeProvider timeRange={testDefaultTimeRange}>
+          <TimeRangeControls />
+        </TimeRangeProvider>
+      </DashboardProvider>,
+      undefined,
+      history
     );
   };
 
   it('should render correct initial relative time shortcut', async () => {
     renderTimeRangeControls();
-    expect(screen.getByText('Last 1 day')).toBeInTheDocument();
+    expect(screen.getByText('Last 5 minutes')).toBeInTheDocument();
   });
 
+  // TODO: fix setTimeRange no-op, test query params
   it('should be able to select the first option', () => {
     renderTimeRangeControls();
     const dateButton = screen.getByRole('button');

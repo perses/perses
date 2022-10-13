@@ -29,21 +29,21 @@ import {
 } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import { usePanels, useEditMode } from '../../context';
+import { usePanels, useEditMode, LayoutItem } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
-  groupIndex: number;
-  itemIndex: number;
+  panelGroupItemId: LayoutItem;
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, groupIndex, itemIndex, ...others } = props;
+  const { definition, panelGroupItemId, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -66,10 +66,10 @@ export function Panel(props: PanelProps) {
 
   const { isEditMode } = useEditMode();
 
-  const { editPanel } = usePanels();
+  const { editPanel, openDeletePanelDialog } = usePanels();
 
   const handleEditButtonClick = () => {
-    editPanel({ groupIndex, itemIndex });
+    editPanel(panelGroupItemId);
   };
 
   return (
@@ -131,6 +131,13 @@ export function Panel(props: PanelProps) {
                 <Stack direction="row" alignItems="center" spacing={0.5}>
                   <IconButton aria-label="edit panel" size="small" onClick={handleEditButtonClick}>
                     <PencilIcon />
+                  </IconButton>
+                  <IconButton
+                    aria-label="delete panel"
+                    size="small"
+                    onClick={() => openDeletePanelDialog(panelGroupItemId)}
+                  >
+                    <DeleteIcon />
                   </IconButton>
                   <IconButton aria-label="drag handle" size="small">
                     <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />

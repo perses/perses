@@ -15,10 +15,11 @@ import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
-import { LayoutSlice, LayoutItem } from './layout-slice';
+import { LayoutSlice, PanelGroupItemId, PanelGroupId } from './layout-slice';
 
 export interface PanelEditorSlice {
   panels: Record<string, PanelDefinition>;
+  deletePanelDialog?: DeletePanelDialog;
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
@@ -27,12 +28,33 @@ export interface PanelEditorSlice {
   /**
    * Edit an existing panel by providing its layout coordinates.
    */
-  editPanel: (item: LayoutItem) => void;
+  editPanel: (item: PanelGroupItemId) => void;
 
   /**
    * Add a new Panel to a panel group.
    */
-  addPanel: (initialGroup: number) => void;
+  addPanel: (panelGroupId?: PanelGroupId) => void;
+
+  /**
+   * Delete panels
+   */
+  deletePanels: (panels: PanelGroupItemId[]) => void;
+
+  /**
+   * Open delete panel dialog
+   */
+  openDeletePanelDialog: (item: PanelGroupItemId) => void;
+
+  /**
+   * Close delete panel dialog
+   */
+  closeDeletePanelDialog: () => void;
+}
+
+export interface DeletePanelDialog {
+  panelGroupItemId: PanelGroupItemId;
+  panelName: string;
+  panelGroupName: string;
 }
 
 export interface PanelEditorState {
@@ -63,7 +85,7 @@ export interface PanelEditorState {
 export interface PanelEditorValues {
   name: string;
   description: string;
-  groupIndex: number;
+  groupId: PanelGroupId;
   kind: string;
   spec: UnknownSpec;
 }
@@ -97,7 +119,7 @@ export function createPanelEditorSlice(
         initialValues: {
           name: panelToEdit.spec.display.name,
           description: panelToEdit.spec.display.description ?? '',
-          groupIndex: item.groupIndex,
+          groupId: item.panelGroupId,
           kind: panelToEdit.spec.plugin.kind,
           spec: panelToEdit.spec.plugin.spec,
         },
@@ -108,8 +130,8 @@ export function createPanelEditorSlice(
           });
 
           // Move the panel to another group if it changed
-          if (next.groupIndex !== item.groupIndex) {
-            get().movePanelToGroup(item, next.groupIndex);
+          if (next.groupId !== item.panelGroupId) {
+            get().movePanelToGroup(item, next.groupId);
           }
         },
         close: () => {
@@ -125,13 +147,22 @@ export function createPanelEditorSlice(
       });
     },
 
-    addPanel(initialGroup) {
+    addPanel(panelGroupId) {
+      // If a panel group isn't supplied, add to the first group
+      if (panelGroupId === undefined) {
+        const firstGroupId = get().panelGroupIdOrder[0];
+        if (firstGroupId === undefined) {
+          throw new Error('No panel groups to add a panel to');
+        }
+        panelGroupId = firstGroupId;
+      }
+
       const editorState: PanelEditorState = {
         mode: 'Add',
         initialValues: {
           name: '',
           description: '',
-          groupIndex: initialGroup,
+          groupId: panelGroupId,
           // TODO: If we knew what plugins were available (and how to create the initial spec), we might be able to
           // set a smarter default here?
           kind: '',
@@ -143,7 +174,7 @@ export function createPanelEditorSlice(
           set((state) => {
             state.panels[panelKey] = panelDef;
           });
-          get().addPanelToGroup(panelKey, next.groupIndex);
+          get().addPanelToGroup(panelKey, next.groupId);
         },
         close: () => {
           set((state) => {
@@ -155,6 +186,42 @@ export function createPanelEditorSlice(
       // Open the editor with the new state
       set((state) => {
         state.panelEditor = editorState;
+      });
+    },
+
+    deletePanels(items: PanelGroupItemId[]) {
+      const { mapPanelToPanelGroups, deletePanelInPanelGroup, getPanelKey } = get();
+      const map = mapPanelToPanelGroups();
+      // get panel key first before deleting panel from panel group since getPanelKey relies on index
+      const panels = items.map((panel) => {
+        return { ...panel, panelKey: getPanelKey(panel) };
+      });
+      panels.forEach(({ panelKey, ...panel }) => {
+        deletePanelInPanelGroup(panel);
+        // make sure panel is only referenced in one panel group before deleting it from state.panels
+        if (map[panelKey] && map[panelKey]?.length === 1) {
+          set((state) => {
+            delete state.panels[panelKey];
+          });
+        }
+      });
+    },
+
+    openDeletePanelDialog(item: PanelGroupItemId) {
+      const { panels, getPanelKey, panelGroups } = get();
+      const panelKey = getPanelKey(item);
+      set((state) => {
+        state.deletePanelDialog = {
+          panelGroupItemId: item,
+          panelName: panels[panelKey]?.spec.display.name ?? '',
+          panelGroupName: panelGroups[item.panelGroupId]?.title ?? '',
+        };
+      });
+    },
+
+    closeDeletePanelDialog() {
+      set((state) => {
+        state.deletePanelDialog = undefined;
       });
     },
   });

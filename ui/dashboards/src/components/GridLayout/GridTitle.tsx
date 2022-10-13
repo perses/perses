@@ -20,11 +20,10 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-
-import { usePanelGroupDialog, useEditMode, useLayouts, usePanels } from '../../context';
+import { usePanelGroupActions, useEditMode, PanelGroupId } from '../../context';
 
 export interface GridTitleProps {
-  groupIndex: number;
+  panelGroupId: PanelGroupId;
   title: string;
   collapse?: {
     isOpen: boolean;
@@ -37,13 +36,11 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { groupIndex, title, collapse } = props;
+  const { panelGroupId, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { openPanelGroupDialog, openDeletePanelGroupDialog } = usePanelGroupDialog();
-  const { addPanel } = usePanels();
+  const { addPanelToGroup, editPanelGroup, deletePanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
   const { isEditMode } = useEditMode();
-  const { layouts, swapPanelGroups } = useLayouts();
 
   const text = (
     <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
@@ -71,27 +68,19 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && isHovered && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton aria-label="add panel to group" onClick={() => addPanel(groupIndex)}>
+              <IconButton aria-label="add panel to group" onClick={addPanelToGroup}>
                 <AddIcon />
               </IconButton>
-              <IconButton aria-label="edit group" onClick={() => openPanelGroupDialog(groupIndex)}>
+              <IconButton aria-label="edit group" onClick={editPanelGroup}>
                 <PencilIcon />
               </IconButton>
-              <IconButton aria-label="delete group" onClick={() => openDeletePanelGroupDialog(groupIndex)}>
+              <IconButton aria-label="delete group" onClick={deletePanelGroup}>
                 <DeleteIcon />
               </IconButton>
-              <IconButton
-                aria-label="move group down"
-                disabled={groupIndex === layouts.length - 1}
-                onClick={() => swapPanelGroups(groupIndex, groupIndex + 1)}
-              >
+              <IconButton aria-label="move group down" disabled={moveDown === undefined} onClick={moveDown}>
                 <ArrowDownIcon />
               </IconButton>
-              <IconButton
-                aria-label="move group up"
-                disabled={groupIndex === 0}
-                onClick={() => swapPanelGroups(groupIndex, groupIndex - 1)}
-              >
+              <IconButton aria-label="move group up" disabled={moveUp === undefined} onClick={moveUp}>
                 <ArrowUpIcon />
               </IconButton>
             </Stack>

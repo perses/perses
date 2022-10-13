@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
 import { Panel, PanelProps } from '../Panel';
 
-export function PanelPreview({ name, description, kind, spec, groupIndex }: PanelEditorValues) {
+export function PanelPreview({ name, description, kind, spec, groupId }: PanelEditorValues) {
   const previewValues: PanelProps = {
     definition: {
       kind: 'Panel',
@@ -30,8 +30,8 @@ export function PanelPreview({ name, description, kind, spec, groupIndex }: Pane
         },
       },
     },
-    groupIndex,
-    itemIndex: 0, // TODO: what should itemIndex be?
+    // TODO: what should itemIndex be?
+    panelGroupItemId: { panelGroupId: groupId, itemIndex: 0 },
   };
 
   return (

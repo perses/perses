@@ -12,23 +12,27 @@
 // limitations under the License.
 
 import { Select, SelectProps, MenuItem } from '@mui/material';
-import { useListPluginMetadata } from '@perses-dev/plugin-system';
+import { useListPluginMetadata } from '../runtime';
+import { PluginType } from '../model';
 
-export type PanelTypeSelectProps = Omit<SelectProps<string>, 'children'>;
+export interface PluginKindSelectProps extends Omit<SelectProps<string>, 'children'> {
+  pluginType: PluginType;
+}
 
 /**
- * Displays a MUI Select input for selecing a Panel type. Queries the plugin system to get the list of all panel types.
+ * Displays a MUI Select input for selecting a plugin's kind from a list of all the available plugins of a specific
+ * plugin type. (e.g. "Show a list of all the Panel plugins" or "Show a list of all the Variable plugins").
  */
-export function PanelTypeSelect(props: PanelTypeSelectProps) {
-  const { value: propValue, ...others } = props;
-  const { data, isLoading } = useListPluginMetadata('Panel');
+export function PluginKindSelect(props: PluginKindSelectProps) {
+  const { pluginType, value: propValue, ...others } = props;
+  const { data, isLoading } = useListPluginMetadata(pluginType);
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
   const value = propValue !== '' && isLoading ? '' : propValue;
 
   // TODO: Does this need a loading indicator of some kind?
   return (
-    <Select {...others} value={value}>
+    <Select sx={{ minWidth: 120 }} {...others} value={value}>
       {data?.map((metadata) => (
         <MenuItem key={metadata.kind} value={metadata.kind}>
           {metadata.display.name}

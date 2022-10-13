@@ -11,23 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext } from 'react';
-import { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/core';
+import { createContext, useContext, useMemo } from 'react';
+import { AbsoluteTimeRange, TimeRangeValue, isRelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 
 export interface TimeRange {
-  timeRange: AbsoluteTimeRange;
+  timeRange: TimeRangeValue; // relative and absolute time supported
   setTimeRange: (value: TimeRangeValue) => void;
+}
+
+export interface ResolvedTimeRange {
+  timeRange: AbsoluteTimeRange; // resolved absolute time for plugins to use
+  setTimeRange: (value: AbsoluteTimeRange) => void;
 }
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);
 
-/**
- * Gets the current TimeRange at runtime.
- */
-export function useTimeRange(): TimeRange {
+export function useTimeRangeContext() {
   const ctx = useContext(TimeRangeContext);
   if (ctx === undefined) {
     throw new Error('No TimeRangeContext found. Did you forget a Provider?');
   }
   return ctx;
+}
+
+/**
+ * Get and set the current resolved time range at runtime.
+ */
+export function useTimeRange(): ResolvedTimeRange {
+  const { timeRange, setTimeRange } = useTimeRangeContext();
+  const resolvedTimeRange = useMemo(() => {
+    return isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+  }, [timeRange]);
+  return { timeRange: resolvedTimeRange, setTimeRange };
 }

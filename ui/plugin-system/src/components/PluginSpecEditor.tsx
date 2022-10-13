@@ -11,21 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ErrorAlert } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/core';
-import { OptionsEditorProps } from '../model';
-import { usePlugin } from './plugins';
+import { OptionsEditorProps, PluginType } from '../model';
+import { usePlugin } from '../runtime/plugins';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
-  pluginType: 'Panel' | 'TimeSeriesQuery';
+  pluginType: PluginType;
   pluginKind: string;
 }
 
 export function PluginSpecEditor(props: PluginSpecEditorProps) {
   const { pluginType, pluginKind, ...others } = props;
-  const { data: plugin, isLoading } = usePlugin(pluginType, pluginKind, {
-    useErrorBoundary: true,
-    enabled: pluginKind !== '',
-  });
+  const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
+
+  if (error) {
+    return <ErrorAlert error={error} />;
+  }
 
   // TODO: Proper loading indicator
   if (isLoading) {

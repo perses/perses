@@ -10,7 +10,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
 import {
   replaceTemplateVariables,
@@ -19,12 +18,15 @@ import {
   DEFAULT_PROM,
   PrometheusDatasourceSelector,
 } from '../model';
+import { JSONSpecEditor } from './JSONSpecEditor';
 
 interface PrometheusVariableOptionsBase {
   datasource?: PrometheusDatasourceSelector;
 }
 
-type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase;
+type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {
+  matchers?: [string];
+};
 
 type PrometheusLabelValuesVariableOptions = PrometheusVariableOptionsBase & {
   label_name: string;
@@ -45,13 +47,14 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
-    const { data: options } = await client.labelNames({});
+    const match = spec.matchers ? spec.matchers.map((m) => replaceTemplateVariables(m, ctx.variables)) : undefined;
+    const { data: options } = await client.labelNames({ 'match[]': match });
     return {
       data: stringArrayToVariableOptions(options),
     };
   },
   dependsOn: () => [],
-  OptionsEditorComponent: () => null,
+  OptionsEditorComponent: JSONSpecEditor,
   createInitialOptions: () => ({}),
 };
 
@@ -70,6 +73,6 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
   dependsOn: (spec) => {
     return spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [];
   },
-  OptionsEditorComponent: () => null,
+  OptionsEditorComponent: JSONSpecEditor,
   createInitialOptions: () => ({ label_name: '' }),
 };

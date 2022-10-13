@@ -23,6 +23,7 @@ import (
 	"cuelang.org/go/cue/errors"
 	"github.com/perses/perses/internal/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -61,9 +62,9 @@ func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, kind
 }
 
 type Schemas interface {
-	ValidateDatasource(plugin modelV1.Plugin) error
+	ValidateDatasource(plugin common.Plugin) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
-	ValidatePanel(plugin modelV1.Plugin, panelName string) error
+	ValidatePanel(plugin common.Plugin, panelName string) error
 	GetLoaders() []Loader
 }
 
@@ -126,7 +127,7 @@ func (s *sch) GetLoaders() []Loader {
 	return s.loaders
 }
 
-func (s *sch) ValidateDatasource(plugin modelV1.Plugin) error {
+func (s *sch) ValidateDatasource(plugin common.Plugin) error {
 	if s.dts == nil {
 		logrus.Warning("datasource schemas are not loaded")
 		return nil
@@ -156,7 +157,7 @@ func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
 	return nil
 }
 
-func (s *sch) ValidatePanel(plugin modelV1.Plugin, panelName string) error {
+func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
 	return s.validatePlugin(plugin, "panel", panelName, s.panels, func(originalValue cue.Value) cue.Value {
 		if s.queries != nil {
 			// Then merge with the queries disjunction schema
@@ -166,7 +167,7 @@ func (s *sch) ValidatePanel(plugin modelV1.Plugin, panelName string) error {
 	})
 }
 
-func (s *sch) validatePlugin(plugin modelV1.Plugin, modelKind string, modelName string, cueDefs *cueDefs, enrichSchema func(originalValue cue.Value) cue.Value) error {
+func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName string, cueDefs *cueDefs, enrichSchema func(originalValue cue.Value) cue.Value) error {
 	pluginData, err := plugin.JSONMarshal()
 	if err != nil {
 		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)

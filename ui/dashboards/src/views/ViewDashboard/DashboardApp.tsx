@@ -14,10 +14,9 @@
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { PanelDrawer, Dashboard } from '../../components';
-import PanelGroupDialog from '../../components/PanelGroupDialog/PanelGroupDialog';
+import { PanelDrawer, Dashboard, PanelGroupDialog, DeletePanelGroupDialog } from '../../components';
 import { DashboardToolbar } from '../../components/DashboardToolbar';
-import DeletePanelGroupDialog from '../../components/PanelGroupDialog/DeletePanelGroupDialog';
+import DeletePanelDialog from '../../components/Panel/DeletePanelDialog';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
@@ -44,6 +43,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <PanelDrawer />
         <PanelGroupDialog />
         <DeletePanelGroupDialog />
+        <DeletePanelDialog />
       </Box>
     </Box>
   );

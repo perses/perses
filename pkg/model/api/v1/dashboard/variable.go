@@ -16,76 +16,21 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"gopkg.in/yaml.v2"
 )
-
-// CapturingRegexp is just an alias to regexp.Regexp.
-// It used mainly to be able to override the way to unmarshall and marshall a regexp
-type CapturingRegexp regexp.Regexp
-
-func (c *CapturingRegexp) GetRegexp() *regexp.Regexp {
-	return (*regexp.Regexp)(c)
-}
-
-// MarshalText is used during the marshal of a json. It will be considered as a text and not as a json struct.
-func (c *CapturingRegexp) MarshalText() ([]byte, error) {
-	return []byte(c.GetRegexp().String()), nil
-}
-
-func (c *CapturingRegexp) MarshalYAML() (interface{}, error) {
-	return c.GetRegexp().String(), nil
-}
-
-func (c *CapturingRegexp) UnmarshalJSON(data []byte) error {
-	var tmp string
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	if err := c.validate(tmp); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *CapturingRegexp) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp string
-	if err := unmarshal(&tmp); err != nil {
-		return err
-	}
-	if err := c.validate(tmp); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *CapturingRegexp) validate(reg string) error {
-	if len(reg) == 0 {
-		return fmt.Errorf("regexp cannot be empty")
-	}
-	re, err := regexp.Compile(reg)
-	if err != nil {
-		return err
-	}
-	*c = CapturingRegexp(*re)
-	return nil
-}
 
 type VariableKind string
 
 const (
-	KindPromQLQueryVariable      VariableKind = "PromQLQuery"
-	KindLabelNamesQueryVariable  VariableKind = "LabelNamesQuery"
-	KindLabelValuesQueryVariable VariableKind = "LabelValuesQuery"
-	KindConstantVariable         VariableKind = "Constant"
+	TextVariable VariableKind = "TextVariable"
+	ListVariable VariableKind = "ListVariable"
 )
 
-var variableKindMap = map[VariableKind]bool{
-	KindPromQLQueryVariable:      true,
-	KindLabelNamesQueryVariable:  true,
-	KindLabelValuesQueryVariable: true,
-	KindConstantVariable:         true,
+var KindMap = map[VariableKind]bool{
+	TextVariable: true,
+	ListVariable: true,
 }
 
 func (k *VariableKind) UnmarshalJSON(data []byte) error {
@@ -118,29 +63,31 @@ func (k *VariableKind) validate() error {
 	if len(*k) == 0 {
 		return fmt.Errorf("variable.kind cannot be empty")
 	}
-	if _, ok := variableKindMap[*k]; !ok {
+	if _, ok := KindMap[*k]; !ok {
 		return fmt.Errorf("unknown variable.kind %q used", *k)
 	}
 	return nil
 }
 
-type VariableParameter interface {
+type VariableSpec interface {
+	// GetName returns the name of the variable. It will be used to reference the variable in others
+	GetName() string
 }
 
-// LabelNamesQueryVariableParameter is representing the parameter to be used when filling the variable by using the HTTP endpoint
-// `GET /api/v1/labels`
-// More information here: https://prometheus.io/docs/prometheus/latest/querying/api/#getting-label-names
-type LabelNamesQueryVariableParameter struct {
-	VariableParameter `json:"-" yaml:"-"`
-	// Matchers is the repeated series selector argument that selects the series from which to read the label names
-	Matchers []string `json:"matchers,omitempty" yaml:"matchers,omitempty"`
-	// CapturingRegexp is the regexp used to catch and filter the result of the query.
-	CapturingRegexp *CapturingRegexp `json:"capturing_regexp" yaml:"capturing_regexp"`
+type TextVariableSpec struct {
+	VariableSpec `json:"-" yaml:"-"`
+	Name         string          `json:"name" yaml:"name"`
+	Value        string          `json:"value" yaml:"value"`
+	Display      *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
 }
 
-func (v *LabelNamesQueryVariableParameter) UnmarshalJSON(data []byte) error {
-	var tmp LabelNamesQueryVariableParameter
-	type plain LabelNamesQueryVariableParameter
+func (v *TextVariableSpec) GetName() string {
+	return v.Name
+}
+
+func (v *TextVariableSpec) UnmarshalJSON(data []byte) error {
+	var tmp TextVariableSpec
+	type plain TextVariableSpec
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -151,9 +98,9 @@ func (v *LabelNamesQueryVariableParameter) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *LabelNamesQueryVariableParameter) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp LabelNamesQueryVariableParameter
-	type plain LabelNamesQueryVariableParameter
+func (v *TextVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp TextVariableSpec
+	type plain TextVariableSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -164,28 +111,32 @@ func (v *LabelNamesQueryVariableParameter) UnmarshalYAML(unmarshal func(interfac
 	return nil
 }
 
-func (v *LabelNamesQueryVariableParameter) validate() error {
-	if v.CapturingRegexp == nil {
-		return fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a LabelNamesQuery")
+func (v *TextVariableSpec) validate() error {
+	if len(v.Name) == 0 {
+		return fmt.Errorf("name cannot be empty")
+	}
+	if len(v.Value) == 0 {
+		return fmt.Errorf("value for the variable %q cannot be empty", v.Name)
 	}
 	return nil
 }
 
-// LabelValuesQueryVariableParameter is representing the parameter to be used when filling the variable by using the HTTP endpoint
-// `GET /api/v1/label/<label_name>/values`
-// More information here: https://prometheus.io/docs/prometheus/latest/querying/api/#querying-label-values
-type LabelValuesQueryVariableParameter struct {
-	VariableParameter `json:"-" yaml:"-"`
-	LabelName         string `json:"label_name" yaml:"label_name"`
-	// Matchers is the repeated series selector argument that selects the series from which to read the label values
-	Matchers []string `json:"matchers,omitempty" yaml:"matchers,omitempty"`
-	// CapturingRegexp is the regexp used to catch and filter the result of the query.
-	CapturingRegexp *CapturingRegexp `json:"capturing_regexp" yaml:"capturing_regexp"`
+type ListVariableSpec struct {
+	VariableSpec  `json:"-" yaml:"-"`
+	Name          string          `json:"name" yaml:"name"`
+	AllowAllValue bool            `json:"allow_all_value,omitempty" yaml:"allowAllValue,omitempty"`
+	AllowMultiple bool            `json:"allow_multiple,omitempty" yaml:"allowMultiple,omitempty"`
+	Display       *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
+	Plugin        common.Plugin   `json:"plugin" yaml:"plugin"`
 }
 
-func (v *LabelValuesQueryVariableParameter) UnmarshalJSON(data []byte) error {
-	var tmp LabelValuesQueryVariableParameter
-	type plain LabelValuesQueryVariableParameter
+func (v *ListVariableSpec) GetName() string {
+	return v.Name
+}
+
+func (v *ListVariableSpec) UnmarshalJSON(data []byte) error {
+	var tmp ListVariableSpec
+	type plain ListVariableSpec
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -196,9 +147,9 @@ func (v *LabelValuesQueryVariableParameter) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *LabelValuesQueryVariableParameter) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp LabelValuesQueryVariableParameter
-	type plain LabelValuesQueryVariableParameter
+func (v *ListVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp ListVariableSpec
+	type plain ListVariableSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -209,172 +160,57 @@ func (v *LabelValuesQueryVariableParameter) UnmarshalYAML(unmarshal func(interfa
 	return nil
 }
 
-func (v *LabelValuesQueryVariableParameter) validate() error {
-	if len(v.LabelName) == 0 {
-		return fmt.Errorf("'parameter.label_name' cannot be empty for a LabelValuesQuery")
-	}
-	if v.CapturingRegexp == nil {
-		return fmt.Errorf("'parameter.capturing_regexp' cannot be empty for a LabelValuesQuery")
+func (v *ListVariableSpec) validate() error {
+	if len(v.Name) == 0 {
+		return fmt.Errorf("name cannot be empty")
 	}
 	return nil
-}
-
-type PromQLQueryVariableParameter struct {
-	VariableParameter `json:"-" yaml:"-"`
-	// Expr is the PromQL expression to be used when variable should be filled by using the HTTP endpoint
-	// `GET /api/v1/query_range`
-	// More information available here: https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
-	Expr string `json:"expr,omitempty" yaml:"expr,omitempty"`
-	// LabelName is the name of the label which is used once the PromQL query is performed to select the labelValue in the metric
-	LabelName       string           `json:"label_name" yaml:"label_name"`
-	CapturingRegexp *CapturingRegexp `json:"capturing_regexp" yaml:"capturing_regexp"`
-}
-
-func (v *PromQLQueryVariableParameter) UnmarshalJSON(data []byte) error {
-	var tmp PromQLQueryVariableParameter
-	type plain PromQLQueryVariableParameter
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*v = tmp
-	return nil
-}
-
-func (v *PromQLQueryVariableParameter) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp PromQLQueryVariableParameter
-	type plain PromQLQueryVariableParameter
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*v = tmp
-	return nil
-}
-
-func (v *PromQLQueryVariableParameter) validate() error {
-	if len(v.Expr) == 0 {
-		return fmt.Errorf("parameter.expr cannot be empty for a PromQLQuery")
-	}
-	if len(v.LabelName) == 0 {
-		return fmt.Errorf("parameter.label_name cannot be empty for a PromQLQuery")
-	}
-	if v.CapturingRegexp == nil {
-		return fmt.Errorf("parameter.capturing_regexp cannot be empty for a PromQLQuery")
-	}
-	return nil
-}
-
-type ConstantVariableParameter struct {
-	VariableParameter `json:"-" yaml:"-"`
-	Values            []string `json:"values" yaml:"values"`
-}
-
-func (v *ConstantVariableParameter) UnmarshalJSON(data []byte) error {
-	var tmp ConstantVariableParameter
-	type plain ConstantVariableParameter
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*v = tmp
-	return nil
-}
-
-func (v *ConstantVariableParameter) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp ConstantVariableParameter
-	type plain ConstantVariableParameter
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*v = tmp
-	return nil
-}
-
-func (v *ConstantVariableParameter) validate() error {
-	if len(v.Values) == 0 {
-		return fmt.Errorf("parameter.values cannot be empty for a constant variable")
-	}
-	return nil
-}
-
-type tmpDashboardVariable struct {
-	Kind          VariableKind           `json:"kind" yaml:"kind"`
-	DisplayedName string                 `json:"displayed_name,omitempty" yaml:"displayed_name,omitempty"`
-	Hide          bool                   `json:"hide" yaml:"hide"`
-	Selected      string                 `json:"selected,omitempty" yaml:"selected,omitempty"`
-	Parameter     map[string]interface{} `json:"parameter" yaml:"parameter"`
 }
 
 type Variable struct {
-	// Kind is the type of the variable. Depending of the value of Kind, it will change the content of Parameter.
+	// Kind is the type of the variable. Depending of the value of Kind, it will change the content of Spec.
 	Kind VariableKind `json:"kind" yaml:"kind"`
-	// DisplayedName is the name that would be displayed by the UI. It should be filled only if Hide is set to false.
-	// It is not the name used to reference the variable in others variables or in the different panels.
-	// The name used for the reference is the key of map of variables
-	DisplayedName string `json:"displayed_name,omitempty" yaml:"displayed_name,omitempty"`
-	// Hide will be used by the UI to decide if the variable has to be displayed
-	Hide bool `json:"hide" yaml:"hide"`
-	// Selected is the variable selected by default if it exists
-	Selected  string            `json:"selected,omitempty" yaml:"selected,omitempty"`
-	Parameter VariableParameter `json:"parameter" yaml:"parameter"`
+	Spec VariableSpec `json:"spec" yaml:"spec"`
 }
 
-func (d *Variable) UnmarshalJSON(data []byte) error {
-	jsonUnmarshalFunc := func(panel interface{}) error {
-		return json.Unmarshal(data, panel)
+type tmpVariable struct {
+	Kind VariableKind `json:"kind" yaml:"kind"`
+	Spec interface{}  `json:"spec" yaml:"spec"`
+}
+
+func (v *Variable) UnmarshalJSON(data []byte) error {
+	jsonUnmarshalFunc := func(variable interface{}) error {
+		return json.Unmarshal(data, variable)
 	}
-	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
+	return v.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
-func (d *Variable) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
+func (v *Variable) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return v.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (d *Variable) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
-	var tmpVariable tmpDashboardVariable
-	if err := unmarshal(&tmpVariable); err != nil {
+func (v *Variable) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+	var tmp tmpVariable
+	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
-	d.Kind = tmpVariable.Kind
-	d.Selected = tmpVariable.Selected
-	d.Hide = tmpVariable.Hide
-	d.DisplayedName = tmpVariable.DisplayedName
-
-	if len(tmpVariable.DisplayedName) == 0 && !d.Hide {
-		return fmt.Errorf("variable.displayed_name cannot be empty if the variable is not hidden")
-	}
-	if len(tmpVariable.Kind) == 0 {
-		return fmt.Errorf("variable.kind cannot be empty")
-	}
-
-	rawParameter, err := staticMarshal(tmpVariable.Parameter)
+	rawSpec, err := staticMarshal(tmp.Spec)
 	if err != nil {
 		return err
 	}
-	var parameter interface{}
-	switch tmpVariable.Kind {
-	case KindPromQLQueryVariable:
-		parameter = &PromQLQueryVariableParameter{}
-	case KindLabelNamesQueryVariable:
-		parameter = &LabelNamesQueryVariableParameter{}
-	case KindLabelValuesQueryVariable:
-		parameter = &LabelValuesQueryVariableParameter{}
-	case KindConstantVariable:
-		parameter = &ConstantVariableParameter{}
+	var spec VariableSpec
+	switch tmp.Kind {
+	case ListVariable:
+		spec = &ListVariableSpec{}
+	case TextVariable:
+		spec = &TextVariableSpec{}
+	default:
+		return fmt.Errorf("unknown variable.kind %q used", tmp.Kind)
 	}
-	if err := staticUnmarshal(rawParameter, parameter); err != nil {
-		return err
+	if unMarshalErr := staticUnmarshal(rawSpec, spec); unMarshalErr != nil {
+		return unMarshalErr
 	}
-	d.Parameter = parameter
+	v.Kind = tmp.Kind
+	v.Spec = spec
 	return nil
 }
