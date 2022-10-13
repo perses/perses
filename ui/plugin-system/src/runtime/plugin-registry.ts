@@ -11,9 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { createContext, useContext } from 'react';
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { usePluginRegistry } from '../components/PluginRegistry';
 import { PluginImplementation, PluginMetadata, PluginType } from '../model';
+
+export interface PluginRegistryContextType {
+  getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;
+  listPluginMetadata(pluginType: PluginType): Promise<PluginMetadata[]>;
+}
+
+export const PluginRegistryContext = createContext<PluginRegistryContextType | undefined>(undefined);
+
+/**
+ * Use the PluginRegistry context directly. This is meant as an escape hatch for custom async flows. You should probably
+ * be using `usePlugin` or `useListPluginMetadata` instead.
+ */
+export function usePluginRegistry() {
+  const ctx = useContext(PluginRegistryContext);
+  if (ctx === undefined) {
+    throw new Error('PluginRegistryContext not found. Did you forget a provider?');
+  }
+  return ctx;
+}
 
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<

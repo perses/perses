@@ -12,7 +12,7 @@
 // limitations under the License.
 
 export * from './datasources';
-export * from './plugins';
+export * from './plugin-registry';
 export * from './template-variables';
 export * from './time-range';
 export * from './time-series-queries';

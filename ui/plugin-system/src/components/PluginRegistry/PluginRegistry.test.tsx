@@ -14,7 +14,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { PluginType } from '../../model';
-import { useListPluginMetadata, usePlugin } from '../../runtime/plugins';
+import { useListPluginMetadata, usePlugin } from '../../runtime';
 import { renderWithContext } from '../../test';
 
 describe('PluginRegistry', () => {
