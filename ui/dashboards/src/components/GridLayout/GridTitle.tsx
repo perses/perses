@@ -41,7 +41,6 @@ export function GridTitle(props: GridTitleProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { addPanelToGroup, editPanelGroup, deletePanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
   const { isEditMode } = useEditMode();
-  const { layouts, swapPanelGroups } = useLayouts();
 
   const text = (
     <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
