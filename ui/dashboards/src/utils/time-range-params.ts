@@ -125,8 +125,10 @@ export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEn
   const { start } = query;
 
   // set start param on page load if empty
-  if (paramsEnabled === true && start === undefined) {
-    setQuery({ start: '30m', end: undefined });
+  if (paramsEnabled && !start) {
+    if (isRelativeTimeRange(initialTimeRange)) {
+      setQuery({ start: initialTimeRange.pastDuration, end: undefined });
+    }
   }
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
@@ -140,7 +142,7 @@ export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEn
     [setQuery]
   );
 
-  if (paramsEnabled === false) {
+  if (!paramsEnabled) {
     return { timeRange: timeRangeState, setTimeRange: setTimeRangeState };
   }
   return { timeRange: initialTimeRange, setTimeRange: setTimeRange };
