@@ -21,7 +21,6 @@ import {
   getTestDashboard,
   mockPluginRegistryProps,
   renderWithContext,
-  setupIntersectionObserverMock,
 } from '../../test';
 import { DashboardProvider } from '../../context/DashboardProvider';
 import { PanelDrawer } from './PanelDrawer';
@@ -30,7 +29,6 @@ describe('Panel Drawer', () => {
   const renderPanelDrawer = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
     addMockPlugin('Panel', 'TimeSeriesChart', FAKE_PANEL_PLUGIN);
-    setupIntersectionObserverMock();
 
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
