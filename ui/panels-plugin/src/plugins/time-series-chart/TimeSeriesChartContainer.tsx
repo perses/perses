@@ -15,14 +15,7 @@ import { useMemo } from 'react';
 import { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import {
-  LineChart,
-  EChartsDataFormat,
-  UnitOptions,
-  ZoomEventData,
-  ListLegend,
-  ListLegendItem,
-} from '@perses-dev/components';
+import { LineChart, EChartsDataFormat, UnitOptions, ZoomEventData } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { getLineSeries, getCommonTimeScale, getYValues, getXValues, RunningQueriesState } from './utils/data-transform';
 
@@ -47,7 +40,6 @@ export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
   const { width, height, show_legend, thresholds, queryResults } = props;
 
   const { setTimeRange } = useTimeRange();
-  const legendItems: ListLegendItem[] = [];
 
   // populate series data based on query results
   const { graphData, loading } = useMemo(() => {
@@ -72,13 +64,6 @@ export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
       if (query.isLoading || query.data === undefined) continue;
 
       for (const timeSeries of query.data.series) {
-        legendItems.push({
-          id: timeSeries.name,
-          label: JSON.stringify(timeSeries.values),
-          isSelected: false,
-          color: 'string',
-          onClick: () => {},
-        });
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(timeSeries.name, yValues);
         graphData.timeSeries.push(lineSeries);
@@ -139,9 +124,13 @@ export function TimeSeriesChartContainer(props: TimeSeriesChartContainerProps) {
   };
 
   return (
-    <>
-      <LineChart height={height} data={graphData} unit={unit} grid={gridOverrides} onDataZoom={handleDataZoom} />
-      {show_legend === true && <ListLegend height={300} width={500} items={legendItems} />}
-    </>
+    <LineChart
+      height={height}
+      data={graphData}
+      unit={unit}
+      legend={legendOverrides}
+      grid={gridOverrides}
+      onDataZoom={handleDataZoom}
+    />
   );
 }
