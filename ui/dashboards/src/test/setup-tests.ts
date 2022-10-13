@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { defaultFallbackInView } from 'react-intersection-observer';
+
 // Add testing library assertions
 import '@testing-library/jest-dom/extend-expect';
 import { setupIntersectionObserverMock } from './';
@@ -18,6 +20,6 @@ import { setupIntersectionObserverMock } from './';
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
 jest.mock('echarts/core');
 
-beforeEach(() => {
-  setupIntersectionObserverMock();
-});
+// Tell react-intersection-observer that everything should be considered in-view for tests (see package documentation
+// for other options)
+defaultFallbackInView(true);

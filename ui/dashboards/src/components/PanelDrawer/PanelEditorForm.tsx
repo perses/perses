@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginKindSelect, PluginSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
-import { useLayouts } from '../../context';
+import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
 import { PanelPreview } from './PanelPreview';
 
@@ -37,11 +37,11 @@ export interface PanelEditorFormProps {
 export function PanelEditorForm(props: PanelEditorFormProps) {
   const { initialValues, onSubmit } = props;
 
-  const { layouts } = useLayouts();
+  const panelGroups = useListPanelGroups();
 
   const [name, setName] = useState(initialValues.name);
   const [description, setDescription] = useState(initialValues.description);
-  const [groupIndex, setGroupIndex] = useState(initialValues.groupIndex);
+  const [groupId, setGroupId] = useState(initialValues.groupId);
   const [kind, setKind] = useState(initialValues.kind);
   const [spec, setSpec] = useState(initialValues.spec);
 
@@ -61,15 +61,12 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     if (typeof value === 'string') {
       return;
     }
-    setGroupIndex(value);
+    setGroupId(value);
   };
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
-    if (spec === undefined) {
-      throw new Error('Cannot submit without a plugin spec');
-    }
-    const values: PanelEditorValues = { name, description, groupIndex, kind, spec };
+    const values: PanelEditorValues = { name, description, groupId, kind, spec };
     onSubmit(values);
   };
 
@@ -82,10 +79,10 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         <Grid item xs={4}>
           <FormControl>
             <InputLabel id="select-group">Group</InputLabel>
-            <Select required labelId="select-group" label="Group" value={groupIndex ?? 0} onChange={handleGroupChange}>
-              {layouts.map((layout, index) => (
-                <MenuItem key={index} value={index}>
-                  {layout.title ?? `Group ${index + 1}`}
+            <Select required labelId="select-group" label="Group" value={groupId} onChange={handleGroupChange}>
+              {panelGroups.map((panelGroup, index) => (
+                <MenuItem key={panelGroup.id} value={panelGroup.id}>
+                  {panelGroup.title ?? `Group ${index + 1}`}
                 </MenuItem>
               ))}
             </Select>
@@ -118,7 +115,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             Preview
           </Typography>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <PanelPreview kind={kind} name={name} description={description} spec={spec} groupIndex={groupIndex} />
+            <PanelPreview kind={kind} name={name} description={description} spec={spec} groupId={groupId} />
           </ErrorBoundary>
         </Grid>
         <Grid item xs={12}>

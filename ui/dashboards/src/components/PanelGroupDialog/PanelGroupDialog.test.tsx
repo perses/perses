@@ -17,7 +17,7 @@ import { act } from 'react-dom/test-utils';
 import { DashboardProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import PanelGroupDialog from './PanelGroupDialog';
+import { PanelGroupDialog } from './PanelGroupDialog';
 
 describe('Add Panel Group', () => {
   const renderDialog = () => {
@@ -42,18 +42,21 @@ describe('Add Panel Group', () => {
     const storeApi = renderDialog();
 
     // Open the dialog for a new panel group
-    act(() => storeApi.getState().openPanelGroupDialog());
+    act(() => storeApi.getState().addPanelGroup());
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel Group');
     userEvent.click(screen.getByText('Add'));
 
-    const layouts = storeApi.getState().layouts;
-    expect(layouts).toContainEqual({
-      id: 3,
-      title: 'New Panel Group',
-      isCollapsed: false,
-      items: [],
+    // TODO: Figure out how to test this without coupling to the store state
+    const panelGroups = storeApi.getState().panelGroups;
+    expect(panelGroups).toMatchObject({
+      '3': {
+        id: 3,
+        title: 'New Panel Group',
+        isCollapsed: false,
+        items: [],
+      },
     });
   });
 
@@ -61,19 +64,22 @@ describe('Add Panel Group', () => {
     const storeApi = renderDialog();
 
     // Open the dialog for an existing panel group
-    act(() => storeApi.getState().openPanelGroupDialog(0));
+    act(() => storeApi.getState().editPanelGroup(0));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);
     userEvent.type(nameInput, 'New Name');
     userEvent.click(screen.getByText('Apply'));
 
-    const layouts = storeApi.getState().layouts;
-    expect(layouts).toContainEqual({
-      id: 0,
-      title: 'New Name',
-      isCollapsed: false,
-      items: testDashboard.spec.layouts[0]?.spec.items,
+    // TODO: Figure out how to test this without coupling to the store state
+    const panelGroups = storeApi.getState().panelGroups;
+    expect(panelGroups).toMatchObject({
+      '0': {
+        id: 0,
+        title: 'New Name',
+        isCollapsed: false,
+        items: testDashboard.spec.layouts[0]?.spec.items,
+      },
     });
   });
 });

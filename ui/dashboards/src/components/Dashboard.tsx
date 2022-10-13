@@ -13,7 +13,7 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { useLayouts } from '../context';
+import { usePanelGroupIds } from '../context';
 import { GridLayout } from './GridLayout';
 
 export type DashboardProps = BoxProps;
@@ -22,12 +22,12 @@ export type DashboardProps = BoxProps;
  * Renders a Dashboard for the provided Dashboard spec.
  */
 export function Dashboard(props: DashboardProps) {
-  const { layouts } = useLayouts();
+  const panelGroupIds = usePanelGroupIds();
   return (
     <Box {...props}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        {layouts.map((layout, groupIndex) => (
-          <GridLayout key={layout.id} groupIndex={groupIndex} groupDefinition={layout} />
+        {panelGroupIds.map((panelGroupId) => (
+          <GridLayout key={panelGroupId} panelGroupId={panelGroupId} />
         ))}
       </ErrorBoundary>
     </Box>

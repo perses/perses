@@ -14,20 +14,20 @@
 import { FormEvent } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { usePanelGroupDialog, useLayouts } from '../../context';
+import { useDeletePanelGroupDialog, useLayouts } from '../../context';
 
-const DeletePanelGroupDialog = () => {
-  const { layouts, deletePanelGroup } = useLayouts();
-  const { deletePanelGroupDialog, closeDeletePanelGroupDialog } = usePanelGroupDialog();
+export const DeletePanelGroupDialog = () => {
+  const { deletePanelGroup } = useLayouts();
+  const { deletePanelGroupDialog, closeDeletePanelGroupDialog } = useDeletePanelGroupDialog();
 
-  const groupIndex = deletePanelGroupDialog?.groupIndex;
+  const panelGroupId = deletePanelGroupDialog?.panelGroupId;
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault();
-    if (groupIndex == undefined) {
+    if (panelGroupId == undefined) {
       throw new Error('group index is undefined');
     }
-    deletePanelGroup(groupIndex);
+    deletePanelGroup(panelGroupId);
     closeDeletePanelGroupDialog();
   };
 
@@ -47,9 +47,8 @@ const DeletePanelGroupDialog = () => {
       </IconButton>
       <form onSubmit={handleDelete}>
         <DialogContent sx={{ width: '500px' }}>
-          {`Are you sure you want to delete ${
-            groupIndex !== undefined && layouts[groupIndex] !== undefined ? layouts[groupIndex]?.title : 'panel group'
-          }? This will delete all the panels within the group.`}
+          Are you sure you want to delete {deletePanelGroupDialog?.panelGroupName ?? 'panel group'}? This will delete
+          all the panels within the group.
         </DialogContent>
         <DialogActions>
           <Button variant="contained" type="submit">
@@ -61,5 +60,3 @@ const DeletePanelGroupDialog = () => {
     </Dialog>
   );
 };
-
-export default DeletePanelGroupDialog;

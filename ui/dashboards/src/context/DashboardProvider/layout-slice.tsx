@@ -17,27 +17,38 @@ import { Middleware } from './common';
 import { PanelEditorSlice } from './panel-editing-slice';
 
 export interface LayoutSlice {
-  layouts: PanelGroupDefinition[];
+  /**
+   * Panel groups indexed by their ID.
+   */
+  panelGroups: Record<PanelGroupId, PanelGroupDefinition>;
+
+  /**
+   * An array of panel group IDs, representing their order in the dashboard.
+   */
+  panelGroupIdOrder: PanelGroupId[];
+
+  // TODO: Remove this
+  createPanelGroupId: () => PanelGroupId;
 
   /**
    * Given a LayoutItem location, returns the panel's unique key at that location.
    */
-  getPanelKey: (layoutItem: LayoutItem) => string;
+  getPanelKey: (layoutItem: PanelGroupItemId) => string;
 
   /**
    * Add a panel with the specified key to an existing group.
    */
-  addPanelToGroup: (panelKey: string, groupIndex: number) => void;
+  addPanelToGroup: (panelKey: string, panelGroupId: PanelGroupId) => void;
 
   /**
    * Move an existing Panel to a new panel group.
    */
-  movePanelToGroup: (layoutItem: LayoutItem, newGroupIndex: number) => void;
+  movePanelToGroup: (layoutItem: PanelGroupItemId, newPanelGroupId: PanelGroupId) => void;
 
   /**
    * Updates an existing panel group to, for example, change its display properties.
    */
-  updatePanelGroup: (layout: Omit<PanelGroupDefinition, 'id'>, groupIndex?: number) => void;
+  updatePanelGroup: (panelGroup: Omit<PanelGroupDefinition, 'id'>, panelGroupId?: PanelGroupId) => void;
 
   /**
    * Rearrange the order of panel groups by swapping the positions
@@ -47,31 +58,33 @@ export interface LayoutSlice {
   /**
    * Delete panel group and all the panels within the group
    */
-  deletePanelGroup: (groupIndex: number) => void;
+  deletePanelGroup: (panelGroupId: PanelGroupId) => void;
 
   /**
    * Delete panel in panel group
    */
-  deletePanelInPanelGroup: (layoutItem: LayoutItem) => void;
+  deletePanelInPanelGroup: (layoutItem: PanelGroupItemId) => void;
 
   /**
    * Map panel to panel groups
    */
-  mapPanelToPanelGroups: () => Record<string, PanelGroupDefinition['id'][]>;
+  mapPanelToPanelGroups: () => Record<string, PanelGroupId[]>;
 }
 
+export type PanelGroupId = number;
+
 export interface PanelGroupDefinition {
-  id: number;
+  id: PanelGroupId;
   items: GridItemDefinition[];
-  isCollapsed?: boolean;
+  isCollapsed: boolean;
   title?: string;
 }
 
 /**
- * The location of an item (e.g. a Panel) in layouts.
+ * Uniquely identifies an item in a PanelGroup.
  */
-export interface LayoutItem {
-  groupIndex: number;
+export interface PanelGroupItemId {
+  panelGroupId: PanelGroupId;
   itemIndex: number;
 }
 
@@ -81,33 +94,45 @@ export interface LayoutItem {
 export function createLayoutSlice(
   layouts: LayoutDefinition[]
 ): StateCreator<LayoutSlice & PanelEditorSlice, Middleware, [], LayoutSlice> {
-  // Return the state creator function for Zustand that uses the layouts provided as initial state
-  let id = -1;
-
-  function createPanelGroupId() {
+  // Helper function for generating unique IDs for a PanelGroup
+  let id: PanelGroupId = -1;
+  function createPanelGroupId(): PanelGroupId {
     id++;
     return id;
   }
 
-  return (set, get) => ({
-    layouts: layouts.map((layout) => ({
-      ...layout,
-      id: createPanelGroupId(),
-      title: layout.spec.display?.title,
-      isCollapsed: !layout.spec.display?.collapse?.open ?? false,
+  // Convert the initial layouts from the JSON to panel groups and keep track of the order
+  const panelGroups: LayoutSlice['panelGroups'] = {};
+  const panelGroupIdOrder: LayoutSlice['panelGroupIdOrder'] = [];
+  for (const layout of layouts) {
+    const id = createPanelGroupId();
+    panelGroups[id] = {
+      id,
       items: layout.spec.items,
-    })),
+      isCollapsed: layout.spec.display?.collapse?.open === false,
+      title: layout.spec.display?.title,
+    };
+    panelGroupIdOrder.push(id);
+  }
 
-    getPanelKey({ groupIndex, itemIndex }) {
-      const { layouts } = get();
-      const group = findGroup(layouts, groupIndex);
+  // Return the state creator function for Zustand
+  return (set, get) => ({
+    panelGroups,
+    panelGroupIdOrder,
+
+    // TODO: Reorder init logic so this isn't exposed
+    createPanelGroupId,
+
+    getPanelKey({ panelGroupId, itemIndex }) {
+      const { panelGroups } = get();
+      const group = findGroup(panelGroups, panelGroupId);
       const item = findItem(group, itemIndex);
       return getPanelKeyFromRef(item.content);
     },
 
-    addPanelToGroup(panelKey, groupIndex) {
-      const { layouts } = get();
-      const group = findGroup(layouts, groupIndex);
+    addPanelToGroup(panelKey, panelGroupId) {
+      const { panelGroups } = get();
+      const group = findGroup(panelGroups, panelGroupId);
       const gridItem: GridItemDefinition = {
         x: 0,
         y: getYForNewRow(group),
@@ -116,27 +141,27 @@ export function createLayoutSlice(
         content: createPanelRef(panelKey),
       };
       set((state) => {
-        state.layouts[groupIndex]?.items.push(gridItem);
+        state.panelGroups[panelGroupId]?.items.push(gridItem);
       });
     },
 
-    movePanelToGroup({ groupIndex, itemIndex }, newGroupIndex) {
-      const { layouts } = get();
+    movePanelToGroup({ panelGroupId, itemIndex }, newPanelGroupId) {
+      const { panelGroups } = get();
 
       // Find the existing item to make sure it exists
-      const group = findGroup(layouts, groupIndex);
+      const group = findGroup(panelGroups, panelGroupId);
       const item = findItem(group, itemIndex);
 
       // Find the new group and figure out where a new row should go
-      const newGroup = findGroup(layouts, newGroupIndex);
+      const newGroup = findGroup(panelGroups, newPanelGroupId);
       const newGroupY = getYForNewRow(newGroup);
 
       set((state) => {
         // Remove the item from its current group
-        state.layouts[groupIndex]?.items.splice(itemIndex, 1);
+        state.panelGroups[panelGroupId]?.items.splice(itemIndex, 1);
 
         // Add a new item to the new group
-        state.layouts[newGroupIndex]?.items.push({
+        state.panelGroups[newPanelGroupId]?.items.push({
           x: 0,
           y: newGroupY,
           width: item.width,
@@ -147,71 +172,78 @@ export function createLayoutSlice(
     },
 
     // TODO: Maybe combine this into some kind of groupEditor state
-    updatePanelGroup(next, groupIndex) {
+    updatePanelGroup(panelGroup, panelGroupId) {
       set((state) => {
-        if (groupIndex === undefined) {
-          state.layouts.unshift({ ...next, id: createPanelGroupId() });
-        } else {
-          const layout = state.layouts[groupIndex];
-          if (layout === undefined) {
-            throw new Error(`No layout at index ${groupIndex}`);
-          }
-          state.layouts[groupIndex] = { ...next, id: layout.id };
+        // Adding a new panel group?
+        if (panelGroupId === undefined) {
+          const id = createPanelGroupId();
+          const newPanelGroup = { ...panelGroup, id };
+          state.panelGroups[id] = newPanelGroup;
+          state.panelGroupIdOrder.unshift(id);
+          return;
         }
+
+        const existingGroup = state.panelGroups[panelGroupId];
+        if (existingGroup === undefined) {
+          throw new Error(`Cannot find panel group with Id ${panelGroupId} to update`);
+        }
+        state.panelGroups[panelGroupId] = { ...panelGroup, id: panelGroupId };
       });
     },
 
     swapPanelGroups(x, y) {
       set((state) => {
-        if (x < 0 || x >= state.layouts.length || y < 0 || y >= state.layouts.length) {
+        if (x < 0 || x >= state.panelGroupIdOrder.length || y < 0 || y >= state.panelGroupIdOrder.length) {
           throw new Error('index out of bound');
         }
-        const xPanelGroup = state.layouts[x];
-        const yPanelGroup = state.layouts[y];
+        const xPanelGroup = state.panelGroupIdOrder[x];
+        const yPanelGroup = state.panelGroupIdOrder[y];
 
         if (xPanelGroup === undefined || yPanelGroup === undefined) {
           throw new Error('panel group is undefined');
         }
         // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
-        [state.layouts[x], state.layouts[y]] = [yPanelGroup, xPanelGroup];
+        [state.panelGroupIdOrder[x], state.panelGroupIdOrder[y]] = [yPanelGroup, xPanelGroup];
       });
     },
 
-    deletePanelInPanelGroup({ groupIndex, itemIndex }) {
+    deletePanelInPanelGroup({ panelGroupId, itemIndex }) {
       set((state) => {
-        const group = state.layouts[groupIndex];
+        const group = state.panelGroups[panelGroupId];
         if (group === undefined) {
-          throw new Error(`No panel group found: ${groupIndex}`);
+          throw new Error(`No panel group found: ${panelGroupId}`);
         }
         // remove panel from panel group
         group.items.splice(itemIndex, 1);
       });
     },
 
-    deletePanelGroup(groupIndex) {
-      const { layouts, deletePanels } = get();
-      const group = layouts[groupIndex];
-      if (group === undefined) {
-        throw new Error(`No panel group found: ${groupIndex}`);
+    deletePanelGroup(panelGroupId) {
+      const { panelGroups, panelGroupIdOrder: panelGroupOrder, deletePanels } = get();
+      const group = findGroup(panelGroups, panelGroupId);
+      const orderIdx = panelGroupOrder.findIndex((id) => id === panelGroupId);
+      if (orderIdx === -1) {
+        throw new Error(`Could not find panel group Id ${panelGroupId} in order array`);
       }
 
       // remove panels from group first
-      const panelsToBeDeleted: LayoutItem[] = [];
+      const panelsToBeDeleted: PanelGroupItemId[] = [];
       for (let i = 0; i < group.items.length; i++) {
-        panelsToBeDeleted.push({ groupIndex, itemIndex: i });
+        panelsToBeDeleted.push({ panelGroupId, itemIndex: i });
       }
       deletePanels(panelsToBeDeleted);
 
-      // remove group from state.layouts
+      // remove group from both panelGroups and panelGroupOrder
       set((state) => {
-        state.layouts.splice(groupIndex, 1);
+        state.panelGroupIdOrder.splice(orderIdx, 1);
+        delete state.panelGroups[panelGroupId];
       });
     },
 
     // Return an object that maps each panel to the groups it belongs
     mapPanelToPanelGroups() {
-      const map: Record<string, PanelGroupDefinition['id'][]> = {}; // { panel key: [group ids] }
-      get().layouts.forEach((group) => {
+      const map: Record<string, Array<PanelGroupDefinition['id']>> = {}; // { panel key: [group ids] }
+      Object.values(get().panelGroups).forEach((group) => {
         // for each panel in a group, add the group id to map[panelKey]
         group.items.forEach((panel) => {
           const panelKey = getPanelKeyFromRef(panel.content);
@@ -228,10 +260,10 @@ export function createLayoutSlice(
 }
 
 // Helper to find a group and throw if not found
-function findGroup(layouts: PanelGroupDefinition[], groupIndex: number) {
-  const group = layouts[groupIndex];
+function findGroup(panelGroups: LayoutSlice['panelGroups'], groupId: PanelGroupId) {
+  const group = panelGroups[groupId];
   if (group === undefined) {
-    throw new Error(`No layout at index ${groupIndex}`);
+    throw new Error(`No panel group found for Id ${groupId}`);
   }
   return group;
 }
