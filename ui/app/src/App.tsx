@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
 import {
   ChartsThemeProvider,
@@ -21,7 +20,6 @@ import {
   generateChartsTheme,
   PersesChartsTheme,
 } from '@perses-dev/components';
-import { QueryStringProvider } from '@perses-dev/dashboards';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
 import Header from './components/Header';
@@ -34,9 +32,6 @@ const ECHARTS_THEME_OVERRIDES = {};
 
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
-
-  const [searchParams] = useSearchParams();
-
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
@@ -62,12 +57,9 @@ function App() {
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
             <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-              <QueryStringProvider queryString={searchParams}>
-                <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
-                  <ViewDashboard />
-                </ErrorBoundary>
-              </QueryStringProvider>
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <ViewDashboard />
+              </ErrorBoundary>
             </PluginRegistry>
           </ChartsThemeProvider>
         </ErrorBoundary>

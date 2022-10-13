@@ -21,14 +21,15 @@ import (
 
 	"github.com/perses/perses/internal/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
 
-func loadPanelPlugin(testDataPath string) v1.Plugin {
+func loadPanelPlugin(testDataPath string) common.Plugin {
 	data, _ := os.ReadFile(testDataPath)
-	plg := v1.Plugin{}
+	plg := common.Plugin{}
 	_ = json.Unmarshal(data, &plg)
 	return plg
 }

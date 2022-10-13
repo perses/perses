@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/stretchr/testify/assert"
@@ -78,7 +79,7 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 				},
 				Spec: DatasourceSpec{
 					Default: true,
-					Plugin: Plugin{
+					Plugin: common.Plugin{
 						Kind: "PrometheusDatasource",
 						Spec: pluginSpecAsMapInterface,
 					},
@@ -142,7 +143,7 @@ spec:
 				},
 				Spec: DatasourceSpec{
 					Default: true,
-					Plugin: Plugin{
+					Plugin: common.Plugin{
 						Kind: "PrometheusDatasource",
 						Spec: pluginSpecAsMapInterface,
 					},

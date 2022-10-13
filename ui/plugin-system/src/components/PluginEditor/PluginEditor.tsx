@@ -28,10 +28,9 @@ export function PluginEditor(props: PluginEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { value, pluginType, pluginKindLabel, onChange: _, ...others } = props;
   const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);
-
   return (
     <Box {...others}>
-      <FormControl margin="dense" fullWidth={false} disabled={isLoading} error={error !== null}>
+      <FormControl margin="dense" fullWidth={false} disabled={isLoading} error={error !== null} sx={{ mb: 1 }}>
         {/* TODO: How to ensure ids are unique? */}
         <InputLabel id="plugin-kind-label">{pluginKindLabel}</InputLabel>
         <PluginKindSelect

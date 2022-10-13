@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
+import { JSONSpecEditor } from './JSONSpecEditor';
 
 type StaticListOption = string | VariableOption;
 
@@ -32,6 +33,6 @@ export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
     };
   },
   dependsOn: () => [],
-  OptionsEditorComponent: () => null,
+  OptionsEditorComponent: JSONSpecEditor,
   createInitialOptions: () => ({ values: [] }),
 };

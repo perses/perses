@@ -13,25 +13,22 @@
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DashboardProvider, QueryStringProvider, TemplateVariableProvider, TimeRangeProvider } from '../../../context';
+import { DashboardProvider, TemplateVariableProvider, TimeRangeProvider } from '../../../context';
 import { getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 
 describe('Panel Groups', () => {
   const renderDashboard = () => {
     renderWithContext(
-      <QueryStringProvider queryString={new URLSearchParams('https://localhost:3000/')}>
-        <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
-          <TemplateVariableProvider>
-            <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
-              <DashboardApp dashboardResource={getTestDashboard()} />
-            </DashboardProvider>
-          </TemplateVariableProvider>
-        </TimeRangeProvider>
-      </QueryStringProvider>
+      <TimeRangeProvider timeRange={{ pastDuration: '30m' }}>
+        <TemplateVariableProvider>
+          <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
+            <DashboardApp dashboardResource={getTestDashboard()} />
+          </DashboardProvider>
+        </TemplateVariableProvider>
+      </TimeRangeProvider>
     );
   };
-
   it('should delete panel', () => {
     renderDashboard();
     const panel = screen.getByText('CPU');

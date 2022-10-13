@@ -57,6 +57,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             sx={{
               display: 'flex',
               width: '100%',
+              alignItems: 'flex-start',
               padding: (theme) => theme.spacing(2),
             }}
           >
