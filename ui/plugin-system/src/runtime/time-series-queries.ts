@@ -14,8 +14,10 @@
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { TimeSeriesQueryContext } from '../model';
-import { usePluginRegistry, usePlugin } from '../components';
-import { useTemplateVariableValues, useTimeRange, useDatasourceStore } from '../runtime';
+import { useTemplateVariableValues } from './template-variables';
+import { useTimeRange } from './time-range';
+import { useDatasourceStore } from './datasources';
+import { usePlugin, usePluginRegistry } from './plugin-registry';
 
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;

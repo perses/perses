@@ -13,7 +13,7 @@
 
 import { createContext, useContext } from 'react';
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { PluginImplementation, PluginMetadata, PluginType } from '../../model';
+import { PluginImplementation, PluginMetadata, PluginType } from '../model';
 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;

@@ -13,7 +13,7 @@
 
 import { Select, SelectProps, MenuItem } from '@mui/material';
 import { PluginType } from '../model';
-import { useListPluginMetadata } from './PluginRegistry';
+import { useListPluginMetadata } from '../runtime';
 
 export interface PluginKindSelectProps extends Omit<SelectProps<string>, 'children'> {
   pluginType: PluginType;
