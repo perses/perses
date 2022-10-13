@@ -13,4 +13,5 @@
 
 export * from './dashboard-provider';
 export * from './plugin-registry';
+export * from './intersection-observer';
 export * from './render';

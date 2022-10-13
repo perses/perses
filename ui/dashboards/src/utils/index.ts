@@ -11,22 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext } from 'react';
-
-export interface QueryString {
-  queryString: URLSearchParams;
-  setQueryString?: (queryString: URLSearchParams) => void;
-}
-
-export const QueryStringContext = createContext<QueryString | undefined>(undefined);
-
-/**
- * Gets the current query params at runtime.
- */
-export function useQueryString(): QueryString {
-  const ctx = useContext(QueryStringContext);
-  if (ctx === undefined) {
-    throw new Error('No QueryStringContext found. Did you forget a Provider?');
-  }
-  return ctx;
-}
+export * from './time-range-params';

@@ -11,18 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { Box, FormControl, Popover, Stack } from '@mui/material';
 import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
 import {
   DurationString,
   RelativeTimeRange,
   AbsoluteTimeRange,
-  TimeRangeValue,
-  getDefaultTimeRange,
+  isRelativeTimeRange,
+  toAbsoluteTimeRange,
 } from '@perses-dev/core';
-import { useTimeRange, useQueryString } from '@perses-dev/plugin-system';
-import { useDefaultTimeRange } from '../../context';
+import { useDashboardTimeRange } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
@@ -38,17 +37,14 @@ export const TIME_OPTIONS: TimeOption[] = [
 ];
 
 export function TimeRangeControls() {
-  const { timeRange, setTimeRange } = useTimeRange();
-  const dashboardDefaultTimeRange = useDefaultTimeRange();
-  const { queryString } = useQueryString();
-
-  const defaultTimeRange = getDefaultTimeRange(dashboardDefaultTimeRange, queryString);
-
-  // selected form value can be relative or absolute, timeRange from plugin-system is only absolute
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeValue>(defaultTimeRange);
+  const { timeRange, setTimeRange } = useDashboardTimeRange();
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
+
+  const convertedTimeRange = useMemo(() => {
+    return isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+  }, [timeRange]);
 
   return (
     <Stack direction="row" spacing={1}>
@@ -65,10 +61,9 @@ export function TimeRangeControls() {
         })}
       >
         <AbsoluteTimePicker
-          initialTimeRange={timeRange}
+          initialTimeRange={convertedTimeRange}
           onChange={(timeRange: AbsoluteTimeRange) => {
             setTimeRange(timeRange);
-            setSelectedTimeRange(timeRange);
             setShowCustomDateSelector(false);
           }}
         />
@@ -77,7 +72,7 @@ export function TimeRangeControls() {
         <Box ref={anchorEl}>
           <TimeRangeSelector
             timeOptions={TIME_OPTIONS}
-            value={selectedTimeRange}
+            value={timeRange}
             onSelectChange={(event) => {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {
@@ -85,7 +80,6 @@ export function TimeRangeControls() {
                 end: new Date(),
               };
               setTimeRange(relativeTimeInput);
-              setSelectedTimeRange(relativeTimeInput);
               setShowCustomDateSelector(false);
             }}
             onCustomClick={() => {
