@@ -19,6 +19,7 @@ import (
 
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/shared/validate"
 	"github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"
@@ -76,8 +77,8 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 	for _, object := range objects {
 		entity, ok := object.(*modelV1.Dashboard)
 		if ok {
-			if err := o.sch.ValidatePanels(entity.Spec.Panels); err != nil {
-				return err
+			if err := validate.Dashboard(entity, o.sch); err != nil {
+				return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
 			}
 		}
 	}

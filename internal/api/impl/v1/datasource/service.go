@@ -20,9 +20,9 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/shared/validate"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
 
@@ -128,33 +128,15 @@ func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 }
 
 func (s *service) validate(entity *v1.Datasource) error {
-	// In case there is a proxy defined, check if it is properly defined
-	plugin := entity.Spec.Plugin
-	if _, err := http.CheckAndValidate(plugin.Spec); err != nil {
-		return err
-	}
-	if err := s.validateUnicityOfDefaultDTS(entity); err != nil {
-		return err
-	}
-	return s.sch.ValidateDatasource(plugin)
-}
-
-func (s *service) validateUnicityOfDefaultDTS(entity *v1.Datasource) error {
-	// Since the entity is not supposed to be a default datasource, no need to verify if there is another one already defined as default
-	if !entity.Spec.Default {
-		return nil
-	}
-	// return the full list of dts
-	list, err := s.dao.List(&datasource.Query{Project: entity.Metadata.Project})
-	if err != nil {
-		logrus.WithError(err).Errorf("unable to get the list of the global datasource")
-		return err
-	}
-	entityPluginKind := entity.Spec.Plugin.Kind
-	for _, dts := range list {
-		if dts.Spec.Default && dts.Spec.Plugin.Kind == entityPluginKind {
-			return fmt.Errorf("datasource %q cannot be a default %q because there is already one defined named %q", entity.Metadata.Name, entityPluginKind, dts.Metadata.Name)
+	var list []*v1.Datasource
+	if entity.Spec.Default {
+		var err error
+		// return the full list of dts
+		list, err = s.dao.List(&datasource.Query{Project: entity.Metadata.Project})
+		if err != nil {
+			logrus.WithError(err).Errorf("unable to get the list of the global datasource")
+			return err
 		}
 	}
-	return nil
+	return validate.Datasource(entity, list, s.sch)
 }
