@@ -14,4 +14,3 @@
 export * from './datasources';
 export * from './template-variables';
 export * from './time-range';
-export * from './time-series-queries';
