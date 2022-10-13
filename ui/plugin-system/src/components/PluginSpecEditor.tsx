@@ -14,7 +14,7 @@
 import { ErrorAlert } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/core';
 import { OptionsEditorProps, PluginType } from '../model';
-import { usePlugin } from '../runtime/plugins';
+import { usePlugin } from './PluginRegistry';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: PluginType;

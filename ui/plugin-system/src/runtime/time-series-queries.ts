@@ -14,10 +14,9 @@
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { TimeSeriesQueryContext } from '../model';
-import { usePluginRegistry } from '../components';
+import { usePluginRegistry, usePlugin } from '../components';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';
-import { usePlugin } from './plugins';
 import { useDatasourceStore } from './datasources';
 
 export interface UseTimeSeriesQueryOptions {

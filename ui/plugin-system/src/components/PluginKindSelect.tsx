@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Select, SelectProps, MenuItem } from '@mui/material';
-import { useListPluginMetadata } from '../runtime';
 import { PluginType } from '../model';
+import { useListPluginMetadata } from './PluginRegistry';
 
 export interface PluginKindSelectProps extends Omit<SelectProps<string>, 'children'> {
   pluginType: PluginType;

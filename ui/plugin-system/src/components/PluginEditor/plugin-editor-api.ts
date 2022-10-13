@@ -18,7 +18,7 @@ import { produce } from 'immer';
 import { PluginType } from '../../model';
 import { PluginKindSelectProps } from '../PluginKindSelect';
 import { PluginSpecEditorProps } from '../PluginSpecEditor';
-import { usePlugin } from '../../runtime';
+import { usePlugin } from '../PluginRegistry';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
