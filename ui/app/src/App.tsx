@@ -12,13 +12,16 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
-import { ErrorAlert, ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
-import { QueryStringProvider } from '@perses-dev/dashboards';
-import { PluginRegistry, PluginBoundary } from '@perses-dev/plugin-system';
+import {
+  ChartsThemeProvider,
+  ErrorAlert,
+  ErrorBoundary,
+  generateChartsTheme,
+  PersesChartsTheme,
+} from '@perses-dev/components';
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import ViewDashboard from './views/ViewDashboard';
-import { DataSourceRegistry } from './context/DataSourceRegistry';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { useBundledPlugins } from './model/bundled-plugins';
@@ -29,12 +32,6 @@ const ECHARTS_THEME_OVERRIDES = {};
 
 function App() {
   const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
-
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // TODO: remove temporary location.key reload hack when routing setup properly
-  const location = useLocation();
-
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
@@ -57,18 +54,15 @@ function App() {
           overflow: 'hidden',
         }}
       >
-        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-            <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-              <DataSourceRegistry>
-                <QueryStringProvider queryString={searchParams} setQueryString={setSearchParams}>
-                  {/* temp fix to ensure dashboard refreshes when URL changes since setQueryString not reloading as expected  */}
-                  <ViewDashboard key={location.key} />
-                </QueryStringProvider>
-              </DataSourceRegistry>
-            </PluginBoundary>
-          </PluginRegistry>
-        </ChartsThemeProvider>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+            <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <ViewDashboard />
+              </ErrorBoundary>
+            </PluginRegistry>
+          </ChartsThemeProvider>
+        </ErrorBoundary>
       </Box>
       <Footer />
     </Box>

@@ -12,14 +12,17 @@
 // limitations under the License.
 
 //go:build integration
-// +build integration
 
 package utils
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -31,6 +34,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
 func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
@@ -107,23 +111,12 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 	if err != nil {
 		t.Fatal(err)
 	}
-	entity := &v1.Datasource{
-		Kind: v1.KindDatasource,
-		Metadata: v1.ProjectMetadata{
-			Metadata: v1.Metadata{
-				Name: "PrometheusDemo",
-			},
-			Project: "perses",
-		},
-		Spec: &datasource.Prometheus{
-			BasicDatasource: datasource.BasicDatasource{
-				Kind:    datasource.PrometheusKind,
-				Default: false,
-			},
-			HTTP: datasource.HTTPConfig{
-				URL:    promURL,
-				Access: datasource.ServerHTTPAccess,
-				AllowedEndpoints: []datasource.HTTPAllowedEndpoint{
+	pluginSpec := &datasource.Prometheus{
+		Proxy: datasourceHTTP.Proxy{
+			Kind: "HTTPProxy",
+			Spec: datasourceHTTP.Config{
+				URL: promURL,
+				AllowedEndpoints: []datasourceHTTP.AllowedEndpoint{
 					{
 						EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 						Method:          http.MethodPost,
@@ -149,6 +142,30 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 						Method:          http.MethodGet,
 					},
 				},
+			},
+		},
+	}
+	data, err := json.Marshal(pluginSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pluginSpecAsMapInterface map[string]interface{}
+	if err := json.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
+		t.Fatal(err)
+	}
+	entity := &v1.Datasource{
+		Kind: v1.KindDatasource,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: "PrometheusDemo",
+			},
+			Project: "perses",
+		},
+		Spec: v1.DatasourceSpec{
+			Default: false,
+			Plugin: common.Plugin{
+				Kind: "PrometheusDatasource",
+				Spec: pluginSpecAsMapInterface,
 			},
 		},
 	}
@@ -180,14 +197,34 @@ func defaultFileConfig() *config.File {
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
-	handler := echo.New()
-	persistenceManager, err := dependency.NewPersistenceManager(config.Database{
-		File: defaultFileConfig(),
-	})
+	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, config.Config{})
+	projectPath := strings.TrimSpace(string(projectPathByte))
+	handler := echo.New()
+	conf := config.Config{
+		Database: config.Database{
+			File: defaultFileConfig(),
+		},
+		Schemas: config.Schemas{
+			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
+			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
+			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
+			Interval:        0,
+		},
+	}
+	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
+	// Load every cue schemas
+	for _, loader := range serviceManager.GetSchemas().GetLoaders() {
+		if err := loader.Load(); err != nil {
+			t.Fatal(err)
+		}
+	}
 	persesAPI := core.NewPersesAPI(serviceManager)
 	persesAPI.RegisterRoute(handler)
 	return httptest.NewServer(handler), persistenceManager

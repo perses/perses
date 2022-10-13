@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { GaugeSeriesOption } from 'echarts';
-import { useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
+import { useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeChartData } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
 import { useMemo } from 'react';
@@ -24,21 +24,14 @@ import { GaugeChartOptions } from './gauge-chart-model';
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
-  const {
-    definition: {
-      spec: {
-        plugin: { spec: pluginSpec },
-      },
-    },
-    contentDimensions,
-  } = props;
+  const { spec: pluginSpec, contentDimensions } = props;
   const { query, calculation, max } = pluginSpec;
 
   const unit = pluginSpec.unit ?? { kind: 'PercentDecimal', decimal_places: 1 };
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
-  const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
+  const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
 
   const chartData: GaugeChartData = useMemo(() => {
     if (data === undefined) return undefined;
@@ -57,7 +50,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
 
   if (contentDimensions === undefined) return null;
 
-  if (loading === true) {
+  if (isLoading === true) {
     return (
       <Skeleton
         sx={{ margin: '0 auto' }}

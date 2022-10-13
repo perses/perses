@@ -12,31 +12,27 @@ This section explains about the format any plugin should follow to be accepted &
 A panel plugin looks like the following:
 
 ```cue
-package <panel type> // e.g package line
+package <panel type> // e.g package timeserie
 
-#panel: {
-	kind:       "<Panel name>" // e.g kind: "LineChart"
-	datasource: #datasource
-	options: {
-		queries:      [...#query]
-		show_legend?: bool
-	}
+kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
+spec: {
+	queries: [...#ts_query]
+	show_legend?: bool
+	unit?:        common.#unit
+	thresholds?:  common.#thresholds
 }
 
-#datasource: _
-#query:      _
+#ts_query: _
 ```
 it should contain:
 - a package name.
-- a `#panel` definition that holds:
-  - the panel's `kind`.
-  - \* `datasource: #datasource`
-  - an `options` map containing
-    - \* a field that maps to the `#query` definition (like `queries: [...#query]`,  `query: #query` etc.)
-    - any other field you want for this plugin.
-- \* a placeholder value `_` for `#datasource` and `#query`. _This is mandatory to pass the initial "compilation" of the plugin, then when it will be used to validate a panel the relevant definitions will be injected at runtime._
+- the panel's `kind`.
+- the panel's `spec` containing:
+  - \* a field that maps to the `#ts_query` definition (like `queries: [...#ts_query]`,  `query: #ts_query` etc.)
+  - any other field you want for this panel plugin.
+- \* a placeholder value `_` for `#ts_query`. _This is mandatory to pass the initial "compilation" of the plugin, then when it will be used to validate a panel the relevant definitions will be injected at runtime._
 
-_* guidelines that apply if your panel defines a query & a datasource (e.g LineChart), otherwise don't apply (e.g TextPanel)_
+_* guidelines that apply if your panel defines a query & a datasource (e.g TimeseriesChart), otherwise don't apply (e.g TextPanel)_
 
 ## Query
 
@@ -45,22 +41,24 @@ A query plugin looks like the following:
 ```cue
 package <query type> // e.g package prometheus
 
-#datasource: {
-	kind: "PrometheusDatasource"
-}
-
-#query: {
-	kind: "PrometheusGraphQuery"
-	options: {
-		query:       string
-		min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-		resolution?: number
+spec: {
+	plugin: {
+		kind: "<Query name>" // e.g kind: "PrometheusTimeSeriesQuery"
+		spec: {
+			datasource: {
+				kind: "<Datasource type>" // e.g kind: "PrometheusDatasource"
+			}
+			query:       string
+			min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+			resolution?: number
+		}
 	}
 }
 ```
 it should contain:
 - a package name.
-- a `#datasource` definition that holds the `kind` of datasource corresponding to this query type.
-- a `#query` definition that holds:
+- under `spec.plugin` :
   - the query's `kind`.
-  - an `options` map containing any field you want for this plugin.
+  - the query's `spec` containing:
+		- a `datasource` field that holds the `kind` of datasource corresponding to this query type.
+		- any other field you want for this query plugin.

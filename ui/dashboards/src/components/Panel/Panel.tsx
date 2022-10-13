@@ -14,8 +14,7 @@
 import { useState, useMemo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { PluginBoundary } from '@perses-dev/plugin-system';
-import { ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import {
   Box,
@@ -30,21 +29,22 @@ import {
 } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import { useDashboardApp, useEditMode } from '../../context';
+import { usePanels, useEditMode } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
   groupIndex: number;
-  panelKey: string;
+  itemIndex: number;
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, groupIndex, panelKey, ...others } = props;
+  const { definition, groupIndex, itemIndex, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -67,10 +67,10 @@ export function Panel(props: PanelProps) {
 
   const { isEditMode } = useEditMode();
 
-  const { openPanelDrawer } = useDashboardApp();
+  const { editPanel, openDeletePanelDialog } = usePanels();
 
   const handleEditButtonClick = () => {
-    openPanelDrawer({ groupIndex, panelKey });
+    editPanel({ groupIndex, itemIndex });
   };
 
   return (
@@ -133,6 +133,13 @@ export function Panel(props: PanelProps) {
                   <IconButton aria-label="edit panel" size="small" onClick={handleEditButtonClick}>
                     <PencilIcon />
                   </IconButton>
+                  <IconButton
+                    aria-label="delete panel"
+                    size="small"
+                    onClick={() => openDeletePanelDialog({ groupIndex, itemIndex })}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                   <IconButton aria-label="drag handle" size="small">
                     <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
                   </IconButton>
@@ -160,9 +167,15 @@ export function Panel(props: PanelProps) {
         }}
         ref={setContentElement}
       >
-        <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-          {inView === true && <PanelContent definition={definition} contentDimensions={contentDimensions} />}
-        </PluginBoundary>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          {inView === true && (
+            <PanelContent
+              panelPluginKind={definition.spec.plugin.kind}
+              spec={definition.spec.plugin.spec}
+              contentDimensions={contentDimensions}
+            />
+          )}
+        </ErrorBoundary>
       </CardContent>
     </Card>
   );

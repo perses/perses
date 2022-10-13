@@ -24,3 +24,4 @@ export * from './context/ChartsThemeProvider';
 export * from './utils';
 export * from './model';
 export * from './ListLegend';
+export * from './test';

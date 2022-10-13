@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from './definitions';
+import { Definition, UnknownSpec } from './definitions';
 
 export type VariableName = string;
 
@@ -23,7 +23,7 @@ interface VariableSpec {
     label?: string;
     hidden?: boolean;
   };
-  defaultValue?: VariableValue;
+  default_value?: VariableValue;
 }
 
 export interface TextVariableDefinition extends Definition<TextVariableSpec> {
@@ -34,14 +34,14 @@ export interface TextVariableSpec extends VariableSpec {
   value: string;
 }
 
-export interface ListVariableDefinition<PluginSpec = unknown> extends Definition<ListVariableSpec<PluginSpec>> {
+export interface ListVariableDefinition<PluginSpec = UnknownSpec> extends Definition<ListVariableSpec<PluginSpec>> {
   kind: 'ListVariable';
 }
 
 export interface ListVariableSpec<PluginSpec> extends VariableSpec {
-  allowMultiple?: boolean;
-  allowAllValue?: boolean;
-  customAllValue?: string;
+  allow_multiple?: boolean;
+  allow_all_value?: boolean;
+  custom_all_value?: string;
   plugin: Definition<PluginSpec>;
 }
 

@@ -17,6 +17,6 @@ import { EmptyChartOptions } from './empty-chart-model';
 
 export type EmptyChartPanelProps = PanelProps<EmptyChartOptions>;
 
-export function EmptyChartPanel(props: EmptyChartPanelProps) {
-  return <Box sx={{ overflow: 'hidden' }}>{props.definition.kind}</Box>;
+export function EmptyChartPanel() {
+  return <Box sx={{ overflow: 'hidden' }}>EmptyChart</Box>;
 }

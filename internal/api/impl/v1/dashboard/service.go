@@ -17,11 +17,10 @@ import (
 	"fmt"
 
 	"github.com/perses/common/etcd"
-	"github.com/perses/perses/internal/api/config"
-	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
-	"github.com/perses/perses/internal/api/impl/v1/dashboard/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/shared/validate"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -29,14 +28,14 @@ import (
 
 type service struct {
 	dashboard.Service
-	dao       dashboard.DAO
-	validator schemas.Validator
+	dao dashboard.DAO
+	sch schemas.Schemas
 }
 
-func NewService(dao dashboard.DAO, conf config.Config) dashboard.Service {
+func NewService(dao dashboard.DAO, sch schemas.Schemas) dashboard.Service {
 	return &service{
-		dao:       dao,
-		validator: schemas.NewValidator(conf.Schemas),
+		dao: dao,
+		sch: sch,
 	}
 }
 
@@ -51,14 +50,8 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// Note: you don't need to check that the project exists since once the permission middleware will be in place,
 	// it won't be possible to create a resources into a not known project
 
-	// verify it's possible to calculate the build order for the variable.
-	if _, err := variable.BuildOrder(entity.Spec.Variables); err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
-	}
-
 	// verify this new dashboard passes the validation
-	err := s.validator.Validate(entity.Spec.Panels)
-	if err != nil {
+	if err := validate.Dashboard(entity, s.sch); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 
@@ -93,13 +86,8 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 		logrus.Debugf("project in dashboard %q and coming from the http request: %q doesn't match", entity.Metadata.Project, parameters.Project)
 		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request doesn't match", shared.BadRequestError)
 	}
-	// verify it's possible to calculate the build order for the variable.
-	if _, err := variable.BuildOrder(entity.Spec.Variables); err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
-	}
-	// verify the updated version of the dashboard passes the validation
-	err := s.validator.Validate(entity.Spec.Panels)
-	if err != nil {
+	// verify this new dashboard passes the validation
+	if err := validate.Dashboard(entity, s.sch); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	// find the previous version of the dashboard
@@ -143,8 +131,4 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 
 func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
-}
-
-func (s *service) GetValidator() schemas.Validator {
-	return s.validator
 }

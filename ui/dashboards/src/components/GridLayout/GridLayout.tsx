@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,56 +13,39 @@
 import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
-import { GridDefinition, GridItemDefinition } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { styles } from '../../css/styles';
 import { useEditMode } from '../../context';
+import { PanelGroupDefinition } from '../../context/DashboardProvider/layout-slice';
 import { GridTitle } from './GridTitle';
+import { GridItemContent } from './GridItemContent';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps extends BoxProps {
   groupIndex: number;
-  definition: GridDefinition;
-  renderGridItemContent: (definition: GridItemDefinition, groupIndex: number) => React.ReactNode;
+  groupDefinition: PanelGroupDefinition;
 }
 
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
 export function GridLayout(props: GridLayoutProps) {
-  const {
-    groupIndex,
-    definition: { spec },
-    renderGridItemContent,
-    ...others
-  } = props;
+  const { groupIndex, groupDefinition, ...others } = props;
 
-  const [isOpen, setIsOpen] = useState(!!spec.display?.collapse?.open);
-
+  const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
   const { isEditMode } = useEditMode();
-
-  const gridItems: React.ReactNode[] = [];
-
-  spec.items.forEach((item, idx) => {
-    const { x, y, width: w, height: h } = item;
-
-    gridItems.push(
-      <div key={idx} data-grid={{ x, y, w, h }}>
-        {renderGridItemContent(item, groupIndex)}
-      </div>
-    );
-  });
 
   return (
     <>
       <GlobalStyles styles={styles} />
       <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
-        {spec.display !== undefined && (
+        {groupDefinition.title !== undefined && (
           <GridTitle
             groupIndex={groupIndex}
-            title={spec.display.title}
+            title={groupDefinition.title}
             collapse={
-              spec.display.collapse === undefined
+              groupDefinition.isCollapsed === undefined
                 ? undefined
                 : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
             }
@@ -79,7 +62,13 @@ export function GridLayout(props: GridLayoutProps) {
             isDraggable={isEditMode}
             isResizable={isEditMode}
           >
-            {gridItems}
+            {groupDefinition.items.map(({ x, y, width, height, content }, itemIndex) => (
+              <div key={itemIndex} data-grid={{ x, y, w: width, h: height }}>
+                <ErrorBoundary FallbackComponent={ErrorAlert}>
+                  <GridItemContent groupIndex={groupIndex} itemIndex={itemIndex} content={content} />
+                </ErrorBoundary>
+              </div>
+            ))}
           </ResponsiveGridLayout>
         </Collapse>
       </Box>

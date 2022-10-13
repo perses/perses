@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
@@ -19,15 +19,18 @@ import {
   TemplateVariableContext,
   VariableStateMap,
   VariableState,
+  VariableOption,
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/plugin-system';
-import { VariableName, VariableValue, ListVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
 
 type TemplateVariableStore = {
   variableDefinitions: VariableDefinition[];
   variableState: VariableStateMap;
   setVariableValue: (variableName: VariableName, value: VariableValue) => void;
-  loadTemplateVariable: (name: VariableName) => Promise<void>;
+  setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
+  setVariableLoading: (name: VariableName, loading: boolean) => void;
+  setVariableDefinitions: (definitions: VariableDefinition[]) => void;
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -81,7 +84,9 @@ export function useTemplateVariableActions() {
   return useStore(store, (s) => {
     return {
       setVariableValue: s.setVariableValue,
-      loadTemplateVariable: s.loadTemplateVariable,
+      setVariableLoading: s.setVariableLoading,
+      setVariableOptions: s.setVariableOptions,
+      setVariableDefinitions: s.setVariableDefinitions,
     };
   });
 }
@@ -97,7 +102,24 @@ export function useTemplateVariableStore() {
 }
 
 function PluginProvider({ children }: { children: React.ReactNode }) {
-  const values = useTemplateVariableValues();
+  const originalValues = useTemplateVariableValues();
+
+  const values = useMemo(() => {
+    const contextValues: VariableStateMap = {};
+
+    // This will loop through all the current variables values
+    // and update any variables that have ALL_VALUE as their current value
+    // to include all options.
+    Object.keys(originalValues).forEach((name) => {
+      const v = { ...originalValues[name] } as VariableState;
+      if (v.value === ALL_VALUE) {
+        v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
+      }
+      contextValues[name] = v;
+    });
+    return contextValues;
+  }, [originalValues]);
+
   return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
 }
 
@@ -108,39 +130,32 @@ interface TemplateVariableSrvArgs {
 function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: TemplateVariableSrvArgs) {
   const store = createStore<TemplateVariableStore>()(
     devtools(
-      immer((set, get) => ({
+      immer((set) => ({
         variableState: hydrateTemplateVariableStates(initialVariableDefinitions),
         variableDefinitions: initialVariableDefinitions,
-
-        // Actions
-        loadTemplateVariable: async (name: VariableName) => {
-          const def = get().variableDefinitions.find((v) => v.spec.name === name) as ListVariableDefinition;
-          if (!def) {
-            // Can't find the variable definition
-            return;
-          }
-
+        setVariableDefinitions(definitions: VariableDefinition[]) {
+          set((state) => {
+            state.variableDefinitions = definitions;
+            state.variableState = hydrateTemplateVariableStates(definitions);
+          });
+        },
+        setVariableOptions(name, options) {
           set((state) => {
             const varState = state.variableState[name];
-            if (varState) {
-              varState.loading = true;
+            if (!varState) {
+              return;
             }
+            varState.options = options;
           });
-
-          // Replace with loader
-          const { data: values } = await loadTemplateVariables();
-
-          if (def.spec.allowAllValue) {
-            values.unshift(getAllOption());
-          }
+        },
+        setVariableLoading(name, loading) {
           set((state) => {
             const varState = state.variableState[name];
-            if (varState) {
-              varState.options = values;
-              varState.loading = false;
+            if (!varState) {
+              return;
             }
+            varState.loading = loading;
           });
-          return;
         },
 
         setVariableValue: (name, value) =>
@@ -154,7 +169,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [] }: Tem
             // Make sure there is only one all value
             if (Array.isArray(val) && val.includes(ALL_VALUE)) {
               if (val.at(-1) === ALL_VALUE) {
-                val = [ALL_VALUE];
+                val = ALL_VALUE;
               } else {
                 val = val.filter((v) => v !== ALL_VALUE);
               }
@@ -175,7 +190,7 @@ export function TemplateVariableProvider({
   children: React.ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
 }) {
-  const store = createTemplateVariableSrvStore({ initialVariableDefinitions });
+  const [store] = useState(createTemplateVariableSrvStore({ initialVariableDefinitions }));
 
   return (
     <TemplateVariableStoreContext.Provider value={store}>
@@ -185,53 +200,11 @@ export function TemplateVariableProvider({
 }
 
 /** Helpers */
-async function loadTemplateVariables() {
-  // @TODO: Replace with plugin call
-  // simluate sleep for 2 seconds
-  // random time between 1 and 3 seconds
-
-  const sleepTime = Math.floor(Math.random() * 10000) + 1000;
-  await new Promise((resolve) => setTimeout(resolve, sleepTime));
-  return {
-    data: [
-      'a',
-      'b',
-      'c',
-      'd',
-      'e',
-      'f',
-      'g',
-      'h',
-      'i',
-      'j',
-      'k',
-      'l',
-      'm',
-      'n',
-      'o',
-      'p',
-      'q',
-      'r',
-      's',
-      't',
-      'u',
-      'v',
-      'w',
-      'x',
-      'y',
-      'z',
-    ].map((v) => ({ label: v, value: v })),
-  };
-}
-
-function getAllOption() {
-  return { label: 'All', value: ALL_VALUE };
-}
 
 function hydrateTemplateVariableState(definition: VariableDefinition) {
   const v = definition;
   const varState: VariableState = {
-    value: null,
+    value: v.spec.default_value ?? null,
     loading: false,
   };
   switch (v.kind) {
@@ -240,15 +213,13 @@ function hydrateTemplateVariableState(definition: VariableDefinition) {
       break;
     case 'ListVariable':
       varState.options = [];
-      if (v.spec.allowAllValue) {
-        varState.options.unshift({ label: 'All', value: ALL_VALUE });
-      }
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {
-          varState.value = v.spec.allowMultiple ? [firstOptionValue] : firstOptionValue;
+          varState.value = v.spec.allow_multiple ? [firstOptionValue] : firstOptionValue;
         }
       }
+      break;
     default:
       break;
   }

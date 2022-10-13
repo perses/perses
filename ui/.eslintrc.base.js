@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 // Base eslint configuration for typescript projects
 module.exports = {
   extends: [
+    'eslint:recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
@@ -67,4 +68,6 @@ module.exports = {
     // Not necessary in React 17
     'react/react-in-jsx-scope': 'off',
   },
+
+  ignorePatterns: ['**/dist'],
 };

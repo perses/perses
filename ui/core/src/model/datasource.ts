@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,23 +11,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Definition, UnknownSpec } from './definitions';
 import { Metadata, ProjectMetadata } from './resource';
 
-export interface DatasourceSpecDefinition {
-  kind: string;
-  default: boolean;
-}
-
-export type AnyDatasourceSpecDefinition = DatasourceSpecDefinition;
-
-export interface DatasourceModel {
-  kind: 'Datasource';
-  metadata: ProjectMetadata;
-  spec: AnyDatasourceSpecDefinition;
-}
-
-export interface GlobalDatasourceModel {
+/**
+ * A Datasource that's available across all projects.
+ */
+export interface GlobalDatasource {
   kind: 'GlobalDatasource';
   metadata: Metadata;
-  spec: AnyDatasourceSpecDefinition;
+  spec: DatasourceSpec;
+}
+
+/**
+ * A Datasource that belongs to a project.
+ */
+export interface Datasource {
+  kind: 'Datasource';
+  metadata: ProjectMetadata;
+  spec: DatasourceSpec;
+}
+
+export interface DatasourceSpec<PluginSpec = UnknownSpec> {
+  display?: {
+    name: string;
+    description?: string;
+  };
+  default: boolean;
+  plugin: Definition<PluginSpec>;
+}
+
+/**
+ * A selector for pointing at a specific Datasource. If name is omitted, it's assumed that you want the default
+ * Datasource for the specified kind.
+ */
+export interface DatasourceSelector {
+  kind: string;
+  name?: string;
 }

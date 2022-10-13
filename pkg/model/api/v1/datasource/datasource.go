@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,55 +14,14 @@
 package datasource
 
 import (
-	"encoding/json"
-	"fmt"
+	"net/url"
+
+	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
-type Kind string
-
-const PrometheusKind Kind = "Prometheus"
-
-var kindMap = map[Kind]bool{
-	PrometheusKind: true,
-}
-
-func (k *Kind) UnmarshalJSON(data []byte) error {
-	var tmp Kind
-	type plain Kind
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*k = tmp
-	return nil
-}
-
-func (k *Kind) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp Kind
-	type plain Kind
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*k = tmp
-	return nil
-}
-
-func (k *Kind) validate() error {
-	if len(*k) == 0 {
-		return fmt.Errorf("spec.kind cannot be empty")
-	}
-	if _, ok := kindMap[*k]; !ok {
-		return fmt.Errorf("unknown spec.kind %q used", *k)
-	}
-	return nil
-}
-
-type BasicDatasource struct {
-	Kind    Kind `json:"kind" yaml:"kind"`
-	Default bool `json:"default" yaml:"default"`
+// Prometheus is only used for testing purpose.
+// It doesn't reflect the nature of the actual prometheus datasource
+type Prometheus struct {
+	DirectURL *url.URL   `json:"direct_url,omitempty" yaml:"direct_url,omitempty"`
+	Proxy     http.Proxy `json:"proxy" yaml:"proxy"`
 }

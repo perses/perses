@@ -11,11 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useRef } from 'react';
-import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, IconButton, TextField } from '@mui/material';
-import { Reload } from 'mdi-material-ui';
-import { VariableName, ListVariableDefinition } from '@perses-dev/core';
-import { useTemplateVariable, useTemplateVariableActions, useTemplateVariableStore } from '../../context';
+import { useEffect, useMemo, useState } from 'react';
+import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
+import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
+import {
+  usePlugin,
+  DEFAULT_ALL_VALUE,
+  useTemplateVariableValues,
+  VariableStateMap,
+  useDatasourceStore,
+} from '@perses-dev/plugin-system';
+import { useQuery } from '@tanstack/react-query';
+import { useTemplateVariable, useTemplateVariableActions } from '../../context';
 
 type TemplateVariableProps = {
   name: VariableName;
@@ -34,59 +41,150 @@ export function TemplateVariable({ name }: TemplateVariableProps) {
   return <div>Unsupported Variable Kind: ${kind}</div>;
 }
 
+/**
+ * Returns a serialized string of the current state of variable values.
+ */
+function getVariableValuesKey(v: VariableStateMap) {
+  return Object.values(v)
+    .map((v) => JSON.stringify(v.value))
+    .join(',');
+}
+
 function ListVariable({ name }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name);
   const definition = ctx.definition as ListVariableDefinition;
-  const { setVariableValue, loadTemplateVariable } = useTemplateVariableActions();
-  const allowMultiple = definition?.spec.allowMultiple === true;
+  const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
+  const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
+  const datasourceStore = useDatasourceStore();
+
+  const spec = definition.spec.plugin.spec;
+
+  let dependsOnVariables: string[] | undefined;
+  if (variablePlugin?.dependsOn) {
+    dependsOnVariables = variablePlugin.dependsOn(spec);
+  }
+
+  const variables = useTemplateVariableValues(dependsOnVariables);
+  const allowMultiple = definition?.spec.allow_multiple === true;
+  const allowAllValue = definition?.spec.allow_all_value === true;
+  const label = definition?.spec.display?.label ?? name;
+
+  let waitToLoad = false;
+  if (dependsOnVariables) {
+    waitToLoad = dependsOnVariables.some((v) => variables[v]?.loading);
+  }
+
+  const variablesValueKey = getVariableValuesKey(variables);
+
+  const variablesOptionsQuery = useQuery(
+    [name, definition, variablesValueKey],
+    async () => {
+      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables });
+      return resp?.data ?? [];
+    },
+    { enabled: !!variablePlugin || waitToLoad }
+  );
+
   useEffect(() => {
-    loadTemplateVariable(name);
-  }, [name, loadTemplateVariable]);
+    setVariableLoading(name, variablesOptionsQuery.isFetching);
+    if (variablesOptionsQuery.data) {
+      setVariableOptions(name, variablesOptionsQuery.data);
+    }
+  }, [variablesOptionsQuery, name, setVariableLoading, setVariableOptions]);
 
   let value = ctx.state?.value;
+  const options = ctx.state?.options;
+  const loading = ctx.state?.loading;
 
+  // Make sure value is an array if allowMultiple is true
   if (allowMultiple && !Array.isArray(value)) {
-    value = [];
+    value = typeof value === 'string' ? [value] : [];
   }
+
+  const finalOptions = useMemo(() => {
+    let computedOptions = options ? [...options] : [];
+
+    // Add the all value if it's allowed
+    if (allowAllValue) {
+      computedOptions = [{ value: DEFAULT_ALL_VALUE, label: 'All' }, ...computedOptions];
+    }
+    return computedOptions;
+  }, [options, allowAllValue]);
+
+  useEffect(() => {
+    const firstOption = finalOptions?.[0];
+    const valueIsInOptions = Boolean(
+      finalOptions.find((v) => {
+        if (allowMultiple) {
+          return (value as string[]).includes(v.value);
+        }
+        return value === v.value;
+      })
+    );
+
+    // If there is no value but there are options, set the value to the first option.
+    if (!value && firstOption) {
+      setVariableValue(name, firstOption.value);
+    }
+
+    // If there is a value but it's not in the options, select the first value or set to null
+    if (value && !valueIsInOptions && !definition.spec.default_value) {
+      setVariableValue(name, firstOption?.value || null);
+    }
+  }, [finalOptions, setVariableValue, value, name, allowMultiple]);
 
   return (
     <Box display={'flex'}>
       <FormControl>
-        <InputLabel id={name}>{name}</InputLabel>
+        <InputLabel id={name}>{label}</InputLabel>
         <Select
+          sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
           label={name}
-          value={value}
+          value={value ?? ''}
           onChange={(e) => {
-            setVariableValue(name, e.target.value as string);
+            // Must be selected
+            if (e.target.value === null || e.target.value.length === 0) {
+              if (allowAllValue) {
+                setVariableValue(name, DEFAULT_ALL_VALUE);
+              }
+              return;
+            }
+            setVariableValue(name, e.target.value as VariableValue);
           }}
           multiple={allowMultiple}
         >
-          {ctx.state?.options?.map((option) => (
+          {loading && (
+            <MenuItem value="loading" disabled>
+              Loading
+            </MenuItem>
+          )}
+          {finalOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
             </MenuItem>
           ))}
         </Select>
-        {ctx.state?.loading && <LinearProgress />}
+        {loading && <LinearProgress />}
       </FormControl>
-      <IconButton onClick={() => loadTemplateVariable(name)}>
-        <Reload />
-      </IconButton>
     </Box>
   );
 }
 
 function TextVariable({ name }: TemplateVariableProps) {
   const { state } = useTemplateVariable(name);
-  const s = useTemplateVariableStore();
-  const setVariableValue = s.setVariableValue;
-  const ref = useRef<HTMLInputElement>(null);
+  const [tempValue, setTempValue] = useState(state?.value ?? '');
+  const { setVariableValue } = useTemplateVariableActions();
+
+  useEffect(() => {
+    setTempValue(state?.value ?? '');
+  }, [state?.value]);
+
   return (
     <TextField
-      ref={ref}
-      defaultValue={state?.value}
-      onBlur={(e) => setVariableValue(name, e.target.value)}
+      value={tempValue}
+      onChange={(e) => setTempValue(e.target.value)}
+      onBlur={() => setVariableValue(name, tempValue)}
       placeholder={name}
       label={name}
     />

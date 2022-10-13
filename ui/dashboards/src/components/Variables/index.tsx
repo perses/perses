@@ -13,3 +13,4 @@
 
 export * from './Variable';
 export * from './VariableList';
+export * from './VariableEditorForm';

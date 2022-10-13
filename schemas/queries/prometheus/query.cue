@@ -13,15 +13,20 @@
 
 package prometheus
 
-#datasource: {
-	kind: "PrometheusDatasource"
-}
+import (
+	"github.com/perses/perses/schemas/datasources/prometheus"
+)
 
-#query: {
-	kind: "PrometheusGraphQuery"
-	options: {
-		query:       string
-		min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-		resolution?: number
+spec: {
+	plugin: {
+		kind: "PrometheusTimeSeriesQuery"
+		spec: {
+			datasource: {
+				kind: prometheus.kind
+			}
+			query:       string
+			min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+			resolution?: number
+		}
 	}
 }

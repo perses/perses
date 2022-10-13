@@ -11,220 +11,68 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  MenuItem,
-  Stack,
-  Select,
-  SelectProps,
-  TextField,
-  InputLabel,
-  FormControl,
-  Grid,
-  Box,
-  Button,
-  Typography,
-} from '@mui/material';
-import { Drawer, ErrorAlert } from '@perses-dev/components';
-import { PluginBoundary } from '@perses-dev/plugin-system';
-import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
-import { useDashboardApp, useLayouts, usePanels } from '../../context';
-import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
-import { PanelOptionsEditor, PanelOptionsEditorProps } from './PanelOptionsEditor';
+import { useState } from 'react';
+import { Stack, Box, Button, Typography } from '@mui/material';
+import { Drawer } from '@perses-dev/components';
+import { usePanels } from '../../context';
+import { PanelEditorForm, panelEditorFormId, PanelEditorFormProps } from './PanelEditorForm';
 
-interface PanelDrawerHeaderProps {
-  onClose: () => void;
-  panelKey?: string;
-}
+/**
+ * The Add/Edit panel drawer for editing a panel's options.
+ */
+export const PanelDrawer = () => {
+  const { panelEditor } = usePanels();
 
-const PanelDrawer = () => {
-  const { layouts } = useLayouts();
-  const { panels, updatePanel } = usePanels();
-  const { panelDrawer, closePanelDrawer } = useDashboardApp();
+  // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
+  const [isClosing, setIsClosing] = useState(false);
+  const handleClose = () => setIsClosing(true);
 
-  let defaultPanelName = '';
-  let defaultDescription = '';
-  if (panelDrawer?.panelKey) {
-    // editing an existing panel
-    defaultPanelName = panels[panelDrawer.panelKey]?.spec.display.name ?? '';
-    defaultDescription = panels[panelDrawer.panelKey]?.spec.display.description ?? '';
-  }
-  const [group, setGroup] = useState(panelDrawer?.groupIndex);
-  const [panelName, setPanelName] = useState(defaultPanelName);
-  const [panelDescription, setPanelDescription] = useState(defaultDescription);
-  const [kind, setKind] = useState('');
-  const [options, setOptions] = useState<unknown>({});
+  // Don't call closeDrawer on the store until the Drawer has completely transitioned out
+  const handleExited = () => {
+    panelEditor?.close();
+    setIsClosing(false);
+  };
 
-  // TO DO: we might want to make the form a sub component we don't need this useEffect
-  // currently, we need to reset the states whenever panelDrawer is reopened
-  // since this component does not get remounted when it open/closes (otherwise we lose the animation of sliding in/out)
-  useEffect(() => {
-    setGroup(panelDrawer?.groupIndex);
-    if (panelDrawer?.panelKey) {
-      // display panel name and description in text fields when editing an existing panel
-      setPanelName(panels[panelDrawer.panelKey]?.spec.display.name ?? '');
-      setPanelDescription(panels[panelDrawer.panelKey]?.spec.display.description ?? '');
-    } else {
-      setPanelName('');
-      setPanelDescription('');
+  // Drawer is open if we have a model and we're not transitioning out
+  const isOpen = panelEditor !== undefined && isClosing === false;
+
+  const handleSubmit: PanelEditorFormProps['onSubmit'] = (values) => {
+    // This shouldn't happen since we don't render the submit button until we have a model, but check to make TS happy
+    if (panelEditor === undefined) {
+      throw new Error('Cannot apply changes');
     }
-  }, [panelDrawer, panels]);
-
-  const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
-    const { value } = e.target;
-
-    // Handle string (which would be empty string but shouldn't happen since we don't allow a "None" option) by
-    // just ignoring it
-    if (typeof value === 'string') return;
-
-    setGroup(value);
-  };
-
-  const handlePanelNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPanelName(e.target.value);
-  };
-
-  const handlePanelDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPanelDescription(e.target.value);
-  };
-
-  const handleKindChange: SelectProps<string>['onChange'] = (e) => {
-    setKind(e.target.value);
-  };
-
-  const handleOptionsChange: PanelOptionsEditorProps['onChange'] = (next) => {
-    setOptions(next);
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    if (panelDrawer?.groupIndex !== undefined && !panelDrawer?.panelKey) {
-      addNewPanel();
-    } else if (panelDrawer?.panelKey) {
-      editPanel();
-    }
-    closePanelDrawer();
-  };
-
-  const addNewPanel = (): void => {
-    if (panelDrawer?.groupIndex === undefined) {
-      return;
-    }
-
-    const panelKey = removeWhiteSpacesAndSpecialCharacters(panelName);
-    updatePanel(
-      panelKey,
-      {
-        kind: 'Panel',
-        spec: {
-          display: { name: panelName, description: panelDescription },
-          plugin: {
-            kind,
-            spec: options,
-          },
-        },
-      },
-      panelDrawer.groupIndex
-    );
-  };
-
-  const editPanel = (): void => {
-    if (panelDrawer?.panelKey === undefined) {
-      return;
-    }
-    updatePanel(panelDrawer.panelKey, {
-      kind: 'Panel',
-      spec: {
-        ...panels[panelDrawer.panelKey]?.spec,
-        display: { name: panelName ?? '', description: panelDescription },
-        plugin: {
-          kind,
-          spec: options,
-        },
-      },
-    });
-    // TO DO: need to move panel if panel group changes
+    panelEditor.applyChanges(values);
+    handleClose();
   };
 
   return (
-    <Drawer isOpen={!!panelDrawer} onClose={() => closePanelDrawer()}>
-      <form onSubmit={handleSubmit}>
-        <PanelDrawerHeader panelKey={panelDrawer?.panelKey} onClose={() => closePanelDrawer()} />
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
-            <FormControl>
-              <InputLabel id="select-group">Group</InputLabel>
-              <Select required labelId="select-group" label="Group" value={group ?? 0} onChange={handleGroupChange}>
-                {layouts.map((layout, index) => (
-                  <MenuItem key={index} value={index}>
-                    {layout.spec.display?.title || `Group ${index + 1}`}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={8}>
-            <Stack spacing={2} sx={{ flexGrow: '1' }}>
-              <TextField
-                required
-                label="Panel Name"
-                value={panelName}
-                variant="outlined"
-                onChange={handlePanelNameChange}
-              />
-              <TextField
-                label="Description"
-                value={panelDescription}
-                variant="outlined"
-                onChange={handlePanelDescriptionChange}
-              />
+    <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }}>
+      {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
+      {panelEditor !== undefined && (
+        <>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: (theme) => theme.spacing(2),
+              paddingBottom: (theme) => theme.spacing(2),
+              borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
+            }}
+          >
+            <Typography variant="h2">{panelEditor.mode} Panel</Typography>
+            <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+              {/* Using the 'form' attribute lets us have a submit button like this outside the form element */}
+              <Button type="submit" variant="contained" form={panelEditorFormId}>
+                {panelEditor.mode === 'Add' ? 'Add' : 'Apply'}
+              </Button>
+              <Button variant="outlined" onClick={handleClose}>
+                Cancel
+              </Button>
             </Stack>
-          </Grid>
-          <Grid item xs={4}>
-            <FormControl>
-              <InputLabel id="panel-type-label">Panel Type</InputLabel>
-              <Select required labelId="panel-type-label" label="Panel Type" value={kind} onChange={handleKindChange}>
-                {/* TODO: Replace this with options that come from asking the plugin system what panel plugins are available */}
-                <MenuItem value="LineChart">Line Chart</MenuItem>
-                <MenuItem value="GaugeChart">Gauge Chart</MenuItem>
-                <MenuItem value="StatChart">Stat Chart</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={8}>
-            <PluginBoundary loadingFallback="Loading..." ErrorFallbackComponent={ErrorAlert}>
-              {kind !== '' && <PanelOptionsEditor kind={kind} value={options} onChange={handleOptionsChange} />}
-            </PluginBoundary>
-          </Grid>
-        </Grid>
-      </form>
+          </Box>
+          <PanelEditorForm onSubmit={handleSubmit} initialValues={panelEditor.initialValues} />
+        </>
+      )}
     </Drawer>
   );
 };
-
-const PanelDrawerHeader = ({ panelKey, onClose }: PanelDrawerHeaderProps) => {
-  const action = panelKey ? 'Edit' : 'Add';
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: (theme) => theme.spacing(2),
-        paddingBottom: (theme) => theme.spacing(2),
-        borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
-      }}
-    >
-      <Typography variant="h2">{`${action} Panel`}</Typography>
-      <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-        <Button type="submit" variant="contained">
-          {panelKey ? 'Apply' : 'Add'}
-        </Button>
-        <Button variant="outlined" onClick={onClose}>
-          Cancel
-        </Button>
-      </Stack>
-    </Box>
-  );
-};
-
-export default PanelDrawer;

@@ -27,7 +27,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	datasourcev1 "github.com/perses/perses/pkg/model/api/v1/datasource"
+	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
 )
 
@@ -43,7 +43,7 @@ func Proxy(dts datasource.DAO, globalDTS globaldatasource.DAO) echo.MiddlewareFu
 			if err != nil {
 				return err
 			}
-			if spec == nil {
+			if spec == (v1.DatasourceSpec{}) {
 				return next(c)
 			}
 			pr, err := newProxy(spec, path)
@@ -61,7 +61,7 @@ func extractDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS glob
 	localDatasourceMatch := localProxyMatcher.MatchString(requestPath)
 	if !globalDatasourceMatch && !localDatasourceMatch {
 		// this is likely a request for the API itself
-		return nil, "", nil
+		return v1.DatasourceSpec{}, "", nil
 	}
 
 	if globalDatasourceMatch {
@@ -73,7 +73,7 @@ func extractDatasourceAndPath(c echo.Context, dts datasource.DAO, globalDTS glob
 func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
 	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 1 {
-		return nil, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
 	datasourceName := matchingGroups[0][1]
 	// getting the datasource object
@@ -81,10 +81,10 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", datasourceName)
-			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
+			return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", datasourceName)
-		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
@@ -98,7 +98,7 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
 	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 2 {
-		return nil, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
 	projectName := matchingGroups[0][1]
 	datasourceName := matchingGroups[0][2]
@@ -107,10 +107,10 @@ func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.Datas
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", datasourceName, projectName)
-			return nil, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
+			return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", datasourceName)
-		return nil, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
@@ -126,16 +126,23 @@ type proxy interface {
 }
 
 func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
-	switch v := spec.(type) {
-	case *datasourcev1.Prometheus:
-		return &httpProxy{config: v.HTTP, path: path}, nil
-	default:
-		return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
+	cfg, err := datasourceHTTP.CheckAndValidate(spec.Plugin.Spec)
+	if err != nil {
+		logrus.WithError(err).Error("unable to build or find the http config in the datasource")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to find the http config")
 	}
+	if cfg != nil {
+		return &httpProxy{
+			config: cfg,
+			path:   path,
+		}, nil
+	}
+	// TODO build the HTTP proxy
+	return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
 }
 
 type httpProxy struct {
-	config datasourcev1.HTTPConfig
+	config *datasourceHTTP.Config
 	path   string
 }
 
@@ -155,9 +162,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
-	if err := h.prepareRequest(c); err != nil {
-		return err
-	}
+	h.prepareRequest(c)
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
@@ -179,7 +184,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 	return proxyErr
 }
 
-func (h *httpProxy) prepareRequest(c echo.Context) error {
+func (h *httpProxy) prepareRequest(c echo.Context) {
 	req := c.Request()
 	// We have to modify the HOST of the request in order to match the host of the targetURL
 	// So far I'm not sure to understand exactly why, but if you are going to remove it, be sure of what you are doing.
@@ -201,29 +206,10 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
-	authConfig := h.config.Auth
-	if authConfig != nil {
-		if len(authConfig.BearerToken) > 0 {
-			req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", authConfig.BearerToken))
-		}
-		if authConfig.BasicAuth != nil {
-			password, err := authConfig.BasicAuth.GetPassword()
-			if err != nil {
-				logrus.WithError(err).Error("unable to retrieve the password for the basic auth")
-				return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
-			}
-			req.SetBasicAuth(authConfig.BasicAuth.Username, password)
-		}
-	}
-	return nil
 }
 
 func (h *httpProxy) prepareTransport() *http.Transport {
 	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
-	if h.config.Auth != nil {
-		tlsConfig.InsecureSkipVerify = h.config.Auth.InsecureTLS
-		// TODO use the certificate
-	}
 	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{

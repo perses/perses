@@ -14,94 +14,89 @@
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import * as dashboardAppSlice from '../../context/DashboardAppSlice';
-import * as layoutsSlice from '../../context/LayoutsSlice';
-import * as context from '../../context/DashboardProvider';
-import { FAKE_PANEL_PLUGIN, mockPluginRegistryProps, renderWithContext } from '../../test';
-import testDashboard from '../../test/testDashboard';
-import PanelDrawer from './PanelDrawer';
-
-const updatePanel = jest.fn();
-jest.spyOn(context, 'usePanels').mockReturnValue({
-  updatePanel,
-  panels: {},
-});
-
-const addItemToLayout = jest.fn();
-jest.spyOn(layoutsSlice, 'useLayouts').mockReturnValue({
-  addItemToLayout,
-  updateLayout: jest.fn(),
-  layouts: testDashboard.spec.layouts,
-});
-
-const dashboardApp = {
-  panelDrawer: {
-    groupIndex: 0,
-  },
-  openPanelDrawer: jest.fn(),
-  closePanelDrawer: jest.fn(),
-  panelGroupDialog: undefined,
-  openPanelGroupDialog: jest.fn(),
-  closePanelGroupDialog: jest.fn(),
-};
+import { act } from 'react-dom/test-utils';
+import {
+  createDashboardProviderSpy,
+  FAKE_PANEL_PLUGIN,
+  getTestDashboard,
+  mockPluginRegistryProps,
+  renderWithContext,
+} from '../../test';
+import { DashboardProvider } from '../../context/DashboardProvider';
+import { PanelDrawer } from './PanelDrawer';
 
 describe('Panel Drawer', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   const renderPanelDrawer = () => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
+    addMockPlugin('Panel', 'TimeSeriesChart', FAKE_PANEL_PLUGIN);
+
+    const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(
       <PluginRegistry {...pluginRegistryProps}>
-        <PanelDrawer />,
+        <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
+          <DashboardProviderSpy />
+          <PanelDrawer />
+        </DashboardProvider>
       </PluginRegistry>
     );
+
+    const { value: storeApi } = store;
+    if (storeApi === undefined) {
+      throw new Error('Expected dashboard store to be set after initial render');
+    }
+
+    return storeApi;
   };
 
-  it('should add new panel', () => {
-    jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue(dashboardApp);
-    renderPanelDrawer();
-    const nameInput = screen.getByLabelText(/Panel Name/);
+  it('should add new panel', async () => {
+    const storeApi = renderPanelDrawer();
+
+    // Open the drawer for a new panel (i.e. no panel key)
+    act(() => storeApi.getState().addPanel(0));
+
+    const nameInput = await screen.findByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel');
     userEvent.click(screen.getByText('Add'));
-    expect(updatePanel).toHaveBeenCalledWith(
-      'NewPanel',
-      {
+
+    // TODO: Assert drawer is closed?
+    const panels = storeApi.getState().panels;
+    expect(panels).toMatchObject({
+      // Should have the new panel in the store
+      NewPanel: {
         kind: 'Panel',
         spec: {
-          display: { name: 'New Panel', description: '' },
+          display: { name: 'New Panel' },
           plugin: {
             kind: '',
             spec: {},
           },
         },
       },
-      0
-    );
+    });
   });
 
-  it('should edit an existing panel', () => {
-    jest.spyOn(dashboardAppSlice, 'useDashboardApp').mockReturnValue({
-      ...dashboardApp,
-      panelDrawer: {
-        groupIndex: 0,
-        panelKey: 'cpu',
-      },
-    });
-    renderPanelDrawer();
-    const nameInput = screen.getByLabelText(/Panel Name/);
+  it('should edit an existing panel', async () => {
+    const storeApi = renderPanelDrawer();
+
+    // Open the drawer for an existing panel
+    act(() => storeApi.getState().editPanel({ groupIndex: 0, itemIndex: 0 }));
+
+    const nameInput = await screen.findByLabelText(/Name/);
+    userEvent.clear(nameInput);
     userEvent.type(nameInput, 'cpu usage');
     userEvent.click(screen.getByText('Apply'));
-    expect(updatePanel).toHaveBeenCalledWith('cpu', {
-      kind: 'Panel',
-      spec: {
-        display: { name: 'cpu usage', description: '' },
-        plugin: {
-          kind: '',
-          spec: {},
+
+    const panels = storeApi.getState().panels;
+    expect(panels).toMatchObject({
+      cpu: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'cpu usage' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {},
+          },
         },
       },
     });

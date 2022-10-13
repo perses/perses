@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-system",
-  "version": "0.7.1",
+  "version": "0.9.0",
   "description": "The plugin feature in Pereses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -12,26 +12,30 @@
     "url": "https://github.com/perses/perses/issues"
   },
   "module": "dist/index.js",
-  "main": "dist/cjs/index.js",
+  "main": "dist//cjs/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "tsc --build",
-    "build:cjs": "tsc --project ./tsconfig.cjs.json",
+    "build": "concurrently \"npm:build:*\"",
+    "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist --config-file ../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --declaration --preserveWatchOutput",
+    "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.7.1",
-    "@perses-dev/core": "^0.7.1",
+    "@perses-dev/components": "^0.9.0",
+    "@perses-dev/core": "^0.9.0",
     "immer": "^9.0.15",
     "use-immer": "^0.7.0"
   },
   "peerDependencies": {
+    "@mui/material": "^5.6.0",
+    "@tanstack/react-query": "^4.7.1",
     "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0",
-    "react-query": "^3.34.16"
+    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "files": [
     "dist"

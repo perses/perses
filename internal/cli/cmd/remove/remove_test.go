@@ -46,9 +46,9 @@ func TestDeleteCMD(t *testing.T) {
 			Args:            []string{"project", "--all"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: `object "Project" "perses" has been deleted
-object "Project" "Amadeus" has been deleted
+			ExpectedMessage: `object "Project" "Amadeus" has been deleted
 object "Project" "Chronosphere" has been deleted
+object "Project" "perses" has been deleted
 `,
 		},
 		{
@@ -79,8 +79,8 @@ object "Project" "Chronosphere" has been deleted
 			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
-object "Folder" "aoe4" has been deleted in the project "game"
+			ExpectedMessage: `object "Folder" "aoe4" has been deleted in the project "game"
+object "Folder" "ff15" has been deleted in the project "perses"
 object "Project" "perses" has been deleted
 `,
 		},

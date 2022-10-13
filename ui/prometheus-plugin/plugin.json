@@ -7,33 +7,41 @@
     "plugins": [
       {
         "pluginType": "Variable",
-        "kind": "PrometheusLabelNames",
+        "kind": "StaticListVariable",
         "display": {
-          "name": "Prometheus Label Names",
+          "name": "Static List Variable",
+          "description": "Static list variables allow you to define an array of values"
+        }
+      },
+      {
+        "pluginType": "Variable",
+        "kind": "PrometheusLabelValuesVariable",
+        "display": {
+          "name": "PrometheusLabelValuesVariable",
           "description": ""
         }
       },
       {
         "pluginType": "Variable",
-        "kind": "PrometheusLabelValues",
+        "kind": "PrometheusLabelNamesVariable",
         "display": {
-          "name": "Prometheus Label Values",
+          "name": "PrometheusLabelNamesVariable",
           "description": ""
         }
       },
       {
-        "pluginType": "Variable",
-        "kind": "Interval",
-        "display": {
-          "name": "Time Duration",
-          "description": ""
-        }
-      },
-      {
-        "pluginType": "GraphQuery",
-        "kind": "PrometheusGraphQuery",
+        "pluginType": "TimeSeriesQuery",
+        "kind": "PrometheusTimeSeriesQuery",
         "display": {
           "name": "Prometheus Range Query",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Datasource",
+        "kind": "PrometheusDatasource",
+        "display": {
+          "name": "Prometheus Datasource",
           "description": ""
         }
       }

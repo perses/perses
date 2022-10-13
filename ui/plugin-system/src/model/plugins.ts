@@ -11,17 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ResourceMetadata, ListVariableDefinition, PanelDefinition, GraphQueryDefinition } from '@perses-dev/core';
-import { GraphQueryPlugin } from './graph-queries';
+import { Metadata, UnknownSpec } from '@perses-dev/core';
+import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
+import { DatasourcePlugin } from './datasource';
+import { Plugin } from './plugin-base';
 
 /**
  * Information about a module/package that contains plugins.
  */
 export interface PluginModuleResource {
   kind: 'PluginModule';
-  metadata: ResourceMetadata;
+  metadata: Metadata;
   spec: PluginSpec;
 }
 
@@ -42,39 +44,26 @@ export interface PluginMetadata {
 }
 
 /**
- * All supported plugin type values as an array for use at runtime.
+ * All supported plugin types. A plugin's implementation must extend from `Plugin<UnknownSpec>` to be considered a valid
+ * `PluginType`.
  */
-export const ALL_PLUGIN_TYPES = ['Variable', 'Panel', 'GraphQuery'] as const;
+export type PluginType = {
+  // Filter out implementations on SupportedPlugins that don't extend `Plugin<UnknownSpec>`
+  [K in keyof SupportedPlugins]: SupportedPlugins[K] extends Plugin<UnknownSpec> ? K : never;
+}[keyof SupportedPlugins];
 
 /**
- * All supported plugin types.
+ * Map of plugin type key/string -> implementation type. Use Typescript module augmentation to extend the plugin system
+ * with new plugin types.
  */
-export type PluginType = typeof ALL_PLUGIN_TYPES[number];
-
-// Map of plugin type -> config and implementation type
-type SupportedPlugins<Spec> = {
-  Variable: {
-    Def: ListVariableDefinition<Spec>;
-    Impl: VariablePlugin<Spec>;
-  };
-  Panel: {
-    Def: PanelDefinition<Spec>;
-    Impl: PanelPlugin<Spec>;
-  };
-  GraphQuery: {
-    Def: GraphQueryDefinition<Spec>;
-    Impl: GraphQueryPlugin<Spec>;
-  };
-};
-
-/**
- * Union type of all available plugin implementations.
- */
-export type Plugin<Spec> = {
-  [Type in PluginType]: PluginImplementation<Type, Spec>;
-}[PluginType];
+export interface SupportedPlugins {
+  Variable: VariablePlugin;
+  Panel: PanelPlugin;
+  TimeSeriesQuery: TimeSeriesQueryPlugin;
+  Datasource: DatasourcePlugin;
+}
 
 /**
  * The implementation for a given plugin type.
  */
-export type PluginImplementation<Type extends PluginType, Spec> = SupportedPlugins<Spec>[Type]['Impl'];
+export type PluginImplementation<Type extends PluginType> = SupportedPlugins[Type];

@@ -11,36 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListVariableDefinition } from '@perses-dev/core';
-import { usePlugin } from '../components/PluginLoadingBoundary';
+import { UnknownSpec } from '@perses-dev/core';
+import { VariableStateMap, DatasourceStore } from '../runtime';
+import { Plugin } from './plugin-base';
 
 export type VariableOption = { label: string; value: string };
+
+export interface GetVariableOptionsContext {
+  variables: VariableStateMap;
+  datasourceStore: DatasourceStore;
+}
 
 /**
  * Plugin for handling custom VariableDefinitions.
  */
-export interface VariablePlugin<Spec = unknown> {
-  useVariableOptions: UseVariableOptionsHook<Spec>;
+export interface VariablePlugin<Spec = UnknownSpec> extends Plugin<Spec> {
+  getVariableOptions: GetVariableOptions<Spec>;
+
+  /**
+   * Returns a list of variables name this variable depends on. Used to optimize fetching
+   */
+  dependsOn?: (definition: Spec) => string[];
 }
 
 /**
  * Plugin hook responsible for getting the options of a custom variable
  * definition.
  */
-export type UseVariableOptionsHook<Spec> = (definition: ListVariableDefinition<Spec>) => {
-  data: VariableOption[];
-  loading: boolean;
-  error?: Error;
-};
-
-/**
- * Use the variable options from a variable plugin at runtime.
- */
-export const useVariableOptions: VariablePlugin['useVariableOptions'] = (definition) => {
-  const plugin = usePlugin('Variable', definition.kind);
-  if (plugin === undefined) {
-    // Provide default values while the plugin is being loaded
-    return { data: [], loading: true };
-  }
-  return plugin.useVariableOptions(definition);
-};
+export type GetVariableOptions<Spec> = (
+  definition: Spec,
+  ctx: GetVariableOptionsContext
+) => Promise<{ data: VariableOption[] }>;

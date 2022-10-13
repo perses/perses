@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import '@fontsource/lato/700.css';
 import '@fontsource/lato/900.css';
 import { createTheme, ThemeOptions } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-import merge from 'lodash/merge';
+import { merge } from 'lodash-es';
 import { typography } from './typography';
 
 /**

@@ -19,18 +19,11 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v3
-    - name: install golang
-      uses: actions/setup-go@v3
+    - uses: ./.github/actions/setup_environment
       with:
-        go-version: 1.19.x
+        enable_go: true
     - name: install cue
       run: go install cuelang.org/go/cmd/cue@v0.4.2
-    - uses: actions/cache@v3.0.8
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
     - name: check format
       run: make checkformat
     - name: check go.mod
@@ -41,31 +34,21 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v3
-    - name: install golang
-      uses: actions/setup-go@v3
+    - uses: ./.github/actions/setup_environment
       with:
-        go-version: 1.19.x
-    - uses: actions/cache@v3.0.8
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+        enable_go: true
     - name: test
       run: make integration-test
-    - uses: codecov/codecov-action@v3
-      with:
-        fail_ci_if_error: true
   golangci:
     name: lint
     runs-on: ubuntu-latest
     steps:
     - name: checkout
       uses: actions/checkout@v3
-    - name: install golang
-      uses: actions/setup-go@v3
+    - uses: ./.github/actions/setup_environment
       with:
-        go-version: 1.19.x
+        enable_go: true
+        enable_npm: false
     - name: generate files
       run: make generate
     - name: golangci-lint
@@ -80,10 +63,9 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v3
-    - name: install golang
-      uses: actions/setup-go@v3
+    - uses: ./.github/actions/setup_environment
       with:
-        go-version: 1.19.x
+        enable_go: true
     - name: install cue
       run: go install cuelang.org/go/cmd/cue@latest
     - name: eval cue schema

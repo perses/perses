@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { VariableName, VariableValue } from '@perses-dev/core';
 import { VariableOption } from '../model';
 
@@ -43,17 +43,20 @@ function useTemplateVariableContext() {
 export function useTemplateVariableValues(names?: string[]) {
   const { state } = useTemplateVariableContext();
 
+  const values = useMemo(() => {
+    const values: VariableStateMap = {};
+    names?.forEach((name) => {
+      const s = state[name];
+      if (s) {
+        values[name] = s;
+      }
+    });
+    return values;
+  }, [state, names]);
+
   if (names === undefined) {
     return state;
   }
-
-  const values: VariableStateMap = {};
-  names.forEach((name) => {
-    const s = state[name];
-    if (s) {
-      values[name] = s;
-    }
-  });
 
   return values;
 }

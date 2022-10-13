@@ -12,19 +12,16 @@
 // limitations under the License.
 
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import 'intersection-observer';
 import { screen } from '@testing-library/react';
-import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN } from '../../test';
-import testDashboard from '../../test/testDashboard';
-import { DashboardStoreProps } from '../../context';
+import userEvent from '@testing-library/user-event';
+import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN, getTestDashboard } from '../../test';
+import { DashboardProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
 describe('Panel', () => {
-  let props: PanelProps;
-  let initialState: DashboardStoreProps;
-
-  beforeEach(() => {
-    props = {
+  // Helper to create panel props for rendering tests
+  const createPanelProps = (): PanelProps => {
+    return {
       definition: {
         kind: 'Panel',
         spec: {
@@ -39,25 +36,21 @@ describe('Panel', () => {
         },
       },
       groupIndex: 0,
-      panelKey: 'panelRef',
+      itemIndex: 0,
     };
-
-    initialState = {
-      isEditMode: false,
-      dashboardSpec: testDashboard.spec,
-    };
-  });
+  };
 
   // Helper to render the panel with some context set
-  const renderPanel = (initialState?: DashboardStoreProps) => {
+  const renderPanel = (isEditMode = false) => {
     const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
     addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
 
     renderWithContext(
       <PluginRegistry {...pluginRegistryProps}>
-        <Panel {...props} />
-      </PluginRegistry>,
-      initialState
+        <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode }}>
+          <Panel {...createPanelProps()} />
+        </DashboardProvider>
+      </PluginRegistry>
     );
   };
 
@@ -67,11 +60,12 @@ describe('Panel', () => {
     screen.queryByLabelText('info-tooltip');
   });
 
-  it('should render edit icons when in edit mode', async () => {
-    initialState.isEditMode = true;
-    renderPanel(initialState);
-    await screen.queryByLabelText('drag handle');
-    screen.queryByLabelText('edit panel');
-    screen.queryByLabelText('more');
+  it('should render edit icons when in edit mode', () => {
+    renderPanel(true);
+    const panelTitle = screen.getByText('Fake Panel');
+    userEvent.hover(panelTitle);
+    screen.getByLabelText('drag handle');
+    screen.getByLabelText('edit panel');
+    screen.getByLabelText('delete panel');
   });
 });

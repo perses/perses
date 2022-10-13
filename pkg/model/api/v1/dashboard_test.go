@@ -15,16 +15,19 @@ package v1
 
 import (
 	"encoding/json"
-	"regexp"
 	"testing"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
+
+type TimeSeriesSpec struct {
+	ShowLegend bool     `json:"show_legend" yaml:"show_legend"`
+	Lines      []string `json:"lines" yaml:"lines"`
+}
 
 func TestMarshalDashboard(t *testing.T) {
 	testSuite := []struct {
@@ -45,24 +48,26 @@ func TestMarshalDashboard(t *testing.T) {
 				Spec: DashboardSpec{
 					Datasource: dashboard.Datasource{
 						Name: "PrometheusDemo",
-						Kind: datasource.PrometheusKind,
+						Kind: "Prometheus",
 					},
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
-					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
-						{
-							"displayed_name": "simple line chart",
-							"kind": "LineChart",
-							"chart": {
-								"show_legend": false,
-								"lines": [
-									{
-										"expr": "up"
-									}
-								]
-							}
-						}
-					`),
+					Panels: map[string]*Panel{
+						"MyPanel": {
+							Kind: "Panel",
+							Spec: PanelSpec{
+								Display: &common.Display{
+									Name: "simple line chart",
+								},
+								Plugin: common.Plugin{
+									Kind: "TimeSeriesChart",
+									Spec: TimeSeriesSpec{
+										ShowLegend: false,
+										Lines:      []string{"up"},
+									},
+								},
+							},
+						},
 					},
 					Layouts: []dashboard.Layout{
 						{
@@ -102,15 +107,20 @@ func TestMarshalDashboard(t *testing.T) {
     "duration": "6h",
     "panels": {
       "MyPanel": {
-        "displayed_name": "simple line chart",
-        "kind": "LineChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "simple line chart"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "show_legend": false,
+              "lines": [
+                "up"
+              ]
             }
-          ]
+          }
         }
       }
     },
@@ -148,46 +158,56 @@ func TestMarshalDashboard(t *testing.T) {
 				Spec: DashboardSpec{
 					Datasource: dashboard.Datasource{
 						Name: "PrometheusDemo",
-						Kind: datasource.PrometheusKind,
+						Kind: "Prometheus",
 					},
 					Duration: model.Duration(6 * time.Hour),
-					Variables: map[string]*dashboard.Variable{
-						"labelName": {
-							Kind: dashboard.KindLabelNamesQueryVariable,
-							Hide: true,
-							Parameter: &dashboard.LabelNamesQueryVariableParameter{
-								Matchers: []string{
-									"up",
+					Variables: []dashboard.Variable{
+						{
+							Kind: dashboard.ListVariable,
+							Spec: &dashboard.ListVariableSpec{
+								Name: "labelName",
+								Plugin: common.Plugin{
+									Kind: "PrometheusLabelNamesVariable",
+									Spec: map[string]interface{}{
+										"matchers": []string{
+											"up",
+										},
+									},
 								},
-								CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
 							},
 						},
-						"labelValue": {
-							Kind: dashboard.KindLabelValuesQueryVariable,
-							Hide: true,
-							Parameter: &dashboard.LabelValuesQueryVariableParameter{
-								LabelName: "$labelName",
-								Matchers: []string{
-									"up",
+						{
+							Kind: dashboard.ListVariable,
+							Spec: &dashboard.ListVariableSpec{
+								Name: "labelValue",
+								Plugin: common.Plugin{
+									Kind: "PrometheusLabelValuesVariable",
+									Spec: map[string]interface{}{
+										"label_name": "$labelName",
+										"matchers": []string{
+											"up",
+										},
+									},
 								},
-								CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
 							},
 						},
 					},
-					Panels: map[string]json.RawMessage{"MyPanel": []byte(`
-						{
-							"displayed_name": "simple line chart",
-							"kind": "LineChart",
-							"chart": {
-								"show_legend": false,
-								"lines": [
-									{
-										"expr": "up"
-									}
-								]
-							}
-						}
-					`),
+					Panels: map[string]*Panel{
+						"MyPanel": {
+							Kind: "Panel",
+							Spec: PanelSpec{
+								Display: &common.Display{
+									Name: "simple line chart",
+								},
+								Plugin: common.Plugin{
+									Kind: "TimeSeriesChart",
+									Spec: TimeSeriesSpec{
+										ShowLegend: false,
+										Lines:      []string{"up"},
+									},
+								},
+							},
+						},
 					},
 					Layouts: []dashboard.Layout{
 						{
@@ -225,40 +245,53 @@ func TestMarshalDashboard(t *testing.T) {
       "global": false
     },
     "duration": "6h",
-    "variables": {
-      "labelName": {
-        "kind": "LabelNamesQuery",
-        "hide": true,
-        "parameter": {
-          "matchers": [
-            "up"
-          ],
-          "capturing_regexp": "(.*)"
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "labelName",
+          "plugin": {
+            "kind": "PrometheusLabelNamesVariable",
+            "spec": {
+              "matchers": [
+                "up"
+              ]
+            }
+          }
         }
       },
-      "labelValue": {
-        "kind": "LabelValuesQuery",
-        "hide": true,
-        "parameter": {
-          "label_name": "$labelName",
-          "matchers": [
-            "up"
-          ],
-          "capturing_regexp": "(.*)"
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "labelValue",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "$labelName",
+              "matchers": [
+                "up"
+              ]
+            }
+          }
         }
       }
-    },
+    ],
     "panels": {
       "MyPanel": {
-        "displayed_name": "simple line chart",
-        "kind": "LineChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "simple line chart"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "show_legend": false,
+              "lines": [
+                "up"
+              ]
             }
-          ]
+          }
         }
       }
     },
@@ -309,40 +342,53 @@ func TestUnmarshallDashboard(t *testing.T) {
       "global": false
     },
     "duration": "6h",
-    "variables": {
-      "labelName": {
-        "kind": "LabelNamesQuery",
-        "hide": true,
-        "parameter": {
-          "matchers": [
-            "up"
-          ],
-          "capturing_regexp": "(.*)"
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "labelName",
+          "plugin": {
+            "kind": "PrometheusLabelNamesVariable",
+            "spec": {
+              "matchers": [
+                "up"
+              ]
+            }
+          }
         }
       },
-      "labelValue": {
-        "kind": "LabelValuesQuery",
-        "hide": true,
-        "parameter": {
-          "label_name": "$labelName",
-          "matchers": [
-            "up"
-          ],
-          "capturing_regexp": "(.*)"
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "labelValue",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "$labelName",
+              "matchers": [
+                "up"
+              ]
+            }
+          }
         }
       }
-    },
+    ],
     "panels": {
       "MyPanel": {
-        "displayed_name": "simple line chart",
-        "kind": "LineChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "simple line chart"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "show_legend": false,
+              "lines": [
+                "up"
+              ]
             }
-          ]
+          }
         }
       }
     },
@@ -367,18 +413,23 @@ func TestUnmarshallDashboard(t *testing.T) {
   }
 }`
 
-	panel := json.RawMessage(`{
-        "displayed_name": "simple line chart",
-        "kind": "LineChart",
-        "chart": {
-          "show_legend": false,
-          "lines": [
-            {
-              "expr": "up"
-            }
-          ]
-        }
-      }`)
+	panel := &Panel{
+		Kind: "Panel",
+		Spec: PanelSpec{
+			Display: &common.Display{
+				Name: "simple line chart",
+			},
+			Plugin: common.Plugin{
+				Kind: "TimeSeriesChart",
+				Spec: map[string]interface{}{
+					"lines": []interface{}{
+						"up",
+					},
+					"show_legend": false,
+				},
+			},
+		},
+	}
 	expected := &Dashboard{
 		Kind: KindDashboard,
 		Metadata: ProjectMetadata{
@@ -390,33 +441,41 @@ func TestUnmarshallDashboard(t *testing.T) {
 		Spec: DashboardSpec{
 			Datasource: dashboard.Datasource{
 				Name: "PrometheusDemo",
-				Kind: datasource.PrometheusKind,
+				Kind: "Prometheus",
 			},
 			Duration: model.Duration(6 * time.Hour),
-			Variables: map[string]*dashboard.Variable{
-				"labelName": {
-					Kind: dashboard.KindLabelNamesQueryVariable,
-					Hide: true,
-					Parameter: &dashboard.LabelNamesQueryVariableParameter{
-						Matchers: []string{
-							"up",
+			Variables: []dashboard.Variable{
+				{
+					Kind: dashboard.ListVariable,
+					Spec: &dashboard.ListVariableSpec{
+						Name: "labelName",
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelNamesVariable",
+							Spec: map[string]interface{}{
+								"matchers": []interface{}{
+									"up",
+								},
+							},
 						},
-						CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
 					},
 				},
-				"labelValue": {
-					Kind: dashboard.KindLabelValuesQueryVariable,
-					Hide: true,
-					Parameter: &dashboard.LabelValuesQueryVariableParameter{
-						LabelName: "$labelName",
-						Matchers: []string{
-							"up",
+				{
+					Kind: dashboard.ListVariable,
+					Spec: &dashboard.ListVariableSpec{
+						Name: "labelValue",
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[string]interface{}{
+								"label_name": "$labelName",
+								"matchers": []interface{}{
+									"up",
+								},
+							},
 						},
-						CapturingRegexp: (*dashboard.CapturingRegexp)(regexp.MustCompile(`(.*)`)),
 					},
 				},
 			},
-			Panels: map[string]json.RawMessage{"MyPanel": panel},
+			Panels: map[string]*Panel{"MyPanel": panel},
 			Layouts: []dashboard.Layout{
 				{
 					Kind: dashboard.KindGridLayout,

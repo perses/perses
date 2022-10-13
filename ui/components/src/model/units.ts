@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -84,9 +84,10 @@ function formatTime(value: number, unitOptions: TimeUnitOptions): string {
     case 'Years':
       duration.years = value;
       break;
-    default:
+    default: {
       const exhaustive: never = unitOptions.kind;
       throw new Error(`Unknown time unit type ${exhaustive}`);
+    }
   }
 
   // Find the largest whole time unit we can display the value in and use it

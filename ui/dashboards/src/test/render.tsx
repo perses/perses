@@ -12,28 +12,39 @@
 // limitations under the License.
 
 import { render, RenderOptions } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { DashboardProvider, DashboardStoreProps } from '../context';
-import testDashboard from './testDashboard';
+import { unstable_HistoryRouter } from 'react-router-dom';
+import { createMemoryHistory, MemoryHistory } from 'history';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
 
-const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
-
-const initialStore: DashboardStoreProps = {
-  isEditMode: true,
-  dashboardSpec: testDashboard.spec,
-};
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.
  */
 export function renderWithContext(
   ui: React.ReactElement,
-  initialState: DashboardStoreProps = initialStore,
-  options?: Omit<RenderOptions, 'queries'>
+  options?: Omit<RenderOptions, 'queries'>,
+  history?: MemoryHistory
 ) {
-  return render(
-    <DashboardProvider initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-    </DashboardProvider>,
-    options
-  );
+  // Create a new QueryClient for each test to avoid caching issues
+  const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
+
+  const BaseRender = () => {
+    const HistoryRouter = unstable_HistoryRouter;
+    history = history ?? createMemoryHistory();
+    return (
+      <HistoryRouter history={history}>
+        <QueryClientProvider client={queryClient}>
+          <QueryParamProvider adapter={ReactRouter6Adapter}>
+            <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
+              {ui}
+            </ChartsThemeProvider>
+          </QueryParamProvider>
+        </QueryClientProvider>
+      </HistoryRouter>
+    );
+  };
+
+  return render(<BaseRender />, options);
 }

@@ -1,0 +1,31 @@
+{
+  "kind": "FirstChart",
+  "spec": {
+    "queries": [
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "plugin": {
+            "kind": "CustomGraphQuery",
+            "spec": {
+              "datasource": {
+                "kind": "SQLDatasource",
+                "name": "MySQLDatasource"
+              },
+              "custom": true
+            }
+          }
+        }
+      }
+    ],
+    "a": "no",
+    "b": {
+      "c": [
+        {
+          "e": "up",
+          "f": "the up metric"
+        }
+      ]
+    }
+  }
+}

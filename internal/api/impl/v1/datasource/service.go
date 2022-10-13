@@ -19,6 +19,8 @@ import (
 	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/shared/validate"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -27,11 +29,13 @@ import (
 type service struct {
 	datasource.Service
 	dao datasource.DAO
+	sch schemas.Schemas
 }
 
-func NewService(dao datasource.DAO) datasource.Service {
+func NewService(dao datasource.DAO, sch schemas.Schemas) datasource.Service {
 	return &service{
 		dao: dao,
+		sch: sch,
 	}
 }
 
@@ -43,6 +47,9 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
+	if err := s.validate(entity); err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -64,6 +71,9 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 }
 
 func (s *service) update(entity *v1.Datasource, parameters shared.Parameters) (*v1.Datasource, error) {
+	if err := s.validate(entity); err != nil {
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+	}
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
@@ -115,4 +125,18 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 
 func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
+}
+
+func (s *service) validate(entity *v1.Datasource) error {
+	var list []*v1.Datasource
+	if entity.Spec.Default {
+		var err error
+		// return the full list of dts
+		list, err = s.dao.List(&datasource.Query{Project: entity.Metadata.Project})
+		if err != nil {
+			logrus.WithError(err).Errorf("unable to get the list of the global datasource")
+			return err
+		}
+	}
+	return validate.Datasource(entity, list, s.sch)
 }

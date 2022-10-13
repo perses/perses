@@ -12,14 +12,32 @@
 // limitations under the License.
 
 import { render, RenderOptions } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PluginRegistry } from '../components/PluginRegistry';
+import { testRegistryProps } from './test-plugins';
 
-// Don't retry in tests
-const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
+const testLogger = {
+  log: console.log,
+  warn: console.warn,
+  error: () => {
+    // Don't log network errors in tests to the console
+  },
+};
 
 /**
- * Test helper to render a React component with some common app-level providers wrapped around it.
+ * Test helper to render a React component with some common app-level providers, as well as the PluginRegistry
+ * wrapped around it.
  */
-export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
+export function renderWithContext(ui: React.ReactNode, options?: Omit<RenderOptions, 'queries'>) {
+  // Create a new QueryClient for each test to avoid caching issues
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
+    logger: testLogger,
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <PluginRegistry {...testRegistryProps}>{ui}</PluginRegistry>
+    </QueryClientProvider>,
+    options
+  );
 }

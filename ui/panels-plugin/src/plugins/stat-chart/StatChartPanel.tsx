@@ -15,7 +15,7 @@ import { StatChart, StatChartData, useChartsTheme, PersesChartsTheme } from '@pe
 import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
-import { GraphData, useGraphQuery, PanelProps } from '@perses-dev/plugin-system';
+import { TimeSeriesData, useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, CalculationType } from '../../model/calculations';
 import { useSuggestedStepMs } from '../../model/time';
 import { SparklineOptions, StatChartOptions } from './stat-chart-model';
@@ -24,26 +24,19 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    definition: {
-      spec: {
-        display: { name },
-        plugin: {
-          spec: { query, calculation, unit, sparkline },
-        },
-      },
-    },
+    spec: { query, calculation, unit, sparkline },
     contentDimensions,
   } = props;
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
-  const { data, loading, error } = useGraphQuery(query, { suggestedStepMs });
-  const chartData = useChartData(data, calculation, name);
+  const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
+  const chartData = useChartData(data, calculation);
   const chartsTheme = useChartsTheme();
 
   if (error) throw error;
 
   if (contentDimensions === undefined) return null;
 
-  if (loading === true) {
+  if (isLoading === true) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -66,7 +59,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   );
 }
 
-const useChartData = (data: GraphData | undefined, calculation: CalculationType, name: string): StatChartData => {
+const useChartData = (data: TimeSeriesData | undefined, calculation: CalculationType): StatChartData => {
   return useMemo(() => {
     const loadingData = {
       calculatedValue: undefined,
@@ -78,12 +71,8 @@ const useChartData = (data: GraphData | undefined, calculation: CalculationType,
     const calculate = CalculationsMap[calculation];
     const calculatedValue = seriesData !== undefined ? calculate(Array.from(seriesData.values)) : undefined;
 
-    return {
-      calculatedValue,
-      seriesData,
-      name,
-    };
-  }, [data, calculation, name]);
+    return { calculatedValue, seriesData };
+  }, [data, calculation]);
 };
 
 export function convertSparkline(

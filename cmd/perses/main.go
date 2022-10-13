@@ -20,9 +20,9 @@ import (
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/front"
-	"github.com/perses/perses/internal/api/impl/v1/dashboard/schemas"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/ui"
 	"github.com/sirupsen/logrus"
 )
 
@@ -57,13 +57,13 @@ func main() {
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
 	persesAPI := core.NewPersesAPI(serviceManager)
-	persesFrontend := front.NewPersesFrontend()
+	persesFrontend := ui.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
 	// enable hot reload of CUE schemas for dashboards validation:
 	// - watch for changes on the schemas folders
 	// - register a cron task to reload all the schemas every <interval>
-	watcher, reloader, err := schemas.NewHotReloaders(conf.Schemas, serviceManager.GetDashboard().GetValidator())
+	watcher, reloader, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
 
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the tasks for hot reload of schemas")

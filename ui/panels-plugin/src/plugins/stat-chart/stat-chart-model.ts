@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GraphQueryDefinition } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { ThresholdOptions } from '../../model/thresholds';
 import { CalculationType } from '../../model/calculations';
@@ -23,7 +23,7 @@ export interface SparklineOptions {
 
 export interface StatChartOptions {
   name: string;
-  query: GraphQueryDefinition;
+  query: TimeSeriesQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
@@ -34,7 +34,7 @@ export function createInitialStatChartOptions(): StatChartOptions {
   return {
     name: '',
     query: {
-      kind: 'GraphQuery',
+      kind: 'TimeSeriesQuery',
       spec: {
         plugin: {
           kind: '',

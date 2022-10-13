@@ -1,0 +1,45 @@
+{
+  "kind": "FirstChart",
+  "spec": {
+    "queries": [
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "plugin": {
+            "kind": "CustomGraphQuery",
+            "spec": {
+              "datasource": {
+                "kind": "CustomDatasource",
+                "name": "MyCustomDatasource"
+              },
+              "custom": true
+            }
+          }
+        }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "plugin": {
+            "kind": "CustomGraphQuery",
+            "spec": {
+              "datasource": {
+                "kind": "CustomDatasource"
+              },
+              "custom": false
+            }
+          }
+        }
+      }
+    ],
+    "a": "yes",
+    "b": {
+      "c": [
+        {
+          "e": "up",
+          "f": "the up metric"
+        }
+      ]
+    }
+  }
+}

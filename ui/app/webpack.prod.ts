@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,12 +13,17 @@
 
 import { Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
+import { ESBuildMinifyPlugin } from 'esbuild-loader';
 import { commonConfig } from './webpack.common';
 
 const prodConfig: Configuration = {
   mode: 'production',
   bail: true,
   devtool: 'source-map',
+  optimization: {
+    // TODO: Could this also be replaced with swc minifier?
+    minimizer: [new ESBuildMinifyPlugin({ target: 'es2018' })],
+  },
 };
 
 const merged = merge(commonConfig, prodConfig);

@@ -34,17 +34,27 @@ const benchmarkDashboard: DashboardResource = {
         },
       },
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'instance',
-          value: 'demo.do.prometheus.io:9100',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['demo.do.prometheus.io:3000', 'demo.do.prometheus.io:9100'],
+            },
+          },
         },
       },
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'interval',
-          value: '1m',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['1m', '5m'],
+            },
+          },
         },
       },
     ],
@@ -59,7 +69,7 @@ const benchmarkDashboard: DashboardResource = {
           plugin: {
             kind: 'Markdown',
             spec: {
-              text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n[check the internet again](https://www.google.com)\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>Will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n",
+              text: "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\nHere is `some inline code`.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n* two bullet\n* points\n\nDo you want to [visit the google](https://www.google.com)?\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>When inlining HTML, will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n",
             },
           },
         },
@@ -69,14 +79,14 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: { name: '1500+ Series', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
                         // query: 'caddy_http_request_duration_seconds_bucket',
@@ -95,14 +105,14 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: { name: '~130 Series', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
                         // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
@@ -124,14 +134,14 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: { name: 'Single Query' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
@@ -153,14 +163,14 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: { name: 'Legend Example' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
@@ -169,10 +179,10 @@ const benchmarkDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
                       },
@@ -180,10 +190,10 @@ const benchmarkDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
                       },
@@ -191,10 +201,10 @@ const benchmarkDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
                       },
@@ -213,14 +223,14 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: { name: 'Thresholds Example', description: 'Description text' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_load15{instance="$instance",job="node"}',
                       },
@@ -228,10 +238,10 @@ const benchmarkDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_load1{instance="$instance",job="node"}',
                       },
@@ -268,14 +278,14 @@ const benchmarkDashboard: DashboardResource = {
         spec: {
           display: { name: 'CPU', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
@@ -304,10 +314,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
                         'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
@@ -336,10 +346,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
                         '100 - ((node_memory_MemAvailable_bytes{job="node",instance="$instance"} * 100) / node_memory_MemTotal_bytes{job="node",instance="$instance"})',
@@ -364,10 +374,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query: 'node_memory_MemTotal_bytes{job="node",instance="$instance"}',
                     },
@@ -394,10 +404,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
                         'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
@@ -430,10 +440,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
                         '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
@@ -460,10 +470,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'GaugeChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
                         '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
@@ -498,10 +508,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'GaugeChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query: 'node_load15{instance="$instance",job="node"}',
                     },
@@ -540,10 +550,10 @@ const benchmarkDashboard: DashboardResource = {
             kind: 'GaugeChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
                         'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',

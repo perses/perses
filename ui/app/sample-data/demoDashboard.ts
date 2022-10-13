@@ -24,27 +24,47 @@ const demoDashboard: DashboardResource = {
   },
   spec: {
     datasource: { kind: 'Prometheus', name: 'PrometheusDemo', global: true },
-    duration: '30m',
+    duration: '5m',
     variables: [
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'job',
-          value: 'node',
+          allow_multiple: true,
+          allow_all_value: true,
+          default_value: 'node',
+          plugin: {
+            kind: 'PrometheusLabelValuesVariable',
+            spec: {
+              label_name: 'job',
+            },
+          },
         },
       },
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'instance',
-          value: 'demo.do.prometheus.io:9100',
+          allow_all_value: true,
+          plugin: {
+            kind: 'PrometheusLabelValuesVariable',
+            spec: {
+              label_name: 'instance',
+              matchers: ['up{job="$job"}'],
+            },
+          },
         },
       },
       {
-        kind: 'TextVariable',
+        kind: 'ListVariable',
         spec: {
           name: 'interval',
-          value: '1m',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['1m', '5m'],
+            },
+          },
         },
       },
     ],
@@ -54,14 +74,14 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: '1500+ Series', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'rate(caddy_http_request_duration_seconds_bucket[$interval])',
                         // query: 'caddy_http_request_duration_seconds_bucket',
@@ -80,14 +100,14 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: '~130 Series', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
                         // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
@@ -106,17 +126,17 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'Single Query' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
-                          '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+                          '1 - node_filesystem_free_bytes{job="node",instance=~"$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance=~"$instance"}',
                       },
                     },
                   },
@@ -132,50 +152,50 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'Legend Example' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
-                          'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
+                          'node_memory_MemTotal_bytes{job="node",instance=~"$instance"} - node_memory_MemFree_bytes{job="node",instance=~"$instance"} - node_memory_Buffers_bytes{job="node",instance=~"$instance"} - node_memory_Cached_bytes{job="node",instance=~"$instance"}',
                       },
                     },
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
-                        query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+                        query: 'node_memory_Buffers_bytes{job="node",instance=~"$instance"}',
                       },
                     },
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
-                        query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                        query: 'node_memory_Cached_bytes{job="node",instance=~"$instance"}',
                       },
                     },
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
-                        query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                        query: 'node_memory_MemFree_bytes{job="node",instance=~"$instance"}',
                       },
                     },
                   },
@@ -187,32 +207,52 @@ const demoDashboard: DashboardResource = {
           },
         },
       },
-      doubleQueries: {
+      testNodeQuery: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Thresholds Example', description: 'Description text' },
+          display: { name: 'Test Query', description: 'Description text' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
-                        query: 'node_load15{instance="$instance",job="node"}',
+                        // query: 'node_load15{instance=~"$instance",job="node"}',
+                        query: 'node_load15{instance=~"(demo.do.prometheus.io:9100)",job="node"}', // instance=~"(demo.do.prometheus.io:9100)"
                       },
                     },
                   },
                 },
+              ],
+              show_legend: false,
+              unit: {
+                kind: 'PercentDecimal',
+                decimal_places: 1,
+              },
+            },
+          },
+        },
+      },
+      testQueryAlt: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Test Query Alt', description: 'Description text' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
-                        query: 'node_load1{instance="$instance",job="node"}',
+                        // query: 'node_load1{instance=~"$instance",job="node"}',
+                        query: 'node_load1{instance=~"(demo.do.prometheus.io:9100)",job="node"}',
                       },
                     },
                   },
@@ -247,17 +287,17 @@ const demoDashboard: DashboardResource = {
         spec: {
           display: { name: 'CPU', description: 'This is a line chart' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
-                          'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+                          'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance=~"$instance",mode!="idle"}[$interval]))',
                       },
                     },
                   },
@@ -283,13 +323,13 @@ const demoDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
-                        'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+                        'node_time_seconds{job="node",instance=~"$instance"} - node_boot_time_seconds{job="node",instance=~"$instance"}',
                     },
                   },
                 },
@@ -315,13 +355,13 @@ const demoDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
-                        '100 - ((node_memory_MemAvailable_bytes{job="node",instance="$instance"} * 100) / node_memory_MemTotal_bytes{job="node",instance="$instance"})',
+                        '100 - ((node_memory_MemAvailable_bytes{job="node",instance=~"$instance"} * 100) / node_memory_MemTotal_bytes{job="node",instance=~"$instance"})',
                     },
                   },
                 },
@@ -343,12 +383,12 @@ const demoDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
-                      query: 'node_memory_MemTotal_bytes{job="node",instance="$instance"}',
+                      query: 'node_memory_MemTotal_bytes{job="node",instance=~"$instance"}',
                     },
                   },
                 },
@@ -373,13 +413,13 @@ const demoDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
-                        'avg(node_load15{job="node",instance="$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu)) * 100',
+                        'avg(node_load15{job="node",instance=~"$instance"}) /  count(count(node_cpu_seconds_total{job="node",instance=~"$instance"}) by (cpu)) * 100',
                     },
                   },
                 },
@@ -409,13 +449,13 @@ const demoDashboard: DashboardResource = {
             kind: 'StatChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
-                        '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+                        '(((count(count(node_cpu_seconds_total{job="node",instance=~"$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance=~"$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance=~"$instance"}) by (cpu))',
                     },
                   },
                 },
@@ -439,13 +479,13 @@ const demoDashboard: DashboardResource = {
             kind: 'GaugeChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
-                        '(((count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance="$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance="$instance"}) by (cpu))',
+                        '(((count(count(node_cpu_seconds_total{job="node",instance=~"$instance"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode="idle",job="node",instance=~"$instance"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job="node",instance=~"$instance"}) by (cpu))',
                     },
                   },
                 },
@@ -477,12 +517,12 @@ const demoDashboard: DashboardResource = {
             kind: 'GaugeChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
-                      query: 'node_load15{instance="$instance",job="node"}',
+                      query: 'node_load15{instance=~"$instance",job="node"}',
                     },
                   },
                 },
@@ -519,13 +559,13 @@ const demoDashboard: DashboardResource = {
             kind: 'GaugeChart',
             spec: {
               query: {
-                kind: 'GraphQuery',
+                kind: 'TimeSeriesQuery',
                 spec: {
                   plugin: {
-                    kind: 'PrometheusGraphQuery',
+                    kind: 'PrometheusTimeSeriesQuery',
                     spec: {
                       query:
-                        'node_time_seconds{job="node",instance="$instance"} - node_boot_time_seconds{job="node",instance="$instance"}',
+                        'node_time_seconds{job="node",instance=~"$instance"} - node_boot_time_seconds{job="node",instance=~"$instance"}',
                     },
                   },
                 },
@@ -595,14 +635,15 @@ const demoDashboard: DashboardResource = {
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/cpu' },
+              // content: { $ref: '#/spec/panels/cpu' },
+              content: { $ref: '#/spec/panels/testNodeQuery' },
             },
             {
               x: 12,
               y: 0,
               width: 12,
               height: 6,
-              content: { $ref: '#/spec/panels/doubleQueries' },
+              content: { $ref: '#/spec/panels/testQueryAlt' },
             },
           ],
         },
@@ -613,7 +654,7 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 3',
             collapse: {
-              open: false,
+              open: true,
             },
           },
           items: [

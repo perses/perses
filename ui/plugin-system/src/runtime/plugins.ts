@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, UseQueryOptions } from 'react-query';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { usePluginRegistry } from '../components/PluginRegistry';
 import { PluginImplementation, PluginMetadata, PluginType } from '../model';
-import { getTypeAndKindKey } from '../utils/cache-keys';
 
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<
-  UseQueryOptions<PluginImplementation<T, unknown>, unknown, PluginImplementation<T, unknown>, string>,
+  UseQueryOptions<PluginImplementation<T>, Error, PluginImplementation<T>, [string, PluginType, string]>,
   'queryKey' | 'queryFn'
 >;
 
@@ -26,15 +25,18 @@ type UsePluginOptions<T extends PluginType> = Omit<
  * Loads a plugin and returns the plugin implementation, along with loading/error state.
  */
 export function usePlugin<T extends PluginType>(pluginType: T, kind: string, options?: UsePluginOptions<T>) {
+  // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
+  options = {
+    ...options,
+    enabled: (options?.enabled ?? true) && kind !== '',
+  };
   const { getPlugin } = usePluginRegistry();
-  const queryKey = getTypeAndKindKey(pluginType, kind);
-  const { data, isLoading, error } = useQuery(queryKey, () => getPlugin(pluginType, kind), options);
-  return { plugin: data, isLoading, error };
+  return useQuery(['getPlugin', pluginType, kind], () => getPlugin(pluginType, kind), options);
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
 type UseListPluginMetadataOptions = Omit<
-  UseQueryOptions<PluginMetadata[], unknown, PluginMetadata[], string>,
+  UseQueryOptions<PluginMetadata[], Error, PluginMetadata[], [string, PluginType]>,
   'queryKey' | 'queryFn'
 >;
 
@@ -43,7 +45,5 @@ type UseListPluginMetadataOptions = Omit<
  */
 export function useListPluginMetadata(pluginType: PluginType, options?: UseListPluginMetadataOptions) {
   const { listPluginMetadata } = usePluginRegistry();
-  const queryKey: string = pluginType;
-  const { data, isLoading, error } = useQuery(queryKey, () => listPluginMetadata(pluginType), options);
-  return { pluginMetadata: data, isLoading, error };
+  return useQuery(['listPluginMetadata', pluginType], () => listPluginMetadata(pluginType), options);
 }

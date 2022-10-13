@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,9 +13,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline } from '@mui/material';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Router from './Router';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import { DarkModeContextProvider } from './context/DarkMode';
@@ -36,12 +38,14 @@ export function renderApp(container: Element | null) {
     <React.StrictMode>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
-          <DarkModeContextProvider>
-            <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-              <CssBaseline />
-              <Router />
-            </SnackbarProvider>
-          </DarkModeContextProvider>
+          <QueryParamProvider adapter={ReactRouter6Adapter}>
+            <DarkModeContextProvider>
+              <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <CssBaseline />
+                <Router />
+              </SnackbarProvider>
+            </DarkModeContextProvider>
+          </QueryParamProvider>
         </QueryClientProvider>
       </BrowserRouter>
     </React.StrictMode>

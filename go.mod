@@ -10,6 +10,8 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.15.0
 	github.com/prometheus/common v0.37.0
+	github.com/prometheus/common/assets v0.2.0
+	github.com/prometheus/promu v0.13.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0
@@ -70,7 +72,7 @@ require (
 	go.opentelemetry.io/otel v1.10.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.10.0 // indirect
 	go.opentelemetry.io/otel/trace v1.10.0 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -34,7 +34,9 @@ function useStorage<T>(storage: Storage, key: string, initialValue: T) {
       if (json !== null) {
         return JSON.parse(json);
       }
-    } catch {}
+    } catch {
+      // No-op
+    }
 
     // Either the value isn't in storage yet or JSON parsing failed, so
     // set to the initial value in both places

@@ -15,6 +15,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
 import { UnitOptions } from '../model';
+import { testChartsTheme } from '../test';
 import { StatChart, StatChartData } from './StatChart';
 
 describe('StatChart', () => {
@@ -43,20 +44,10 @@ describe('StatChart', () => {
     },
   };
 
-  const exampleChartsTheme = {
-    themeName: 'perses',
-    echartsTheme: {},
-    noDataOption: {},
-    sparkline: {
-      width: 1,
-      color: '#000000',
-    },
-  };
-
   describe('Render default options (no sparkline)', () => {
     it('should render', () => {
       render(
-        <ChartsThemeProvider themeName="perses" chartsTheme={exampleChartsTheme}>
+        <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
           <StatChart
             width={contentDimensions.width}
             height={contentDimensions.height}

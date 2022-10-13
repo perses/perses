@@ -1,20 +1,29 @@
 {
   "kind": "StatChart",
-  "display": {
-    "name": "CPU Cores",
-    "description": "This is a stat chart"
-  },
-  "options": {
+  "spec": {
     "query": {
-      "kind": "PrometheusGraphQuery",
-      "options": {
-        "query": "count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))"
+      "kind": "TimeSeriesQuery",
+      "spec": {
+        "plugin": {
+          "kind": "PrometheusTimeSeriesQuery",
+          "spec": {
+            "datasource": {
+              "kind": "PrometheusDatasource"
+            },
+            "query": "count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))"
+          }
+        }
       }
     },
-    "calculation": "LastNumber",
+    "calculation": "Sum",
     "unit": {
       "kind": "Decimal",
-      "decimal_places": 2
+      "decimal_places": 2,
+      "abbreviate": true
+    },
+    "sparkline": {
+      "color": "#e65013",
+      "width": 1.5
     }
   }
 }

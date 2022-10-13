@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/core';
-import { useQuery, UseQueryOptions } from 'react-query';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
 
 const resource = 'health';
@@ -30,7 +30,7 @@ type HealthOptions = Omit<UseQueryOptions<HealthModel, Error>, 'queryKey' | 'que
  */
 export function useHealth(options?: HealthOptions) {
   return useQuery<HealthModel, Error>(
-    resource,
+    [resource],
     () => {
       const url = buildURL({ resource });
       return fetchJson<HealthModel>(url);

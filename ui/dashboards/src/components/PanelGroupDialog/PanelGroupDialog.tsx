@@ -28,39 +28,29 @@ import {
   SelectChangeEvent,
   MenuItem,
 } from '@mui/material';
-import { LayoutDefinition } from '@perses-dev/core';
 import CloseIcon from 'mdi-material-ui/Close';
-import { useDashboardApp, useLayouts } from '../../context';
+import { usePanelGroupDialog, useLayouts } from '../../context';
+import { PanelGroupDefinition } from '../../context/DashboardProvider/layout-slice';
 
 const PanelGroupDialog = () => {
-  const { layouts, updateLayout } = useLayouts();
-  const { panelGroupDialog, closePanelGroupDialog } = useDashboardApp();
+  const { layouts, updatePanelGroup } = useLayouts();
+  const { panelGroupDialog, closePanelGroupDialog } = usePanelGroupDialog();
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const { groupIndex } = panelGroupDialog!; // PanelGroupDialog is only mounted if panelGroupDialog is defined
+  const groupIndex = panelGroupDialog?.groupIndex;
 
   const isEditingPanelGroup = groupIndex !== undefined;
 
-  const [isCollapsed, setIsCollapsed] = useState(
-    isEditingPanelGroup && !layouts[groupIndex]?.spec.display?.collapse?.open
-  );
-  const [name, setName] = useState(isEditingPanelGroup ? layouts[groupIndex]?.spec.display?.title : '');
+  const [isCollapsed, setIsCollapsed] = useState(isEditingPanelGroup && layouts[groupIndex]?.isCollapsed);
+  const [name, setName] = useState(isEditingPanelGroup ? layouts[groupIndex]?.title : '');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const newLayout: LayoutDefinition = {
-      kind: 'Grid',
-      spec: {
-        display: {
-          title: name ?? '',
-          collapse: {
-            open: !isCollapsed,
-          },
-        },
-        items: groupIndex === undefined ? [] : layouts[groupIndex]?.spec.items ?? [],
-      },
+    const newGroup: Omit<PanelGroupDefinition, 'id'> = {
+      isCollapsed,
+      title: name ?? '',
+      items: groupIndex === undefined ? [] : layouts[groupIndex]?.items ?? [],
     };
-    updateLayout(newLayout, groupIndex);
+    updatePanelGroup(newGroup, groupIndex);
     closePanelGroupDialog();
   };
 
@@ -70,7 +60,7 @@ const PanelGroupDialog = () => {
   };
 
   return (
-    <Dialog open>
+    <Dialog open={panelGroupDialog !== undefined}>
       <DialogTitle>Panel Group</DialogTitle>
       <IconButton
         aria-label="Close"

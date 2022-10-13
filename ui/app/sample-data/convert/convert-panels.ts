@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GraphQueryDefinition, PanelDefinition, DashboardSpec } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition, PanelDefinition, DashboardSpec } from '@perses-dev/core';
 import { camelCase } from 'lodash-es';
 import {
   GrafanaGaugePanel,
@@ -94,7 +94,7 @@ function convertGraphPanel(graphPanel: GrafanaGraphPanel): PanelDefinition {
         name: graphPanel.title,
       },
       plugin: {
-        kind: 'LineChart',
+        kind: 'TimeSeriesChart',
         spec: {
           queries: graphPanel.targets.map(convertQueryTarget),
         },
@@ -161,15 +161,15 @@ function convertSingleStatPanel(statPanel: GrafanaSingleStatPanel): PanelDefinit
   return convertedPanel;
 }
 
-function convertQueryTarget(target?: PromQueryTarget): GraphQueryDefinition {
+function convertQueryTarget(target?: PromQueryTarget): TimeSeriesQueryDefinition {
   const query = target?.expr ?? '';
   const min_step = target?.step === undefined ? undefined : `${target.step}s`;
 
   return {
-    kind: 'GraphQuery',
+    kind: 'TimeSeriesQuery',
     spec: {
       plugin: {
-        kind: 'PrometheusGraphQuery',
+        kind: 'PrometheusTimeSeriesQuery',
         spec: {
           query,
           min_step,

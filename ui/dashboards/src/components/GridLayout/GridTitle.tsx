@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,13 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronUp';
 import CollapsedIcon from 'mdi-material-ui/ChevronDown';
 import AddIcon from 'mdi-material-ui/Plus';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
-import { useState } from 'react';
-import { useDashboardApp, useEditMode } from '../../context';
+import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
+import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+
+import { usePanelGroupDialog, useEditMode, useLayouts, usePanels } from '../../context';
 
 export interface GridTitleProps {
   groupIndex: number;
@@ -36,8 +40,10 @@ export function GridTitle(props: GridTitleProps) {
   const { groupIndex, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { openPanelDrawer, openPanelGroupDialog } = useDashboardApp();
+  const { openPanelGroupDialog, openDeletePanelGroupDialog } = usePanelGroupDialog();
+  const { addPanel } = usePanels();
   const { isEditMode } = useEditMode();
+  const { layouts, swapPanelGroups } = useLayouts();
 
   const text = (
     <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
@@ -65,11 +71,28 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && isHovered && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton onClick={() => openPanelDrawer({ groupIndex })}>
+              <IconButton aria-label="add panel to group" onClick={() => addPanel(groupIndex)}>
                 <AddIcon />
               </IconButton>
-              <IconButton onClick={() => openPanelGroupDialog(groupIndex)}>
+              <IconButton aria-label="edit group" onClick={() => openPanelGroupDialog(groupIndex)}>
                 <PencilIcon />
+              </IconButton>
+              <IconButton aria-label="delete group" onClick={() => openDeletePanelGroupDialog(groupIndex)}>
+                <DeleteIcon />
+              </IconButton>
+              <IconButton
+                aria-label="move group down"
+                disabled={groupIndex === layouts.length - 1}
+                onClick={() => swapPanelGroups(groupIndex, groupIndex + 1)}
+              >
+                <ArrowDownIcon />
+              </IconButton>
+              <IconButton
+                aria-label="move group up"
+                disabled={groupIndex === 0}
+                onClick={() => swapPanelGroups(groupIndex, groupIndex - 1)}
+              >
+                <ArrowUpIcon />
               </IconButton>
             </Stack>
           )}

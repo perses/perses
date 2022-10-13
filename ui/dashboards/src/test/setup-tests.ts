@@ -13,6 +13,11 @@
 
 // Add testing library assertions
 import '@testing-library/jest-dom/extend-expect';
+import { setupIntersectionObserverMock } from './';
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
 jest.mock('echarts/core');
+
+beforeEach(() => {
+  setupIntersectionObserverMock();
+});

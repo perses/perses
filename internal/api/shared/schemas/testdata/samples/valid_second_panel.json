@@ -1,0 +1,30 @@
+{
+  "kind": "SecondChart",
+  "spec": {
+    "query": {
+      "kind": "TimeSeriesQuery",
+      "spec": {
+        "plugin": {
+          "kind": "SQLGraphQuery",
+          "spec": {
+            "datasource": {
+              "kind": "SQLDatasource"
+            },
+            "select": "*",
+            "from": "TABLE",
+            "where": "ID > 0"
+          }
+        }
+      }
+    },
+    "a": "yes",
+    "b": {
+      "c": false,
+      "d": [
+        {
+          "f": 66
+        }
+      ]
+    }
+  }
+}

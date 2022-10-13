@@ -15,7 +15,10 @@ GO                    ?= go
 CUE                   ?= cue
 GOCI                  ?= golangci-lint
 GOFMT                 ?= $(GO)fmt
-GOARCH                ?= amd64
+GOOS                  ?= $(shell $(GO) env GOOS)
+GOARCH                ?= $(shell $(GO) env GOARCH)
+GOHOSTOS              ?= $(shell $(GO) env GOHOSTOS)
+GOHOSTARCH            ?= $(shell $(GO) env GOHOSTARCH)
 COMMIT                := $(shell git rev-parse HEAD)
 DATE                  := $(shell date +%Y-%m-%d)
 BRANCH                := $(shell git rev-parse --abbrev-ref HEAD)
@@ -26,6 +29,7 @@ LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDF
 GORELEASER_PARALLEL   ?= 0
 
 export LDFLAGS
+export DATE
 
 all: clean build
 
@@ -81,7 +85,7 @@ cue-eval:
 .PHONY: cue-test
 cue-test:
 	@echo ">> test cue schemas with json data"
-	./scripts/cue.sh --test
+	$(GO) run ./scripts/cue-test/cue-test.go
 
 .PHONY: test
 test: generate
@@ -92,17 +96,24 @@ test: generate
 integration-test: generate
 	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
+.PHONY: coverage-html
 coverage-html: integration-test
 	@echo ">> Print test coverage"
 	$(GO) tool cover -html=$(COVER_PROFILE)
 
+.PHONY: assets-compress
+assets-compress:
+	@echo '>> compressing assets'
+	scripts/compress_assets.sh
+
+## Cross build binaries for all platforms (Use "make build" in development)
 .PHONY: cross-build
 cross-build: ## Cross build binaries for all platforms (Use "make build" in development)
 	goreleaser release --snapshot --rm-dist --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: cross-release
 cross-release:
-	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL}
+	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL} --release-notes GENERATED_CHANGELOG.md
 
 .PHONY: build
 build: build-ui build-api build-cli
@@ -110,7 +121,7 @@ build: build-ui build-api build-cli
 .PHONY: build-api
 build-api: generate
 	@echo ">> build the perses api"
-	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/perses ./cmd/perses
+	CGO_ENABLED=0 GOARCH=${GOARCH} GOOS=${GOOS} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/perses ./cmd/perses
 
 .PHONY: build-ui
 build-ui:
@@ -119,16 +130,20 @@ build-ui:
 .PHONY: build-cli
 build-cli:
 	@echo ">> build the perses cli"
-	CGO_ENABLED=0 GOARCH=${GOARCH} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
+	CGO_ENABLED=0 GOARCH=${GOARCH} GOOS=${GOOS} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
 
 .PHONY: generate
-generate:
-	$(GO) generate ./internal/api
-	$(GO) generate ./internal/api/front
+generate: assets-compress
+	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./internal/api
+
+.PHONY: generate-changelog
+generate-changelog:
+	$(GO) run ./scripts/generate-changelog/generate-changelog.go --version="${VERSION}"
 
 .PHONY: clean
 clean:
 	rm -rf ./bin
+	rm GENERATED_CHANGELOG.md
 	./scripts/ui_release.sh --clean
 	cd ./ui && npm run clean
 

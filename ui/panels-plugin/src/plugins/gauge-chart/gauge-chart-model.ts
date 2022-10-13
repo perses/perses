@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GraphQueryDefinition } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { ThresholdOptions } from '../../model/thresholds';
 import { CalculationType } from '../../model/calculations';
@@ -20,7 +20,7 @@ import { CalculationType } from '../../model/calculations';
  * The Options object type supported by the GaugeChart panel plugin.
  */
 export interface GaugeChartOptions {
-  query: GraphQueryDefinition;
+  query: TimeSeriesQueryDefinition;
   calculation: CalculationType;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
@@ -34,7 +34,7 @@ export function createInitialGaugeChartOptions(): GaugeChartOptions {
   return {
     // TODO: How do you represent an initially empty/unset graph query?
     query: {
-      kind: 'GraphQuery',
+      kind: 'TimeSeriesQuery',
       spec: {
         plugin: {
           kind: '',

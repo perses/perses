@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,8 +23,7 @@ const testDashboard: DashboardResource = {
     version: 0,
   },
   spec: {
-    datasource: { kind: 'Prometheus', global: true, name: 'Public Prometheus Demo Server' },
-    duration: '24h',
+    duration: '5m',
     variables: [
       {
         kind: 'TextVariable',
@@ -54,14 +53,14 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'CPU' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
@@ -80,14 +79,14 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Memory' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
@@ -96,10 +95,10 @@ const testDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
                       },
@@ -107,10 +106,10 @@ const testDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
                       },
@@ -118,10 +117,10 @@ const testDashboard: DashboardResource = {
                   },
                 },
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
                       },
@@ -139,14 +138,14 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Disk I/O Utilization' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
@@ -165,14 +164,14 @@ const testDashboard: DashboardResource = {
         spec: {
           display: { name: 'Filesystem Fullness' },
           plugin: {
-            kind: 'LineChart',
+            kind: 'TimeSeriesChart',
             spec: {
               queries: [
                 {
-                  kind: 'GraphQuery',
+                  kind: 'TimeSeriesQuery',
                   spec: {
                     plugin: {
-                      kind: 'PrometheusGraphQuery',
+                      kind: 'PrometheusTimeSeriesQuery',
                       spec: {
                         query:
                           '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
@@ -194,6 +193,9 @@ const testDashboard: DashboardResource = {
         spec: {
           display: {
             title: 'CPU Stats',
+            collapse: {
+              open: true,
+            },
           },
           items: [
             // First Row
@@ -203,6 +205,13 @@ const testDashboard: DashboardResource = {
               width: 12,
               height: 4,
               content: { $ref: '#/spec/panels/cpu' },
+            },
+            {
+              x: 0,
+              y: 5,
+              width: 6,
+              height: 2,
+              content: { $ref: '#/spec/panels/diskIO' },
             },
           ],
         },
