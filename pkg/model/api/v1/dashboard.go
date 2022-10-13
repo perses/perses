@@ -31,8 +31,8 @@ func GenerateDashboardID(project string, name string) string {
 }
 
 type PanelSpec struct {
-	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
-	Plugin  Plugin   `json:"plugin" yaml:"plugin"`
+	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
+	Plugin  common.Plugin   `json:"plugin" yaml:"plugin"`
 }
 
 type Panel struct {
@@ -45,10 +45,10 @@ type DashboardSpec struct {
 	Datasource dashboard.Datasource `json:"datasource" yaml:"datasource"`
 	// Duration is the default time you would like to use to looking in the past when getting data to fill the
 	// dashboard
-	Duration  model.Duration                 `json:"duration" yaml:"duration"`
-	Variables map[string]*dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Panels    map[string]*Panel              `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
-	Layouts   []dashboard.Layout             `json:"layouts" yaml:"layouts"`
+	Duration  model.Duration       `json:"duration" yaml:"duration"`
+	Variables []dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Panels    map[string]*Panel    `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
+	Layouts   []dashboard.Layout   `json:"layouts" yaml:"layouts"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
@@ -81,9 +81,16 @@ func (d *DashboardSpec) validate() error {
 	if len(d.Panels) == 0 {
 		return fmt.Errorf("dashboard.spec.panels cannot be empty")
 	}
-	for variableKey := range d.Variables {
-		if len(keyRegexp.FindAllString(variableKey, -1)) <= 0 {
-			return fmt.Errorf("variable reference %q is containing spaces or special characters", variableKey)
+	variables := make(map[string]bool, len(d.Variables))
+	for i, variable := range d.Variables {
+		name := variable.Spec.GetName()
+		if len(keyRegexp.FindAllString(name, -1)) <= 0 {
+			return fmt.Errorf("variable reference %q is containing spaces or special characters", name)
+		}
+		if !variables[name] {
+			variables[name] = true
+		} else {
+			return fmt.Errorf("variable %q (index %d) already exists", name, i)
 		}
 	}
 	for panelKey := range d.Panels {

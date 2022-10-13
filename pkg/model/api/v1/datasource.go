@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func GenerateGlobalDatasourceID(name string) string {
@@ -28,11 +29,11 @@ func GenerateDatasourceID(project string, name string) string {
 }
 
 type DatasourceSpec struct {
-	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
-	Default bool     `json:"default" yaml:"default"`
+	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
+	Default bool            `json:"default" yaml:"default"`
 	// Plugin will contain the datasource configuration.
 	// The data typed is available in Cue.
-	Plugin Plugin `json:"plugin" yaml:"plugin"`
+	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 // GlobalDatasource is the struct representing the datasource shared to everybody.
