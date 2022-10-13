@@ -21,6 +21,19 @@ export function useEditMode() {
 }
 
 /**
+ * Returns actions that can be performed on the current dashboard.
+ */
+export function useDashboardActions() {
+  const addPanelGroup = useDashboardStore((store) => store.addPanelGroup);
+  const addPanel = useDashboardStore((store) => store.addPanel);
+
+  return {
+    addPanelGroup,
+    addPanel: () => addPanel(undefined),
+  };
+}
+
+/**
  * Returns an array of PanelGroupIds in the order they appear in the dashboard.
  */
 export function usePanelGroupIds() {
@@ -56,10 +69,28 @@ export function usePanelGroup(panelGroupId: PanelGroupId) {
 }
 
 /**
+ * Returns actions that can be performed on the given panel group.
+ */
+export function usePanelGroupActions(panelGroupId: PanelGroupId) {
+  const { moveUp, moveDown } = useMovePanelGroup(panelGroupId);
+  const editPanelGroup = useDashboardStore((store) => store.editPanelGroup);
+  const deletePanelGroup = useDashboardStore((store) => store.openDeletePanelGroupDialog);
+  const addPanel = useDashboardStore((store) => store.addPanel);
+
+  return {
+    editPanelGroup: () => editPanelGroup(panelGroupId),
+    deletePanelGroup: () => deletePanelGroup(panelGroupId),
+    addPanelToGroup: () => addPanel(panelGroupId),
+    moveUp,
+    moveDown,
+  };
+}
+
+/**
  * Returns functions for moving a panel group up or down. A function will be undefined if the panel group can't be
  * moved in that direction.
  */
-export function useMovePanelGroup(panelGroupId: PanelGroupId) {
+function useMovePanelGroup(panelGroupId: PanelGroupId) {
   const currentIndex = useDashboardStore((store) => store.panelGroupIdOrder.findIndex((id) => id === panelGroupId));
   const panelGroupsLength = useDashboardStore((store) => store.panelGroupIdOrder.length);
   const swapPanelGroups = useDashboardStore((store) => store.swapPanelGroups);
@@ -95,6 +126,13 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
   return panel;
 }
 
+/**
+ * Gets the Panel Group editor state.
+ */
+export function usePanelGroupEditor() {
+  return useDashboardStore((store) => store.panelGroupEditor);
+}
+
 export function useLayouts() {
   return useDashboardStore(
     ({ addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups, deletePanelGroup }) => ({
@@ -105,16 +143,6 @@ export function useLayouts() {
       deletePanelGroup,
     })
   );
-}
-
-export function usePanelGroupDialog() {
-  return useDashboardStore(({ panelGroups, panelGroupDialog, openPanelGroupDialog, closePanelGroupDialog }) => ({
-    // TODO: Refactor this dialog so that it doesn't need access to all the panelGroups
-    panelGroups,
-    panelGroupDialog,
-    openPanelGroupDialog,
-    closePanelGroupDialog,
-  }));
 }
 
 export function useDeletePanelGroupDialog() {

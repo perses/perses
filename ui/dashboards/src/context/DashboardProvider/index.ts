@@ -14,3 +14,4 @@
 export * from './dashboard-provider-api';
 export * from './DashboardProvider';
 export type { PanelGroupId, PanelGroupDefinition, PanelGroupItemId as LayoutItem } from './layout-slice';
+export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-slice';
