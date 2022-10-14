@@ -46,18 +46,20 @@ You should start to create a branch that follows the pattern `release/v<X.Y>`. R
 for any given major or minor release happen in the same release/v<major>.<minor> branch. Do not create release/<version>
 for patch or release candidate releases.
 
-Update the file `VERSION` with the new version to be created.
+- Update the file `VERSION` with the new version to be created.
 
-Update the file `CHANGELOG.md` and the different `package.json` with the corresponding version:
+- Update the file `CHANGELOG.md` and the different `package.json` with the corresponding version:
 
 ```bash
 make bump-version
 ```
 
-Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release in
-general and on the addition to the changelog in particular.
+- Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release
+  in general and on the addition to the changelog in particular.
 
-Entries in the `CHANGELOG.md` are meant to be in this order:
+- Create a proper title for the release following this template : `## <version_number> / <Date>`
+
+- Entries in the `CHANGELOG.md` are meant to be in this order:
 
 * `[FEATURE]`
 * `[ENHANCEMENT]`
