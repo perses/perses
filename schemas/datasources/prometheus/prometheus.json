@@ -1,0 +1,6 @@
+{
+  "kind": "PrometheusDatasource",
+  "spec": {
+    "direct_url": "http://localhost:8080"
+  }
+}
