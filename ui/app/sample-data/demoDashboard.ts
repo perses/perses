@@ -597,7 +597,7 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 1',
             collapse: {
-              open: false,
+              open: true,
             },
           },
           items: [
@@ -610,13 +610,13 @@ const demoDashboard: DashboardResource = {
               // content: { $ref: '#/spec/panels/seriesTestAlt' },
               // content: { $ref: '#/spec/panels/seriesTest' },
             },
-            {
-              x: 12,
-              y: 0,
-              width: 12,
-              height: 6,
-              content: { $ref: '#/spec/panels/basicEx' },
-            },
+            // {
+            //   x: 12,
+            //   y: 0,
+            //   width: 12,
+            //   height: 6,
+            //   content: { $ref: '#/spec/panels/basicEx' },
+            // },
           ],
         },
       },
@@ -626,7 +626,7 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 2',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [
@@ -654,7 +654,7 @@ const demoDashboard: DashboardResource = {
           display: {
             title: 'Row 3',
             collapse: {
-              open: true,
+              open: false,
             },
           },
           items: [
