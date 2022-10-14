@@ -46,11 +46,6 @@ export interface LayoutSlice {
   movePanelToGroup: (layoutItem: PanelGroupItemId, newPanelGroupId: PanelGroupId) => void;
 
   /**
-   * Updates an existing panel group to, for example, change its display properties.
-   */
-  updatePanelGroup: (panelGroup: Omit<PanelGroupDefinition, 'id'>, panelGroupId?: PanelGroupId) => void;
-
-  /**
    * Rearrange the order of panel groups by swapping the positions
    */
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
@@ -168,26 +163,6 @@ export function createLayoutSlice(
           height: item.height,
           content: item.content,
         });
-      });
-    },
-
-    // TODO: Maybe combine this into some kind of groupEditor state
-    updatePanelGroup(panelGroup, panelGroupId) {
-      set((state) => {
-        // Adding a new panel group?
-        if (panelGroupId === undefined) {
-          const id = createPanelGroupId();
-          const newPanelGroup = { ...panelGroup, id };
-          state.panelGroups[id] = newPanelGroup;
-          state.panelGroupIdOrder.unshift(id);
-          return;
-        }
-
-        const existingGroup = state.panelGroups[panelGroupId];
-        if (existingGroup === undefined) {
-          throw new Error(`Cannot find panel group with Id ${panelGroupId} to update`);
-        }
-        state.panelGroups[panelGroupId] = { ...panelGroup, id: panelGroupId };
       });
     },
 
