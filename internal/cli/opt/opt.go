@@ -56,7 +56,7 @@ type ProjectOption struct {
 func (o *ProjectOption) Complete() error {
 	if len(o.Project) == 0 {
 		if len(config.Global.Project) == 0 {
-			return fmt.Errorf("project is not defined. Please set it using the flag --project or using the command argos project <project_name>")
+			return fmt.Errorf("project is not defined. Please set it using the flag --project or using the command perses project <project_name>")
 		}
 		o.Project = config.Global.Project
 	}
