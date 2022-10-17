@@ -35,15 +35,15 @@ type api struct {
 	endpoints []endpoint
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager) echoUtils.Register {
+func NewPersesAPI(serviceManager dependency.ServiceManager, readonly bool) echoUtils.Register {
 	endpoints := []endpoint{
-		dashboard.NewEndpoint(serviceManager.GetDashboard()),
-		datasource.NewEndpoint(serviceManager.GetDatasource()),
-		folder.NewEndpoint(serviceManager.GetFolder()),
-		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource()),
+		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
+		datasource.NewEndpoint(serviceManager.GetDatasource(), readonly),
+		folder.NewEndpoint(serviceManager.GetFolder(), readonly),
+		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), readonly),
 		health.NewEndpoint(serviceManager.GetHealth()),
-		project.NewEndpoint(serviceManager.GetProject()),
-		user.NewEndpoint(serviceManager.GetUser()),
+		project.NewEndpoint(serviceManager.GetProject(), readonly),
+		user.NewEndpoint(serviceManager.GetUser(), readonly),
 	}
 	return &api{
 		endpoints: endpoints,
