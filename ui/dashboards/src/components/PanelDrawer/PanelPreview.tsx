@@ -34,6 +34,10 @@ export function PanelPreview({ name, description, kind, spec, groupId }: PanelEd
     panelGroupItemId: { panelGroupId: groupId, itemIndex: 0 },
   };
 
+  if (!kind) {
+    return null;
+  }
+
   return (
     <Box height={300}>
       <Panel {...previewValues} />
