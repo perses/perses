@@ -6,7 +6,7 @@ require (
 	cuelang.org/go v0.4.2
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gavv/httpexpect/v2 v2.3.1
-	github.com/labstack/echo/v4 v4.9.0
+	github.com/labstack/echo/v4 v4.9.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.15.0
 	github.com/prometheus/common v0.37.0
@@ -42,7 +42,7 @@ require (
 	github.com/imkira/go-interpol v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/klauspost/compress v1.12.2 // indirect
-	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
