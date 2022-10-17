@@ -59,30 +59,38 @@ import (
 )
 
 type Endpoint struct {
-	toolbox shared.Toolbox
+	toolbox  shared.Toolbox
+	readonly bool
 }
 
-func NewEndpoint(service {{ $package }}.Service) *Endpoint {
+func NewEndpoint(service {{ $package }}.Service, readonly bool) *Endpoint {
 	return &Endpoint{
 		toolbox: shared.NewToolBox(service),
+		readonly: readonly,
 	}
 }
 
 func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 	group := g.Group(fmt.Sprintf("/%s", shared.Path{{ $kind }}))
-	group.POST("", e.Create)
+{{ if $endpoint.IsProjectResource -}}
+	subGroup := g.Group(fmt.Sprintf("/%s/:%s/%s", shared.PathProject, shared.ParamProject, shared.Path{{ $kind }}))
+{{- end }}
+	if !e.readonly {
+		group.POST("", e.Create)
+{{ if $endpoint.IsProjectResource -}}
+		subGroup.POST("", e.Create)
+		subGroup.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
+		subGroup.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete)
+{{- else -}}
+		group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
+		group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete)
+{{- end }}
+	}
 	group.GET("", e.List)
 {{ if $endpoint.IsProjectResource -}}
-
-	subGroup := g.Group(fmt.Sprintf("/%s/:%s/%s", shared.PathProject, shared.ParamProject, shared.Path{{ $kind }}))
-	subGroup.POST("", e.Create)
 	subGroup.GET("", e.List)
-	subGroup.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
-	subGroup.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete)
 	subGroup.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get)
 {{- else -}}
-	group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
-	group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete)
 	group.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get)
 {{- end }}
 }

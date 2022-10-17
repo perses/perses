@@ -10,3 +10,4 @@ schemas:
   panels_path: "schemas/panels"
   queries_path: "schemas/queries"
   interval: "5m"
+readonly: true
