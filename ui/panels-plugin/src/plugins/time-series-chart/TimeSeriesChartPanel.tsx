@@ -91,9 +91,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
         if (legend.show && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name,
+            id: timeSeries.name, // TODO: should query generate an id instead of using name here and in getRandomColor?
             label: timeSeries.name,
-            isSelected: false,
+            isSelected: selectedSeriesName === timeSeries.name,
             color: getRandomColor(timeSeries.name),
             onClick: () => onLegendItemClick(timeSeries.name),
           });
