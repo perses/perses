@@ -210,7 +210,7 @@ const demoDashboard: DashboardResource = {
                 },
               ],
               legend: {
-                // show: true,
+                show: true,
                 // position: 'bottom',
               },
               unit: { kind: 'Bytes' },
@@ -271,9 +271,6 @@ const demoDashboard: DashboardResource = {
                   },
                 },
               ],
-              // legend: {
-              //   show: true,
-              // },
               unit: {
                 kind: 'PercentDecimal',
                 decimal_places: 1,

@@ -26,7 +26,7 @@ export interface TimeSeriesChartOptions {
 }
 
 export const DEFAULT_LEGEND: LegendOptions = {
-  show: true,
+  show: false,
   position: 'bottom',
 };
 
