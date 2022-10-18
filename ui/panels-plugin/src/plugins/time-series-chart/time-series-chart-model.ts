@@ -30,6 +30,12 @@ export const DEFAULT_LEGEND: LegendOptions = {
   position: 'bottom',
 };
 
+export const LEGEND_POSITIONS = ['bottom', 'right'] as const;
+
+export type LegendPositionOptions = {
+  position: typeof LEGEND_POSITIONS[number];
+};
+
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
  */

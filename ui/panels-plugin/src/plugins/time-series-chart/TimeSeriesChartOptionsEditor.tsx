@@ -25,16 +25,14 @@ import {
 } from '@mui/material';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { OptionsEditorProps, TimeSeriesQueryEditor } from '@perses-dev/plugin-system';
-import { TimeSeriesChartOptions, DEFAULT_LEGEND } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_LEGEND,
+  LEGEND_POSITIONS,
+  LegendPositionOptions,
+} from './time-series-chart-model';
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
-
-// TODO: reorg supported options
-const LEGEND_POSITIONS = ['bottom', 'right'] as const;
-
-type LegendPositionOptions = {
-  position: typeof LEGEND_POSITIONS[number];
-};
 
 export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
