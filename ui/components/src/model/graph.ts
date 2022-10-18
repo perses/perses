@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { MouseEventHandler } from 'react';
 import { LineSeriesOption } from 'echarts/charts';
 
 export const PROGRESSIVE_MODE_SERIES_LIMIT = 500;
@@ -34,6 +35,23 @@ export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
 export type EChartsDataFormat = {
   timeSeries: EChartsTimeSeries[];
   xAxis: number[];
+  legendItems?: LegendItem[];
   xAxisMax?: number | string;
   rangeMs?: number;
 };
+
+/**
+ * Supported legend options
+ */
+export interface LegendOptions {
+  show: boolean;
+  position: 'bottom' | 'right';
+}
+
+export interface LegendItem {
+  id: string;
+  label: string;
+  isSelected: boolean;
+  color: string;
+  onClick: MouseEventHandler<HTMLLIElement>;
+}

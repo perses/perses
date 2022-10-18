@@ -11,17 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './InfoTooltip';
-export * from './Legend';
-export * from './LineChart';
-export * from './GaugeChart';
-export * from './StatChart';
-export * from './TimeRangeSelector';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test';
+import React from 'react';
+import { Box, BoxProps } from '@mui/material';
+import { combineSx } from '../utils';
+
+export interface LegendColorBadgeProps extends BoxProps<'div'> {
+  color: string;
+}
+
+export const LegendColorBadge = React.memo(function LegendColorBadge({ color, sx, ...others }: LegendColorBadgeProps) {
+  return (
+    <Box
+      {...others}
+      sx={combineSx(
+        {
+          height: 4,
+          width: 16,
+          margin: (theme) => theme.spacing(0.5),
+        },
+        sx
+      )}
+      style={{ ...others.style, backgroundColor: color }}
+    />
+  );
+});

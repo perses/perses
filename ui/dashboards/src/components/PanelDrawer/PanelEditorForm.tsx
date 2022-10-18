@@ -72,7 +72,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   return (
     <form id={panelEditorFormId} onSubmit={handleSubmit}>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ overflowY: 'scroll', maxHeight: '90vh' }}>
         <Grid item xs={8}>
           <TextField required label="Name" value={name} variant="outlined" onChange={(e) => setName(e.target.value)} />
         </Grid>

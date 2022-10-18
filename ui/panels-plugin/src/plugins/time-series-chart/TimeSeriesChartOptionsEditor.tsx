@@ -12,12 +12,29 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Stack, Box, Typography } from '@mui/material';
+import {
+  Stack,
+  Box,
+  Typography,
+  Switch,
+  MenuItem,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  Select,
+} from '@mui/material';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { OptionsEditorProps, TimeSeriesQueryEditor } from '@perses-dev/plugin-system';
-import { TimeSeriesChartOptions } from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_LEGEND } from './time-series-chart-model';
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
+
+// TODO: reorg supported options
+const LEGEND_POSITIONS = ['bottom', 'right'] as const;
+
+type LegendPositionOptions = {
+  position: typeof LEGEND_POSITIONS[number];
+};
 
 export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
@@ -31,6 +48,22 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
+  function updateLegendShow(show: boolean) {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.legend.show = show;
+      })
+    );
+  }
+
+  function updateLegendPosition(position: LegendPositionOptions['position']) {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.legend.position = position;
+      })
+    );
+  }
+
   return (
     <Stack spacing={1}>
       {/* TODO: Deal with user deleting all queries */}
@@ -42,6 +75,41 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
           <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
         </Box>
       ))}
+      <Stack spacing={1}>
+        <Typography variant="overline" component="h3">
+          Legend
+        </Typography>
+        <FormControlLabel
+          label="Show"
+          control={
+            <Switch
+              checked={value.legend.show ?? DEFAULT_LEGEND.show}
+              onChange={(e) => {
+                updateLegendShow(e.target.checked);
+              }}
+            />
+          }
+        />
+        <FormControl>
+          <InputLabel id="legend-position-select-label">Position</InputLabel>
+          <Select
+            sx={{ maxWidth: 100 }}
+            labelId="legend-position-select-label"
+            id="legend-position-select"
+            label="Position"
+            value={value.legend.position ?? DEFAULT_LEGEND.position}
+            onChange={(e) => {
+              updateLegendPosition(e.target.value as LegendPositionOptions['position']);
+            }}
+          >
+            {LEGEND_POSITIONS.map((v) => (
+              <MenuItem key={v} value={v}>
+                {v}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
     </Stack>
   );
 }
