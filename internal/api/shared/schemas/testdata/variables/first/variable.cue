@@ -11,24 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stat
+package first
 
-import (
-	"github.com/perses/perses/schemas/common"
-)
-
-kind: "StatChart"
+kind: "FirstVariable"
 spec: close({
-	query:       #ts_query
-	calculation: common.#calculation
-	unit:        common.#unit
-	thresholds?: common.#thresholds
-	sparkline?:  #sparkline
-
-	#sparkline: {
-		color?: string
-		width?: number
-	}
+	a: string
+	b: string
 })
-
-#ts_query: _

@@ -18,11 +18,11 @@ import (
 )
 
 kind: "TimeSeriesChart"
-spec: {
+spec: close({
 	queries: [...#ts_query]
 	show_legend?: bool
 	unit?:        common.#unit
 	thresholds?:  common.#thresholds
-}
+})
 
 #ts_query: _

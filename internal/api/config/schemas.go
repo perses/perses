@@ -19,6 +19,7 @@ const (
 	DefaultPanelsPath      = "schemas/panels"
 	DefaultQueriesPath     = "schemas/queries"
 	DefaultDatasourcesPath = "schemas/datasources"
+	DefaultVariablesPath   = "schemas/variables"
 	defaultInterval        = 1 * time.Hour
 )
 
@@ -26,6 +27,7 @@ type Schemas struct {
 	PanelsPath      string        `yaml:"panels_path,omitempty"`
 	QueriesPath     string        `yaml:"queries_path,omitempty"`
 	DatasourcesPath string        `yaml:"datasources_path,omitempty"`
+	VariablesPath   string        `yaml:"variables_path,omitempty"`
 	Interval        time.Duration `yaml:"interval,omitempty"`
 }
 
@@ -38,6 +40,9 @@ func (s *Schemas) Verify() error {
 	}
 	if len(s.DatasourcesPath) == 0 {
 		s.DatasourcesPath = DefaultDatasourcesPath
+	}
+	if len(s.VariablesPath) == 0 {
+		s.VariablesPath = DefaultVariablesPath
 	}
 	if s.Interval <= 0 {
 		s.Interval = defaultInterval
