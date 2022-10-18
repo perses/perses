@@ -1,13 +1,13 @@
 database:
-  etcd:
-    protocol: "http"
-    request_timeout: 10
-    connections:
-      - host: 0.0.0.0
-        port: 2379
+  file:
+    folder: "dev/local_db"
+    file_extension: "json"
 
 schemas:
   panels_path: "schemas/panels"
   queries_path: "schemas/queries"
+  datasources_path: "schemas/datasources"
+  variables_path: "schemas/variables"
   interval: "5m"
-readonly: true
+
+readonly: false

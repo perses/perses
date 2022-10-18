@@ -25,7 +25,7 @@
       "name": "PrometheusDemoBrowser"
     },
     "spec": {
-      "default": true,
+      "default": false,
       "plugin": {
         "kind": "PrometheusDatasource",
         "spec": {
@@ -40,7 +40,7 @@
       "name": "PrometheusLocal"
     },
     "spec": {
-      "default": true,
+      "default": false,
       "plugin": {
         "kind": "PrometheusDatasource",
         "spec": {
