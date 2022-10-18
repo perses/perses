@@ -18,16 +18,16 @@ import (
 )
 
 #legend: {
-	show?: bool
+	show?:     bool
 	position?: "bottom" | "right"
 }
 
 kind: "TimeSeriesChart"
 spec: close({
 	queries: [...#ts_query]
-	legend?:      #legend
-	unit?:        common.#unit
-	thresholds?:  common.#thresholds
+	legend?:     #legend
+	unit?:       common.#unit
+	thresholds?: common.#thresholds
 })
 
 #ts_query: _
