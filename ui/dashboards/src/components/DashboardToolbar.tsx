@@ -81,7 +81,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Typography variant="h2">{dashboardName}</Typography>
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
-              {isLaptopSize ? (
+              {isLaptopSize && (
                 <Button
                   variant="outlined"
                   startIcon={<PencilIcon />}
@@ -90,8 +90,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 >
                   Edit
                 </Button>
-              ) : (
-                <></>
               )}
             </Stack>
           </Box>
