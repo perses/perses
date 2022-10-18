@@ -17,10 +17,15 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
+#legend: {
+	show?: bool
+	position?: "bottom" | "right"
+}
+
 kind: "TimeSeriesChart"
 spec: close({
 	queries: [...#ts_query]
-	show_legend?: bool
+	legend?:      #legend
 	unit?:        common.#unit
 	thresholds?:  common.#thresholds
 })

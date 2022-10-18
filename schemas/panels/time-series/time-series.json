@@ -22,7 +22,10 @@
       "kind": "Decimal",
       "decimal_places": 2
     },
-    "show_legend": true,
+    "legend": {
+      "show": true,
+      "position": "bottom"
+    },
     "thresholds": {
       "steps": [
         {
