@@ -12,16 +12,28 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Stack, Box, Typography } from '@mui/material';
+import { Button, IconButton, Stack, Typography } from '@mui/material';
+import AddIcon from 'mdi-material-ui/Plus';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { OptionsEditorProps, TimeSeriesQueryEditor } from '@perses-dev/plugin-system';
+import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
+
 import { TimeSeriesChartOptions } from './time-series-chart-model';
+
+const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
+const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
   const { queries } = value;
+  const hasMoreThanOneQuery = queries.length > 1;
+
+  const { data: defaultQueryPlugin } = usePlugin(DEFAULT_QUERY_PLUGIN_TYPE, DEFAULT_QUERY_PLUGIN_KIND, {
+    useErrorBoundary: true,
+    enabled: true,
+  });
 
   const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
     onChange(
@@ -31,16 +43,47 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
+  const handleQueryAdd = () => {
+    if (!defaultQueryPlugin) return;
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.queries.push({
+          kind: DEFAULT_QUERY_PLUGIN_TYPE,
+          spec: {
+            plugin: { kind: DEFAULT_QUERY_PLUGIN_KIND, spec: defaultQueryPlugin.createInitialOptions() },
+          },
+        });
+      })
+    );
+  };
+
+  const handleQueryDelete = (index: number) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.queries.splice(index, 1);
+      })
+    );
+  };
+
   return (
-    <Stack spacing={1}>
-      {/* TODO: Deal with user deleting all queries */}
+    <Stack spacing={2}>
+      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
+        Add Query
+      </Button>
       {queries.map((query, i) => (
-        <Box key={i}>
-          <Typography variant="overline" component="h3">
-            Query {i + 1}
-          </Typography>
+        <Stack key={i}>
+          <Stack direction="row">
+            <Typography variant="overline" component="h3">
+              Query {i + 1}
+            </Typography>
+            {hasMoreThanOneQuery && (
+              <IconButton sx={{ marginLeft: 'auto' }} onClick={() => handleQueryDelete(i)}>
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Stack>
           <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
-        </Box>
+        </Stack>
       ))}
     </Stack>
   );
