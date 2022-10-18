@@ -20,6 +20,23 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
+func FilterDatasource[T DatasourceInterface](kind string, defaultDTS *bool, list []T) []T {
+	result := make([]T, 0, len(list))
+	for _, d := range list {
+		keep := true
+		if len(kind) > 0 && kind != d.GetSpec().Plugin.Kind {
+			keep = false
+		}
+		if defaultDTS != nil && *defaultDTS != d.GetSpec().Default {
+			keep = false
+		}
+		if keep {
+			result = append(result, d)
+		}
+	}
+	return result
+}
+
 func GenerateGlobalDatasourceID(name string) string {
 	return fmt.Sprintf("/globaldatasources/%s", name)
 }
