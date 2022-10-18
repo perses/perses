@@ -62,7 +62,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 			logrus.Debugf("unable to create the dashboard %q. It already exists", entity.Metadata.Name)
 			return nil, shared.ConflictError
 		}
-		logrus.WithError(err).Errorf("unable to perform the creation of the prometheuRule %q, something wrong with the database", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the creation of the dashboard %q, something wrong with the database", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil
@@ -86,10 +86,12 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 		logrus.Debugf("project in dashboard %q and coming from the http request: %q doesn't match", entity.Metadata.Project, parameters.Project)
 		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request doesn't match", shared.BadRequestError)
 	}
+
 	// verify this new dashboard passes the validation
 	if err := validate.Dashboard(entity, s.sch); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
+
 	// find the previous version of the dashboard
 	oldEntity, err := s.Get(parameters)
 	if err != nil {
@@ -107,10 +109,10 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 func (s *service) Delete(parameters shared.Parameters) error {
 	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the project %q", parameters.Name)
+			logrus.Debugf("unable to find the dashboard %q", parameters.Name)
 			return shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to delete the project %q, something wrong with the database", parameters.Name)
+		logrus.WithError(err).Errorf("unable to delete the dashboard %q, something wrong with the database", parameters.Name)
 		return shared.InternalError
 	}
 	return nil
@@ -120,10 +122,10 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	entity, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
 		if etcd.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the project %q", parameters.Name)
+			logrus.Debugf("unable to find the dashboard %q", parameters.Name)
 			return nil, shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the project %q, something wrong with the database", parameters.Name)
+		logrus.WithError(err).Errorf("unable to find the previous version of the dashboard %q, something wrong with the database", parameters.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil

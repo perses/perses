@@ -86,7 +86,7 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters shared.Paramete
 	oldObject := oldEntity.(*v1.GlobalDatasource)
 	entity.Metadata.Update(oldObject.Metadata)
 	if err := s.dao.Update(entity); err != nil {
-		logrus.WithError(err).Errorf("unable to perform the update of the Datasource %q, something wrong with etcd", entity.Metadata.Name)
+		logrus.WithError(err).Errorf("unable to perform the update of the GlobalDatasource %q, something wrong with etcd", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil
@@ -98,7 +98,7 @@ func (s *service) Delete(parameters shared.Parameters) error {
 			logrus.Debugf("unable to find the Datasource %q", parameters.Name)
 			return shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to delete the Datasource %q, something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to delete the GlobalDatasource %q, something wrong with etcd", parameters.Name)
 		return shared.InternalError
 	}
 	return nil
@@ -111,7 +111,7 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 			logrus.Debugf("unable to find the Datasource %q", parameters.Name)
 			return nil, shared.NotFoundError
 		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the Datasource %q, something wrong with etcd", parameters.Name)
+		logrus.WithError(err).Errorf("unable to find the previous version of the GlobalDatasource %q, something wrong with etcd", parameters.Name)
 		return nil, shared.InternalError
 	}
 	return entity, nil

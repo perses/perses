@@ -24,6 +24,7 @@ import (
 	"github.com/perses/perses/internal/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/sirupsen/logrus"
 )
 
@@ -65,6 +66,8 @@ type Schemas interface {
 	ValidateDatasource(plugin common.Plugin) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
+	ValidateVariables([]dashboard.Variable) error
+	ValidateVariable(plugin common.Plugin, varName string) error
 	GetLoaders() []Loader
 }
 
@@ -110,6 +113,16 @@ func New(conf config.Schemas) Schemas {
 		loaders = append(loaders, dts)
 		s.dts = dts
 	}
+	if len(conf.VariablesPath) != 0 {
+		vars := &cueDefs{
+			context:     ctx,
+			schemas:     &sync.Map{},
+			schemasPath: conf.VariablesPath,
+			kindCuePath: "kind",
+		}
+		loaders = append(loaders, vars)
+		s.vars = vars
+	}
 	s.loaders = loaders
 
 	return s
@@ -119,6 +132,7 @@ type sch struct {
 	context *cue.Context
 	panels  *cueDefs
 	dts     *cueDefs
+	vars    *cueDefs
 	queries *cueDefsWithDisjunction
 	loaders []Loader
 }
@@ -163,6 +177,43 @@ func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
 			// Then merge with the queries disjunction schema
 			return originalValue.Unify(s.queries.disjSchema)
 		}
+		return originalValue
+	})
+}
+
+// ValidateVariables verify a list of variables.
+// The variables are matched against the known list of CUE definitions (schemas)
+// This applies to the ListVariable type only (TextVariable is skipped)
+// If no schema matches for at least 1 variable, the validation fails.
+func (s *sch) ValidateVariables(variables []dashboard.Variable) error {
+	if s.vars == nil {
+		logrus.Warning("variable schemas are not loaded")
+		return nil
+	}
+	// go through the variables list
+	// the processing stops as soon as it detects an invalid variable  -> TODO: improve this to return a list of all the errors encountered ?
+	for _, variable := range variables {
+		// skip if this is not a ListVariable (no validation needed in this case)
+		if variable.Kind != dashboard.ListVariable {
+			continue
+		}
+		// convert the variable's spec to ListVariableSpec
+		listVariableSpec, ok := variable.Spec.(*dashboard.ListVariableSpec)
+		if !ok {
+			return errors.New("Error converting Variable to ListVariable")
+		}
+		variableName := listVariableSpec.GetName()
+		logrus.Tracef("Variable to validate: %s", variableName)
+		if err := s.ValidateVariable(listVariableSpec.Plugin, variableName); err != nil {
+			return err
+		}
+	}
+	logrus.Debug("All variables are valid")
+	return nil
+}
+
+func (s *sch) ValidateVariable(plugin common.Plugin, variableName string) error {
+	return s.validatePlugin(plugin, "variable", variableName, s.vars, func(originalValue cue.Value) cue.Value {
 		return originalValue
 	})
 }

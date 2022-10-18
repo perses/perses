@@ -23,8 +23,14 @@ import (
 
 func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 	if sch != nil {
-		return sch.ValidatePanels(entity.Spec.Panels)
+		if err := sch.ValidateVariables(entity.Spec.Variables); err != nil {
+			return err
+		}
+		if err := sch.ValidatePanels(entity.Spec.Panels); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 

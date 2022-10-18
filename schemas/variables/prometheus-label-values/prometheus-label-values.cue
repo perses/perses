@@ -11,16 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package invalid
+package prometheusLabelValues
 
-spec: {
-	plugin: {
-		kind:    "InvalidQuery"
-		invalid: true
-		spec: {
-			datasource: {
-				kind: "PrometheusDatasource"
-			}
-		}
-	}
-}
+kind: "PrometheusLabelValuesVariable"
+spec: close({
+	label_name: string
+	matchers: [...string]
+})
