@@ -26,7 +26,7 @@ export const ListLegendItem = React.memo(function ListLegendItem({ item }: ListL
       dense={true}
       sx={{
         display: 'flex',
-        maxWidth: 270,
+        maxWidth: 270, // TODO: adjust spacing depending on number of series
         padding: 0,
         cursor: 'pointer',
       }}
