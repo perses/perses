@@ -11,17 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, GridItemDefinition, PanelDefinition, UnknownSpec } from '@perses-dev/core';
+import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
-import {
-  PanelGroupSlice,
-  PanelGroupItemId,
-  PanelGroupId,
-  getPanelKey,
-  PanelGroupDefinition,
-} from './panel-group-slice';
+import { PanelGroupSlice, PanelGroupItemId, PanelGroupId, PanelGroupDefinition } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -94,8 +88,12 @@ export function createPanelEditorSlice(): StateCreator<
     openEditPanel(panelGroupItemId) {
       const { panels, panelGroups } = get();
 
-      // Ask the layout store for the panel key at that location
-      const panelKey = getPanelKey(panelGroups, panelGroupItemId);
+      // Figure out the panel key at that location
+      const content = panelGroups[panelGroupItemId.panelGroupId]?.items[panelGroupItemId.itemIndex]?.content;
+      if (content === undefined) {
+        throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
+      }
+      const panelKey = getPanelKeyFromRef(content);
 
       // Find the panel to edit
       const panelToEdit = panels[panelKey];

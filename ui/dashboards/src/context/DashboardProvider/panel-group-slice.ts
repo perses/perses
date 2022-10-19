@@ -146,18 +146,6 @@ export function createPanelGroupSlice(
 }
 
 /**
- * Helper to get the panel key for an item in a PanelGroup.
- */
-export function getPanelKey(panelGroups: PanelGroupSlice['panelGroups'], panelGroupItemId: PanelGroupItemId) {
-  const { panelGroupId, itemIndex } = panelGroupItemId;
-  const content = panelGroups[panelGroupId]?.items[itemIndex]?.content;
-  if (content === undefined) {
-    throw new Error(`Could not find panel group item ${panelGroupItemId}`);
-  }
-  return getPanelKeyFromRef(content);
-}
-
-/**
  * Returns an object that maps each panel to the groups it belongs
  */
 export function mapPanelToPanelGroups(panelGroups: PanelGroupSlice['panelGroups']) {

@@ -14,7 +14,7 @@
 import { getPanelKeyFromRef } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { PanelGroupSlice, PanelGroupItemId, getPanelKey, mapPanelToPanelGroups } from './panel-group-slice';
+import { PanelGroupSlice, PanelGroupItemId, mapPanelToPanelGroups } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -85,14 +85,29 @@ export function createPanelDeleteSlice(): StateCreator<
       });
     },
 
-    openDeletePanelDialog(item: PanelGroupItemId) {
+    openDeletePanelDialog(panelGroupItemId: PanelGroupItemId) {
       const { panels, panelGroups } = get();
-      const panelKey = getPanelKey(panelGroups, item);
+      const panelGroup = panelGroups[panelGroupItemId.panelGroupId];
+      if (panelGroup === undefined) {
+        throw new Error(`Panel group not found ${panelGroupItemId.panelGroupId}`);
+      }
+
+      const content = panelGroup.items[panelGroupItemId.itemIndex]?.content;
+      if (content === undefined) {
+        throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
+      }
+
+      const panelKey = getPanelKeyFromRef(content);
+      const panel = panels[panelKey];
+      if (panel === undefined) {
+        throw new Error(`Could not find panel ${panelKey}`);
+      }
+
       set((state) => {
         state.deletePanelDialog = {
-          panelGroupItemId: item,
-          panelName: panels[panelKey]?.spec.display.name ?? '',
-          panelGroupName: panelGroups[item.panelGroupId]?.title ?? '',
+          panelGroupItemId: panelGroupItemId,
+          panelName: panel.spec.display.name,
+          panelGroupName: panelGroup.title ?? '',
         };
       });
     },
