@@ -32,8 +32,10 @@ export const DEFAULT_LEGEND: LegendOptions = {
 
 export const LEGEND_POSITIONS = ['bottom', 'right'] as const;
 
+export type LegendPosition = typeof LEGEND_POSITIONS[number];
+
 export type LegendPositionOptions = {
-  position: typeof LEGEND_POSITIONS[number];
+  position: LegendPosition;
 };
 
 /**
