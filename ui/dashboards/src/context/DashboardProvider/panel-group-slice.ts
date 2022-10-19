@@ -150,9 +150,11 @@ export function createPanelGroupSlice(
  */
 export function getPanelKey(panelGroups: PanelGroupSlice['panelGroups'], panelGroupItemId: PanelGroupItemId) {
   const { panelGroupId, itemIndex } = panelGroupItemId;
-  const group = findGroup(panelGroups, panelGroupId);
-  const item = findItem(group, itemIndex);
-  return getPanelKeyFromRef(item.content);
+  const content = panelGroups[panelGroupId]?.items[itemIndex]?.content;
+  if (content === undefined) {
+    throw new Error(`Could not find panel group item ${panelGroupItemId}`);
+  }
+  return getPanelKeyFromRef(content);
 }
 
 /**
@@ -170,22 +172,4 @@ export function mapPanelToPanelGroups(panelGroups: PanelGroupSlice['panelGroups'
     });
   });
   return map;
-}
-
-// Helper to find a group and throw if not found
-function findGroup(panelGroups: PanelGroupSlice['panelGroups'], groupId: PanelGroupId) {
-  const group = panelGroups[groupId];
-  if (group === undefined) {
-    throw new Error(`No panel group found for Id ${groupId}`);
-  }
-  return group;
-}
-
-// Helper to get an item in a group and throw if not found
-function findItem(group: PanelGroupDefinition, itemIndex: number) {
-  const item = group.items[itemIndex];
-  if (item === undefined) {
-    throw new Error(`No grid item found at position ${itemIndex}`);
-  }
-  return item;
 }
