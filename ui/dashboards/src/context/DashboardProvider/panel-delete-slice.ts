@@ -14,7 +14,7 @@
 import { getPanelKeyFromRef } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { PanelGroupSlice, PanelGroupItemId, mapPanelToPanelGroups } from './panel-group-slice';
+import { PanelGroupSlice, PanelGroupItemId } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -78,8 +78,7 @@ export function createPanelDeleteSlice(): StateCreator<
         existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
 
         // See if panel key is still used and if not, delete it
-        const usedGroupIds = mapPanelToPanelGroups(draft.panelGroups)[panelKey];
-        if (usedGroupIds === undefined || usedGroupIds.length === 0) {
+        if (isPanelKeyStillUsed(draft.panelGroups, panelKey)) {
           delete draft.panels[panelKey];
         }
       });
@@ -118,4 +117,15 @@ export function createPanelDeleteSlice(): StateCreator<
       });
     },
   });
+}
+
+// Helper function to determine if a panel key is still being used somewhere in Panel Groups
+function isPanelKeyStillUsed(panelGroups: PanelGroupSlice['panelGroups'], panelKey: string) {
+  for (const group of Object.values(panelGroups)) {
+    const found = group.items.findIndex((item) => getPanelKeyFromRef(item.content) === panelKey);
+    if (found !== -1) {
+      return true;
+    }
+  }
+  return false;
 }

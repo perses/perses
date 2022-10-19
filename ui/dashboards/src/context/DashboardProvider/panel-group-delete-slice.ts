@@ -14,7 +14,7 @@
 import { getPanelKeyFromRef } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { mapPanelToPanelGroups, PanelGroupId, PanelGroupSlice } from './panel-group-slice';
+import { PanelGroupId, PanelGroupSlice } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -60,16 +60,15 @@ export const createPanelGroupDeleteSlice: StateCreator<
       delete draft.panelGroups[panelGroupId];
       draft.panelGroupIdOrder.splice(idIndex, 1);
 
-      // Get usage of all remaining panel keys
-      const panelKeyMap = mapPanelToPanelGroups(draft.panelGroups);
+      // Get all remaining panel keys in use
+      const usedPanelKeys = getUsedPanelKeys(draft.panelGroups);
 
       // For the panel keys of the items that were just deleted, see if they're still used and if not, also delete the
       // panel definition
       for (const panelKey of panelKeys) {
-        const panelKeyUsage = panelKeyMap[panelKey];
-        if (panelKeyUsage === undefined || panelKeyUsage.length === 0) {
-          delete draft.panels[panelKey];
-        }
+        if (usedPanelKeys.has(panelKey)) continue;
+
+        delete draft.panels[panelKey];
       }
     });
   },
@@ -89,3 +88,14 @@ export const createPanelGroupDeleteSlice: StateCreator<
       state.deletePanelGroupDialog = undefined;
     }),
 });
+
+// Helper to get the panel keys of all groups, returning a set to eliminate duplicates
+function getUsedPanelKeys(panelGroups: PanelGroupSlice['panelGroups']): Set<string> {
+  const usedPanelKeys = new Set<string>();
+  for (const group of Object.values(panelGroups)) {
+    for (const item of group.items) {
+      usedPanelKeys.add(getPanelKeyFromRef(item.content));
+    }
+  }
+  return usedPanelKeys;
+}

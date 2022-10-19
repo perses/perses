@@ -144,20 +144,3 @@ export function createPanelGroupSlice(
     },
   });
 }
-
-/**
- * Returns an object that maps each panel to the groups it belongs
- */
-export function mapPanelToPanelGroups(panelGroups: PanelGroupSlice['panelGroups']) {
-  const map: Record<string, Array<PanelGroupDefinition['id']>> = {}; // { panel key: [group ids] }
-  Object.values(panelGroups).forEach((group) => {
-    // for each panel in a group, add the group id to map[panelKey]
-    group.items.forEach((panel) => {
-      const panelKey = getPanelKeyFromRef(panel.content);
-      const groupIds = map[panelKey] ?? [];
-      groupIds.push(group.id);
-      map[panelKey] = groupIds;
-    });
-  });
-  return map;
-}
