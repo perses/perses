@@ -50,6 +50,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     enabled: true,
   });
 
+  // Query editing handlers
   const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -58,21 +59,6 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
-  function updateLegendShow(show: boolean) {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.legend.show = show;
-      })
-    );
-  }
-
-  function updateLegendPosition(position: LegendPositionOptions['position']) {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.legend.position = position;
-      })
-    );
-  }
   const handleQueryAdd = () => {
     if (!defaultQueryPlugin) return;
     onChange(
@@ -91,6 +77,23 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.queries.splice(index, 1);
+      })
+    );
+  };
+
+  // edit legend options handlers
+  const updateLegendShow = (show: boolean) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.legend.show = show;
+      })
+    );
+  };
+
+  const updateLegendPosition = (position: LegendPositionOptions['position']) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.legend.position = position;
       })
     );
   };
