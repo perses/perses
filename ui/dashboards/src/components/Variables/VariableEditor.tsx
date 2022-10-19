@@ -82,19 +82,21 @@ export function VariableEditor(props: {
   const changeVariableOrder = (index: number, direction: 'up' | 'down') => {
     setVariableDefinitions((draft) => {
       if (direction === 'up') {
-        if (index === 0) {
+        const prevElement = draft[index - 1];
+        const currentElement = draft[index];
+        if (index === 0 || !prevElement || !currentElement) {
           return;
         }
-        const tmp = draft[index - 1] as VariableDefinition;
-        draft[index - 1] = draft[index] as VariableDefinition;
-        draft[index] = tmp;
+        draft[index - 1] = currentElement;
+        draft[index] = prevElement;
       } else {
-        if (index === draft.length - 1) {
+        const nextElement = draft[index + 1];
+        const currentElement = draft[index];
+        if (index === draft.length - 1 || !nextElement || !currentElement) {
           return;
         }
-        const tmp = draft[index + 1];
-        draft[index + 1] = draft[index] as VariableDefinition;
-        draft[index] = tmp as VariableDefinition;
+        draft[index + 1] = currentElement;
+        draft[index] = nextElement;
       }
     });
   };
