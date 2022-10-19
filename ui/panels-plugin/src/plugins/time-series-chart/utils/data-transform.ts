@@ -24,9 +24,15 @@ export interface TimeScale {
   stepMs: number;
 }
 
+export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
+
 export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
-export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
+export const EMPTY_GRAPH_DATA = {
+  timeSeries: [],
+  xAxis: [],
+  legendItems: [],
+};
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -126,6 +132,7 @@ export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<numb
 export function getLineSeries(
   name: string,
   data: EChartsTimeSeries['data'],
+  selectedSeriesName: string | null,
   threshold?: StepOptions
 ): EChartsTimeSeries {
   if (threshold !== undefined) {
@@ -156,5 +163,13 @@ export function getLineSeries(
     color: getRandomColor(name),
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
+    lineStyle: {
+      width: selectedSeriesName && selectedSeriesName === name ? 2 : 1,
+    },
+    emphasis: {
+      lineStyle: {
+        width: selectedSeriesName && selectedSeriesName === name ? 2.5 : 1.5,
+      },
+    },
   };
 }

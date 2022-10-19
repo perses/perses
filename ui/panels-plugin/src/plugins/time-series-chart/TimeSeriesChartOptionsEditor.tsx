@@ -12,13 +12,24 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Button, IconButton, Stack, Typography } from '@mui/material';
+import {
+  Button,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectProps,
+  Stack,
+  Switch,
+  Typography,
+} from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
-
-import { TimeSeriesChartOptions } from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_LEGEND, LEGEND_POSITIONS, LegendPosition } from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
@@ -35,6 +46,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     enabled: true,
   });
 
+  // Query editing handlers
   const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -65,6 +77,26 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
+  // edit legend options handlers
+  const updateLegendShow = (show: boolean) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.legend = show ? DEFAULT_LEGEND : undefined;
+      })
+    );
+  };
+
+  const updateLegendPosition: SelectProps<LegendPosition>['onChange'] = (e) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        // TODO: type cast should not be necessary
+        if (draft.legend) {
+          draft.legend.position = e.target.value as LegendPosition;
+        }
+      })
+    );
+  };
+
   return (
     <Stack spacing={2}>
       <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
@@ -85,6 +117,39 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
           <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
         </Stack>
       ))}
+      <Stack spacing={1}>
+        <Typography variant="overline" component="h3">
+          Legend
+        </Typography>
+        <FormControlLabel
+          label="Show"
+          control={
+            <Switch
+              checked={value.legend !== undefined}
+              onChange={(e) => {
+                updateLegendShow(e.target.checked);
+              }}
+            />
+          }
+        />
+        <FormControl>
+          <InputLabel id="legend-position-select-label">Position</InputLabel>
+          <Select
+            sx={{ maxWidth: 100 }}
+            labelId="legend-position-select-label"
+            id="legend-position-select"
+            label="Position"
+            value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
+            onChange={updateLegendPosition}
+          >
+            {LEGEND_POSITIONS.map((position) => (
+              <MenuItem key={position} value={position}>
+                {position}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
     </Stack>
   );
 }

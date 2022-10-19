@@ -11,5 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './ListLegend';
-export * from './ListLegendItem';
+import { List } from '@mui/material';
+import { LegendItem } from '../model';
+import { ListLegendItem } from './ListLegendItem';
+
+interface ListLegendProps {
+  items: LegendItem[];
+}
+
+export function ListLegend({ items }: ListLegendProps) {
+  return (
+    <List>
+      {items.map((item) => (
+        <ListLegendItem key={item.id} item={item} />
+      ))}
+    </List>
+  );
+}
