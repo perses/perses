@@ -78,7 +78,7 @@ export function createPanelDeleteSlice(): StateCreator<
         existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
 
         // See if panel key is still used and if not, delete it
-        if (isPanelKeyStillUsed(draft.panelGroups, panelKey)) {
+        if (isPanelKeyStillUsed(draft.panelGroups, panelKey) === false) {
           delete draft.panels[panelKey];
         }
       });
