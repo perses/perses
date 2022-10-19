@@ -33,6 +33,9 @@ export interface PanelSlice {
   savePanels: () => void;
 }
 
+/**
+ * Curried function for creating the PanelSlice.
+ */
 export function createPanelSlice(panels: PanelSlice['panels']): StateCreator<PanelSlice, Middleware, [], PanelSlice> {
   return (set) => ({
     panels,

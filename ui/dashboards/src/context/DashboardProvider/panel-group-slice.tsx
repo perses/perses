@@ -214,7 +214,7 @@ export function createPanelGroupSlice(
 /**
  * Helper to move an item in a PanelGroup from one group to another on the given immer draft state.
  */
-export function movePanelToGroup(
+export function movePanelGroupItem(
   draft: WritableDraft<PanelGroupSlice>,
   panelGroupItemId: PanelGroupItemId,
   newPanelGroupId: PanelGroupId
@@ -246,9 +246,9 @@ export function movePanelToGroup(
 }
 
 /**
- * Helper function to add a panel to a panel group on the given immer draft state.
+ * Helper function to add a panel group item to a panel group on the given immer draft state.
  */
-export function addPanelToGroup(draft: WritableDraft<PanelGroupSlice>, panelKey: string, panelGroupId: PanelGroupId) {
+export function addPanelGroupItem(draft: WritableDraft<PanelGroupSlice>, panelKey: string, panelGroupId: PanelGroupId) {
   const group = draft.panelGroups[panelGroupId];
   if (group === undefined) {
     throw new Error(`Missing panel group ${panelGroupId}`);

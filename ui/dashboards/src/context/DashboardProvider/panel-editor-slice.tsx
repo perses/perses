@@ -19,9 +19,8 @@ import {
   PanelGroupSlice,
   PanelGroupItemId,
   PanelGroupId,
-  PanelGroupDefinition,
-  movePanelToGroup,
-  addPanelToGroup,
+  movePanelGroupItem,
+  addPanelGroupItem,
   getPanelKey,
 } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -151,7 +150,7 @@ export function createPanelEditorSlice(): StateCreator<
             }
 
             // Move panel to the new group
-            movePanelToGroup(state, panelGroupItemId, next.groupId);
+            movePanelGroupItem(state, panelGroupItemId, next.groupId);
           });
         },
         close: () => {
@@ -193,7 +192,7 @@ export function createPanelEditorSlice(): StateCreator<
           const panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
           set((state) => {
             state.panels[panelKey] = panelDef;
-            addPanelToGroup(state, panelKey, next.groupId);
+            addPanelGroupItem(state, panelKey, next.groupId);
           });
         },
         close: () => {
