@@ -14,11 +14,11 @@
 import { FormEvent } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { usePanels } from '../../context';
-import { DeletePanelDialog } from '../../context/DashboardProvider/panel-editing-slice';
+import { useDeletePanelDialog } from '../../context';
+import { DeletePanelDialog } from '../../context/DashboardProvider/panel-editor-slice';
 
 const DeletePanelDialog = () => {
-  const { deletePanelDialog, closeDeletePanelDialog } = usePanels();
+  const { deletePanelDialog, closeDeletePanelDialog } = useDeletePanelDialog();
 
   return (
     <Dialog open={deletePanelDialog !== undefined}>
@@ -44,7 +44,7 @@ interface DeletePanelFormProps {
 }
 
 const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
-  const { deletePanels, closeDeletePanelDialog } = usePanels();
+  const { deletePanels, closeDeletePanelDialog } = useDeletePanelDialog();
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault();

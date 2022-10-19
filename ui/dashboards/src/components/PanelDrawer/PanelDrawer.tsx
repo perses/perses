@@ -14,14 +14,14 @@
 import { useState } from 'react';
 import { Stack, Box, Button, Typography } from '@mui/material';
 import { Drawer } from '@perses-dev/components';
-import { usePanels } from '../../context';
+import { usePanelEditor } from '../../context';
 import { PanelEditorForm, panelEditorFormId, PanelEditorFormProps } from './PanelEditorForm';
 
 /**
  * The Add/Edit panel drawer for editing a panel's options.
  */
 export const PanelDrawer = () => {
-  const { panelEditor } = usePanels();
+  const panelEditor = usePanelEditor();
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);

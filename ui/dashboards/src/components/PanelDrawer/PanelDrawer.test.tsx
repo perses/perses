@@ -53,7 +53,7 @@ describe('Panel Drawer', () => {
     const storeApi = renderPanelDrawer();
 
     // Open the drawer for a new panel (i.e. no panel key)
-    act(() => storeApi.getState().addPanel(0));
+    act(() => storeApi.getState().openAddPanel(0));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel');
@@ -80,7 +80,7 @@ describe('Panel Drawer', () => {
     const storeApi = renderPanelDrawer();
 
     // Open the drawer for an existing panel
-    act(() => storeApi.getState().editPanel({ panelGroupId: 0, itemIndex: 0 }));
+    act(() => storeApi.getState().openEditPanel({ panelGroupId: 0, itemIndex: 0 }));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);

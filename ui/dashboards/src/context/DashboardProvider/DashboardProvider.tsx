@@ -18,11 +18,11 @@ import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext } from 'react';
 import { DashboardSpec, RelativeTimeRange } from '@perses-dev/core';
+import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
-import { createLayoutSlice, LayoutSlice } from './layout-slice';
-import { createPanelEditorSlice, PanelEditorSlice } from './panel-editing-slice';
+import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
 
-export interface DashboardStoreState extends PanelGroupSlice, LayoutSlice, PanelEditorSlice {
+export interface DashboardStoreState extends PanelGroupEditorSlice, PanelGroupSlice, PanelEditorSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
@@ -63,8 +63,8 @@ export function DashboardProvider(props: DashboardProviderProps) {
       devtools((...args) => {
         const [set, get] = args;
         return {
-          ...createPanelGroupSlice(...args),
-          ...createLayoutSlice(layouts)(...args),
+          ...createPanelGroupEditorSlice(...args),
+          ...createPanelGroupSlice(layouts)(...args),
           ...createPanelEditorSlice(panels)(...args),
           defaultTimeRange: { pastDuration: dashboardSpec.duration },
           isEditMode: !!isEditMode,

@@ -31,7 +31,7 @@ import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import { usePanels, useEditMode, LayoutItem } from '../../context';
+import { useEditMode, LayoutItem, usePanelActions } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
@@ -66,11 +66,7 @@ export function Panel(props: PanelProps) {
 
   const { isEditMode } = useEditMode();
 
-  const { editPanel, openDeletePanelDialog } = usePanels();
-
-  const handleEditButtonClick = () => {
-    editPanel(panelGroupItemId);
-  };
+  const { openEditPanel, openDeletePanelDialog } = usePanelActions(panelGroupItemId);
 
   return (
     <Card
@@ -129,14 +125,10 @@ export function Panel(props: PanelProps) {
               )}
               {isEditMode && isHovered && (
                 <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <IconButton aria-label="edit panel" size="small" onClick={handleEditButtonClick}>
+                  <IconButton aria-label="edit panel" size="small" onClick={openEditPanel}>
                     <PencilIcon />
                   </IconButton>
-                  <IconButton
-                    aria-label="delete panel"
-                    size="small"
-                    onClick={() => openDeletePanelDialog(panelGroupItemId)}
-                  >
+                  <IconButton aria-label="delete panel" size="small" onClick={openDeletePanelDialog}>
                     <DeleteIcon />
                   </IconButton>
                   <IconButton aria-label="drag handle" size="small">
