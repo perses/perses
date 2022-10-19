@@ -14,6 +14,6 @@
 package text
 
 kind: "Markdown"
-spec: {
+spec: close({
 	text: string
-}
+})

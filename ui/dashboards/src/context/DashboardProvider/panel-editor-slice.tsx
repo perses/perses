@@ -23,6 +23,8 @@ import { PanelGroupSlice, PanelGroupItemId, PanelGroupId } from './panel-group-s
 export interface PanelEditorSlice {
   // TODO: Move panels state to its own slice so that other slices can depend on it (and modify the state)
   panels: Record<string, PanelDefinition>;
+  previousPanels: Record<string, PanelDefinition>;
+
 
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
@@ -43,6 +45,16 @@ export interface PanelEditorSlice {
    * Delete panels
    */
   deletePanels: (panels: PanelGroupItemId[]) => void;
+
+  /**
+   * Reset panels to previous state
+   */
+  resetPanels: () => void;
+
+  /**
+   * Save panels
+   */
+  savePanels: () => void;
 
   /**
    * State for the delete panel dialog when it's open, otherwise undefined when it's closed.
@@ -107,9 +119,22 @@ export function createPanelEditorSlice(
 ): StateCreator<PanelEditorSlice & PanelGroupSlice, Middleware, [], PanelEditorSlice> {
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
+    previousPanels: panels,
     panels,
 
     panelEditor: undefined,
+
+    savePanels() {
+      set((state) => {
+        state.previousPanels = state.panels;
+      });
+    },
+
+    resetPanels() {
+      set((state) => {
+        state.panels = state.previousPanels;
+      });
+    },
 
     openEditPanel(item) {
       const { panels, getPanelKey } = get();

@@ -27,6 +27,10 @@ type Query struct {
 	// Project is the exact name of the project.
 	// The value can come from the path of the URL or from the query parameter
 	Project string `param:"project" query:"project"`
+	// Kind is the type of the datasource.
+	Kind string `query:"kind"`
+	// Default will filter the list of datasource and return only the default datasource, whatever the kind of the datasource is.
+	Default *bool `query:"default"`
 }
 
 func (q *Query) Build() (string, error) {

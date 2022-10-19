@@ -15,3 +15,4 @@ export * from './DashboardProvider';
 export * from './DatasourceStoreProvider';
 export * from './TemplateVariableProvider';
 export * from './TimeRangeProvider';
+export * from './useDashboardSpec';

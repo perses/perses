@@ -32,3 +32,5 @@ GENERATED_CHANGELOG.md
 
 cue.mod/pkg
 cue.mod/usr
+
+dev/local_db

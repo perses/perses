@@ -26,6 +26,8 @@ export interface DashboardStoreState extends PanelGroupEditorSlice, PanelGroupSl
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
+  reset: () => void;
+  save: () => void;
 }
 
 export interface DashboardStoreProps {
@@ -59,7 +61,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
   const dashboardStore = createStore<DashboardStoreState>()(
     immer(
       devtools((...args) => {
-        const [set] = args;
+        const [set, get] = args;
         return {
           ...createPanelGroupEditorSlice(...args),
           ...createPanelGroupSlice(layouts)(...args),
@@ -67,6 +69,16 @@ export function DashboardProvider(props: DashboardProviderProps) {
           defaultTimeRange: { pastDuration: dashboardSpec.duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
+          reset: () => {
+            const { resetPanels, resetPanelGroups } = get();
+            resetPanels();
+            resetPanelGroups();
+          },
+          save: () => {
+            const { savePanels, savePanelGroups } = get();
+            savePanels();
+            savePanelGroups();
+          },
         };
       })
     )

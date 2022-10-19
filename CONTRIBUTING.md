@@ -28,20 +28,12 @@ Both components can be started and tested individually as described below.
 Building and starting the backend API server requires the following tools:
 
 * [Go](https://go.dev/doc/install) (usually the latest version as we are following upstream Go releases closely)
-* [Docker](https://docs.docker.com/engine/install/), which includes docker-compose
 * Make
 * [jq](https://stedolan.github.io/jq/download/) to run the populate.sh script below
 
 With these dependencies installed, you can proceed as follows:
 
-* Change to the `dev` folder and start an [etcd](https://etcd.io/) server, which is currently still required for storing and retrieving dashboard definitions:
-
-```bash
-cd dev/
-docker-compose up -d
-```
-
-* To populate the etcd database with a default dashboard and datasource setup for demonstration purposes, run the `populate.sh` script:
+* Change to the `dev` folder and generate the local database by running the `populate.sh` script You will then be able to modify it on the fly.
 
 ```bash
 bash populate.sh

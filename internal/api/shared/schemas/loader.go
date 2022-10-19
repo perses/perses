@@ -59,7 +59,7 @@ func (c *cueDefs) Load() error {
 	// process each schema plugin to convert it into a CUE Value
 	for _, file := range files {
 		if !file.IsDir() {
-			logrus.Warningf("Plugin %s is not a folder", file.Name())
+			logrus.Warningf("Plugin %s will not be loaded: it is not a folder", file.Name())
 			continue
 		}
 
@@ -70,21 +70,21 @@ func (c *cueDefs) Load() error {
 		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 		// TODO can probably be improved
 		if len(buildInstances) != 1 {
-			logrus.Errorf("The number of build instances for %s is != 1, skipping this schema", schemaPath)
+			logrus.Errorf("Plugin %s will not be loaded: The number of build instances is != 1", schemaPath)
 			continue
 		}
 		buildInstance := buildInstances[0]
 
 		// check for errors on the instances (these are typically parsing errors)
 		if buildInstance.Err != nil {
-			logrus.WithError(buildInstance.Err).Errorf("Error retrieving schema for %s, skipping this schema", schemaPath)
+			logrus.WithError(buildInstance.Err).Errorf("Plugin %s will not be loaded: file loading error", schemaPath)
 			continue
 		}
 
 		// build Value from the Instance
 		schema := c.context.BuildInstance(buildInstance)
 		if schema.Err() != nil {
-			logrus.WithError(schema.Err()).Errorf("Error during build for %s, skipping this schema", schemaPath)
+			logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: build error", schemaPath)
 			continue
 		}
 
@@ -92,19 +92,19 @@ func (c *cueDefs) Load() error {
 			// unify with the base def to complete defaults + check if the plugin fulfils the base requirements
 			schema = c.baseDef.Unify(schema)
 			if schema.Err() != nil {
-				logrus.WithError(schema.Err()).Errorf("Error during schema validation for %s, skipping this schema", schemaPath)
+				logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: it doesn't meet the expected format for its plugin type", schemaPath)
 				continue
 			}
 		}
 		// check if another schema for the same Kind was already registered
 		kind, _ := schema.LookupPath(cue.ParsePath(c.kindCuePath)).String()
 		if _, ok := newSchemas[kind]; ok {
-			logrus.Warningf("Conflict caused by %s: a schema already exists for kind %s, skipping this schema", schemaPath, kind)
+			logrus.Warningf("Plugin %s will not be loaded: conflicting schema already exists for kind %s", schemaPath, kind)
 			continue
 		}
 
 		newSchemas[kind] = schema
-		logrus.Debugf("Loaded schema %s from file %s", kind, schemaPath)
+		logrus.Debugf("%s plugin loaded from file %s", kind, schemaPath)
 	}
 
 	// make c.schemas equal to newSchemas: deep copy newSchemas to c.schemas, then remove any value of c.schemas not existing in newSchemas
@@ -207,7 +207,7 @@ func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 				return fmt.Errorf("schemas watcher channel has been closed unexpectedly")
 			}
 			// NB room for improvement: the event fsnotify.Remove could be used to actually remove the CUE schema from the map
-			if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Remove == fsnotify.Remove {
+			if event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
 				logrus.Tracef("%s event on %s", event.Op, event.Name)
 				for _, l := range w.loaders {
 					if strings.HasPrefix(event.Name, filepath.FromSlash(l.GetSchemaPath())) {

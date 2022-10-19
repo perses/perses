@@ -18,13 +18,23 @@ import (
 
 	"github.com/perses/perses/internal/api/shared/schemas"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
 func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
-	if sch != nil {
-		return sch.ValidatePanels(entity.Spec.Panels)
+	if _, err := dashboard.BuildVariableOrder(entity.Spec.Variables); err != nil {
+		return err
 	}
+	if sch != nil {
+		if err := sch.ValidateVariables(entity.Spec.Variables); err != nil {
+			return err
+		}
+		if err := sch.ValidatePanels(entity.Spec.Panels); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

@@ -1,0 +1,11 @@
+
+{
+  "kind": "StaticListVariable",
+  "spec": {
+    "values": [
+      "1m",
+      "5m",
+      "10m"
+    ]
+  }
+}

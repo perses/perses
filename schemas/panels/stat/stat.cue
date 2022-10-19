@@ -18,7 +18,7 @@ import (
 )
 
 kind: "StatChart"
-spec: {
+spec: close({
 	query:       #ts_query
 	calculation: common.#calculation
 	unit:        common.#unit
@@ -29,6 +29,6 @@ spec: {
 		color?: string
 		width?: number
 	}
-}
+})
 
 #ts_query: _

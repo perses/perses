@@ -71,7 +71,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   };
 
   return (
-    <form id={panelEditorFormId} onSubmit={handleSubmit}>
+    // Padding accounts for the combination of overflow: 'auto' and the MUI input labels - the labels are cut off otherwise.
+    <form id={panelEditorFormId} onSubmit={handleSubmit} style={{ overflowY: 'auto', padding: '8px 0' }}>
       <Grid container spacing={2}>
         <Grid item xs={8}>
           <TextField required label="Name" value={name} variant="outlined" onChange={(e) => setName(e.target.value)} />

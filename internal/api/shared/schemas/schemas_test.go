@@ -27,21 +27,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func loadPanelPlugin(testDataPath string) common.Plugin {
+func loadPlugin(testDataPath string) common.Plugin {
 	data, _ := os.ReadFile(testDataPath)
 	plg := common.Plugin{}
 	_ = json.Unmarshal(data, &plg)
 	return plg
 }
 
-func TestValidateDashboard(t *testing.T) {
-	validFirstPanel := loadPanelPlugin("testdata/samples/valid_first_panel.json")
-	validSecondPanel := loadPanelPlugin("testdata/samples/valid_second_panel.json")
-	validThirdPanel := loadPanelPlugin("testdata/samples/valid_third_panel.json")
-	invalidKind := loadPanelPlugin("testdata/samples/invalid_kind.json")
-	invalidDatasourceKind := loadPanelPlugin("testdata/samples/invalid_datasource_kind.json")
-	invalidUnwantedQueryField := loadPanelPlugin("testdata/samples/invalid_unwanted_query_field.json")
-	invalidQueryDatasourceMismatch := loadPanelPlugin("testdata/samples/invalid_query_datasource_mismatch.json")
+func TestValidatePanels(t *testing.T) {
+	validFirstPanel := loadPlugin("testdata/samples/panels/valid_first_panel.json")
+	validSecondPanel := loadPlugin("testdata/samples/panels/valid_second_panel.json")
+	validThirdPanel := loadPlugin("testdata/samples/panels/valid_third_panel.json")
+	invalidKind := loadPlugin("testdata/samples/panels/invalid_kind.json")
+	invalidDatasourceKind := loadPlugin("testdata/samples/panels/invalid_datasource_kind.json")
+	invalidUnwantedQueryField := loadPlugin("testdata/samples/panels/invalid_unwanted_query_field.json")
+	invalidQueryDatasourceMismatch := loadPlugin("testdata/samples/panels/invalid_query_datasource_mismatch.json")
 
 	metadata := v1.ProjectMetadata{
 		Metadata: v1.Metadata{
@@ -189,6 +189,118 @@ func TestValidateDashboard(t *testing.T) {
 			}
 
 			err := schema.ValidatePanels(test.dashboard.Spec.Panels)
+			errString := ""
+			if err != nil {
+				errString = err.Error()
+			}
+			assert.Equal(t, test.result, errString)
+		})
+	}
+}
+
+func TestValidateVariables(t *testing.T) {
+	validFirstVariable := loadPlugin("testdata/samples/variables/valid_first_variable.json")
+	validSecondVariable := loadPlugin("testdata/samples/variables/valid_second_variable.json")
+	invalidUnknownVariable := loadPlugin("testdata/samples/variables/invalid_unknown_variable.json")
+
+	metadata := v1.ProjectMetadata{
+		Metadata: v1.Metadata{
+			Name: "SimpleDashboard",
+		},
+		Project: "perses",
+	}
+	dts := dashboard.Datasource{
+		Name: "PrometheusDemo",
+		Kind: "Prometheus",
+	}
+
+	testSuite := []struct {
+		title     string
+		dashboard *v1.Dashboard
+		result    string
+	}{
+		{
+			title: "dashboard containing valid variables",
+			dashboard: &v1.Dashboard{
+				Kind:     v1.KindDashboard,
+				Metadata: metadata,
+				Spec: v1.DashboardSpec{
+					Datasource: dts,
+					Duration:   model.Duration(6 * time.Hour),
+					Variables: []dashboard.Variable{
+						{
+							Kind: "ListVariable",
+							Spec: &dashboard.ListVariableSpec{
+								Name:          "my1rstVar",
+								AllowAllValue: true,
+								AllowMultiple: false,
+								Display: &common.Display{
+									Name:        "My First Variable",
+									Description: "A simple variable of type FirstVariable",
+								},
+								Plugin: validFirstVariable,
+							},
+						},
+						{
+							Kind: "ListVariable",
+							Spec: &dashboard.ListVariableSpec{
+								Name:          "my2ndVar",
+								AllowAllValue: true,
+								AllowMultiple: false,
+								Display: &common.Display{
+									Name:        "My Second Variable",
+									Description: "A simple variable of type SecondVariable",
+								},
+								Plugin: validSecondVariable,
+							},
+						},
+					},
+					Panels:  map[string]*v1.Panel{},
+					Layouts: []dashboard.Layout{},
+				},
+			},
+			result: "",
+		},
+		{
+			title: "dashboard containing a variable of an unknown schema type",
+			dashboard: &v1.Dashboard{
+				Kind:     v1.KindDashboard,
+				Metadata: metadata,
+				Spec: v1.DashboardSpec{
+					Datasource: dts,
+					Duration:   model.Duration(6 * time.Hour),
+					Variables: []dashboard.Variable{
+						{
+							Kind: "ListVariable",
+							Spec: &dashboard.ListVariableSpec{
+								Name:          "myUnknownVar",
+								AllowAllValue: false,
+								AllowMultiple: true,
+								Display: &common.Display{
+									Name:        "My Unknown Variable",
+									Description: "A simple variable of type UnknownVariable",
+								},
+								Plugin: invalidUnknownVariable,
+							},
+						},
+					},
+					Panels:  map[string]*v1.Panel{},
+					Layouts: []dashboard.Layout{},
+				},
+			},
+			result: "invalid variable myUnknownVar: Unknown kind UnknownVariable",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			schema := New(config.Schemas{
+				VariablesPath: "testdata/variables",
+			})
+			for _, l := range schema.GetLoaders() {
+				assert.NoError(t, l.Load())
+			}
+
+			err := schema.ValidateVariables(test.dashboard.Spec.Variables)
 			errString := ""
 			if err != nil {
 				errString = err.Error()

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Typography, Stack, Button, Box } from '@mui/material';
+import { Typography, Stack, Button, Box, useTheme, useMediaQuery } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
@@ -27,13 +27,20 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { openAddPanelGroup, openAddPanel } = useDashboardActions();
+  const { openAddPanelGroup, openAddPanel, reset, save } = useDashboardActions();
+  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
 
   const onEditButtonClick = () => {
     setEditMode(true);
   };
 
   const onCancelButtonClick = () => {
+    reset();
+    setEditMode(false);
+  };
+
+  const onSave = () => {
+    save();
     setEditMode(false);
   };
 
@@ -45,7 +52,9 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Box padding={2} display="flex">
               <Typography variant="h2">Edit {dashboardName}</Typography>
               <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-                <Button variant="contained">Save</Button>
+                <Button variant="contained" onClick={onSave}>
+                  Save
+                </Button>
                 <Button variant="outlined" onClick={onCancelButtonClick}>
                   Cancel
                 </Button>
@@ -80,14 +89,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Typography variant="h2">{dashboardName}</Typography>
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
-              <Button
-                variant="outlined"
-                startIcon={<PencilIcon />}
-                onClick={onEditButtonClick}
-                sx={{ marginLeft: 'auto' }}
-              >
-                Edit
-              </Button>
+              {isLaptopSize && (
+                <Button
+                  variant="outlined"
+                  startIcon={<PencilIcon />}
+                  onClick={onEditButtonClick}
+                  sx={{ marginLeft: 'auto' }}
+                >
+                  Edit
+                </Button>
+              )}
             </Stack>
           </Box>
           <Box paddingY={2}>

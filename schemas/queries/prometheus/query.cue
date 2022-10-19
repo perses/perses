@@ -20,13 +20,13 @@ import (
 spec: {
 	plugin: {
 		kind: "PrometheusTimeSeriesQuery"
-		spec: {
+		spec: close({
 			datasource: {
 				kind: prometheus.kind
 			}
 			query:       string
 			min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
 			resolution?: number
-		}
+		})
 	}
 }

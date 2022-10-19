@@ -25,6 +25,29 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type validateFunc func(plugin common.Plugin, name string) error
+
+func validateSchemas(folder string, vf validateFunc) {
+	logrus.Infof("validate schemas under %q", folder)
+	dirEntries, err := os.ReadDir(folder)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	for _, dir := range dirEntries {
+		data, readErr := os.ReadFile(filepath.Join(folder, dir.Name(), fmt.Sprintf("%s.json", dir.Name())))
+		if readErr != nil {
+			logrus.Fatal(readErr)
+		}
+		plugin := &common.Plugin{}
+		if jsonErr := json.Unmarshal(data, plugin); jsonErr != nil {
+			logrus.Fatal(jsonErr)
+		}
+		if validateErr := vf(*plugin, dir.Name()); validateErr != nil {
+			logrus.Fatal(validateErr)
+		}
+	}
+}
+
 func main() {
 	cfg := config.Schemas{}
 	_ = cfg.Verify()
@@ -34,21 +57,10 @@ func main() {
 			logrus.Fatal(err)
 		}
 	}
-	dirEntries, err := os.ReadDir(config.DefaultPanelsPath)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	for _, dir := range dirEntries {
-		data, readErr := os.ReadFile(filepath.Join(config.DefaultPanelsPath, dir.Name(), fmt.Sprintf("%s.json", dir.Name())))
-		if readErr != nil {
-			logrus.Fatal(readErr)
-		}
-		plugin := &common.Plugin{}
-		if jsonErr := json.Unmarshal(data, plugin); jsonErr != nil {
-			logrus.Fatal(jsonErr)
-		}
-		if validateErr := sch.ValidatePanel(*plugin, dir.Name()); validateErr != nil {
-			logrus.Fatal(validateErr)
-		}
-	}
+	validateSchemas(config.DefaultPanelsPath, func(plugin common.Plugin, name string) error {
+		return sch.ValidatePanel(plugin, name)
+	})
+	validateSchemas(config.DefaultDatasourcesPath, func(plugin common.Plugin, _ string) error {
+		return sch.ValidateDatasource(plugin)
+	})
 }
