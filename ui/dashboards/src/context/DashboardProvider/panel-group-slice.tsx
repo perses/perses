@@ -103,7 +103,7 @@ export function createPanelGroupSlice(
   }
 
   // Return the state creator function for Zustand
-  return (set, get) => ({
+  return (set) => ({
     panelGroups,
     panelGroupIdOrder,
 

@@ -14,13 +14,7 @@
 import { getPanelKeyFromRef } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import {
-  PanelGroupSlice,
-  PanelGroupDefinition,
-  PanelGroupId,
-  getPanelKey,
-  mapPanelToPanelGroups,
-} from './panel-group-slice';
+import { PanelGroupSlice, PanelGroupDefinition, PanelGroupId, mapPanelToPanelGroups } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 export interface PanelGroupEditor {
