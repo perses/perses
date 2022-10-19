@@ -21,10 +21,9 @@ import { PanelGroupSlice, PanelGroupItemId, PanelGroupId } from './panel-group-s
  * Slice that handles the visual editor state and actions for Panels (i.e. add, edit, delete).
  */
 export interface PanelEditorSlice {
-  // TODO: Move panels state to its own slice
+  // TODO: Move panels state to its own slice so that other slices can depend on it (and modify the state)
   panels: Record<string, PanelDefinition>;
 
-  deletePanelDialog?: DeletePanelDialog;
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
@@ -44,6 +43,11 @@ export interface PanelEditorSlice {
    * Delete panels
    */
   deletePanels: (panels: PanelGroupItemId[]) => void;
+
+  /**
+   * State for the delete panel dialog when it's open, otherwise undefined when it's closed.
+   */
+  deletePanelDialog?: DeletePanelDialog;
 
   /**
    * Open delete panel dialog

@@ -17,7 +17,7 @@ import { Middleware } from './common';
 import { PanelEditorSlice } from './panel-editor-slice';
 
 /**
- * Slice with the state of Panel Groups, as well as any actions that only modify Panel Group state.
+ * Slice with the state of Panel Groups, as well as any actions that modify only Panel Group state.
  */
 export interface PanelGroupSlice {
   /**
