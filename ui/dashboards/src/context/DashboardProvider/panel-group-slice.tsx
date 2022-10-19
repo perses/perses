@@ -30,6 +30,14 @@ export interface PanelGroupSlice {
    */
   panelGroupIdOrder: PanelGroupId[];
 
+  /**
+   * previous state
+   */
+  previousPanelGroupStates: {
+    panelGroups: PanelGroupSlice['panelGroups'];
+    panelGroupIdOrder: PanelGroupSlice['panelGroupIdOrder'];
+  };
+
   // TODO: Remove this
   createPanelGroupId: () => PanelGroupId;
 
@@ -67,6 +75,16 @@ export interface PanelGroupSlice {
    * Map panel to panel groups
    */
   mapPanelToPanelGroups: () => Record<string, PanelGroupId[]>;
+
+  /**
+   * save
+   */
+  savePanelGroups: () => void;
+
+  /**
+   * reset to previous panel group states
+   */
+  resetPanelGroups: () => void;
 }
 
 export type PanelGroupId = number;
@@ -118,8 +136,26 @@ export function createPanelGroupSlice(
     panelGroups,
     panelGroupIdOrder,
 
+    previousPanelGroupStates: { panelGroups, panelGroupIdOrder },
+
     // TODO: Reorder init logic so this isn't exposed
     createPanelGroupId,
+
+    savePanelGroups() {
+      set((state) => {
+        state.previousPanelGroupStates = {
+          panelGroups: state.panelGroups,
+          panelGroupIdOrder: state.panelGroupIdOrder,
+        };
+      });
+    },
+
+    resetPanelGroups() {
+      set((state) => {
+        state.panelGroups = state.previousPanelGroupStates.panelGroups;
+        state.panelGroupIdOrder = state.previousPanelGroupStates.panelGroupIdOrder;
+      });
+    },
 
     getPanelKey({ panelGroupId, itemIndex }) {
       const { panelGroups } = get();
