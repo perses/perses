@@ -1,6 +1,5 @@
 import { PaletteMode, PaletteOptions } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-// import { grey, white } from './colors';
 
 export const background = (mode: PaletteMode): PaletteOptions['background'] => {
   return mode === 'light'

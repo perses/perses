@@ -1,7 +1,6 @@
 import { createTheme, PaletteMode, ThemeOptions } from '@mui/material';
 import { getPaletteOptions } from './palette/palette-options';
 import { typography } from './typography';
-// import { addGlobalStyles } from './global-styles';
 
 /**
  * Gets theme used by all components for the provided mode. For more details, see:
@@ -20,7 +19,6 @@ export function getTheme(mode: PaletteMode) {
     mixins: {},
     components,
   });
-  // addGlobalStyles(theme, applicationRoot);
   return theme;
 }
 
@@ -28,13 +26,11 @@ export function getTheme(mode: PaletteMode) {
 const components: ThemeOptions['components'] = {
   MuiFormControl: {
     defaultProps: {
-      fullWidth: true,
       size: 'small',
     },
   },
   MuiTextField: {
     defaultProps: {
-      fullWidth: true,
       size: 'small',
     },
   },
@@ -46,11 +42,6 @@ const components: ThemeOptions['components'] = {
       fontSizeSmall: {
         fontSize: '1rem',
       },
-    },
-  },
-  MuiCardHeader: {
-    defaultProps: {
-      disableTypography: true,
     },
   },
 };
