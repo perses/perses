@@ -2,10 +2,12 @@
 
 ## 0.11.0 / 2022-10-19
 
+- [FEATURE] Ability to change variable order #667
 - [FEATURE] Save and cancel dashboard visual editing changes #661
 - [FEATURE] Add variable plugin editors #647
 - [FEATURE] Add and delete queries #656
 - [FEATURE] New custom legend in TimeSeriesChart panel #638, #660
+- [ENHANCEMENT] Dashboard store renames and clean-up #666
 - [ENHANCEMENT] Provide kind and default query parameter to filter the list of datasources #659
 - [ENHANCEMENT] Dashboard and datasource validation improvements #635, #636, #637, #641
 - [ENHANCEMENT] Review variable data model and migrate variables management to cuelang #629, #654, #662
@@ -19,7 +21,7 @@
 - [BUGFIX] Fix panel preview unselected condition #655
 - [BUGFIX] Remove edit button on mobile #646
 - [BREAKINGCHANGE] New time-range query param approach using `QueryParamProvider` #621
-- [BREAKINGCHANGE] `DashboardProvider` API changes to support visual editing #661
+- [BREAKINGCHANGE] `DashboardProvider` API changes to support visual editing #661, #666
 
 ## 0.10.0 / 2022-10-12
 
