@@ -48,21 +48,6 @@ export interface PanelGroupSlice {
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
 
   /**
-   * Delete panel group and all the panels within the group
-   */
-  deletePanelGroup: (panelGroupId: PanelGroupId) => void;
-
-  /**
-   * Delete panel in panel group
-   */
-  deletePanelInPanelGroup: (layoutItem: PanelGroupItemId) => void;
-
-  /**
-   * Map panel to panel groups
-   */
-  mapPanelToPanelGroups: () => Record<string, PanelGroupId[]>;
-
-  /**
    * save
    */
   savePanelGroups: () => void;
@@ -158,61 +143,11 @@ export function createPanelGroupSlice(
         [state.panelGroupIdOrder[x], state.panelGroupIdOrder[y]] = [yPanelGroup, xPanelGroup];
       });
     },
-
-    deletePanelInPanelGroup({ panelGroupId, itemIndex }) {
-      set((state) => {
-        const group = state.panelGroups[panelGroupId];
-        if (group === undefined) {
-          throw new Error(`No panel group found: ${panelGroupId}`);
-        }
-        // remove panel from panel group
-        group.items.splice(itemIndex, 1);
-      });
-    },
-
-    deletePanelGroup(panelGroupId) {
-      const { panelGroups, panelGroupIdOrder: panelGroupOrder, deletePanels } = get();
-      const group = findGroup(panelGroups, panelGroupId);
-      const orderIdx = panelGroupOrder.findIndex((id) => id === panelGroupId);
-      if (orderIdx === -1) {
-        throw new Error(`Could not find panel group Id ${panelGroupId} in order array`);
-      }
-
-      // remove panels from group first
-      const panelsToBeDeleted: PanelGroupItemId[] = [];
-      for (let i = 0; i < group.items.length; i++) {
-        panelsToBeDeleted.push({ panelGroupId, itemIndex: i });
-      }
-      deletePanels(panelsToBeDeleted);
-
-      // remove group from both panelGroups and panelGroupOrder
-      set((state) => {
-        state.panelGroupIdOrder.splice(orderIdx, 1);
-        delete state.panelGroups[panelGroupId];
-      });
-    },
-
-    // Return an object that maps each panel to the groups it belongs
-    mapPanelToPanelGroups() {
-      const map: Record<string, Array<PanelGroupDefinition['id']>> = {}; // { panel key: [group ids] }
-      Object.values(get().panelGroups).forEach((group) => {
-        // for each panel in a group, add the group id to map[panelKey]
-        group.items.forEach((panel) => {
-          const panelKey = getPanelKeyFromRef(panel.content);
-          if (map[panelKey]) {
-            map[panelKey]?.push(group.id);
-          } else {
-            map[panelKey] = [group.id];
-          }
-        });
-      });
-      return map;
-    },
   });
 }
 
 /**
- * Helper to move an item in a PanelGroup from one group to another on the given immer draft state.
+ * Move an item in a PanelGroup from one group to another on the given immer draft state.
  */
 export function movePanelGroupItem(
   draft: WritableDraft<PanelGroupSlice>,
@@ -246,7 +181,7 @@ export function movePanelGroupItem(
 }
 
 /**
- * Helper function to add a panel group item to a panel group on the given immer draft state.
+ * Add a panel group item to a panel group on the given immer draft state.
  */
 export function addPanelGroupItem(draft: WritableDraft<PanelGroupSlice>, panelKey: string, panelGroupId: PanelGroupId) {
   const group = draft.panelGroups[panelGroupId];
@@ -264,6 +199,28 @@ export function addPanelGroupItem(draft: WritableDraft<PanelGroupSlice>, panelKe
 }
 
 /**
+ * Delete a panel group item from its group on the given immer draft state. Returns a boolean indicating whther that
+ * item's panel key is still referenced in a group.
+ */
+export function deletePanelGroupItem(draft: WritableDraft<PanelGroupSlice>, panelGroupItemId: PanelGroupItemId) {
+  const existingGroup = draft.panelGroups[panelGroupItemId.panelGroupId];
+  if (existingGroup === undefined) {
+    throw new Error(`Missing panel group ${panelGroupItemId.panelGroupId}`);
+  }
+  const existingItem = existingGroup.items[panelGroupItemId.itemIndex];
+  if (existingItem === undefined) {
+    throw new Error(`Missing panel group item ${panelGroupItemId.itemIndex}`);
+  }
+  const panelKey = getPanelKeyFromRef(existingItem.content);
+
+  // remove panel from panel group
+  existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
+
+  const usedGroupIds = mapPanelToPanelGroups(draft.panelGroups)[panelKey];
+  return usedGroupIds !== undefined && usedGroupIds.length > 0;
+}
+
+/**
  * Helper to get the panel key for an item in a PanelGroup.
  */
 export function getPanelKey(panelGroups: PanelGroupSlice['panelGroups'], panelGroupItemId: PanelGroupItemId) {
@@ -271,6 +228,21 @@ export function getPanelKey(panelGroups: PanelGroupSlice['panelGroups'], panelGr
   const group = findGroup(panelGroups, panelGroupId);
   const item = findItem(group, itemIndex);
   return getPanelKeyFromRef(item.content);
+}
+
+// Return an object that maps each panel to the groups it belongs
+export function mapPanelToPanelGroups(panelGroups: PanelGroupSlice['panelGroups']) {
+  const map: Record<string, Array<PanelGroupDefinition['id']>> = {}; // { panel key: [group ids] }
+  Object.values(panelGroups).forEach((group) => {
+    // for each panel in a group, add the group id to map[panelKey]
+    group.items.forEach((panel) => {
+      const panelKey = getPanelKeyFromRef(panel.content);
+      const groupIds = map[panelKey] ?? [];
+      groupIds.push(group.id);
+      map[panelKey] = groupIds;
+    });
+  });
+  return map;
 }
 
 // Helper to find a group and throw if not found

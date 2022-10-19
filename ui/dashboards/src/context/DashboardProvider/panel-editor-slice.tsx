@@ -22,6 +22,7 @@ import {
   movePanelGroupItem,
   addPanelGroupItem,
   getPanelKey,
+  deletePanelGroupItem,
 } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
@@ -47,7 +48,7 @@ export interface PanelEditorSlice {
   /**
    * Delete panels
    */
-  deletePanels: (panels: PanelGroupItemId[]) => void;
+  deletePanel: (panelGroupItemId: PanelGroupItemId) => void;
 
   /**
    * State for the delete panel dialog when it's open, otherwise undefined when it's closed.
@@ -57,7 +58,7 @@ export interface PanelEditorSlice {
   /**
    * Open delete panel dialog
    */
-  openDeletePanelDialog: (item: PanelGroupItemId) => void;
+  openDeletePanelDialog: (panelGroupItemId: PanelGroupItemId) => void;
 
   /**
    * Close delete panel dialog
@@ -208,20 +209,15 @@ export function createPanelEditorSlice(): StateCreator<
       });
     },
 
-    deletePanels(items: PanelGroupItemId[]) {
-      const { mapPanelToPanelGroups, deletePanelInPanelGroup, panelGroups } = get();
-      const map = mapPanelToPanelGroups();
+    deletePanel(panelGroupItemId: PanelGroupItemId) {
+      const { panelGroups } = get();
+
       // get panel key first before deleting panel from panel group since getPanelKey relies on index
-      const panels = items.map((panel) => {
-        return { ...panel, panelKey: getPanelKey(panelGroups, panel) };
-      });
-      panels.forEach(({ panelKey, ...panel }) => {
-        deletePanelInPanelGroup(panel);
-        // make sure panel is only referenced in one panel group before deleting it from state.panels
-        if (map[panelKey] && map[panelKey]?.length === 1) {
-          set((state) => {
-            delete state.panels[panelKey];
-          });
+      const panelKey = getPanelKey(panelGroups, panelGroupItemId);
+      set((state) => {
+        const isStillUsed = deletePanelGroupItem(state, panelGroupItemId);
+        if (isStillUsed === false) {
+          delete state.panels[panelKey];
         }
       });
     },

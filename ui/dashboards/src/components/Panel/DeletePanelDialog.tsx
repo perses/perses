@@ -44,12 +44,12 @@ interface DeletePanelFormProps {
 }
 
 const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
-  const { deletePanels, closeDeletePanelDialog } = useDeletePanelDialog();
+  const { deletePanel, closeDeletePanelDialog } = useDeletePanelDialog();
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault();
     const { panelGroupItemId } = deletePanelDialog;
-    deletePanels([panelGroupItemId]);
+    deletePanel(panelGroupItemId);
     closeDeletePanelDialog();
   };
   return (

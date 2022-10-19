@@ -176,12 +176,12 @@ export function usePanelEditor() {
 export function useDeletePanelDialog() {
   const deletePanelDialog = useDashboardStore((store) => store.deletePanelDialog);
   // TODO: Refactor similar to other dialogs/editors so these are on the editor state itself
-  const deletePanels = useDashboardStore((store) => store.deletePanels);
+  const deletePanel = useDashboardStore((store) => store.deletePanel);
   const closeDeletePanelDialog = useDashboardStore((store) => store.closeDeletePanelDialog);
 
   return {
     deletePanelDialog,
-    deletePanels,
+    deletePanel,
     closeDeletePanelDialog,
   };
 }
