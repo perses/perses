@@ -10,28 +10,45 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
-import {
-  replaceTemplateVariables,
-  parseTemplateVariables,
-  PrometheusClient,
-  DEFAULT_PROM,
-  PrometheusDatasourceSelector,
-} from '../model';
-import { JSONSpecEditor } from './JSONSpecEditor';
+import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Stack, TextField } from '@mui/material';
+import { replaceTemplateVariables, parseTemplateVariables, PrometheusClient, DEFAULT_PROM } from '../model';
+import { PrometheusLabelNamesVariableOptions, PrometheusLabelValuesVariableOptions } from './types';
+import { MatcherEditor } from './MatcherEditor';
 
-interface PrometheusVariableOptionsBase {
-  datasource?: PrometheusDatasourceSelector;
+function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>) {
+  return (
+    <Stack spacing={1}>
+      <TextField
+        sx={{ mb: 1 }}
+        label="Label Name"
+        value={props.value.label_name}
+        onChange={(e) => {
+          props.onChange({ ...props.value, label_name: e.target.value });
+        }}
+      />
+      <MatcherEditor
+        initialMatchers={props.value.matchers}
+        onChange={(e) => {
+          props.onChange({ ...props.value, matchers: e });
+        }}
+      />
+    </Stack>
+  );
 }
 
-type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {
-  matchers?: [string];
-};
-
-type PrometheusLabelValuesVariableOptions = PrometheusVariableOptionsBase & {
-  label_name: string;
-  matchers?: [string];
-};
+function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<PrometheusLabelNamesVariableOptions>) {
+  return (
+    <Stack spacing={1}>
+      <MatcherEditor
+        initialMatchers={props.value.matchers}
+        onChange={(e) => {
+          props.onChange({ ...props.value, matchers: e });
+        }}
+      />
+    </Stack>
+  );
+}
 
 /**
  * Takes a list of strings and returns a list of VariableOptions
@@ -54,7 +71,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
     };
   },
   dependsOn: () => [],
-  OptionsEditorComponent: JSONSpecEditor,
+  OptionsEditorComponent: PrometheusLabelNamesVariableEditor,
   createInitialOptions: () => ({}),
 };
 
@@ -73,6 +90,6 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
   dependsOn: (spec) => {
     return spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [];
   },
-  OptionsEditorComponent: JSONSpecEditor,
+  OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
   createInitialOptions: () => ({ label_name: '' }),
 };

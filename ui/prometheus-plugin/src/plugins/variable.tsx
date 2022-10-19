@@ -11,14 +11,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariablePlugin, VariableOption } from '@perses-dev/plugin-system';
-import { JSONSpecEditor } from './JSONSpecEditor';
+import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Autocomplete, TextField } from '@mui/material';
 
 type StaticListOption = string | VariableOption;
 
 type StaticListVariableOptions = {
   values: StaticListOption[];
 };
+
+function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVariableOptions>) {
+  const value = props.value.values.map((v) => {
+    if (typeof v === 'string') {
+      return v;
+    } else {
+      return v.value;
+    }
+  });
+
+  const onChange = (__: unknown, value: string[]) => {
+    props.onChange({
+      values: value.map((v) => {
+        return { value: v, label: v };
+      }),
+    });
+  };
+
+  return (
+    <div>
+      <Autocomplete
+        multiple
+        value={value}
+        onChange={onChange}
+        options={[]}
+        freeSolo
+        renderInput={(params) => <TextField {...params} label="Values" placeholder="Values" />}
+      />
+    </div>
+  );
+}
 
 export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
   getVariableOptions: async (spec) => {
@@ -33,6 +64,6 @@ export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
     };
   },
   dependsOn: () => [],
-  OptionsEditorComponent: JSONSpecEditor,
+  OptionsEditorComponent: StaticListVariableOptionEditor,
   createInitialOptions: () => ({ values: [] }),
 };
