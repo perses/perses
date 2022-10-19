@@ -14,7 +14,7 @@
 import { getPanelKeyFromRef } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupId } from './layout-slice';
+import { PanelGroupItemId, PanelGroupId } from './panel-group-slice';
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
@@ -24,12 +24,12 @@ export function useEditMode() {
  * Returns actions that can be performed on the current dashboard.
  */
 export function useDashboardActions() {
-  const addPanelGroup = useDashboardStore((store) => store.addPanelGroup);
-  const addPanel = useDashboardStore((store) => store.addPanel);
+  const openAddPanelGroup = useDashboardStore((store) => store.openAddPanelGroup);
+  const openAddPanel = useDashboardStore((store) => store.openAddPanel);
 
   return {
-    addPanelGroup,
-    addPanel: () => addPanel(undefined),
+    openAddPanelGroup,
+    openAddPanel: () => openAddPanel(undefined),
   };
 }
 
@@ -73,14 +73,14 @@ export function usePanelGroup(panelGroupId: PanelGroupId) {
  */
 export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   const { moveUp, moveDown } = useMovePanelGroup(panelGroupId);
-  const editPanelGroup = useDashboardStore((store) => store.editPanelGroup);
+  const openEditPanelGroup = useDashboardStore((store) => store.openEditPanelGroup);
   const deletePanelGroup = useDashboardStore((store) => store.openDeletePanelGroupDialog);
-  const addPanel = useDashboardStore((store) => store.addPanel);
+  const openAddPanel = useDashboardStore((store) => store.openAddPanel);
 
   return {
-    editPanelGroup: () => editPanelGroup(panelGroupId),
+    openEditPanelGroup: () => openEditPanelGroup(panelGroupId),
     deletePanelGroup: () => deletePanelGroup(panelGroupId),
-    addPanelToGroup: () => addPanel(panelGroupId),
+    openAddPanel: () => openAddPanel(panelGroupId),
     moveUp,
     moveDown,
   };
@@ -148,8 +148,8 @@ export function usePanels() {
   return useDashboardStore(
     ({
       panelEditor,
-      addPanel,
-      editPanel,
+      openAddPanel: addPanel,
+      openEditPanel: editPanel,
       deletePanelDialog,
       deletePanels,
       openDeletePanelDialog,

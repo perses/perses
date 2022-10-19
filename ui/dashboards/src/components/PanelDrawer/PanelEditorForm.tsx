@@ -26,7 +26,7 @@ import {
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginKindSelect, PluginSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
 import { useListPanelGroups } from '../../context';
-import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
+import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {

@@ -42,7 +42,7 @@ describe('Add Panel Group', () => {
     const storeApi = renderDialog();
 
     // Open the dialog for a new panel group
-    act(() => storeApi.getState().addPanelGroup());
+    act(() => storeApi.getState().openAddPanelGroup());
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel Group');
@@ -64,7 +64,7 @@ describe('Add Panel Group', () => {
     const storeApi = renderDialog();
 
     // Open the dialog for an existing panel group
-    act(() => storeApi.getState().editPanelGroup(0));
+    act(() => storeApi.getState().openEditPanelGroup(0));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);

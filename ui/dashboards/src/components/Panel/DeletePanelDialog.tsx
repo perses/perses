@@ -15,7 +15,7 @@ import { FormEvent } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { usePanels } from '../../context';
-import { DeletePanelDialog } from '../../context/DashboardProvider/panel-editing-slice';
+import { DeletePanelDialog } from '../../context/DashboardProvider/panel-editor-slice';
 
 const DeletePanelDialog = () => {
   const { deletePanelDialog, closeDeletePanelDialog } = usePanels();

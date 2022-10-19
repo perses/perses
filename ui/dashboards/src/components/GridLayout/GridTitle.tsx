@@ -39,7 +39,13 @@ export function GridTitle(props: GridTitleProps) {
   const { panelGroupId, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { addPanelToGroup, editPanelGroup, deletePanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
+  const {
+    openAddPanel: addPanelToGroup,
+    openEditPanelGroup: editPanelGroup,
+    deletePanelGroup,
+    moveUp,
+    moveDown,
+  } = usePanelGroupActions(panelGroupId);
   const { isEditMode } = useEditMode();
 
   const text = (
