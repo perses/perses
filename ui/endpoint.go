@@ -14,15 +14,24 @@
 package ui
 
 import (
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
+	"github.com/perses/perses/internal/api/shared"
 	"github.com/prometheus/common/assets"
+	"github.com/sirupsen/logrus"
 )
 
-var asts = http.FS(assets.New(embedFS))
+var (
+	asts        = http.FS(assets.New(embedFS))
+	reactRoutes = []string{
+		"/projects",
+	}
+)
 
 type frontend struct {
 	echoUtils.Register
@@ -35,5 +44,30 @@ func NewPersesFrontend() echoUtils.Register {
 func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentHandler := echo.WrapHandler(http.FileServer(asts))
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
-	e.GET("/*", contentHandler, contentRewrite)
+	e.GET("/*", contentHandler, routerMiddleware(), contentRewrite)
+}
+
+func routerMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			for _, route := range reactRoutes {
+				if !strings.HasPrefix(c.Request().URL.Path, route) {
+					continue
+				}
+				f, err := asts.Open("/app/dist/index.html")
+				if err != nil {
+					logrus.WithError(err).Error("Unable to open the React index.html")
+					return shared.HandleError(err)
+				}
+				idx, err := io.ReadAll(f)
+				if err != nil {
+					logrus.WithError(err).Error("Error reading React index.html")
+					return shared.HandleError(err)
+				}
+				_, err = c.Response().Write(idx)
+				return shared.HandleError(err)
+			}
+			return next(c)
+		}
+	}
 }

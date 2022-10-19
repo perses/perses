@@ -2,202 +2,1513 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "SimpleLineChart",
-      "project": "perses"
+      "name": "DemoDashboard",
+      "project": "perses",
+      "created_at": "2021-11-09T00:00:00Z",
+      "updated_at": "2021-11-09T00:00:00Z",
+      "version": 0
     },
     "spec": {
-      "datasource": {
-        "name": "PrometheusDemo",
-        "kind": "Prometheus",
-        "global": true
-      },
-      "duration": "6h",
-      "variables": {
-        "labelName": {
-          "kind": "LabelNamesQuery",
-          "displayed_name": "LabelName",
-          "hide": false,
-          "parameter": {
-            "matchers": [
-              "up"
-            ],
-            "capturing_regexp": "(.*)"
+      "duration": "5m",
+      "variables": [
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "job",
+            "allow_multiple": true,
+            "allow_all_value": true,
+            "default_value": "node",
+            "plugin": {
+              "kind": "PrometheusLabelValuesVariable",
+              "spec": {
+                "label_name": "job"
+              }
+            }
           }
         },
-        "labelValue": {
-          "kind": "LabelValuesQuery",
-          "displayed_name": "LabelValue",
-          "hide": false,
-          "parameter": {
-            "label_name": "$labelName",
-            "matchers": [
-              "up"
-            ],
-            "capturing_regexp": "(.*)"
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "instance",
+            "allow_all_value": true,
+            "plugin": {
+              "kind": "PrometheusLabelValuesVariable",
+              "spec": {
+                "label_name": "instance",
+                "matchers": [
+                  "up{job=\"$job\"}"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "interval",
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  "1m",
+                  "5m"
+                ]
+              }
+            }
           }
         }
-      },
+      ],
       "panels": {
-        "upByLabel": {
-          "kind": "TimeSeriesChart",
-          "displayed_name": "Line Chart using variable",
-          "chart": {
-            "lines": [
-              {
-                "expr": "up{$labelName='$labelValue'}"
+        "seriesTest": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "1500+ Series",
+              "description": "This is a line chart"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "rate(caddy_http_request_duration_seconds_bucket[$interval])"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "Bytes"
+                }
               }
-            ]
+            }
           }
         },
-        "allUP": {
-          "kind": "TimeSeriesChart",
-          "displayed_name": "Line chart using legend template",
-          "chart": {
-            "show_legend": true,
-            "lines": [
-              {
-                "expr": "up",
-                "legend": "{{job}}[{{instance}}]"
+        "seriesTestAlt": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "~130 Series",
+              "description": "This is a line chart"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "rate(caddy_http_response_duration_seconds_sum[$interval])"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "Bytes"
+                }
               }
-            ]
+            }
+          }
+        },
+        "basicEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Query"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "1 - node_filesystem_free_bytes{job=\"node\",instance=~\"$instance\",fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job=\"node\",instance=~\"$instance\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "Percent"
+                }
+              }
+            }
+          }
+        },
+        "legendEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Example"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_MemTotal_bytes{job=\"node\",instance=~\"$instance\"} - node_memory_MemFree_bytes{job=\"node\",instance=~\"$instance\"} - node_memory_Buffers_bytes{job=\"node\",instance=~\"$instance\"} - node_memory_Cached_bytes{job=\"node\",instance=~\"$instance\"}"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_Buffers_bytes{job=\"node\",instance=~\"$instance\"}"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_Cached_bytes{job=\"node\",instance=~\"$instance\"}"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_MemFree_bytes{job=\"node\",instance=~\"$instance\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "show_legend": true,
+                "unit": {
+                  "kind": "Bytes"
+                }
+              }
+            }
+          }
+        },
+        "testNodeQuery": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Test Query",
+              "description": "Description text"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job=\"node\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "show_legend": false,
+                "unit": {
+                  "kind": "PercentDecimal",
+                  "decimal_places": 1
+                }
+              }
+            }
+          }
+        },
+        "testQueryAlt": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Test Query Alt",
+              "description": "Description text"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_load1{instance=~\"(demo.do.prometheus.io:9100)\",job=\"node\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "show_legend": false,
+                "unit": {
+                  "kind": "PercentDecimal",
+                  "decimal_places": 1
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0.4,
+                      "name": "Alert: Warning condition example"
+                    },
+                    {
+                      "value": 0.75,
+                      "name": "Alert: Critical condition example"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "cpu": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "CPU",
+              "description": "This is a line chart"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\",mode!=\"idle\"}[$interval]))"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "Decimal",
+                  "decimal_places": 2
+                },
+                "show_legend": true
+              }
+            }
+          }
+        },
+        "statSm": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Stat Sm"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_time_seconds{job=\"node\",instance=~\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=~\"$instance\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "Mean",
+                "unit": {
+                  "kind": "Decimal",
+                  "decimal_places": 1,
+                  "abbreviate": true
+                }
+              }
+            }
+          }
+        },
+        "statRAM": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "RAM Used",
+              "description": "This is a stat chart"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "100 - ((node_memory_MemAvailable_bytes{job=\"node\",instance=~\"$instance\"} * 100) / node_memory_MemTotal_bytes{job=\"node\",instance=~\"$instance\"})"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Percent"
+                }
+              }
+            }
+          }
+        },
+        "statTotalRAM": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "RAM Total",
+              "description": "This is a stat chart"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_memory_MemTotal_bytes{job=\"node\",instance=~\"$instance\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Bytes",
+                  "decimal_places": 1
+                }
+              }
+            }
+          }
+        },
+        "statMd": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Stat Md"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "avg(node_load15{job=\"node\",instance=~\"$instance\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu)) * 100"
+                      }
+                    }
+                  }
+                },
+                "calculation": "Sum",
+                "unit": {
+                  "kind": "Decimal",
+                  "decimal_places": 2,
+                  "abbreviate": true
+                },
+                "sparkline": {
+                  "color": "#e65013",
+                  "width": 1.5
+                }
+              }
+            }
+          }
+        },
+        "statLg": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Stat Lg",
+              "description": "This is a stat chart"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=~\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))"
+                      }
+                    }
+                  }
+                },
+                "calculation": "Mean",
+                "unit": {
+                  "kind": "Percent"
+                },
+                "sparkline": {
+                  "area_opacity": 0.2
+                }
+              }
+            }
+          }
+        },
+        "gaugeEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Gauge Ex",
+              "description": "This is a gauge chart"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=~\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Percent"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 85
+                    },
+                    {
+                      "value": 95
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "gaugeAltEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Gauge Alt Ex",
+              "description": "GaugeChart description text"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_load15{instance=~\"$instance\",job=\"node\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "PercentDecimal",
+                  "decimal_places": 1
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0.5,
+                      "name": "Alert: Warning condition example"
+                    },
+                    {
+                      "value": 0.75,
+                      "name": "Alert: Critical condition example"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "gaugeFormatTest": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Gauge Format Test"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_time_seconds{job=\"node\",instance=~\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=~\"$instance\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Decimal"
+                },
+                "max": 95000000,
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 71000000
+                    },
+                    {
+                      "value": 82000000
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       },
-      "layouts": {
-        "main": {
-          "kind": "Expand",
-          "parameter": {
-            "open": true,
-            "children": [
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
               {
-                "$ref": "#/spec/panels/upByLabel"
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/legendEx"
+                }
               },
               {
-                "$ref": "#/spec/panels/allUP"
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/basicEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 2",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/testNodeQuery"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/testQueryAlt"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 3",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 2,
+                "height": 2,
+                "content": {
+                  "$ref": "#/spec/panels/statSm"
+                }
+              },
+              {
+                "x": 0,
+                "y": 2,
+                "width": 2,
+                "height": 2,
+                "content": {
+                  "$ref": "#/spec/panels/statRAM"
+                }
+              },
+              {
+                "x": 0,
+                "y": 4,
+                "width": 2,
+                "height": 2,
+                "content": {
+                  "$ref": "#/spec/panels/statTotalRAM"
+                }
+              },
+              {
+                "x": 2,
+                "y": 0,
+                "width": 4,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/statMd"
+                }
+              },
+              {
+                "x": 6,
+                "y": 0,
+                "width": 10,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/statLg"
+                }
+              },
+              {
+                "x": 16,
+                "y": 0,
+                "width": 8,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/gaugeFormatTest"
+                }
               }
             ]
           }
         }
-      },
-      "entrypoint": {
-        "$ref": "#/spec/layouts/main"
-      }
+      ]
     }
   },
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "NodeExporter",
-      "project": "perses"
+      "name": "BenchmarkDashboard",
+      "project": "perses",
+      "created_at": "2021-11-09T00:00:00Z",
+      "updated_at": "2021-11-09T00:00:00Z",
+      "version": 0
     },
     "spec": {
-      "datasource": {
-        "name": "PrometheusDemo",
-        "kind": "Prometheus",
-        "global": true
-      },
       "duration": "6h",
-      "variables": {
-        "job": {
-          "kind": "LabelValuesQuery",
-          "displayed_name": "job",
-          "hide": false,
-          "parameter": {
-            "label_name": "job",
-            "matchers": [
-              "node_uname_info"
-            ],
-            "capturing_regexp": "(.*)"
+      "variables": [
+        {
+          "kind": "TextVariable",
+          "spec": {
+            "name": "job",
+            "value": "node"
           }
         },
-        "node": {
-          "kind": "LabelValuesQuery",
-          "displayed_name": "node",
-          "hide": false,
-          "parameter": {
-            "label_name": "instance",
-            "matchers": [
-              "node_uname_info{job=\"$job\"}"
-            ],
-            "capturing_regexp": "(.*)"
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "instance",
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  "demo.do.prometheus.io:3000",
+                  "demo.do.prometheus.io:9100"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "interval",
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  "1m",
+                  "5m"
+                ]
+              }
+            }
           }
         }
-      },
+      ],
       "panels": {
-        "CPUBusy": {
-          "kind": "GaugeChart",
-          "displayed_name": "CPU Busy",
-          "chart": {
-            "expr": "(((count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',instance=\"$node\",job=\"$job\"}[5m])))) * 100) / count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu))"
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Dashboard Team Overview",
+              "description": "This is a markdown panel"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\nHere is `some inline code`.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n* two bullet\n* points\n\nDo you want to [visit the google](https://www.google.com)?\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>When inlining HTML, will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n"
+              }
+            }
           }
         },
-        "SysLoad5mAVG": {
-          "kind": "GaugeChart",
-          "displayed_name": "Sys Load (5m avg)",
-          "chart": {
-            "expr": "avg(node_load5{instance=\"$node\",job=\"$job\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)) * 100"
+        "seriesTest": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "1500+ Series",
+              "description": "This is a line chart"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "rate(caddy_http_request_duration_seconds_bucket[$interval])"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "Bytes"
+                }
+              }
+            }
           }
         },
-        "SysLoad15mAVG": {
-          "kind": "GaugeChart",
-          "displayed_name": "Sys Load (15m avg)",
-          "chart": {
-            "expr": "avg(node_load15{instance=\"$node\",job=\"$job\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)) * 100"
+        "seriesTestAlt": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "~130 Series",
+              "description": "This is a line chart"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "rate(caddy_http_response_duration_seconds_sum[$interval])"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "Decimal",
+                  "decimal_places": 4
+                }
+              }
+            }
           }
         },
-        "RamUsed": {
-          "kind": "GaugeChart",
-          "displayed_name": "Ram Used",
-          "chart": {
-            "expr": "100 - ((node_memory_MemAvailable_bytes{instance=\"$node\",job=\"$job\"} * 100) / node_memory_MemTotal_bytes{instance=\"$node\",job=\"$job\"})"
+        "basicEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Query"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "1 - node_filesystem_free_bytes{job=\"node\",instance=\"$instance\",fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job=\"node\",instance=\"$instance\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "PercentDecimal",
+                  "decimal_places": 0
+                }
+              }
+            }
           }
         },
-        "SwapUsed": {
-          "kind": "GaugeChart",
-          "displayed_name": "Swap Used",
-          "chart": {
-            "expr": "((node_memory_SwapTotal_bytes{instance=\"$node\",job=\"$job\"} - node_memory_SwapFree_bytes{instance=\"$node\",job=\"$job\"}) / (node_memory_SwapTotal_bytes{instance=\"$node\",job=\"$job\"} )) * 100"
+        "legendEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Example"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"} - node_memory_MemFree_bytes{job=\"node\",instance=\"$instance\"} - node_memory_Buffers_bytes{job=\"node\",instance=\"$instance\"} - node_memory_Cached_bytes{job=\"node\",instance=\"$instance\"}"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_Buffers_bytes{job=\"node\",instance=\"$instance\"}"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_Cached_bytes{job=\"node\",instance=\"$instance\"}"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_memory_MemFree_bytes{job=\"node\",instance=\"$instance\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "show_legend": true,
+                "unit": {
+                  "kind": "Bytes"
+                }
+              }
+            }
           }
         },
-        "RootFSUsed": {
-          "kind": "GaugeChart",
-          "displayed_name": "Root FS Used",
-          "chart": {
-            "expr": "100 - ((node_filesystem_avail_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{instance=\"$node\",job=\"$job\",mountpoint=\"/\",fstype!=\"rootfs\"})"
+        "doubleQueries": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Thresholds Example",
+              "description": "Description text"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_load15{instance=\"$instance\",job=\"node\"}"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "node_load1{instance=\"$instance\",job=\"node\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "show_legend": false,
+                "unit": {
+                  "kind": "PercentDecimal",
+                  "decimal_places": 1
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0.4,
+                      "name": "Alert: Warning condition example"
+                    },
+                    {
+                      "value": 0.75,
+                      "name": "Alert: Critical condition example"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "cpu": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "CPU",
+              "description": "This is a line chart"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=\"$instance\",mode!=\"idle\"}[$interval]))"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unit": {
+                  "kind": "Decimal",
+                  "decimal_places": 2
+                },
+                "show_legend": true
+              }
+            }
+          }
+        },
+        "statSm": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Stat Sm"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_time_seconds{job=\"node\",instance=\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=\"$instance\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "Mean",
+                "unit": {
+                  "kind": "Decimal",
+                  "decimal_places": 1,
+                  "abbreviate": true
+                }
+              }
+            }
+          }
+        },
+        "statRAM": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "RAM Used",
+              "description": "This is a stat chart"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "100 - ((node_memory_MemAvailable_bytes{job=\"node\",instance=\"$instance\"} * 100) / node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"})"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Percent"
+                }
+              }
+            }
+          }
+        },
+        "statTotalRAM": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "RAM Total",
+              "description": "This is a stat chart"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Bytes",
+                  "decimal_places": 1
+                }
+              }
+            }
+          }
+        },
+        "statMd": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Stat Md"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "avg(node_load15{job=\"node\",instance=\"$instance\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu)) * 100"
+                      }
+                    }
+                  }
+                },
+                "calculation": "Sum",
+                "unit": {
+                  "kind": "Decimal",
+                  "decimal_places": 2,
+                  "abbreviate": true
+                },
+                "sparkline": {
+                  "color": "#e65013",
+                  "width": 1.5
+                }
+              }
+            }
+          }
+        },
+        "statLg": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Stat Lg",
+              "description": "This is a stat chart"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))"
+                      }
+                    }
+                  }
+                },
+                "calculation": "Mean",
+                "unit": {
+                  "kind": "Percent"
+                },
+                "sparkline": {
+                  "area_opacity": 0.2
+                }
+              }
+            }
+          }
+        },
+        "gaugeEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Gauge Ex",
+              "description": "This is a gauge chart"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Percent"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 85
+                    },
+                    {
+                      "value": 95
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "gaugeAltEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Gauge Alt Ex",
+              "description": "GaugeChart description text"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_load15{instance=\"$instance\",job=\"node\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "PercentDecimal",
+                  "decimal_places": 1
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0.5,
+                      "name": "Alert: Warning condition example"
+                    },
+                    {
+                      "value": 0.75,
+                      "name": "Alert: Critical condition example"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "gaugeFormatTest": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Gauge Format Test"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "node_time_seconds{job=\"node\",instance=\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=\"$instance\"}"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Decimal"
+                },
+                "max": 95000000,
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 71000000
+                    },
+                    {
+                      "value": 82000000
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       },
-      "layouts": {
-        "main": {
-          "kind": "Expand",
-          "parameter": {
-            "open": true,
-            "children": [
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
               {
-                "$ref": "#/spec/panels/CPUBusy"
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
               },
               {
-                "$ref": "#/spec/panels/SysLoad5mAVG"
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/legendEx"
+                }
               },
               {
-                "$ref": "#/spec/panels/SysLoad15mAVG"
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/seriesTestAlt"
+                }
               },
               {
-                "$ref": "#/spec/panels/RamUsed"
+                "x": 12,
+                "y": 6,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/basicEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 2",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/legendEx"
+                }
               },
               {
-                "$ref": "#/spec/panels/SwapUsed"
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/basicEx"
+                }
               },
               {
-                "$ref": "#/spec/panels/RootFSUsed"
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/basicEx"
+                }
+              },
+              {
+                "x": 12,
+                "y": 6,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/basicEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 3",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/cpu"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/doubleQueries"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 3",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 2,
+                "height": 2,
+                "content": {
+                  "$ref": "#/spec/panels/statSm"
+                }
+              },
+              {
+                "x": 0,
+                "y": 2,
+                "width": 2,
+                "height": 2,
+                "content": {
+                  "$ref": "#/spec/panels/statRAM"
+                }
+              },
+              {
+                "x": 0,
+                "y": 4,
+                "width": 2,
+                "height": 2,
+                "content": {
+                  "$ref": "#/spec/panels/statTotalRAM"
+                }
+              },
+              {
+                "x": 2,
+                "y": 0,
+                "width": 4,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/statMd"
+                }
+              },
+              {
+                "x": 6,
+                "y": 0,
+                "width": 10,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/statLg"
+                }
+              },
+              {
+                "x": 16,
+                "y": 0,
+                "width": 8,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/gaugeFormatTest"
+                }
               }
             ]
           }
         }
-      },
-      "entrypoint": {
-        "$ref": "#/spec/layouts/main"
-      }
+      ]
     }
   }
 ]
