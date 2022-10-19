@@ -27,7 +27,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { openAddPanelGroup, openAddPanel: addPanel } = useDashboardActions();
+  const { openAddPanelGroup, openAddPanel } = useDashboardActions();
 
   const onEditButtonClick = () => {
     setEditMode(true);
@@ -67,7 +67,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
                 Add Panel Group
               </Button>
-              <Button startIcon={<AddPanelIcon />} onClick={addPanel}>
+              <Button startIcon={<AddPanelIcon />} onClick={openAddPanel}>
                 Add Panel
               </Button>
               <TimeRangeControls />
