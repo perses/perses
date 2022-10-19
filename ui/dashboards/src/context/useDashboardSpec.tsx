@@ -16,7 +16,11 @@ import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
 import { useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
 export function useDashboardSpec(): DashboardSpec {
-  const { panels, panelGroups } = useDashboardStore(({ panels, panelGroups }) => ({ panels, panelGroups }));
+  const { panels, panelGroups, defaultTimeRange } = useDashboardStore(({ panels, panelGroups, defaultTimeRange }) => ({
+    panels,
+    panelGroups,
+    defaultTimeRange,
+  }));
   const variables = useTemplateVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups);
 
@@ -24,7 +28,7 @@ export function useDashboardSpec(): DashboardSpec {
     panels,
     layouts,
     variables,
-    duration: '1h', // to do
+    duration: defaultTimeRange.pastDuration,
   };
 }
 
