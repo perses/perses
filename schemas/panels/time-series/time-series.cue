@@ -18,7 +18,6 @@ import (
 )
 
 #legend: {
-	show?:     bool
 	position?: "bottom" | "right"
 }
 

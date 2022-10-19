@@ -31,8 +31,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
 
-  // popuate 'position' and 'show' if undefined
-  const legend = merge({}, DEFAULT_LEGEND, props.spec.legend);
+  // popuate default 'position' and other future properties
+  const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
 
   const unit = props.spec.unit ?? {
     kind: 'Decimal',
@@ -89,7 +89,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         if (selectedSeriesName === null || selectedSeriesName === timeSeries.name) {
           graphData.timeSeries.push(lineSeries);
         }
-        if (legend.show && graphData.legendItems) {
+        if (legend && graphData.legendItems) {
           graphData.legendItems.push({
             id: timeSeries.name, // TODO: should query generate an id instead of using name here and in getRandomColor?
             label: timeSeries.name,
@@ -143,15 +143,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     );
   }
 
-  const legendWidth = legend.position === 'right' ? 200 : contentDimensions.width;
+  const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
   const gridOverrides: GridComponentOption = {
-    right: legend.show && legend.position === 'right' ? legendWidth : 20,
+    right: legend && legend.position === 'right' ? legendWidth : 20,
   };
 
   const lineChartHeight =
-    legend.position === 'bottom' && graphData.legendItems && graphData.legendItems.length > 0
+    legend && legend.position === 'bottom' && graphData.legendItems && graphData.legendItems.length > 0
       ? contentDimensions.height - 50
       : contentDimensions.height;
 
@@ -169,7 +169,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         grid={gridOverrides}
         onDataZoom={handleDataZoom}
       />
-      {legend.show && graphData.legendItems && (
+      {legend && graphData.legendItems && (
         <Legend width={legendWidth} height={contentDimensions.width} options={legend} data={graphData.legendItems} />
       )}
     </>

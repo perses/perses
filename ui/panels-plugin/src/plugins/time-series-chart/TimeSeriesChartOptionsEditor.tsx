@@ -81,7 +81,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   const updateLegendShow = (show: boolean) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.legend.show = show;
+        draft.legend = show ? DEFAULT_LEGEND : undefined;
       })
     );
   };
@@ -90,7 +90,9 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         // TODO: type cast should not be necessary
-        draft.legend.position = e.target.value as LegendPosition;
+        if (draft.legend) {
+          draft.legend.position = e.target.value as LegendPosition;
+        }
       })
     );
   };
@@ -123,7 +125,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
           label="Show"
           control={
             <Switch
-              checked={value.legend.show ?? DEFAULT_LEGEND.show}
+              checked={value.legend !== undefined}
               onChange={(e) => {
                 updateLegendShow(e.target.checked);
               }}
@@ -137,7 +139,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
             labelId="legend-position-select-label"
             id="legend-position-select"
             label="Position"
-            value={value.legend.position ?? DEFAULT_LEGEND.position}
+            value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
             onChange={updateLegendPosition}
           >
             {LEGEND_POSITIONS.map((position) => (

@@ -20,13 +20,12 @@ import { ThresholdOptions } from '../../model/thresholds';
  */
 export interface TimeSeriesChartOptions {
   queries: TimeSeriesQueryDefinition[];
-  legend: LegendOptions;
+  legend?: LegendOptions;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
 }
 
 export const DEFAULT_LEGEND: LegendOptions = {
-  show: false,
   position: 'bottom',
 };
 

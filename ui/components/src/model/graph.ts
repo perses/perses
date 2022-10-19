@@ -44,8 +44,7 @@ export type EChartsDataFormat = {
  * Supported legend options
  */
 export interface LegendOptions {
-  show: boolean;
-  position: 'bottom' | 'right';
+  position?: 'bottom' | 'right';
 }
 
 export interface LegendItem {
