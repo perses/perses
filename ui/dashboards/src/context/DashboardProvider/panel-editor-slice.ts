@@ -22,12 +22,11 @@ import {
   movePanelGroupItem,
   addPanelGroupItem,
   getPanelKey,
-  deletePanelGroupItem,
 } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
- * Slice that handles the visual editor state and actions for Panels (i.e. add, edit, delete).
+ * Slice that handles the visual editor state and actions for adding or editing Panels.
  */
 export interface PanelEditorSlice {
   /**
@@ -44,32 +43,6 @@ export interface PanelEditorSlice {
    * Opens the editor for adding a new Panel to a panel group.
    */
   openAddPanel: (panelGroupId?: PanelGroupId) => void;
-
-  /**
-   * Delete panels
-   */
-  deletePanel: (panelGroupItemId: PanelGroupItemId) => void;
-
-  /**
-   * State for the delete panel dialog when it's open, otherwise undefined when it's closed.
-   */
-  deletePanelDialog?: DeletePanelDialog;
-
-  /**
-   * Open delete panel dialog
-   */
-  openDeletePanelDialog: (panelGroupItemId: PanelGroupItemId) => void;
-
-  /**
-   * Close delete panel dialog
-   */
-  closeDeletePanelDialog: () => void;
-}
-
-export interface DeletePanelDialog {
-  panelGroupItemId: PanelGroupItemId;
-  panelName: string;
-  panelGroupName: string;
 }
 
 export interface PanelEditorState {
@@ -206,37 +179,6 @@ export function createPanelEditorSlice(): StateCreator<
       // Open the editor with the new state
       set((state) => {
         state.panelEditor = editorState;
-      });
-    },
-
-    deletePanel(panelGroupItemId: PanelGroupItemId) {
-      const { panelGroups } = get();
-
-      // get panel key first before deleting panel from panel group since getPanelKey relies on index
-      const panelKey = getPanelKey(panelGroups, panelGroupItemId);
-      set((state) => {
-        const isStillUsed = deletePanelGroupItem(state, panelGroupItemId);
-        if (isStillUsed === false) {
-          delete state.panels[panelKey];
-        }
-      });
-    },
-
-    openDeletePanelDialog(item: PanelGroupItemId) {
-      const { panels, panelGroups } = get();
-      const panelKey = getPanelKey(panelGroups, item);
-      set((state) => {
-        state.deletePanelDialog = {
-          panelGroupItemId: item,
-          panelName: panels[panelKey]?.spec.display.name ?? '',
-          panelGroupName: panelGroups[item.panelGroupId]?.title ?? '',
-        };
-      });
-    },
-
-    closeDeletePanelDialog() {
-      set((state) => {
-        state.deletePanelDialog = undefined;
       });
     },
   });
