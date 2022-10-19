@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import EventIcon from '@mui/icons-material/Event';
+import Calendar from 'mdi-material-ui/Calendar';
 import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
 import { formatAbsoluteRange } from './utils';
 
@@ -39,7 +39,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
     <Select
       value={formattedValue}
       onChange={onSelectChange}
-      IconComponent={EventIcon}
+      IconComponent={Calendar}
       sx={{
         '.MuiSelect-icon': {
           marginTop: '1px',

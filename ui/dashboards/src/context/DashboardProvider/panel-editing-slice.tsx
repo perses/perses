@@ -19,7 +19,9 @@ import { LayoutSlice, PanelGroupItemId, PanelGroupId } from './layout-slice';
 
 export interface PanelEditorSlice {
   panels: Record<string, PanelDefinition>;
+  previousPanels: Record<string, PanelDefinition>;
   deletePanelDialog?: DeletePanelDialog;
+
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
@@ -39,6 +41,16 @@ export interface PanelEditorSlice {
    * Delete panels
    */
   deletePanels: (panels: PanelGroupItemId[]) => void;
+
+  /**
+   * Reset panels to previous state
+   */
+  resetPanels: () => void;
+
+  /**
+   * Save panels
+   */
+  savePanels: () => void;
 
   /**
    * Open delete panel dialog
@@ -98,9 +110,22 @@ export function createPanelEditorSlice(
 ): StateCreator<PanelEditorSlice & LayoutSlice, Middleware, [], PanelEditorSlice> {
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
+    previousPanels: panels,
     panels,
 
     panelEditor: undefined,
+
+    savePanels() {
+      set((state) => {
+        state.previousPanels = state.panels;
+      });
+    },
+
+    resetPanels() {
+      set((state) => {
+        state.panels = state.previousPanels;
+      });
+    },
 
     editPanel(item) {
       const { panels, getPanelKey } = get();

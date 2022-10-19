@@ -11,8 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DashboardProvider';
-export * from './DatasourceStoreProvider';
-export * from './TemplateVariableProvider';
-export * from './TimeRangeProvider';
-export * from './useDashboardSpec';
+import { PrometheusDatasourceSelector } from '../model';
+
+export interface PrometheusVariableOptionsBase {
+  datasource?: PrometheusDatasourceSelector;
+}
+
+export type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {
+  matchers?: string[];
+};
+
+export type PrometheusLabelValuesVariableOptions = PrometheusVariableOptionsBase & {
+  label_name: string;
+  matchers?: string[];
+};
