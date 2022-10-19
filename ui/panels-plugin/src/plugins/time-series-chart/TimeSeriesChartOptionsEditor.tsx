@@ -20,6 +20,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectProps,
   Stack,
   Switch,
   Typography,
@@ -28,12 +29,7 @@ import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_LEGEND,
-  LEGEND_POSITIONS,
-  LegendPositionOptions,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_LEGEND, LEGEND_POSITIONS, LegendPosition } from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
@@ -90,10 +86,11 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
-  const updateLegendPosition = (position: LegendPositionOptions['position']) => {
+  const updateLegendPosition: SelectProps<LegendPosition>['onChange'] = (e) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.legend.position = position;
+        // TODO: type cast should not be necessary
+        draft.legend.position = e.target.value as LegendPosition;
       })
     );
   };
@@ -141,9 +138,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
             id="legend-position-select"
             label="Position"
             value={value.legend.position ?? DEFAULT_LEGEND.position}
-            onChange={(e) => {
-              updateLegendPosition(e.target.value as LegendPositionOptions['position']);
-            }}
+            onChange={updateLegendPosition}
           >
             {LEGEND_POSITIONS.map((position) => (
               <MenuItem key={position} value={position}>
