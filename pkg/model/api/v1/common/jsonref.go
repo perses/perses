@@ -22,7 +22,8 @@ import (
 var (
 	// jsonRefMatching is only used to validate the whole reference.
 	jsonRefMatching = regexp.MustCompile(`^#?/([a-zA-Z0-9_-]+)(?:/([a-zA-Z0-9_-]+))*$`)
-	// jsonRefCapturedGroup is used to captured every part of the reference
+	// jsonRefCapturedGroup is used to capture every part of the reference
+	// Note: the captured part must match idRegexp for the coherence between the different ID used.
 	jsonRefCapturedGroup = regexp.MustCompile(`(?:/([a-zA-Z0-9_-]+))`)
 )
 

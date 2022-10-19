@@ -16,13 +16,10 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"gopkg.in/yaml.v2"
 )
-
-var variableNameRegexp = regexp.MustCompile("^[a-zA-Z0-9_-]+$")
 
 type VariableKind string
 
@@ -115,11 +112,8 @@ func (v *TextVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) erro
 }
 
 func (v *TextVariableSpec) validate() error {
-	if len(v.Name) == 0 {
-		return fmt.Errorf("name cannot be empty")
-	}
-	if !variableNameRegexp.MatchString(v.Name) {
-		return fmt.Errorf("%q is not a correct variable name. It should match the regexp: %s", v.Name, variableNameRegexp.String())
+	if err := common.ValidateID(v.Name); err != nil {
+		return err
 	}
 	if len(v.Value) == 0 {
 		return fmt.Errorf("value for the variable %q cannot be empty", v.Name)
@@ -167,11 +161,8 @@ func (v *ListVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) erro
 }
 
 func (v *ListVariableSpec) validate() error {
-	if len(v.Name) == 0 {
-		return fmt.Errorf("name cannot be empty")
-	}
-	if !variableNameRegexp.MatchString(v.Name) {
-		return fmt.Errorf("%q is not a correct variable name. It should match the regexp: %s", v.Name, variableNameRegexp.String())
+	if err := common.ValidateID(v.Name); err != nil {
+		return err
 	}
 	return nil
 }
