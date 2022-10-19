@@ -16,15 +16,12 @@ import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
 import { PanelGroupSlice, PanelGroupItemId, PanelGroupId } from './panel-group-slice';
+import { PanelSlice } from './panel-slice';
 
 /**
  * Slice that handles the visual editor state and actions for Panels (i.e. add, edit, delete).
  */
 export interface PanelEditorSlice {
-  // TODO: Move panels state to its own slice so that other slices can depend on it (and modify the state)
-  panels: Record<string, PanelDefinition>;
-  previousPanels: Record<string, PanelDefinition>;
-
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
@@ -44,16 +41,6 @@ export interface PanelEditorSlice {
    * Delete panels
    */
   deletePanels: (panels: PanelGroupItemId[]) => void;
-
-  /**
-   * Reset panels to previous state
-   */
-  resetPanels: () => void;
-
-  /**
-   * Save panels
-   */
-  savePanels: () => void;
 
   /**
    * State for the delete panel dialog when it's open, otherwise undefined when it's closed.
@@ -113,27 +100,16 @@ export interface PanelEditorValues {
 /**
  * Curried function for creating the PanelEditorSlice.
  */
-export function createPanelEditorSlice(
-  panels: PanelEditorSlice['panels']
-): StateCreator<PanelEditorSlice & PanelGroupSlice, Middleware, [], PanelEditorSlice> {
+export function createPanelEditorSlice(): StateCreator<
+  // Actions in here need to modify both Panels and Panel Groups state
+  PanelEditorSlice & PanelSlice & PanelGroupSlice,
+  Middleware,
+  [],
+  PanelEditorSlice
+> {
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
-    previousPanels: panels,
-    panels,
-
     panelEditor: undefined,
-
-    savePanels() {
-      set((state) => {
-        state.previousPanels = state.panels;
-      });
-    },
-
-    resetPanels() {
-      set((state) => {
-        state.panels = state.previousPanels;
-      });
-    },
 
     openEditPanel(item) {
       const { panels, getPanelKey } = get();
