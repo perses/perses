@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import EventIcon from '@mui/icons-material/Event';
+import EventIcon from 'mdi-material-ui/EventIcon';
 import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
 import { formatAbsoluteRange } from './utils';
 
