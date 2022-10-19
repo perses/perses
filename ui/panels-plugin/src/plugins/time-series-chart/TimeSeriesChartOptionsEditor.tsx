@@ -145,9 +145,9 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
               updateLegendPosition(e.target.value as LegendPositionOptions['position']);
             }}
           >
-            {LEGEND_POSITIONS.map((v) => (
-              <MenuItem key={v} value={v}>
-                {v}
+            {LEGEND_POSITIONS.map((position) => (
+              <MenuItem key={position} value={position}>
+                {position}
               </MenuItem>
             ))}
           </Select>
