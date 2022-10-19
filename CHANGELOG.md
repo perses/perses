@@ -17,6 +17,7 @@
 - [ENHANCEMENT] Provide a way to pass the API in a readonly mode by config #649
 - [ENHANCEMENT] Refactor panel groups to use panel group id everywhere #633
 - [ENHANCEMENT] Add circular-dependency-plugin to catch import issues #622
+- [BUGFIX] Refactor theme, fix form control width #668
 - [BUGFIX] Fix MUI icon dependency in components package #665
 - [BUGFIX] Fix panel preview unselected condition #655
 - [BUGFIX] Remove edit button on mobile #646
