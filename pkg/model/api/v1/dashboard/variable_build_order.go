@@ -21,7 +21,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-var variableRegexp = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
+var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
 
 type VariableGroup struct {
 	Variables []string
@@ -142,7 +142,7 @@ func extractVariableInStringOrInSomethingElse(v reflect.Value, matches *[][]stri
 }
 
 func parseVariableUsed(str string) [][]string {
-	return variableRegexp.FindAllStringSubmatch(str, -1)
+	return variableTemplateSyntaxRegexp.FindAllStringSubmatch(str, -1)
 }
 
 type node struct {
