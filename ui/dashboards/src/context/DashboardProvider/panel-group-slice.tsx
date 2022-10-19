@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
+import { WritableDraft } from 'immer/dist/internal';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 import { PanelEditorSlice } from './panel-editor-slice';
@@ -40,21 +41,6 @@ export interface PanelGroupSlice {
 
   // TODO: Remove this
   createPanelGroupId: () => PanelGroupId;
-
-  /**
-   * Given a LayoutItem location, returns the panel's unique key at that location.
-   */
-  getPanelKey: (layoutItem: PanelGroupItemId) => string;
-
-  /**
-   * Add a panel with the specified key to an existing group.
-   */
-  addPanelToGroup: (panelKey: string, panelGroupId: PanelGroupId) => void;
-
-  /**
-   * Move an existing Panel to a new panel group.
-   */
-  movePanelToGroup: (layoutItem: PanelGroupItemId, newPanelGroupId: PanelGroupId) => void;
 
   /**
    * Rearrange the order of panel groups by swapping the positions
@@ -157,54 +143,6 @@ export function createPanelGroupSlice(
       });
     },
 
-    getPanelKey({ panelGroupId, itemIndex }) {
-      const { panelGroups } = get();
-      const group = findGroup(panelGroups, panelGroupId);
-      const item = findItem(group, itemIndex);
-      return getPanelKeyFromRef(item.content);
-    },
-
-    addPanelToGroup(panelKey, panelGroupId) {
-      const { panelGroups } = get();
-      const group = findGroup(panelGroups, panelGroupId);
-      const gridItem: GridItemDefinition = {
-        x: 0,
-        y: getYForNewRow(group),
-        width: 12,
-        height: 6,
-        content: createPanelRef(panelKey),
-      };
-      set((state) => {
-        state.panelGroups[panelGroupId]?.items.push(gridItem);
-      });
-    },
-
-    movePanelToGroup({ panelGroupId, itemIndex }, newPanelGroupId) {
-      const { panelGroups } = get();
-
-      // Find the existing item to make sure it exists
-      const group = findGroup(panelGroups, panelGroupId);
-      const item = findItem(group, itemIndex);
-
-      // Find the new group and figure out where a new row should go
-      const newGroup = findGroup(panelGroups, newPanelGroupId);
-      const newGroupY = getYForNewRow(newGroup);
-
-      set((state) => {
-        // Remove the item from its current group
-        state.panelGroups[panelGroupId]?.items.splice(itemIndex, 1);
-
-        // Add a new item to the new group
-        state.panelGroups[newPanelGroupId]?.items.push({
-          x: 0,
-          y: newGroupY,
-          width: item.width,
-          height: item.height,
-          content: item.content,
-        });
-      });
-    },
-
     swapPanelGroups(x, y) {
       set((state) => {
         if (x < 0 || x >= state.panelGroupIdOrder.length || y < 0 || y >= state.panelGroupIdOrder.length) {
@@ -273,6 +211,68 @@ export function createPanelGroupSlice(
   });
 }
 
+/**
+ * Helper to move an item in a PanelGroup from one group to another on the given immer draft state.
+ */
+export function movePanelToGroup(
+  draft: WritableDraft<PanelGroupSlice>,
+  panelGroupItemId: PanelGroupItemId,
+  newPanelGroupId: PanelGroupId
+) {
+  const existingGroup = draft.panelGroups[panelGroupItemId.panelGroupId];
+  if (existingGroup === undefined) {
+    throw new Error(`Missing panel group ${panelGroupItemId.panelGroupId}`);
+  }
+  const existingItem = existingGroup.items[panelGroupItemId.itemIndex];
+  if (existingItem === undefined) {
+    throw new Error(`Missing panel group item ${panelGroupItemId.itemIndex}`);
+  }
+
+  // Remove item from the old group
+  existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
+
+  // Add item to the end of the new group
+  const newGroup = draft.panelGroups[newPanelGroupId];
+  if (newGroup === undefined) {
+    throw new Error(`Could not find new group ${newPanelGroupId}`);
+  }
+  newGroup.items.push({
+    x: 0,
+    y: getYForNewRow(newGroup),
+    width: existingItem.width,
+    height: existingItem.height,
+    content: existingItem.content,
+  });
+}
+
+/**
+ * Helper function to add a panel to a panel group on the given immer draft state.
+ */
+export function addPanelToGroup(draft: WritableDraft<PanelGroupSlice>, panelKey: string, panelGroupId: PanelGroupId) {
+  const group = draft.panelGroups[panelGroupId];
+  if (group === undefined) {
+    throw new Error(`Missing panel group ${panelGroupId}`);
+  }
+  const gridItem: GridItemDefinition = {
+    x: 0,
+    y: getYForNewRow(group),
+    width: 12,
+    height: 6,
+    content: createPanelRef(panelKey),
+  };
+  group.items.push(gridItem);
+}
+
+/**
+ * Helper to get the panel key for an item in a PanelGroup.
+ */
+export function getPanelKey(panelGroups: PanelGroupSlice['panelGroups'], panelGroupItemId: PanelGroupItemId) {
+  const { panelGroupId, itemIndex } = panelGroupItemId;
+  const group = findGroup(panelGroups, panelGroupId);
+  const item = findItem(group, itemIndex);
+  return getPanelKeyFromRef(item.content);
+}
+
 // Helper to find a group and throw if not found
 function findGroup(panelGroups: PanelGroupSlice['panelGroups'], groupId: PanelGroupId) {
   const group = panelGroups[groupId];
@@ -291,7 +291,7 @@ function findItem(group: PanelGroupDefinition, itemIndex: number) {
   return item;
 }
 
-// Given a Grid, will find the Y coordinate for adding a new row to the grid, taking into account the items present
+// Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
 function getYForNewRow(group: PanelGroupDefinition) {
   let newRowY = 0;
   for (const item of group.items) {
