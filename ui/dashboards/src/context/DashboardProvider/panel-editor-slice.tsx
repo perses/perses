@@ -25,7 +25,6 @@ export interface PanelEditorSlice {
   panels: Record<string, PanelDefinition>;
   previousPanels: Record<string, PanelDefinition>;
 
-
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
