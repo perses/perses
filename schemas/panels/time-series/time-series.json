@@ -23,7 +23,6 @@
       "decimal_places": 2
     },
     "legend": {
-      "show": true,
       "position": "bottom"
     },
     "thresholds": {
