@@ -11,4 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {} from './types/ThemeExtension';
+import { PaletteMode, PaletteOptions } from '@mui/material';
+import { blueGrey } from '@mui/material/colors';
+
+export const background = (mode: PaletteMode): PaletteOptions['background'] => {
+  return mode === 'light'
+    ? {
+        default: blueGrey[50],
+        paper: '#FFFFFF',
+      }
+    : {
+        default: '#121212',
+        paper: '#191d21',
+      };
+};

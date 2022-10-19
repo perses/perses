@@ -75,10 +75,17 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     <form id={panelEditorFormId} onSubmit={handleSubmit}>
       <Grid container spacing={2} sx={{ overflowY: 'scroll', maxHeight: '90vh' }}>
         <Grid item xs={8}>
-          <TextField required label="Name" value={name} variant="outlined" onChange={(e) => setName(e.target.value)} />
+          <TextField
+            required
+            fullWidth
+            label="Name"
+            value={name}
+            variant="outlined"
+            onChange={(e) => setName(e.target.value)}
+          />
         </Grid>
         <Grid item xs={4}>
-          <FormControl>
+          <FormControl fullWidth>
             <InputLabel id="select-group">Group</InputLabel>
             <Select required labelId="select-group" label="Group" value={groupId} onChange={handleGroupChange}>
               {panelGroups.map((panelGroup, index) => (
@@ -91,6 +98,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={8}>
           <TextField
+            fullWidth
             label="Description"
             value={description}
             variant="outlined"
@@ -98,7 +106,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           />
         </Grid>
         <Grid item xs={4}>
-          <FormControl disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
+          <FormControl fullWidth disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
             <InputLabel id="panel-type-label">Type</InputLabel>
             <PluginKindSelect
               pluginType="Panel"

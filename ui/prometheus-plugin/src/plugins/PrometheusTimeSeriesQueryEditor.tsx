@@ -49,7 +49,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   return (
     <Box>
-      <TextField label="Query" value={query} onChange={handleQueryChange} margin="dense" />
+      <TextField fullWidth label="Query" value={query} onChange={handleQueryChange} margin="dense" />
       <FormControl margin="dense" fullWidth={false}>
         {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
             maintain 17 compatibility somehow with a polyfill/shim? */}

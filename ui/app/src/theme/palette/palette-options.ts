@@ -11,23 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getTheme } from './common';
+import { PaletteMode, PaletteOptions } from '@mui/material';
+import { background } from './background';
+import { greyOption } from './grey';
 
-export const getLightTheme = () => {
-  return getTheme({
-    components: {
-      MuiCssBaseline: {
-        styleOverrides: {},
-      },
-      MuiButton: {},
+/**
+ * Returns the MUI PaletteOptions for the given mode.
+ */
+export function getPaletteOptions(mode: PaletteMode): PaletteOptions {
+  // Palette options should be split out into their own files with functions
+  // for creating the option values based on light/dark mode
+  return {
+    mode,
+    common: {
+      white: '#FFFFFF',
+      black: '#000000',
     },
-    palette: {
-      secondary: {
-        main: '#F0F1F6',
-      },
-      text: {
-        primary: '#2A2E42',
-      },
-    },
-  });
-};
+    grey: greyOption(mode),
+    background: background(mode),
+  };
+}

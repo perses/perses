@@ -135,7 +135,7 @@ function ListVariable({ name }: TemplateVariableProps) {
 
   return (
     <Box display={'flex'}>
-      <FormControl>
+      <FormControl fullWidth>
         <InputLabel id={name}>{label}</InputLabel>
         <Select
           sx={{ minWidth: 100, maxWidth: 250 }}

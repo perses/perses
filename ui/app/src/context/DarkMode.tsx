@@ -13,8 +13,8 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
-import { getDarkTheme, getLightTheme } from '../theme';
 import { useLocalStorage } from '../utils/browser-storage';
+import { getTheme } from '../theme/theme';
 
 const DARK_MODE_PREFERENCE_KEY = 'PERSES_ENABLE_DARK_MODE';
 
@@ -45,8 +45,10 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }) {
     [isDarkModeEnabled]
   );
 
+  const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);
+
   return (
-    <ThemeProvider theme={isDarkModeEnabled ? getDarkTheme() : getLightTheme()}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
 
       <DarkModeContext.Provider value={darkModeContext}>{props.children}</DarkModeContext.Provider>
