@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.11.0 / 2022-10-19
+
+- [FEATURE] Ability to change variable order #667
+- [FEATURE] Save and cancel dashboard visual editing changes #661
+- [FEATURE] Add variable plugin editors #647
+- [FEATURE] Add and delete queries #656
+- [FEATURE] New custom legend in TimeSeriesChart panel #638, #660
+- [ENHANCEMENT] Dashboard store renames and clean-up #666
+- [ENHANCEMENT] Provide kind and default query parameter to filter the list of datasources #659
+- [ENHANCEMENT] Dashboard and datasource validation improvements #635, #636, #637, #641
+- [ENHANCEMENT] Review variable data model and migrate variables management to cuelang #629, #654, #662
+- [ENHANCEMENT] Modify populate script to generate a local db #658
+- [ENHANCEMENT] Update go deps and simplify fsnotify event management #657
+- [ENHANCEMENT] Provide a way to determinate the build order of variables #650
+- [ENHANCEMENT] Provide a way to pass the API in a readonly mode by config #649
+- [ENHANCEMENT] Refactor panel groups to use panel group id everywhere #633
+- [ENHANCEMENT] Add circular-dependency-plugin to catch import issues #622
+- [BUGFIX] Refactor theme, fix form control width #668
+- [BUGFIX] Fix MUI icon dependency in components package #665
+- [BUGFIX] Fix panel preview unselected condition #655
+- [BUGFIX] Remove edit button on mobile #646
+- [BREAKINGCHANGE] New time-range query param approach using `QueryParamProvider` #621
+- [BREAKINGCHANGE] `DashboardProvider` API changes to support visual editing #661, #666
+
 ## 0.10.0 / 2022-10-12
 
 - [FEATURE] Implement new datasource format #570
