@@ -31,6 +31,8 @@ import { VariableDefinition } from '@perses-dev/core';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
+import ArrowUp from 'mdi-material-ui/ArrowUp';
+import ArrowDown from 'mdi-material-ui/ArrowDown';
 
 import { VariableEditForm } from './VariableEditorForm';
 
@@ -74,6 +76,28 @@ export function VariableEditor(props: {
         };
       }
       v.spec.display.hidden = visible === false;
+    });
+  };
+
+  const changeVariableOrder = (index: number, direction: 'up' | 'down') => {
+    setVariableDefinitions((draft) => {
+      if (direction === 'up') {
+        const prevElement = draft[index - 1];
+        const currentElement = draft[index];
+        if (index === 0 || !prevElement || !currentElement) {
+          return;
+        }
+        draft[index - 1] = currentElement;
+        draft[index] = prevElement;
+      } else {
+        const nextElement = draft[index + 1];
+        const currentElement = draft[index];
+        if (index === draft.length - 1 || !nextElement || !currentElement) {
+          return;
+        }
+        draft[index + 1] = currentElement;
+        draft[index] = nextElement;
+      }
     });
   };
 
@@ -146,6 +170,16 @@ export function VariableEditor(props: {
                       </TableCell>
                       <TableCell>{v.kind}</TableCell>
                       <TableCell align="right">
+                        <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
+                          <ArrowUp />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => changeVariableOrder(idx, 'down')}
+                          disabled={idx === variableDefinitions.length - 1}
+                        >
+                          <ArrowDown />
+                        </IconButton>
+
                         <IconButton onClick={() => setVariableEditIdx(idx)}>
                           <PencilIcon />
                         </IconButton>
