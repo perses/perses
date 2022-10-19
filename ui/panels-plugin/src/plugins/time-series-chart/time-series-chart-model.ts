@@ -48,7 +48,7 @@ export function createInitialTimeSeriesChartOptions(): TimeSeriesChartOptions {
           plugin: {
             kind: 'PrometheusTimeSeriesQuery',
             spec: {
-              query: 'up',
+              query: '',
             },
           },
         },

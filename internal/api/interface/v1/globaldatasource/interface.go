@@ -24,6 +24,10 @@ type Query struct {
 	// NamePrefix is a prefix of the GlobalDatasource.metadata.name that is used to filter the list of the GlobalDatasource.
 	// NamePrefix can be empty in case you want to return the full list of GlobalDatasource available.
 	NamePrefix string `query:"name"`
+	// Kind is the type of the datasource.
+	Kind string `query:"kind"`
+	// Default will filter the list of datasource and return only the default datasource, whatever the kind of the datasource is.
+	Default *bool `query:"default"`
 }
 
 func (q *Query) Build() (string, error) {

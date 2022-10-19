@@ -124,7 +124,12 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 }
 
 func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
-	return s.dao.List(q)
+	dtsList, err := s.dao.List(q)
+	if err != nil {
+		return nil, err
+	}
+	dtsQuery := q.(*datasource.Query)
+	return v1.FilterDatasource(dtsQuery.Kind, dtsQuery.Default, dtsList), nil
 }
 
 func (s *service) validate(entity *v1.Datasource) error {

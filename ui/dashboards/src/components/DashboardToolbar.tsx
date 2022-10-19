@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Typography, Stack, Button, Box } from '@mui/material';
+import { Typography, Stack, Button, Box, useTheme, useMediaQuery } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
@@ -28,6 +28,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   const { isEditMode, setEditMode } = useEditMode();
   const { addPanelGroup, addPanel } = useDashboardActions();
+  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
 
   const onEditButtonClick = () => {
     setEditMode(true);
@@ -80,14 +81,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Typography variant="h2">{dashboardName}</Typography>
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
-              <Button
-                variant="outlined"
-                startIcon={<PencilIcon />}
-                onClick={onEditButtonClick}
-                sx={{ marginLeft: 'auto' }}
-              >
-                Edit
-              </Button>
+              {isLaptopSize && (
+                <Button
+                  variant="outlined"
+                  startIcon={<PencilIcon />}
+                  onClick={onEditButtonClick}
+                  sx={{ marginLeft: 'auto' }}
+                >
+                  Edit
+                </Button>
+              )}
             </Stack>
           </Box>
           <Box paddingY={2}>

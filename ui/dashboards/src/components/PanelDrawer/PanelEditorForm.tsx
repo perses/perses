@@ -71,6 +71,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   };
 
   return (
+    // Grid maxHeight allows user to scroll inside Drawer to see all content
     <form id={panelEditorFormId} onSubmit={handleSubmit}>
       <Grid container spacing={2} sx={{ overflowY: 'scroll', maxHeight: '90vh' }}>
         <Grid item xs={8}>
