@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
+import { createPanelRef, GridItemDefinition, PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
@@ -19,9 +19,8 @@ import {
   PanelGroupSlice,
   PanelGroupItemId,
   PanelGroupId,
-  movePanelGroupItem,
-  addPanelGroupItem,
   getPanelKey,
+  PanelGroupDefinition,
 } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
@@ -115,8 +114,8 @@ export function createPanelEditorSlice(): StateCreator<
         },
         applyChanges: (next) => {
           const panelDefinititon = createPanelDefinitionFromEditorValues(next);
-          set((state) => {
-            state.panels[panelKey] = panelDefinititon;
+          set((draft) => {
+            draft.panels[panelKey] = panelDefinititon;
 
             // If the panel didn't change groups, nothing else to do
             if (next.groupId === panelGroupItemId.panelGroupId) {
@@ -124,7 +123,30 @@ export function createPanelEditorSlice(): StateCreator<
             }
 
             // Move panel to the new group
-            movePanelGroupItem(state, panelGroupItemId, next.groupId);
+            const existingGroup = draft.panelGroups[panelGroupItemId.panelGroupId];
+            if (existingGroup === undefined) {
+              throw new Error(`Missing panel group ${panelGroupItemId.panelGroupId}`);
+            }
+            const existingItem = existingGroup.items[panelGroupItemId.itemIndex];
+            if (existingItem === undefined) {
+              throw new Error(`Missing panel group item ${panelGroupItemId.itemIndex}`);
+            }
+
+            // Remove item from the old group
+            existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
+
+            // Add item to the end of the new group
+            const newGroup = draft.panelGroups[next.groupId];
+            if (newGroup === undefined) {
+              throw new Error(`Could not find new group ${next.groupId}`);
+            }
+            newGroup.items.push({
+              x: 0,
+              y: getYForNewRow(newGroup),
+              width: existingItem.width,
+              height: existingItem.height,
+              content: existingItem.content,
+            });
           });
         },
         close: () => {
@@ -164,9 +186,23 @@ export function createPanelEditorSlice(): StateCreator<
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
           const panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
-          set((state) => {
-            state.panels[panelKey] = panelDef;
-            addPanelGroupItem(state, panelKey, next.groupId);
+          set((draft) => {
+            // Add a panel
+            draft.panels[panelKey] = panelDef;
+
+            // Also add a panel group item referencing the panel
+            const group = draft.panelGroups[next.groupId];
+            if (group === undefined) {
+              throw new Error(`Missing panel group ${next.groupId}`);
+            }
+            const gridItem: GridItemDefinition = {
+              x: 0,
+              y: getYForNewRow(group),
+              width: 12,
+              height: 6,
+              content: createPanelRef(panelKey),
+            };
+            group.items.push(gridItem);
           });
         },
         close: () => {
@@ -199,4 +235,16 @@ function createPanelDefinitionFromEditorValues(editorValues: PanelEditorValues):
       },
     },
   };
+}
+
+// Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
+function getYForNewRow(group: PanelGroupDefinition) {
+  let newRowY = 0;
+  for (const item of group.items) {
+    const itemMaxY = item.y + item.height;
+    if (itemMaxY > newRowY) {
+      newRowY = itemMaxY;
+    }
+  }
+  return newRowY;
 }

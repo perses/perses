@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { getPanelKeyFromRef } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { PanelGroupSlice, PanelGroupItemId, getPanelKey, deletePanelGroupItem } from './panel-group-slice';
+import { PanelGroupSlice, PanelGroupItemId, getPanelKey, mapPanelToPanelGroups } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -28,7 +29,7 @@ export interface PanelDeleteSlice {
   /**
    * State for the delete panel dialog when it's open, otherwise undefined when it's closed.
    */
-  deletePanelDialog?: DeletePanelDialog;
+  deletePanelDialog?: DeletePanelDialogState;
 
   /**
    * Open delete panel dialog
@@ -41,7 +42,7 @@ export interface PanelDeleteSlice {
   closeDeletePanelDialog: () => void;
 }
 
-export interface DeletePanelDialog {
+export interface DeletePanelDialogState {
   panelGroupItemId: PanelGroupItemId;
   panelName: string;
   panelGroupName: string;
@@ -60,14 +61,26 @@ export function createPanelDeleteSlice(): StateCreator<
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
     deletePanel(panelGroupItemId: PanelGroupItemId) {
-      const { panelGroups } = get();
+      set((draft) => {
+        const existingGroup = draft.panelGroups[panelGroupItemId.panelGroupId];
+        if (existingGroup === undefined) {
+          throw new Error(`Missing panel group ${panelGroupItemId.panelGroupId}`);
+        }
+        const existingItem = existingGroup.items[panelGroupItemId.itemIndex];
+        if (existingItem === undefined) {
+          throw new Error(`Missing panel group item ${panelGroupItemId.itemIndex}`);
+        }
 
-      // get panel key first before deleting panel from panel group since getPanelKey relies on index
-      const panelKey = getPanelKey(panelGroups, panelGroupItemId);
-      set((state) => {
-        const isStillUsed = deletePanelGroupItem(state, panelGroupItemId);
-        if (isStillUsed === false) {
-          delete state.panels[panelKey];
+        // get panel key first before deleting panel
+        const panelKey = getPanelKeyFromRef(existingItem.content);
+
+        // remove panel from panel group
+        existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
+
+        // See if panel key is still used and if not, delete it
+        const usedGroupIds = mapPanelToPanelGroups(draft.panelGroups)[panelKey];
+        if (usedGroupIds === undefined || usedGroupIds.length === 0) {
+          delete draft.panels[panelKey];
         }
       });
     },
