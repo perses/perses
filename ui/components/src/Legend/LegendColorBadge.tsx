@@ -31,7 +31,7 @@ export const LegendColorBadge = React.memo(function LegendColorBadge({ color, sx
         },
         sx
       )}
-      style={{ ...others.style, backgroundColor: color }}
+      style={{ backgroundColor: color }}
     />
   );
 });
