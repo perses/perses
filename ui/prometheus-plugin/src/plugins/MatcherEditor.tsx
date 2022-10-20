@@ -22,6 +22,7 @@ export function MatcherEditor(props: { initialMatchers?: string[]; onChange: (ma
       {matchers.map((matcher, index) => (
         <Box key={index} display="flex">
           <TextField
+            fullWidth
             onBlur={() => {
               props.onChange(matchers);
             }}

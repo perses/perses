@@ -137,7 +137,7 @@ export function VariableEditor(props: {
                 props.onChange(variableDefinitions);
               }}
             >
-              Apply Changes
+              Apply
             </Button>
           </Stack>
           <Typography variant="h3" mb={2}>
