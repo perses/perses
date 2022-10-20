@@ -29,7 +29,7 @@ export function TemplateVariableList() {
   const { setVariableDefinitions } = useTemplateVariableActions();
 
   return (
-    <Box m={2}>
+    <Box>
       <Drawer anchor={'right'} open={isEditing}>
         <VariableEditor
           onCancel={() => {

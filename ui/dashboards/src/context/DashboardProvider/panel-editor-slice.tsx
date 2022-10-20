@@ -15,30 +15,50 @@ import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
 import { Middleware } from './common';
-import { LayoutSlice, PanelGroupItemId, PanelGroupId } from './layout-slice';
+import { PanelGroupSlice, PanelGroupItemId, PanelGroupId } from './panel-group-slice';
 
+/**
+ * Slice that handles the visual editor state and actions for Panels (i.e. add, edit, delete).
+ */
 export interface PanelEditorSlice {
+  // TODO: Move panels state to its own slice so that other slices can depend on it (and modify the state)
   panels: Record<string, PanelDefinition>;
-  deletePanelDialog?: DeletePanelDialog;
+  previousPanels: Record<string, PanelDefinition>;
+
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
   panelEditor?: PanelEditorState;
 
   /**
-   * Edit an existing panel by providing its layout coordinates.
+   * Opens the editor for editing an existing panel by providing its layout coordinates.
    */
-  editPanel: (item: PanelGroupItemId) => void;
+  openEditPanel: (item: PanelGroupItemId) => void;
 
   /**
-   * Add a new Panel to a panel group.
+   * Opens the editor for adding a new Panel to a panel group.
    */
-  addPanel: (panelGroupId?: PanelGroupId) => void;
+  openAddPanel: (panelGroupId?: PanelGroupId) => void;
 
   /**
    * Delete panels
    */
   deletePanels: (panels: PanelGroupItemId[]) => void;
+
+  /**
+   * Reset panels to previous state
+   */
+  resetPanels: () => void;
+
+  /**
+   * Save panels
+   */
+  savePanels: () => void;
+
+  /**
+   * State for the delete panel dialog when it's open, otherwise undefined when it's closed.
+   */
+  deletePanelDialog?: DeletePanelDialog;
 
   /**
    * Open delete panel dialog
@@ -95,14 +115,27 @@ export interface PanelEditorValues {
  */
 export function createPanelEditorSlice(
   panels: PanelEditorSlice['panels']
-): StateCreator<PanelEditorSlice & LayoutSlice, Middleware, [], PanelEditorSlice> {
+): StateCreator<PanelEditorSlice & PanelGroupSlice, Middleware, [], PanelEditorSlice> {
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
+    previousPanels: panels,
     panels,
 
     panelEditor: undefined,
 
-    editPanel(item) {
+    savePanels() {
+      set((state) => {
+        state.previousPanels = state.panels;
+      });
+    },
+
+    resetPanels() {
+      set((state) => {
+        state.panels = state.previousPanels;
+      });
+    },
+
+    openEditPanel(item) {
       const { panels, getPanelKey } = get();
 
       // Ask the layout store for the panel key at that location
@@ -147,7 +180,7 @@ export function createPanelEditorSlice(
       });
     },
 
-    addPanel(panelGroupId) {
+    openAddPanel(panelGroupId) {
       // If a panel group isn't supplied, add to the first group
       if (panelGroupId === undefined) {
         const firstGroupId = get().panelGroupIdOrder[0];

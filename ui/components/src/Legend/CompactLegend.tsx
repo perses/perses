@@ -11,5 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './ListLegend';
-export * from './ListLegendItem';
+import { Stack } from '@mui/material';
+import { LegendItem } from '../model';
+import { ListLegendItem } from './ListLegendItem';
+
+interface CompactLegendProps {
+  items: LegendItem[];
+}
+
+export function CompactLegend({ items }: CompactLegendProps) {
+  return (
+    <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
+      {items.map((item) => (
+        <ListLegendItem key={item.id} item={item} />
+      ))}
+    </Stack>
+  );
+}

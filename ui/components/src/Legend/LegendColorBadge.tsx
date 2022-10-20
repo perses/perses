@@ -11,22 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package timeserie
+import React from 'react';
+import { Box, BoxProps } from '@mui/material';
+import { combineSx } from '../utils';
 
-import (
-	"github.com/perses/perses/schemas/common"
-)
-
-#legend: {
-	position?: "bottom" | "right"
+export interface LegendColorBadgeProps extends BoxProps<'div'> {
+  color: string;
 }
 
-kind: "TimeSeriesChart"
-spec: close({
-	queries: [...#ts_query]
-	legend?:     #legend
-	unit?:       common.#unit
-	thresholds?: common.#thresholds
-})
-
-#ts_query: _
+export const LegendColorBadge = React.memo(function LegendColorBadge({ color, sx, ...others }: LegendColorBadgeProps) {
+  return (
+    <Box
+      {...others}
+      sx={combineSx(
+        {
+          height: 4,
+          width: 16,
+          margin: (theme) => theme.spacing(0.5),
+        },
+        sx
+      )}
+      style={{ backgroundColor: color }}
+    />
+  );
+});

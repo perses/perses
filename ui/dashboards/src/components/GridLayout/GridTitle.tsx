@@ -39,7 +39,7 @@ export function GridTitle(props: GridTitleProps) {
   const { panelGroupId, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { addPanelToGroup, editPanelGroup, deletePanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
+  const { openAddPanel, openEditPanelGroup, deletePanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
   const { isEditMode } = useEditMode();
 
   const text = (
@@ -68,10 +68,10 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && isHovered && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton aria-label="add panel to group" onClick={addPanelToGroup}>
+              <IconButton aria-label="add panel to group" onClick={openAddPanel}>
                 <AddIcon />
               </IconButton>
-              <IconButton aria-label="edit group" onClick={editPanelGroup}>
+              <IconButton aria-label="edit group" onClick={openEditPanelGroup}>
                 <PencilIcon />
               </IconButton>
               <IconButton aria-label="delete group" onClick={deletePanelGroup}>

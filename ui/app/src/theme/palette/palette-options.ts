@@ -11,27 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { List } from '@mui/material';
-import { ListLegendItem } from './ListLegendItem';
+import { PaletteMode, PaletteOptions } from '@mui/material';
+import { background } from './background';
+import { greyOption } from './grey';
 
-interface ListLegendProps {
-  height: number;
-  width: number;
-  items: ListLegendItem[];
-}
-
-export function ListLegend({ items, height, width }: ListLegendProps) {
-  return (
-    <List
-      sx={{
-        height: height,
-        width: width,
-        overflow: 'auto',
-      }}
-    >
-      {items.map((item) => (
-        <ListLegendItem key={item.id} item={item} />
-      ))}
-    </List>
-  );
+/**
+ * Returns the MUI PaletteOptions for the given mode.
+ */
+export function getPaletteOptions(mode: PaletteMode): PaletteOptions {
+  // Palette options should be split out into their own files with functions
+  // for creating the option values based on light/dark mode
+  return {
+    mode,
+    common: {
+      white: '#FFFFFF',
+      black: '#000000',
+    },
+    grey: greyOption(mode),
+    background: background(mode),
+  };
 }

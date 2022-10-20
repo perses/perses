@@ -26,7 +26,7 @@ import {
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginKindSelect, PluginSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
 import { useListPanelGroups } from '../../context';
-import { PanelEditorValues } from '../../context/DashboardProvider/panel-editing-slice';
+import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
@@ -71,14 +71,21 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   };
 
   return (
-    // Padding accounts for the combination of overflow: 'auto' and the MUI input labels - the labels are cut off otherwise.
-    <form id={panelEditorFormId} onSubmit={handleSubmit} style={{ overflowY: 'auto', padding: '8px 0' }}>
-      <Grid container spacing={2}>
+    // Grid maxHeight allows user to scroll inside Drawer to see all content
+    <form id={panelEditorFormId} onSubmit={handleSubmit}>
+      <Grid container spacing={2} sx={{ overflowY: 'scroll', maxHeight: '90vh' }}>
         <Grid item xs={8}>
-          <TextField required label="Name" value={name} variant="outlined" onChange={(e) => setName(e.target.value)} />
+          <TextField
+            required
+            fullWidth
+            label="Name"
+            value={name}
+            variant="outlined"
+            onChange={(e) => setName(e.target.value)}
+          />
         </Grid>
         <Grid item xs={4}>
-          <FormControl>
+          <FormControl fullWidth>
             <InputLabel id="select-group">Group</InputLabel>
             <Select required labelId="select-group" label="Group" value={groupId} onChange={handleGroupChange}>
               {panelGroups.map((panelGroup, index) => (
@@ -91,6 +98,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         </Grid>
         <Grid item xs={8}>
           <TextField
+            fullWidth
             label="Description"
             value={description}
             variant="outlined"
@@ -98,7 +106,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           />
         </Grid>
         <Grid item xs={4}>
-          <FormControl disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
+          <FormControl fullWidth disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
             <InputLabel id="panel-type-label">Type</InputLabel>
             <PluginKindSelect
               pluginType="Panel"

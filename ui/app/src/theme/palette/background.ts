@@ -11,22 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package timeserie
+import { PaletteMode, PaletteOptions } from '@mui/material';
+import { blueGrey } from '@mui/material/colors';
 
-import (
-	"github.com/perses/perses/schemas/common"
-)
-
-#legend: {
-	position?: "bottom" | "right"
-}
-
-kind: "TimeSeriesChart"
-spec: close({
-	queries: [...#ts_query]
-	legend?:     #legend
-	unit?:       common.#unit
-	thresholds?: common.#thresholds
-})
-
-#ts_query: _
+export const background = (mode: PaletteMode): PaletteOptions['background'] => {
+  return mode === 'light'
+    ? {
+        default: blueGrey[50],
+        paper: '#FFFFFF',
+      }
+    : {
+        default: '#121212',
+        paper: '#191d21',
+      };
+};

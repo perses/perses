@@ -11,23 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getTheme } from './common';
+import { PrometheusDatasourceSelector } from '../model';
 
-export const getLightTheme = () => {
-  return getTheme({
-    components: {
-      MuiCssBaseline: {
-        styleOverrides: {},
-      },
-      MuiButton: {},
-    },
-    palette: {
-      secondary: {
-        main: '#F0F1F6',
-      },
-      text: {
-        primary: '#2A2E42',
-      },
-    },
-  });
+export interface PrometheusVariableOptionsBase {
+  datasource?: PrometheusDatasourceSelector;
+}
+
+export type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {
+  matchers?: string[];
+};
+
+export type PrometheusLabelValuesVariableOptions = PrometheusVariableOptionsBase & {
+  label_name: string;
+  matchers?: string[];
 };

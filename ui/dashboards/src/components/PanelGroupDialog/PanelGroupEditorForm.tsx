@@ -40,10 +40,10 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps) {
 
   return (
     <form id={panelGroupEditorFormId} onSubmit={handleSubmit}>
-      <FormControl margin="normal">
+      <FormControl fullWidth margin="normal">
         <TextField required label="Name" variant="outlined" value={title} onChange={(e) => setTitle(e.target.value)} />
       </FormControl>
-      <FormControl margin="normal">
+      <FormControl fullWidth margin="normal">
         <InputLabel id="select-collapse-state">Collapse State</InputLabel>
         <Select<CollapsedState>
           required

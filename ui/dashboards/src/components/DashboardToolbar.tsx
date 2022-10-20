@@ -27,7 +27,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { addPanelGroup, addPanel } = useDashboardActions();
+  const { openAddPanelGroup, openAddPanel, reset, save } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
 
   const onEditButtonClick = () => {
@@ -35,6 +35,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   };
 
   const onCancelButtonClick = () => {
+    reset();
+    setEditMode(false);
+  };
+
+  const onSave = () => {
+    save();
     setEditMode(false);
   };
 
@@ -46,7 +52,9 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Box padding={2} display="flex">
               <Typography variant="h2">Edit {dashboardName}</Typography>
               <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-                <Button variant="contained">Save</Button>
+                <Button variant="contained" onClick={onSave}>
+                  Save
+                </Button>
                 <Button variant="outlined" onClick={onCancelButtonClick}>
                   Cancel
                 </Button>
@@ -65,10 +73,10 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               <TemplateVariableList />
             </ErrorBoundary>
             <Stack direction={'row'} spacing={1} sx={{ marginLeft: 'auto' }}>
-              <Button startIcon={<AddPanelGroupIcon />} onClick={addPanelGroup}>
+              <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
                 Add Panel Group
               </Button>
-              <Button startIcon={<AddPanelIcon />} onClick={addPanel}>
+              <Button startIcon={<AddPanelIcon />} onClick={openAddPanel}>
                 Add Panel
               </Button>
               <TimeRangeControls />

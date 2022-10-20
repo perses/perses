@@ -2,7 +2,7 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "DemoDashboard",
+      "name": "Demo",
       "project": "perses",
       "created_at": "2021-11-09T00:00:00Z",
       "updated_at": "2021-11-09T00:00:00Z",
@@ -113,7 +113,11 @@
                   }
                 ],
                 "unit": {
-                  "kind": "Bytes"
+                  "kind": "Decimal",
+                  "decimal_places": 2
+                },
+                "legend": {
+                  "position": "right"
                 }
               }
             }
@@ -142,7 +146,11 @@
                   }
                 ],
                 "unit": {
-                  "kind": "Percent"
+                  "kind": "PercentDecimal",
+                  "decimal_places": 0
+                },
+                "legend": {
+                  "position": "right"
                 }
               }
             }
@@ -203,7 +211,7 @@
                     }
                   }
                 ],
-                "show_legend": true,
+                "legend": {},
                 "unit": {
                   "kind": "Bytes"
                 }
@@ -234,7 +242,6 @@
                     }
                   }
                 ],
-                "show_legend": false,
                 "unit": {
                   "kind": "PercentDecimal",
                   "decimal_places": 1
@@ -266,7 +273,6 @@
                     }
                   }
                 ],
-                "show_legend": false,
                 "unit": {
                   "kind": "PercentDecimal",
                   "decimal_places": 1
@@ -314,7 +320,7 @@
                   "kind": "Decimal",
                   "decimal_places": 2
                 },
-                "show_legend": true
+                "legend": {}
               }
             }
           }
@@ -602,7 +608,7 @@
             "display": {
               "title": "Row 1",
               "collapse": {
-                "open": false
+                "open": true
               }
             },
             "items": [
@@ -633,7 +639,7 @@
             "display": {
               "title": "Row 2",
               "collapse": {
-                "open": true
+                "open": false
               }
             },
             "items": [
@@ -664,7 +670,7 @@
             "display": {
               "title": "Row 3",
               "collapse": {
-                "open": true
+                "open": false
               }
             },
             "items": [
@@ -731,7 +737,7 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "BenchmarkDashboard",
+      "name": "Benchmark",
       "project": "perses",
       "created_at": "2021-11-09T00:00:00Z",
       "updated_at": "2021-11-09T00:00:00Z",
@@ -741,25 +747,25 @@
       "duration": "6h",
       "variables": [
         {
-          "kind": "TextVariable",
+          "kind": "ListVariable",
           "spec": {
             "name": "job",
-            "value": "node"
+            "allow_multiple": false,
+            "allow_all_value": true,
+            "default_value": "node",
+            "plugin": {
+              "kind": "PrometheusLabelValuesVariable",
+              "spec": {
+                "label_name": "job"
+              }
+            }
           }
         },
         {
-          "kind": "ListVariable",
+          "kind": "TextVariable",
           "spec": {
             "name": "instance",
-            "plugin": {
-              "kind": "StaticListVariable",
-              "spec": {
-                "values": [
-                  "demo.do.prometheus.io:3000",
-                  "demo.do.prometheus.io:9100"
-                ]
-              }
-            }
+            "value": "demo.do.prometheus.io:9100"
           }
         },
         {
@@ -940,7 +946,7 @@
                     }
                   }
                 ],
-                "show_legend": true,
+                "legend": {},
                 "unit": {
                   "kind": "Bytes"
                 }
@@ -982,7 +988,6 @@
                     }
                   }
                 ],
-                "show_legend": false,
                 "unit": {
                   "kind": "PercentDecimal",
                   "decimal_places": 1
@@ -1030,7 +1035,7 @@
                   "kind": "Decimal",
                   "decimal_places": 2
                 },
-                "show_legend": true
+                "legend": {}
               }
             }
           }

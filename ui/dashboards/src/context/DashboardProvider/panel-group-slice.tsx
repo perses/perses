@@ -11,133 +11,294 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { LayoutSlice, PanelGroupDefinition, PanelGroupId } from './layout-slice';
+import { PanelEditorSlice } from './panel-editor-slice';
 
-export interface PanelGroupEditor {
-  mode: 'Add' | 'Edit';
-  initialValues: PanelGroupEditorValues;
-  applyChanges: (next: PanelGroupEditorValues) => void;
-  close: () => void;
-}
-
-export interface PanelGroupEditorValues {
-  title: string;
-  isCollapsed: boolean;
-}
-
-export interface DeletePanelGroupDialog {
-  panelGroupId: PanelGroupId;
-  panelGroupName?: string;
-}
-
+/**
+ * Slice with the state of Panel Groups, as well as any actions that modify only Panel Group state.
+ */
 export interface PanelGroupSlice {
   /**
-   * State that's present when the panel group editor is open.
+   * Panel groups indexed by their ID.
    */
-  panelGroupEditor?: PanelGroupEditor;
+  panelGroups: Record<PanelGroupId, PanelGroupDefinition>;
 
   /**
-   * Opens the panel group editor to add a new panel group.
+   * An array of panel group IDs, representing their order in the dashboard.
    */
-  addPanelGroup: () => void;
+  panelGroupIdOrder: PanelGroupId[];
 
   /**
-   * Opens the panel group editor to edit an existing panel group.
+   * previous state
    */
-  editPanelGroup: (panelGroupId: PanelGroupId) => void;
+  previousPanelGroupStates: {
+    panelGroups: PanelGroupSlice['panelGroups'];
+    panelGroupIdOrder: PanelGroupSlice['panelGroupIdOrder'];
+  };
 
-  deletePanelGroupDialog?: DeletePanelGroupDialog;
-  openDeletePanelGroupDialog: (panelGroupId: PanelGroupId) => void;
-  closeDeletePanelGroupDialog: () => void;
+  // TODO: Remove this
+  createPanelGroupId: () => PanelGroupId;
+
+  /**
+   * Given a LayoutItem location, returns the panel's unique key at that location.
+   */
+  getPanelKey: (layoutItem: PanelGroupItemId) => string;
+
+  /**
+   * Add a panel with the specified key to an existing group.
+   */
+  addPanelToGroup: (panelKey: string, panelGroupId: PanelGroupId) => void;
+
+  /**
+   * Move an existing Panel to a new panel group.
+   */
+  movePanelToGroup: (layoutItem: PanelGroupItemId, newPanelGroupId: PanelGroupId) => void;
+
+  /**
+   * Rearrange the order of panel groups by swapping the positions
+   */
+  swapPanelGroups: (xIndex: number, yIndex: number) => void;
+
+  /**
+   * Delete panel group and all the panels within the group
+   */
+  deletePanelGroup: (panelGroupId: PanelGroupId) => void;
+
+  /**
+   * Delete panel in panel group
+   */
+  deletePanelInPanelGroup: (layoutItem: PanelGroupItemId) => void;
+
+  /**
+   * Map panel to panel groups
+   */
+  mapPanelToPanelGroups: () => Record<string, PanelGroupId[]>;
+
+  /**
+   * save
+   */
+  savePanelGroups: () => void;
+
+  /**
+   * reset to previous panel group states
+   */
+  resetPanelGroups: () => void;
 }
 
-export const createPanelGroupSlice: StateCreator<PanelGroupSlice & LayoutSlice, Middleware, [], PanelGroupSlice> = (
-  set,
-  get
-) => ({
-  panelGroupEditor: undefined,
+export type PanelGroupId = number;
 
-  addPanelGroup: () => {
-    // Create the editor state
-    const editor: PanelGroupEditor = {
-      mode: 'Add',
-      initialValues: {
-        title: '',
-        isCollapsed: false,
-      },
-      applyChanges(next) {
-        const newGroup: PanelGroupDefinition = {
-          id: get().createPanelGroupId(),
-          items: [],
-          ...next,
+export interface PanelGroupDefinition {
+  id: PanelGroupId;
+  items: GridItemDefinition[];
+  isCollapsed: boolean;
+  title?: string;
+}
+
+/**
+ * Uniquely identifies an item in a PanelGroup.
+ */
+export interface PanelGroupItemId {
+  panelGroupId: PanelGroupId;
+  itemIndex: number;
+}
+
+/**
+ * Curried function for creating a PanelGroupSlice.
+ */
+export function createPanelGroupSlice(
+  layouts: LayoutDefinition[]
+): StateCreator<PanelGroupSlice & PanelEditorSlice, Middleware, [], PanelGroupSlice> {
+  // Helper function for generating unique IDs for a PanelGroup
+  let id: PanelGroupId = -1;
+  function createPanelGroupId(): PanelGroupId {
+    id++;
+    return id;
+  }
+
+  // Convert the initial layouts from the JSON to panel groups and keep track of the order
+  const panelGroups: PanelGroupSlice['panelGroups'] = {};
+  const panelGroupIdOrder: PanelGroupSlice['panelGroupIdOrder'] = [];
+  for (const layout of layouts) {
+    const id = createPanelGroupId();
+    panelGroups[id] = {
+      id,
+      items: layout.spec.items,
+      isCollapsed: layout.spec.display?.collapse?.open === false,
+      title: layout.spec.display?.title,
+    };
+    panelGroupIdOrder.push(id);
+  }
+
+  // Return the state creator function for Zustand
+  return (set, get) => ({
+    panelGroups,
+    panelGroupIdOrder,
+
+    previousPanelGroupStates: { panelGroups, panelGroupIdOrder },
+
+    // TODO: Reorder init logic so this isn't exposed
+    createPanelGroupId,
+
+    savePanelGroups() {
+      set((state) => {
+        state.previousPanelGroupStates = {
+          panelGroups: state.panelGroups,
+          panelGroupIdOrder: state.panelGroupIdOrder,
         };
-        set((draft) => {
-          draft.panelGroups[newGroup.id] = newGroup;
-          draft.panelGroupIdOrder.unshift(newGroup.id);
+      });
+    },
+
+    resetPanelGroups() {
+      set((state) => {
+        state.panelGroups = state.previousPanelGroupStates.panelGroups;
+        state.panelGroupIdOrder = state.previousPanelGroupStates.panelGroupIdOrder;
+      });
+    },
+
+    getPanelKey({ panelGroupId, itemIndex }) {
+      const { panelGroups } = get();
+      const group = findGroup(panelGroups, panelGroupId);
+      const item = findItem(group, itemIndex);
+      return getPanelKeyFromRef(item.content);
+    },
+
+    addPanelToGroup(panelKey, panelGroupId) {
+      const { panelGroups } = get();
+      const group = findGroup(panelGroups, panelGroupId);
+      const gridItem: GridItemDefinition = {
+        x: 0,
+        y: getYForNewRow(group),
+        width: 12,
+        height: 6,
+        content: createPanelRef(panelKey),
+      };
+      set((state) => {
+        state.panelGroups[panelGroupId]?.items.push(gridItem);
+      });
+    },
+
+    movePanelToGroup({ panelGroupId, itemIndex }, newPanelGroupId) {
+      const { panelGroups } = get();
+
+      // Find the existing item to make sure it exists
+      const group = findGroup(panelGroups, panelGroupId);
+      const item = findItem(group, itemIndex);
+
+      // Find the new group and figure out where a new row should go
+      const newGroup = findGroup(panelGroups, newPanelGroupId);
+      const newGroupY = getYForNewRow(newGroup);
+
+      set((state) => {
+        // Remove the item from its current group
+        state.panelGroups[panelGroupId]?.items.splice(itemIndex, 1);
+
+        // Add a new item to the new group
+        state.panelGroups[newPanelGroupId]?.items.push({
+          x: 0,
+          y: newGroupY,
+          width: item.width,
+          height: item.height,
+          content: item.content,
         });
-      },
-      close() {
-        set((draft) => {
-          draft.panelGroupEditor = undefined;
-        });
-      },
-    };
+      });
+    },
 
-    // Open the editor
-    set((draft) => {
-      draft.panelGroupEditor = editor;
-    });
-  },
+    swapPanelGroups(x, y) {
+      set((state) => {
+        if (x < 0 || x >= state.panelGroupIdOrder.length || y < 0 || y >= state.panelGroupIdOrder.length) {
+          throw new Error('index out of bound');
+        }
+        const xPanelGroup = state.panelGroupIdOrder[x];
+        const yPanelGroup = state.panelGroupIdOrder[y];
 
-  editPanelGroup: (panelGroupId) => {
-    const existingGroup = get().panelGroups[panelGroupId];
-    if (existingGroup === undefined) {
-      throw new Error(`Panel group with Id ${panelGroupId} does not exist`);
-    }
+        if (xPanelGroup === undefined || yPanelGroup === undefined) {
+          throw new Error('panel group is undefined');
+        }
+        // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
+        [state.panelGroupIdOrder[x], state.panelGroupIdOrder[y]] = [yPanelGroup, xPanelGroup];
+      });
+    },
 
-    // Create the editor state
-    const editor: PanelGroupEditor = {
-      mode: 'Edit',
-      initialValues: {
-        title: existingGroup.title ?? '',
-        isCollapsed: existingGroup.isCollapsed,
-      },
-      applyChanges(next) {
-        set((draft) => {
-          const group = draft.panelGroups[panelGroupId];
-          if (group === undefined) {
-            throw new Error(`Panel group with Id ${panelGroupId} does not exist`);
+    deletePanelInPanelGroup({ panelGroupId, itemIndex }) {
+      set((state) => {
+        const group = state.panelGroups[panelGroupId];
+        if (group === undefined) {
+          throw new Error(`No panel group found: ${panelGroupId}`);
+        }
+        // remove panel from panel group
+        group.items.splice(itemIndex, 1);
+      });
+    },
+
+    deletePanelGroup(panelGroupId) {
+      const { panelGroups, panelGroupIdOrder: panelGroupOrder, deletePanels } = get();
+      const group = findGroup(panelGroups, panelGroupId);
+      const orderIdx = panelGroupOrder.findIndex((id) => id === panelGroupId);
+      if (orderIdx === -1) {
+        throw new Error(`Could not find panel group Id ${panelGroupId} in order array`);
+      }
+
+      // remove panels from group first
+      const panelsToBeDeleted: PanelGroupItemId[] = [];
+      for (let i = 0; i < group.items.length; i++) {
+        panelsToBeDeleted.push({ panelGroupId, itemIndex: i });
+      }
+      deletePanels(panelsToBeDeleted);
+
+      // remove group from both panelGroups and panelGroupOrder
+      set((state) => {
+        state.panelGroupIdOrder.splice(orderIdx, 1);
+        delete state.panelGroups[panelGroupId];
+      });
+    },
+
+    // Return an object that maps each panel to the groups it belongs
+    mapPanelToPanelGroups() {
+      const map: Record<string, Array<PanelGroupDefinition['id']>> = {}; // { panel key: [group ids] }
+      Object.values(get().panelGroups).forEach((group) => {
+        // for each panel in a group, add the group id to map[panelKey]
+        group.items.forEach((panel) => {
+          const panelKey = getPanelKeyFromRef(panel.content);
+          if (map[panelKey]) {
+            map[panelKey]?.push(group.id);
+          } else {
+            map[panelKey] = [group.id];
           }
-          group.title = next.title;
-          group.isCollapsed = next.isCollapsed;
         });
-      },
-      close() {
-        set((draft) => {
-          draft.panelGroupEditor = undefined;
-        });
-      },
-    };
+      });
+      return map;
+    },
+  });
+}
 
-    // Open the editor
-    set((draft) => {
-      draft.panelGroupEditor = editor;
-    });
-  },
+// Helper to find a group and throw if not found
+function findGroup(panelGroups: PanelGroupSlice['panelGroups'], groupId: PanelGroupId) {
+  const group = panelGroups[groupId];
+  if (group === undefined) {
+    throw new Error(`No panel group found for Id ${groupId}`);
+  }
+  return group;
+}
 
-  openDeletePanelGroupDialog: (panelGroupId) => {
-    const panelGroup = get().panelGroups[panelGroupId];
-    if (panelGroup === undefined) {
-      throw new Error(`Panel group with Id ${panelGroupId} not found`);
+// Helper to get an item in a group and throw if not found
+function findItem(group: PanelGroupDefinition, itemIndex: number) {
+  const item = group.items[itemIndex];
+  if (item === undefined) {
+    throw new Error(`No grid item found at position ${itemIndex}`);
+  }
+  return item;
+}
+
+// Given a Grid, will find the Y coordinate for adding a new row to the grid, taking into account the items present
+function getYForNewRow(group: PanelGroupDefinition) {
+  let newRowY = 0;
+  for (const item of group.items) {
+    const itemMaxY = item.y + item.height;
+    if (itemMaxY > newRowY) {
+      newRowY = itemMaxY;
     }
-    set((state) => {
-      state.deletePanelGroupDialog = { panelGroupId, panelGroupName: panelGroup.title };
-    });
-  },
-  closeDeletePanelGroupDialog: () =>
-    set((state) => {
-      state.deletePanelGroupDialog = undefined;
-    }),
-});
+  }
+  return newRowY;
+}

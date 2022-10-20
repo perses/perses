@@ -14,7 +14,7 @@
 import { getPanelKeyFromRef } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupId } from './layout-slice';
+import { PanelGroupItemId, PanelGroupId } from './panel-group-slice';
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
@@ -24,12 +24,16 @@ export function useEditMode() {
  * Returns actions that can be performed on the current dashboard.
  */
 export function useDashboardActions() {
-  const addPanelGroup = useDashboardStore((store) => store.addPanelGroup);
-  const addPanel = useDashboardStore((store) => store.addPanel);
+  const save = useDashboardStore((store) => store.save);
+  const reset = useDashboardStore((store) => store.reset);
+  const openAddPanelGroup = useDashboardStore((store) => store.openAddPanelGroup);
+  const openAddPanel = useDashboardStore((store) => store.openAddPanel);
 
   return {
-    addPanelGroup,
-    addPanel: () => addPanel(undefined),
+    save,
+    reset,
+    openAddPanelGroup,
+    openAddPanel: () => openAddPanel(undefined),
   };
 }
 
@@ -73,14 +77,14 @@ export function usePanelGroup(panelGroupId: PanelGroupId) {
  */
 export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   const { moveUp, moveDown } = useMovePanelGroup(panelGroupId);
-  const editPanelGroup = useDashboardStore((store) => store.editPanelGroup);
+  const openEditPanelGroup = useDashboardStore((store) => store.openEditPanelGroup);
   const deletePanelGroup = useDashboardStore((store) => store.openDeletePanelGroupDialog);
-  const addPanel = useDashboardStore((store) => store.addPanel);
+  const openAddPanel = useDashboardStore((store) => store.openAddPanel);
 
   return {
-    editPanelGroup: () => editPanelGroup(panelGroupId),
+    openEditPanelGroup: () => openEditPanelGroup(panelGroupId),
     deletePanelGroup: () => deletePanelGroup(panelGroupId),
-    addPanelToGroup: () => addPanel(panelGroupId),
+    openAddPanel: () => openAddPanel(panelGroupId),
     moveUp,
     moveDown,
   };
@@ -108,6 +112,27 @@ function useMovePanelGroup(panelGroupId: PanelGroupId) {
 }
 
 /**
+ * Gets the Panel Group editor state.
+ */
+export function usePanelGroupEditor() {
+  return useDashboardStore((store) => store.panelGroupEditor);
+}
+
+/**
+ * Gets the Delete Panel Group dialog state.
+ */
+export function useDeletePanelGroupDialog() {
+  return useDashboardStore(
+    ({ deletePanelGroupDialog, openDeletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup }) => ({
+      deletePanelGroupDialog,
+      openDeletePanelGroupDialog,
+      closeDeletePanelGroupDialog,
+      deletePanelGroup,
+    })
+  );
+}
+
+/**
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
 export function usePanel(panelGroupItemId: PanelGroupItemId) {
@@ -127,52 +152,38 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
 }
 
 /**
- * Gets the Panel Group editor state.
+ * Returns actions that can be performed on the given Panel.
  */
-export function usePanelGroupEditor() {
-  return useDashboardStore((store) => store.panelGroupEditor);
+export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
+  const openEditPanel = useDashboardStore((store) => store.openEditPanel);
+  const openDeletePanelDialog = useDashboardStore((store) => store.openDeletePanelDialog);
+  return {
+    openEditPanel: () => openEditPanel(panelGroupItemId),
+    openDeletePanelDialog: () => openDeletePanelDialog(panelGroupItemId),
+  };
 }
 
-export function useLayouts() {
-  return useDashboardStore(
-    ({ addPanelToGroup, movePanelToGroup, updatePanelGroup, swapPanelGroups, deletePanelGroup }) => ({
-      addPanelToGroup,
-      movePanelToGroup,
-      updatePanelGroup,
-      swapPanelGroups,
-      deletePanelGroup,
-    })
-  );
+/**
+ * Gets the state for the Panel Editor.
+ */
+export function usePanelEditor() {
+  return useDashboardStore((store) => store.panelEditor);
 }
 
-export function useDeletePanelGroupDialog() {
-  return useDashboardStore(({ deletePanelGroupDialog, openDeletePanelGroupDialog, closeDeletePanelGroupDialog }) => ({
-    deletePanelGroupDialog,
-    openDeletePanelGroupDialog,
-    closeDeletePanelGroupDialog,
-  }));
-}
+/**
+ * Gets the state for the Delete Panel dialog.
+ */
+export function useDeletePanelDialog() {
+  const deletePanelDialog = useDashboardStore((store) => store.deletePanelDialog);
+  // TODO: Refactor similar to other dialogs/editors so these are on the editor state itself
+  const deletePanels = useDashboardStore((store) => store.deletePanels);
+  const closeDeletePanelDialog = useDashboardStore((store) => store.closeDeletePanelDialog);
 
-export function usePanels() {
-  return useDashboardStore(
-    ({
-      panelEditor,
-      addPanel,
-      editPanel,
-      deletePanelDialog,
-      deletePanels,
-      openDeletePanelDialog,
-      closeDeletePanelDialog,
-    }) => ({
-      panelEditor,
-      addPanel,
-      editPanel,
-      deletePanels,
-      deletePanelDialog,
-      openDeletePanelDialog,
-      closeDeletePanelDialog,
-    })
-  );
+  return {
+    deletePanelDialog,
+    deletePanels,
+    closeDeletePanelDialog,
+  };
 }
 
 export function useDefaultTimeRange() {
