@@ -124,20 +124,21 @@ export function VariableEditor(props: {
         <>
           <Stack direction="row" spacing={1} justifyContent="end">
             <Button
-              onClick={() => {
-                props.onCancel();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
               disabled={props.variableDefinitions === variableDefinitions}
               variant="contained"
               onClick={() => {
                 props.onChange(variableDefinitions);
               }}
             >
-              Apply Changes
+              Apply
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                props.onCancel();
+              }}
+            >
+              Cancel
             </Button>
           </Stack>
           <Typography variant="h3" mb={2}>

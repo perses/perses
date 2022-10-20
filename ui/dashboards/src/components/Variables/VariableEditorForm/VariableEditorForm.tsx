@@ -55,6 +55,7 @@ export function VariableEditForm({
       <Grid container spacing={2} mb={2}>
         <Grid item xs={6}>
           <TextField
+            fullWidth
             label="Name"
             value={state.name}
             onChange={(v) => {
@@ -88,6 +89,7 @@ export function VariableEditForm({
         </Grid>
         <Grid item xs={6}>
           <TextField
+            fullWidth
             label="Label"
             value={state.label}
             onChange={(v) => {
@@ -99,6 +101,7 @@ export function VariableEditForm({
         </Grid>
         <Grid item xs={12}>
           <TextField
+            fullWidth
             label="Description"
             value={state.description}
             onChange={(v) => {
@@ -178,20 +181,20 @@ export function VariableEditForm({
 
       <Stack direction={'row'} spacing={2} justifyContent="end">
         <Button
-          onClick={() => {
-            onCancel();
-          }}
-        >
-          Cancel
-        </Button>
-
-        <Button
           variant="contained"
           onClick={() => {
             onChange(getVariableDefinitionFromState(state));
           }}
         >
-          Update Variable
+          Update
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            onCancel();
+          }}
+        >
+          Cancel
         </Button>
       </Stack>
     </Box>
