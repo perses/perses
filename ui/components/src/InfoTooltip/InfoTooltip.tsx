@@ -86,8 +86,5 @@ const StyledTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
   },
   [`& .${tooltipClasses.arrow}`]: {
     color: theme.palette.grey[100],
-    // '&::before': {
-    //   backgroundColor: theme.palette.secondary.main,
-    // },
   },
 }));
