@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { useDashboardActions, useEditMode } from '../context';
+import { DashboardSpec } from '@perses-dev/core';
+import { useDashboardActions, useDashboardSpec, useEditMode } from '../context';
 import { TemplateVariableList, TimeRangeControls } from '../components';
 
 export interface DashboardToolbarProps {
@@ -27,15 +29,21 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { openAddPanelGroup, openAddPanel, reset, save } = useDashboardActions();
+  const { openAddPanelGroup, openAddPanel, save } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
+  const [originalSpec, setOriginalSpec] = useState<DashboardSpec | undefined>(undefined);
+  const { spec, resetSpec } = useDashboardSpec();
 
   const onEditButtonClick = () => {
+    setOriginalSpec(spec);
     setEditMode(true);
   };
 
   const onCancelButtonClick = () => {
-    reset();
+    // Reset to the original spec and exit edit mode
+    if (originalSpec) {
+      resetSpec(originalSpec);
+    }
     setEditMode(false);
   };
 

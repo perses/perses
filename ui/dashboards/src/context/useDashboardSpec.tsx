@@ -13,22 +13,40 @@
 
 import { DashboardSpec, GridDefinition } from '@perses-dev/core';
 import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
-import { useTemplateVariableDefinitions } from './TemplateVariableProvider';
+import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
-export function useDashboardSpec(): DashboardSpec {
-  const { panels, panelGroups, defaultTimeRange } = useDashboardStore(({ panels, panelGroups, defaultTimeRange }) => ({
+export function useDashboardSpec() {
+  const {
     panels,
     panelGroups,
     defaultTimeRange,
+    reset: resetDashboardStore,
+  } = useDashboardStore(({ panels, panelGroups, defaultTimeRange, reset }) => ({
+    panels,
+    panelGroups,
+    defaultTimeRange,
+    reset,
   }));
+  const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups);
 
-  return {
+  const spec = {
     panels,
     layouts,
     variables,
     duration: defaultTimeRange.pastDuration,
+  };
+
+  const resetSpec = (spec: DashboardSpec) => {
+    setVariableDefinitions(spec.variables);
+    // TODO: Should we call reset on the dashboard store with the spec?
+    resetDashboardStore();
+  };
+
+  return {
+    spec,
+    resetSpec,
   };
 }
 
