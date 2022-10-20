@@ -31,23 +31,6 @@ import { useDatasourceApi } from '../model/datasource-api';
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
 const ECHARTS_THEME_OVERRIDES = {};
 
-interface ViewSingleDashboardProperty {
-  dashboardName: string;
-  projectName: string;
-}
-
-function ViewSingleDashboard(props: ViewSingleDashboardProperty) {
-  const { dashboardName, projectName } = props;
-  // TODO: Loading indicator
-  const { data, isLoading } = useDashboard(projectName, dashboardName);
-  const datasourceApi = useDatasourceApi();
-
-  if (!isLoading && data !== undefined) {
-    return <DashboardView dashboardResource={data} datasourceApi={datasourceApi} />;
-  }
-  return null;
-}
-
 /**
  * The View for viewing a Dashboard.
  */
@@ -58,31 +41,36 @@ function ViewDashboard() {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
   }, [muiTheme]);
 
-  const projectName = useParams().projectID;
-  const dashboardName = useParams().dashboardID;
+  const projectName = useParams().projectName;
+  const dashboardName = useParams().dashboardName;
   if (projectName === undefined || dashboardName === undefined) {
-    return null;
+    throw new Error('Unable to get the Dashboard or Project name');
   }
+  const { data, isLoading } = useDashboard(projectName, dashboardName);
+  const datasourceApi = useDatasourceApi();
 
-  return (
-    <Box
-      component="main"
-      sx={{
-        flexGrow: 1,
-        overflow: 'hidden',
-      }}
-    >
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <ViewSingleDashboard dashboardName={dashboardName} projectName={projectName} />
-            </ErrorBoundary>
-          </PluginRegistry>
-        </ChartsThemeProvider>
-      </ErrorBoundary>
-    </Box>
-  );
+  if (!isLoading && data !== undefined) {
+    return (
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          overflow: 'hidden',
+        }}
+      >
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+            <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <DashboardView dashboardResource={data} datasourceApi={datasourceApi} />;
+              </ErrorBoundary>
+            </PluginRegistry>
+          </ChartsThemeProvider>
+        </ErrorBoundary>
+      </Box>
+    );
+  }
+  return null;
 }
 
 export default ViewDashboard;
