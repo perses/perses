@@ -6,7 +6,6 @@ tasks:
       make build-cli
     command: |
       cd ./dev
-      docker-compose up -d
       bash ./populate.sh
       cd ../
       ./bin/perses -config ./dev/config.yaml
