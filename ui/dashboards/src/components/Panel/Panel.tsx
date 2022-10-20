@@ -28,7 +28,7 @@ import {
   styled,
 } from '@mui/material';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import PencilIcon from 'mdi-material-ui/Pencil';
+import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import { useEditMode, LayoutItem, usePanelActions } from '../../context';
@@ -89,17 +89,10 @@ export function Panel(props: PanelProps) {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              minHeight: '24px',
+              minHeight: '32px',
             }}
           >
-            <Typography
-              component="h2"
-              variant="body2"
-              fontWeight={(theme) => theme.typography.fontWeightMedium}
-              whiteSpace="nowrap"
-              overflow="hidden"
-              textOverflow="ellipsis"
-            >
+            <Typography variant="subtitle1" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
               {definition.spec.display.name}
             </Typography>
             <Box
@@ -118,8 +111,7 @@ export function Panel(props: PanelProps) {
                   <InformationOutlineIcon
                     aria-describedby="info-tooltip"
                     aria-hidden={false}
-                    fontSize="small"
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: 'pointer', color: (theme) => theme.palette.grey[700] }}
                   />
                 </InfoTooltip>
               )}
@@ -141,7 +133,8 @@ export function Panel(props: PanelProps) {
         }
         sx={{
           display: 'block',
-          padding: (theme) => theme.spacing(1, panelPadding),
+          paddingX: (theme) => theme.spacing(panelPadding),
+          paddingY: '4px',
           borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
         }}
       />

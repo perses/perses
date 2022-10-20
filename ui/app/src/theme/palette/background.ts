@@ -13,12 +13,13 @@
 
 import { PaletteMode, PaletteOptions } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
+import { white } from './common';
 
 export const background = (mode: PaletteMode): PaletteOptions['background'] => {
   return mode === 'light'
     ? {
         default: blueGrey[50],
-        paper: '#FFFFFF',
+        paper: white,
       }
     : {
         default: '#121212',
