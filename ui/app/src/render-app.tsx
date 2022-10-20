@@ -18,9 +18,9 @@ import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Router from './Router';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import { DarkModeContextProvider } from './context/DarkMode';
+import App from './App';
 
 /**
  * Renders the Perses application in the target container.
@@ -42,7 +42,7 @@ export function renderApp(container: Element | null) {
             <DarkModeContextProvider>
               <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
                 <CssBaseline />
-                <Router />
+                <App />
               </SnackbarProvider>
             </DarkModeContextProvider>
           </QueryParamProvider>

@@ -13,8 +13,23 @@
 
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { useParams } from 'react-router-dom';
-import { useDatasourceApi } from '../model/datasource-api';
+import { Box, useTheme } from '@mui/material';
+import {
+  ChartsThemeProvider,
+  ErrorAlert,
+  ErrorBoundary,
+  generateChartsTheme,
+  PersesChartsTheme,
+} from '@perses-dev/components';
+import { useMemo } from 'react';
+import { PluginRegistry } from '@perses-dev/plugin-system';
+import { useBundledPlugins } from '../model/bundled-plugins';
 import { useDashboard } from '../model/dashboard-client';
+import { useDatasourceApi } from '../model/datasource-api';
+
+// app specific echarts option overrides, empty since perses uses default
+// https://apache.github.io/echarts-handbook/en/concepts/style/#theme
+const ECHARTS_THEME_OVERRIDES = {};
 
 interface ViewSingleDashboardProperty {
   dashboardName: string;
@@ -37,13 +52,37 @@ function ViewSingleDashboard(props: ViewSingleDashboardProperty) {
  * The View for viewing a Dashboard.
  */
 function ViewDashboard() {
+  const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
+  const muiTheme = useTheme();
+  const chartsTheme: PersesChartsTheme = useMemo(() => {
+    return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
+  }, [muiTheme]);
+
   const projectName = useParams().projectID;
   const dashboardName = useParams().dashboardID;
   if (projectName === undefined || dashboardName === undefined) {
     return null;
   }
 
-  return <ViewSingleDashboard dashboardName={dashboardName} projectName={projectName} />;
+  return (
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        overflow: 'hidden',
+      }}
+    >
+      <ErrorBoundary FallbackComponent={ErrorAlert}>
+        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <ViewSingleDashboard dashboardName={dashboardName} projectName={projectName} />
+            </ErrorBoundary>
+          </PluginRegistry>
+        </ChartsThemeProvider>
+      </ErrorBoundary>
+    </Box>
+  );
 }
 
 export default ViewDashboard;
