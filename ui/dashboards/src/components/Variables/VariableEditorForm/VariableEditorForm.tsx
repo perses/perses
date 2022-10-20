@@ -181,20 +181,20 @@ export function VariableEditForm({
 
       <Stack direction={'row'} spacing={2} justifyContent="end">
         <Button
-          onClick={() => {
-            onCancel();
-          }}
-        >
-          Cancel
-        </Button>
-
-        <Button
           variant="contained"
           onClick={() => {
             onChange(getVariableDefinitionFromState(state));
           }}
         >
           Update
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            onCancel();
+          }}
+        >
+          Cancel
         </Button>
       </Stack>
     </Box>
