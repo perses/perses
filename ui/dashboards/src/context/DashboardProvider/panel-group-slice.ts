@@ -14,7 +14,6 @@
 import { GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
-import { PanelEditorSlice } from './panel-editor-slice';
 
 /**
  * Slice with the state of Panel Groups, as well as any actions that modify only Panel Group state.
@@ -79,7 +78,7 @@ export interface PanelGroupItemId {
  */
 export function createPanelGroupSlice(
   layouts: LayoutDefinition[]
-): StateCreator<PanelGroupSlice & PanelEditorSlice, Middleware, [], PanelGroupSlice> {
+): StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> {
   // Helper function for generating unique IDs for a PanelGroup
   let id: PanelGroupId = -1;
   function createPanelGroupId(): PanelGroupId {
