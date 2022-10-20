@@ -48,6 +48,5 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
  */
 export function useDashboardTimeRange() {
   const { timeRange, setTimeRange } = useTimeRangeContext();
-  console.log(timeRange);
   return { timeRange, setTimeRange };
 }
