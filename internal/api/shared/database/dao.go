@@ -16,6 +16,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -150,7 +151,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	}
 	// so now we have the proper folder to looking for and potentially a filter to use
 	var files []string
-	if err = d.visit(&files, folder, prefix); err != nil {
+	if files, err = d.visit(folder, prefix); err != nil {
 		return err
 	}
 	if len(files) <= 0 {
@@ -160,9 +161,9 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	}
 	for _, file := range files {
 		// now read all file and append them to the final result
-		data, err := os.ReadFile(fmt.Sprintf("%s/%s", folder, file))
-		if err != nil {
-			return err
+		data, readErr := os.ReadFile(file)
+		if readErr != nil {
+			return readErr
 		}
 		// first create a pointer with the accurate type
 		var value reflect.Value
@@ -174,8 +175,8 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 		}
 		// then get back the actual struct behind the value.
 		obj := value.Interface()
-		if err := d.unmarshal(data, obj); err != nil {
-			return err
+		if unmarshalErr := d.unmarshal(data, obj); err != nil {
+			return unmarshalErr
 		}
 		sliceElem.Set(reflect.Append(sliceElem, value))
 	}
@@ -217,25 +218,25 @@ func (d *fileDAO) marshal(entity interface{}) ([]byte, error) {
 	return yaml.Marshal(entity)
 }
 
-func (d *fileDAO) visit(files *[]string, path string, prefix string) error {
-	filesInfo, err := os.ReadDir(path)
-	if err != nil {
-		return err
-	}
-
-	for _, info := range filesInfo {
+func (d *fileDAO) visit(rootPath string, prefix string) ([]string, error) {
+	var result []string
+	err := filepath.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if info.IsDir() {
 			return nil
 		}
-		file := info.Name()
-		if filepath.Ext(file) != fmt.Sprintf(".%s", d.extension) {
+		fileName := info.Name()
+		if filepath.Ext(fileName) != fmt.Sprintf(".%s", d.extension) {
 			// skip every file that doesn't have the correct extension
 			return nil
 		}
-
-		if len(prefix) == 0 || strings.HasPrefix(file, prefix) {
-			*files = append(*files, file)
+		if len(prefix) == 0 || strings.HasPrefix(fileName, prefix) {
+			result = append(result, path)
 		}
-	}
-	return nil
+		return nil
+	})
+
+	return result, err
 }
