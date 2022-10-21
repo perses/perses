@@ -39,8 +39,10 @@ function RenderDashboardList() {
     return <CircularProgress size="1rem" />;
   }
 
-  if (data !== undefined) {
-    const dashboardListAsMap = new Map<string, DashboardResource[]>();
+  if (data === undefined) return null;
+
+  const dashboardListAsMap = new Map<string, DashboardResource[]>();
+  if (Array.isArray(data)) {
     data.map((dashboard) => {
       const project = dashboard.metadata.project;
       const list = dashboardListAsMap.get(project);
@@ -50,39 +52,37 @@ function RenderDashboardList() {
         dashboardListAsMap.set(project, [dashboard]);
       }
     });
-    const accordions: JSX.Element[] = [];
-
-    dashboardListAsMap.forEach((value, key) => {
-      accordions.push(
-        <Accordion TransitionProps={{ unmountOnExit: true }} key={key}>
-          <AccordionSummary expandIcon={<ChevronDown />}>
-            <Stack direction="row" alignItems="center" gap={1}>
-              <FolderPound />
-              <Typography variant="h3">{key}</Typography>
-            </Stack>
-          </AccordionSummary>
-          <AccordionDetails>
-            <List>
-              {value.map((v, i) => {
-                return (
-                  <Box sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }} key={v.metadata.name}>
-                    {i !== 0 && <Divider />}
-                    <ListItemButton onClick={() => navigate('/projects/' + key + '/dashboards/' + v.metadata.name)}>
-                      <ListItemText primary={v.metadata.name} />
-                    </ListItemButton>
-                  </Box>
-                );
-              })}
-            </List>
-          </AccordionDetails>
-        </Accordion>
-      );
-    });
-
-    return <Box>{accordions}</Box>;
   }
 
-  return <></>;
+  const accordions: JSX.Element[] = [];
+  dashboardListAsMap.forEach((value, key) => {
+    accordions.push(
+      <Accordion TransitionProps={{ unmountOnExit: true }} key={key}>
+        <AccordionSummary expandIcon={<ChevronDown />}>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <FolderPound />
+            <Typography variant="h3">{key}</Typography>
+          </Stack>
+        </AccordionSummary>
+        <AccordionDetails>
+          <List>
+            {value.map((v, i) => {
+              return (
+                <Box sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }} key={v.metadata.name}>
+                  {i !== 0 && <Divider />}
+                  <ListItemButton onClick={() => navigate('/projects/' + key + '/dashboards/' + v.metadata.name)}>
+                    <ListItemText primary={v.metadata.name} />
+                  </ListItemButton>
+                </Box>
+              );
+            })}
+          </List>
+        </AccordionDetails>
+      </Accordion>
+    );
+  });
+
+  return <Box>{accordions}</Box>;
 }
 
 function ViewDashboardList() {
