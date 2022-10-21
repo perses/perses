@@ -119,7 +119,7 @@ func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
 		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
 	}
-	if err := validateMetadata(entity.GetMetadata()); err != nil {
+	if err := validateMetadata(ctx, entity.GetMetadata()); err != nil {
 		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
 	}
 	return nil

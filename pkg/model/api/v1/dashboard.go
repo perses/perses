@@ -16,15 +16,12 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
 )
-
-var keyRegexp = regexp.MustCompile("(?m)^[a-zA-Z0-9_-]")
 
 func GenerateDashboardID(project string, name string) string {
 	return generateProjectResourceID("dashboards", project, name)
@@ -84,9 +81,6 @@ func (d *DashboardSpec) validate() error {
 	variables := make(map[string]bool, len(d.Variables))
 	for i, variable := range d.Variables {
 		name := variable.Spec.GetName()
-		if len(keyRegexp.FindAllString(name, -1)) <= 0 {
-			return fmt.Errorf("variable reference %q is containing spaces or special characters", name)
-		}
 		if !variables[name] {
 			variables[name] = true
 		} else {
@@ -94,8 +88,8 @@ func (d *DashboardSpec) validate() error {
 		}
 	}
 	for panelKey := range d.Panels {
-		if len(keyRegexp.FindAllString(panelKey, -1)) <= 0 {
-			return fmt.Errorf("panel reference %q is containing spaces or special characters", panelKey)
+		if err := common.ValidateID(panelKey); err != nil {
+			return err
 		}
 	}
 	return nil

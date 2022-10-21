@@ -17,7 +17,10 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -40,18 +43,34 @@ func getProjectParameter(ctx echo.Context) string {
 	return ctx.Param(ParamProject)
 }
 
-func validateMetadata(metadata interface{}) error {
+// validateMetadataVersusParameter is the generic method used to validate provided metadata against the parameters in the context
+//   - If the parameter in the context is empty, no checks are performed => OK
+//   - Else
+//   - If metadata value is empty, it is overridden with the context value => OK
+//   - Else
+//   - If the values are not matching return an error => KO
+//   - Else => OK
+func validateMetadataVersusParameter(ctx echo.Context, paramName string, metadataValue *string) error {
+	paramValue := ctx.Param(paramName)
+	if len(paramValue) > 0 {
+		if len(*metadataValue) <= 0 {
+			logrus.Debugf("overridden empty metadata value with %s parameter value '%s'", paramName, paramValue)
+			*metadataValue = paramValue
+		} else if *metadataValue != paramValue {
+			return fmt.Errorf("%s parameter value '%s' does not match provided metadata value '%s'", paramName, paramValue, *metadataValue)
+		}
+	}
+	return nil
+}
+
+func validateMetadata(ctx echo.Context, metadata api.Metadata) error {
+	if err := common.ValidateID(metadata.GetName()); err != nil {
+		return err
+	}
 	switch met := metadata.(type) {
 	case *v1.ProjectMetadata:
-		if len(met.Project) == 0 {
-			return fmt.Errorf("metadata.project cannot be empty")
-		}
-		if len(met.Name) == 0 {
-			return fmt.Errorf("metadata.name cannot be empty")
-		}
-	case *v1.Metadata:
-		if len(met.Name) == 0 {
-			return fmt.Errorf("metadata.name cannot be empty")
+		if err := validateMetadataVersusParameter(ctx, ParamProject, &met.Project); err != nil {
+			return err
 		}
 	}
 	return nil
