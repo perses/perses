@@ -39,7 +39,7 @@ export function createInitialGaugeChartOptions(): GaugeChartOptions {
         plugin: {
           kind: 'PrometheusTimeSeriesQuery',
           spec: {
-            query: 'up',
+            query: '',
           },
         },
       },
