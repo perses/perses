@@ -11,13 +11,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect, useRef, useState } from 'react';
+import { TextField } from '@mui/material';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Box } from '@mui/material';
 import { GaugeChartOptions } from './gauge-chart-model';
 
 export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
 
 export function GaugeChartOptionsEditor(props: GaugeChartOptionsEditorProps) {
-  const { value } = props;
-  return <Box>{JSON.stringify(value)}</Box>;
+  const ref = useRef<HTMLInputElement>(null);
+  const [value, setValue] = useState(JSON.stringify(props.value, null, 2));
+  const [invalidJSON, setInvalidJSON] = useState(false);
+
+  useEffect(() => {
+    setValue(JSON.stringify(props.value, null, 2));
+    setInvalidJSON(false);
+  }, [props.value]);
+
+  return (
+    <TextField
+      label="JSON"
+      error={invalidJSON}
+      helperText={invalidJSON ? 'Invalid JSON' : ''}
+      multiline
+      fullWidth
+      inputRef={ref}
+      value={value}
+      onChange={(event) => {
+        setValue(event.target.value);
+      }}
+      onBlur={() => {
+        try {
+          const json = JSON.parse(value ?? '{}');
+          setInvalidJSON(false);
+          props.onChange(json);
+        } catch (e) {
+          setInvalidJSON(true);
+        }
+      }}
+    />
+  );
 }

@@ -37,11 +37,24 @@ export function createInitialGaugeChartOptions(): GaugeChartOptions {
       kind: 'TimeSeriesQuery',
       spec: {
         plugin: {
-          kind: '',
-          spec: {},
+          kind: 'PrometheusTimeSeriesQuery',
+          spec: {
+            query: 'up',
+          },
         },
       },
     },
-    calculation: 'First',
+    calculation: 'LastNumber',
+    unit: { kind: 'Percent' },
+    thresholds: {
+      steps: [
+        {
+          value: 80,
+        },
+        {
+          value: 90,
+        },
+      ],
+    },
   };
 }

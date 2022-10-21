@@ -37,14 +37,17 @@ export function createInitialStatChartOptions(): StatChartOptions {
       kind: 'TimeSeriesQuery',
       spec: {
         plugin: {
-          kind: '',
-          spec: {},
+          kind: 'PrometheusTimeSeriesQuery',
+          spec: {
+            query: 'up',
+          },
         },
       },
     },
-    calculation: 'First',
+    calculation: 'LastNumber',
     unit: {
       kind: 'Decimal',
     },
+    sparkline: {},
   };
 }
