@@ -46,7 +46,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     enabled: true,
   });
 
-  // Query editing handlers
+  // Query handlers
   const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -77,8 +77,8 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
-  // edit legend options handlers
-  const updateLegendShow = (show: boolean) => {
+  // Legend options handlers
+  const handleLegendShowChange = (show: boolean) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.legend = show ? DEFAULT_LEGEND : undefined;
@@ -86,7 +86,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
-  const updateLegendPosition: SelectProps<LegendPosition>['onChange'] = (e) => {
+  const handleLegendPositionChange: SelectProps<LegendPosition>['onChange'] = (e) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         // TODO: type cast should not be necessary
@@ -103,8 +103,8 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
         Add Query
       </Button>
       {queries.map((query, i) => (
-        <Stack key={i}>
-          <Stack direction="row">
+        <Stack key={i} spacing={1}>
+          <Stack direction="row" borderBottom={1} borderColor="grey.300">
             <Typography variant="overline" component="h3">
               Query {i + 1}
             </Typography>
@@ -127,7 +127,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
             <Switch
               checked={value.legend !== undefined}
               onChange={(e) => {
-                updateLegendShow(e.target.checked);
+                handleLegendShowChange(e.target.checked);
               }}
             />
           }
@@ -140,7 +140,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
             id="legend-position-select"
             label="Position"
             value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
-            onChange={updateLegendPosition}
+            onChange={handleLegendPositionChange}
           >
             {LEGEND_POSITIONS.map((position) => (
               <MenuItem key={position} value={position}>
