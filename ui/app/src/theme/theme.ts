@@ -47,14 +47,4 @@ const components: ThemeOptions['components'] = {
       size: 'small',
     },
   },
-  MuiSvgIcon: {
-    defaultProps: {
-      fontSize: 'small',
-    },
-    styleOverrides: {
-      fontSizeSmall: {
-        fontSize: '1rem',
-      },
-    },
-  },
 };

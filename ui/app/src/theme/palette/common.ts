@@ -11,18 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PaletteMode, PaletteOptions } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
-import { white } from './common';
-
-export const background = (mode: PaletteMode): PaletteOptions['background'] => {
-  return mode === 'light'
-    ? {
-        default: blueGrey[50],
-        paper: white,
-      }
-    : {
-        default: '#121212',
-        paper: '#191d21',
-      };
-};
+export const white = '#FFFFFF';
+export const black = '#000000';

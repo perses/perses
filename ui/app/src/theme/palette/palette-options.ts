@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { PaletteMode, PaletteOptions } from '@mui/material';
+import { text } from './text';
 import { background } from './background';
 import { greyOption } from './grey';
+import { black, white } from './common';
 
 /**
  * Returns the MUI PaletteOptions for the given mode.
@@ -24,10 +26,11 @@ export function getPaletteOptions(mode: PaletteMode): PaletteOptions {
   return {
     mode,
     common: {
-      white: '#FFFFFF',
-      black: '#000000',
+      white,
+      black,
     },
     grey: greyOption(mode),
+    text: text(mode),
     background: background(mode),
   };
 }

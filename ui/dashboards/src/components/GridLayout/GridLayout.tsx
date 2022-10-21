@@ -60,6 +60,7 @@ export function GridLayout(props: GridLayoutProps) {
             resizeHandles={['se']}
             isDraggable={isEditMode}
             isResizable={isEditMode}
+            containerPadding={[0, 10]}
           >
             {groupDefinition.items.map(({ x, y, width, height }, itemIndex) => (
               <div key={itemIndex} data-grid={{ x, y, w: width, h: height }}>
