@@ -11,19 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Routes, Route } from 'react-router-dom';
-import Docs from './views/Docs';
-import ViewDashboard from './views/ViewDashboard';
-import ViewDashboardList from './views/ViewDashboardList';
+import { useQuery } from '@tanstack/react-query';
+import { DashboardResource, fetchJson } from '@perses-dev/core';
+import buildURL from './url-builder';
 
-function Router() {
-  return (
-    <Routes>
-      <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
-      <Route path="docs" element={<Docs />} />
-      <Route path="/" element={<ViewDashboardList />} />
-    </Routes>
-  );
+const resource = 'dashboards';
+
+export function useDashboard(project: string, name: string) {
+  return useQuery<DashboardResource, Error>([resource], () => {
+    const url = buildURL({ resource: resource, name: name, project: project });
+    return fetchJson<DashboardResource>(url);
+  });
 }
-
-export default Router;

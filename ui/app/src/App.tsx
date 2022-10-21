@@ -11,32 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
-import { Box, useTheme } from '@mui/material';
-import {
-  ChartsThemeProvider,
-  ErrorAlert,
-  ErrorBoundary,
-  generateChartsTheme,
-  PersesChartsTheme,
-} from '@perses-dev/components';
-import { PluginRegistry } from '@perses-dev/plugin-system';
-import ViewDashboard from './views/ViewDashboard';
+import { Box } from '@mui/material';
+
 import Header from './components/Header';
 import Footer from './components/Footer';
-import { useBundledPlugins } from './model/bundled-plugins';
-
-// app specific echarts option overrides, empty since perses uses default
-// https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-const ECHARTS_THEME_OVERRIDES = {};
+import Router from './Router';
 
 function App() {
-  const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
-  const muiTheme = useTheme();
-  const chartsTheme: PersesChartsTheme = useMemo(() => {
-    return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
-  }, [muiTheme]);
-
   return (
     <Box
       sx={{
@@ -47,23 +28,7 @@ function App() {
       }}
     >
       <Header />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          overflow: 'hidden',
-        }}
-      >
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-            <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <ViewDashboard />
-              </ErrorBoundary>
-            </PluginRegistry>
-          </ChartsThemeProvider>
-        </ErrorBoundary>
-      </Box>
+      <Router />
       <Footer />
     </Box>
   );

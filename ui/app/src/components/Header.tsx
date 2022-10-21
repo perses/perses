@@ -128,7 +128,7 @@ export default function Header(): JSX.Element {
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
-        <Button href="/?dashboard=demoDashboard" color="inherit">
+        <Button href="/projects/perses/dashboards/Demo" color="inherit">
           Demo
         </Button>
         <Button href="/docs" color="inherit">

@@ -11,32 +11,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQueryParams, StringParam } from 'use-query-params';
-import { DashboardResource } from '@perses-dev/core';
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
+import { useParams } from 'react-router-dom';
+import { Box, useTheme } from '@mui/material';
+import {
+  ChartsThemeProvider,
+  ErrorAlert,
+  ErrorBoundary,
+  generateChartsTheme,
+  PersesChartsTheme,
+} from '@perses-dev/components';
+import { useMemo } from 'react';
+import { PluginRegistry } from '@perses-dev/plugin-system';
+import { useBundledPlugins } from '../model/bundled-plugins';
+import { useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
-import { useSampleData } from '../utils/temp-sample-data';
 
-const DEFAULT_DASHBOARD_ID = 'node-exporter-full';
+// app specific echarts option overrides, empty since perses uses default
+// https://apache.github.io/echarts-handbook/en/concepts/style/#theme
+const ECHARTS_THEME_OVERRIDES = {};
 
 /**
  * The View for viewing a Dashboard.
  */
 function ViewDashboard() {
-  const [query] = useQueryParams({ dashboard: StringParam });
-  const { dashboard } = query;
+  const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
+  const muiTheme = useTheme();
+  const chartsTheme: PersesChartsTheme = useMemo(() => {
+    return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
+  }, [muiTheme]);
 
-  // TODO: setup project routing
-  const sampleDashboard = useSampleData<DashboardResource>(dashboard || DEFAULT_DASHBOARD_ID);
-
+  const projectName = useParams().projectName;
+  const dashboardName = useParams().dashboardName;
+  if (projectName === undefined || dashboardName === undefined) {
+    throw new Error('Unable to get the Dashboard or Project name');
+  }
+  const { data, isLoading } = useDashboard(projectName, dashboardName);
   const datasourceApi = useDatasourceApi();
 
-  // TODO: Loading indicator
-  if (sampleDashboard === undefined) {
-    return null;
+  if (!isLoading && data !== undefined) {
+    return (
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          overflow: 'hidden',
+        }}
+      >
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+            <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <DashboardView dashboardResource={data} datasourceApi={datasourceApi} />;
+              </ErrorBoundary>
+            </PluginRegistry>
+          </ChartsThemeProvider>
+        </ErrorBoundary>
+      </Box>
+    );
   }
-
-  return <DashboardView dashboardResource={sampleDashboard} datasourceApi={datasourceApi} />;
+  return null;
 }
 
 export default ViewDashboard;

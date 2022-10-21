@@ -14,15 +14,24 @@
 package ui
 
 import (
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
+	"github.com/perses/perses/internal/api/shared"
 	"github.com/prometheus/common/assets"
+	"github.com/sirupsen/logrus"
 )
 
-var asts = http.FS(assets.New(embedFS))
+var (
+	asts        = http.FS(assets.New(embedFS))
+	reactRoutes = []string{
+		"/projects",
+	}
+)
 
 type frontend struct {
 	echoUtils.Register
@@ -35,5 +44,54 @@ func NewPersesFrontend() echoUtils.Register {
 func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentHandler := echo.WrapHandler(http.FileServer(asts))
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
-	e.GET("/*", contentHandler, contentRewrite)
+	e.GET("/*", contentHandler, routerMiddleware(), contentRewrite)
+}
+
+// routerMiddleware is here to serve properly the react app.
+//
+// As React is creating a single page application, it embeds its own router, which allows you to navigate in the UI without reloading it.
+// For example, if you run the UI separately (with npm start), you will be able to access to a dashboard using the URL http://localhost:3000/projects/perses/dashboards/<name>.
+// But this is not working anymore when the UI is embedded in the binary, because then the echo router has no idea that the route /projects/:projectID/* is a React Route.
+//
+// Another problem that comes when you want to embed a UI in a binary is to be able to serve every single static file.
+// The package embed is tackling this issue. But as a side effect, we are not able to know exactly how many static files it is serving.
+// Which is an issue because then how can we know if the request is an internal route of the React app, or is a request to get a static file.
+//
+// The dummy idea is to provide a list of react route prefix here. If the URL path is matching one of the prefix, then the request is returning the index.html.
+// Because it's an internal React Route, and we need to let the React app manage it.
+// And if the URL Path doesn't match one of the prefix, then it should be a static file that need to be served. So we just relies on `contentHandler` that is serving the static file.
+//
+// In case the URL path is actually prefixed by /api/v1, and it's a request to the backend, then we can thanks the echo Router that decides to have the following routing strategy:
+// 			if the URL path is matching the less generic route registered, then use this on, otherwise use the previous route that is a bit more generic and so on.
+// So for the following route :
+//		1. /api/v1/projects/perses/dashboards/*
+// 		2. /api/v1/projects/*
+// 		3. /api/v1/*
+// Then:
+// - /api/v1/projects/perses/dashboards/* will be served by the first route
+// - /api/v1/projects/test will be served by the second route
+// - /api/v1/foo will be served by the last route.
+func routerMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			for _, route := range reactRoutes {
+				if !strings.HasPrefix(c.Request().URL.Path, route) {
+					continue
+				}
+				f, err := asts.Open("/app/dist/index.html")
+				if err != nil {
+					logrus.WithError(err).Error("Unable to open the React index.html")
+					return shared.HandleError(err)
+				}
+				idx, err := io.ReadAll(f)
+				if err != nil {
+					logrus.WithError(err).Error("Error reading React index.html")
+					return shared.HandleError(err)
+				}
+				_, err = c.Response().Write(idx)
+				return shared.HandleError(err)
+			}
+			return next(c)
+		}
+	}
 }
