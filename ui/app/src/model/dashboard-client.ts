@@ -23,3 +23,10 @@ export function useDashboard(project: string, name: string) {
     return fetchJson<DashboardResource>(url);
   });
 }
+
+export function useDashboardList(project?: string) {
+  return useQuery<DashboardResource[], Error>([resource], () => {
+    const url = buildURL({ resource: resource, project: project });
+    return fetchJson<DashboardResource[]>(url);
+  });
+}
