@@ -12,5 +12,4 @@
 // limitations under the License.
 
 export * from './plugin-registry';
-export * from './render';
 export * from './mock-query-result';
