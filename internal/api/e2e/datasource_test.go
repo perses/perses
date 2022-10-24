@@ -16,10 +16,14 @@
 package e2e
 
 import (
+	"fmt"
+	"net/http"
 	"testing"
 
+	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/pkg/model/api"
 )
 
@@ -30,36 +34,24 @@ func TestMainScenarioDatasource(t *testing.T) {
 }
 
 func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
-
-	dts := utils.NewDatasource(t)
-	dts.Metadata.Project = ""
-	server, _ := utils.CreateServer(t)
-	defer server.Close()
-	e := httpexpect.WithConfig(httpexpect.Config{
-		BaseURL:  server.URL,
-		Reporter: httpexpect.NewAssertReporter(t),
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		entity := e2eframework.NewDatasource(t, "", "myDTS")
+		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusBadRequest)
+		return []api.Entity{}
 	})
-
-	// metadata.name is not provided, it should return a bad request
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(dts).
-		Expect().
-		Status(http.StatusBadRequest)
 }
 
 func TestCreateDatasourceWithNonExistingProject(t *testing.T) {
-	dts := utils.NewDatasource(t)
-	dts.Metadata.Project = "404NotFound"
-	server, _ := utils.CreateServer(t)
-	defer server.Close()
-	e := httpexpect.WithConfig(httpexpect.Config{
-		BaseURL:  server.URL,
-		Reporter: httpexpect.NewAssertReporter(t),
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		entity := e2eframework.NewDatasource(t, "awesomeProjectThatDoesntExist", "myDTS")
+		// metadata.name is not provided, it should return a bad request
+		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusBadRequest)
+		return []api.Entity{}
 	})
-
-	// metadata.name is not provided, it should return a bad request
-	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(dts).
-		Expect().
-		Status(http.StatusBadRequest)
 }
