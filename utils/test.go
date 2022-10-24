@@ -29,6 +29,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
+	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/shared/database"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -225,6 +226,7 @@ func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager
 			t.Fatal(err)
 		}
 	}
+	handler.Use(middleware.CheckProject(serviceManager.GetProject()))
 	persesAPI := core.NewPersesAPI(serviceManager, false)
 	persesAPI.RegisterRoute(handler)
 	return httptest.NewServer(handler), persistenceManager

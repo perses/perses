@@ -76,7 +76,7 @@ func main() {
 		APIRegistration(persesAPI).
 		APIRegistration(persesFrontend).
 		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource())).
-		Middleware(middleware.CheckProject(persistenceManager.GetProject()))
+		Middleware(middleware.CheckProject(serviceManager.GetProject()))
 
 	// start the application
 	runner.Start()

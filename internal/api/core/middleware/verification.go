@@ -33,7 +33,7 @@ type partialObject struct {
 }
 
 // CheckProject is a middleware that will verify if the project used for the request exists.
-func CheckProject(dao project.DAO) echo.MiddlewareFunc {
+func CheckProject(svc project.Service) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// we don't need to verify if a project exists in case we are in a PUT / GET / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
@@ -62,7 +62,7 @@ func CheckProject(dao project.DAO) echo.MiddlewareFunc {
 				}
 			}
 			if len(projectName) > 0 {
-				if _, err := dao.Get(projectName); err != nil {
+				if _, err := svc.Get(shared.Parameters{Name: projectName}); err != nil {
 					if errors.Is(err, shared.NotFoundError) {
 						return shared.HandleError(fmt.Errorf("%w, metadata.project %q doesn't exist", shared.BadRequestError, projectName))
 					}

@@ -86,7 +86,7 @@ func TestCreateDatasourceBadRequest(t *testing.T) {
 }
 
 func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
-	dts := &v1.Datasource{Kind: v1.KindDatasource}
+	dts := utils.NewDatasource(t)
 	dts.Metadata.Project = ""
 	server, _ := utils.CreateServer(t)
 	defer server.Close()
@@ -103,7 +103,7 @@ func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
 }
 
 func TestCreateDatasourceWithNonExistingProject(t *testing.T) {
-	dts := &v1.Datasource{Kind: v1.KindDatasource}
+	dts := utils.NewDatasource(t)
 	dts.Metadata.Project = "404NotFound"
 	server, _ := utils.CreateServer(t)
 	defer server.Close()
