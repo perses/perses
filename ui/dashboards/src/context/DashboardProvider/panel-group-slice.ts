@@ -44,6 +44,11 @@ export interface PanelGroupSlice {
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
 
   /**
+   * Update the item layouts for a panel group when, for example, a panel is moved or resized.
+   */
+  updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupDefinition['itemLayouts']) => void;
+
+  /**
    * save
    */
   savePanelGroups: () => void;
@@ -152,6 +157,16 @@ export function createPanelGroupSlice(
         }
         // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
         [state.panelGroupOrder[x], state.panelGroupOrder[y]] = [yPanelGroup, xPanelGroup];
+      });
+    },
+
+    updatePanelGroupLayouts(panelGroupId, itemLayouts) {
+      set((state) => {
+        const group = state.panelGroups[panelGroupId];
+        if (group === undefined) {
+          throw new Error(`Cannot find panel group ${panelGroupId}`);
+        }
+        group.itemLayouts = itemLayouts;
       });
     },
   });

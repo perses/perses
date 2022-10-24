@@ -13,7 +13,7 @@
 
 import { useMemo } from 'react';
 import { useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupId } from './panel-group-slice';
+import { PanelGroupItemId, PanelGroupId, PanelGroupLayout } from './panel-group-slice';
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
@@ -79,6 +79,7 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   const openEditPanelGroup = useDashboardStore((store) => store.openEditPanelGroup);
   const deletePanelGroup = useDashboardStore((store) => store.openDeletePanelGroupDialog);
   const openAddPanel = useDashboardStore((store) => store.openAddPanel);
+  const updatePanelGroupLayouts = useDashboardStore((store) => store.updatePanelGroupLayouts);
 
   return {
     openEditPanelGroup: () => openEditPanelGroup(panelGroupId),
@@ -86,6 +87,7 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
     openAddPanel: () => openAddPanel(panelGroupId),
     moveUp,
     moveDown,
+    updatePanelGroupLayouts: (itemLayouts: PanelGroupLayout[]) => updatePanelGroupLayouts(panelGroupId, itemLayouts),
   };
 }
 
