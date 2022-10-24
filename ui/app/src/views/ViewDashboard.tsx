@@ -41,36 +41,39 @@ function ViewDashboard() {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
   }, [muiTheme]);
 
-  const projectName = useParams().projectName;
-  const dashboardName = useParams().dashboardName;
+  const { projectName, dashboardName } = useParams();
+
   if (projectName === undefined || dashboardName === undefined) {
     throw new Error('Unable to get the Dashboard or Project name');
   }
-  const { data, isLoading } = useDashboard(projectName, dashboardName);
+
   const datasourceApi = useDatasourceApi();
 
-  if (!isLoading && data !== undefined) {
-    return (
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          overflow: 'hidden',
-        }}
-      >
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-            <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <DashboardView dashboardResource={data} datasourceApi={datasourceApi} />;
-              </ErrorBoundary>
-            </PluginRegistry>
-          </ChartsThemeProvider>
-        </ErrorBoundary>
-      </Box>
-    );
-  }
-  return null;
+  const { data, isLoading } = useDashboard(projectName, dashboardName);
+
+  if (isLoading === true) return null;
+
+  if (!data || data.spec === undefined) return null;
+
+  return (
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        overflow: 'hidden',
+      }}
+    >
+      <ErrorBoundary FallbackComponent={ErrorAlert}>
+        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <DashboardView dashboardResource={data} datasourceApi={datasourceApi} />;
+            </ErrorBoundary>
+          </PluginRegistry>
+        </ChartsThemeProvider>
+      </ErrorBoundary>
+    </Box>
+  );
 }
 
 export default ViewDashboard;

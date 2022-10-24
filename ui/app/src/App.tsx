@@ -23,12 +23,19 @@ function App() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        minHeight: '100vh',
         backgroundColor: (theme) => theme.palette.background.paper,
       }}
     >
       <Header />
-      <Router />
+      <Box
+        sx={{
+          padding: (theme) => theme.spacing(1, 0),
+          flex: 1,
+        }}
+      >
+        <Router />
+      </Box>
       <Footer />
     </Box>
   );
