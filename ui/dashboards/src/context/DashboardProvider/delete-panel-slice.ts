@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getPanelKeyFromRef } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 import { PanelGroupSlice, PanelGroupItemId } from './panel-group-slice';
@@ -123,8 +122,8 @@ export function createDeletePanelSlice(): StateCreator<
 // Helper function to determine if a panel key is still being used somewhere in Panel Groups
 function isPanelKeyStillUsed(panelGroups: PanelGroupSlice['panelGroups'], panelKey: string) {
   for (const group of Object.values(panelGroups)) {
-    const found = group.itemPanelKeys[panelKey] !== undefined;
-    if (found) {
+    const found = Object.values(group.itemPanelKeys).find((key) => key === panelKey);
+    if (found !== undefined) {
       return true;
     }
   }
