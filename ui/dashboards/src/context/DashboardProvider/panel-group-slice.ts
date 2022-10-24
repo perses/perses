@@ -13,7 +13,7 @@
 
 import { GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
-import { Middleware } from './common';
+import { generateId, Middleware } from './common';
 
 /**
  * Slice with the state of Panel Groups, as well as any actions that modify only Panel Group state.
@@ -36,9 +36,6 @@ export interface PanelGroupSlice {
     panelGroups: PanelGroupSlice['panelGroups'];
     panelGroupIdOrder: PanelGroupSlice['panelGroupOrder'];
   };
-
-  // TODO: Remove this
-  createPanelGroupId: () => PanelGroupId;
 
   /**
    * Rearrange the order of panel groups by swapping the positions
@@ -79,18 +76,11 @@ export interface PanelGroupItemId {
 export function createPanelGroupSlice(
   layouts: LayoutDefinition[]
 ): StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> {
-  // Helper function for generating unique IDs for a PanelGroup
-  let id: PanelGroupId = -1;
-  function createPanelGroupId(): PanelGroupId {
-    id++;
-    return id;
-  }
-
   // Convert the initial layouts from the JSON to panel groups and keep track of the order
   const panelGroups: PanelGroupSlice['panelGroups'] = {};
   const panelGroupIdOrder: PanelGroupSlice['panelGroupOrder'] = [];
   for (const layout of layouts) {
-    const id = createPanelGroupId();
+    const id = generateId();
     panelGroups[id] = {
       id,
       items: layout.spec.items,
@@ -106,9 +96,6 @@ export function createPanelGroupSlice(
     panelGroupOrder: panelGroupIdOrder,
 
     previousPanelGroupState: { panelGroups, panelGroupIdOrder },
-
-    // TODO: Reorder init logic so this isn't exposed
-    createPanelGroupId,
 
     savePanelGroups() {
       set((state) => {

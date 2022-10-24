@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { Middleware } from './common';
+import { generateId, Middleware } from './common';
 import { PanelGroupSlice, PanelGroupDefinition, PanelGroupId } from './panel-group-slice';
 
 export interface PanelGroupEditor {
@@ -66,7 +66,7 @@ export const createPanelGroupEditorSlice: StateCreator<
       },
       applyChanges(next) {
         const newGroup: PanelGroupDefinition = {
-          id: get().createPanelGroupId(),
+          id: generateId(),
           items: [],
           ...next,
         };

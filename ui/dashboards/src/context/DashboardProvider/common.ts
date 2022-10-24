@@ -15,3 +15,18 @@
  * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
  */
 export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];
+
+declare global {
+  // eslint-disable-next-line no-var
+  var dashboardStoreId: number | undefined;
+}
+
+/**
+ * Helper function to generate unique IDs for things in the dashboard store that don't have a "natural" ID.
+ */
+export function generateId() {
+  if (globalThis.dashboardStoreId === undefined) {
+    globalThis.dashboardStoreId = -1;
+  }
+  return globalThis.dashboardStoreId++;
+}
