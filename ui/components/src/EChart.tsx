@@ -124,8 +124,9 @@ export const EChart = React.memo(function EChart<T>({
 
   // Initialize chart, dispose on unmount
   useLayoutEffect(() => {
-    if (containerRef.current === null || !chartElement.current) return;
+    if (containerRef.current === null || chartElement.current !== null) return;
     chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
+    if (chartElement.current === undefined) return;
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
@@ -162,7 +163,7 @@ export const EChart = React.memo(function EChart<T>({
   // Bind and unbind chart events passed as prop
   useEffect(() => {
     const chart = chartElement.current;
-    if (chart === null || onEvents === undefined) return;
+    if (!chart || onEvents === undefined) return;
     bindEvents(chart, onEvents);
     return () => {
       if (chart === undefined) return;
