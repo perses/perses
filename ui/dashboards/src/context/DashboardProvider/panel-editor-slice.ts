@@ -164,7 +164,7 @@ export function createPanelEditorSlice(): StateCreator<
     openAddPanel(panelGroupId) {
       // If a panel group isn't supplied, add to the first group
       if (panelGroupId === undefined) {
-        const firstGroupId = get().panelGroupIdOrder[0];
+        const firstGroupId = get().panelGroupOrder[0];
         if (firstGroupId === undefined) {
           throw new Error('No panel groups to add a panel to');
         }

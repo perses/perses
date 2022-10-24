@@ -27,14 +27,14 @@ export interface PanelGroupSlice {
   /**
    * An array of panel group IDs, representing their order in the dashboard.
    */
-  panelGroupIdOrder: PanelGroupId[];
+  panelGroupOrder: PanelGroupId[];
 
   /**
    * previous state
    */
-  previousPanelGroupStates: {
+  previousPanelGroupState: {
     panelGroups: PanelGroupSlice['panelGroups'];
-    panelGroupIdOrder: PanelGroupSlice['panelGroupIdOrder'];
+    panelGroupIdOrder: PanelGroupSlice['panelGroupOrder'];
   };
 
   // TODO: Remove this
@@ -88,7 +88,7 @@ export function createPanelGroupSlice(
 
   // Convert the initial layouts from the JSON to panel groups and keep track of the order
   const panelGroups: PanelGroupSlice['panelGroups'] = {};
-  const panelGroupIdOrder: PanelGroupSlice['panelGroupIdOrder'] = [];
+  const panelGroupIdOrder: PanelGroupSlice['panelGroupOrder'] = [];
   for (const layout of layouts) {
     const id = createPanelGroupId();
     panelGroups[id] = {
@@ -103,42 +103,42 @@ export function createPanelGroupSlice(
   // Return the state creator function for Zustand
   return (set) => ({
     panelGroups,
-    panelGroupIdOrder,
+    panelGroupOrder: panelGroupIdOrder,
 
-    previousPanelGroupStates: { panelGroups, panelGroupIdOrder },
+    previousPanelGroupState: { panelGroups, panelGroupIdOrder },
 
     // TODO: Reorder init logic so this isn't exposed
     createPanelGroupId,
 
     savePanelGroups() {
       set((state) => {
-        state.previousPanelGroupStates = {
+        state.previousPanelGroupState = {
           panelGroups: state.panelGroups,
-          panelGroupIdOrder: state.panelGroupIdOrder,
+          panelGroupIdOrder: state.panelGroupOrder,
         };
       });
     },
 
     resetPanelGroups() {
       set((state) => {
-        state.panelGroups = state.previousPanelGroupStates.panelGroups;
-        state.panelGroupIdOrder = state.previousPanelGroupStates.panelGroupIdOrder;
+        state.panelGroups = state.previousPanelGroupState.panelGroups;
+        state.panelGroupOrder = state.previousPanelGroupState.panelGroupIdOrder;
       });
     },
 
     swapPanelGroups(x, y) {
       set((state) => {
-        if (x < 0 || x >= state.panelGroupIdOrder.length || y < 0 || y >= state.panelGroupIdOrder.length) {
+        if (x < 0 || x >= state.panelGroupOrder.length || y < 0 || y >= state.panelGroupOrder.length) {
           throw new Error('index out of bound');
         }
-        const xPanelGroup = state.panelGroupIdOrder[x];
-        const yPanelGroup = state.panelGroupIdOrder[y];
+        const xPanelGroup = state.panelGroupOrder[x];
+        const yPanelGroup = state.panelGroupOrder[y];
 
         if (xPanelGroup === undefined || yPanelGroup === undefined) {
           throw new Error('panel group is undefined');
         }
         // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
-        [state.panelGroupIdOrder[x], state.panelGroupIdOrder[y]] = [yPanelGroup, xPanelGroup];
+        [state.panelGroupOrder[x], state.panelGroupOrder[y]] = [yPanelGroup, xPanelGroup];
       });
     },
   });

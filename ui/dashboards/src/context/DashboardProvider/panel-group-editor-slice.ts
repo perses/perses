@@ -72,7 +72,7 @@ export const createPanelGroupEditorSlice: StateCreator<
         };
         set((draft) => {
           draft.panelGroups[newGroup.id] = newGroup;
-          draft.panelGroupIdOrder.unshift(newGroup.id);
+          draft.panelGroupOrder.unshift(newGroup.id);
         });
       },
       close() {

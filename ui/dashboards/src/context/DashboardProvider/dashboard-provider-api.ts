@@ -41,7 +41,7 @@ export function useDashboardActions() {
  * Returns an array of PanelGroupIds in the order they appear in the dashboard.
  */
 export function usePanelGroupIds() {
-  return useDashboardStore((store) => store.panelGroupIdOrder);
+  return useDashboardStore((store) => store.panelGroupOrder);
 }
 
 /**
@@ -95,8 +95,8 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
  * moved in that direction.
  */
 function useMovePanelGroup(panelGroupId: PanelGroupId) {
-  const currentIndex = useDashboardStore((store) => store.panelGroupIdOrder.findIndex((id) => id === panelGroupId));
-  const panelGroupsLength = useDashboardStore((store) => store.panelGroupIdOrder.length);
+  const currentIndex = useDashboardStore((store) => store.panelGroupOrder.findIndex((id) => id === panelGroupId));
+  const panelGroupsLength = useDashboardStore((store) => store.panelGroupOrder.length);
   const swapPanelGroups = useDashboardStore((store) => store.swapPanelGroups);
 
   if (currentIndex < 0) {

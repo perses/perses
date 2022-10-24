@@ -45,7 +45,7 @@ export const createDeletePanelGroupSlice: StateCreator<
   DeletePanelGroupSlice
 > = (set, get) => ({
   deletePanelGroup(panelGroupId) {
-    const { panelGroups, panelGroupIdOrder } = get();
+    const { panelGroups, panelGroupOrder: panelGroupIdOrder } = get();
     const group = panelGroups[panelGroupId];
     const idIndex = panelGroupIdOrder.findIndex((id) => id === panelGroupId);
     if (group === undefined || idIndex === -1) {
@@ -58,7 +58,7 @@ export const createDeletePanelGroupSlice: StateCreator<
     set((draft) => {
       // Delete the panel group which also deletes all its items
       delete draft.panelGroups[panelGroupId];
-      draft.panelGroupIdOrder.splice(idIndex, 1);
+      draft.panelGroupOrder.splice(idIndex, 1);
 
       // Get all remaining panel keys in use
       const usedPanelKeys = getUsedPanelKeys(draft.panelGroups);
