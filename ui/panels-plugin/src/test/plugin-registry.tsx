@@ -10,13 +10,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 import { UnknownSpec } from '@perses-dev/core';
 import {
   PluginRegistryProps,
   PluginModuleResource,
   PluginImplementation,
   PluginType,
-  PanelPlugin,
   Plugin,
 } from '@perses-dev/plugin-system';
 
@@ -69,13 +69,3 @@ export function mockPluginRegistryProps() {
     addMockPlugin,
   };
 }
-
-export const FAKE_PANEL_PLUGIN: PanelPlugin = {
-  PanelComponent: () => {
-    return <div role="figure">FakePanel chart</div>;
-  },
-  OptionsEditorComponent: () => {
-    return <div>Edit options here</div>;
-  },
-  createInitialOptions: () => ({}),
-};

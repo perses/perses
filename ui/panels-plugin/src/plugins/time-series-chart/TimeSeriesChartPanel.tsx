@@ -76,7 +76,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       legendItems: [],
       rangeMs: timeScale.endMs - timeScale.startMs,
     };
-
     const xAxisData = [...getXValues(timeScale)];
 
     let queriesFinished = 0;
