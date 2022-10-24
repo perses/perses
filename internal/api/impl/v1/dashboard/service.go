@@ -47,9 +47,6 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
-	// Note: you don't need to check that the project exists since once the permission middleware will be in place,
-	// it won't be possible to create a resources into a not known project
-
 	// verify this new dashboard passes the validation
 	if err := validate.Dashboard(entity, s.sch); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)

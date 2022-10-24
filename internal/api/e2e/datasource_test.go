@@ -69,7 +69,7 @@ func TestCreateDatasourceWithConflict(t *testing.T) {
 }
 
 func TestCreateDatasourceBadRequest(t *testing.T) {
-	project := &v1.Datasource{Kind: v1.KindDatasource}
+	dts := &v1.Datasource{Kind: v1.KindDatasource}
 
 	server, _ := utils.CreateServer(t)
 	defer server.Close()
@@ -80,7 +80,41 @@ func TestCreateDatasourceBadRequest(t *testing.T) {
 
 	// metadata.name is not provided, it should return a bad request
 	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
-		WithJSON(project).
+		WithJSON(dts).
+		Expect().
+		Status(http.StatusBadRequest)
+}
+
+func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
+	dts := &v1.Datasource{Kind: v1.KindDatasource}
+	dts.Metadata.Project = ""
+	server, _ := utils.CreateServer(t)
+	defer server.Close()
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  server.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	// metadata.name is not provided, it should return a bad request
+	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+		WithJSON(dts).
+		Expect().
+		Status(http.StatusBadRequest)
+}
+
+func TestCreateDatasourceWithNonExistingProject(t *testing.T) {
+	dts := &v1.Datasource{Kind: v1.KindDatasource}
+	dts.Metadata.Project = "404NotFound"
+	server, _ := utils.CreateServer(t)
+	defer server.Close()
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  server.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	// metadata.name is not provided, it should return a bad request
+	e.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+		WithJSON(dts).
 		Expect().
 		Status(http.StatusBadRequest)
 }

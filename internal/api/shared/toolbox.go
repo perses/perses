@@ -29,7 +29,7 @@ type Parameters struct {
 
 func extractParameters(ctx echo.Context) Parameters {
 	return Parameters{
-		Project: getProjectParameter(ctx),
+		Project: GetProjectParameter(ctx),
 		Name:    getNameParameter(ctx),
 	}
 }

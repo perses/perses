@@ -126,7 +126,7 @@ type proxy interface {
 }
 
 func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
-	cfg, err := datasourceHTTP.CheckAndValidate(spec.Plugin.Spec)
+	cfg, err := datasourceHTTP.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).Error("unable to build or find the http config in the datasource")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to find the http config")
@@ -137,7 +137,6 @@ func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
 			path:   path,
 		}, nil
 	}
-	// TODO build the HTTP proxy
 	return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
 }
 
