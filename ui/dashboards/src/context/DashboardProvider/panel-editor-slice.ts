@@ -11,11 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, getPanelKeyFromRef, GridItemDefinition, PanelDefinition, UnknownSpec } from '@perses-dev/core';
+import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
-import { Middleware } from './common';
-import { PanelGroupSlice, PanelGroupItemId, PanelGroupId, PanelGroupDefinition } from './panel-group-slice';
+import { generateId, Middleware } from './common';
+import {
+  PanelGroupSlice,
+  PanelGroupItemId,
+  PanelGroupId,
+  PanelGroupDefinition,
+  PanelGroupLayout,
+} from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -89,12 +95,11 @@ export function createPanelEditorSlice(): StateCreator<
       const { panels, panelGroups } = get();
 
       // Figure out the panel key at that location
-      const { panelGroupId, itemIndex } = panelGroupItemId;
-      const content = panelGroups[panelGroupId]?.items[itemIndex]?.content;
-      if (content === undefined) {
+      const { panelGroupId, panelGroupLayoutId } = panelGroupItemId;
+      const panelKey = panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];
+      if (panelKey === undefined) {
         throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
       }
-      const panelKey = getPanelKeyFromRef(content);
 
       // Find the panel to edit
       const panelToEdit = panels[panelKey];
@@ -117,35 +122,41 @@ export function createPanelEditorSlice(): StateCreator<
             draft.panels[panelKey] = panelDefinititon;
 
             // If the panel didn't change groups, nothing else to do
-            if (next.groupId === panelGroupItemId.panelGroupId) {
+            if (next.groupId === panelGroupId) {
               return;
             }
 
             // Move panel to the new group
-            const existingGroup = draft.panelGroups[panelGroupItemId.panelGroupId];
+            const existingGroup = draft.panelGroups[panelGroupId];
             if (existingGroup === undefined) {
-              throw new Error(`Missing panel group ${panelGroupItemId.panelGroupId}`);
+              throw new Error(`Missing panel group ${panelGroupId}`);
             }
-            const existingItem = existingGroup.items[panelGroupItemId.itemIndex];
-            if (existingItem === undefined) {
-              throw new Error(`Missing panel group item ${panelGroupItemId.itemIndex}`);
+
+            const existingLayoutIdx = existingGroup.itemLayouts.findIndex((layout) => layout.i === panelGroupLayoutId);
+            const existingLayout = existingGroup.itemLayouts[existingLayoutIdx];
+            const existingPanelKey = existingGroup.itemPanelKeys[panelGroupLayoutId];
+            if (existingLayoutIdx === -1 || existingLayout === undefined || existingPanelKey === undefined) {
+              throw new Error(`Missing panel group item ${panelGroupLayoutId}`);
             }
 
             // Remove item from the old group
-            existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
+            existingGroup.itemLayouts.splice(existingLayoutIdx, 1);
+            delete existingGroup.itemPanelKeys[panelGroupLayoutId];
 
             // Add item to the end of the new group
             const newGroup = draft.panelGroups[next.groupId];
             if (newGroup === undefined) {
               throw new Error(`Could not find new group ${next.groupId}`);
             }
-            newGroup.items.push({
+
+            newGroup.itemLayouts.push({
+              i: existingLayout.i,
               x: 0,
               y: getYForNewRow(newGroup),
-              width: existingItem.width,
-              height: existingItem.height,
-              content: existingItem.content,
+              w: existingLayout.w,
+              h: existingLayout.h,
             });
+            newGroup.itemPanelKeys[existingLayout.i] = existingPanelKey;
           });
         },
         close: () => {
@@ -194,14 +205,15 @@ export function createPanelEditorSlice(): StateCreator<
             if (group === undefined) {
               throw new Error(`Missing panel group ${next.groupId}`);
             }
-            const gridItem: GridItemDefinition = {
+            const layout: PanelGroupLayout = {
+              i: generateId().toString(),
               x: 0,
               y: getYForNewRow(group),
-              width: 12,
-              height: 6,
-              content: createPanelRef(panelKey),
+              w: 12,
+              h: 6,
             };
-            group.items.push(gridItem);
+            group.itemLayouts.push(layout);
+            group.itemPanelKeys[layout.i] = panelKey;
           });
         },
         close: () => {
@@ -239,8 +251,8 @@ function createPanelDefinitionFromEditorValues(editorValues: PanelEditorValues):
 // Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
 function getYForNewRow(group: PanelGroupDefinition) {
   let newRowY = 0;
-  for (const item of group.items) {
-    const itemMaxY = item.y + item.height;
+  for (const layout of group.itemLayouts) {
+    const itemMaxY = layout.y + layout.h;
     if (itemMaxY > newRowY) {
       newRowY = itemMaxY;
     }

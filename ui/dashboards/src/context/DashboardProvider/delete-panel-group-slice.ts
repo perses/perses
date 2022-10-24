@@ -45,15 +45,15 @@ export const createDeletePanelGroupSlice: StateCreator<
   DeletePanelGroupSlice
 > = (set, get) => ({
   deletePanelGroup(panelGroupId) {
-    const { panelGroups, panelGroupOrder: panelGroupIdOrder } = get();
+    const { panelGroups, panelGroupOrder } = get();
     const group = panelGroups[panelGroupId];
-    const idIndex = panelGroupIdOrder.findIndex((id) => id === panelGroupId);
+    const idIndex = panelGroupOrder.findIndex((id) => id === panelGroupId);
     if (group === undefined || idIndex === -1) {
       throw new Error(`Panel group ${panelGroupId} not found`);
     }
 
     // Get the panel keys for all the panel items in the group we're going to delete
-    const panelKeys = group.items.map((item) => getPanelKeyFromRef(item.content));
+    const panelKeys = Object.values(group.itemPanelKeys);
 
     set((draft) => {
       // Delete the panel group which also deletes all its items
@@ -93,8 +93,8 @@ export const createDeletePanelGroupSlice: StateCreator<
 function getUsedPanelKeys(panelGroups: PanelGroupSlice['panelGroups']): Set<string> {
   const usedPanelKeys = new Set<string>();
   for (const group of Object.values(panelGroups)) {
-    for (const item of group.items) {
-      usedPanelKeys.add(getPanelKeyFromRef(item.content));
+    for (const panelKey of Object.values(group.itemPanelKeys)) {
+      usedPanelKeys.add(panelKey);
     }
   }
   return usedPanelKeys;

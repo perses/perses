@@ -31,12 +31,12 @@ import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import { useEditMode, LayoutItem, usePanelActions } from '../../context';
+import { useEditMode, PanelGroupItemId, usePanelActions } from '../../context';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
-  panelGroupItemId: LayoutItem;
+  panelGroupItemId: PanelGroupItemId;
 }
 
 /**

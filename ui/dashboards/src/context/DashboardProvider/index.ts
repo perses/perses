@@ -13,6 +13,6 @@
 
 export * from './dashboard-provider-api';
 export * from './DashboardProvider';
-export type { PanelGroupId, PanelGroupDefinition, PanelGroupItemId as LayoutItem } from './panel-group-slice';
+export type { PanelGroupId, PanelGroupDefinition, PanelGroupItemId, PanelGroupLayoutId } from './panel-group-slice';
 export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-editor-slice';
 export type { DeletePanelDialogState } from './delete-panel-slice';

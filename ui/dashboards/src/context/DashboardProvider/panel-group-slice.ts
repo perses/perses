@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GridItemDefinition, LayoutDefinition } from '@perses-dev/core';
+import { getPanelKeyFromRef, LayoutDefinition } from '@perses-dev/core';
+import { Layout } from 'react-grid-layout';
 import { StateCreator } from 'zustand';
 import { generateId, Middleware } from './common';
 
@@ -57,17 +58,24 @@ export type PanelGroupId = number;
 
 export interface PanelGroupDefinition {
   id: PanelGroupId;
-  items: GridItemDefinition[];
   isCollapsed: boolean;
   title?: string;
+  itemLayouts: PanelGroupLayout[];
+  itemPanelKeys: Record<PanelGroupLayoutId, string>;
 }
+
+export interface PanelGroupLayout extends Layout {
+  i: PanelGroupLayoutId;
+}
+
+export type PanelGroupLayoutId = string;
 
 /**
  * Uniquely identifies an item in a PanelGroup.
  */
 export interface PanelGroupItemId {
   panelGroupId: PanelGroupId;
-  itemIndex: number;
+  panelGroupLayoutId: PanelGroupLayoutId;
 }
 
 /**
@@ -76,18 +84,36 @@ export interface PanelGroupItemId {
 export function createPanelGroupSlice(
   layouts: LayoutDefinition[]
 ): StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> {
-  // Convert the initial layouts from the JSON to panel groups and keep track of the order
+  // Convert the initial layouts from the JSON
   const panelGroups: PanelGroupSlice['panelGroups'] = {};
   const panelGroupIdOrder: PanelGroupSlice['panelGroupOrder'] = [];
   for (const layout of layouts) {
-    const id = generateId();
-    panelGroups[id] = {
-      id,
-      items: layout.spec.items,
+    const itemLayouts: PanelGroupDefinition['itemLayouts'] = [];
+    const itemPanelKeys: PanelGroupDefinition['itemPanelKeys'] = {};
+
+    // Split layout information from panel keys to make it easier to update just layouts on move/resize of panels
+    for (const item of layout.spec.items) {
+      const panelGroupLayoutId = generateId().toString();
+      itemLayouts.push({
+        i: panelGroupLayoutId,
+        w: item.width,
+        h: item.height,
+        x: item.x,
+        y: item.y,
+      });
+      itemPanelKeys[panelGroupLayoutId] = getPanelKeyFromRef(item.content);
+    }
+
+    // Create the panel group and keep track of the ID order
+    const panelGroupId = generateId();
+    panelGroups[panelGroupId] = {
+      id: panelGroupId,
       isCollapsed: layout.spec.display?.collapse?.open === false,
       title: layout.spec.display?.title,
+      itemLayouts,
+      itemPanelKeys,
     };
-    panelGroupIdOrder.push(id);
+    panelGroupIdOrder.push(panelGroupId);
   }
 
   // Return the state creator function for Zustand

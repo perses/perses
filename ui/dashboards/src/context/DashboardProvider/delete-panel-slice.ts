@@ -62,41 +62,42 @@ export function createDeletePanelSlice(): StateCreator<
   return (set, get) => ({
     deletePanel(panelGroupItemId: PanelGroupItemId) {
       set((draft) => {
-        const existingGroup = draft.panelGroups[panelGroupItemId.panelGroupId];
+        const { panelGroupId, panelGroupLayoutId } = panelGroupItemId;
+        const existingGroup = draft.panelGroups[panelGroupId];
         if (existingGroup === undefined) {
-          throw new Error(`Missing panel group ${panelGroupItemId.panelGroupId}`);
+          throw new Error(`Missing panel group ${panelGroupId}`);
         }
-        const existingItem = existingGroup.items[panelGroupItemId.itemIndex];
-        if (existingItem === undefined) {
-          throw new Error(`Missing panel group item ${panelGroupItemId.itemIndex}`);
+        const existingLayoutIdx = existingGroup.itemLayouts.findIndex((layout) => layout.i === panelGroupLayoutId);
+        const existingPanelKey = existingGroup.itemPanelKeys[panelGroupLayoutId];
+        if (existingLayoutIdx === -1 || existingPanelKey === undefined) {
+          throw new Error(`Missing panel group item ${panelGroupLayoutId}`);
         }
-
-        // get panel key first before deleting panel
-        const panelKey = getPanelKeyFromRef(existingItem.content);
 
         // remove panel from panel group
-        existingGroup.items.splice(panelGroupItemId.itemIndex, 1);
+        existingGroup.itemLayouts.splice(existingLayoutIdx, 1);
+        delete existingGroup.itemPanelKeys[panelGroupLayoutId];
 
         // See if panel key is still used and if not, delete it
-        if (isPanelKeyStillUsed(draft.panelGroups, panelKey) === false) {
-          delete draft.panels[panelKey];
+        if (isPanelKeyStillUsed(draft.panelGroups, existingPanelKey) === false) {
+          delete draft.panels[existingPanelKey];
         }
       });
     },
 
     openDeletePanelDialog(panelGroupItemId: PanelGroupItemId) {
+      const { panelGroupId, panelGroupLayoutId } = panelGroupItemId;
+
       const { panels, panelGroups } = get();
-      const panelGroup = panelGroups[panelGroupItemId.panelGroupId];
+      const panelGroup = panelGroups[panelGroupId];
       if (panelGroup === undefined) {
-        throw new Error(`Panel group not found ${panelGroupItemId.panelGroupId}`);
+        throw new Error(`Panel group not found ${panelGroupId}`);
       }
 
-      const content = panelGroup.items[panelGroupItemId.itemIndex]?.content;
-      if (content === undefined) {
-        throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
+      const panelKey = panelGroup.itemPanelKeys[panelGroupLayoutId];
+      if (panelKey === undefined) {
+        throw new Error(`Could not find Panel Group item ${panelGroupLayoutId}`);
       }
 
-      const panelKey = getPanelKeyFromRef(content);
       const panel = panels[panelKey];
       if (panel === undefined) {
         throw new Error(`Could not find panel ${panelKey}`);
@@ -122,8 +123,8 @@ export function createDeletePanelSlice(): StateCreator<
 // Helper function to determine if a panel key is still being used somewhere in Panel Groups
 function isPanelKeyStillUsed(panelGroups: PanelGroupSlice['panelGroups'], panelKey: string) {
   for (const group of Object.values(panelGroups)) {
-    const found = group.items.findIndex((item) => getPanelKeyFromRef(item.content) === panelKey);
-    if (found !== -1) {
+    const found = group.itemPanelKeys[panelKey] !== undefined;
+    if (found) {
       return true;
     }
   }

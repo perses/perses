@@ -62,10 +62,10 @@ export function GridLayout(props: GridLayoutProps) {
             isResizable={isEditMode}
             containerPadding={[0, 10]}
           >
-            {groupDefinition.items.map(({ x, y, width, height }, itemIndex) => (
-              <div key={itemIndex} data-grid={{ x, y, w: width, h: height }}>
+            {groupDefinition.itemLayouts.map(({ i, x, y, w, h }) => (
+              <div key={i} data-grid={{ i, x, y, w, h }}>
                 <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <GridItemContent panelGroupItemId={{ panelGroupId, itemIndex }} />
+                  <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupLayoutId: i }} />
                 </ErrorBoundary>
               </div>
             ))}
