@@ -47,7 +47,6 @@ func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
 func TestCreateDatasourceWithNonExistingProject(t *testing.T) {
 	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		entity := e2eframework.NewDatasource(t, "awesomeProjectThatDoesntExist", "myDTS")
-		// metadata.name is not provided, it should return a bad request
 		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
 			WithJSON(entity).
 			Expect().
