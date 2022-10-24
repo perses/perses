@@ -113,6 +113,10 @@ func (d *Dashboard) GetKind() string {
 	return string(d.Kind)
 }
 
+func (d *Dashboard) GetSpec() interface{} {
+	return d.Spec
+}
+
 func (d *Dashboard) UnmarshalJSON(data []byte) error {
 	var tmp Dashboard
 	type plain Dashboard

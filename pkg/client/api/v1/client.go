@@ -27,7 +27,6 @@ type ClientInterface interface {
 	GlobalDatasource() GlobalDatasourceInterface
 	Health() HealthInterface
 	Project() ProjectInterface
-	User() UserInterface
 }
 
 type client struct {
@@ -67,10 +66,6 @@ func (c *client) Health() HealthInterface {
 
 func (c *client) Project() ProjectInterface {
 	return newProject(c.restClient)
-}
-
-func (c *client) User() UserInterface {
-	return newUser(c.restClient)
 }
 
 type query struct {
