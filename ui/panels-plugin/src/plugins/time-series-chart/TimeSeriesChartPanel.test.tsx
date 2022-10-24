@@ -15,11 +15,8 @@ import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeRangeValue } from '@perses-dev/core';
 import { PluginRegistry, useTimeSeriesQueries, TimeRangeContext } from '@perses-dev/plugin-system';
 import { screen, render } from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
 import { mockPluginRegistryProps, mockTimeSeriesQueryResult } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
-
-console.log('mockTimeSeriesQueryResult data: ', mockTimeSeriesQueryResult[0]?.data);
 
 jest.mock('@perses-dev/plugin-system', () => {
   return {
@@ -29,47 +26,13 @@ jest.mock('@perses-dev/plugin-system', () => {
 });
 
 describe('TimeSeriesChartPanel', () => {
-  // beforeEach(() => {
-  //   (useTimeSeriesQueries as jest.Mock).mockReturnValue(mockTimeSeriesQueryResult);
-  //   (useTimeRange as jest.Mock).mockReturnValue({ start: new Date(), end: new Date() });
-  // });
-
-  // Test TimeSeriesChart with legend
-  const testPanel: TimeSeriesChartProps = {
-    contentDimensions: {
-      width: 500,
-      height: 500,
-    },
-    spec: {
-      queries: [
-        {
-          kind: 'TimeSeriesQuery',
-          spec: {
-            plugin: {
-              kind: 'PrometheusTimeSeriesQuery',
-              spec: {
-                query: 'rate(caddy_http_response_duration_seconds_sum[$interval])',
-                // query: 'histogram_quantile(0.9, rate(caddy_http_request_duration_seconds_bucket[$interval]))',
-              },
-            },
-          },
-        },
-      ],
-      unit: { kind: 'Decimal', decimal_places: 2 },
-      legend: {
-        position: 'right',
-      },
-    },
-  };
+  beforeEach(() => {
+    (useTimeSeriesQueries as jest.Mock).mockReturnValue(mockTimeSeriesQueryResult);
+  });
 
   // Helper to render the panel with some context set
   const renderPanel = () => {
     const { pluginRegistryProps } = mockPluginRegistryProps();
-
-    // (useTimeSeriesQueries as jest.Mock).mockReturnValue([mockTimeSeriesQueryResult]);
-    (useTimeSeriesQueries as jest.Mock).mockReturnValue(mockTimeSeriesQueryResult);
-
-    // (useTimeRange as jest.Mock).mockReturnValue({ start: new Date(), end: new Date() });
 
     const testTimeRange: TimeRangeValue = { pastDuration: '1h' };
     const mockTimeRangeContext = {
@@ -79,20 +42,32 @@ describe('TimeSeriesChartPanel', () => {
       },
     };
 
-    // render(
-    //   <QueryClientProvider client={queryClient}>
-    //     <PluginRegistry
-    //       getInstalledPlugins={pluginRegistryProps.getInstalledPlugins}
-    //       importPluginModule={pluginRegistryProps.importPluginModule}
-    //     >
-    //       <ChartsThemeProvider themeName="perses" chartsTheme={{}}>
-    //         <TimeRangeContext.Provider value={mockTimeRangeContext}>
-    //           <TimeSeriesChartPanel {...testPanel} />
-    //         </TimeRangeContext.Provider>
-    //       </ChartsThemeProvider>
-    //     </PluginRegistry>
-    //   </QueryClientProvider>
-    // );
+    // Test TimeSeriesChart with legend
+    const testPanel: TimeSeriesChartProps = {
+      contentDimensions: {
+        width: 500,
+        height: 500,
+      },
+      spec: {
+        queries: [
+          {
+            kind: 'TimeSeriesQuery',
+            spec: {
+              plugin: {
+                kind: 'PrometheusTimeSeriesQuery',
+                spec: {
+                  query: 'rate(caddy_http_response_duration_seconds_sum["5m"])',
+                },
+              },
+            },
+          },
+        ],
+        unit: { kind: 'Decimal', decimal_places: 2 },
+        legend: {
+          position: 'right',
+        },
+      },
+    };
 
     render(
       <PluginRegistry
