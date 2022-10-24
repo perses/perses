@@ -20,7 +20,7 @@ import { PanelSlice } from './panel-slice';
 /**
  * Slice that handles the visual editor state and actions for deleting Panels.
  */
-export interface PanelDeleteSlice {
+export interface DeletePanelSlice {
   /**
    * Delete panels
    */
@@ -51,12 +51,12 @@ export interface DeletePanelDialogState {
 /**
  * Curried function for creating the PanelDeleteSlice.
  */
-export function createPanelDeleteSlice(): StateCreator<
+export function createDeletePanelSlice(): StateCreator<
   // Actions in here need to modify both Panels and Panel Groups state
-  PanelDeleteSlice & PanelSlice & PanelGroupSlice,
+  DeletePanelSlice & PanelSlice & PanelGroupSlice,
   Middleware,
   [],
-  PanelDeleteSlice
+  DeletePanelSlice
 > {
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({

@@ -20,8 +20,8 @@ import { PanelSlice } from './panel-slice';
 /**
  * Slice that handles the visual editor state and related actions for deleting a Panel Group.
  */
-export interface PanelGroupDeleteSlice {
-  deletePanelGroupDialog?: DeletePanelGroupDialog;
+export interface DeletePanelGroupSlice {
+  deletePanelGroupDialog?: DeletePanelGroupDialogState;
 
   /**
    * Delete panel group and all the panels within the group
@@ -32,17 +32,17 @@ export interface PanelGroupDeleteSlice {
   closeDeletePanelGroupDialog: () => void;
 }
 
-export interface DeletePanelGroupDialog {
+export interface DeletePanelGroupDialogState {
   panelGroupId: PanelGroupId;
   panelGroupName?: string;
 }
 
-export const createPanelGroupDeleteSlice: StateCreator<
+export const createDeletePanelGroupSlice: StateCreator<
   // Actions in here need to modify both Panels and Panel Groups state
-  PanelGroupDeleteSlice & PanelGroupSlice & PanelSlice,
+  DeletePanelGroupSlice & PanelGroupSlice & PanelSlice,
   Middleware,
   [],
-  PanelGroupDeleteSlice
+  DeletePanelGroupSlice
 > = (set, get) => ({
   deletePanelGroup(panelGroupId) {
     const { panelGroups, panelGroupIdOrder } = get();

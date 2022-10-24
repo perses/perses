@@ -89,7 +89,8 @@ export function createPanelEditorSlice(): StateCreator<
       const { panels, panelGroups } = get();
 
       // Figure out the panel key at that location
-      const content = panelGroups[panelGroupItemId.panelGroupId]?.items[panelGroupItemId.itemIndex]?.content;
+      const { panelGroupId, itemIndex } = panelGroupItemId;
+      const content = panelGroups[panelGroupId]?.items[itemIndex]?.content;
       if (content === undefined) {
         throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
       }

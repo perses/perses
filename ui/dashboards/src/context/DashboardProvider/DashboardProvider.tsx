@@ -22,16 +22,16 @@ import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-grou
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
 import { createPanelSlice, PanelSlice } from './panel-slice';
-import { createPanelGroupDeleteSlice, PanelGroupDeleteSlice } from './panel-group-delete-slice';
-import { createPanelDeleteSlice, PanelDeleteSlice } from './panel-delete-slice';
+import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
+import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
     PanelSlice,
     PanelGroupEditorSlice,
-    PanelGroupDeleteSlice,
+    DeletePanelGroupSlice,
     PanelEditorSlice,
-    PanelDeleteSlice {
+    DeletePanelSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
@@ -75,9 +75,9 @@ export function DashboardProvider(props: DashboardProviderProps) {
           ...createPanelGroupSlice(layouts)(...args),
           ...createPanelSlice(panels)(...args),
           ...createPanelGroupEditorSlice(...args),
-          ...createPanelGroupDeleteSlice(...args),
+          ...createDeletePanelGroupSlice(...args),
           ...createPanelEditorSlice()(...args),
-          ...createPanelDeleteSlice()(...args),
+          ...createDeletePanelSlice()(...args),
           defaultTimeRange: { pastDuration: dashboardSpec.duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
