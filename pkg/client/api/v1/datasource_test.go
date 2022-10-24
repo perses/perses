@@ -18,87 +18,83 @@ package v1
 import (
 	"testing"
 
-	"github.com/perses/perses/utils"
+	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	"github.com/perses/perses/internal/api/shared/dependency"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateDatasource(t *testing.T) {
-	entity := utils.NewDatasource(t)
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		projectEntity := e2eframework.NewProject("perses")
+		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
 
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	object, err := persesClient.Datasource(entity.Metadata.Project).Create(entity)
-	assert.NoError(t, err)
-
-	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
-	assert.Equal(t, entity.Spec, object.Spec)
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+		object, err := clientInterface.Datasource(entity.Metadata.Project).Create(entity)
+		assert.NoError(t, err)
+		assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
+		assert.Equal(t, entity.Spec, object.Spec)
+		return []modelAPI.Entity{projectEntity, entity}
+	})
 }
 
 func TestUpdateDatasource(t *testing.T) {
-	entity := utils.NewDatasource(t)
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		projectEntity := e2eframework.NewProject("perses")
+		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
+		object, err := clientInterface.Datasource(entity.Metadata.Project).Update(entity)
+		assert.NoError(t, err)
 
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	object, err := persesClient.Datasource(entity.Metadata.Project).Update(entity)
-	assert.NoError(t, err)
-
-	// for the moment the only thing to test is that the dates are correctly updated
-	assert.True(t, object.Metadata.CreatedAt.UnixNano() < object.Metadata.UpdatedAt.UnixNano())
-	assert.Equal(t, entity.Spec, object.Spec)
-
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+		// for the moment the only thing to test is that the dates are correctly updated
+		assert.True(t, object.Metadata.CreatedAt.UnixNano() < object.Metadata.UpdatedAt.UnixNano())
+		assert.Equal(t, entity.Spec, object.Spec)
+		return []modelAPI.Entity{projectEntity, entity}
+	})
 }
 
 func TestGetDatasource(t *testing.T) {
-	entity := utils.NewDatasource(t)
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		projectEntity := e2eframework.NewProject("perses")
+		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	object, err := persesClient.Datasource(entity.Metadata.Project).Get(entity.Metadata.Name)
-	assert.NoError(t, err)
-	assert.Equal(t, entity.Metadata.Name, object.Metadata.Name)
-	assert.Equal(t, entity.Spec, object.Spec)
-
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+		object, err := clientInterface.Datasource(entity.Metadata.Project).Get(entity.Metadata.Name)
+		assert.NoError(t, err)
+		assert.Equal(t, entity.Metadata.Name, object.Metadata.Name)
+		assert.Equal(t, entity.Spec, object.Spec)
+		return []modelAPI.Entity{projectEntity, entity}
+	})
 }
 
 func TestDeleteDatasource(t *testing.T) {
-	entity := utils.NewDatasource(t)
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		projectEntity := e2eframework.NewProject("perses")
+		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	err := persesClient.Datasource(entity.Metadata.Project).Delete(entity.Metadata.Name)
-	assert.NoError(t, err)
+		err := clientInterface.Datasource(entity.Metadata.Project).Delete(entity.Metadata.Name)
+		assert.NoError(t, err)
+		return []modelAPI.Entity{projectEntity}
+	})
 }
 
 func TestListDatasource(t *testing.T) {
-	entity := utils.NewDatasource(t)
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		projectEntity := e2eframework.NewProject("perses")
+		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
+		objects, err := clientInterface.Datasource(entity.Metadata.Project).List("")
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(objects))
+		assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
 
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	objects, err := persesClient.Datasource(entity.Metadata.Project).List("")
-	assert.NoError(t, err)
-	assert.Equal(t, 1, len(objects))
-	assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
-
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+		return []modelAPI.Entity{projectEntity, entity}
+	})
 }

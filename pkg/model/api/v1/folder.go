@@ -91,6 +91,10 @@ func (f *Folder) GetKind() string {
 	return string(f.Kind)
 }
 
+func (f *Folder) GetSpec() interface{} {
+	return f.Spec
+}
+
 func (f *Folder) UnmarshalJSON(data []byte) error {
 	var tmp Folder
 	type plain Folder
