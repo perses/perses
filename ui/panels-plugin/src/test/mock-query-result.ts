@@ -1,9 +1,16 @@
-// import { UseQueryResult } from '@tanstack/react-query;
-// import { TimeSeriesData } from '../model';
-import { toAbsoluteTimeRange } from '@perses-dev/core';
+// Copyright 2022 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-// export const mockTimeSeriesQueryResult: UseQueryResult<TimeSeriesData, unknown>[] = {
-// export const mockTimeSeriesQueryResult: Array<UseQueryResult<TimeSeriesData, unknown>> = {
 export const mockTimeSeriesQueryResult = [
   {
     status: 'success',
@@ -12,13 +19,10 @@ export const mockTimeSeriesQueryResult = [
     isSuccess: true,
     isError: false,
     data: {
-      // timeRange: {
-      //   // start: 1666625490000,
-      //   // end: 1666625535000,
-      //   start: new Date(),
-      //   end: new Date(),
-      // },
-      timeRange: toAbsoluteTimeRange({ pastDuration: '1h' }),
+      timeRange: {
+        start: new Date(Number('1666625490000')),
+        end: new Date(Number('1666625535000')),
+      },
       stepMs: 24379,
       series: [
         {

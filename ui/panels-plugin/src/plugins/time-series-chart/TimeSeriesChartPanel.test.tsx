@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ChartsThemeProvider } from '@perses-dev/components';
+import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
+import { TimeRangeValue } from '@perses-dev/core';
 import { PluginRegistry, useTimeSeriesQueries, TimeRangeContext } from '@perses-dev/plugin-system';
 import { screen, render } from '@testing-library/react';
 // import userEvent from '@testing-library/user-event';
 import { mockPluginRegistryProps, mockTimeSeriesQueryResult } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
+
+console.log('mockTimeSeriesQueryResult data: ', mockTimeSeriesQueryResult[0]?.data);
 
 jest.mock('@perses-dev/plugin-system', () => {
   return {
@@ -60,8 +62,6 @@ describe('TimeSeriesChartPanel', () => {
     },
   };
 
-  const queryClient = new QueryClient();
-
   // Helper to render the panel with some context set
   const renderPanel = () => {
     const { pluginRegistryProps } = mockPluginRegistryProps();
@@ -71,26 +71,40 @@ describe('TimeSeriesChartPanel', () => {
 
     // (useTimeRange as jest.Mock).mockReturnValue({ start: new Date(), end: new Date() });
 
+    const testTimeRange: TimeRangeValue = { pastDuration: '1h' };
     const mockTimeRangeContext = {
-      timeRange: { pastDuration: '1h' },
+      timeRange: testTimeRange,
       setTimeRange: () => {
         /* no-op */
       },
     };
 
+    // render(
+    //   <QueryClientProvider client={queryClient}>
+    //     <PluginRegistry
+    //       getInstalledPlugins={pluginRegistryProps.getInstalledPlugins}
+    //       importPluginModule={pluginRegistryProps.importPluginModule}
+    //     >
+    //       <ChartsThemeProvider themeName="perses" chartsTheme={{}}>
+    //         <TimeRangeContext.Provider value={mockTimeRangeContext}>
+    //           <TimeSeriesChartPanel {...testPanel} />
+    //         </TimeRangeContext.Provider>
+    //       </ChartsThemeProvider>
+    //     </PluginRegistry>
+    //   </QueryClientProvider>
+    // );
+
     render(
-      <QueryClientProvider client={queryClient}>
-        <PluginRegistry
-          getInstalledPlugins={pluginRegistryProps.getInstalledPlugins}
-          importPluginModule={pluginRegistryProps.importPluginModule}
-        >
-          <ChartsThemeProvider themeName="perses" chartsTheme={{}}>
-            <TimeRangeContext.Provider value={mockTimeRangeContext}>
-              <TimeSeriesChartPanel {...testPanel} />
-            </TimeRangeContext.Provider>
-          </ChartsThemeProvider>
-        </PluginRegistry>
-      </QueryClientProvider>
+      <PluginRegistry
+        getInstalledPlugins={pluginRegistryProps.getInstalledPlugins}
+        importPluginModule={pluginRegistryProps.importPluginModule}
+      >
+        <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
+          <TimeRangeContext.Provider value={mockTimeRangeContext}>
+            <TimeSeriesChartPanel {...testPanel} />
+          </TimeRangeContext.Provider>
+        </ChartsThemeProvider>
+      </PluginRegistry>
     );
   };
 

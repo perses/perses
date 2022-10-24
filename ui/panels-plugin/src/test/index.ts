@@ -13,4 +13,4 @@
 
 export * from './plugin-registry';
 export * from './render';
-export * from './mock_range_query';
+export * from './mock-query-result';
