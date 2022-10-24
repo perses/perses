@@ -142,7 +142,7 @@ export const EChart = React.memo(function EChart<T>({
   // Update chart data when option changes
   useEffect(() => {
     if (prevOption.current === undefined || isEqual(prevOption.current, option)) return;
-    if (chartElement.current === null) return;
+    if (!chartElement.current) return;
     chartElement.current.setOption(option, true);
     prevOption.current = option;
   }, [option]);
@@ -150,7 +150,7 @@ export const EChart = React.memo(function EChart<T>({
   // Resize chart, cleanup listener on unmount
   useLayoutEffect(() => {
     const updateSize = debounce(() => {
-      if (chartElement.current === null) return;
+      if (!chartElement.current) return;
       chartElement.current.resize();
     }, 200);
     window.addEventListener('resize', updateSize);
@@ -176,7 +176,7 @@ export const EChart = React.memo(function EChart<T>({
 
   useEffect(() => {
     const updateSize = debounce(() => {
-      if (chartElement.current === null) return;
+      if (!chartElement.current) return;
       chartElement.current.resize();
     }, 200);
     updateSize();

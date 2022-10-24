@@ -20,8 +20,8 @@ export const mockTimeSeriesQueryResult = [
     isError: false,
     data: {
       timeRange: {
-        start: new Date(Number('1666625490000')),
-        end: new Date(Number('1666625535000')),
+        start: new Date(1666625490000),
+        end: new Date(1666625535000),
       },
       stepMs: 24379,
       series: [
