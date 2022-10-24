@@ -26,17 +26,16 @@ import {
   Typography,
 } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-import { ChevronDown } from 'mdi-material-ui/light';
 import { useNavigate } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { FolderPound } from 'mdi-material-ui';
+import { ChevronDown, FolderPound } from 'mdi-material-ui';
 import { useDashboardList } from '../model/dashboard-client';
 
 function RenderDashboardList() {
   const { data, isLoading } = useDashboardList();
   const navigate = useNavigate();
   if (isLoading) {
-    return <CircularProgress size="1rem" />;
+    return <CircularProgress />;
   }
 
   if (data === undefined) return null;
@@ -55,23 +54,28 @@ function RenderDashboardList() {
   }
 
   const accordions: JSX.Element[] = [];
-  dashboardListAsMap.forEach((value, key) => {
+  dashboardListAsMap.forEach((list, projectName: string) => {
     accordions.push(
-      <Accordion TransitionProps={{ unmountOnExit: true }} key={key}>
+      <Accordion TransitionProps={{ unmountOnExit: true }} key={projectName}>
         <AccordionSummary expandIcon={<ChevronDown />}>
           <Stack direction="row" alignItems="center" gap={1}>
             <FolderPound />
-            <Typography variant="h3">{key}</Typography>
+            <Typography variant="h3">{projectName}</Typography>
           </Stack>
         </AccordionSummary>
         <AccordionDetails>
           <List>
-            {value.map((v, i) => {
+            {list.map((dashboard, i) => {
               return (
-                <Box sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }} key={v.metadata.name}>
+                <Box
+                  sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }}
+                  key={dashboard.metadata.name}
+                >
                   {i !== 0 && <Divider />}
-                  <ListItemButton onClick={() => navigate('/projects/' + key + '/dashboards/' + v.metadata.name)}>
-                    <ListItemText primary={v.metadata.name} />
+                  <ListItemButton
+                    onClick={() => navigate('/projects/' + projectName + '/dashboards/' + dashboard.metadata.name)}
+                  >
+                    <ListItemText primary={dashboard.metadata.name} />
                   </ListItemButton>
                 </Box>
               );
