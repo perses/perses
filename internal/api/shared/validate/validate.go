@@ -39,7 +39,7 @@ func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 }
 
 func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
-	plugin := entity.GetSpec().Plugin
+	plugin := entity.GetDTSSpec().Plugin
 	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
 		return err
 	}
@@ -55,14 +55,14 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.S
 }
 
 func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
-	spec := entity.GetSpec()
+	spec := entity.GetDTSSpec()
 	// Since the entity is not supposed to be a default datasource, no need to verify if there is another one already defined as default
 	if !spec.Default {
 		return nil
 	}
 	entityPluginKind := spec.Plugin.Kind
 	for _, dts := range list {
-		dtsSpec := dts.GetSpec()
+		dtsSpec := dts.GetDTSSpec()
 		if dtsSpec.Default && dtsSpec.Plugin.Kind == entityPluginKind {
 			return fmt.Errorf("datasource %q cannot be a default %q because there is already one defined named %q", entity.GetMetadata().GetName(), entityPluginKind, dts.GetMetadata().GetName())
 		}

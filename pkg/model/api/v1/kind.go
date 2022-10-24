@@ -28,7 +28,6 @@ const (
 	KindFolder           Kind = "Folder"
 	KindGlobalDatasource Kind = "GlobalDatasource"
 	KindProject          Kind = "Project"
-	KindUser             Kind = "User"
 )
 
 var KindMap = map[Kind]bool{
@@ -37,7 +36,6 @@ var KindMap = map[Kind]bool{
 	KindFolder:           true,
 	KindGlobalDatasource: true,
 	KindProject:          true,
-	KindUser:             true,
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {
@@ -89,8 +87,6 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 		return &GlobalDatasource{}, nil
 	case KindProject:
 		return &Project{}, nil
-	case KindUser:
-		return &User{}, nil
 	default:
 		return nil, fmt.Errorf("%q has no associated struct", kind)
 	}

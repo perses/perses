@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,73 +13,64 @@
 
 //go:build integration
 
-package utils
+package e2eframework
 
 import (
 	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
-	"os/exec"
-	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/config"
-	"github.com/perses/perses/internal/api/core"
-	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/shared/database"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
-func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
-	for _, key := range keys {
-		err := dao.Delete(key)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-}
+type GetFunc func() (api.Entity, error)
+type UpsertFunc func() error
 
-func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
-	var getFunc func() (interface{}, error)
-	var upsertFunc func() error
+func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) (GetFunc, UpsertFunc) {
+	var getFunc GetFunc
+	var upsertFunc UpsertFunc
 	switch entity := object.(type) {
 	case *v1.Project:
-		getFunc = func() (interface{}, error) {
+		getFunc = func() (api.Entity, error) {
 			return persistenceManager.GetProject().Get(entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
 			return persistenceManager.GetProject().Update(entity)
 		}
 	case *v1.Datasource:
-		getFunc = func() (interface{}, error) {
+		getFunc = func() (api.Entity, error) {
 			return persistenceManager.GetDatasource().Get(entity.Metadata.Project, entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
 			return persistenceManager.GetDatasource().Update(entity)
 		}
-	case *v1.User:
-		getFunc = func() (interface{}, error) {
-			return persistenceManager.GetUser().Get(entity.Metadata.Name)
+	case *v1.GlobalDatasource:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetGlobalDatasource().Get(entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
-			return persistenceManager.GetUser().Update(entity)
+			return persistenceManager.GetGlobalDatasource().Update(entity)
 		}
 	default:
 		t.Fatalf("%T is not managed", object)
 	}
+	return getFunc, upsertFunc
+}
 
-	// it appears that (maybe because of the tiny short between a delete order and a create order),
+func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
+	getFunc, upsertFunc := CreateGetFunc(t, persistenceManager, object)
+
+	// it appears that (maybe because of the tiny short between a deletion order and a creation order),
 	// an entity actually created in database could be removed by a previous delete order.
 	// In order to avoid that we will upsert the entity multiple times.
-	// Also we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
+	// Also, we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
 	nbTimeToCreate := 3
 	var err error
 	for i := 0; i < nbTimeToCreate; i++ {
@@ -97,17 +88,17 @@ func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.
 	}
 }
 
-func NewProject() *v1.Project {
+func NewProject(name string) *v1.Project {
 	entity := &v1.Project{
 		Kind: v1.KindProject,
 		Metadata: v1.Metadata{
-			Name: "perses",
+			Name: name,
 		}}
 	entity.Metadata.CreateNow()
 	return entity
 }
 
-func NewDatasource(t *testing.T) *v1.Datasource {
+func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 	promURL, err := url.Parse("https://prometheus.demo.do.prometheus.io")
 	if err != nil {
 		t.Fatal(err)
@@ -154,80 +145,38 @@ func NewDatasource(t *testing.T) *v1.Datasource {
 	if err := json.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
 		t.Fatal(err)
 	}
+	return v1.DatasourceSpec{
+		Default: false,
+		Plugin: common.Plugin{
+			Kind: "PrometheusDatasource",
+			Spec: pluginSpecAsMapInterface,
+		},
+	}
+}
+
+func NewDatasource(t *testing.T, projectName string, name string) *v1.Datasource {
 	entity := &v1.Datasource{
 		Kind: v1.KindDatasource,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
-				Name: "PrometheusDemo",
+				Name: name,
 			},
-			Project: "perses",
+			Project: projectName,
 		},
-		Spec: v1.DatasourceSpec{
-			Default: false,
-			Plugin: common.Plugin{
-				Kind: "PrometheusDatasource",
-				Spec: pluginSpecAsMapInterface,
-			},
-		},
+		Spec: newDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
 	return entity
 }
 
-func NewUser() *v1.User {
-	entity := &v1.User{
-		Kind: v1.KindUser,
+func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
+	entity := &v1.GlobalDatasource{
+		Kind: v1.KindGlobalDatasource,
 		Metadata: v1.Metadata{
-			Name: "jdoe",
+			Name: name,
 		},
-		Spec: v1.UserSpec{
-			FirstName: "John",
-			LastName:  "Doe",
-			Password:  []byte("password"),
-		},
+		Spec: newDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
 	return entity
-}
-
-func defaultFileConfig() *config.File {
-	return &config.File{
-		Folder:        "./test",
-		FileExtension: config.JSONExtension,
-	}
-}
-
-func CreateServer(t *testing.T) (*httptest.Server, dependency.PersistenceManager) {
-	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
-	if err != nil {
-		t.Fatal(err)
-	}
-	projectPath := strings.TrimSpace(string(projectPathByte))
-	handler := echo.New()
-	conf := config.Config{
-		Database: config.Database{
-			File: defaultFileConfig(),
-		},
-		Schemas: config.Schemas{
-			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
-			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
-			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
-			Interval:        0,
-		},
-	}
-	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
-	if err != nil {
-		t.Fatal(err)
-	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
-	// Load every cue schemas
-	for _, loader := range serviceManager.GetSchemas().GetLoaders() {
-		if err := loader.Load(); err != nil {
-			t.Fatal(err)
-		}
-	}
-	handler.Use(middleware.CheckProject(serviceManager.GetProject()))
-	persesAPI := core.NewPersesAPI(serviceManager, false)
-	persesAPI.RegisterRoute(handler)
-	return httptest.NewServer(handler), persistenceManager
 }

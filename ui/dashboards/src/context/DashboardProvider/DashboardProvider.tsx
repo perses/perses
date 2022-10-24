@@ -21,8 +21,17 @@ import { DashboardSpec, RelativeTimeRange } from '@perses-dev/core';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
+import { createPanelSlice, PanelSlice } from './panel-slice';
+import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
+import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 
-export interface DashboardStoreState extends PanelGroupEditorSlice, PanelGroupSlice, PanelEditorSlice {
+export interface DashboardStoreState
+  extends PanelGroupSlice,
+    PanelSlice,
+    PanelGroupEditorSlice,
+    DeletePanelGroupSlice,
+    PanelEditorSlice,
+    DeletePanelSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
@@ -63,9 +72,12 @@ export function DashboardProvider(props: DashboardProviderProps) {
       devtools((...args) => {
         const [set, get] = args;
         return {
-          ...createPanelGroupEditorSlice(...args),
           ...createPanelGroupSlice(layouts)(...args),
-          ...createPanelEditorSlice(panels)(...args),
+          ...createPanelSlice(panels)(...args),
+          ...createPanelGroupEditorSlice(...args),
+          ...createDeletePanelGroupSlice(...args),
+          ...createPanelEditorSlice()(...args),
+          ...createDeletePanelSlice()(...args),
           defaultTimeRange: { pastDuration: dashboardSpec.duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),

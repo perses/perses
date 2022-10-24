@@ -24,9 +24,13 @@ func GenerateProjectID(name string) string {
 	return fmt.Sprintf("/projects/%s", name)
 }
 
+type ProjectSpec struct {
+}
+
 type Project struct {
-	Kind     Kind     `json:"kind" yaml:"kind"`
-	Metadata Metadata `json:"metadata" yaml:"metadata"`
+	Kind     Kind        `json:"kind" yaml:"kind"`
+	Metadata Metadata    `json:"metadata" yaml:"metadata"`
+	Spec     ProjectSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
 }
 
 func (p *Project) GenerateID() string {
@@ -39,6 +43,10 @@ func (p *Project) GetMetadata() modelAPI.Metadata {
 
 func (p *Project) GetKind() string {
 	return string(p.Kind)
+}
+
+func (p *Project) GetSpec() interface{} {
+	return p.Spec
 }
 
 func (p *Project) UnmarshalJSON(data []byte) error {

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2022 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,23 +12,19 @@
 // limitations under the License.
 
 //go:build integration
-// +build integration
 
-package v1
+package e2e
 
 import (
-	"net/http/httptest"
 	"testing"
 
-	"github.com/perses/perses/pkg/client/perseshttp"
+	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/pkg/model/api"
 )
 
-func createClient(t *testing.T, server *httptest.Server) ClientInterface {
-	restClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
-		URL: server.URL,
+func TestMainScenarioGlobalDatasource(t *testing.T) {
+	e2eframework.MainTestScenario(t, shared.PathGlobalDatasource, func(name string) api.Entity {
+		return e2eframework.NewGlobalDatasource(t, name)
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	return NewWithClient(restClient)
 }

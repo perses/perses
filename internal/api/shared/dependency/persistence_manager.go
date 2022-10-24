@@ -21,14 +21,12 @@ import (
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
-	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
-	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared/database"
 )
 
@@ -40,7 +38,6 @@ type PersistenceManager interface {
 	GetHealth() health.DAO
 	GetPersesDAO() database.DAO
 	GetProject() project.DAO
-	GetUser() user.DAO
 }
 
 type persistence struct {
@@ -52,7 +49,6 @@ type persistence struct {
 	health           health.DAO
 	perses           database.DAO
 	project          project.DAO
-	user             user.DAO
 }
 
 func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
@@ -66,7 +62,6 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	globalDatatasourceDAO := globalDatasourceImpl.NewDAO(persesDAO)
 	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
-	userDAO := userImpl.NewDAO(persesDAO)
 	return &persistence{
 		dashboard:        dashboardDAO,
 		datasource:       datasourceDAO,
@@ -75,7 +70,6 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 		health:           healthDAO,
 		perses:           persesDAO,
 		project:          projectDAO,
-		user:             userDAO,
 	}, nil
 }
 
@@ -105,8 +99,4 @@ func (p *persistence) GetPersesDAO() database.DAO {
 
 func (p *persistence) GetProject() project.DAO {
 	return p.project
-}
-
-func (p *persistence) GetUser() user.DAO {
-	return p.user
 }
