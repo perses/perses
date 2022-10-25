@@ -16,6 +16,7 @@ export * from './EChart';
 export * from './ErrorAlert';
 export * from './ErrorBoundary';
 export * from './InfoTooltip';
+export * from './JSONEditor';
 export * from './Legend';
 export * from './LineChart';
 export * from './GaugeChart';

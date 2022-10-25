@@ -33,18 +33,22 @@ export interface StatChartOptions {
 export function createInitialStatChartOptions(): StatChartOptions {
   return {
     name: '',
+    // TODO: How do you represent an initially empty/unset graph query?
     query: {
       kind: 'TimeSeriesQuery',
       spec: {
         plugin: {
-          kind: '',
-          spec: {},
+          kind: 'PrometheusTimeSeriesQuery',
+          spec: {
+            query: '',
+          },
         },
       },
     },
-    calculation: 'First',
+    calculation: 'LastNumber',
     unit: {
       kind: 'Decimal',
     },
+    sparkline: {},
   };
 }

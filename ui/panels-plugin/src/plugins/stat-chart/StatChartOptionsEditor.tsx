@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { JSONEditor } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Box } from '@mui/material';
 import { StatChartOptions } from './stat-chart-model';
 
 export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
 export function StatChartOptionsEditor(props: StatChartOptionsEditorProps) {
-  const { value } = props;
-  return <Box>{JSON.stringify(value)}</Box>;
+  // TODO: replace with form controls for visual editing
+  return <JSONEditor {...props} />;
 }
