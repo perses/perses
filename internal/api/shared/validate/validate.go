@@ -40,7 +40,7 @@ func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 
 func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
 	plugin := entity.GetDTSSpec().Plugin
-	if _, err := http.CheckAndValidate(plugin.Spec); err != nil {
+	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
 		return err
 	}
 	if list != nil {
