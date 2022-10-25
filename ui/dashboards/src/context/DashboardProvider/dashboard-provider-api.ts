@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getPanelKeyFromRef } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupId } from './panel-group-slice';
+import { PanelGroupItemId, PanelGroupId, PanelGroupItemLayout } from './panel-group-slice';
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
@@ -80,6 +79,7 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   const openEditPanelGroup = useDashboardStore((store) => store.openEditPanelGroup);
   const deletePanelGroup = useDashboardStore((store) => store.openDeletePanelGroupDialog);
   const openAddPanel = useDashboardStore((store) => store.openAddPanel);
+  const updatePanelGroupLayouts = useDashboardStore((store) => store.updatePanelGroupLayouts);
 
   return {
     openEditPanelGroup: () => openEditPanelGroup(panelGroupId),
@@ -87,6 +87,8 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
     openAddPanel: () => openAddPanel(panelGroupId),
     moveUp,
     moveDown,
+    updatePanelGroupLayouts: (itemLayouts: PanelGroupItemLayout[]) =>
+      updatePanelGroupLayouts(panelGroupId, itemLayouts),
   };
 }
 
@@ -136,12 +138,11 @@ export function useDeletePanelGroupDialog() {
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
 export function usePanel(panelGroupItemId: PanelGroupItemId) {
-  const { panelGroupId, itemIndex } = panelGroupItemId;
+  const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
 
   const panel = useDashboardStore((store) => {
-    const panelRef = store.panelGroups[panelGroupId]?.items[itemIndex]?.content;
-    if (panelRef === undefined) return;
-    const panelKey = getPanelKeyFromRef(panelRef);
+    const panelKey = store.panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];
+    if (panelKey === undefined) return;
     return store.panels[panelKey];
   });
 

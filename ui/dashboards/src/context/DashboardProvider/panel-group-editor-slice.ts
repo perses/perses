@@ -67,7 +67,8 @@ export const createPanelGroupEditorSlice: StateCreator<
       applyChanges(next) {
         const newGroup: PanelGroupDefinition = {
           id: generateId(),
-          items: [],
+          itemLayouts: [],
+          itemPanelKeys: {},
           ...next,
         };
         set((draft) => {

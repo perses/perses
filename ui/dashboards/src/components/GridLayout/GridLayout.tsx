@@ -12,10 +12,10 @@
 // limitations under the License.
 import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Box, BoxProps, Collapse, GlobalStyles } from '@mui/material';
+import { Box, BoxProps, Collapse, GlobalStyles, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { styles } from '../../css/styles';
-import { useEditMode, usePanelGroup, PanelGroupId } from '../../context';
+import { useEditMode, usePanelGroup, usePanelGroupActions, PanelGroupId } from '../../context';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 
@@ -30,7 +30,9 @@ export interface GridLayoutProps extends BoxProps {
  */
 export function GridLayout(props: GridLayoutProps) {
   const { panelGroupId, ...others } = props;
+  const theme = useTheme();
   const groupDefinition = usePanelGroup(panelGroupId);
+  const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
 
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
   const { isEditMode } = useEditMode();
@@ -53,19 +55,21 @@ export function GridLayout(props: GridLayoutProps) {
         <Collapse in={isOpen} unmountOnExit>
           <ResponsiveGridLayout
             className="layout"
-            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 2 }}
+            breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}
+            cols={{ sm: 24, xxs: 2 }}
             rowHeight={30}
             draggableHandle={'.drag-handle'}
             resizeHandles={['se']}
             isDraggable={isEditMode}
             isResizable={isEditMode}
             containerPadding={[0, 10]}
+            layouts={{ sm: groupDefinition.itemLayouts }}
+            onLayoutChange={updatePanelGroupLayouts}
           >
-            {groupDefinition.items.map(({ x, y, width, height }, itemIndex) => (
-              <div key={itemIndex} data-grid={{ x, y, w: width, h: height }}>
+            {groupDefinition.itemLayouts.map(({ i }) => (
+              <div key={i}>
                 <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <GridItemContent panelGroupItemId={{ panelGroupId, itemIndex }} />
+                  <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }} />
                 </ErrorBoundary>
               </div>
             ))}

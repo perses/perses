@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LayoutItem, usePanel } from '../../context';
+import { PanelGroupItemId, usePanel } from '../../context';
 import { Panel } from '../Panel/Panel';
 
 export interface GridItemContentProps {
-  panelGroupItemId: LayoutItem;
+  panelGroupItemId: PanelGroupItemId;
 }
 
 /**

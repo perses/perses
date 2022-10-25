@@ -16,7 +16,6 @@ import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { DashboardProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
-import testDashboard from '../../test/testDashboard';
 import { PanelGroupDialog } from './PanelGroupDialog';
 
 describe('Add Panel Group', () => {
@@ -54,7 +53,8 @@ describe('Add Panel Group', () => {
       id: expect.any(Number),
       title: 'New Panel Group',
       isCollapsed: false,
-      items: [],
+      itemLayouts: expect.any(Array),
+      itemPanelKeys: expect.any(Object),
     });
   });
 
@@ -80,7 +80,6 @@ describe('Add Panel Group', () => {
         id: group.id,
         title: 'New Name',
         isCollapsed: false,
-        items: testDashboard.spec.layouts[0]?.spec.items,
       },
     });
   });

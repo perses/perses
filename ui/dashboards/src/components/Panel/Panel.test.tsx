@@ -35,7 +35,8 @@ describe('Panel', () => {
           },
         },
       },
-      panelGroupItemId: { panelGroupId: 0, itemIndex: 0 },
+      // TODO: This is coupled to ID generation which is not good and the tests will probably fail
+      panelGroupItemId: { panelGroupId: 0, panelGroupItemLayoutId: '' },
     };
   };
 
