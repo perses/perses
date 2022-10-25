@@ -12,24 +12,26 @@
 // limitations under the License.
 
 import { createPanelRef, DashboardSpec, GridDefinition } from '@perses-dev/core';
-import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
+import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
 import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
 export function useDashboardSpec() {
   const {
     panels,
     panelGroups,
+    panelGroupOrder,
     defaultTimeRange,
     reset: resetDashboardStore,
-  } = useDashboardStore(({ panels, panelGroups, defaultTimeRange, reset }) => ({
+  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, defaultTimeRange, reset }) => ({
     panels,
     panelGroups,
+    panelGroupOrder,
     defaultTimeRange,
     reset,
   }));
   const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
-  const layouts = convertPanelGroupsToLayouts(panelGroups);
+  const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
   const spec = {
     panels,
@@ -50,9 +52,16 @@ export function useDashboardSpec() {
   };
 }
 
-function convertPanelGroupsToLayouts(panelGroups: Record<number, PanelGroupDefinition>): GridDefinition[] {
+function convertPanelGroupsToLayouts(
+  panelGroups: Record<number, PanelGroupDefinition>,
+  panelGroupOrder: PanelGroupId[]
+): GridDefinition[] {
   const layouts: GridDefinition[] = [];
-  Object.values(panelGroups).forEach((group) => {
+  panelGroupOrder.map((groupOrderId) => {
+    const group = panelGroups[groupOrderId];
+    if (group === undefined) {
+      throw new Error('panel group not found');
+    }
     const { title, isCollapsed, itemLayouts, itemPanelKeys } = group;
     let display = undefined;
     if (title) {
@@ -84,5 +93,6 @@ function convertPanelGroupsToLayouts(panelGroups: Record<number, PanelGroupDefin
     };
     layouts.push(layout);
   });
+
   return layouts;
 }
