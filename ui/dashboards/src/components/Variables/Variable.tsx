@@ -113,23 +113,10 @@ function ListVariable({ name }: TemplateVariableProps) {
 
   useEffect(() => {
     const firstOption = finalOptions?.[0];
-    const valueIsInOptions = Boolean(
-      finalOptions.find((v) => {
-        if (allowMultiple) {
-          return (value as string[]).includes(v.value);
-        }
-        return value === v.value;
-      })
-    );
 
     // If there is no value but there are options, set the value to the first option.
     if (!value && firstOption) {
       setVariableValue(name, firstOption.value);
-    }
-
-    // If there is a value but it's not in the options, select the first value or set to null
-    if (value && !valueIsInOptions && !definition.spec.default_value) {
-      setVariableValue(name, firstOption?.value || null);
     }
   }, [finalOptions, setVariableValue, value, name, allowMultiple]);
 
@@ -181,12 +168,14 @@ function TextVariable({ name }: TemplateVariableProps) {
   }, [state?.value]);
 
   return (
-    <TextField
-      value={tempValue}
-      onChange={(e) => setTempValue(e.target.value)}
-      onBlur={() => setVariableValue(name, tempValue)}
-      placeholder={name}
-      label={name}
-    />
+    <>
+      <TextField
+        value={tempValue}
+        onChange={(e) => setTempValue(e.target.value)}
+        onBlur={() => setVariableValue(name, tempValue)}
+        placeholder={name}
+        label={name}
+      />
+    </>
   );
 }
