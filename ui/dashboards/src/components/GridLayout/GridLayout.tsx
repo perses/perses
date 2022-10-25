@@ -69,7 +69,7 @@ export function GridLayout(props: GridLayoutProps) {
             {groupDefinition.itemLayouts.map(({ i }) => (
               <div key={i}>
                 <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupLayoutId: i }} />
+                  <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }} />
                 </ErrorBoundary>
               </div>
             ))}

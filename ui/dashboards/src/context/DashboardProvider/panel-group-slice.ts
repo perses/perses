@@ -65,22 +65,22 @@ export interface PanelGroupDefinition {
   id: PanelGroupId;
   isCollapsed: boolean;
   title?: string;
-  itemLayouts: PanelGroupLayout[];
-  itemPanelKeys: Record<PanelGroupLayoutId, string>;
+  itemLayouts: PanelGroupItemLayout[];
+  itemPanelKeys: Record<PanelGroupItemLayoutId, string>;
 }
 
-export interface PanelGroupLayout extends Layout {
-  i: PanelGroupLayoutId;
+export interface PanelGroupItemLayout extends Layout {
+  i: PanelGroupItemLayoutId;
 }
 
-export type PanelGroupLayoutId = string;
+export type PanelGroupItemLayoutId = string;
 
 /**
  * Uniquely identifies an item in a PanelGroup.
  */
 export interface PanelGroupItemId {
   panelGroupId: PanelGroupId;
-  panelGroupLayoutId: PanelGroupLayoutId;
+  panelGroupItemLayoutId: PanelGroupItemLayoutId;
 }
 
 /**

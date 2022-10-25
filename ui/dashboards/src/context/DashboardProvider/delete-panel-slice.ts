@@ -61,7 +61,7 @@ export function createDeletePanelSlice(): StateCreator<
   return (set, get) => ({
     deletePanel(panelGroupItemId: PanelGroupItemId) {
       set((draft) => {
-        const { panelGroupId, panelGroupLayoutId } = panelGroupItemId;
+        const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
         const existingGroup = draft.panelGroups[panelGroupId];
         if (existingGroup === undefined) {
           throw new Error(`Missing panel group ${panelGroupId}`);
@@ -84,7 +84,7 @@ export function createDeletePanelSlice(): StateCreator<
     },
 
     openDeletePanelDialog(panelGroupItemId: PanelGroupItemId) {
-      const { panelGroupId, panelGroupLayoutId } = panelGroupItemId;
+      const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
 
       const { panels, panelGroups } = get();
       const panelGroup = panelGroups[panelGroupId];

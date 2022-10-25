@@ -13,7 +13,7 @@
 
 import { useMemo } from 'react';
 import { useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupId, PanelGroupLayout } from './panel-group-slice';
+import { PanelGroupItemId, PanelGroupId, PanelGroupItemLayout } from './panel-group-slice';
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
@@ -87,7 +87,8 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
     openAddPanel: () => openAddPanel(panelGroupId),
     moveUp,
     moveDown,
-    updatePanelGroupLayouts: (itemLayouts: PanelGroupLayout[]) => updatePanelGroupLayouts(panelGroupId, itemLayouts),
+    updatePanelGroupLayouts: (itemLayouts: PanelGroupItemLayout[]) =>
+      updatePanelGroupLayouts(panelGroupId, itemLayouts),
   };
 }
 
@@ -137,7 +138,7 @@ export function useDeletePanelGroupDialog() {
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
 export function usePanel(panelGroupItemId: PanelGroupItemId) {
-  const { panelGroupId, panelGroupLayoutId } = panelGroupItemId;
+  const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
 
   const panel = useDashboardStore((store) => {
     const panelKey = store.panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];

@@ -31,7 +31,7 @@ export function PanelPreview({ name, description, kind, spec, groupId }: PanelEd
       },
     },
     // TODO: this shouldn't be necessary for preview
-    panelGroupItemId: { panelGroupId: groupId, panelGroupLayoutId: '' },
+    panelGroupItemId: { panelGroupId: groupId, panelGroupItemLayoutId: '' },
   };
 
   if (!kind) {

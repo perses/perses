@@ -20,7 +20,7 @@ import {
   PanelGroupItemId,
   PanelGroupId,
   PanelGroupDefinition,
-  PanelGroupLayout,
+  PanelGroupItemLayout,
 } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
@@ -95,7 +95,7 @@ export function createPanelEditorSlice(): StateCreator<
       const { panels, panelGroups } = get();
 
       // Figure out the panel key at that location
-      const { panelGroupId, panelGroupLayoutId } = panelGroupItemId;
+      const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
       const panelKey = panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];
       if (panelKey === undefined) {
         throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
@@ -205,7 +205,7 @@ export function createPanelEditorSlice(): StateCreator<
             if (group === undefined) {
               throw new Error(`Missing panel group ${next.groupId}`);
             }
-            const layout: PanelGroupLayout = {
+            const layout: PanelGroupItemLayout = {
               i: generateId().toString(),
               x: 0,
               y: getYForNewRow(group),

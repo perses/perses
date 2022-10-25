@@ -88,7 +88,7 @@ describe('Panel Drawer', () => {
     if (layout === undefined) {
       throw new Error('Test panel not found');
     }
-    act(() => storeApi.getState().openEditPanel({ panelGroupId: group.id, panelGroupLayoutId: layout[0] }));
+    act(() => storeApi.getState().openEditPanel({ panelGroupId: group.id, panelGroupItemLayoutId: layout[0] }));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);
