@@ -22,7 +22,6 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
-	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/shared/dependency"
 )
 
@@ -43,7 +42,6 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, readonly bool) echoU
 		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), readonly),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject(), readonly),
-		user.NewEndpoint(serviceManager.GetUser(), readonly),
 	}
 	return &api{
 		endpoints: endpoints,

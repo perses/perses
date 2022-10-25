@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getPanelKeyFromRef } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupId } from './panel-group-slice';
+import { PanelGroupItemId, PanelGroupId, PanelGroupItemLayout } from './panel-group-slice';
 
 export function useEditMode() {
   return useDashboardStore(({ isEditMode, setEditMode }) => ({ isEditMode, setEditMode }));
@@ -41,7 +40,7 @@ export function useDashboardActions() {
  * Returns an array of PanelGroupIds in the order they appear in the dashboard.
  */
 export function usePanelGroupIds() {
-  return useDashboardStore((store) => store.panelGroupIdOrder);
+  return useDashboardStore((store) => store.panelGroupOrder);
 }
 
 /**
@@ -80,6 +79,7 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   const openEditPanelGroup = useDashboardStore((store) => store.openEditPanelGroup);
   const deletePanelGroup = useDashboardStore((store) => store.openDeletePanelGroupDialog);
   const openAddPanel = useDashboardStore((store) => store.openAddPanel);
+  const updatePanelGroupLayouts = useDashboardStore((store) => store.updatePanelGroupLayouts);
 
   return {
     openEditPanelGroup: () => openEditPanelGroup(panelGroupId),
@@ -87,6 +87,8 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
     openAddPanel: () => openAddPanel(panelGroupId),
     moveUp,
     moveDown,
+    updatePanelGroupLayouts: (itemLayouts: PanelGroupItemLayout[]) =>
+      updatePanelGroupLayouts(panelGroupId, itemLayouts),
   };
 }
 
@@ -95,8 +97,8 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
  * moved in that direction.
  */
 function useMovePanelGroup(panelGroupId: PanelGroupId) {
-  const currentIndex = useDashboardStore((store) => store.panelGroupIdOrder.findIndex((id) => id === panelGroupId));
-  const panelGroupsLength = useDashboardStore((store) => store.panelGroupIdOrder.length);
+  const currentIndex = useDashboardStore((store) => store.panelGroupOrder.findIndex((id) => id === panelGroupId));
+  const panelGroupsLength = useDashboardStore((store) => store.panelGroupOrder.length);
   const swapPanelGroups = useDashboardStore((store) => store.swapPanelGroups);
 
   if (currentIndex < 0) {
@@ -136,12 +138,11 @@ export function useDeletePanelGroupDialog() {
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
 export function usePanel(panelGroupItemId: PanelGroupItemId) {
-  const { panelGroupId, itemIndex } = panelGroupItemId;
+  const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
 
   const panel = useDashboardStore((store) => {
-    const panelRef = store.panelGroups[panelGroupId]?.items[itemIndex]?.content;
-    if (panelRef === undefined) return;
-    const panelKey = getPanelKeyFromRef(panelRef);
+    const panelKey = store.panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];
+    if (panelKey === undefined) return;
     return store.panels[panelKey];
   });
 
@@ -176,12 +177,12 @@ export function usePanelEditor() {
 export function useDeletePanelDialog() {
   const deletePanelDialog = useDashboardStore((store) => store.deletePanelDialog);
   // TODO: Refactor similar to other dialogs/editors so these are on the editor state itself
-  const deletePanels = useDashboardStore((store) => store.deletePanels);
+  const deletePanel = useDashboardStore((store) => store.deletePanel);
   const closeDeletePanelDialog = useDashboardStore((store) => store.closeDeletePanelDialog);
 
   return {
     deletePanelDialog,
-    deletePanels,
+    deletePanel,
     closeDeletePanelDialog,
   };
 }

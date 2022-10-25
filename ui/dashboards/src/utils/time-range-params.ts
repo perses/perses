@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import { useQueryParams, QueryParamConfig } from 'use-query-params';
 import { getUnixTime, isDate } from 'date-fns';
 import {
@@ -124,12 +124,13 @@ export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEn
 
   const { start } = query;
 
-  // set start param on page load if empty
-  if (paramsEnabled && !start) {
-    if (isRelativeTimeRange(initialTimeRange)) {
-      setQuery({ start: initialTimeRange.pastDuration, end: undefined });
+  useEffect(() => {
+    if (paramsEnabled && !start) {
+      if (isRelativeTimeRange(initialTimeRange)) {
+        setQuery({ start: initialTimeRange.pastDuration, end: undefined });
+      }
     }
-  }
+  }, [initialTimeRange, paramsEnabled, start, setQuery]);
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {

@@ -16,7 +16,6 @@ import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { DashboardProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
-import testDashboard from '../../test/testDashboard';
 import { PanelGroupDialog } from './PanelGroupDialog';
 
 describe('Add Panel Group', () => {
@@ -49,14 +48,13 @@ describe('Add Panel Group', () => {
     userEvent.click(screen.getByText('Add'));
 
     // TODO: Figure out how to test this without coupling to the store state
-    const panelGroups = storeApi.getState().panelGroups;
-    expect(panelGroups).toMatchObject({
-      '3': {
-        id: 3,
-        title: 'New Panel Group',
-        isCollapsed: false,
-        items: [],
-      },
+    const panelGroups = Object.values(storeApi.getState().panelGroups);
+    expect(panelGroups).toContainEqual({
+      id: expect.any(Number),
+      title: 'New Panel Group',
+      isCollapsed: false,
+      itemLayouts: expect.any(Array),
+      itemPanelKeys: expect.any(Object),
     });
   });
 
@@ -64,7 +62,11 @@ describe('Add Panel Group', () => {
     const storeApi = renderDialog();
 
     // Open the dialog for an existing panel group
-    act(() => storeApi.getState().openEditPanelGroup(0));
+    const group = Object.values(storeApi.getState().panelGroups).find((group) => group.title === 'CPU Stats');
+    if (group === undefined) {
+      throw new Error('Missing test group');
+    }
+    act(() => storeApi.getState().openEditPanelGroup(group.id));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);
@@ -74,11 +76,10 @@ describe('Add Panel Group', () => {
     // TODO: Figure out how to test this without coupling to the store state
     const panelGroups = storeApi.getState().panelGroups;
     expect(panelGroups).toMatchObject({
-      '0': {
-        id: 0,
+      [group.id]: {
+        id: group.id,
         title: 'New Name',
         isCollapsed: false,
-        items: testDashboard.spec.layouts[0]?.spec.items,
       },
     });
   });

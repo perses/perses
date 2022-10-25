@@ -419,7 +419,7 @@ method: POST
 	}
 }
 
-func TestCheckAndValidate(t *testing.T) {
+func TestValidateAndExtract(t *testing.T) {
 	// Check and Validate HTTPProxy contained in a proper struct
 	type aStruct struct {
 		A struct {
@@ -444,7 +444,7 @@ func TestCheckAndValidate(t *testing.T) {
 		}{Kind: "HTTPProxy", Spec: &Config{URL: u}}},
 	}
 
-	c, err := CheckAndValidate(b)
+	c, err := ValidateAndExtract(b)
 	assert.NoError(t, err)
 	assert.Equal(t, &Config{URL: u}, c)
 
@@ -458,7 +458,7 @@ func TestCheckAndValidate(t *testing.T) {
 			},
 		},
 	}
-	c, err = CheckAndValidate(uglyStruct)
+	c, err = ValidateAndExtract(uglyStruct)
 	assert.NoError(t, err)
 	assert.Equal(t, &Config{URL: u}, c)
 }

@@ -27,7 +27,6 @@ export const DashboardApp = (props: DashboardAppProps) => {
   return (
     <Box
       sx={{
-        padding: (theme) => theme.spacing(1, 0),
         flexGrow: 1,
         overflowX: 'hidden',
         overflowY: 'auto',

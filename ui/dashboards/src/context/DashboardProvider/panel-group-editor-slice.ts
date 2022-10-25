@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { Middleware } from './common';
+import { generateId, Middleware } from './common';
 import { PanelGroupSlice, PanelGroupDefinition, PanelGroupId } from './panel-group-slice';
 
 export interface PanelGroupEditor {
@@ -27,13 +27,8 @@ export interface PanelGroupEditorValues {
   isCollapsed: boolean;
 }
 
-export interface DeletePanelGroupDialog {
-  panelGroupId: PanelGroupId;
-  panelGroupName?: string;
-}
-
 /**
- * Slice that handles the visual editor state and actions for Panel Groups (i.e. add, edit, delete).
+ * Slice that handles the visual editor state and related actions for adding or editing Panel Groups.
  */
 export interface PanelGroupEditorSlice {
   /**
@@ -50,13 +45,10 @@ export interface PanelGroupEditorSlice {
    * Opens the panel group editor to edit an existing panel group.
    */
   openEditPanelGroup: (panelGroupId: PanelGroupId) => void;
-
-  deletePanelGroupDialog?: DeletePanelGroupDialog;
-  openDeletePanelGroupDialog: (panelGroupId: PanelGroupId) => void;
-  closeDeletePanelGroupDialog: () => void;
 }
 
 export const createPanelGroupEditorSlice: StateCreator<
+  // Actions in here need to modify Panel Group state
   PanelGroupEditorSlice & PanelGroupSlice,
   Middleware,
   [],
@@ -74,13 +66,14 @@ export const createPanelGroupEditorSlice: StateCreator<
       },
       applyChanges(next) {
         const newGroup: PanelGroupDefinition = {
-          id: get().createPanelGroupId(),
-          items: [],
+          id: generateId(),
+          itemLayouts: [],
+          itemPanelKeys: {},
           ...next,
         };
         set((draft) => {
           draft.panelGroups[newGroup.id] = newGroup;
-          draft.panelGroupIdOrder.unshift(newGroup.id);
+          draft.panelGroupOrder.unshift(newGroup.id);
         });
       },
       close() {
@@ -131,18 +124,4 @@ export const createPanelGroupEditorSlice: StateCreator<
       draft.panelGroupEditor = editor;
     });
   },
-
-  openDeletePanelGroupDialog: (panelGroupId) => {
-    const panelGroup = get().panelGroups[panelGroupId];
-    if (panelGroup === undefined) {
-      throw new Error(`Panel group with Id ${panelGroupId} not found`);
-    }
-    set((state) => {
-      state.deletePanelGroupDialog = { panelGroupId, panelGroupName: panelGroup.title };
-    });
-  },
-  closeDeletePanelGroupDialog: () =>
-    set((state) => {
-      state.deletePanelGroupDialog = undefined;
-    }),
 });

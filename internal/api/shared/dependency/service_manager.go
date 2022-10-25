@@ -23,14 +23,12 @@ import (
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
-	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
-	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared/schemas"
 )
 
@@ -42,7 +40,6 @@ type ServiceManager interface {
 	GetHealth() health.Service
 	GetProject() project.Service
 	GetSchemas() schemas.Schemas
-	GetUser() user.Service
 }
 
 type service struct {
@@ -54,7 +51,6 @@ type service struct {
 	health           health.Service
 	project          project.Service
 	schemas          schemas.Schemas
-	user             user.Service
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManager {
@@ -65,7 +61,6 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManage
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject())
-	userService := userImpl.NewService(dao.GetUser())
 	return &service{
 		dashboard:        dashboardService,
 		datasource:       datasourceService,
@@ -74,7 +69,6 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManage
 		health:           healthService,
 		project:          projectService,
 		schemas:          schemasService,
-		user:             userService,
 	}
 }
 
@@ -104,8 +98,4 @@ func (s *service) GetProject() project.Service {
 
 func (s *service) GetSchemas() schemas.Schemas {
 	return s.schemas
-}
-
-func (s *service) GetUser() user.Service {
-	return s.user
 }

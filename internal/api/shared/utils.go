@@ -35,11 +35,16 @@ const (
 	PathUser             = "users"
 )
 
+// ProjectResourcePathList is containing the list of the resource path that are part of a project.
+var ProjectResourcePathList = []string{
+	PathDashboard, PathDatasource, PathFolder,
+}
+
 func getNameParameter(ctx echo.Context) string {
 	return ctx.Param(ParamName)
 }
 
-func getProjectParameter(ctx echo.Context) string {
+func GetProjectParameter(ctx echo.Context) string {
 	return ctx.Param(ParamProject)
 }
 

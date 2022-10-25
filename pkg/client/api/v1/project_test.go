@@ -12,91 +12,71 @@
 // limitations under the License.
 
 //go:build integration
-// +build integration
 
 package v1
 
 import (
 	"testing"
 
-	"github.com/perses/perses/utils"
+	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	"github.com/perses/perses/internal/api/shared/dependency"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateProject(t *testing.T) {
-	entity := utils.NewProject()
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		entity := e2eframework.NewProject("perses")
+		object, err := clientInterface.Project().Create(entity)
+		assert.NoError(t, err)
 
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	object, err := persesClient.Project().Create(entity)
-	assert.NoError(t, err)
-
-	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+		assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
+		return []modelAPI.Entity{object}
+	})
 }
 
 func TestUpdateProject(t *testing.T) {
-	entity := utils.NewProject()
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		entity := e2eframework.NewProject("perses")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
+		object, err := clientInterface.Project().Update(entity)
+		assert.NoError(t, err)
 
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	object, err := persesClient.Project().Update(entity)
-	assert.NoError(t, err)
-
-	// for the moment the only thing to test is that the dates are correctly updated
-	assert.True(t, object.Metadata.CreatedAt.UnixNano() < object.Metadata.UpdatedAt.UnixNano())
-
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+		// for the moment the only thing to test is that the dates are correctly updated
+		assert.True(t, object.Metadata.CreatedAt.UnixNano() < object.Metadata.UpdatedAt.UnixNano())
+		return []modelAPI.Entity{object}
+	})
 }
 
 func TestGetProject(t *testing.T) {
-	entity := utils.NewProject()
-
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	object, err := persesClient.Project().Get(entity.Metadata.Name)
-	assert.NoError(t, err)
-	assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
-
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		entity := e2eframework.NewProject("perses")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
+		object, err := clientInterface.Project().Get(entity.Metadata.Name)
+		assert.NoError(t, err)
+		assert.Equal(t, object.Metadata.Name, entity.Metadata.Name)
+		return []modelAPI.Entity{object}
+	})
 }
 
 func TestDeleteProject(t *testing.T) {
-	entity := utils.NewProject()
-
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	err := persesClient.Project().Delete(entity.Metadata.Name)
-	assert.NoError(t, err)
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		entity := e2eframework.NewProject("perses")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
+		err := clientInterface.Project().Delete(entity.Metadata.Name)
+		assert.NoError(t, err)
+		return []modelAPI.Entity{}
+	})
 }
 
 func TestListProject(t *testing.T) {
-	entity := utils.NewProject()
-
-	server, persistenceManager := utils.CreateServer(t)
-	defer server.Close()
-	persesClient := createClient(t, server)
-
-	utils.CreateAndWaitUntilEntityExists(t, persistenceManager, entity)
-
-	objects, err := persesClient.Project().List("")
-	assert.NoError(t, err)
-	assert.Equal(t, 1, len(objects))
-	assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
-
-	utils.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entity.GenerateID())
+	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+		entity := e2eframework.NewProject("perses")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
+		objects, err := clientInterface.Project().List("")
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(objects))
+		assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
+		return []modelAPI.Entity{entity}
+	})
 }

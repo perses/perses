@@ -52,8 +52,8 @@ describe('Panel Drawer', () => {
   it('should add new panel', async () => {
     const storeApi = renderPanelDrawer();
 
-    // Open the drawer for a new panel (i.e. no panel key)
-    act(() => storeApi.getState().openAddPanel(0));
+    // Open the drawer for a new panel
+    act(() => storeApi.getState().openAddPanel());
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel');
@@ -80,7 +80,15 @@ describe('Panel Drawer', () => {
     const storeApi = renderPanelDrawer();
 
     // Open the drawer for an existing panel
-    act(() => storeApi.getState().openEditPanel({ panelGroupId: 0, itemIndex: 0 }));
+    const group = Object.values(storeApi.getState().panelGroups).find((group) => group.title === 'CPU Stats');
+    if (group === undefined) {
+      throw new Error('Test group not found');
+    }
+    const layout = Object.entries(group.itemPanelKeys).find(([, panelKey]) => panelKey === 'cpu');
+    if (layout === undefined) {
+      throw new Error('Test panel not found');
+    }
+    act(() => storeApi.getState().openEditPanel({ panelGroupId: group.id, panelGroupItemLayoutId: layout[0] }));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);

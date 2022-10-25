@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardSpec, GridDefinition } from '@perses-dev/core';
+import { createPanelRef, DashboardSpec, GridDefinition } from '@perses-dev/core';
 import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
 import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
@@ -53,7 +53,7 @@ export function useDashboardSpec() {
 function convertPanelGroupsToLayouts(panelGroups: Record<number, PanelGroupDefinition>): GridDefinition[] {
   const layouts: GridDefinition[] = [];
   Object.values(panelGroups).forEach((group) => {
-    const { title, isCollapsed, items } = group;
+    const { title, isCollapsed, itemLayouts, itemPanelKeys } = group;
     let display = undefined;
     if (title) {
       display = {
@@ -67,7 +67,19 @@ function convertPanelGroupsToLayouts(panelGroups: Record<number, PanelGroupDefin
       kind: 'Grid',
       spec: {
         display,
-        items,
+        items: itemLayouts.map((layout) => {
+          const panelKey = itemPanelKeys[layout.i];
+          if (panelKey === undefined) {
+            throw new Error(`Missing panel key of layout ${layout.i}`);
+          }
+          return {
+            x: layout.x,
+            y: layout.y,
+            width: layout.w,
+            height: layout.h,
+            content: createPanelRef(panelKey),
+          };
+        }),
       },
     };
     layouts.push(layout);
