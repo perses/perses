@@ -168,14 +168,12 @@ function TextVariable({ name }: TemplateVariableProps) {
   }, [state?.value]);
 
   return (
-    <>
-      <TextField
-        value={tempValue}
-        onChange={(e) => setTempValue(e.target.value)}
-        onBlur={() => setVariableValue(name, tempValue)}
-        placeholder={name}
-        label={name}
-      />
-    </>
+    <TextField
+      value={tempValue}
+      onChange={(e) => setTempValue(e.target.value)}
+      onBlur={() => setVariableValue(name, tempValue)}
+      placeholder={name}
+      label={name}
+    />
   );
 }
