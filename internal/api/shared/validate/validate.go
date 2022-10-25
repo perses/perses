@@ -18,6 +18,7 @@ import (
 
 	"github.com/perses/perses/internal/api/shared/schemas"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
@@ -34,22 +35,32 @@ func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 			return err
 		}
 	}
+	if len(entity.Spec.Datasources) > 0 {
+		defaultDTS := make(map[string]bool)
+		for _, spec := range entity.Spec.Datasources {
+			if err := validateDTSPlugin(spec.Plugin, sch); err != nil {
+				return err
+			}
+			if spec.Default {
+				if defaultDTS[spec.Plugin.Kind] {
+					return fmt.Errorf("there is already a default datasource defined for the kind %q", spec.Plugin.Kind)
+				}
+				defaultDTS[spec.Plugin.Kind] = true
+			}
+		}
+	}
 
 	return nil
 }
 
 func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
-	plugin := entity.GetDTSSpec().Plugin
-	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
+	if err := validateDTSPlugin(entity.GetDTSSpec().Plugin, sch); err != nil {
 		return err
 	}
 	if list != nil {
 		if err := validateUnicityOfDefaultDTS(entity, list); err != nil {
 			return err
 		}
-	}
-	if sch != nil {
-		return sch.ValidateDatasource(plugin)
 	}
 	return nil
 }
@@ -68,4 +79,11 @@ func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list [
 		}
 	}
 	return nil
+}
+
+func validateDTSPlugin(plugin common.Plugin, sch schemas.Schemas) error {
+	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
+		return err
+	}
+	return sch.ValidateDatasource(plugin)
 }
