@@ -14,12 +14,12 @@
 import { useEffect, useState } from 'react';
 import { TextField } from '@mui/material';
 
-interface JSONSpecEditorProps<Spec> {
+interface JSONEditorProps<Spec> {
   value: Spec;
   onChange: (next: Spec) => void;
 }
 
-export function JSONSpecEditor<T>(props: JSONSpecEditorProps<T>) {
+export function JSONEditor<T>(props: JSONEditorProps<T>) {
   const [value, setValue] = useState(() => JSON.stringify(props.value, null, 2));
   const [invalidJSON, setInvalidJSON] = useState(false);
 
@@ -28,6 +28,7 @@ export function JSONSpecEditor<T>(props: JSONSpecEditorProps<T>) {
     setInvalidJSON(false);
   }, [props.value]);
 
+  // TODO: replace with CodeMirror editor
   return (
     <TextField
       label="JSON"
