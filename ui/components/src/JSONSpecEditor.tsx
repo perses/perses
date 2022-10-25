@@ -11,13 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextField } from '@mui/material';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export function JSONSpecEditor<T>(props: OptionsEditorProps<T>) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState(JSON.stringify(props.value, null, 2));
+interface JSONSpecEditorProps<Spec> {
+  value: Spec;
+  onChange: (next: Spec) => void;
+}
+
+export function JSONSpecEditor<T>(props: JSONSpecEditorProps<T>) {
+  const [value, setValue] = useState(() => JSON.stringify(props.value, null, 2));
   const [invalidJSON, setInvalidJSON] = useState(false);
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export function JSONSpecEditor<T>(props: OptionsEditorProps<T>) {
       error={invalidJSON}
       helperText={invalidJSON ? 'Invalid JSON' : ''}
       multiline
-      inputRef={ref}
+      fullWidth
       value={value}
       onChange={(event) => {
         setValue(event.target.value);
