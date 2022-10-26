@@ -12,7 +12,13 @@
 // limitations under the License.
 import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Stack, TextField } from '@mui/material';
-import { replaceTemplateVariables, parseTemplateVariables, PrometheusClient, DEFAULT_PROM } from '../model';
+import {
+  replaceTemplateVariables,
+  parseTemplateVariables,
+  PrometheusClient,
+  DEFAULT_PROM,
+  getPrometheusTimeRange,
+} from '../model';
 import { PrometheusLabelNamesVariableOptions, PrometheusLabelValuesVariableOptions } from './types';
 import { MatcherEditor } from './MatcherEditor';
 
@@ -65,7 +71,9 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
   getVariableOptions: async (spec, ctx) => {
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
     const match = spec.matchers ? spec.matchers.map((m) => replaceTemplateVariables(m, ctx.variables)) : undefined;
-    const { data: options } = await client.labelNames({ 'match[]': match });
+    const timeRange = getPrometheusTimeRange(ctx.timeRange);
+
+    const { data: options } = await client.labelNames({ 'match[]': match, ...timeRange });
     return {
       data: stringArrayToVariableOptions(options),
     };
@@ -82,7 +90,14 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
     const match = pluginDef.matchers
       ? pluginDef.matchers.map((m) => replaceTemplateVariables(m, ctx.variables))
       : undefined;
-    const { data: options } = await client.labelValues({ labelName: pluginDef.label_name, 'match[]': match });
+
+    const timeRange = getPrometheusTimeRange(ctx.timeRange);
+
+    const { data: options } = await client.labelValues({
+      labelName: pluginDef.label_name,
+      'match[]': match,
+      ...timeRange,
+    });
     return {
       data: stringArrayToVariableOptions(options),
     };

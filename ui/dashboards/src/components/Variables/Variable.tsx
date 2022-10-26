@@ -20,6 +20,7 @@ import {
   useTemplateVariableValues,
   VariableStateMap,
   useDatasourceStore,
+  useTimeRange,
 } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
@@ -75,11 +76,12 @@ function ListVariable({ name }: TemplateVariableProps) {
   }
 
   const variablesValueKey = getVariableValuesKey(variables);
+  const { timeRange } = useTimeRange();
 
   const variablesOptionsQuery = useQuery(
-    [name, definition, variablesValueKey],
+    [name, definition, variablesValueKey, timeRange],
     async () => {
-      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables });
+      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
       return resp?.data ?? [];
     },
     { enabled: !!variablePlugin || waitToLoad }
