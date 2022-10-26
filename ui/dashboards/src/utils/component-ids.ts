@@ -11,14 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard-provider-api';
-export * from './DashboardProvider';
-export type {
-  PanelGroupId,
-  PanelGroupDefinition,
-  PanelGroupItemId,
-  PanelGroupItemLayoutId as PanelGroupLayoutId,
-} from './panel-group-slice';
-export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-editor-slice';
-export type { DeletePanelDialogState } from './delete-panel-slice';
-export type { PanelEditorValues } from './panel-editor-slice';
+import { useRef } from 'react';
+
+declare global {
+  // eslint-disable-next-line no-var
+  var useIdValue: number;
+}
+
+if (globalThis.useIdValue === undefined) {
+  globalThis.useIdValue = 0;
+}
+
+/**
+ * Generates a unique (stable) ID for a component. Should be replaced with React.useId once we support only React 18.
+ */
+export function useId(prefix: string) {
+  const id = useRef<string | undefined>(undefined);
+  if (id.current === undefined) {
+    id.current = `${prefix}-${globalThis.useIdValue++}`;
+  }
+  return id.current;
+}

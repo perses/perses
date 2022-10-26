@@ -18,15 +18,16 @@ export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]]
 
 declare global {
   // eslint-disable-next-line no-var
-  var dashboardStoreId: number | undefined;
+  var dashboardStoreId: number;
+}
+
+if (globalThis.dashboardStoreId === undefined) {
+  globalThis.dashboardStoreId = 0;
 }
 
 /**
  * Helper function to generate unique IDs for things in the dashboard store that don't have a "natural" ID.
  */
 export function generateId() {
-  if (globalThis.dashboardStoreId === undefined) {
-    globalThis.dashboardStoreId = -1;
-  }
   return globalThis.dashboardStoreId++;
 }
