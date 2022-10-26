@@ -79,7 +79,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   const { timeRange } = useTimeRange();
 
   const variablesOptionsQuery = useQuery(
-    [name, definition, variablesValueKey],
+    [name, definition, variablesValueKey, timeRange],
     async () => {
       const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
       return resp?.data ?? [];
