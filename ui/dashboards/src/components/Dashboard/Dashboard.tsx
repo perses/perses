@@ -13,8 +13,8 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { usePanelGroupIds } from '../context';
-import { GridLayout } from './GridLayout';
+import { usePanelGroupIds } from '../../context';
+import { GridLayout } from '../GridLayout';
 
 export type DashboardProps = BoxProps;
 
