@@ -36,7 +36,7 @@ export function Panel(props: PanelProps) {
   const generatedPanelId = useId('Panel');
   const headerId = `${generatedPanelId}-header`;
 
-  const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
+  const [contentElement, setContentElement] = useState<HTMLElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
   const { width, height } = useResizeObserver({ ref: contentElement });
@@ -82,6 +82,7 @@ export function Panel(props: PanelProps) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       aria-labelledby={headerId}
+      aria-describedby={headerId}
       {...others}
     >
       <PanelHeader
@@ -93,10 +94,12 @@ export function Panel(props: PanelProps) {
         sx={{ paddingX: (theme) => theme.spacing(panelPadding) }}
       />
       <CardContent
+        component="figure"
         sx={{
           position: 'relative',
           overflow: 'hidden',
           flexGrow: 1,
+          margin: 0,
           padding: (theme) => theme.spacing(panelPadding),
           // Override MUI default style for last-child
           ':last-child': {

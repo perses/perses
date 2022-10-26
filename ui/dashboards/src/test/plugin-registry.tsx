@@ -72,7 +72,7 @@ export function mockPluginRegistryProps() {
 
 export const FAKE_PANEL_PLUGIN: PanelPlugin = {
   PanelComponent: () => {
-    return <div role="figure">FakePanel chart</div>;
+    return <div>FakePanel chart</div>;
   },
   OptionsEditorComponent: () => {
     return <div>Edit options here</div>;

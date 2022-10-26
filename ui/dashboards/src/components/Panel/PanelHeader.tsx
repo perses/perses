@@ -33,12 +33,14 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
 
 export function PanelHeader({ id, title, description, editHandlers, isHovered, sx, ...rest }: PanelHeaderProps) {
   const titleElementId = `${id}-title`;
+  const descriptionTooltipId = `${id}-description`;
 
   return (
     <CardHeader
       id={id}
       component="header"
       aria-labelledby={titleElementId}
+      aria-describedby={descriptionTooltipId}
       title={
         <Box
           sx={{
@@ -62,12 +64,14 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
             }}
           >
             {isHovered && editHandlers === undefined && description !== undefined && (
-              <InfoTooltip id="info-tooltip" description={description} placement={TooltipPlacement.Bottom}>
-                <InformationOutlineIcon
-                  aria-describedby="info-tooltip"
-                  aria-hidden={false}
-                  sx={{ cursor: 'pointer', color: (theme) => theme.palette.grey[700] }}
-                />
+              <InfoTooltip id={descriptionTooltipId} description={description} placement={TooltipPlacement.Bottom}>
+                <HeaderIconButton aria-label="Panel Description">
+                  <InformationOutlineIcon
+                    aria-describedby="info-tooltip"
+                    aria-hidden={false}
+                    sx={{ color: (theme) => theme.palette.grey[700] }}
+                  />
+                </HeaderIconButton>
               </InfoTooltip>
             )}
             {isHovered && editHandlers !== undefined && (
