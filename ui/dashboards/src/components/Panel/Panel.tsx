@@ -17,20 +17,19 @@ import { useInView } from 'react-intersection-observer';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
-import { useEditMode, PanelGroupItemId, usePanelActions } from '../../context';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
   definition: PanelDefinition;
-  panelGroupItemId: PanelGroupItemId;
+  editHandlers?: PanelHeaderProps['editHandlers'];
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, panelGroupItemId, onMouseEnter, onMouseLeave, ...others } = props;
+  const { definition, editHandlers, onMouseEnter, onMouseLeave, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -51,10 +50,6 @@ export function Panel(props: PanelProps) {
   // TODO: adjust padding for small panels, consistent way to determine isLargePanel here and in StatChart
   const panelPadding = 1.5;
 
-  const { isEditMode } = useEditMode();
-
-  const { openEditPanel, openDeletePanelDialog } = usePanelActions(panelGroupItemId);
-
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     setIsHovered(true);
     onMouseEnter?.(e);
@@ -64,13 +59,6 @@ export function Panel(props: PanelProps) {
     setIsHovered(false);
     onMouseLeave?.(e);
   };
-
-  const description = isHovered ? definition.spec.display.description : undefined;
-
-  const editHandlers: PanelHeaderProps['editHandlers'] =
-    isEditMode && isHovered
-      ? { onEditPanelClick: openEditPanel, onDeletePanelClick: openDeletePanelDialog }
-      : undefined;
 
   return (
     <Card
@@ -89,8 +77,9 @@ export function Panel(props: PanelProps) {
     >
       <PanelHeader
         title={definition.spec.display.name}
-        description={description}
+        description={definition.spec.display.description}
         editHandlers={editHandlers}
+        isHovered={isHovered}
         sx={{ paddingX: (theme) => theme.spacing(panelPadding) }}
       />
       <CardContent

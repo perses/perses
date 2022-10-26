@@ -12,26 +12,22 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
+import { PanelEditorValues } from '../../context';
 import { Panel, PanelProps } from '../Panel';
 
-export function PanelPreview({ name, description, kind, spec, groupId }: PanelEditorValues) {
-  const previewValues: PanelProps = {
-    definition: {
-      kind: 'Panel',
-      spec: {
-        display: {
-          name,
-          description,
-        },
-        plugin: {
-          kind,
-          spec,
-        },
+export function PanelPreview({ name, description, kind, spec }: PanelEditorValues) {
+  const definition: PanelProps['definition'] = {
+    kind: 'Panel',
+    spec: {
+      display: {
+        name,
+        description: description === '' ? undefined : description,
+      },
+      plugin: {
+        kind,
+        spec,
       },
     },
-    // TODO: this shouldn't be necessary for preview
-    panelGroupItemId: { panelGroupId: groupId, panelGroupItemLayoutId: '' },
   };
 
   if (!kind) {
@@ -40,7 +36,7 @@ export function PanelPreview({ name, description, kind, spec, groupId }: PanelEd
 
   return (
     <Box height={300}>
-      <Panel {...previewValues} />
+      <Panel definition={definition} />
     </Box>
   );
 }

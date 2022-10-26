@@ -27,9 +27,10 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
     onEditPanelClick: () => void;
     onDeletePanelClick: () => void;
   };
+  isHovered: boolean;
 }
 
-export function PanelHeader({ title, description, editHandlers, sx, ...rest }: PanelHeaderProps) {
+export function PanelHeader({ title, description, editHandlers, isHovered, sx, ...rest }: PanelHeaderProps) {
   return (
     <CardHeader
       {...rest}
@@ -51,7 +52,7 @@ export function PanelHeader({ title, description, editHandlers, sx, ...rest }: P
               marginLeft: 'auto',
             }}
           >
-            {editHandlers === undefined && description !== undefined && (
+            {isHovered && editHandlers === undefined && description !== undefined && (
               <InfoTooltip id="info-tooltip" description={description} placement={TooltipPlacement.Bottom}>
                 <InformationOutlineIcon
                   aria-describedby="info-tooltip"
@@ -60,7 +61,7 @@ export function PanelHeader({ title, description, editHandlers, sx, ...rest }: P
                 />
               </InfoTooltip>
             )}
-            {editHandlers !== undefined && (
+            {isHovered && editHandlers !== undefined && (
               <Stack direction="row" alignItems="center" spacing={0.5}>
                 <HeaderIconButton aria-label="edit panel" size="small" onClick={editHandlers.onEditPanelClick}>
                   <PencilIcon />
