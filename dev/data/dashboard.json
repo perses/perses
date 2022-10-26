@@ -762,10 +762,19 @@
           }
         },
         {
-          "kind": "TextVariable",
+          "kind": "ListVariable",
           "spec": {
             "name": "instance",
-            "value": "demo.do.prometheus.io:9100"
+            "allow_multiple": false,
+            "allow_all_value": false,
+            "default_value": "demo.do.prometheus.io:9100",
+            "plugin": {
+              "kind": "PrometheusLabelValuesVariable",
+              "spec": {
+                "label_name": "instance",
+                "matchers": ["up{job=~\"$job\"}"]
+              }
+            }
           }
         },
         {
