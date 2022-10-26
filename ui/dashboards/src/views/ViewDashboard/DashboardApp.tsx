@@ -14,9 +14,14 @@
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { PanelDrawer, Dashboard, PanelGroupDialog, DeletePanelGroupDialog } from '../../components';
-import { DashboardToolbar } from '../../components/DashboardToolbar';
-import DeletePanelDialog from '../../components/Panel/DeletePanelDialog';
+import {
+  PanelDrawer,
+  Dashboard,
+  PanelGroupDialog,
+  DeletePanelGroupDialog,
+  DeletePanelDialog,
+  DashboardToolbar,
+} from '../../components';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
