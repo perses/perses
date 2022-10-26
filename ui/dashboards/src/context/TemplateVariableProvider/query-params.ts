@@ -20,14 +20,14 @@ export function getURLQueryParamName(name: string) {
   return `${variableQueryParameterPrefix}${name}`;
 }
 
-function encodeVariableValue(value: VariableValue) {
+export function encodeVariableValue(value: VariableValue) {
   if (Array.isArray(value)) {
     return value.join(',');
   }
   return value;
 }
 
-function decodeVariableValue(value: string): VariableValue {
+export function decodeVariableValue(value: string): VariableValue {
   if (!value) {
     return null;
   }

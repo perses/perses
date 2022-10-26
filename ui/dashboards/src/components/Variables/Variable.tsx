@@ -111,6 +111,20 @@ function ListVariable({ name }: TemplateVariableProps) {
     return computedOptions;
   }, [options, allowAllValue]);
 
+  const valueIsInOptions = useMemo(
+    () =>
+      Boolean(
+        finalOptions.find((v) => {
+          if (allowMultiple) {
+            return (value as string[]).includes(v.value);
+          }
+          return value === v.value;
+        })
+      ),
+    [finalOptions, value, allowMultiple]
+  );
+  const selectValue = valueIsInOptions ? value ?? '' : '';
+
   useEffect(() => {
     const firstOption = finalOptions?.[0];
 
@@ -128,7 +142,7 @@ function ListVariable({ name }: TemplateVariableProps) {
           sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
           label={name}
-          value={value ?? ''}
+          value={selectValue}
           onChange={(e) => {
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {
