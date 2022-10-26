@@ -14,24 +14,11 @@
 import { useState, useMemo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
-import {
-  Box,
-  Card,
-  CardProps,
-  CardHeader,
-  CardContent,
-  Typography,
-  IconButton as MuiIconButton,
-  Stack,
-  styled,
-} from '@mui/material';
-import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import PencilIcon from 'mdi-material-ui/PencilOutline';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import DragIcon from 'mdi-material-ui/DragVertical';
+import { Card, CardProps, CardContent } from '@mui/material';
 import { useEditMode, PanelGroupItemId, usePanelActions } from '../../context';
+import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps {
@@ -43,7 +30,7 @@ export interface PanelProps extends CardProps {
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, panelGroupItemId, ...others } = props;
+  const { definition, panelGroupItemId, onMouseEnter, onMouseLeave, ...others } = props;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -68,6 +55,23 @@ export function Panel(props: PanelProps) {
 
   const { openEditPanel, openDeletePanelDialog } = usePanelActions(panelGroupItemId);
 
+  const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
+    setIsHovered(true);
+    onMouseEnter?.(e);
+  };
+
+  const handleMouseLeave: CardProps['onMouseLeave'] = (e) => {
+    setIsHovered(false);
+    onMouseLeave?.(e);
+  };
+
+  const description = isHovered ? definition.spec.display.description : undefined;
+
+  const editHandlers: PanelHeaderProps['editHandlers'] =
+    isEditMode && isHovered
+      ? { onEditPanelClick: openEditPanel, onDeletePanelClick: openDeletePanelDialog }
+      : undefined;
+
   return (
     <Card
       ref={ref}
@@ -79,64 +83,15 @@ export function Panel(props: PanelProps) {
         flexFlow: 'column nowrap',
       }}
       variant="outlined"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       {...others}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <CardHeader
-        title={
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              minHeight: '32px',
-            }}
-          >
-            <Typography variant="subtitle1" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-              {definition.spec.display.name}
-            </Typography>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                marginLeft: 'auto',
-              }}
-            >
-              {!isEditMode && isHovered && definition.spec.display.description && (
-                <InfoTooltip
-                  id="info-tooltip"
-                  description={definition.spec.display.description}
-                  placement={TooltipPlacement.Bottom}
-                >
-                  <InformationOutlineIcon
-                    aria-describedby="info-tooltip"
-                    aria-hidden={false}
-                    sx={{ cursor: 'pointer', color: (theme) => theme.palette.grey[700] }}
-                  />
-                </InfoTooltip>
-              )}
-              {isEditMode && isHovered && (
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <IconButton aria-label="edit panel" size="small" onClick={openEditPanel}>
-                    <PencilIcon />
-                  </IconButton>
-                  <IconButton aria-label="delete panel" size="small" onClick={openDeletePanelDialog}>
-                    <DeleteIcon />
-                  </IconButton>
-                  <IconButton aria-label="drag handle" size="small">
-                    <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
-                  </IconButton>
-                </Stack>
-              )}
-            </Box>
-          </Box>
-        }
-        sx={{
-          display: 'block',
-          paddingX: (theme) => theme.spacing(panelPadding),
-          paddingY: '4px',
-          borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
-        }}
+      <PanelHeader
+        title={definition.spec.display.name}
+        description={description}
+        editHandlers={editHandlers}
+        sx={{ paddingX: (theme) => theme.spacing(panelPadding) }}
       />
       <CardContent
         sx={{
@@ -164,8 +119,3 @@ export function Panel(props: PanelProps) {
     </Card>
   );
 }
-
-const IconButton = styled(MuiIconButton)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: '4px',
-}));
