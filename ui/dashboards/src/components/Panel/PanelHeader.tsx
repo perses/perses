@@ -21,6 +21,7 @@ import DragIcon from 'mdi-material-ui/DragVertical';
 type OmittedProps = 'children';
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
+  id: string;
   title: string;
   description?: string;
   editHandlers?: {
@@ -30,10 +31,14 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   isHovered: boolean;
 }
 
-export function PanelHeader({ title, description, editHandlers, isHovered, sx, ...rest }: PanelHeaderProps) {
+export function PanelHeader({ id, title, description, editHandlers, isHovered, sx, ...rest }: PanelHeaderProps) {
+  const titleElementId = `${id}-title`;
+
   return (
     <CardHeader
-      {...rest}
+      id={id}
+      component="header"
+      aria-labelledby={titleElementId}
       title={
         <Box
           sx={{
@@ -42,7 +47,11 @@ export function PanelHeader({ title, description, editHandlers, isHovered, sx, .
             minHeight: '32px',
           }}
         >
-          <Typography variant="subtitle1" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+          <Typography
+            id={titleElementId}
+            variant="subtitle1"
+            sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          >
             {title}
           </Typography>
           <Box
@@ -85,6 +94,7 @@ export function PanelHeader({ title, description, editHandlers, isHovered, sx, .
         }),
         sx
       )}
+      {...rest}
     />
   );
 }

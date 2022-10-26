@@ -30,7 +30,7 @@ export function PanelPreview({ name, description, kind, spec }: PanelEditorValue
     },
   };
 
-  if (!kind) {
+  if (kind === '') {
     return null;
   }
 

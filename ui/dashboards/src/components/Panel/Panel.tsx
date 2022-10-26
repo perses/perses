@@ -14,13 +14,14 @@
 import { useState, useMemo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
+import { useId } from '../../utils/component-ids';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 import { PanelContent } from './PanelContent';
 
-export interface PanelProps extends CardProps {
+export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
   editHandlers?: PanelHeaderProps['editHandlers'];
 }
@@ -29,7 +30,11 @@ export interface PanelProps extends CardProps {
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, editHandlers, onMouseEnter, onMouseLeave, ...others } = props;
+  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, ...others } = props;
+
+  // Make sure we have an ID we can use for aria attributes
+  const generatedPanelId = useId('Panel');
+  const headerId = `${generatedPanelId}-header`;
 
   const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -63,19 +68,24 @@ export function Panel(props: PanelProps) {
   return (
     <Card
       ref={ref}
-      sx={{
-        ...others.sx,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column nowrap',
-      }}
+      component="section"
+      sx={combineSx(
+        {
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexFlow: 'column nowrap',
+        },
+        sx
+      )}
       variant="outlined"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      aria-labelledby={headerId}
       {...others}
     >
       <PanelHeader
+        id={headerId}
         title={definition.spec.display.name}
         description={definition.spec.display.description}
         editHandlers={editHandlers}

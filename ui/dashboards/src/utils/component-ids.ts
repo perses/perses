@@ -11,23 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
- */
-export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];
+import { useRef } from 'react';
 
 declare global {
   // eslint-disable-next-line no-var
-  var dashboardStoreId: number;
+  var useIdValue: number;
 }
 
-if (globalThis.dashboardStoreId === undefined) {
-  globalThis.dashboardStoreId = 0;
+if (globalThis.useIdValue === undefined) {
+  globalThis.useIdValue = 0;
 }
 
 /**
- * Helper function to generate unique IDs for things in the dashboard store that don't have a "natural" ID.
+ * Generates a unique (stable) ID for a component. Should be replaced with React.useId once we support only React 18.
  */
-export function generateId() {
-  return globalThis.dashboardStoreId++;
+export function useId(prefix: string) {
+  const id = useRef<string | undefined>(undefined);
+  if (id.current === undefined) {
+    id.current = `${prefix}-${globalThis.useIdValue++}`;
+  }
+  return id.current;
 }
