@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { useParams } from 'react-router-dom';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container, Paper, Stack, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { FolderPound, ViewDashboard } from 'mdi-material-ui';
 import { useDashboardList } from '../model/dashboard-client';
 import { DashboardList } from './ViewDashboardList';
 
@@ -27,14 +28,17 @@ function RenderDashboardInProject(props: RenderDashboardInProjectProperties) {
     return null;
   }
   return (
-    <Box>
-      <Typography variant="h2" mb={2}>
-        Dashboards
-      </Typography>
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <DashboardList dashboardList={data} />
-      </ErrorBoundary>
-    </Box>
+    <Paper>
+      <Box p={1}>
+        <Stack direction="row" alignItems="center" gap={1} my={2}>
+          <ViewDashboard />
+          <Typography variant="h3">Dashboards</Typography>
+        </Stack>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <DashboardList dashboardList={data} />
+        </ErrorBoundary>
+      </Box>
+    </Paper>
   );
 }
 
@@ -45,6 +49,10 @@ function ViewProject() {
   }
   return (
     <Container maxWidth="md">
+      <Stack direction="row" alignItems="center" gap={1} mb={2}>
+        <FolderPound />
+        <Typography variant="h1">{projectName}</Typography>
+      </Stack>
       <RenderDashboardInProject projectName={projectName} />
     </Container>
   );
