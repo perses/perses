@@ -16,12 +16,15 @@ package core
 import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
+	"github.com/perses/perses/internal/api/config"
+	configendpoint "github.com/perses/perses/internal/api/impl/config"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
 	"github.com/perses/perses/internal/api/impl/v1/folder"
 	"github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
+	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
 )
 
@@ -31,11 +34,13 @@ type endpoint interface {
 
 type api struct {
 	echoUtils.Register
-	endpoints []endpoint
+	apiV1Endpoints []endpoint
+	apiEndpoints   []endpoint
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager, readonly bool) echoUtils.Register {
-	endpoints := []endpoint{
+func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) echoUtils.Register {
+	readonly := cfg.Readonly
+	apiV1Endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
 		datasource.NewEndpoint(serviceManager.GetDatasource(), readonly),
 		folder.NewEndpoint(serviceManager.GetFolder(), readonly),
@@ -43,8 +48,12 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, readonly bool) echoU
 		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject(), readonly),
 	}
+	apiEndpoints := []endpoint{
+		configendpoint.New(cfg),
+	}
 	return &api{
-		endpoints: endpoints,
+		apiV1Endpoints: apiV1Endpoints,
+		apiEndpoints:   apiEndpoints,
 	}
 }
 
@@ -53,8 +62,12 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 }
 
 func (a *api) registerAPIV1Route(e *echo.Echo) {
-	apiV1 := e.Group("/api/v1")
-	for _, ept := range a.endpoints {
-		ept.RegisterRoutes(apiV1)
+	apiGroup := e.Group("/api")
+	for _, ept := range a.apiEndpoints {
+		ept.RegisterRoutes(apiGroup)
+	}
+	apiV1Group := e.Group(shared.APIV1Prefix)
+	for _, ept := range a.apiV1Endpoints {
+		ept.RegisterRoutes(apiV1Group)
 	}
 }
