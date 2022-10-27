@@ -28,11 +28,15 @@ import {
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
+import { ArchiveOutline } from 'mdi-material-ui';
 import { useProjectQuery } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useDarkMode } from '../context/DarkMode';
 
+const ITEM_HEIGHT = 48;
+
 function ProjectMenu(): JSX.Element {
+  const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { data, isLoading } = useProjectQuery({ onError: exceptionSnackbar });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -48,45 +52,50 @@ function ProjectMenu(): JSX.Element {
     return <CircularProgress size="1rem" />;
   }
 
-  if (data !== undefined) {
-    return (
-      <>
-        <Button
-          aria-label="List of the available projects"
-          aria-controls="menu-project-list-appbar"
-          aria-haspopup="true"
-          color="inherit"
-          endIcon={<ChevronDown />}
-          onClick={handleMenu}
-        >
-          Projects
-        </Button>
-        <Menu
-          id="menu-project-list-appbar"
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          keepMounted
-          open={anchorEl !== null}
-          onClose={handleCloseMenu}
-        >
-          {data.map((value, index) => {
-            return (
-              // TODO when routing is in place, use the button to redirect to the project page
-              <MenuItem key={index} onClick={handleCloseMenu}>
-                {value.metadata.name}
-              </MenuItem>
-            );
-          })}
-        </Menu>
-      </>
-    );
+  if (data === undefined) {
+    return <></>;
   }
-  // In case the loading is finished and there is an error, it will be handled by the snackbar.
-  // That's why we return an empty bracket
-  return <></>;
+
+  return (
+    <>
+      <Button
+        aria-label="List of the available projects"
+        aria-controls="menu-project-list-appbar"
+        aria-haspopup="true"
+        color="inherit"
+        endIcon={<ChevronDown />}
+        onClick={handleMenu}
+      >
+        Projects
+      </Button>
+      <Menu
+        id="menu-project-list-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        keepMounted
+        open={anchorEl !== null}
+        onClose={handleCloseMenu}
+        PaperProps={{
+          style: {
+            maxHeight: ITEM_HEIGHT * 4.5,
+            width: '20ch',
+          },
+        }}
+      >
+        {data.map((value, index) => {
+          return (
+            <MenuItem key={index} onClick={() => navigate('/projects/' + value.metadata.name)}>
+              <ArchiveOutline />
+              {value.metadata.name}
+            </MenuItem>
+          );
+        })}
+      </Menu>
+    </>
+  );
 }
 
 const style: SxProps<Theme> = {
