@@ -12,7 +12,7 @@
 // limitations under the License.
 import { UnknownSpec } from '@perses-dev/core';
 import {
-  PluginRegistryProps,
+  PluginLoader,
   PluginModuleResource,
   PluginImplementation,
   PluginType,
@@ -55,7 +55,7 @@ export function mockPluginRegistryProps() {
     mockPluginModule[kind] = plugin;
   };
 
-  const pluginRegistryProps: Omit<PluginRegistryProps, 'children'> = {
+  const pluginLoader: PluginLoader = {
     getInstalledPlugins() {
       return Promise.resolve([mockPluginResource]);
     },
@@ -65,7 +65,7 @@ export function mockPluginRegistryProps() {
   };
 
   return {
-    pluginRegistryProps,
+    pluginRegistryProps: { pluginLoader },
     addMockPlugin,
   };
 }

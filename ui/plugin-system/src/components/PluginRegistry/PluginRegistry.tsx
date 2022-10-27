@@ -13,14 +13,13 @@
 
 import { UnknownSpec, useEvent } from '@perses-dev/core';
 import { useRef, useCallback, useMemo } from 'react';
-import { PluginModuleResource, PluginType, PluginImplementation, Plugin } from '../../model';
+import { PluginModuleResource, PluginType, PluginImplementation, Plugin, PluginLoader } from '../../model';
 import { PluginRegistryContext } from '../../runtime';
-import { GetInstalledPlugins, usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
+import { usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
 
 export interface PluginRegistryProps {
   children?: React.ReactNode;
-  getInstalledPlugins: GetInstalledPlugins;
-  importPluginModule: (resource: PluginModuleResource) => Promise<unknown>;
+  pluginLoader: PluginLoader;
 }
 
 /**
@@ -28,7 +27,10 @@ export interface PluginRegistryProps {
  * querying the metadata about them.
  */
 export function PluginRegistry(props: PluginRegistryProps) {
-  const { getInstalledPlugins, importPluginModule, children } = props;
+  const {
+    pluginLoader: { getInstalledPlugins, importPluginModule },
+    children,
+  } = props;
 
   const getPluginIndexes = usePluginIndexes(getInstalledPlugins);
 
