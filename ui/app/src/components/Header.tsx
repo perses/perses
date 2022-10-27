@@ -28,7 +28,6 @@ import {
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
-import { FolderPound } from 'mdi-material-ui';
 import { useProjectQuery } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useDarkMode } from '../context/DarkMode';
@@ -94,7 +93,6 @@ function ProjectMenu(): JSX.Element {
                 navigate('/projects/' + project.metadata.name);
               }}
             >
-              <FolderPound fontSize={'small'} />
               {project.metadata.name}
             </MenuItem>
           );
