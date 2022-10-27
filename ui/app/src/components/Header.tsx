@@ -28,7 +28,7 @@ import {
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
-import { ArchiveOutline } from 'mdi-material-ui';
+import { FolderPound } from 'mdi-material-ui';
 import { useProjectQuery } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useDarkMode } from '../context/DarkMode';
@@ -85,11 +85,17 @@ function ProjectMenu(): JSX.Element {
           },
         }}
       >
-        {data.map((value, index) => {
+        {data.map((project, index) => {
           return (
-            <MenuItem key={index} onClick={() => navigate('/projects/' + value.metadata.name)}>
-              <ArchiveOutline />
-              {value.metadata.name}
+            <MenuItem
+              key={index}
+              onClick={() => {
+                setAnchorEl(null);
+                navigate('/projects/' + project.metadata.name);
+              }}
+            >
+              <FolderPound fontSize={'small'} />
+              {project.metadata.name}
             </MenuItem>
           );
         })}
