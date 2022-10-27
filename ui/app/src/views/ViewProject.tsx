@@ -50,7 +50,7 @@ function ViewProject() {
   return (
     <Container maxWidth="md">
       <Stack direction="row" alignItems="center" gap={1} mb={2}>
-        <FolderPound />
+        <FolderPound fontSize={'large'} />
         <Typography variant="h1">{projectName}</Typography>
       </Stack>
       <RenderDashboardInProject projectName={projectName} />
