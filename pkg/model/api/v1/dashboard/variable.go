@@ -124,8 +124,8 @@ func (v *TextVariableSpec) validate() error {
 type ListVariableSpec struct {
 	VariableSpec  `json:"-" yaml:"-"`
 	Name          string          `json:"name" yaml:"name"`
-	AllowAllValue bool            `json:"allow_all_value,omitempty" yaml:"allow_all_value,omitempty"`
-	AllowMultiple bool            `json:"allow_multiple,omitempty" yaml:"allow_multiple,omitempty"`
+	AllowAllValue bool            `json:"allow_all_value" yaml:"allow_all_value"`
+	AllowMultiple bool            `json:"allow_multiple" yaml:"allow_multiple"`
 	Display       *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
 	Plugin        common.Plugin   `json:"plugin" yaml:"plugin"`
 }
