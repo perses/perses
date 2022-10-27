@@ -128,9 +128,6 @@ export default function Header(): JSX.Element {
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
-        <Button href="/docs" color="inherit">
-          Docs
-        </Button>
         <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
       </Toolbar>
     </AppBar>
