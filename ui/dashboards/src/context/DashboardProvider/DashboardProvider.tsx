@@ -17,7 +17,7 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useContext, useState } from 'react';
-import { DashboardSpec, RelativeTimeRange } from '@perses-dev/core';
+import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
@@ -35,12 +35,12 @@ export interface DashboardStoreState
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
-  reset: () => void;
-  save: () => void;
+  reset: (dashboardResource: DashboardResource) => void;
+  metadata: ProjectMetadata;
 }
 
 export interface DashboardStoreProps {
-  dashboardSpec: DashboardSpec;
+  dashboardResource: DashboardResource;
   isEditMode?: boolean;
 }
 
@@ -71,10 +71,13 @@ export function DashboardProvider(props: DashboardProviderProps) {
 
 function createDashboardStore(props: DashboardProviderProps) {
   const {
-    initialState: { dashboardSpec, isEditMode },
+    initialState: { dashboardResource, isEditMode },
   } = props;
 
-  const { layouts, panels } = dashboardSpec;
+  const {
+    spec: { layouts, panels, duration },
+    metadata,
+  } = dashboardResource;
   const store = createStore<DashboardStoreState>()(
     immer(
       devtools((...args) => {
@@ -86,18 +89,14 @@ function createDashboardStore(props: DashboardProviderProps) {
           ...createDeletePanelGroupSlice(...args),
           ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
-          defaultTimeRange: { pastDuration: dashboardSpec.duration },
+          metadata,
+          defaultTimeRange: { pastDuration: duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          reset: () => {
-            const { resetPanels, resetPanelGroups } = get();
-            resetPanels();
-            resetPanelGroups();
-          },
-          save: () => {
-            const { savePanels, savePanelGroups } = get();
-            savePanels();
-            savePanelGroups();
+          reset: ({ spec: { panels, layouts } }) => {
+            const { setPanels, setPanelGroups } = get();
+            setPanels(panels);
+            setPanelGroups(layouts);
           },
         };
       })

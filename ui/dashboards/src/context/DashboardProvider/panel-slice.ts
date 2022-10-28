@@ -20,17 +20,11 @@ import { Middleware } from './common';
  */
 export interface PanelSlice {
   panels: Record<string, PanelDefinition>;
-  previousPanels: Record<string, PanelDefinition>;
 
   /**
-   * Reset panels to previous state
+   * set panels
    */
-  resetPanels: () => void;
-
-  /**
-   * Save panels
-   */
-  savePanels: () => void;
+  setPanels: (panels: Record<string, PanelDefinition>) => void;
 }
 
 /**
@@ -39,17 +33,10 @@ export interface PanelSlice {
 export function createPanelSlice(panels: PanelSlice['panels']): StateCreator<PanelSlice, Middleware, [], PanelSlice> {
   return (set) => ({
     panels,
-    previousPanels: panels,
 
-    resetPanels() {
+    setPanels(panels) {
       set((state) => {
-        state.panels = state.previousPanels;
-      });
-    },
-
-    savePanels() {
-      set((state) => {
-        state.previousPanels = state.panels;
+        state.panels = panels;
       });
     },
   });

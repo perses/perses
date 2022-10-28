@@ -11,44 +11,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, DashboardSpec, GridDefinition } from '@perses-dev/core';
+import { createPanelRef, DashboardResource, GridDefinition } from '@perses-dev/core';
 import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
 import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
-export function useDashboardSpec() {
+export function useDashboardResource() {
   const {
     panels,
     panelGroups,
     panelGroupOrder,
     defaultTimeRange,
-    reset: resetDashboardStore,
-  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, defaultTimeRange, reset }) => ({
+    reset: setDashboardResource,
+    metadata,
+  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, defaultTimeRange, reset, metadata }) => ({
     panels,
     panelGroups,
     panelGroupOrder,
     defaultTimeRange,
     reset,
+    metadata,
   }));
   const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
-  const spec = {
-    panels,
-    layouts,
-    variables,
-    duration: defaultTimeRange.pastDuration,
+  const dashboardResource: DashboardResource = {
+    kind: 'Dashboard',
+    metadata,
+    spec: {
+      panels,
+      layouts,
+      variables,
+      duration: defaultTimeRange.pastDuration,
+    },
   };
 
-  const resetSpec = (spec: DashboardSpec) => {
-    setVariableDefinitions(spec.variables);
-    // TODO: Should we call reset on the dashboard store with the spec?
-    resetDashboardStore();
+  const resetDashboardResource = (dashboardResource: DashboardResource) => {
+    setVariableDefinitions(dashboardResource.spec.variables);
+    setDashboardResource(dashboardResource);
   };
 
   return {
-    spec,
-    resetSpec,
+    dashboardResource,
+    resetDashboardResource,
   };
 }
 
