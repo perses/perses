@@ -17,7 +17,7 @@ package <panel type> // e.g package timeserie
 kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
 spec: {
 	queries: [...#ts_query]
-	show_legend?: bool
+	legend?:      #legend 
 	unit?:        common.#unit
 	thresholds?:  common.#thresholds
 }
