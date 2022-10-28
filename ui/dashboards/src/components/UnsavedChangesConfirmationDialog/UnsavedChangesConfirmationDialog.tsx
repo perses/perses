@@ -13,38 +13,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dialog, DialogButtonProps } from '@perses-dev/components';
-
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import CloseIcon from 'mdi-material-ui/Close';
 export interface UnsavedChangesConfirmationDialogProps {
-  isOpen: boolean;
-  onSave: () => Promise<void>;
-  onCancel: () => void;
+  open: boolean;
 }
 
-export const UnsavedChangesConfirmationDialog = ({
-  isOpen,
-  onSave,
-  onCancel,
-}: UnsavedChangesConfirmationDialogProps) => {
-  const saveButtonProps: DialogButtonProps = {
-    name: 'Save',
-    onClick: onSave,
-  };
-
-  const cancelButtonProps: DialogButtonProps = {
-    name: 'Cancel',
-    onClick: onCancel,
-  };
-
+export const UnsavedChangesConfirmationDialog = (props: UnsavedChangesConfirmationDialogProps) => {
   return (
-    <Dialog
-      isOpen={isOpen}
-      title="Unsaved Changes"
-      primaryButton={saveButtonProps}
-      secondaryButton={cancelButtonProps}
-      onClose={onCancel}
-    >
-      You have unsaved changes in this dashboard. Would you like to save these changes?
+    <Dialog open={props.open}>
+      <DialogTitle>Unsaved Changes</DialogTitle>
+      <IconButton
+        aria-label="Close"
+        // onClick={() => closeDeletePanelDialog()}
+        sx={(theme) => ({
+          position: 'absolute',
+          top: theme.spacing(0.5),
+          right: theme.spacing(0.5),
+        })}
+      >
+        <CloseIcon />
+      </IconButton>
+      <form onSubmit={}>
+        <DialogContent sx={{ width: '500px' }}>
+          You have unsaved changes in this dashboard. Would you like to save these changes?
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" type="submit">
+            Save
+          </Button>
+          <Button>Cancel</Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 };
