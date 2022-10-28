@@ -14,9 +14,14 @@
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
-import { TimeRangeValue } from '@perses-dev/core';
-import { PluginRegistry, useTimeSeriesQueries, TimeRangeContext } from '@perses-dev/plugin-system';
-import { mockPluginRegistryProps, mockTimeSeriesQueryResult } from '../../test';
+import { TimeRangeValue, UnknownSpec } from '@perses-dev/core';
+import {
+  PluginRegistry,
+  useTimeSeriesQueries,
+  TimeRangeContext,
+  TimeSeriesQueryPlugin,
+} from '@perses-dev/plugin-system';
+import { mockPluginRegistryProps, MOCK_TIME_SERIES_QUERY_RESULT, MOCK_TIME_SERIES_DATA } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
@@ -26,9 +31,18 @@ jest.mock('@perses-dev/plugin-system', () => {
   };
 });
 
+const FAKE_PROM_QUERY_PLUGIN: TimeSeriesQueryPlugin<UnknownSpec> = {
+  getTimeSeriesData: async () => {
+    return MOCK_TIME_SERIES_DATA;
+  },
+  OptionsEditorComponent: () => {
+    return <div>Edit options here</div>;
+  },
+  createInitialOptions: () => ({}),
+};
+
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
-// Test TimeSeriesChart with legend
 const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
   contentDimensions: {
     width: 500,
@@ -57,25 +71,23 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
 
 describe('TimeSeriesChartPanel', () => {
   beforeEach(() => {
-    (useTimeSeriesQueries as jest.Mock).mockReturnValue(mockTimeSeriesQueryResult);
+    // TODO: remove and instead use addMockPlugin after rest of runtime dependencies are mocked
+    (useTimeSeriesQueries as jest.Mock).mockReturnValue(MOCK_TIME_SERIES_QUERY_RESULT);
   });
 
   // Helper to render the panel with some context set
   const renderPanel = () => {
-    const { pluginRegistryProps } = mockPluginRegistryProps();
+    const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
+    // not actually used yet, until rest of runtime deps are mocked
+    addMockPlugin('TimeSeriesQuery', 'PrometheusTimeSeriesQuery', FAKE_PROM_QUERY_PLUGIN);
 
     const mockTimeRangeContext = {
       timeRange: TEST_TIME_RANGE,
-      setTimeRange: () => {
-        /* no-op */
-      },
+      setTimeRange: () => ({}),
     };
 
     render(
-      <PluginRegistry
-        getInstalledPlugins={pluginRegistryProps.getInstalledPlugins}
-        importPluginModule={pluginRegistryProps.importPluginModule}
-      >
+      <PluginRegistry {...pluginRegistryProps}>
         <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
           <TimeRangeContext.Provider value={mockTimeRangeContext}>
             <TimeSeriesChartPanel {...TEST_TIME_SERIES_PANEL} />
