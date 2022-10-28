@@ -11,22 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { mockPluginRegistry, PluginRegistry } from '@perses-dev/plugin-system';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DashboardProvider, TemplateVariableProvider, TimeRangeProvider } from '../../../context';
-import { getTestDashboard, renderWithContext } from '../../../test';
+import { getTestDashboard, MOCK_TIME_SERIES_PANEL, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 
 describe('Panel Groups', () => {
   const renderDashboard = () => {
     renderWithContext(
-      <TimeRangeProvider timeRange={{ pastDuration: '30m' }}>
-        <TemplateVariableProvider>
-          <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
-            <DashboardApp dashboardResource={getTestDashboard()} />
-          </DashboardProvider>
-        </TemplateVariableProvider>
-      </TimeRangeProvider>
+      <PluginRegistry {...mockPluginRegistry(MOCK_TIME_SERIES_PANEL)}>
+        <TimeRangeProvider timeRange={{ pastDuration: '30m' }}>
+          <TemplateVariableProvider>
+            <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
+              <DashboardApp dashboardResource={getTestDashboard()} />
+            </DashboardProvider>
+          </TemplateVariableProvider>
+        </TimeRangeProvider>
+      </PluginRegistry>
     );
   };
   it('should delete panel', () => {
