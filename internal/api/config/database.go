@@ -27,8 +27,8 @@ const (
 )
 
 type File struct {
-	Folder        string        `yaml:"folder"`
-	FileExtension FileExtension `yaml:"file_extension"`
+	Folder        string        `json:"folder" yaml:"folder"`
+	FileExtension FileExtension `json:"file_extension" yaml:"file_extension"`
 }
 
 func (f *File) Verify() error {
@@ -42,8 +42,8 @@ func (f *File) Verify() error {
 }
 
 type Database struct {
-	File *File              `yaml:"file,omitempty"`
-	Etcd *config.EtcdConfig `yaml:"etcd,omitempty"`
+	File *File              `json:"file,omitempty" yaml:"file,omitempty"`
+	Etcd *config.EtcdConfig `json:"etcd,omitempty" yaml:"etcd,omitempty"`
 }
 
 func (d *Database) Verify() error {
