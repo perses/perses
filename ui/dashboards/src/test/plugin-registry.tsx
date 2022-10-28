@@ -24,8 +24,11 @@ const FakeTimeSeriesPlugin: PanelPlugin<UnknownSpec> = {
   createInitialOptions: () => ({}),
 };
 
-export const MOCK_TIME_SERIES_PANEL: MockPlugin = {
+const MOCK_TIME_SERIES_PANEL: MockPlugin = {
   pluginType: 'Panel',
   kind: 'TimeSeriesChart',
   plugin: FakeTimeSeriesPlugin,
 };
+
+// Array of default mock plugins added to the PluginRegistry during test renders
+export const MOCK_PLUGINS: MockPlugin[] = [MOCK_TIME_SERIES_PANEL];

@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginRegistry } from '@perses-dev/plugin-system';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
-import { mockPluginRegistry } from '@perses-dev/plugin-system';
-import { createDashboardProviderSpy, getTestDashboard, MOCK_TIME_SERIES_PANEL, renderWithContext } from '../../test';
+import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import { DashboardProvider } from '../../context/DashboardProvider';
 import { PanelDrawer } from './PanelDrawer';
 
@@ -25,12 +23,10 @@ describe('Panel Drawer', () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(
-      <PluginRegistry {...mockPluginRegistry(MOCK_TIME_SERIES_PANEL)}>
-        <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
-          <DashboardProviderSpy />
-          <PanelDrawer />
-        </DashboardProvider>
-      </PluginRegistry>
+      <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
+        <DashboardProviderSpy />
+        <PanelDrawer />
+      </DashboardProvider>
     );
 
     const { value: storeApi } = store;
