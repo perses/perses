@@ -11,26 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent } from 'react';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Box, TextField, FormControl, InputLabel } from '@mui/material';
-import { OptionsEditorProps, DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
-import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector } from '../model';
-import { PrometheusTimeSeriesQuerySpec } from './time-series-query';
+import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector } from '../../model';
+import { PrometheusTimeSeriesQueryEditorProps, useQueryState } from './query-editor-model';
 
-export type PrometheusTimeSeriesQueryEditorProps = OptionsEditorProps<PrometheusTimeSeriesQuerySpec>;
-
+/**
+ * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
+ */
 export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps) {
   const { onChange, value } = props;
-  const { query, datasource } = value;
+  const { datasource } = value;
 
-  const handleQueryChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(
-      produce(value, (draft) => {
-        draft.query = e.target.value;
-      })
-    );
-  };
+  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {
@@ -49,7 +43,14 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   return (
     <Box>
-      <TextField fullWidth label="Query" value={query} onChange={handleQueryChange} margin="dense" />
+      <TextField
+        fullWidth
+        label="Query"
+        value={query}
+        onChange={handleQueryChange}
+        onBlur={handleQueryBlur}
+        margin="dense"
+      />
       <FormControl margin="dense" fullWidth={false}>
         {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
             maintain 17 compatibility somehow with a polyfill/shim? */}

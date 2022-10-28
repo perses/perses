@@ -11,30 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString } from '@perses-dev/core';
 import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import {
   parseValueTuple,
-  PrometheusDatasourceSelector,
   PrometheusClient,
-  TemplateString,
   getDurationStringSeconds,
   getPrometheusTimeRange,
   getRangeStep,
   replaceTemplateVariables,
   DEFAULT_PROM,
-} from '../model';
-import { PrometheusTimeSeriesQueryEditor } from './PrometheusTimeSeriesQueryEditor';
+} from '../../model';
+import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
-export interface PrometheusTimeSeriesQuerySpec {
-  query: TemplateString;
-  min_step?: DurationString;
-  resolution?: number;
-  datasource?: PrometheusDatasourceSelector;
-}
-
-const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
+export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
   context
 ) => {
@@ -94,15 +84,4 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['g
     }),
   };
   return chartData;
-};
-
-/**
- * The core Prometheus TimeSeriesQuery plugin for Perses.
- */
-export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec> = {
-  getTimeSeriesData,
-  OptionsEditorComponent: PrometheusTimeSeriesQueryEditor,
-  createInitialOptions: () => ({
-    query: '',
-  }),
 };
