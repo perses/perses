@@ -24,10 +24,16 @@ import { TimeRangeControls } from '../TimeRangeControls';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
+  dashboardTitleComponent?: JSX.Element;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName } = props;
+  const dashboardTitle = props.dashboardTitleComponent ? (
+    props.dashboardTitleComponent
+  ) : (
+    <Typography variant="h2">{dashboardName}</Typography>
+  );
 
   const { isEditMode, setEditMode } = useEditMode();
   const { openAddPanelGroup, openAddPanel, save } = useDashboardActions();
@@ -59,7 +65,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
         <Stack spacing={2}>
           <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
             <Box padding={2} display="flex">
-              <Typography variant="h2">Edit {dashboardName}</Typography>
+              {dashboardTitle}
               <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
                 <Button variant="contained" onClick={onSave}>
                   Save
@@ -95,7 +101,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
       ) : (
         <Stack spacing={2} padding={2}>
           <Box sx={{ display: 'flex', width: '100%' }}>
-            <Typography variant="h2">{dashboardName}</Typography>
+            {dashboardTitle}
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
               {isLaptopSize && (

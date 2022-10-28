@@ -25,10 +25,11 @@ import {
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
+  dashboardTitleComponent?: JSX.Element;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource } = props;
+  const { dashboardResource, dashboardTitleComponent } = props;
   return (
     <Box
       sx={{
@@ -39,7 +40,10 @@ export const DashboardApp = (props: DashboardAppProps) => {
         flexDirection: 'column',
       }}
     >
-      <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
+      <DashboardToolbar
+        dashboardName={dashboardResource.metadata.name}
+        dashboardTitleComponent={dashboardTitleComponent}
+      />
       <Box sx={{ padding: (theme) => theme.spacing(2) }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard />
