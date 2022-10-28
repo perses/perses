@@ -56,7 +56,7 @@ func main() {
 		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
 	}
 	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
-	persesAPI := core.NewPersesAPI(serviceManager, conf.Readonly)
+	persesAPI := core.NewPersesAPI(serviceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
@@ -75,7 +75,8 @@ func main() {
 	runner.HTTPServerBuilder().
 		APIRegistration(persesAPI).
 		APIRegistration(persesFrontend).
-		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource()))
+		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource())).
+		Middleware(middleware.CheckProject(serviceManager.GetProject()))
 
 	// start the application
 	runner.Start()

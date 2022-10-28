@@ -20,6 +20,7 @@ import {
   useTemplateVariableValues,
   VariableStateMap,
   useDatasourceStore,
+  useTimeRange,
 } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
@@ -75,11 +76,12 @@ function ListVariable({ name }: TemplateVariableProps) {
   }
 
   const variablesValueKey = getVariableValuesKey(variables);
+  const { timeRange } = useTimeRange();
 
   const variablesOptionsQuery = useQuery(
-    [name, definition, variablesValueKey],
+    [name, definition, variablesValueKey, timeRange],
     async () => {
-      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables });
+      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
       return resp?.data ?? [];
     },
     { enabled: !!variablePlugin || waitToLoad }
@@ -111,25 +113,30 @@ function ListVariable({ name }: TemplateVariableProps) {
     return computedOptions;
   }, [options, allowAllValue]);
 
+  const valueIsInOptions = useMemo(
+    () =>
+      Boolean(
+        finalOptions.find((v) => {
+          if (allowMultiple) {
+            return (value as string[]).includes(v.value);
+          }
+          return value === v.value;
+        })
+      ),
+    [finalOptions, value, allowMultiple]
+  );
+
+  let selectValue = value;
+  if (!valueIsInOptions) {
+    selectValue = allowMultiple ? [] : '';
+  }
+
   useEffect(() => {
     const firstOption = finalOptions?.[0];
-    const valueIsInOptions = Boolean(
-      finalOptions.find((v) => {
-        if (allowMultiple) {
-          return (value as string[]).includes(v.value);
-        }
-        return value === v.value;
-      })
-    );
 
     // If there is no value but there are options, set the value to the first option.
     if (!value && firstOption) {
       setVariableValue(name, firstOption.value);
-    }
-
-    // If there is a value but it's not in the options, select the first value or set to null
-    if (value && !valueIsInOptions && !definition.spec.default_value) {
-      setVariableValue(name, firstOption?.value || null);
     }
   }, [finalOptions, setVariableValue, value, name, allowMultiple]);
 
@@ -141,7 +148,7 @@ function ListVariable({ name }: TemplateVariableProps) {
           sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
           label={name}
-          value={value ?? ''}
+          value={selectValue}
           onChange={(e) => {
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {

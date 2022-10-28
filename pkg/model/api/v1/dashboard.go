@@ -38,8 +38,8 @@ type Panel struct {
 }
 
 type DashboardSpec struct {
-	// Datasource is a set of values that will be used to find the datasource definition.
-	Datasource dashboard.Datasource `json:"datasource" yaml:"datasource"`
+	// Datasources is an optional list of datasource definition.
+	Datasources map[string]*DatasourceSpec `json:"datasources,omitempty" yaml:"datasources,omitempty"`
 	// Duration is the default time you would like to use to looking in the past when getting data to fill the
 	// dashboard
 	Duration  model.Duration       `json:"duration" yaml:"duration"`

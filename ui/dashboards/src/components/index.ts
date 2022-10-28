@@ -12,6 +12,9 @@
 // limitations under the License.
 
 export * from './Dashboard';
+export * from './DashboardToolbar';
+export * from './DeletePanelDialog';
+export * from './DeletePanelGroupDialog';
 export * from './GridLayout';
 export * from './Panel';
 export * from './PanelDrawer';

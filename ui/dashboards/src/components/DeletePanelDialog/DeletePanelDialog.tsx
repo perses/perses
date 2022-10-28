@@ -16,7 +16,7 @@ import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button }
 import CloseIcon from 'mdi-material-ui/Close';
 import { useDeletePanelDialog, DeletePanelDialogState } from '../../context';
 
-const DeletePanelDialog = () => {
+export const DeletePanelDialog = () => {
   const { deletePanelDialog, closeDeletePanelDialog } = useDeletePanelDialog();
 
   return (
@@ -66,5 +66,3 @@ const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
     </form>
   );
 };
-
-export default DeletePanelDialog;

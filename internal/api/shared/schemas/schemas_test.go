@@ -49,10 +49,6 @@ func TestValidatePanels(t *testing.T) {
 		},
 		Project: "perses",
 	}
-	dts := dashboard.Datasource{
-		Name: "PrometheusDemo",
-		Kind: "Prometheus",
-	}
 
 	testSuite := []struct {
 		title     string
@@ -65,9 +61,8 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Datasource: dts,
-					Duration:   model.Duration(6 * time.Hour),
-					Variables:  nil,
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyFirstPanel": {
 							Spec: v1.PanelSpec{
@@ -96,9 +91,8 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Datasource: dts,
-					Duration:   model.Duration(6 * time.Hour),
-					Variables:  nil,
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
@@ -117,9 +111,8 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Datasource: dts,
-					Duration:   model.Duration(6 * time.Hour),
-					Variables:  nil,
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
@@ -139,9 +132,8 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Datasource: dts,
-					Duration:   model.Duration(6 * time.Hour),
-					Variables:  nil,
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
@@ -161,9 +153,8 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Datasource: dts,
-					Duration:   model.Duration(6 * time.Hour),
-					Variables:  nil,
+					Duration:  model.Duration(6 * time.Hour),
+					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
@@ -209,10 +200,6 @@ func TestValidateVariables(t *testing.T) {
 		},
 		Project: "perses",
 	}
-	dts := dashboard.Datasource{
-		Name: "PrometheusDemo",
-		Kind: "Prometheus",
-	}
 
 	testSuite := []struct {
 		title     string
@@ -225,8 +212,7 @@ func TestValidateVariables(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Datasource: dts,
-					Duration:   model.Duration(6 * time.Hour),
+					Duration: model.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
 							Kind: "ListVariable",
@@ -267,8 +253,7 @@ func TestValidateVariables(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Datasource: dts,
-					Duration:   model.Duration(6 * time.Hour),
+					Duration: model.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
 							Kind: "ListVariable",

@@ -18,8 +18,9 @@ import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/core';
-import { useDashboardActions, useDashboardSpec, useEditMode } from '../context';
-import { TemplateVariableList, TimeRangeControls } from '../components';
+import { useDashboardActions, useDashboardSpec, useEditMode } from '../../context';
+import { TemplateVariableList } from '../Variables';
+import { TimeRangeControls } from '../TimeRangeControls';
 
 export interface DashboardToolbarProps {
   dashboardName: string;

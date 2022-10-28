@@ -84,7 +84,11 @@ describe('Panel Drawer', () => {
     if (group === undefined) {
       throw new Error('Test group not found');
     }
-    act(() => storeApi.getState().openEditPanel({ panelGroupId: group.id, itemIndex: 0 }));
+    const layout = Object.entries(group.itemPanelKeys).find(([, panelKey]) => panelKey === 'cpu');
+    if (layout === undefined) {
+      throw new Error('Test panel not found');
+    }
+    act(() => storeApi.getState().openEditPanel({ panelGroupId: group.id, panelGroupItemLayoutId: layout[0] }));
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.clear(nameInput);

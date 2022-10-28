@@ -47,10 +47,6 @@ func TestMarshalDashboard(t *testing.T) {
 					Project: "perses",
 				},
 				Spec: DashboardSpec{
-					Datasource: dashboard.Datasource{
-						Name: "PrometheusDemo",
-						Kind: "Prometheus",
-					},
 					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]*Panel{
@@ -100,11 +96,6 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "datasource": {
-      "name": "PrometheusDemo",
-      "kind": "Prometheus",
-      "global": false
-    },
     "duration": "6h",
     "panels": {
       "MyPanel": {
@@ -157,10 +148,6 @@ func TestMarshalDashboard(t *testing.T) {
 					Project: "perses",
 				},
 				Spec: DashboardSpec{
-					Datasource: dashboard.Datasource{
-						Name: "PrometheusDemo",
-						Kind: "Prometheus",
-					},
 					Duration: model.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
@@ -240,17 +227,14 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "datasource": {
-      "name": "PrometheusDemo",
-      "kind": "Prometheus",
-      "global": false
-    },
     "duration": "6h",
     "variables": [
       {
         "kind": "ListVariable",
         "spec": {
           "name": "labelName",
+          "allow_all_value": false,
+          "allow_multiple": false,
           "plugin": {
             "kind": "PrometheusLabelNamesVariable",
             "spec": {
@@ -265,6 +249,8 @@ func TestMarshalDashboard(t *testing.T) {
         "kind": "ListVariable",
         "spec": {
           "name": "labelValue",
+          "allow_all_value": false,
+          "allow_multiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -337,11 +323,6 @@ func TestUnmarshallDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "datasource": {
-      "name": "PrometheusDemo",
-      "kind": "Prometheus",
-      "global": false
-    },
     "duration": "6h",
     "variables": [
       {
@@ -440,10 +421,6 @@ func TestUnmarshallDashboard(t *testing.T) {
 			Project: "perses",
 		},
 		Spec: DashboardSpec{
-			Datasource: dashboard.Datasource{
-				Name: "PrometheusDemo",
-				Kind: "Prometheus",
-			},
 			Duration: model.Duration(6 * time.Hour),
 			Variables: []dashboard.Variable{
 				{

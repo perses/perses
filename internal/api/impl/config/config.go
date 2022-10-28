@@ -11,18 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './InfoTooltip';
-export * from './JSONEditor';
-export * from './Legend';
-export * from './LineChart';
-export * from './GaugeChart';
-export * from './StatChart';
-export * from './TimeRangeSelector';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test';
+package configendpoint
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/config"
+)
+
+type Endpoint struct {
+	cfg config.Config
+}
+
+func New(cfg config.Config) *Endpoint {
+	return &Endpoint{
+		cfg: cfg,
+	}
+}
+
+func (e *Endpoint) RegisterRoutes(g *echo.Group) {
+	g.GET("/config", e.getConfig)
+}
+
+func (e *Endpoint) getConfig(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, e.cfg)
+}

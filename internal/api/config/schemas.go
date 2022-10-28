@@ -13,7 +13,10 @@
 
 package config
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 const (
 	DefaultPanelsPath      = "schemas/panels"
@@ -22,6 +25,16 @@ const (
 	DefaultVariablesPath   = "schemas/variables"
 	defaultInterval        = 1 * time.Hour
 )
+
+// jsonSchemas is only used to marshal the config in a proper json format
+// (mainly because of the duration that is not yet supported by json).
+type jsonSchemas struct {
+	PanelsPath      string `json:"panels_path,omitempty"`
+	QueriesPath     string `json:"queries_path,omitempty" `
+	DatasourcesPath string `json:"datasources_path,omitempty" `
+	VariablesPath   string `json:"variables_path,omitempty"`
+	Interval        string `json:"interval,omitempty"`
+}
 
 type Schemas struct {
 	PanelsPath      string        `yaml:"panels_path,omitempty"`
@@ -48,4 +61,15 @@ func (s *Schemas) Verify() error {
 		s.Interval = defaultInterval
 	}
 	return nil
+}
+
+func (s Schemas) MarshalJSON() ([]byte, error) {
+	j := &jsonSchemas{
+		PanelsPath:      s.PanelsPath,
+		QueriesPath:     s.QueriesPath,
+		DatasourcesPath: s.DatasourcesPath,
+		VariablesPath:   s.VariablesPath,
+		Interval:        s.Interval.String(),
+	}
+	return json.Marshal(j)
 }

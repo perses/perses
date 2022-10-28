@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Routes, Route } from 'react-router-dom';
-import Docs from './views/Docs';
 import ViewDashboard from './views/ViewDashboard';
 import ViewDashboardList from './views/ViewDashboardList';
 
@@ -20,7 +19,6 @@ function Router() {
   return (
     <Routes>
       <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
-      <Route path="docs" element={<Docs />} />
       <Route path="/" element={<ViewDashboardList />} />
     </Routes>
   );

@@ -14,38 +14,29 @@
 import { useState, useMemo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
-import {
-  Box,
-  Card,
-  CardProps,
-  CardHeader,
-  CardContent,
-  Typography,
-  IconButton as MuiIconButton,
-  Stack,
-  styled,
-} from '@mui/material';
-import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import PencilIcon from 'mdi-material-ui/PencilOutline';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import DragIcon from 'mdi-material-ui/DragVertical';
-import { useEditMode, LayoutItem, usePanelActions } from '../../context';
+import { Card, CardProps, CardContent } from '@mui/material';
+import { useId } from '../../utils/component-ids';
+import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 import { PanelContent } from './PanelContent';
 
-export interface PanelProps extends CardProps {
+export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
-  panelGroupItemId: LayoutItem;
+  editHandlers?: PanelHeaderProps['editHandlers'];
 }
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export function Panel(props: PanelProps) {
-  const { definition, panelGroupItemId, ...others } = props;
+  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, ...others } = props;
 
-  const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
+  // Make sure we have an ID we can use for aria attributes
+  const generatedPanelId = useId('Panel');
+  const headerId = `${generatedPanelId}-header`;
+
+  const [contentElement, setContentElement] = useState<HTMLElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
   const { width, height } = useResizeObserver({ ref: contentElement });
@@ -64,85 +55,51 @@ export function Panel(props: PanelProps) {
   // TODO: adjust padding for small panels, consistent way to determine isLargePanel here and in StatChart
   const panelPadding = 1.5;
 
-  const { isEditMode } = useEditMode();
+  const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
+    setIsHovered(true);
+    onMouseEnter?.(e);
+  };
 
-  const { openEditPanel, openDeletePanelDialog } = usePanelActions(panelGroupItemId);
+  const handleMouseLeave: CardProps['onMouseLeave'] = (e) => {
+    setIsHovered(false);
+    onMouseLeave?.(e);
+  };
 
   return (
     <Card
       ref={ref}
-      sx={{
-        ...others.sx,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column nowrap',
-      }}
+      component="section"
+      sx={combineSx(
+        {
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexFlow: 'column nowrap',
+        },
+        sx
+      )}
       variant="outlined"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      aria-labelledby={headerId}
+      aria-describedby={headerId}
       {...others}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <CardHeader
-        title={
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              minHeight: '32px',
-            }}
-          >
-            <Typography variant="subtitle1" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-              {definition.spec.display.name}
-            </Typography>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                marginLeft: 'auto',
-              }}
-            >
-              {!isEditMode && isHovered && definition.spec.display.description && (
-                <InfoTooltip
-                  id="info-tooltip"
-                  description={definition.spec.display.description}
-                  placement={TooltipPlacement.Bottom}
-                >
-                  <InformationOutlineIcon
-                    aria-describedby="info-tooltip"
-                    aria-hidden={false}
-                    sx={{ cursor: 'pointer', color: (theme) => theme.palette.grey[700] }}
-                  />
-                </InfoTooltip>
-              )}
-              {isEditMode && isHovered && (
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <IconButton aria-label="edit panel" size="small" onClick={openEditPanel}>
-                    <PencilIcon />
-                  </IconButton>
-                  <IconButton aria-label="delete panel" size="small" onClick={openDeletePanelDialog}>
-                    <DeleteIcon />
-                  </IconButton>
-                  <IconButton aria-label="drag handle" size="small">
-                    <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
-                  </IconButton>
-                </Stack>
-              )}
-            </Box>
-          </Box>
-        }
-        sx={{
-          display: 'block',
-          paddingX: (theme) => theme.spacing(panelPadding),
-          paddingY: '4px',
-          borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
-        }}
+      <PanelHeader
+        id={headerId}
+        title={definition.spec.display.name}
+        description={definition.spec.display.description}
+        editHandlers={editHandlers}
+        isHovered={isHovered}
+        sx={{ paddingX: (theme) => theme.spacing(panelPadding) }}
       />
       <CardContent
+        component="figure"
         sx={{
           position: 'relative',
           overflow: 'hidden',
           flexGrow: 1,
+          margin: 0,
           padding: (theme) => theme.spacing(panelPadding),
           // Override MUI default style for last-child
           ':last-child': {
@@ -164,8 +121,3 @@ export function Panel(props: PanelProps) {
     </Card>
   );
 }
-
-const IconButton = styled(MuiIconButton)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: '4px',
-}));

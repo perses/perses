@@ -270,7 +270,7 @@ const (
 	httpProxySpec      = "spec"
 )
 
-func CheckAndValidate(pluginSpec interface{}) (*Config, error) {
+func ValidateAndExtract(pluginSpec interface{}) (*Config, error) {
 	finder := &configFinder{}
 	finder.find(reflect.ValueOf(pluginSpec))
 	return finder.config, finder.err

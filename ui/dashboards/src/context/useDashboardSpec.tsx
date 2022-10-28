@@ -11,25 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardSpec, GridDefinition } from '@perses-dev/core';
-import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
+import { createPanelRef, DashboardSpec, GridDefinition } from '@perses-dev/core';
+import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
 import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
 export function useDashboardSpec() {
   const {
     panels,
     panelGroups,
+    panelGroupOrder,
     defaultTimeRange,
     reset: resetDashboardStore,
-  } = useDashboardStore(({ panels, panelGroups, defaultTimeRange, reset }) => ({
+  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, defaultTimeRange, reset }) => ({
     panels,
     panelGroups,
+    panelGroupOrder,
     defaultTimeRange,
     reset,
   }));
   const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
-  const layouts = convertPanelGroupsToLayouts(panelGroups);
+  const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
   const spec = {
     panels,
@@ -50,10 +52,17 @@ export function useDashboardSpec() {
   };
 }
 
-function convertPanelGroupsToLayouts(panelGroups: Record<number, PanelGroupDefinition>): GridDefinition[] {
+function convertPanelGroupsToLayouts(
+  panelGroups: Record<number, PanelGroupDefinition>,
+  panelGroupOrder: PanelGroupId[]
+): GridDefinition[] {
   const layouts: GridDefinition[] = [];
-  Object.values(panelGroups).forEach((group) => {
-    const { title, isCollapsed, items } = group;
+  panelGroupOrder.map((groupOrderId) => {
+    const group = panelGroups[groupOrderId];
+    if (group === undefined) {
+      throw new Error('panel group not found');
+    }
+    const { title, isCollapsed, itemLayouts, itemPanelKeys } = group;
     let display = undefined;
     if (title) {
       display = {
@@ -67,10 +76,23 @@ function convertPanelGroupsToLayouts(panelGroups: Record<number, PanelGroupDefin
       kind: 'Grid',
       spec: {
         display,
-        items,
+        items: itemLayouts.map((layout) => {
+          const panelKey = itemPanelKeys[layout.i];
+          if (panelKey === undefined) {
+            throw new Error(`Missing panel key of layout ${layout.i}`);
+          }
+          return {
+            x: layout.x,
+            y: layout.y,
+            width: layout.w,
+            height: layout.h,
+            content: createPanelRef(panelKey),
+          };
+        }),
       },
     };
     layouts.push(layout);
   });
+
   return layouts;
 }

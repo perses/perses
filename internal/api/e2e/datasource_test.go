@@ -16,15 +16,41 @@
 package e2e
 
 import (
+	"fmt"
+	"net/http"
 	"testing"
 
+	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/pkg/model/api"
 )
 
 func TestMainScenarioDatasource(t *testing.T) {
 	e2eframework.MainTestScenarioWithProject(t, shared.PathDatasource, func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewDatasource(t, projectName, name)
+	})
+}
+
+func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		entity := e2eframework.NewDatasource(t, "", "myDTS")
+		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusBadRequest)
+		return []api.Entity{}
+	})
+}
+
+func TestCreateDatasourceWithNonExistingProject(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		entity := e2eframework.NewDatasource(t, "awesomeProjectThatDoesntExist", "myDTS")
+		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusBadRequest)
+		return []api.Entity{}
 	})
 }

@@ -12,4 +12,3 @@
 // limitations under the License.
 
 export * from './PanelGroupDialog';
-export * from './DeletePanelGroupDialog';

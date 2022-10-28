@@ -11,8 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function Docs() {
-  return <h1>Docs</h1>;
-}
-
-export default Docs;
+export * from './DeletePanelDialog';

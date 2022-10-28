@@ -28,7 +28,7 @@ export interface UseTimeSeriesQueryOptions {
  */
 export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
-  const context = useTimeSeriesQueryContext(options);
+  const context = useTimeSeriesQueryContext();
 
   const key = [definition, context] as const;
   return useQuery(
@@ -39,7 +39,9 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
         throw new Error('Expected plugin to be loaded');
       }
       const [definition, context] = queryKey;
-      return plugin.getTimeSeriesData(definition.spec.plugin.spec, context);
+      // Keep options out of query key so we don't re-run queries because suggested step changes
+      const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
+      return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
     },
     { enabled: plugin !== undefined }
   );
@@ -50,28 +52,29 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
  */
 export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], options?: UseTimeSeriesQueryOptions) {
   const { getPlugin } = usePluginRegistry();
-  const context = useTimeSeriesQueryContext(options);
+  const context = useTimeSeriesQueryContext();
 
   return useQueries({
     queries: definitions.map((definition) => ({
       queryKey: [definition, context] as const,
       queryFn: async () => {
+        // Keep options out of query key so we don't re-run queries because suggested step changes
+        const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
         const plugin = await getPlugin('TimeSeriesQuery', definition.spec.plugin.kind);
-        const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context);
+        const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
         return data;
       },
     })),
   });
 }
 
-function useTimeSeriesQueryContext(options?: UseTimeSeriesQueryOptions): TimeSeriesQueryContext {
+function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
   // Build the context object from data available at runtime
   const { timeRange } = useTimeRange();
   const variableState = useTemplateVariableValues();
   const datasourceStore = useDatasourceStore();
 
   return {
-    suggestedStepMs: options?.suggestedStepMs,
     timeRange,
     variableState,
     datasourceStore,
