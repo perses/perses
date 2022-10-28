@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { Button, Stack, Box, Drawer } from '@mui/material';
+import { Button, Stack, Box, Drawer, AppBar, useScrollTrigger } from '@mui/material';
 import EyeIcon from 'mdi-material-ui/Eye';
 import PencilIcon from 'mdi-material-ui/Pencil';
 
@@ -27,6 +27,7 @@ export function TemplateVariableList() {
   const [showVariablesInEditMode, setShowVariablesInEditMode] = useState(true);
   const showVariables = isEditMode ? showVariablesInEditMode : true;
   const { setVariableDefinitions } = useTemplateVariableActions();
+  const trigger = useScrollTrigger({ disableHysteresis: true });
 
   return (
     <Box>
@@ -52,16 +53,19 @@ export function TemplateVariableList() {
           </Button>
         </Box>
       )}
-      <Box display={'flex'} justifyContent="space-between">
-        <Stack direction={'row'} spacing={2}>
-          {showVariables &&
-            variableDefinitions.map((v) => (
-              <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>
-                <TemplateVariable key={v.spec.name} name={v.spec.name} />
-              </Box>
-            ))}
-        </Stack>
-      </Box>
+
+      <AppBar color={'inherit'} position={trigger ? 'fixed' : 'static'} elevation={trigger ? 4 : 0}>
+        <Box display={'flex'} justifyContent="space-between" my={trigger ? 2 : 0} ml={trigger ? 2 : 0}>
+          <Stack direction={'row'} spacing={2}>
+            {showVariables &&
+              variableDefinitions.map((v) => (
+                <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>
+                  <TemplateVariable key={v.spec.name} name={v.spec.name} />
+                </Box>
+              ))}
+          </Stack>
+        </Box>
+      </AppBar>
     </Box>
   );
 }
