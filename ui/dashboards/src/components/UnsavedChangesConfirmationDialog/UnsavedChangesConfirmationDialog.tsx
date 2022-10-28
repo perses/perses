@@ -16,16 +16,22 @@
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 export interface UnsavedChangesConfirmationDialogProps {
-  open: boolean;
+  isOpen: boolean;
+  onSave: () => void;
+  onClose: () => void;
 }
 
-export const UnsavedChangesConfirmationDialog = (props: UnsavedChangesConfirmationDialogProps) => {
+export const UnsavedChangesConfirmationDialog = ({
+  isOpen,
+  onSave,
+  onClose,
+}: UnsavedChangesConfirmationDialogProps) => {
   return (
-    <Dialog open={props.open}>
+    <Dialog open={isOpen}>
       <DialogTitle>Unsaved Changes</DialogTitle>
       <IconButton
         aria-label="Close"
-        // onClick={() => closeDeletePanelDialog()}
+        onClick={onClose}
         sx={(theme) => ({
           position: 'absolute',
           top: theme.spacing(0.5),
@@ -34,17 +40,15 @@ export const UnsavedChangesConfirmationDialog = (props: UnsavedChangesConfirmati
       >
         <CloseIcon />
       </IconButton>
-      <form onSubmit={}>
-        <DialogContent sx={{ width: '500px' }}>
-          You have unsaved changes in this dashboard. Would you like to save these changes?
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" type="submit">
-            Save
-          </Button>
-          <Button>Cancel</Button>
-        </DialogActions>
-      </form>
+      <DialogContent sx={{ width: '500px' }}>
+        You have unsaved changes in this dashboard. Would you like to save these changes?
+      </DialogContent>
+      <DialogActions>
+        <Button variant="contained" onClick={onSave}>
+          Save
+        </Button>
+        <Button onClick={onClose}>Cancel</Button>
+      </DialogActions>
     </Dialog>
   );
 };

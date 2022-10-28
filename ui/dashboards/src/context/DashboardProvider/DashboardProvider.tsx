@@ -16,7 +16,7 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { DashboardSpec, RelativeTimeRange } from '@perses-dev/core';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -60,14 +60,22 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 }
 
 export function DashboardProvider(props: DashboardProviderProps) {
+  const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
+
+  return (
+    <DashboardContext.Provider value={store as StoreApi<DashboardStoreState>}>
+      {props.children}
+    </DashboardContext.Provider>
+  );
+}
+
+function createDashboardStore(props: DashboardProviderProps) {
   const {
-    children,
     initialState: { dashboardSpec, isEditMode },
   } = props;
 
   const { layouts, panels } = dashboardSpec;
-
-  const dashboardStore = createStore<DashboardStoreState>()(
+  const store = createStore<DashboardStoreState>()(
     immer(
       devtools((...args) => {
         const [set, get] = args;
@@ -96,9 +104,5 @@ export function DashboardProvider(props: DashboardProviderProps) {
     )
   );
 
-  return (
-    <DashboardContext.Provider value={dashboardStore as StoreApi<DashboardStoreState>}>
-      {children}
-    </DashboardContext.Provider>
-  );
+  return store;
 }
