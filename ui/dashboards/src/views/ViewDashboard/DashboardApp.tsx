@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DashboardResource, DashboardSpec } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 import {
   PanelDrawer,
   Dashboard,
@@ -24,7 +24,7 @@ import {
   DashboardToolbar,
   DeletePanelDialog,
 } from '../../components';
-import { useDashboardActions, useDashboardSpec, useEditMode } from '../../context';
+import { useDashboard, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
@@ -32,22 +32,20 @@ export interface DashboardAppProps {
 
 export const DashboardApp = (props: DashboardAppProps) => {
   const { dashboardResource } = props;
-  const { save } = useDashboardActions();
   const { setEditMode } = useEditMode();
-  const { spec, resetSpec } = useDashboardSpec();
-  const [originalSpec, setOriginalSpec] = useState<DashboardSpec | undefined>(undefined);
+  const { dashboard, setDashboard } = useDashboard();
+  const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
   const [isUnsavedDashboardDialogOpen, setUnsavedDashboardDialogIsOpen] = useState(false);
 
   const saveDashboard = async () => {
-    save();
     setEditMode(false);
     setUnsavedDashboardDialogIsOpen(false);
   };
 
   const cancelDashboard = () => {
     // Reset to the original spec and exit edit mode
-    if (originalSpec) {
-      resetSpec(originalSpec);
+    if (originalDashboard) {
+      setDashboard(originalDashboard);
     }
     setUnsavedDashboardDialogIsOpen(false);
     setEditMode(false);
@@ -55,12 +53,12 @@ export const DashboardApp = (props: DashboardAppProps) => {
 
   const onEditButtonClick = () => {
     setEditMode(true);
-    setOriginalSpec(spec);
+    setOriginalDashboard(dashboard);
   };
 
   const onCancelButtonClick = () => {
     // check if dashboard has been modified
-    if (JSON.stringify(spec) === JSON.stringify(originalSpec)) {
+    if (JSON.stringify(dashboard) === JSON.stringify(originalDashboard)) {
       setEditMode(false);
     } else {
       setUnsavedDashboardDialogIsOpen(true);

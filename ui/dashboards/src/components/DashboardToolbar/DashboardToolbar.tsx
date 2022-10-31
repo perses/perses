@@ -30,11 +30,10 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { dashboardName, onEditButtonClick, onCancelButtonClick } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { openAddPanelGroup, openAddPanel, save } = useDashboardActions();
+  const { openAddPanelGroup, openAddPanel } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
 
   const onSave = () => {
-    save();
     setEditMode(false);
   };
 
