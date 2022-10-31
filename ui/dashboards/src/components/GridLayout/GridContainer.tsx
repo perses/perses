@@ -33,7 +33,7 @@ export function GridContainer(props: GridContainerProps) {
         '& + &': { marginTop: (theme) => theme.spacing(1) },
         // This disables the animation of grid items when a grid is first rendered
         // (see https://github.com/react-grid-layout/react-grid-layout/issues/103)
-        //'& .react-grid-item.cssTransforms': { transitionProperty: isFirstRender ? 'none' : 'transform' },
+        '& .react-grid-item.cssTransforms': { transitionProperty: isFirstRender ? 'none' : 'transform' },
       }}
     >
       {props.children}
