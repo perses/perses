@@ -17,3 +17,4 @@ export * from './plugins';
 export * from './time-series-queries';
 export * from './variables';
 export * from './plugin-base';
+export * from './plugin-loading';

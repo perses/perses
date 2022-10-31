@@ -10,72 +10,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 import { UnknownSpec } from '@perses-dev/core';
-import {
-  PluginRegistryProps,
-  PluginModuleResource,
-  PluginImplementation,
-  PluginType,
-  PanelPlugin,
-  Plugin,
-} from '@perses-dev/plugin-system';
+import { PanelPlugin, MockPlugin } from '@perses-dev/plugin-system';
 
-/**
- * Helper for mocking `PluginRegistry` data during tests. Returns props that can be spread on the `PluginRegistry`
- * component so that it will load the mock plugins you setup. You can use the `addMockPlugin` function that's returned
- * to add mock plugins before rendering components that use them.
- */
-export function mockPluginRegistryProps() {
-  const mockPluginResource: PluginModuleResource = {
-    kind: 'PluginModule',
-    metadata: {
-      name: 'Fake Plugin Module for Tests',
-      created_at: '',
-      updated_at: '',
-      version: 0,
-    },
-    spec: {
-      plugins: [],
-    },
-  };
-
-  const mockPluginModule: Record<string, Plugin<UnknownSpec>> = {};
-
-  // Allow adding mock plugins in tests
-  const addMockPlugin = <T extends PluginType>(pluginType: T, kind: string, plugin: PluginImplementation<T>) => {
-    mockPluginResource.spec.plugins.push({
-      pluginType,
-      kind,
-      display: {
-        name: `Fake ${pluginType} Plugin for ${kind}`,
-      },
-    });
-
-    // "Export" on the module under the same name as the kind the plugin handles
-    mockPluginModule[kind] = plugin;
-  };
-
-  const pluginRegistryProps: Omit<PluginRegistryProps, 'children'> = {
-    getInstalledPlugins() {
-      return Promise.resolve([mockPluginResource]);
-    },
-    importPluginModule(/* resource */) {
-      return Promise.resolve(mockPluginModule);
-    },
-  };
-
-  return {
-    pluginRegistryProps,
-    addMockPlugin,
-  };
-}
-
-export const FAKE_PANEL_PLUGIN: PanelPlugin = {
+const FakeTimeSeriesPlugin: PanelPlugin<UnknownSpec> = {
   PanelComponent: () => {
-    return <div>FakePanel chart</div>;
+    return <div>TimeSeriesChart panel</div>;
   },
   OptionsEditorComponent: () => {
-    return <div>Edit options here</div>;
+    return <div>TimeSeriesChart options</div>;
   },
   createInitialOptions: () => ({}),
 };
+
+const MOCK_TIME_SERIES_PANEL: MockPlugin = {
+  pluginType: 'Panel',
+  kind: 'TimeSeriesChart',
+  plugin: FakeTimeSeriesPlugin,
+};
+
+// Array of default mock plugins added to the PluginRegistry during test renders
+export const MOCK_PLUGINS: MockPlugin[] = [MOCK_TIME_SERIES_PANEL];
