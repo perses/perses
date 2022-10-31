@@ -11,20 +11,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack } from '@mui/material';
+import { Box } from '@mui/material';
 import { LegendItem } from '../model';
 import { ListLegendItem } from './ListLegendItem';
 
 interface CompactLegendProps {
+  height: number;
   items: LegendItem[];
 }
 
-export function CompactLegend({ items }: CompactLegendProps) {
+/**
+ * CompactLegend is default and used when legend items need to show side by side
+ * which corresponds to when legend.position is `bottom`
+ */
+export function CompactLegend({ height, items }: CompactLegendProps) {
   return (
-    <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
+    <Box sx={{ width: '100%', height, paddingTop: 1, overflowY: 'scroll' }}>
       {items.map((item) => (
-        <ListLegendItem key={item.id} item={item} />
+        <ListLegendItem
+          key={item.id}
+          item={item}
+          sx={{
+            width: 'auto',
+            float: 'left',
+            paddingRight: 1.5,
+          }}
+        />
       ))}
-    </Stack>
+    </Box>
   );
 }

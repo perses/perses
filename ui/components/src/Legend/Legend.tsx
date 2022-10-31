@@ -29,7 +29,7 @@ export function Legend({ width, height, options, data }: LegendProps) {
       <Box
         sx={{
           width: width,
-          height: height,
+          height: '100%',
           position: 'absolute',
           top: 0,
           right: 0,
@@ -40,9 +40,6 @@ export function Legend({ width, height, options, data }: LegendProps) {
       </Box>
     );
   }
-  return (
-    <Box sx={{ height: 50, overflowY: 'scroll' }}>
-      <CompactLegend items={data} />
-    </Box>
-  );
+
+  return <CompactLegend items={data} height={height} />;
 }

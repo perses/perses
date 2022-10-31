@@ -57,3 +57,35 @@ export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps) {
 
   return { query, handleQueryChange, handleQueryBlur };
 }
+
+/**
+ * Hook to manage `series_name_format` state to ensure panel preview does not rerender until text input is blurred
+ */
+export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
+  const { onChange, value } = props;
+
+  // TODO: reusable hook or helper util instead of duplicating from useQueryState
+  const [format, setFormat] = useState(value.series_name_format);
+  const [lastSyncedFormat, setLastSyncedFormat] = useState(value.series_name_format);
+  if (value.series_name_format !== lastSyncedFormat) {
+    setFormat(value.series_name_format);
+    setLastSyncedFormat(value.series_name_format);
+  }
+
+  // Update our local state as the user types
+  const handleFormatChange: TextFieldProps['onChange'] = (e) => {
+    setFormat(e.target.value);
+  };
+
+  // Propagate changes to the series_name_format
+  const handleFormatBlur: TextFieldProps['onBlur'] = () => {
+    setLastSyncedFormat(format);
+    onChange(
+      produce(value, (draft) => {
+        draft.series_name_format = format;
+      })
+    );
+  };
+
+  return { format, handleFormatChange, handleFormatBlur };
+}

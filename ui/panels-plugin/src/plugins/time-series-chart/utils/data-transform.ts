@@ -126,41 +126,19 @@ export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<numb
 }
 
 /**
- * Gets default ECharts line series option properties or returns threshold-specific styles
- * Note: markLine cannot be used since it does not update yAxis max / min
+ * Gets default ECharts line series option properties
  */
 export function getLineSeries(
   name: string,
+  formattedName: string,
   data: EChartsTimeSeries['data'],
-  selectedSeriesName: string | null,
-  threshold?: StepOptions
+  selectedSeriesName: string | null
 ): EChartsTimeSeries {
-  if (threshold !== undefined) {
-    return {
-      type: 'line',
-      name: name,
-      data: data,
-      color: threshold.color,
-      label: {
-        show: false,
-      },
-      lineStyle: {
-        type: 'dashed',
-        width: 2,
-      },
-      emphasis: {
-        lineStyle: {
-          width: 2.5,
-        },
-      },
-    };
-  }
-
   return {
     type: 'line',
-    name: name,
+    name: formattedName,
     data: data,
-    color: getRandomColor(name),
+    color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
     lineStyle: {
@@ -169,6 +147,36 @@ export function getLineSeries(
     emphasis: {
       lineStyle: {
         width: selectedSeriesName && selectedSeriesName === name ? 2.5 : 1.5,
+      },
+    },
+  };
+}
+
+/**
+ * Gets threshold-specific line series styles
+ * markLine cannot be used since it does not update yAxis max / min
+ * and threshold data needs to show in the tooltip
+ */
+export function getThresholdSeries(
+  name: string,
+  data: EChartsTimeSeries['data'],
+  threshold: StepOptions
+): EChartsTimeSeries {
+  return {
+    type: 'line',
+    name: name,
+    data: data,
+    color: threshold.color,
+    label: {
+      show: false,
+    },
+    lineStyle: {
+      type: 'dashed',
+      width: 2,
+    },
+    emphasis: {
+      lineStyle: {
+        width: 2.5,
       },
     },
   };
