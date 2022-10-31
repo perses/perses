@@ -39,11 +39,6 @@ export interface PanelGroupSlice {
    * Update the item layouts for a panel group when, for example, a panel is moved or resized.
    */
   updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupDefinition['itemLayouts']) => void;
-
-  /**
-   * set to panel groups
-   */
-  setPanelGroups: (layouts: LayoutDefinition[]) => void;
 }
 
 export type PanelGroupId = number;
@@ -83,14 +78,6 @@ export function createPanelGroupSlice(
     panelGroups,
     panelGroupOrder,
 
-    setPanelGroups(layouts) {
-      set((state) => {
-        const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
-        state.panelGroups = panelGroups;
-        state.panelGroupOrder = panelGroupOrder;
-      });
-    },
-
     swapPanelGroups(x, y) {
       set((state) => {
         if (x < 0 || x >= state.panelGroupOrder.length || y < 0 || y >= state.panelGroupOrder.length) {
@@ -119,7 +106,7 @@ export function createPanelGroupSlice(
   });
 }
 
-function convertLayoutsToPanelGroups(
+export function convertLayoutsToPanelGroups(
   layouts: LayoutDefinition[]
 ): Pick<PanelGroupSlice, 'panelGroups' | 'panelGroupOrder'> {
   // Convert the initial layouts from the JSON

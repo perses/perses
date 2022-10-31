@@ -15,27 +15,27 @@ import { createPanelRef, DashboardResource, GridDefinition } from '@perses-dev/c
 import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
 import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
-export function useDashboardResource() {
+export function useDashboard() {
   const {
     panels,
     panelGroups,
     panelGroupOrder,
     defaultTimeRange,
-    reset: setDashboardResource,
     metadata,
-  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, defaultTimeRange, reset, metadata }) => ({
+    setDashboard: setDashboardResource,
+  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, defaultTimeRange, setDashboard, metadata }) => ({
     panels,
     panelGroups,
     panelGroupOrder,
     defaultTimeRange,
-    reset,
+    setDashboard,
     metadata,
   }));
   const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
-  const dashboardResource: DashboardResource = {
+  const dashboard: DashboardResource = {
     kind: 'Dashboard',
     metadata,
     spec: {
@@ -46,14 +46,14 @@ export function useDashboardResource() {
     },
   };
 
-  const resetDashboardResource = (dashboardResource: DashboardResource) => {
+  const setDashboard = (dashboardResource: DashboardResource) => {
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };
 
   return {
-    dashboardResource,
-    resetDashboardResource,
+    dashboard,
+    setDashboard,
   };
 }
 

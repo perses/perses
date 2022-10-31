@@ -16,10 +16,10 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
-import { createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
+import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
 import { createPanelSlice, PanelSlice } from './panel-slice';
 import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
@@ -35,7 +35,7 @@ export interface DashboardStoreState
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
-  reset: (dashboardResource: DashboardResource) => void;
+  setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
 }
 
@@ -60,6 +60,8 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 }
 
 export function DashboardProvider(props: DashboardProviderProps) {
+  const createDashboardStore = useCallback(initStore, [props]);
+
   const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
 
   return (
@@ -69,7 +71,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
   );
 }
 
-function createDashboardStore(props: DashboardProviderProps) {
+function initStore(props: DashboardProviderProps) {
   const {
     initialState: { dashboardResource, isEditMode },
   } = props;
@@ -81,7 +83,7 @@ function createDashboardStore(props: DashboardProviderProps) {
   const store = createStore<DashboardStoreState>()(
     immer(
       devtools((...args) => {
-        const [set, get] = args;
+        const [set] = args;
         return {
           ...createPanelGroupSlice(layouts)(...args),
           ...createPanelSlice(panels)(...args),
@@ -93,10 +95,13 @@ function createDashboardStore(props: DashboardProviderProps) {
           defaultTimeRange: { pastDuration: duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          reset: ({ spec: { panels, layouts } }) => {
-            const { setPanels, setPanelGroups } = get();
-            setPanels(panels);
-            setPanelGroups(layouts);
+          setDashboard: ({ spec: { panels, layouts } }) => {
+            set((state) => {
+              const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
+              state.panels = panels;
+              state.panelGroups = panelGroups;
+              state.panelGroupOrder = panelGroupOrder;
+            });
           },
         };
       })

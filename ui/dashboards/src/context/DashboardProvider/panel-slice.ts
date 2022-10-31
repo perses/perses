@@ -20,24 +20,13 @@ import { Middleware } from './common';
  */
 export interface PanelSlice {
   panels: Record<string, PanelDefinition>;
-
-  /**
-   * set panels
-   */
-  setPanels: (panels: Record<string, PanelDefinition>) => void;
 }
 
 /**
  * Curried function for creating the PanelSlice.
  */
 export function createPanelSlice(panels: PanelSlice['panels']): StateCreator<PanelSlice, Middleware, [], PanelSlice> {
-  return (set) => ({
+  return () => ({
     panels,
-
-    setPanels(panels) {
-      set((state) => {
-        state.panels = panels;
-      });
-    },
   });
 }

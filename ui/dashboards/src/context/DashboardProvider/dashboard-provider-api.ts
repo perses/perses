@@ -23,12 +23,12 @@ export function useEditMode() {
  * Returns actions that can be performed on the current dashboard.
  */
 export function useDashboardActions() {
-  const reset = useDashboardStore((store) => store.reset);
+  const setDashboard = useDashboardStore((store) => store.setDashboard);
   const openAddPanelGroup = useDashboardStore((store) => store.openAddPanelGroup);
   const openAddPanel = useDashboardStore((store) => store.openAddPanel);
 
   return {
-    reset,
+    setDashboard,
     openAddPanelGroup,
     openAddPanel: () => openAddPanel(undefined),
   };
