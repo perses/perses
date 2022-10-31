@@ -58,6 +58,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         value={format ?? ''}
         onChange={handleFormatChange}
         onBlur={handleFormatBlur}
+        margin="dense"
       />
       <FormControl margin="dense" fullWidth={false}>
         {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
