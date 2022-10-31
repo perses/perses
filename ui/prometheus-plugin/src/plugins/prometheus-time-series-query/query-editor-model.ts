@@ -77,7 +77,7 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
     setFormat(e.target.value);
   };
 
-  // Propagate changes to the series_name_format
+  // Propagate changes to the panel preview component when series_name_format TextField is blurred
   const handleFormatBlur: TextFieldProps['onBlur'] = () => {
     setLastSyncedFormat(format);
     onChange(

@@ -77,8 +77,8 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
         .join(', ');
       if (name === '') name = query;
 
-      // query editor allows you to define optional series_name_format
-      // to customize legend and tooltip display
+      // query editor allows you to define an optional series_name_format
+      // property to customize legend and tooltip display
       const formattedName = spec.series_name_format ? formatSeriesName(spec.series_name_format, metric) : name;
 
       return {

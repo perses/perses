@@ -14,7 +14,7 @@
 import { formatSeriesName } from './time-series-queries';
 
 describe('formatSeriesName', () => {
-  it('should resolve label name tokens with resolved labels from query', () => {
+  it('should resolve label name tokens to label values from query response', () => {
     // example from query: node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}
     const inputFormat = 'Test {{job}} {{instance}}';
 
