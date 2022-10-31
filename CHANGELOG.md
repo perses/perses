@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- [FEATURE] custom legend formatting in TimeSeriesChart using `series_name_format` query option #709
+
 ## 0.11.0 / 2022-10-19
 
 - [FEATURE] Ability to change variable order #667
