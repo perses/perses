@@ -12,16 +12,16 @@
 // limitations under the License.
 import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Box, BoxProps, Collapse, GlobalStyles, useTheme } from '@mui/material';
+import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { styles } from '../../css/styles';
 import { useEditMode, usePanelGroup, usePanelGroupActions, PanelGroupId } from '../../context';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
+import { GridContainer } from './GridContainer';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-export interface GridLayoutProps extends BoxProps {
+export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
 }
 
@@ -29,7 +29,7 @@ export interface GridLayoutProps extends BoxProps {
  * Layout component that arranges children in a Grid based on the definition.
  */
 export function GridLayout(props: GridLayoutProps) {
-  const { panelGroupId, ...others } = props;
+  const { panelGroupId /*...others */ } = props;
   const theme = useTheme();
   const groupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
@@ -38,44 +38,41 @@ export function GridLayout(props: GridLayoutProps) {
   const { isEditMode } = useEditMode();
 
   return (
-    <>
-      <GlobalStyles styles={styles} />
-      <Box {...others} component="section" sx={{ '& + &': { marginTop: (theme) => theme.spacing(1) } }}>
-        {groupDefinition.title !== undefined && (
-          <GridTitle
-            panelGroupId={panelGroupId}
-            title={groupDefinition.title}
-            collapse={
-              groupDefinition.isCollapsed === undefined
-                ? undefined
-                : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
-            }
-          />
-        )}
-        <Collapse in={isOpen} unmountOnExit>
-          <ResponsiveGridLayout
-            className="layout"
-            breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}
-            cols={{ sm: 24, xxs: 2 }}
-            rowHeight={30}
-            draggableHandle={'.drag-handle'}
-            resizeHandles={['se']}
-            isDraggable={isEditMode}
-            isResizable={isEditMode}
-            containerPadding={[0, 10]}
-            layouts={{ sm: groupDefinition.itemLayouts }}
-            onLayoutChange={updatePanelGroupLayouts}
-          >
-            {groupDefinition.itemLayouts.map(({ i }) => (
-              <div key={i}>
-                <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }} />
-                </ErrorBoundary>
-              </div>
-            ))}
-          </ResponsiveGridLayout>
-        </Collapse>
-      </Box>
-    </>
+    <GridContainer>
+      {groupDefinition.title !== undefined && (
+        <GridTitle
+          panelGroupId={panelGroupId}
+          title={groupDefinition.title}
+          collapse={
+            groupDefinition.isCollapsed === undefined
+              ? undefined
+              : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
+          }
+        />
+      )}
+      <Collapse in={isOpen} unmountOnExit appear={false}>
+        <ResponsiveGridLayout
+          className="layout"
+          breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}
+          cols={{ sm: 24, xxs: 2 }}
+          rowHeight={30}
+          draggableHandle={'.drag-handle'}
+          resizeHandles={['se']}
+          isDraggable={isEditMode}
+          isResizable={isEditMode}
+          containerPadding={[0, 10]}
+          layouts={{ sm: groupDefinition.itemLayouts }}
+          onLayoutChange={updatePanelGroupLayouts}
+        >
+          {groupDefinition.itemLayouts.map(({ i }) => (
+            <div key={i}>
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }} />
+              </ErrorBoundary>
+            </div>
+          ))}
+        </ResponsiveGridLayout>
+      </Collapse>
+    </GridContainer>
   );
 }
