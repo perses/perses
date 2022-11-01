@@ -87,6 +87,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
 
   return useQueries({
     queries: definitions.map((definition) => ({
+      // TODO: Need a way to load multiple plugins at once to call plugin.dependsOn for the queryKey
       queryKey: [definition, context] as const,
       queryFn: async () => {
         // Keep options out of query key so we don't re-run queries because suggested step changes
