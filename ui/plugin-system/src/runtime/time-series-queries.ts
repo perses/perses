@@ -14,6 +14,7 @@
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { TimeSeriesQueryContext } from '../model';
+import { VariableStateMap } from './template-variables';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';
 import { useDatasourceStore } from './datasources';
@@ -24,26 +25,56 @@ export interface UseTimeSeriesQueryOptions {
 }
 
 /**
+ * Returns a serialized string of the current state of variable values.
+ */
+function getVariableValuesKey(v: VariableStateMap) {
+  return Object.values(v)
+    .map((v) => JSON.stringify(v.value))
+    .join(',');
+}
+
+function filterVariableStateMap(v: VariableStateMap, names?: string[]) {
+  if (!names) {
+    return v;
+  }
+  return Object.fromEntries(Object.entries(v).filter(([name]) => names.includes(name)));
+}
+
+/**
  * Runs a time series query using a plugin and returns the results.
  */
 export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
-  const key = [definition, context] as const;
+  const { timeRange, datasourceStore, suggestedStepMs, variableState } = context;
+
+  let dependsOnVariables: string[] | undefined;
+  if (plugin?.dependsOn) {
+    dependsOnVariables = plugin.dependsOn(definition.spec.plugin.spec);
+  }
+  const filteredVariabledState = filterVariableStateMap(variableState, dependsOnVariables);
+  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
+  const key = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey] as const;
+
+  let waitToLoad = false;
+  if (dependsOnVariables) {
+    waitToLoad = dependsOnVariables.some((v) => variableState[v]?.loading);
+  }
+  const pluginEnabled = plugin !== undefined && !waitToLoad;
+
   return useQuery(
     key,
-    ({ queryKey }) => {
+    () => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
         throw new Error('Expected plugin to be loaded');
       }
-      const [definition, context] = queryKey;
       // Keep options out of query key so we don't re-run queries because suggested step changes
       const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
       return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
     },
-    { enabled: plugin !== undefined }
+    { enabled: pluginEnabled }
   );
 };
 

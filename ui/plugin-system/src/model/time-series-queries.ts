@@ -20,6 +20,11 @@ import { Plugin } from './plugin-base';
  */
 export interface TimeSeriesQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getTimeSeriesData: (spec: Spec, ctx: TimeSeriesQueryContext) => Promise<TimeSeriesData>;
+
+  /**
+   * Returns a list of variables name this time series query depends on. Used to optimize fetching
+   */
+  dependsOn?: (definition: Spec) => string[];
 }
 
 /**
