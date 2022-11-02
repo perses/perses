@@ -25,4 +25,4 @@ export * from './TimeRangeSelector';
 export * from './context/ChartsThemeProvider';
 export * from './utils';
 export * from './model';
-export * from './test';
+export * from './test-utils';

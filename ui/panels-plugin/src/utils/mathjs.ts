@@ -11,22 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
- */
-export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];
+import { gcdDependencies, create } from 'mathjs';
 
-declare global {
-  // eslint-disable-next-line no-var
-  var dashboardStoreId: number;
-}
-
-/**
- * Helper function to generate unique IDs for things in the dashboard store that don't have a "natural" ID.
- */
-export function generateId() {
-  if (globalThis.dashboardStoreId === undefined) {
-    globalThis.dashboardStoreId = 0;
-  }
-  return globalThis.dashboardStoreId++;
-}
+// This ensures we get a minimal mathjs bundle for just what we need (see https://mathjs.org/docs/custom_bundling.html)
+const { gcd } = create({ gcdDependencies });
+export { gcd };

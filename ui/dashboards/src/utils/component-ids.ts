@@ -18,14 +18,14 @@ declare global {
   var useIdValue: number;
 }
 
-if (globalThis.useIdValue === undefined) {
-  globalThis.useIdValue = 0;
-}
-
 /**
  * Generates a unique (stable) ID for a component. Should be replaced with React.useId once we support only React 18.
  */
 export function useId(prefix: string) {
+  if (globalThis.useIdValue === undefined) {
+    globalThis.useIdValue = 0;
+  }
+
   const id = useRef<string | undefined>(undefined);
   if (id.current === undefined) {
     id.current = `${prefix}-${globalThis.useIdValue++}`;

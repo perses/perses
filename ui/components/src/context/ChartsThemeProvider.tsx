@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { createContext, useContext } from 'react';
-import { registerTheme } from 'echarts';
+import { registerTheme } from 'echarts/core';
 import { PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
