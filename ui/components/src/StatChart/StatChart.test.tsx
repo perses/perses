@@ -47,7 +47,7 @@ describe('StatChart', () => {
   describe('Render default options (no sparkline)', () => {
     it('should render', () => {
       render(
-        <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
+        <ChartsThemeProvider chartsTheme={testChartsTheme}>
           <StatChart
             width={contentDimensions.width}
             height={contentDimensions.height}

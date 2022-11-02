@@ -64,7 +64,7 @@ function ViewDashboard() {
       }}
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+        <ChartsThemeProvider chartsTheme={chartsTheme}>
           <PluginRegistry pluginLoader={bundledPluginLoader}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <DashboardView

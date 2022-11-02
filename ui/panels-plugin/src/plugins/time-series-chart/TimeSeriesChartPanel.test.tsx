@@ -92,7 +92,7 @@ describe('TimeSeriesChartPanel', () => {
 
     render(
       <PluginRegistry {...mockPluginRegistry(MOCK_PROM_QUERY_PLUGIN)}>
-        <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
+        <ChartsThemeProvider chartsTheme={testChartsTheme}>
           <TimeRangeContext.Provider value={mockTimeRangeContext}>
             <TimeSeriesChartPanel {...TEST_TIME_SERIES_PANEL} />
           </TimeRangeContext.Provider>
