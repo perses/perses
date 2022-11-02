@@ -152,13 +152,13 @@ const selectDeletePanelGroupDialog = ({
   closeDeletePanelGroupDialog,
   deletePanelGroup,
 });
-export function useDeletePanelGroupDialog(panelGroupId: PanelGroupId) {
+export function useDeletePanelGroupDialog() {
   const { deletePanelGroupDialog, openDeletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup } =
     useDashboardStore(selectDeletePanelGroupDialog);
   return {
     deletePanelGroupDialog,
     deletePanelGroup,
-    openDeletePanelGroupDialog: () => openDeletePanelGroupDialog(panelGroupId),
+    openDeletePanelGroupDialog,
     closeDeletePanelGroupDialog: () => closeDeletePanelGroupDialog(),
   };
 }
