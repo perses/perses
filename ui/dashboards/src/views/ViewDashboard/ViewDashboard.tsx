@@ -27,13 +27,14 @@ import { DashboardApp } from './DashboardApp';
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  dashboardTitleComponent?: JSX.Element;
 }
 
 /**
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
 export function ViewDashboard(props: ViewDashboardProps) {
-  const { dashboardResource, datasourceApi, sx, ...others } = props;
+  const { dashboardResource, datasourceApi, dashboardTitleComponent, sx, ...others } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
@@ -58,7 +59,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
               {...others}
             >
               <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <DashboardApp dashboardResource={dashboardResource} />
+                <DashboardApp dashboardResource={dashboardResource} dashboardTitleComponent={dashboardTitleComponent} />
               </ErrorBoundary>
             </Box>
           </TemplateVariableProvider>
