@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ## 0.14.0 / 2022-11-2
 
 - [FEATURE] Add a Project view with a dashboard list section #697
