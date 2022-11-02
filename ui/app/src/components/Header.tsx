@@ -80,7 +80,7 @@ function ProjectMenu(): JSX.Element {
         PaperProps={{
           style: {
             maxHeight: ITEM_HEIGHT * 4.5,
-            width: '20ch',
+            width: '10em',
           },
         }}
       >
@@ -90,10 +90,20 @@ function ProjectMenu(): JSX.Element {
               key={index}
               onClick={() => {
                 setAnchorEl(null);
-                navigate('/projects/' + project.metadata.name);
+                navigate(`/projects/${project.metadata.name}`);
               }}
             >
-              {project.metadata.name}
+              <Typography
+                variant="inherit"
+                noWrap
+                sx={{
+                  '&:hover': {
+                    overflow: 'visible',
+                  },
+                }}
+              >
+                {project.metadata.name}
+              </Typography>
             </MenuItem>
           );
         })}

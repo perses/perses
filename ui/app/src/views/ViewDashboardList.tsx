@@ -20,6 +20,7 @@ import {
   Container,
   Divider,
   List,
+  ListItem,
   ListItemButton,
   ListItemText,
   Stack,
@@ -41,16 +42,22 @@ export function DashboardList(props: DashboardListProperties) {
     <List>
       {props.dashboardList.map((dashboard, i) => {
         return (
-          <Box sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }} key={dashboard.metadata.name}>
-            {i !== 0 && <Divider />}
-            <ListItemButton
-              onClick={() =>
-                navigate('/projects/' + dashboard.metadata.project + '/dashboards/' + dashboard.metadata.name)
-              }
+          <>
+            {i !== 0 && <Divider key={`divider-${i}`} />}
+            <ListItem
+              disablePadding
+              sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }}
+              key={`list-item-${i}`}
             >
-              <ListItemText primary={dashboard.metadata.name} />
-            </ListItemButton>
-          </Box>
+              <ListItemButton
+                onClick={() =>
+                  navigate(`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`)
+                }
+              >
+                <ListItemText primary={dashboard.metadata.name} />
+              </ListItemButton>
+            </ListItem>
+          </>
         );
       })}
     </List>

@@ -22,7 +22,7 @@ interface RenderDashboardInProjectProperties {
   projectName: string;
 }
 
-function RenderDashboardInProject(props: RenderDashboardInProjectProperties) {
+function DashboardPageInProject(props: RenderDashboardInProjectProperties) {
   const { data } = useDashboardList(props.projectName);
   if (data === undefined) {
     return null;
@@ -53,7 +53,7 @@ function ViewProject() {
         <FolderPound fontSize={'large'} />
         <Typography variant="h1">{projectName}</Typography>
       </Stack>
-      <RenderDashboardInProject projectName={projectName} />
+      <DashboardPageInProject projectName={projectName} />
     </Container>
   );
 }
