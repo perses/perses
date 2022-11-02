@@ -16,6 +16,7 @@ import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
 import ViewDashboardList from './views/ViewDashboardList';
+import ViewProject from './views/ViewProject';
 
 // Other routes are lazy-loaded for code-splitting
 const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
@@ -27,6 +28,7 @@ function Router() {
       <Suspense>
         <Routes>
           <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
+          <Route path="/projects/:projectName" element={<ViewProject />} />
           <Route path="/" element={<ViewDashboardList />} />
         </Routes>
       </Suspense>
