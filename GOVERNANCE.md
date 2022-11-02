@@ -6,7 +6,7 @@ we expect the governance to evolve as the project grows.
 
 ## Team Members
 
-A Team Member is any member if the private [perses-team](perses-team@googlegroups.com)
+A Team Member is any member of the private [perses-team](https://groups.google.com/g/perses-team)
 Google Group.
 
 Team member status may be given to those who have made ongoing contributions to
@@ -15,7 +15,7 @@ code improvements, notable work on documentation, organizing events,
 user support, and other contributions.
 
 New members may be proposed by any existing member by email to 
-[perses-team](perses-team@googlegroups.com).
+[perses-team](https://groups.google.com/g/perses-team).
 
 It is highly desirable to reach consensus about acceptance of a new member.
 However, the proposal is ultimately voted on by a formal 2/3 majority vote.
@@ -38,10 +38,10 @@ The current team members are:
 | Team Member | GitHub ID | Affiliation |
 | --------------- | --------- | ----------- |
 | Augustin Husson | [nexucis](https://github.com/Nexucis) | Amadeus IT Group |
-| Luke Tillman | [luketillman](https://github.com/LukeTillman) | Chronosphere |
-| Steven Cobb | [sjcobb](https://github.com/sjcobb) | Chronosphere |
 | Antoine Thebaud | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus IT Group |
 | Eunice Wong | [eunicorn](https://github.com/eunicorn) | Chronosphere |
+| Luke Tillman | [luketillman](https://github.com/LukeTillman) | Chronosphere |
+| Steven Cobb | [sjcobb](https://github.com/sjcobb) | Chronosphere |
 
 ## Maintainers
 
