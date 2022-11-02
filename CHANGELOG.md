@@ -1,15 +1,8 @@
 # Changelog
 
-## 0.13.0 / 2022-10-31
+## Unreleased
 
-- [FEATURE] Add endpoint /api/config that will provide the config of the server #700
-- [FEATURE] Warn users of any unsaved changes when canceling edit mode #699
-- [FEATURE] Update variables based on time range #692
-- [FEATURE] Sync variable state with URL #690
-- [ENHANCEMENT] Run queries in panel editor on input blur #705
-- [ENHANCEMENT] Edit icons no longer appear when previewing a panel in the editor #694
-- [BREAKINGCHANGE] DashboardProvider API changes #711
-- [BREAKINGCHANGE] Add PluginLoader type to PluginRegistry #704
+- [FEATURE] Add a breadcrumbs as a dashboard title #702
 
 ## 0.12.0 / 2022-10-25
 
