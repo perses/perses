@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
-import { useParams, Link as RouterLink } from 'react-router-dom';
-import { Box, Breadcrumbs, Link, Typography, useTheme } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { Box, useTheme } from '@mui/material';
 import {
   ChartsThemeProvider,
   ErrorAlert,
@@ -26,27 +26,11 @@ import { PluginRegistry } from '@perses-dev/plugin-system';
 import { useBundledPlugins } from '../model/bundled-plugins';
 import { useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
+import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
 const ECHARTS_THEME_OVERRIDES = {};
-
-interface DashboardBreadcrumbsProps {
-  dashboardName: string;
-  dashboardProject: string;
-}
-
-function DashboardBreadcrumbs(props: DashboardBreadcrumbsProps) {
-  const { dashboardName, dashboardProject } = props;
-  return (
-    <Breadcrumbs sx={{ fontSize: 'large' }}>
-      <Link underline={'hover'} variant={'h2'} component={RouterLink} to={`/projects/${dashboardProject}`}>
-        {dashboardProject}
-      </Link>
-      <Typography variant={'h2'}>{dashboardName}</Typography>
-    </Breadcrumbs>
-  );
-}
 
 /**
  * The View for viewing a Dashboard.
