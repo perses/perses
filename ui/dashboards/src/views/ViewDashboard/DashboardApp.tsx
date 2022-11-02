@@ -28,11 +28,12 @@ import { useDashboard, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
+  dashboardTitleComponent?: JSX.Element;
   variableIsSticky?: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource, variableIsSticky } = props;
+  const { dashboardResource, dashboardTitleComponent, variableIsSticky } = props;
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
@@ -78,6 +79,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
     >
       <DashboardToolbar
         dashboardName={dashboardResource.metadata.name}
+        dashboardTitleComponent={dashboardTitleComponent}
         variableIsSticky={variableIsSticky}
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}

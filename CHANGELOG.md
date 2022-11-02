@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- [FEATURE] Add a breadcrumbs as a dashboard title #702
+
 ## 0.12.0 / 2022-10-25
 
 - [FEATURE] Cancel variable editing #673

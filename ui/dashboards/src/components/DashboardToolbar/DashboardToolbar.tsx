@@ -22,17 +22,23 @@ import { TimeRangeControls } from '../TimeRangeControls';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
+  dashboardTitleComponent?: JSX.Element;
   variableIsSticky?: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
-  const { dashboardName, variableIsSticky, onEditButtonClick, onCancelButtonClick } = props;
+  const { dashboardName, dashboardTitleComponent, variableIsSticky, onEditButtonClick, onCancelButtonClick } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
   const { openAddPanelGroup, openAddPanel } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
+  const dashboardTitle = dashboardTitleComponent ? (
+    dashboardTitleComponent
+  ) : (
+    <Typography variant="h2">{dashboardName}</Typography>
+  );
 
   const onSave = () => {
     setEditMode(false);
@@ -44,7 +50,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
         <Stack spacing={2}>
           <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
             <Box padding={2} display="flex">
-              <Typography variant="h2">Edit {dashboardName}</Typography>
+              {dashboardTitle}
               <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
                 <Button variant="contained" onClick={onSave}>
                   Save
@@ -80,7 +86,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
       ) : (
         <Stack spacing={2} padding={2}>
           <Box sx={{ display: 'flex', width: '100%' }}>
-            <Typography variant="h2">{dashboardName}</Typography>
+            {dashboardTitle}
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
               {isLaptopSize && (

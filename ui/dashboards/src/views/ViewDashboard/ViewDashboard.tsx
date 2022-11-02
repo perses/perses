@@ -27,6 +27,7 @@ import { DashboardApp } from './DashboardApp';
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  dashboardTitleComponent?: JSX.Element;
   variableIsSticky?: boolean;
 }
 
@@ -34,7 +35,7 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
 export function ViewDashboard(props: ViewDashboardProps) {
-  const { dashboardResource, datasourceApi, variableIsSticky, sx, ...others } = props;
+  const { dashboardResource, datasourceApi, dashboardTitleComponent, variableIsSticky, sx, ...others } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
@@ -59,7 +60,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
               {...others}
             >
               <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <DashboardApp dashboardResource={dashboardResource} variableIsSticky={variableIsSticky} />
+                <DashboardApp dashboardResource={dashboardResource} dashboardTitleComponent={dashboardTitleComponent} variableIsSticky={variableIsSticky} />
               </ErrorBoundary>
             </Box>
           </TemplateVariableProvider>

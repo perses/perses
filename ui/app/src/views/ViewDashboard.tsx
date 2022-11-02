@@ -26,6 +26,7 @@ import { PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
+import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
@@ -66,7 +67,14 @@ function ViewDashboard() {
         <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
           <PluginRegistry pluginLoader={bundledPluginLoader}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardView dashboardResource={data} datasourceApi={datasourceApi} variableIsSticky={true} />;
+              <DashboardView
+                dashboardResource={data}
+                datasourceApi={datasourceApi}
+                dashboardTitleComponent={
+                  <DashboardBreadcrumbs dashboardName={data.metadata.name} dashboardProject={data.metadata.project} />
+                }
+                variableIsSticky={true}
+              />
             </ErrorBoundary>
           </PluginRegistry>
         </ChartsThemeProvider>
