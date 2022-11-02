@@ -10,7 +10,6 @@ be found in [GOVERNANCE.md](GOVERNANCE.md).
 | Augustin Husson | [nexucis](https://github.com/Nexucis) | Amadeus IT Group |
 | Luke Tillman | [luketillman](https://github.com/LukeTillman) | Chronosphere |
 | Steven Cobb | [sjcobb](https://github.com/sjcobb) | Chronosphere |
-| Julius Volz | [juliusv](https://github.com/juliusv) | PromLabs |
 | Antoine Thebaud | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus IT Group |
 | Eunice Wong | [eunicorn](https://github.com/eunicorn) | Chronosphere |
 
