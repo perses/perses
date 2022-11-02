@@ -14,7 +14,7 @@
 import { useMemo, useState } from 'react';
 import { merge } from 'lodash-es';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
-import { GridComponentOption } from 'echarts';
+import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, ZoomEventData, Legend } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';

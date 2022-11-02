@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GaugeSeriesOption } from 'echarts';
+import type { GaugeSeriesOption } from 'echarts';
 import { useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeChartData } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
