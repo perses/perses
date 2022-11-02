@@ -25,10 +25,11 @@ import {
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
+  variableIsSticky?: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource } = props;
+  const { dashboardResource, variableIsSticky } = props;
   return (
     <Box
       sx={{
@@ -39,7 +40,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         flexDirection: 'column',
       }}
     >
-      <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
+      <DashboardToolbar dashboardName={dashboardResource.metadata.name} variableIsSticky={variableIsSticky} />
       <Box sx={{ padding: (theme) => theme.spacing(2) }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard />

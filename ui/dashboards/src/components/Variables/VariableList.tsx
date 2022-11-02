@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Stack, Box, Drawer, AppBar, useScrollTrigger } from '@mui/material';
 import EyeIcon from 'mdi-material-ui/Eye';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -20,15 +20,19 @@ import { useTemplateVariableDefinitions, useEditMode, useTemplateVariableActions
 import { TemplateVariable } from './Variable';
 import { VariableEditor } from './VariableEditor';
 
-export function TemplateVariableList() {
+interface TemplateVariableListProps {
+  variableIsSticky?: boolean;
+}
+
+export function TemplateVariableList(props: TemplateVariableListProps) {
   const [isEditing, setIsEditing] = useState(false);
   const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
   const [showVariablesInEditMode, setShowVariablesInEditMode] = useState(true);
   const showVariables = isEditMode ? showVariablesInEditMode : true;
   const { setVariableDefinitions } = useTemplateVariableActions();
-  const trigger = useScrollTrigger({ disableHysteresis: true });
-
+  const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
+  const isSticky = scrollTrigger && props.variableIsSticky;
   return (
     <Box>
       <Drawer anchor={'right'} open={isEditing}>
@@ -54,8 +58,8 @@ export function TemplateVariableList() {
         </Box>
       )}
 
-      <AppBar color={'inherit'} position={trigger ? 'fixed' : 'static'} elevation={trigger ? 4 : 0}>
-        <Box display={'flex'} justifyContent="space-between" my={trigger ? 2 : 0} ml={trigger ? 2 : 0}>
+      <AppBar color={'inherit'} position={isSticky ? 'fixed' : 'static'} elevation={isSticky ? 4 : 0}>
+        <Box display={'flex'} justifyContent="space-between" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
           <Stack direction={'row'} spacing={2}>
             {showVariables &&
               variableDefinitions.map((v) => (

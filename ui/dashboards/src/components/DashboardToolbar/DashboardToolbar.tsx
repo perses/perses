@@ -24,10 +24,11 @@ import { TimeRangeControls } from '../TimeRangeControls';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
+  variableIsSticky?: boolean;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
-  const { dashboardName } = props;
+  const { dashboardName, variableIsSticky } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
   const { openAddPanelGroup, openAddPanel, save } = useDashboardActions();
@@ -79,7 +80,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList />
+              <TemplateVariableList variableIsSticky={variableIsSticky} />
             </ErrorBoundary>
             <Stack direction={'row'} spacing={1} sx={{ marginLeft: 'auto' }}>
               <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
@@ -112,7 +113,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
           <Box paddingY={2}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList />
+              <TemplateVariableList variableIsSticky={variableIsSticky} />
             </ErrorBoundary>
           </Box>
         </Stack>
