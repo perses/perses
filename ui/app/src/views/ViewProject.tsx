@@ -14,7 +14,8 @@
 import { useParams } from 'react-router-dom';
 import { Box, Container, Paper, Stack, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { FolderPound, ViewDashboard } from 'mdi-material-ui';
+import FolderPound from 'mdi-material-ui/FolderPound';
+import ViewDashboard from 'mdi-material-ui/ViewDashboard';
 import { useDashboardList } from '../model/dashboard-client';
 import DashboardList from '../components/DashboardList';
 

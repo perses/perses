@@ -14,6 +14,11 @@
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
+  "sideEffects": [
+    "./dist/GaugeChart/GaugeChart.js",
+    "./dist/LineChart/LineChart.js",
+    "./dist/StatChart/StatChart.js"
+  ],
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",

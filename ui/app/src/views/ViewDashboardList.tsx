@@ -23,7 +23,8 @@ import {
 } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ChevronDown, FolderPound } from 'mdi-material-ui';
+import ChevronDown from 'mdi-material-ui/ChevronDown';
+import FolderPound from 'mdi-material-ui/FolderPound';
 import { useDashboardList } from '../model/dashboard-client';
 import DashboardList from '../components/DashboardList';
 
