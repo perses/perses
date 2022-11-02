@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.14.0 / 2022-11-2
+## Unreleased
+
+## 0.14.0 / 2022-11-02
 
 - [FEATURE] Add a Project view with a dashboard list section #697
 - [FEATURE] Add a breadcrumbs as a dashboard title #702
