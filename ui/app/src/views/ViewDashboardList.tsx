@@ -28,7 +28,8 @@ import {
 import { DashboardResource } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ChevronDown, FolderPound } from 'mdi-material-ui';
+import ChevronDown from 'mdi-material-ui/ChevronDown';
+import FolderPound from 'mdi-material-ui/FolderPound';
 import { useDashboardList } from '../model/dashboard-client';
 
 function RenderDashboardList() {
