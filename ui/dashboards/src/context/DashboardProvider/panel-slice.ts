@@ -20,37 +20,13 @@ import { Middleware } from './common';
  */
 export interface PanelSlice {
   panels: Record<string, PanelDefinition>;
-  previousPanels: Record<string, PanelDefinition>;
-
-  /**
-   * Reset panels to previous state
-   */
-  resetPanels: () => void;
-
-  /**
-   * Save panels
-   */
-  savePanels: () => void;
 }
 
 /**
  * Curried function for creating the PanelSlice.
  */
 export function createPanelSlice(panels: PanelSlice['panels']): StateCreator<PanelSlice, Middleware, [], PanelSlice> {
-  return (set) => ({
+  return () => ({
     panels,
-    previousPanels: panels,
-
-    resetPanels() {
-      set((state) => {
-        state.panels = state.previousPanels;
-      });
-    },
-
-    savePanels() {
-      set((state) => {
-        state.previousPanels = state.panels;
-      });
-    },
   });
 }

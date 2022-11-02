@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-system",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "The plugin feature in Pereses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -26,8 +26,8 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.11.0",
-    "@perses-dev/core": "^0.11.0",
+    "@perses-dev/components": "^0.12.0",
+    "@perses-dev/core": "^0.12.0",
     "immer": "^9.0.15",
     "use-immer": "^0.7.0"
   },

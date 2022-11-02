@@ -30,6 +30,7 @@ export const ListLegendItem = React.memo(function ListLegendItem({ item }: ListL
         padding: 0,
         cursor: 'pointer',
       }}
+      data-testid={`legend-item-${item.color}`}
       key={item.id}
       onClick={item.onClick}
       selected={item.isSelected}

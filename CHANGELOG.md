@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.12.0 / 2022-10-25
+
+- [FEATURE] Cancel variable editing #673
+- [FEATURE] Display dashboard list #677
+- [FEATURE] Get dashboard from backend #663
+- [ENHANCEMENT] Add border to each query in time series chart editor #676
+- [ENHANCEMENT] Save dashboard layout changes #684
+- [ENHANCEMENT] Add middleware to verify project exists during a request #680
+- [ENHANCEMENT] Review of API e2e tests and remove user endpoint
+- [ENHANCEMENT] Add missing datasources definition in dashboard #688
+- [ENHANCEMENT] Fallback to text field for gauge and stat editors #678
+- [BUGFIX] Fix dao file to be able to return the list when we are at the root of the resources #671
+- [BUGFIX] Fix variable editor styling #674
+- [BUGFIX] Fix tooltip and other stylings #675
+- [BUGFIX] Remove suggested step from time series query key #686
+- [BREAKINGCHANGE] `DashboardProvider` API changes #670
+
 ## 0.11.0 / 2022-10-19
 
 - [FEATURE] Ability to change variable order #667

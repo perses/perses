@@ -25,6 +25,7 @@ import (
 )
 
 type TimeSeriesSpec struct {
+	// TODO: show_legend needs to be removed in favor of new spec
 	ShowLegend bool     `json:"show_legend" yaml:"show_legend"`
 	Lines      []string `json:"lines" yaml:"lines"`
 }
