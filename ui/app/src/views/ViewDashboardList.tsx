@@ -18,22 +18,17 @@ import {
   Box,
   CircularProgress,
   Container,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemText,
   Stack,
   Typography,
 } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-import { useNavigate } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ChevronDown, FolderPound } from 'mdi-material-ui';
 import { useDashboardList } from '../model/dashboard-client';
+import DashboardList from '../components/DashboardList';
 
 function RenderDashboardList() {
   const { data, isLoading } = useDashboardList();
-  const navigate = useNavigate();
   if (isLoading) {
     return <CircularProgress />;
   }
@@ -64,23 +59,7 @@ function RenderDashboardList() {
           </Stack>
         </AccordionSummary>
         <AccordionDetails>
-          <List>
-            {list.map((dashboard, i) => {
-              return (
-                <Box
-                  sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }}
-                  key={dashboard.metadata.name}
-                >
-                  {i !== 0 && <Divider />}
-                  <ListItemButton
-                    onClick={() => navigate('/projects/' + projectName + '/dashboards/' + dashboard.metadata.name)}
-                  >
-                    <ListItemText primary={dashboard.metadata.name} />
-                  </ListItemButton>
-                </Box>
-              );
-            })}
-          </List>
+          <DashboardList dashboardList={list} />
         </AccordionDetails>
       </Accordion>
     );
