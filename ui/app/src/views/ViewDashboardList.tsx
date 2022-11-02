@@ -18,51 +18,14 @@ import {
   Box,
   CircularProgress,
   Container,
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   Stack,
   Typography,
 } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-import { useNavigate } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ChevronDown, FolderPound } from 'mdi-material-ui';
 import { useDashboardList } from '../model/dashboard-client';
-
-export interface DashboardListProperties {
-  dashboardList: DashboardResource[];
-}
-
-export function DashboardList(props: DashboardListProperties) {
-  const navigate = useNavigate();
-  return (
-    <List>
-      {props.dashboardList.map((dashboard, i) => {
-        return (
-          <>
-            {i !== 0 && <Divider key={`divider-${i}`} />}
-            <ListItem
-              disablePadding
-              sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }}
-              key={`list-item-${i}`}
-            >
-              <ListItemButton
-                onClick={() =>
-                  navigate(`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`)
-                }
-              >
-                <ListItemText primary={dashboard.metadata.name} />
-              </ListItemButton>
-            </ListItem>
-          </>
-        );
-      })}
-    </List>
-  );
-}
+import DashboardList from '../components/DashboardList';
 
 function RenderDashboardList() {
   const { data, isLoading } = useDashboardList();

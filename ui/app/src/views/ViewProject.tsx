@@ -16,7 +16,7 @@ import { Box, Container, Paper, Stack, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { FolderPound, ViewDashboard } from 'mdi-material-ui';
 import { useDashboardList } from '../model/dashboard-client';
-import { DashboardList } from './ViewDashboardList';
+import DashboardList from '../components/DashboardList';
 
 interface RenderDashboardInProjectProperties {
   projectName: string;
