@@ -52,13 +52,13 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }) {
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);
   const chartsTheme: PersesChartsTheme = useMemo(() => {
-    return generateChartsTheme('perses', theme, ECHARTS_THEME_OVERRIDES);
+    return generateChartsTheme(theme, ECHARTS_THEME_OVERRIDES);
   }, [theme]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
+      <ChartsThemeProvider chartsTheme={chartsTheme}>
         <DarkModeContext.Provider value={darkModeContext}>{props.children}</DarkModeContext.Provider>
       </ChartsThemeProvider>
     </ThemeProvider>

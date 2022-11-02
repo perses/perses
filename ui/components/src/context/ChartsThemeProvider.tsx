@@ -12,23 +12,15 @@
 // limitations under the License.
 
 import React, { createContext, useContext } from 'react';
-import { registerTheme } from 'echarts/core';
 import { PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
-  themeName: string;
   chartsTheme?: PersesChartsTheme;
   children?: React.ReactNode;
 }
 
 export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
-  const { children, themeName, chartsTheme } = props;
-
-  if (chartsTheme !== undefined && chartsTheme.echartsTheme !== undefined) {
-    // register ECharts theme to be used in individual charts, see: https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-    registerTheme(themeName, chartsTheme.echartsTheme);
-  }
-
+  const { children, chartsTheme } = props;
   return <ChartsThemeContext.Provider value={chartsTheme}>{children}</ChartsThemeContext.Provider>;
 }
 
