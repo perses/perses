@@ -14,11 +14,13 @@
 import { Routes, Route } from 'react-router-dom';
 import ViewDashboard from './views/ViewDashboard';
 import ViewDashboardList from './views/ViewDashboardList';
+import ViewProject from './views/ViewProject';
 
 function Router() {
   return (
     <Routes>
       <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
+      <Route path="/projects/:projectName" element={<ViewProject />} />
       <Route path="/" element={<ViewDashboardList />} />
     </Routes>
   );

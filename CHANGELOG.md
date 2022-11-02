@@ -3,6 +3,7 @@
 ## Unreleased
 
 - [FEATURE] Add a breadcrumbs as a dashboard title #702
+- [FEATURE] Add a Project view with a dashboard list section #697
 
 ## 0.12.0 / 2022-10-25
 
