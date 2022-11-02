@@ -14,7 +14,6 @@
 import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOption, GaugeSeriesOption } from 'echarts';
 
 export interface PersesChartsTheme {
-  themeName: string;
   echartsTheme: EChartsTheme;
   noDataOption: EChartsCoreOption;
   sparkline: {

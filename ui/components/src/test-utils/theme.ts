@@ -14,7 +14,6 @@
 import { PersesChartsTheme } from '../model';
 
 export const testChartsTheme: PersesChartsTheme = {
-  themeName: 'perses',
   echartsTheme: {},
   noDataOption: {},
   sparkline: {

@@ -157,7 +157,7 @@ export function GaugeChart(props: GaugeChartProps) {
         height: height,
       }}
       option={option}
-      theme={chartsTheme.themeName}
+      theme={chartsTheme.echartsTheme}
     />
   );
 }

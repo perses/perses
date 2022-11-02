@@ -28,7 +28,7 @@ describe('generateChartsTheme', () => {
       smooth: true,
     },
   };
-  const chartsTheme: PersesChartsTheme = generateChartsTheme('perses', muiTheme, echartsThemeOverrides);
+  const chartsTheme: PersesChartsTheme = generateChartsTheme(muiTheme, echartsThemeOverrides);
 
   it('should return perses specific charts theme from converted MUI theme', () => {
     expect(chartsTheme).toMatchInlineSnapshot(`
@@ -191,7 +191,6 @@ describe('generateChartsTheme', () => {
           "color": "#1976d2",
           "width": 2,
         },
-        "themeName": "perses",
       }
     `);
   });
