@@ -21,13 +21,12 @@ declare global {
   var dashboardStoreId: number;
 }
 
-if (globalThis.dashboardStoreId === undefined) {
-  globalThis.dashboardStoreId = 0;
-}
-
 /**
  * Helper function to generate unique IDs for things in the dashboard store that don't have a "natural" ID.
  */
 export function generateId() {
+  if (globalThis.dashboardStoreId === undefined) {
+    globalThis.dashboardStoreId = 0;
+  }
   return globalThis.dashboardStoreId++;
 }
