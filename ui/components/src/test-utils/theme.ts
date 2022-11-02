@@ -11,22 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
- */
-export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];
+import { PersesChartsTheme } from '../model';
 
-declare global {
-  // eslint-disable-next-line no-var
-  var dashboardStoreId: number;
-}
-
-/**
- * Helper function to generate unique IDs for things in the dashboard store that don't have a "natural" ID.
- */
-export function generateId() {
-  if (globalThis.dashboardStoreId === undefined) {
-    globalThis.dashboardStoreId = 0;
-  }
-  return globalThis.dashboardStoreId++;
-}
+export const testChartsTheme: PersesChartsTheme = {
+  themeName: 'perses',
+  echartsTheme: {},
+  noDataOption: {},
+  sparkline: {
+    width: 1,
+    color: '#000000',
+  },
+};

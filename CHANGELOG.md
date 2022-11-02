@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- [FEATURE] Add a breadcrumbs as a dashboard title #702
+- [FEATURE] Add a Project view with a dashboard list section #697
+
 ## 0.13.0 / 2022-10-31
 
 - [FEATURE] Add endpoint /api/config that will provide the config of the server #700

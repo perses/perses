@@ -54,8 +54,7 @@ export const PanelDrawer = () => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              marginBottom: (theme) => theme.spacing(2),
-              paddingBottom: (theme) => theme.spacing(2),
+              padding: (theme) => theme.spacing(1, 2),
               borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
             }}
           >
