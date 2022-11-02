@@ -11,14 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme } from '../';
-
-export const testChartsTheme: PersesChartsTheme = {
-  themeName: 'perses',
-  echartsTheme: {},
-  noDataOption: {},
-  sparkline: {
-    width: 1,
-    color: '#000000',
-  },
-};
+export * from './theme';

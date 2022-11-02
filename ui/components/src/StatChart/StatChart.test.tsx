@@ -15,7 +15,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
 import { UnitOptions } from '../model';
-import { testChartsTheme } from '../test';
+import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
 
 describe('StatChart', () => {
