@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
 import { PanelGroupItemId, PanelGroupId, PanelGroupItemLayout } from './panel-group-slice';
 
@@ -20,14 +20,14 @@ export function useEditMode() {
   return useDashboardStore(selectEditMode);
 }
 
-/**
- * Returns actions that can be performed on the current dashboard.
- */
 const selectDashboardActions = ({ setDashboard, openAddPanelGroup, openAddPanel }: DashboardStoreState) => ({
   setDashboard,
   openAddPanelGroup,
   openAddPanel,
 });
+/**
+ * Returns actions that can be performed on the current dashboard.
+ */
 export function useDashboardActions() {
   const { setDashboard, openAddPanelGroup, openAddPanel } = useDashboardStore(selectDashboardActions);
   return {
@@ -37,18 +37,18 @@ export function useDashboardActions() {
   };
 }
 
+const selectPanelGroupOrder = (state: DashboardStoreState) => state.panelGroupOrder;
 /**
  * Returns an array of PanelGroupIds in the order they appear in the dashboard.
  */
-const selectPanelGroupOrder = (store: DashboardStoreState) => store.panelGroupOrder;
 export function usePanelGroupIds() {
   return useDashboardStore(selectPanelGroupOrder);
 }
 
+const selectPanelGroups = (state: DashboardStoreState) => state.panelGroups;
 /**
  * Returns an array of PanelGroupDefinitions in the order they appear in the dashboard.
  */
-const selectPanelGroups = (store: DashboardStoreState) => store.panelGroups;
 export function useListPanelGroups() {
   const panelGroupIds = usePanelGroupIds();
   const panelGroups = useDashboardStore(selectPanelGroups);
@@ -67,17 +67,13 @@ export function useListPanelGroups() {
  * Gets a specific panel group by its id. Throws if the panel group does not exist.
  */
 export function usePanelGroup(panelGroupId: PanelGroupId) {
-  const panelGroups = useDashboardStore(selectPanelGroups);
-  const panelGroup = panelGroups[panelGroupId];
+  const panelGroup = useDashboardStore(useCallback((state) => state.panelGroups[panelGroupId], [panelGroupId]));
   if (panelGroup === undefined) {
     throw new Error(`Panel group with Id ${panelGroupId} was not found`);
   }
   return panelGroup;
 }
 
-/**
- * Returns actions that can be performed on the given panel group.
- */
 const selectPanelGroupActions = ({
   openEditPanelGroup,
   deletePanelGroup,
@@ -89,6 +85,9 @@ const selectPanelGroupActions = ({
   openAddPanel,
   updatePanelGroupLayouts,
 });
+/**
+ * Returns actions that can be performed on the given panel group.
+ */
 export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   const { moveUp, moveDown } = useMovePanelGroup(panelGroupId);
   const { openEditPanelGroup, deletePanelGroup, openAddPanel, updatePanelGroupLayouts } =
@@ -105,18 +104,18 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   };
 }
 
+const selectSwapPanelGroups = (state: DashboardStoreState) => state.swapPanelGroups;
+const selectPanelGroupsLength = (state: DashboardStoreState) => state.panelGroupOrder.length;
 /**
  * Returns functions for moving a panel group up or down. A function will be undefined if the panel group can't be
  * moved in that direction.
  */
-const selectSwapPanelGroups = (store: DashboardStoreState) => store.swapPanelGroups;
 function useMovePanelGroup(panelGroupId: PanelGroupId) {
-  const panelGroupOrder = usePanelGroupIds();
+  const currentIndex = useDashboardStore(
+    useCallback((store) => store.panelGroupOrder.findIndex((id) => id === panelGroupId), [panelGroupId])
+  );
+  const panelGroupsLength = useDashboardStore(selectPanelGroupsLength);
   const swapPanelGroups = useDashboardStore(selectSwapPanelGroups);
-  const currentIndex = panelGroupOrder.findIndex((id) => id === panelGroupId);
-  const panelGroupsLength = panelGroupOrder.length;
-
-  // const swapPanelGroups = useDashboardStore(selectSwapPanelGroups);
 
   if (currentIndex < 0) {
     throw new Error(`Could not find panel group with Id ${panelGroupId} in order array`);
@@ -130,17 +129,14 @@ function useMovePanelGroup(panelGroupId: PanelGroupId) {
   };
 }
 
+const selectPanelGroupEditor = (state: DashboardStoreState) => state.panelGroupEditor;
 /**
  * Gets the Panel Group editor state.
  */
-const selectPanelGroupEditor = (store: DashboardStoreState) => store.panelGroupEditor;
 export function usePanelGroupEditor() {
   return useDashboardStore(selectPanelGroupEditor);
 }
 
-/**
- * Gets the Delete Panel Group dialog state.
- */
 const selectDeletePanelGroupDialog = ({
   deletePanelGroupDialog,
   openDeletePanelGroupDialog,
@@ -152,6 +148,9 @@ const selectDeletePanelGroupDialog = ({
   closeDeletePanelGroupDialog,
   deletePanelGroup,
 });
+/**
+ * Gets the Delete Panel Group dialog state.
+ */
 export function useDeletePanelGroupDialog() {
   const { deletePanelGroupDialog, openDeletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup } =
     useDashboardStore(selectDeletePanelGroupDialog);
@@ -166,17 +165,18 @@ export function useDeletePanelGroupDialog() {
 /**
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
-
-const selectPanels = (store: DashboardStoreState) => store.panels;
 export function usePanel(panelGroupItemId: PanelGroupItemId) {
   const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
-  const panelGroup = usePanelGroup(panelGroupId);
-  const panels = useDashboardStore(selectPanels);
-  const panelKey = panelGroup?.itemPanelKeys[panelGroupLayoutId];
-  if (panelKey === undefined) {
-    throw new Error(`Could not find panel key: ${panelKey}`);
-  }
-  const panel = panels[panelKey];
+  const panel = useDashboardStore(
+    useCallback(
+      (store) => {
+        const panelKey = store.panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];
+        if (panelKey === undefined) return;
+        return store.panels[panelKey];
+      },
+      [panelGroupId, panelGroupLayoutId]
+    )
+  );
 
   if (panel === undefined) {
     throw new Error(`Could not find panel for Id ${panelGroupItemId}`);
@@ -184,13 +184,13 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
   return panel;
 }
 
-/**
- * Returns actions that can be performed on the given Panel.
- */
 const selectPanelActions = ({ openEditPanel, openDeletePanelDialog }: DashboardStoreState) => ({
   openEditPanel,
   openDeletePanelDialog,
 });
+/**
+ * Returns actions that can be performed on the given Panel.
+ */
 export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
   const { openEditPanel, openDeletePanelDialog } = useDashboardStore(selectPanelActions);
   return {
@@ -199,28 +199,29 @@ export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
   };
 }
 
+const selectPanelEditor = (state: DashboardStoreState) => state.panelEditor;
 /**
  * Gets the state for the Panel Editor.
  */
-const selectPanelEditor = (store: DashboardStoreState) => store.panelEditor;
 export function usePanelEditor() {
   return useDashboardStore(selectPanelEditor);
 }
 
-/**
- * Gets the state for the Delete Panel dialog.
- */
 const selectDeletePanelDialog = ({ deletePanelDialog, deletePanel, closeDeletePanelDialog }: DashboardStoreState) => ({
   deletePanelDialog,
   deletePanel,
   closeDeletePanelDialog,
 });
+
+/**
+ * Gets the state for the Delete Panel dialog.
+ */
 export function useDeletePanelDialog() {
   // TODO: Refactor similar to other dialogs/editors so these are on the editor state itself
   return useDashboardStore(selectDeletePanelDialog);
 }
 
-const selectDefaultTimeRange = (store: DashboardStoreState) => store.defaultTimeRange;
+const selectDefaultTimeRange = (state: DashboardStoreState) => state.defaultTimeRange;
 export function useDefaultTimeRange() {
   return useDashboardStore(selectDefaultTimeRange);
 }
