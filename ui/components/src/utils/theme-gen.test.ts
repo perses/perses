@@ -190,7 +190,7 @@ describe('generateChartsTheme', () => {
         "sparkline": Object {
           "color": "#1976d2",
           "width": 2,
-        }
+        },
       }
     `);
   });
