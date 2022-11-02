@@ -50,13 +50,13 @@ function ViewDashboard() {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={bundledPluginLoader}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardView
-                dashboardResource={data}
-                datasourceApi={datasourceApi}
-                dashboardTitleComponent={
-                  <DashboardBreadcrumbs dashboardName={data.metadata.name} dashboardProject={data.metadata.project} />
-                }
-              />
+            <DashboardView
+              dashboardResource={data}
+              datasourceApi={datasourceApi}
+              dashboardTitleComponent={
+                <DashboardBreadcrumbs dashboardName={data.metadata.name} dashboardProject={data.metadata.project} />
+              }
+            />
           </ErrorBoundary>
         </PluginRegistry>
       </ErrorBoundary>
