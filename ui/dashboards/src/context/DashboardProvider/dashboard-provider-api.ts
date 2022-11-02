@@ -173,7 +173,9 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
   const panelGroup = usePanelGroup(panelGroupId);
   const panels = useDashboardStore(selectPanels);
   const panelKey = panelGroup?.itemPanelKeys[panelGroupLayoutId];
-  if (panelKey === undefined) return;
+  if (panelKey === undefined) {
+    throw new Error(`Could not find panel key: ${panelKey}`);
+  }
   const panel = panels[panelKey];
 
   if (panel === undefined) {
