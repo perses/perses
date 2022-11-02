@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Duration, milliseconds } from 'date-fns';
-import { round } from 'mathjs';
+import { round } from '../utils/mathjs';
 
 export const DEFAULT_DECIMAL_PLACES = 2;
 
