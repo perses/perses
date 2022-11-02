@@ -20,11 +20,7 @@ const DEFAULT_TEXT_COLOR = '#222';
 // avoid component override type errors since only palette and typography are used
 type MuiTheme = Omit<Theme, 'components'>;
 
-export function generateChartsTheme(
-  themeName: string,
-  muiTheme: MuiTheme,
-  echartsTheme: EChartsTheme
-): PersesChartsTheme {
+export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsTheme): PersesChartsTheme {
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
   const muiConvertedTheme: EChartsTheme = {
@@ -156,7 +152,6 @@ export function generateChartsTheme(
   };
 
   return {
-    themeName,
     echartsTheme: merge(muiConvertedTheme, echartsTheme),
     noDataOption: {
       title: {
