@@ -60,7 +60,11 @@ export function ViewDashboard(props: ViewDashboardProps) {
               {...others}
             >
               <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <DashboardApp dashboardResource={dashboardResource} dashboardTitleComponent={dashboardTitleComponent} variableIsSticky={variableIsSticky} />
+                <DashboardApp
+                  dashboardResource={dashboardResource}
+                  dashboardTitleComponent={dashboardTitleComponent}
+                  variableIsSticky={variableIsSticky}
+                />
               </ErrorBoundary>
             </Box>
           </TemplateVariableProvider>
