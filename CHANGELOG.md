@@ -2,8 +2,16 @@
 
 ## Unreleased
 
-- [FEATURE] Add a breadcrumbs as a dashboard title #702
+## 0.14.0 / 2022-11-02
+
 - [FEATURE] Add a Project view with a dashboard list section #697
+- [FEATURE] Add a breadcrumbs as a dashboard title #702
+- [ENHANCEMENT] Adjust panel editor padding #716
+- [ENHANCEMENT] Clean up imports and exports to help with package and bundle size #721
+- [BUGFIX] ECharts theme performance fix #722
+- [BUGFIX] Fix query border #717
+- [BUGFIX] Adjust gauge chart radius to avoid clipping #714
+- [BREAKINGCHANGE] Chart theme provider `themeName` prop removed #722
 
 ## 0.13.0 / 2022-10-31
 
