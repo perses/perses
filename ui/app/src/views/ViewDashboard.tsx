@@ -66,7 +66,7 @@ function ViewDashboard() {
         <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
           <PluginRegistry pluginLoader={bundledPluginLoader}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardView dashboardResource={data} datasourceApi={datasourceApi} />;
+              <DashboardView dashboardResource={data} datasourceApi={datasourceApi} variableIsSticky={true} />;
             </ErrorBoundary>
           </PluginRegistry>
         </ChartsThemeProvider>
