@@ -18,6 +18,8 @@ import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
+import { mockPluginRegistry, PluginRegistry } from '@perses-dev/plugin-system';
+import { MOCK_PLUGINS } from './plugin-registry';
 
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.
@@ -38,7 +40,7 @@ export function renderWithContext(
         <QueryClientProvider client={queryClient}>
           <QueryParamProvider adapter={ReactRouter6Adapter}>
             <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
-              {ui}
+              <PluginRegistry {...mockPluginRegistry(...MOCK_PLUGINS)}>{ui}</PluginRegistry>
             </ChartsThemeProvider>
           </QueryParamProvider>
         </QueryClientProvider>

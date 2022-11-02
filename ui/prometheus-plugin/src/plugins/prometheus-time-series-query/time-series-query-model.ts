@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './components';
-export * from './model';
-export * from './runtime';
-export * from './test-utils';
+import { DurationString } from '@perses-dev/core';
+import { PrometheusDatasourceSelector, TemplateString } from '../../model';
+
+/**
+ * The spec/options for the PrometheusTimeSeriesQuery plugin.
+ */
+export interface PrometheusTimeSeriesQuerySpec {
+  query: TemplateString;
+  min_step?: DurationString;
+  resolution?: number;
+  datasource?: PrometheusDatasourceSelector;
+}

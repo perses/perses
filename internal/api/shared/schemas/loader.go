@@ -207,8 +207,8 @@ func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 				return fmt.Errorf("schemas watcher channel has been closed unexpectedly")
 			}
 			// NB room for improvement: the event fsnotify.Remove could be used to actually remove the CUE schema from the map
-			if event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
-				logrus.Tracef("%s event on %s", event.Op, event.Name)
+			logrus.Tracef("%s event on %s", event.Op, event.Name)
+			if event.Has(fsnotify.Create) || event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
 				for _, l := range w.loaders {
 					if strings.HasPrefix(event.Name, filepath.FromSlash(l.GetSchemaPath())) {
 						if err := l.Load(); err != nil {

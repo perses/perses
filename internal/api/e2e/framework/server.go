@@ -78,7 +78,7 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 		}
 	}
 	handler.Use(middleware.CheckProject(serviceManager.GetProject()))
-	persesAPI := core.NewPersesAPI(serviceManager, false)
+	persesAPI := core.NewPersesAPI(serviceManager, conf)
 	persesAPI.RegisterRoute(handler)
 	server := httptest.NewServer(handler)
 	return server, httpexpect.WithConfig(httpexpect.Config{

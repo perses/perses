@@ -19,11 +19,11 @@ import (
 
 type Config struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
-	Readonly bool `yaml:"readonly"`
+	Readonly bool `json:"readonly" yaml:"readonly"`
 	// Database contains the different configuration depending on the database you want to use
-	Database Database `yaml:"database"`
+	Database Database `json:"database" yaml:"database"`
 	// Schemas contains the configuration to get access to the CUE schemas
-	Schemas Schemas `yaml:"schemas"`
+	Schemas Schemas `json:"schemas" yaml:"schemas"`
 }
 
 func Resolve(configFile string, dbFolder string, dbExtension string) (Config, error) {

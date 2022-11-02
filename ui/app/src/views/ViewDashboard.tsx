@@ -23,7 +23,7 @@ import {
 } from '@perses-dev/components';
 import { useMemo } from 'react';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { useBundledPlugins } from '../model/bundled-plugins';
+import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
@@ -36,7 +36,6 @@ const ECHARTS_THEME_OVERRIDES = {};
  * The View for viewing a Dashboard.
  */
 function ViewDashboard() {
-  const { getInstalledPlugins, importPluginModule } = useBundledPlugins();
   const muiTheme = useTheme();
   const chartsTheme: PersesChartsTheme = useMemo(() => {
     return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
@@ -66,7 +65,7 @@ function ViewDashboard() {
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-          <PluginRegistry getInstalledPlugins={getInstalledPlugins} importPluginModule={importPluginModule}>
+          <PluginRegistry pluginLoader={bundledPluginLoader}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <DashboardView
                 dashboardResource={data}

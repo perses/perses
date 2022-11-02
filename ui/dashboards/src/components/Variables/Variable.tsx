@@ -125,7 +125,11 @@ function ListVariable({ name }: TemplateVariableProps) {
       ),
     [finalOptions, value, allowMultiple]
   );
-  const selectValue = valueIsInOptions ? value ?? '' : '';
+
+  let selectValue = value;
+  if (!valueIsInOptions) {
+    selectValue = allowMultiple ? [] : '';
+  }
 
   useEffect(() => {
     const firstOption = finalOptions?.[0];
