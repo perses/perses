@@ -39,7 +39,7 @@ export function renderWithContext(
       <HistoryRouter history={history}>
         <QueryClientProvider client={queryClient}>
           <QueryParamProvider adapter={ReactRouter6Adapter}>
-            <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
+            <ChartsThemeProvider chartsTheme={testChartsTheme}>
               <PluginRegistry {...mockPluginRegistry(...MOCK_PLUGINS)}>{ui}</PluginRegistry>
             </ChartsThemeProvider>
           </QueryParamProvider>

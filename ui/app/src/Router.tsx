@@ -11,16 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import ViewDashboard from './views/ViewDashboard';
+import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+// Default route is eagerly loaded
 import ViewDashboardList from './views/ViewDashboardList';
+
+// Other routes are lazy-loaded for code-splitting
+const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
+const ViewProject = lazy(() => import('./views/ViewProject'));
 
 function Router() {
   return (
-    <Routes>
-      <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
-      <Route path="/" element={<ViewDashboardList />} />
-    </Routes>
+    <ErrorBoundary FallbackComponent={ErrorAlert}>
+      {/* TODO: What sort of loading fallback to we want? */}
+      <Suspense>
+        <Routes>
+          <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
+          <Route path="/projects/:projectName" element={<ViewProject />} />
+          <Route path="/" element={<ViewDashboardList />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

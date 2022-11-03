@@ -134,7 +134,7 @@ export function StatChart(props: StatChartProps) {
             left: 0,
           }}
           option={option}
-          theme={chartsTheme.themeName}
+          theme={chartsTheme.echartsTheme}
           renderer="svg"
         />
       )}

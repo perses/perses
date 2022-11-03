@@ -34,7 +34,6 @@ export const Drawer = ({ anchor = 'right', isOpen, onClose, PaperProps, children
         sx: combineSx(
           {
             width: `${DRAWER_DEFAULT_WIDTH}px`,
-            padding: (theme) => theme.spacing(2),
             overflow: 'hidden',
           },
           PaperProps?.sx
