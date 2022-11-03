@@ -20,7 +20,7 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { usePanelGroupActions, useEditMode, PanelGroupId } from '../../context';
+import { usePanelGroupActions, useEditMode, PanelGroupId, useDeletePanelGroupDialog } from '../../context';
 
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;
@@ -39,7 +39,8 @@ export function GridTitle(props: GridTitleProps) {
   const { panelGroupId, title, collapse } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { openAddPanel, openEditPanelGroup, deletePanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
+  const { openAddPanel, openEditPanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
+  const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
   const { isEditMode } = useEditMode();
 
   const text = (
@@ -74,7 +75,7 @@ export function GridTitle(props: GridTitleProps) {
               <IconButton aria-label="edit group" onClick={openEditPanelGroup}>
                 <PencilIcon />
               </IconButton>
-              <IconButton aria-label="delete group" onClick={deletePanelGroup}>
+              <IconButton aria-label="delete group" onClick={() => openDeletePanelGroupDialog(panelGroupId)}>
                 <DeleteIcon />
               </IconButton>
               <IconButton aria-label="move group down" disabled={moveDown === undefined} onClick={moveDown}>
