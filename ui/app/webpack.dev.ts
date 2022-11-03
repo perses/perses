@@ -27,16 +27,18 @@ declare module 'webpack' {
 
 // Get dev server HTTP options (note: HTTP2 is not currently supported by webpack since we're on Node 16)
 function getServerConfig(): ServerConfiguration | undefined {
-  // in case you would like to disable explicitly the https config of Perses (dev environment only).
-  // It's useful in a gitpod environment since the https config is blocking the preview of the UI.
-  if (process.env.PERSES_DISABLE_HTTPS === 'true') {
+  // Just use regular HTTP by default
+  if (process.env.HTTPS !== 'true') {
     return undefined;
   }
-  // If key/cert not specified, just use the default self-signed cert
+
+  // Support the same HTTPS options as Creact React App if HTTPS is set
   if (process.env.SSL_KEY_FILE === undefined || process.env.SSL_CRT_FILE === undefined) {
+    // Use the default self-signed cert
     return { type: 'https' };
   }
 
+  // Use a custom cert
   return {
     type: 'https',
     options: {
