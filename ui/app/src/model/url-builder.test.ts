@@ -56,6 +56,17 @@ describe('buildURL', () => {
         name: 'hôpital',
       },
     },
+    {
+      title: 'url with query parameters',
+      expectedURI: '/api/v1/globaldatasources?kind=PrometheusDatasource&name=Demo',
+      parameters: {
+        resource: 'globaldatasources',
+        queryParams: {
+          kind: 'PrometheusDatasource',
+          name: 'Demo',
+        },
+      },
+    },
   ];
 
   testSuite.forEach(({ title, expectedURI, parameters }) => {

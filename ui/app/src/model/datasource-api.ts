@@ -12,40 +12,42 @@
 // limitations under the License.
 
 import { Datasource, GlobalDatasource } from '@perses-dev/core';
-import { DatasourceStoreProviderProps } from '@perses-dev/dashboards';
+import { DatasourceApi } from '@perses-dev/dashboards';
+import { fetchDatasourceList, fetchGlobalDatasourceList } from './datasource-client';
 
-export function useDatasourceApi(): DatasourceStoreProviderProps['datasourceApi'] {
+export function useDatasourceApi(): DatasourceApi {
   return {
-    getDatasource: async (/*project, selector*/) => {
-      // TODO: Convert selector to appropriate request params and fetchJson to get it from backend using project
-      // argument passed in
-      return undefined;
+    getDatasource: async (project, selector) => {
+      return fetchDatasourceList(project, selector.kind, selector.name ? undefined : true, selector.name).then(
+        (list) => {
+          // hopefully it should return at most one element even
+          if (list.length > 0 && list[0] !== undefined) {
+            return {
+              resource: list[0],
+              proxyUrl: getProxyUrl(list[0]),
+            };
+          }
+        }
+      );
     },
     getGlobalDatasource: async (selector) => {
-      // TODO: Convert selector to appropriate request params and fetchJson to get it from backend
-
-      // Just resolve a default PrometheusDatasource right now
-      if (
-        selector.kind === tempDatasource.spec.plugin.kind &&
-        (selector.name === undefined || selector.name === tempDatasource.metadata.name)
-      ) {
-        return {
-          resource: tempDatasource,
-          proxyUrl: getProxyUrl(tempDatasource),
-        };
-      }
-      return undefined;
+      return fetchGlobalDatasourceList(selector.kind, selector.name ? undefined : true, selector.name).then((list) => {
+        // hopefully it should return at most one element even
+        if (list.length > 0 && list[0] !== undefined) {
+          return {
+            resource: list[0],
+            proxyUrl: getProxyUrl(list[0]),
+          };
+        }
+      });
     },
 
-    listDatasources: async (/*project, pluginKind*/) => {
-      return [];
+    listDatasources: async (project, pluginKind) => {
+      return fetchDatasourceList(project, pluginKind);
     },
 
     listGlobalDatasources: async (pluginKind) => {
-      if (pluginKind === tempDatasource.spec.plugin.kind) {
-        return [tempDatasource];
-      }
-      return [];
+      return fetchGlobalDatasourceList(pluginKind);
     },
   };
 }
@@ -59,26 +61,3 @@ function getProxyUrl(datasource: Datasource | GlobalDatasource) {
   url += `/${datasource.kind.toLowerCase()}s/${encodeURIComponent(datasource.metadata.name)}`;
   return url;
 }
-
-// Just a temporary datasource while we're working on connecting to a real backend API
-const tempDatasource: GlobalDatasource = {
-  kind: 'GlobalDatasource',
-  metadata: {
-    name: 'PrometheusDemo',
-    created_at: '',
-    updated_at: '',
-    version: 0,
-  },
-  spec: {
-    default: true,
-    display: {
-      name: 'Prometheus Demo',
-    },
-    plugin: {
-      kind: 'PrometheusDatasource',
-      spec: {
-        direct_url: 'https://prometheus.demo.do.prometheus.io',
-      },
-    },
-  },
-};
