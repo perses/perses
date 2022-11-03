@@ -14,11 +14,12 @@
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { TimeSeriesQueryContext } from '../model';
+import { TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap } from './template-variables';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './time-range';
 import { useDatasourceStore } from './datasources';
-import { usePlugin, usePluginRegistry } from './plugin-registry';
+import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
@@ -40,6 +41,35 @@ function filterVariableStateMap(v: VariableStateMap, names?: string[]) {
   return Object.fromEntries(Object.entries(v).filter(([name]) => names.includes(name)));
 }
 
+function getQueryOptions({
+  plugin,
+  definition,
+  context,
+}: {
+  plugin?: TimeSeriesQueryPlugin;
+  definition: TimeSeriesQueryDefinition;
+  context: TimeSeriesQueryContext;
+}) {
+  const { timeRange, datasourceStore, suggestedStepMs, variableState } = context;
+
+  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
+  const variableDependencies = dependencies?.variables;
+
+  const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
+  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
+  const queryKey = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey] as const;
+
+  let waitToLoad = false;
+  if (variableDependencies) {
+    waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
+  }
+  const pluginEnabled = plugin !== undefined && !waitToLoad;
+  return {
+    queryKey,
+    pluginEnabled,
+  };
+}
+
 /**
  * Runs a time series query using a plugin and returns the results.
  */
@@ -47,24 +77,10 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
-  const { timeRange, datasourceStore, suggestedStepMs, variableState } = context;
-
-  let dependsOnVariables: string[] | undefined;
-  if (plugin?.dependsOn) {
-    dependsOnVariables = plugin.dependsOn(definition.spec.plugin.spec);
-  }
-  const filteredVariabledState = filterVariableStateMap(variableState, dependsOnVariables);
-  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-  const key = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey] as const;
-
-  let waitToLoad = false;
-  if (dependsOnVariables) {
-    waitToLoad = dependsOnVariables.some((v) => variableState[v]?.loading);
-  }
-  const pluginEnabled = plugin !== undefined && !waitToLoad;
+  const { pluginEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
 
   return useQuery(
-    key,
+    queryKey,
     () => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
@@ -85,18 +101,28 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
   const { getPlugin } = usePluginRegistry();
   const context = useTimeSeriesQueryContext();
 
+  const pluginLoaderResponse = usePlugins(
+    'TimeSeriesQuery',
+    definitions.map((d) => ({ kind: d.spec.plugin.kind }))
+  );
+
   return useQueries({
-    queries: definitions.map((definition) => ({
-      // TODO: Need a way to load multiple plugins at once to call plugin.dependsOn for the queryKey
-      queryKey: [definition, context] as const,
-      queryFn: async () => {
-        // Keep options out of query key so we don't re-run queries because suggested step changes
-        const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
-        const plugin = await getPlugin('TimeSeriesQuery', definition.spec.plugin.kind);
-        const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
-        return data;
-      },
-    })),
+    queries: definitions.map((definition, idx) => {
+      const resp = pluginLoaderResponse[idx];
+      const plugin = resp?.data;
+      const { pluginEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
+      return {
+        enabled: pluginEnabled,
+        queryKey: queryKey,
+        queryFn: async () => {
+          // Keep options out of query key so we don't re-run queries because suggested step changes
+          const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
+          const plugin = await getPlugin('TimeSeriesQuery', definition.spec.plugin.kind);
+          const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
+          return data;
+        },
+      };
+    }),
   });
 }
 

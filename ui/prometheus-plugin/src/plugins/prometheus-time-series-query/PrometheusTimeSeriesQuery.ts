@@ -28,6 +28,8 @@ export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeri
     datasource: undefined,
   }),
   dependsOn: (spec) => {
-    return parseTemplateVariables(spec.query);
+    return {
+      variables: parseTemplateVariables(spec.query),
+    };
   },
 };
