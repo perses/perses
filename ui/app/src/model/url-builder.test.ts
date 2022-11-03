@@ -61,10 +61,10 @@ describe('buildURL', () => {
       expectedURI: '/api/v1/globaldatasources?kind=PrometheusDatasource&name=Demo',
       parameters: {
         resource: 'globaldatasources',
-        queryParams: {
+        queryParams: new URLSearchParams({
           kind: 'PrometheusDatasource',
           name: 'Demo',
-        },
+        }),
       },
     },
   ];

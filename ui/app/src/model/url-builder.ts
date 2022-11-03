@@ -17,33 +17,8 @@ export type URLParams = {
   resource: string;
   name?: string;
   project?: string;
-  queryParams?: Record<string, string | boolean>;
+  queryParams?: URLSearchParams;
 };
-
-function buildQueryParams(queryParams?: Record<string, string | boolean>): string | undefined {
-  if (queryParams === undefined || Object.keys(queryParams).length === 0) {
-    return undefined;
-  }
-  let result = '';
-  let i = 0;
-  const queryParamsKeys = Object.keys(queryParams);
-  while (i < queryParamsKeys.length) {
-    const k = queryParamsKeys[i];
-    if (k === undefined) {
-      continue;
-    }
-    const v = queryParams[k];
-    if (v === undefined) {
-      continue;
-    }
-    result = `${result}${encodeURIComponent(k)}=${encodeURIComponent(v)}`;
-    if (i < queryParamsKeys.length - 1) {
-      result = `${result}&`;
-    }
-    i++;
-  }
-  return result;
-}
 
 export default function buildURL(params: URLParams): string {
   let url = apiPrefix;
@@ -55,9 +30,8 @@ export default function buildURL(params: URLParams): string {
     url = `${url}/${encodeURIComponent(params.name)}`;
   }
 
-  const queryParams = buildQueryParams(params.queryParams);
-  if (queryParams !== undefined) {
-    url = `${url}?${queryParams}`;
+  if (params.queryParams !== undefined) {
+    url = `${url}?${params.queryParams.toString()}`;
   }
   return url;
 }

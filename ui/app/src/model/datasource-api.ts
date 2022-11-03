@@ -20,8 +20,8 @@ export function useDatasourceApi(): DatasourceApi {
     getDatasource: async (project, selector) => {
       return fetchDatasourceList(project, selector.kind, selector.name ? undefined : true, selector.name).then(
         (list) => {
-          // hopefully it should return at most one element even
-          if (list.length > 0 && list[0] !== undefined) {
+          // hopefully it should return at most one element
+          if (list[0] !== undefined) {
             return {
               resource: list[0],
               proxyUrl: getProxyUrl(list[0]),
@@ -32,8 +32,8 @@ export function useDatasourceApi(): DatasourceApi {
     },
     getGlobalDatasource: async (selector) => {
       return fetchGlobalDatasourceList(selector.kind, selector.name ? undefined : true, selector.name).then((list) => {
-        // hopefully it should return at most one element even
-        if (list.length > 0 && list[0] !== undefined) {
+        // hopefully it should return at most one element
+        if (list[0] !== undefined) {
           return {
             resource: list[0],
             proxyUrl: getProxyUrl(list[0]),

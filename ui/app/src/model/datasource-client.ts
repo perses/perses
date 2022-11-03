@@ -18,17 +18,17 @@ const datasourceResource = 'datasources';
 const globalDatasourceResource = 'globaldatasources';
 
 function buildDatasourceQueryParameters(kind?: string, defaultDatasource?: boolean, name?: string) {
-  const queryParameters: Record<string, string | boolean> = {};
+  const q = new URLSearchParams();
   if (kind !== undefined) {
-    queryParameters['kind'] = kind;
+    q.append('kind', kind);
   }
   if (defaultDatasource !== undefined) {
-    queryParameters['default'] = defaultDatasource;
+    q.append('default', String(defaultDatasource));
   }
   if (name !== undefined) {
-    queryParameters['name'] = name;
+    q.append('name', name);
   }
-  return queryParameters;
+  return q;
 }
 
 export function fetchDatasourceList(project: string, kind?: string, defaultDatasource?: boolean, name?: string) {
