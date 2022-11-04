@@ -21,7 +21,7 @@ export * from './Legend';
 export * from './LineChart';
 export * from './GaugeChart';
 export * from './StatChart';
-export * from './TimeRangeSelector';
+export * from './DateTimeRangePicker';
 export * from './context/ChartsThemeProvider';
 export * from './utils';
 export * from './model';

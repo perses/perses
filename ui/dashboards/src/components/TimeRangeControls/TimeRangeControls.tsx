@@ -11,16 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState, useMemo } from 'react';
-import { Box, FormControl, Popover, Stack } from '@mui/material';
-import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
-import {
-  DurationString,
-  RelativeTimeRange,
-  AbsoluteTimeRange,
-  isRelativeTimeRange,
-  toAbsoluteTimeRange,
-} from '@perses-dev/core';
+import { DateTimeRangePicker, TimeOption } from '@perses-dev/components';
 import { useDashboardTimeRange } from '../../context';
 
 // TODO: add time shortcut if one does not match duration
@@ -38,56 +29,5 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useDashboardTimeRange();
-
-  const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
-  const anchorEl = useRef();
-
-  const convertedTimeRange = useMemo(() => {
-    return isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-  }, [timeRange]);
-
-  return (
-    <Stack direction="row" spacing={1}>
-      <Popover
-        anchorEl={anchorEl.current}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        open={showCustomDateSelector}
-        onClose={() => setShowCustomDateSelector(false)}
-        sx={(theme) => ({
-          padding: theme.spacing(2),
-        })}
-      >
-        <AbsoluteTimePicker
-          initialTimeRange={convertedTimeRange}
-          onChange={(timeRange: AbsoluteTimeRange) => {
-            setTimeRange(timeRange);
-            setShowCustomDateSelector(false);
-          }}
-        />
-      </Popover>
-      <FormControl fullWidth>
-        <Box ref={anchorEl}>
-          <TimeRangeSelector
-            timeOptions={TIME_OPTIONS}
-            value={timeRange}
-            onSelectChange={(event) => {
-              const duration = event.target.value;
-              const relativeTimeInput: RelativeTimeRange = {
-                pastDuration: duration as DurationString,
-                end: new Date(),
-              };
-              setTimeRange(relativeTimeInput);
-              setShowCustomDateSelector(false);
-            }}
-            onCustomClick={() => {
-              setShowCustomDateSelector(true);
-            }}
-          />
-        </Box>
-      </FormControl>
-    </Stack>
-  );
+  return <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} />;
 }
