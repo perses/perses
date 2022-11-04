@@ -4,6 +4,7 @@
 
 - [FEATURE] Add a breadcrumbs as a dashboard title #702
 - [FEATURE] Add a Project view with a dashboard list section #697
+- [FEATURE] User can collapse / expand queries in the panel editor #718
 - [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
 
 ## 0.13.0 / 2022-10-31
