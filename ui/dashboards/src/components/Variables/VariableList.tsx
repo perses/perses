@@ -22,19 +22,19 @@ import { TemplateVariable } from './Variable';
 import { VariableEditor } from './VariableEditor';
 
 interface TemplateVariableListProps {
-  variableIsSticky?: boolean;
+  initialVariableIsSticky?: boolean;
 }
 
 export function TemplateVariableList(props: TemplateVariableListProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [isPin, setIsPin] = useState(props.variableIsSticky);
+  const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
   const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
   const [showVariablesInEditMode, setShowVariablesInEditMode] = useState(true);
   const showVariables = isEditMode ? showVariablesInEditMode : true;
   const { setVariableDefinitions } = useTemplateVariableActions();
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
-  const isSticky = scrollTrigger && props.variableIsSticky && isPin;
+  const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
   return (
     <Box>
       <Drawer anchor={'right'} open={isEditing}>
@@ -70,7 +70,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
                 </Box>
               ))}
           </Stack>
-          {props.variableIsSticky && (
+          {props.initialVariableIsSticky && (
             <IconButton onClick={() => setIsPin(!isPin)}>{isPin ? <PinOutline /> : <PinOffOutline />}</IconButton>
           )}
         </Box>
