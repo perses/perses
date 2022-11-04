@@ -12,27 +12,29 @@
 // limitations under the License.
 
 import React, { useState } from 'react';
-import { Button, Stack, Box, Drawer, AppBar, useScrollTrigger } from '@mui/material';
+import { Button, Stack, Box, Drawer, AppBar, useScrollTrigger, IconButton } from '@mui/material';
 import EyeIcon from 'mdi-material-ui/Eye';
 import PencilIcon from 'mdi-material-ui/Pencil';
-
+import PinOutline from 'mdi-material-ui/PinOutline';
+import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { useTemplateVariableDefinitions, useEditMode, useTemplateVariableActions } from '../../context';
 import { TemplateVariable } from './Variable';
 import { VariableEditor } from './VariableEditor';
 
 interface TemplateVariableListProps {
-  variableIsSticky?: boolean;
+  initialVariableIsSticky?: boolean;
 }
 
 export function TemplateVariableList(props: TemplateVariableListProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
   const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
   const [showVariablesInEditMode, setShowVariablesInEditMode] = useState(true);
   const showVariables = isEditMode ? showVariablesInEditMode : true;
   const { setVariableDefinitions } = useTemplateVariableActions();
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
-  const isSticky = scrollTrigger && props.variableIsSticky;
+  const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
   return (
     <Box>
       <Drawer anchor={'right'} open={isEditing}>
@@ -68,6 +70,9 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
                 </Box>
               ))}
           </Stack>
+          {props.initialVariableIsSticky && (
+            <IconButton onClick={() => setIsPin(!isPin)}>{isPin ? <PinOutline /> : <PinOffOutline />}</IconButton>
+          )}
         </Box>
       </AppBar>
     </Box>
