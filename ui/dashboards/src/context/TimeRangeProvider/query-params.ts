@@ -119,18 +119,24 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
 export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEnabled = true): TimeRange {
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
 
-  // fallback when app does not want query string as source of truth
+  // determine whether initial param had previously been populated to fix back btn
+  const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);
+
+  // optional fallback when app does not want query string as source of truth
+  // this occurs when paramsEnabled is set to false on TimeRangeProvider
   const [timeRangeState, setTimeRangeState] = useState<TimeRangeValue>(initialTimeRange);
 
   const { start } = query;
 
   useEffect(() => {
-    if (paramsEnabled && !start) {
+    // when dashboard loaded with no params, default to dashboard duration
+    if (paramsEnabled && !paramsLoaded && !start) {
       if (isRelativeTimeRange(initialTimeRange)) {
         setQuery({ start: initialTimeRange.pastDuration, end: undefined });
+        setParamsLoaded(true);
       }
     }
-  }, [initialTimeRange, paramsEnabled, start, setQuery]);
+  }, [initialTimeRange, paramsEnabled, paramsLoaded, start, setQuery]);
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
