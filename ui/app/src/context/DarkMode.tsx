@@ -13,8 +13,13 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
+import { ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
 import { useLocalStorage } from '../utils/browser-storage';
 import { getTheme } from '../theme/theme';
+
+// app specific echarts option overrides, empty since perses uses default
+// https://apache.github.io/echarts-handbook/en/concepts/style/#theme
+const ECHARTS_THEME_OVERRIDES = {};
 
 const DARK_MODE_PREFERENCE_KEY = 'PERSES_ENABLE_DARK_MODE';
 
@@ -46,12 +51,16 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }) {
   );
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);
+  const chartsTheme: PersesChartsTheme = useMemo(() => {
+    return generateChartsTheme(theme, ECHARTS_THEME_OVERRIDES);
+  }, [theme]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
-      <DarkModeContext.Provider value={darkModeContext}>{props.children}</DarkModeContext.Provider>
+      <ChartsThemeProvider chartsTheme={chartsTheme}>
+        <DarkModeContext.Provider value={darkModeContext}>{props.children}</DarkModeContext.Provider>
+      </ChartsThemeProvider>
     </ThemeProvider>
   );
 }

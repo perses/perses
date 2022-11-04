@@ -30,7 +30,7 @@ describe('TimeRangeControls', () => {
 
   beforeEach(() => {
     initialState = {
-      dashboardSpec: testDashboard.spec,
+      dashboardResource: testDashboard,
     };
   });
 

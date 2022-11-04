@@ -1,5 +1,40 @@
 # Changelog
 
+## Unreleased
+
+- [FEATURE] Add a breadcrumbs as a dashboard title #702
+- [FEATURE] Add a Project view with a dashboard list section #697
+- [FEATURE] User can collapse / expand queries in the panel editor #718
+- [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
+
+## 0.13.0 / 2022-10-31
+
+- [FEATURE] Add endpoint /api/config that will provide the config of the server #700
+- [FEATURE] Warn users of any unsaved changes when canceling edit mode #699
+- [FEATURE] Update variables based on time range #692
+- [FEATURE] Sync variable state with URL #690
+- [ENHANCEMENT] Run queries in panel editor on input blur #705
+- [ENHANCEMENT] Edit icons no longer appear when previewing a panel in the editor #694
+- [BREAKINGCHANGE] DashboardProvider API changes #711
+- [BREAKINGCHANGE] Add PluginLoader type to PluginRegistry #704
+
+## 0.12.0 / 2022-10-25
+
+- [FEATURE] Cancel variable editing #673
+- [FEATURE] Display dashboard list #677
+- [FEATURE] Get dashboard from backend #663
+- [ENHANCEMENT] Add border to each query in time series chart editor #676
+- [ENHANCEMENT] Save dashboard layout changes #684
+- [ENHANCEMENT] Add middleware to verify project exists during a request #680
+- [ENHANCEMENT] Review of API e2e tests and remove user endpoint
+- [ENHANCEMENT] Add missing datasources definition in dashboard #688
+- [ENHANCEMENT] Fallback to text field for gauge and stat editors #678
+- [BUGFIX] Fix dao file to be able to return the list when we are at the root of the resources #671
+- [BUGFIX] Fix variable editor styling #674
+- [BUGFIX] Fix tooltip and other stylings #675
+- [BUGFIX] Remove suggested step from time series query key #686
+- [BREAKINGCHANGE] `DashboardProvider` API changes #670
+
 ## 0.11.0 / 2022-10-19
 
 - [FEATURE] Ability to change variable order #667

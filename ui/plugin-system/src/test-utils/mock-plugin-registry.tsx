@@ -12,20 +12,22 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/core';
-import {
-  PluginRegistryProps,
-  PluginModuleResource,
-  PluginImplementation,
-  PluginType,
-  Plugin,
-} from '@perses-dev/plugin-system';
+import { PluginRegistryProps } from '../components';
+import { PluginModuleResource, Plugin, PluginLoader, PluginImplementation, PluginType } from '../model';
+
+export type MockPlugin = {
+  [T in PluginType]: {
+    pluginType: T;
+    kind: string;
+    plugin: PluginImplementation<T>;
+  };
+}[PluginType];
 
 /**
  * Helper for mocking `PluginRegistry` data during tests. Returns props that can be spread on the `PluginRegistry`
- * component so that it will load the mock plugins you setup. You can use the `addMockPlugin` function that's returned
- * to add mock plugins before rendering components that use them.
+ * component so that it will load the mock plugins you provide.
  */
-export function mockPluginRegistryProps() {
+export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginRegistryProps, 'children'> {
   const mockPluginResource: PluginModuleResource = {
     kind: 'PluginModule',
     metadata: {
@@ -35,27 +37,24 @@ export function mockPluginRegistryProps() {
       version: 0,
     },
     spec: {
-      plugins: [],
+      // Add metadata for all mock plugins
+      plugins: mockPlugins.map(({ pluginType, kind }) => ({
+        pluginType,
+        kind,
+        display: {
+          name: getMockPluginName(pluginType, kind),
+        },
+      })),
     },
   };
 
   const mockPluginModule: Record<string, Plugin<UnknownSpec>> = {};
-
-  // Allow adding mock plugins in tests
-  const addMockPlugin = <T extends PluginType>(pluginType: T, kind: string, plugin: PluginImplementation<T>) => {
-    mockPluginResource.spec.plugins.push({
-      pluginType,
-      kind,
-      display: {
-        name: `Fake ${pluginType} Plugin for ${kind}`,
-      },
-    });
-
+  for (const mockPlugin of mockPlugins) {
     // "Export" on the module under the same name as the kind the plugin handles
-    mockPluginModule[kind] = plugin;
-  };
+    mockPluginModule[mockPlugin.kind] = mockPlugin.plugin;
+  }
 
-  const pluginRegistryProps: Omit<PluginRegistryProps, 'children'> = {
+  const pluginLoader: PluginLoader = {
     getInstalledPlugins() {
       return Promise.resolve([mockPluginResource]);
     },
@@ -65,7 +64,14 @@ export function mockPluginRegistryProps() {
   };
 
   return {
-    pluginRegistryProps,
-    addMockPlugin,
+    pluginLoader,
   };
+}
+
+/**
+ * The function that's used to generate the display name of mocked plugins in mockPluginRegistry. Can be useful if you
+ * need to interact with some UI component that's displaying it.
+ */
+export function getMockPluginName(pluginType: PluginType, kind: string) {
+  return `${pluginType} Plugin for ${kind}`;
 }

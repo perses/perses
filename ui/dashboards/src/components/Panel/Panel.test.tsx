@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginRegistry } from '@perses-dev/plugin-system';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
-import { renderWithContext, mockPluginRegistryProps, FAKE_PANEL_PLUGIN } from '../../test';
+import { renderWithContext } from '../../test';
 import { Panel, PanelProps } from './Panel';
 
 describe('Panel', () => {
@@ -27,7 +26,7 @@ describe('Panel', () => {
         description: 'This is a fake panel',
       },
       plugin: {
-        kind: 'FakePanel',
+        kind: 'TimeSeriesChart',
         spec: {},
       },
     },
@@ -37,14 +36,7 @@ describe('Panel', () => {
   const renderPanel = (definition?: PanelDefinition, editHandlers?: PanelProps['editHandlers']) => {
     definition ??= createTestPanel();
 
-    const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    addMockPlugin('Panel', 'FakePanel', FAKE_PANEL_PLUGIN);
-
-    renderWithContext(
-      <PluginRegistry {...pluginRegistryProps}>
-        <Panel definition={definition} editHandlers={editHandlers} />
-      </PluginRegistry>
-    );
+    renderWithContext(<Panel definition={definition} editHandlers={editHandlers} />);
   };
 
   // Helper to get the panel once rendered
@@ -63,7 +55,7 @@ describe('Panel', () => {
     // Should display chart's content from the fake panel plugin
     const content = screen.getByRole('figure');
     await waitFor(() => {
-      expect(content).toHaveTextContent('FakePanel chart');
+      expect(content).toHaveTextContent('TimeSeriesChart panel');
     });
     expect(content);
   });

@@ -11,45 +11,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardSpec } from '@perses-dev/core';
-import { useDashboardActions, useDashboardSpec, useEditMode } from '../../context';
+import { useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
+  dashboardTitleComponent?: JSX.Element;
+  initialVariableIsSticky?: boolean;
+  onEditButtonClick: () => void;
+  onCancelButtonClick: () => void;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
-  const { dashboardName } = props;
+  const { dashboardName, dashboardTitleComponent, initialVariableIsSticky, onEditButtonClick, onCancelButtonClick } =
+    props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const { openAddPanelGroup, openAddPanel, save } = useDashboardActions();
+  const { openAddPanelGroup, openAddPanel } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
-  const [originalSpec, setOriginalSpec] = useState<DashboardSpec | undefined>(undefined);
-  const { spec, resetSpec } = useDashboardSpec();
-
-  const onEditButtonClick = () => {
-    setOriginalSpec(spec);
-    setEditMode(true);
-  };
-
-  const onCancelButtonClick = () => {
-    // Reset to the original spec and exit edit mode
-    if (originalSpec) {
-      resetSpec(originalSpec);
-    }
-    setEditMode(false);
-  };
+  const dashboardTitle = dashboardTitleComponent ? (
+    dashboardTitleComponent
+  ) : (
+    <Typography variant="h2">{dashboardName}</Typography>
+  );
 
   const onSave = () => {
-    save();
     setEditMode(false);
   };
 
@@ -59,7 +51,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
         <Stack spacing={2}>
           <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
             <Box padding={2} display="flex">
-              <Typography variant="h2">Edit {dashboardName}</Typography>
+              {dashboardTitle}
               <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
                 <Button variant="contained" onClick={onSave}>
                   Save
@@ -79,7 +71,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList />
+              <TemplateVariableList initialVariableIsSticky={initialVariableIsSticky} />
             </ErrorBoundary>
             <Stack direction={'row'} spacing={1} sx={{ marginLeft: 'auto' }}>
               <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
@@ -95,7 +87,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
       ) : (
         <Stack spacing={2} padding={2}>
           <Box sx={{ display: 'flex', width: '100%' }}>
-            <Typography variant="h2">{dashboardName}</Typography>
+            {dashboardTitle}
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
               {isLaptopSize && (
@@ -112,7 +104,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
           <Box paddingY={2}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList />
+              <TemplateVariableList initialVariableIsSticky={initialVariableIsSticky} />
             </ErrorBoundary>
           </Box>
         </Stack>

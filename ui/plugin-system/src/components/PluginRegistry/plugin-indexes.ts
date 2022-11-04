@@ -13,9 +13,7 @@
 
 import { useEvent } from '@perses-dev/core';
 import { useCallback, useRef } from 'react';
-import { PluginMetadata, PluginModuleResource, PluginType } from '../../model';
-
-export type GetInstalledPlugins = () => Promise<PluginModuleResource[]>;
+import { PluginLoader, PluginMetadata, PluginModuleResource, PluginType } from '../../model';
 
 export interface PluginIndexes {
   // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)
@@ -27,7 +25,7 @@ export interface PluginIndexes {
 /**
  * Returns an async callback for getting indexes of the installed plugin data.
  */
-export function usePluginIndexes(getInstalledPlugins: GetInstalledPlugins) {
+export function usePluginIndexes(getInstalledPlugins: PluginLoader['getInstalledPlugins']) {
   // Creates indexes from the installed plugins data (does useEvent because this accesses the getInstalledPlugins prop
   // and we want a stable reference for the callback below)
   const createPluginIndexes = useEvent(async (): Promise<PluginIndexes> => {

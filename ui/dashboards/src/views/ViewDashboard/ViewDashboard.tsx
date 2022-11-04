@@ -27,13 +27,15 @@ import { DashboardApp } from './DashboardApp';
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  dashboardTitleComponent?: JSX.Element;
+  initialVariableIsSticky?: boolean;
 }
 
 /**
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
 export function ViewDashboard(props: ViewDashboardProps) {
-  const { dashboardResource, datasourceApi, sx, ...others } = props;
+  const { dashboardResource, datasourceApi, dashboardTitleComponent, initialVariableIsSticky, sx, ...others } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
@@ -41,7 +43,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardSpec: spec }}>
+      <DashboardProvider initialState={{ dashboardResource }}>
         <TimeRangeProvider timeRange={timeRange} setTimeRange={setTimeRange}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
@@ -58,7 +60,11 @@ export function ViewDashboard(props: ViewDashboardProps) {
               {...others}
             >
               <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <DashboardApp dashboardResource={dashboardResource} />
+                <DashboardApp
+                  dashboardResource={dashboardResource}
+                  dashboardTitleComponent={dashboardTitleComponent}
+                  initialVariableIsSticky={initialVariableIsSticky}
+                />
               </ErrorBoundary>
             </Box>
           </TemplateVariableProvider>
