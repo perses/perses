@@ -37,7 +37,7 @@ describe('TimeRangeControls', () => {
   const renderTimeRangeControls = () => {
     renderWithContext(
       <DashboardProvider initialState={initialState}>
-        <TimeRangeProvider timeRange={testDefaultTimeRange}>
+        <TimeRangeProvider initialTimeRange={testDefaultTimeRange} paramsEnabled={false}>
           <TimeRangeControls />
         </TimeRangeProvider>
       </DashboardProvider>,
@@ -48,7 +48,7 @@ describe('TimeRangeControls', () => {
 
   it('should render correct initial relative time shortcut', async () => {
     renderTimeRangeControls();
-    expect(screen.getByText('Last 5 minutes')).toBeInTheDocument();
+    expect(screen.getByText('Last 30 minutes')).toBeInTheDocument();
   });
 
   // TODO: fix setTimeRange no-op, test query params

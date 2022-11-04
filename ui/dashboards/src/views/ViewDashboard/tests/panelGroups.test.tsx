@@ -20,7 +20,7 @@ import { DashboardApp } from '../DashboardApp';
 describe('Panel Groups', () => {
   const renderDashboard = () => {
     renderWithContext(
-      <TimeRangeProvider timeRange={{ pastDuration: '30m' }}>
+      <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
         <TemplateVariableProvider>
           <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
             <DashboardApp dashboardResource={getTestDashboard()} />
