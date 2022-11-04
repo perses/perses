@@ -5,6 +5,9 @@
 - [FEATURE] Add a breadcrumbs as a dashboard title #702
 - [FEATURE] Add a Project view with a dashboard list section #697
 - [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
+- [ENHANCEMENT] time range components styling improvements #733
+- [BUGFIX] Back button to dashboard listing broken #735
+- [BREAKINGCHANGE] TimeRangeProvider props changed, `paramsEnabled` added #735
 
 ## 0.13.0 / 2022-10-31
 
