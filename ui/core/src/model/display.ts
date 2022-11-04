@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './layout';
-export * from './panels';
-export * from './resource';
-export * from './time';
-export * from './time-series-queries';
-export * from './variables';
-export * from './display';
+export interface Display {
+  name: string;
+  description?: string;
+}

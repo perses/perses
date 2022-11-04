@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableDefinition, TextVariableDefinition, ListVariableDefinition } from '@perses-dev/core';
+import { VariableDefinition, TextVariableDefinition, ListVariableDefinition, Display } from '@perses-dev/core';
 
 export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const textVariableFields = {
@@ -34,7 +34,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
 
   return {
     name: initialVariableDefinition.spec.name,
-    label: initialVariableDefinition.spec.display?.label,
+    title: initialVariableDefinition.spec.display?.name,
     kind: initialVariableDefinition.kind,
     description: '',
     listVariableFields,
@@ -45,13 +45,13 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
 export type VariableEditorState = ReturnType<typeof getInitialState>;
 
 export function getVariableDefinitionFromState(state: VariableEditorState): VariableDefinition {
-  const { name, label, kind } = state;
+  const { name, title, kind } = state;
 
   const commonSpec = {
     name,
     display: {
-      label,
-    },
+      name: title,
+    } as Display,
   };
 
   if (kind === 'TextVariable') {

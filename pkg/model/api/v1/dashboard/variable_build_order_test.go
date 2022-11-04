@@ -38,7 +38,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: TextVariable,
 					Spec: &TextVariableSpec{
-						Name:  "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Value: "myConstant",
 					},
 				},
@@ -51,7 +53,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -69,7 +73,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -81,7 +87,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "foo",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "foo",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -93,7 +101,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "bar",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "bar",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -105,7 +115,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: TextVariable,
 					Spec: &TextVariableSpec{
-						Name:  "doe",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "doe",
+						},
 						Value: "myConstant",
 					},
 				},
@@ -125,7 +137,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{
@@ -140,7 +154,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "foo",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "foo",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -152,7 +168,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "bar",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "bar",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -164,7 +182,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: TextVariable,
 					Spec: &TextVariableSpec{
-						Name:  "doe",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "doe",
+						},
 						Value: "myConstant",
 					},
 				},
@@ -184,7 +204,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -196,7 +218,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "foo",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "foo",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -208,7 +232,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "bar",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "bar",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -220,7 +246,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 				{
 					Kind: TextVariable,
 					Spec: &TextVariableSpec{
-						Name:  "doe",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "doe",
+						},
 						Value: "myConstant",
 					},
 				},
@@ -259,7 +287,9 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -401,7 +431,9 @@ func TestBuildOrder(t *testing.T) {
 				{
 					Kind: TextVariable,
 					Spec: &TextVariableSpec{
-						Name:  "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Value: "myConstant",
 					},
 				},
@@ -414,7 +446,9 @@ func TestBuildOrder(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "myVariable",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "myVariable",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -426,7 +460,9 @@ func TestBuildOrder(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "foo",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "foo",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -438,7 +474,9 @@ func TestBuildOrder(t *testing.T) {
 				{
 					Kind: ListVariable,
 					Spec: &ListVariableSpec{
-						Name: "bar",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "bar",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusPromQLVariable",
 							Spec: map[string]interface{}{
@@ -450,7 +488,9 @@ func TestBuildOrder(t *testing.T) {
 				{
 					Kind: TextVariable,
 					Spec: &TextVariableSpec{
-						Name:  "doe",
+						CommonVariableSpec: CommonVariableSpec{
+							Name: "doe",
+						},
 						Value: "myConstant",
 					},
 				},

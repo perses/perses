@@ -72,6 +72,7 @@ export function VariableEditor(props: {
       }
       if (!v.spec.display) {
         v.spec.display = {
+          name: v.spec.name,
           hidden: false,
         };
       }
