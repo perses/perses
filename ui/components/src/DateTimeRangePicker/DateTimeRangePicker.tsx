@@ -13,7 +13,6 @@
 
 import { useRef, useState, useMemo } from 'react';
 import { Box, FormControl, Popover, Stack } from '@mui/material';
-import { AbsoluteTimePicker, TimeRangeSelector } from '@perses-dev/components';
 import {
   DurationString,
   RelativeTimeRange,
@@ -22,7 +21,8 @@ import {
   toAbsoluteTimeRange,
   TimeRangeValue,
 } from '@perses-dev/core';
-import { TimeOption } from './';
+import { AbsoluteTimePicker } from './AbsoluteTimePicker';
+import { TimeRangeSelector, TimeOption } from './TimeRangeSelector';
 
 interface DateTimeRangePickerProps {
   value: TimeRangeValue;
