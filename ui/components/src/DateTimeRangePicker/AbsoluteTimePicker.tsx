@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { Grid, Box, Stack, TextField } from '@mui/material';
+import { Grid, Box, Stack, TextField, Typography } from '@mui/material';
 import { LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
@@ -56,7 +56,12 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Stack spacing={3} sx={{ padding: (theme) => theme.spacing(1, 2, 3) }}>
+      <Stack
+        spacing={2}
+        sx={(theme) => ({
+          padding: theme.spacing(1, 0, 2),
+        })}
+      >
         {showStartCalendar && (
           <Box
             sx={(theme) => ({
@@ -72,7 +77,9 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               },
             })}
           >
-            <h3>Select Start Time</h3>
+            <Typography variant="h3" padding={1}>
+              Select Start Time
+            </Typography>
             <StaticDateTimePicker
               displayStaticWrapperAs="desktop"
               openTo="day"
@@ -105,7 +112,9 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               },
             })}
           >
-            <h3>Select End Time</h3>
+            <Typography variant="h3" padding={1}>
+              Select End Time
+            </Typography>
             <StaticDateTimePicker
               displayStaticWrapperAs="desktop"
               openTo="day"
@@ -130,7 +139,7 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
           container
           spacing={1}
           sx={{
-            maxWidth: 320,
+            maxWidth: 312,
           }}
         >
           <Grid item xs={6}>
