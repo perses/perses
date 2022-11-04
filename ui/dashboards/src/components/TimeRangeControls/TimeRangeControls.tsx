@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { DateTimeRangePicker, TimeOption } from '@perses-dev/components';
+import { isDurationString } from '@perses-dev/core';
 import { useDashboardTimeRange } from '../../context';
+import { useDefaultTimeRange } from '../../context';
 
-// TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
   { value: { pastDuration: '15m' }, display: 'Last 15 minutes' },
@@ -29,5 +30,16 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useDashboardTimeRange();
+  const defaultTimeRange = useDefaultTimeRange();
+
+  // add time shortcut if one does not match duration from dashboard JSON
+  if (!TIME_OPTIONS.some((option) => option.value.pastDuration === defaultTimeRange.pastDuration)) {
+    if (isDurationString(defaultTimeRange.pastDuration)) {
+      TIME_OPTIONS.push({
+        value: { pastDuration: defaultTimeRange.pastDuration },
+        display: `Last ${defaultTimeRange.pastDuration}`,
+      });
+    }
+  }
   return <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} />;
 }
