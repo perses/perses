@@ -81,9 +81,16 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={activeTab} onChange={handleChange}>
-          {normalizedTabs.map(({ id, label }) => {
-            return <Tab key={id} label={label} />;
+        <Tabs value={activeTab} onChange={handleChange} aria-label="Panel configuration tabs">
+          {normalizedTabs.map(({ id, label }, i) => {
+            return (
+              <Tab
+                key={id}
+                label={label}
+                id={`options-editor-tab-${i}`}
+                aria-controls={`options-editor-tabpanel-${i}`}
+              />
+            );
           })}
         </Tabs>
       </Box>
