@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -14,6 +14,7 @@
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",

@@ -67,6 +67,30 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'warn',
     // Not necessary in React 17
     'react/react-in-jsx-scope': 'off',
+
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            /**
+             * This library is gigantic and named imports end up slowing down builds/blowing out bundle sizes,
+             * so this prevents that style of import.
+             */
+            group: ['mdi-material-ui', '!mdi-material-ui/'],
+            message: `
+Please use the default import from the icon file directly rather than using a named import.
+
+Good:
+import IconName from 'mdi-material-ui/IconName';
+
+Bad:
+import { IconName } from 'mdi-material-ui';
+`,
+          },
+        ],
+      },
+    ],
   },
 
   ignorePatterns: ['**/dist'],

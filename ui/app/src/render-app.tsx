@@ -16,7 +16,6 @@ import ReactDOM from 'react-dom/client';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { BrowserRouter } from 'react-router-dom';
-import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import { DarkModeContextProvider } from './context/DarkMode';
@@ -41,7 +40,6 @@ export function renderApp(container: Element | null) {
           <QueryParamProvider adapter={ReactRouter6Adapter}>
             <DarkModeContextProvider>
               <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                <CssBaseline />
                 <App />
               </SnackbarProvider>
             </DarkModeContextProvider>

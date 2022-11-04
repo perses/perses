@@ -11,18 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './InfoTooltip';
-export * from './JSONEditor';
-export * from './Legend';
-export * from './LineChart';
-export * from './GaugeChart';
-export * from './StatChart';
-export * from './DateTimeRangePicker';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test-utils';
+import { gcdDependencies, create } from 'mathjs';
+
+// This ensures we get a minimal mathjs bundle for just what we need (see https://mathjs.org/docs/custom_bundling.html)
+const { gcd } = create({ gcdDependencies });
+export { gcd };

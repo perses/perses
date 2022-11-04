@@ -218,7 +218,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
           height: '100%',
         }}
         option={option}
-        theme={chartsTheme.themeName}
+        theme={chartsTheme.echartsTheme}
         onEvents={handleEvents}
         _instance={chartRef}
       />

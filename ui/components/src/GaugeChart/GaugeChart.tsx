@@ -53,7 +53,7 @@ export function GaugeChart(props: GaugeChartProps) {
         {
           type: 'gauge',
           center: ['50%', '65%'],
-          radius: '100%',
+          radius: '86%',
           startAngle: 200,
           endAngle: -20,
           min: 0,
@@ -106,7 +106,7 @@ export function GaugeChart(props: GaugeChartProps) {
         {
           type: 'gauge',
           center: ['50%', '65%'],
-          radius: '114%',
+          radius: '100%',
           startAngle: 200,
           endAngle: -20,
           min: 0,
@@ -157,7 +157,7 @@ export function GaugeChart(props: GaugeChartProps) {
         height: height,
       }}
       option={option}
-      theme={chartsTheme.themeName}
+      theme={chartsTheme.echartsTheme}
     />
   );
 }

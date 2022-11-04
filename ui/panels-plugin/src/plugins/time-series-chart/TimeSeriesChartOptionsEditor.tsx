@@ -102,23 +102,26 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
       <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
         Add Query
       </Button>
-      {queries.map((query, i) => (
+      {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
         <Stack key={i} spacing={1}>
-          <Stack direction="row" borderBottom={1} borderColor="grey.300">
-            <Typography variant="overline" component="h3">
+          <Stack direction="row" alignItems="center" borderBottom={1} borderColor="grey.300">
+            <Typography variant="overline" component="h4">
               Query {i + 1}
             </Typography>
-            {hasMoreThanOneQuery && (
-              <IconButton sx={{ marginLeft: 'auto' }} onClick={() => handleQueryDelete(i)}>
-                <DeleteIcon />
-              </IconButton>
-            )}
+            <IconButton
+              size="small"
+              // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
+              sx={{ marginLeft: 'auto', visibility: `${hasMoreThanOneQuery ? 'visible' : 'hidden'}` }}
+              onClick={() => handleQueryDelete(i)}
+            >
+              <DeleteIcon />
+            </IconButton>
           </Stack>
           <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
         </Stack>
       ))}
       <Stack spacing={1}>
-        <Typography variant="overline" component="h3">
+        <Typography variant="overline" component="h4">
           Legend
         </Typography>
         <FormControlLabel

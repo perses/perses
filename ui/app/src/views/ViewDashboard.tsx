@@ -13,33 +13,18 @@
 
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { useParams } from 'react-router-dom';
-import { Box, useTheme } from '@mui/material';
-import {
-  ChartsThemeProvider,
-  ErrorAlert,
-  ErrorBoundary,
-  generateChartsTheme,
-  PersesChartsTheme,
-} from '@perses-dev/components';
-import { useMemo } from 'react';
+import { Box } from '@mui/material';
+import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
-
-// app specific echarts option overrides, empty since perses uses default
-// https://apache.github.io/echarts-handbook/en/concepts/style/#theme
-const ECHARTS_THEME_OVERRIDES = {};
+import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 
 /**
  * The View for viewing a Dashboard.
  */
 function ViewDashboard() {
-  const muiTheme = useTheme();
-  const chartsTheme: PersesChartsTheme = useMemo(() => {
-    return generateChartsTheme('perses', muiTheme, ECHARTS_THEME_OVERRIDES);
-  }, [muiTheme]);
-
   const { projectName, dashboardName } = useParams();
 
   if (projectName === undefined || dashboardName === undefined) {
@@ -63,13 +48,18 @@ function ViewDashboard() {
       }}
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <ChartsThemeProvider themeName="perses" chartsTheme={chartsTheme}>
-          <PluginRegistry pluginLoader={bundledPluginLoader}>
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardView dashboardResource={data} datasourceApi={datasourceApi} />;
-            </ErrorBoundary>
-          </PluginRegistry>
-        </ChartsThemeProvider>
+        <PluginRegistry pluginLoader={bundledPluginLoader}>
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <DashboardView
+              dashboardResource={data}
+              datasourceApi={datasourceApi}
+              dashboardTitleComponent={
+                <DashboardBreadcrumbs dashboardName={data.metadata.name} dashboardProject={data.metadata.project} />
+              }
+              initialVariableIsSticky={true}
+            />
+          </ErrorBoundary>
+        </PluginRegistry>
       </ErrorBoundary>
     </Box>
   );

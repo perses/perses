@@ -18,14 +18,14 @@ import buildURL from './url-builder';
 const resource = 'dashboards';
 
 export function useDashboard(project: string, name: string) {
-  return useQuery<DashboardResource, Error>([resource], () => {
+  return useQuery<DashboardResource, Error>([resource, project, name], () => {
     const url = buildURL({ resource: resource, name: name, project: project });
     return fetchJson<DashboardResource>(url);
   });
 }
 
 export function useDashboardList(project?: string) {
-  return useQuery<DashboardResource[], Error>([resource], () => {
+  return useQuery<DashboardResource[], Error>([resource, project], () => {
     const url = buildURL({ resource: resource, project: project });
     return fetchJson<DashboardResource[]>(url);
   });

@@ -11,14 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme } from '../';
+import { roundDependencies, create } from 'mathjs';
 
-export const testChartsTheme: PersesChartsTheme = {
-  themeName: 'perses',
-  echartsTheme: {},
-  noDataOption: {},
-  sparkline: {
-    width: 1,
-    color: '#000000',
-  },
-};
+// This ensures we get a minimal mathjs bundle for just what we need (see https://mathjs.org/docs/custom_bundling.html)
+const { round } = create({ roundDependencies });
+export { round };

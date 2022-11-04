@@ -157,7 +157,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 		}
 	}
 
-	if !isAllowed {
+	if len(h.config.AllowedEndpoints) > 0 && !isAllowed {
 		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
