@@ -63,10 +63,10 @@ function getQueryOptions({
   if (variableDependencies) {
     waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
   }
-  const pluginEnabled = plugin !== undefined && !waitToLoad;
+  const queryEnabled = plugin !== undefined && !waitToLoad;
   return {
     queryKey,
-    pluginEnabled,
+    queryEnabled,
   };
 }
 
@@ -77,7 +77,7 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
-  const { pluginEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
+  const { queryEnabled: pluginEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
 
   return useQuery(
     queryKey,
@@ -110,9 +110,9 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
     queries: definitions.map((definition, idx) => {
       const resp = pluginLoaderResponse[idx];
       const plugin = resp?.data;
-      const { pluginEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
+      const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
-        enabled: pluginEnabled,
+        enabled: queryEnabled,
         queryKey: queryKey,
         queryFn: async () => {
           // Keep options out of query key so we don't re-run queries because suggested step changes
