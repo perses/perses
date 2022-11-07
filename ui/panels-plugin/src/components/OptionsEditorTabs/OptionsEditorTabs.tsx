@@ -77,10 +77,9 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
   const otherTabs = tabs?.other || [];
   const normalizedTabs = [...commonTabs, ...otherTabs];
 
-  // TODO: check on divider color
   return (
     <>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'grey.300' }}>
         <Tabs value={activeTab} onChange={handleChange} aria-label="Panel configuration tabs">
           {normalizedTabs.map(({ id, label }, i) => {
             return (
