@@ -27,7 +27,7 @@ interface OtherTabConfig extends BaseTabConfig {
   label: TabProps['label'];
 }
 
-type CommonTabId = 'query' | 'settings';
+type CommonTabId = 'query' | 'settings' | 'json';
 
 /**
  * Common tabs that are frequently used in the options editor across multiple
@@ -48,11 +48,16 @@ export type OptionsEditorTabsProps = {
   tabs: CommonTabs & OtherTabs;
 };
 
-// Configuration of the order and labeling for common tabs across plugins
-// to enforce a consistent UX.
+// Configuration of the order and labeling for tabs across plugins to enforce a
+// consistent UX.
 const TAB_CONFIG = [
   { id: 'query', label: 'Query' },
   { id: 'settings', label: 'Settings' },
+
+  // Custom tabs go between the visual common tabs and the raw JSON editor.
+  'other',
+
+  { id: 'json', label: 'JSON' },
 ] as const;
 
 export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
@@ -65,17 +70,27 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
   // Normalize the common tabs that are managed via constants in this file
   // and custom tabs that bring their own config into a consistent shape for
   // rendering.
-  const commonTabs = TAB_CONFIG.filter((tabConfig) => {
-    // Only include common tabs that are specified.
-    return !!tabs[tabConfig.id];
-  }).map((tabConfig) => {
-    return {
-      ...tabConfig,
-      ...tabs[tabConfig.id],
-    };
-  });
-  const otherTabs = tabs?.other || [];
-  const normalizedTabs = [...commonTabs, ...otherTabs];
+  const normalizedTabs = TAB_CONFIG.reduce((combinedTabs, tabConfig) => {
+    // Custom tabs
+    if (tabConfig === 'other') {
+      const otherTabs = tabs?.other || [];
+      return [...combinedTabs, ...otherTabs];
+    }
+
+    // Common tabs
+    const commonTab = tabs[tabConfig.id];
+    if (commonTab) {
+      return [
+        ...combinedTabs,
+        {
+          ...tabConfig,
+          ...commonTab,
+        },
+      ];
+    }
+
+    return combinedTabs;
+  }, [] as OtherTabConfig[]);
 
   return (
     <>
