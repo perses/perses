@@ -34,10 +34,10 @@ describe('TimeRangeControls', () => {
     };
   });
 
-  const renderTimeRangeControls = () => {
+  const renderTimeRangeControls = (testURLParams: boolean) => {
     renderWithContext(
       <DashboardProvider initialState={initialState}>
-        <TimeRangeProvider initialTimeRange={testDefaultTimeRange} enabledURLParams={false}>
+        <TimeRangeProvider initialTimeRange={testDefaultTimeRange} enabledURLParams={testURLParams}>
           <TimeRangeControls />
         </TimeRangeProvider>
       </DashboardProvider>,
@@ -46,19 +46,32 @@ describe('TimeRangeControls', () => {
     );
   };
 
-  it('should render correct initial relative time shortcut', async () => {
-    renderTimeRangeControls();
+  it('should default to dashboard duration and update selected time option when clicked', async () => {
+    renderTimeRangeControls(false);
     expect(screen.getByText('Last 30 minutes')).toBeInTheDocument();
-  });
-
-  // TODO: fix setTimeRange no-op, test query params
-  it('should be able to select the first option', () => {
-    renderTimeRangeControls();
     const dateButton = screen.getByRole('button');
     userEvent.click(dateButton);
-    const firstOption = screen.getByRole('option', { name: 'Last 5 minutes' });
-    userEvent.click(firstOption);
+    const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
+    userEvent.click(firstSelected);
     expect(dateButton).toHaveTextContent(/5 minutes/i);
+  });
+
+  it('should update URL params with correct time range values', () => {
+    renderTimeRangeControls(true);
+    const dateButton = screen.getByRole('button');
+    userEvent.click(dateButton);
+    const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
+    userEvent.click(firstSelected);
+    expect(history.location.search).toEqual('?start=5m');
+
+    // pick another option from TimeRangeSelector dropdown
+    const secondSelected = screen.getByText('Last 12 hours');
+    userEvent.click(secondSelected);
+    expect(history.location.search).toEqual('?start=12h');
+
+    // back button should return to first option selected
+    history.back();
+    expect(history.location.search).toEqual('?start=5m');
   });
 
   // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.
