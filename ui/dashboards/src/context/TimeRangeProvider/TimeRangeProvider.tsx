@@ -18,7 +18,7 @@ import { useSetTimeRangeParams } from './query-params';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
-  paramsEnabled?: boolean;
+  enabledURLParams?: boolean;
   children?: React.ReactNode;
 }
 
@@ -26,9 +26,9 @@ export interface TimeRangeProviderProps {
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { initialTimeRange, paramsEnabled, children } = props;
+  const { initialTimeRange, enabledURLParams, children } = props;
 
-  const { timeRange, setTimeRange } = useSetTimeRangeParams(initialTimeRange, paramsEnabled);
+  const { timeRange, setTimeRange } = useSetTimeRangeParams(initialTimeRange, enabledURLParams);
 
   const ctx = useMemo(
     () => ({

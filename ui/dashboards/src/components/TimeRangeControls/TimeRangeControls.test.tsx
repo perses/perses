@@ -37,7 +37,7 @@ describe('TimeRangeControls', () => {
   const renderTimeRangeControls = () => {
     renderWithContext(
       <DashboardProvider initialState={initialState}>
-        <TimeRangeProvider initialTimeRange={testDefaultTimeRange} paramsEnabled={false}>
+        <TimeRangeProvider initialTimeRange={testDefaultTimeRange} enabledURLParams={false}>
           <TimeRangeControls />
         </TimeRangeProvider>
       </DashboardProvider>,

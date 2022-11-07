@@ -42,7 +42,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource }}>
-        <TimeRangeProvider initialTimeRange={initialTimeRange} paramsEnabled={true}>
+        <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
               sx={combineSx(
