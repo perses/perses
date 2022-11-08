@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './PluginRegistry';
 export * from './DatasourceSelect';
+export * from './OptionsEditorTabs';
 export * from './PluginEditor';
 export * from './PluginKindSelect';
+export * from './PluginRegistry';
 export * from './PluginSpecEditor';
 export * from './TimeSeriesQueryEditor';
