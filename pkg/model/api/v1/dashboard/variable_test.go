@@ -43,7 +43,9 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			result: &Variable{
 				Kind: TextVariable,
 				Spec: &TextVariableSpec{
-					Name:  "SimpleText",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "SimpleText",
+					},
 					Value: "value",
 				},
 			},
@@ -68,9 +70,14 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			result: &Variable{
 				Kind: ListVariable,
 				Spec: &ListVariableSpec{
-					Name: "MyList",
-					Display: &common.Display{
-						Name: "my awesome variable",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
 					},
 					Plugin: common.Plugin{
 						Kind: "PrometheusLabelNamesVariable",
@@ -103,9 +110,14 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			result: &Variable{
 				Kind: ListVariable,
 				Spec: &ListVariableSpec{
-					Name: "MyList",
-					Display: &common.Display{
-						Name: "my awesome variable",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
 					},
 					Plugin: common.Plugin{
 						Kind: "PrometheusLabelNamesVariable",
@@ -141,9 +153,14 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			result: &Variable{
 				Kind: ListVariable,
 				Spec: &ListVariableSpec{
-					Name: "MyList",
-					Display: &common.Display{
-						Name: "my awesome variable",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
 					},
 					Plugin: common.Plugin{
 						Kind: "PrometheusLabelValuesVariable",
@@ -182,7 +199,9 @@ spec:
 			result: &Variable{
 				Kind: TextVariable,
 				Spec: &TextVariableSpec{
-					Name:  "SimpleText",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "SimpleText",
+					},
 					Value: "value",
 				},
 			},
@@ -201,9 +220,14 @@ spec:
 			result: &Variable{
 				Kind: ListVariable,
 				Spec: &ListVariableSpec{
-					Name: "MyList",
-					Display: &common.Display{
-						Name: "my awesome variable",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
 					},
 					Plugin: common.Plugin{
 						Kind: "PrometheusLabelNamesVariable",
@@ -228,9 +252,14 @@ spec:
 			result: &Variable{
 				Kind: ListVariable,
 				Spec: &ListVariableSpec{
-					Name: "MyList",
-					Display: &common.Display{
-						Name: "my awesome variable",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
 					},
 					Plugin: common.Plugin{
 						Kind: "PrometheusLabelNamesVariable",
@@ -259,9 +288,14 @@ spec:
 			result: &Variable{
 				Kind: ListVariable,
 				Spec: &ListVariableSpec{
-					Name: "MyList",
-					Display: &common.Display{
-						Name: "my awesome variable",
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
 					},
 					Plugin: common.Plugin{
 						Kind: "PrometheusLabelValuesVariable",

@@ -13,6 +13,7 @@
 
 import { Definition, UnknownSpec } from './definitions';
 import { Metadata, ProjectMetadata } from './resource';
+import { Display } from './display';
 
 /**
  * A Datasource that's available across all projects.
@@ -33,10 +34,7 @@ export interface Datasource {
 }
 
 export interface DatasourceSpec<PluginSpec = UnknownSpec> {
-  display?: {
-    name: string;
-    description?: string;
-  };
+  display?: Display;
   default: boolean;
   plugin: Definition<PluginSpec>;
 }

@@ -91,10 +91,10 @@ export function VariableEditForm({
           <TextField
             fullWidth
             label="Label"
-            value={state.label}
+            value={state.title}
             onChange={(v) => {
               setState((draft) => {
-                draft.label = v.target.value;
+                draft.title = v.target.value;
               });
             }}
           />

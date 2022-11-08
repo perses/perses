@@ -5,6 +5,9 @@
 - [FEATURE] User can collapse / expand queries in the panel editor #718
 - [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
 - [ENHANCEMENT] Disable initial panel animation #710
+- [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the backend. #734
+- [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
+  becomes `display.name` #734
 
 ## 0.14.0 / 2022-11-02
 
@@ -96,7 +99,8 @@
 - [ENHANCEMENT] Upgrade react-query to v4 #578
 - [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #583, #585, #586
 - [ENHANCEMENT] Update Perses Header, refactor embeddable components #580
-- [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553, #563
+- [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553,
+  #563
 - [ENHANCEMENT] Add optional Datasource selector spec to Prom variables and queries #587
 - [BUGFIX] Fix overlapping header issue #580
 - [BREAKINGCHANGE] Initial Datasources v2 spec support in UI #577
@@ -168,7 +172,8 @@
 
 ## 0.5.0 / 2022-07-20
 
-- [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at runtime #422 #434 #435 #457 #459 #478
+- [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at
+  runtime #422 #434 #435 #457 #459 #478
 - [FEATURE] echarts theme customization which allows flexibility when Perses is embedded in other apps #480
 - [FEATURE] Add ability to show info icon next to panel header using `display.description` #465
 - [FEATURE] `thresholds` support in line chart #462
@@ -178,7 +183,8 @@
 - [ENHANCEMENT] add `Bytes` formatting to line and stats charts #462
 - [ENHANCEMENT] stat chart selectable text and theme improvements #462
 - [ENHANCEMENT] release process and license header improvements #452, #456
-- [ENHANCEMENT] add a version number on every resources managed. This number is increased when a resource is updated. #453
+- [ENHANCEMENT] add a version number on every resources managed. This number is increased when a resource is updated.
+  #453
 - [ENHANCEMENT] add documentation regarding how Perses might work on k8s #448
 - [BUGFIX] line chart query error handling #479
 - [BUGFIX] line chart fill empty data regression #462
@@ -224,7 +230,8 @@
 
 ## 0.2.1 / 2022-03-28
 
-- [ENHANCEMENT] Merge GitHub workflow for build and release in a single one. It also fixed the publishing of the docker images.
+- [ENHANCEMENT] Merge GitHub workflow for build and release in a single one. It also fixed the publishing of the docker
+  images.
 
 ## 0.2.0 / 2022-03-24
 
