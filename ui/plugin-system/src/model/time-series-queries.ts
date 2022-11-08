@@ -45,14 +45,3 @@ export interface TimeSeries {
 }
 
 export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
-
-export type SeriesLabels = Record<string, string>;
-
-/*
- * Formatter used for series name display in legends and tooltips
- * Regex replaces label {{ name }} with resolved label value
- */
-export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels): string {
-  const resolveLabelsRegex = /\{\{\s*(.+?)\s*\}\}/g;
-  return inputFormat.replace(resolveLabelsRegex, (_, g) => (seriesLabels[g] ? seriesLabels[g] : g));
-}

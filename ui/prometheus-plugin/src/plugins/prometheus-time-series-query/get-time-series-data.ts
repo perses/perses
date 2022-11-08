@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesData, TimeSeriesQueryPlugin, formatSeriesName } from '@perses-dev/plugin-system';
+import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import {
   parseValueTuple,
@@ -21,6 +21,7 @@ import {
   getRangeStep,
   replaceTemplateVariables,
   DEFAULT_PROM,
+  formatSeriesName,
 } from '../../model';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
