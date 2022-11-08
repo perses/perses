@@ -8,7 +8,7 @@ Perses
 ## Overview
 
 Perses is part of the [CoreDash community](https://github.com/coredashio/community). It belongs to the Linux Foundation.
-On a later stage, we want to promote the project to the [Cloud Native Computing Foundation](https://www.cncf.io/) and be
+At a later stage, we want to promote the project to the [Cloud Native Computing Foundation](https://www.cncf.io/) and be
 part of the monitoring tools like Prometheus or Thanos.
 
 Perses is going to tackle multiple different goals:
@@ -17,13 +17,13 @@ Perses is going to tackle multiple different goals:
    being GitOps-compatible and thus enabling a smooth "dashboards as code" workflow via a new and well-defined dashboard
    definition model.
 2. While becoming another visualization tool, Perses also aims to provide different npm packages, so it can benefit to
-   anyone that would like to integrate data visualization in his UI. For example, these packages might be used to
+   anyone that would like to embed charts and dashboards in their UI. For example, these packages might be used to
    improve the display of the data in the Prometheus UI.
 3. It also aims to offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from
-   individual application namespaces (Using CRDs)
-4. To be dashboard as code friendly, we want to provide a complete static validation of the dashboard format. That means
-   you will be able to validate your dashboard in a CI/CD totally statically certainly using
-   the Perses CLI (named `percli`)
+   individual application namespaces (Using CRDs). For more information you can take a look
+   at [the doc](./docs/kubernetes.md) that would give you an idea of how it would work.
+4. To be friendly to dashboard as code users, we want to provide a complete static validation of the dashboard format.
+   That means you will be able to validate your dashboard in a CI/CD using the Perses CLI (named `percli`)
 5. The architecture should support plugins (at least for the panels)
 
 ## Status
@@ -42,11 +42,23 @@ progress. The current pieces that are in place are:
         * Time series charts.
         * Gauge panels.
         * Stat panels (single value with sparkline).
-        * Mardown panels (as an alternative to the Text panel)
-    * The editing of dashboard is well advanced. Remaining work most of the remaining work is in panel options, right
-      now you have to use the JSON editor for a lot of properties, but those will be form controls soon
+        * Markdown panels (as an alternative to the Text panel)
+    * The editing of dashboard is well advanced. Most of the remaining work is in panel options, right now you have to
+      use the JSON editor for a lot of properties, but those will be form controls soon.
+* The dashboard data model is still evolving along with the dashboard implementation and new requirements. Before
+  reaching a stable state regarding the data model, we are waiting for feedback to know if we need to adjust and
+  potentially break things.
 
-The dashboard data model is still evolving along with the dashboard implementation and new requirements.
+## What's next
+
+Here is a not ordered list of what it can come in the future in Perses:
+
+* Perses native on Kubernetes using CRDs
+* Traces Visualization support
+* Docs, a lot of docs :)
+* Generating Panel #200
+* Sub folder management #183
+* Datasource discovery #74
 
 ## Install
 
