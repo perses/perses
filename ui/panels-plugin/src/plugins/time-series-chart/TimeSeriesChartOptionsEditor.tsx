@@ -26,12 +26,13 @@ import {
   Switch,
   Typography,
 } from '@mui/material';
+import { JSONEditor } from '@perses-dev/components';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
+import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs } from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions, DEFAULT_LEGEND, LEGEND_POSITIONS, LegendPosition } from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
@@ -120,66 +121,81 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   };
 
   return (
-    <Stack spacing={2}>
-      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
-        Add Query
-      </Button>
-      {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
-        <Stack key={i} spacing={1}>
-          <Stack direction="row" alignItems="center" borderBottom={1} borderColor="grey.300">
-            <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
-              {queriesCollapsed[i] ? <ChevronUp /> : <ChevronDown />}
-            </IconButton>
-            <Typography variant="overline" component="h4">
-              Query {i + 1}
-            </Typography>
-            <IconButton
-              size="small"
-              // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
-              sx={{ marginLeft: 'auto', visibility: `${hasMoreThanOneQuery ? 'visible' : 'hidden'}` }}
-              onClick={() => handleQueryDelete(i)}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Stack>
-          {!queriesCollapsed[i] && (
-            <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
-          )}
-        </Stack>
-      ))}
-      <Stack spacing={1}>
-        <Typography variant="overline" component="h4">
-          Legend
-        </Typography>
-        <FormControlLabel
-          label="Show"
-          control={
-            <Switch
-              checked={value.legend !== undefined}
-              onChange={(e) => {
-                handleLegendShowChange(e.target.checked);
-              }}
-            />
-          }
-        />
-        <FormControl>
-          <InputLabel id="legend-position-select-label">Position</InputLabel>
-          <Select
-            sx={{ maxWidth: 100 }}
-            labelId="legend-position-select-label"
-            id="legend-position-select"
-            label="Position"
-            value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
-            onChange={handleLegendPositionChange}
-          >
-            {LEGEND_POSITIONS.map((position) => (
-              <MenuItem key={position} value={position}>
-                {position}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Stack>
-    </Stack>
+    <OptionsEditorTabs
+      tabs={{
+        query: {
+          content: (
+            <Stack spacing={2}>
+              <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
+                Add Query
+              </Button>
+              {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
+                <Stack key={i} spacing={1}>
+                  <Stack direction="row" alignItems="center" borderBottom={1} borderColor="grey.300">
+                    <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
+                      {queriesCollapsed[i] ? <ChevronUp /> : <ChevronDown />}
+                    </IconButton>
+                    <Typography variant="overline" component="h4">
+                      Query {i + 1}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
+                      sx={{ marginLeft: 'auto', visibility: `${hasMoreThanOneQuery ? 'visible' : 'hidden'}` }}
+                      onClick={() => handleQueryDelete(i)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Stack>
+                  {!queriesCollapsed[i] && (
+                    <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
+                  )}
+                </Stack>
+              ))}
+            </Stack>
+          ),
+        },
+        settings: {
+          content: (
+            <Stack spacing={1}>
+              <Typography variant="overline" component="h4">
+                Legend
+              </Typography>
+              <FormControlLabel
+                label="Show"
+                control={
+                  <Switch
+                    checked={value.legend !== undefined}
+                    onChange={(e) => {
+                      handleLegendShowChange(e.target.checked);
+                    }}
+                  />
+                }
+              />
+              <FormControl>
+                <InputLabel id="legend-position-select-label">Position</InputLabel>
+                <Select
+                  sx={{ maxWidth: 100 }}
+                  labelId="legend-position-select-label"
+                  id="legend-position-select"
+                  label="Position"
+                  value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
+                  onChange={handleLegendPositionChange}
+                >
+                  {LEGEND_POSITIONS.map((position) => (
+                    <MenuItem key={position} value={position}>
+                      {position}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Stack>
+          ),
+        },
+        json: {
+          content: <JSONEditor {...props} />,
+        },
+      }}
+    />
   );
 }
