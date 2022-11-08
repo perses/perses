@@ -27,6 +27,9 @@ describe('OptionsEditorTabs', () => {
           settings: {
             content: <div>Edit settings configuration</div>,
           },
+          json: {
+            content: <div>JSON editor</div>,
+          },
           other: otherTabs,
         }}
       />
@@ -53,9 +56,10 @@ describe('OptionsEditorTabs', () => {
 
     const tabList = screen.getByRole('tablist');
     const tabs = getAllByRole(tabList, 'tab');
-    expect(tabs).toHaveLength(2);
+    expect(tabs).toHaveLength(3);
     expect(tabs[0]).toHaveTextContent('Query');
     expect(tabs[1]).toHaveTextContent('Settings');
+    expect(tabs[2]).toHaveTextContent('JSON');
   });
 
   it('defaults to selecting the first tab', () => {
@@ -72,16 +76,16 @@ describe('OptionsEditorTabs', () => {
 
   it('switches selected tab on click', () => {
     renderTabs();
-    const vizTab = screen.getByRole('tab', { name: 'Settings' });
-    userEvent.click(vizTab);
+    const jsonTab = screen.getByRole('tab', { name: 'JSON' });
+    userEvent.click(jsonTab);
 
     const activeTab = screen.getByRole('tab', {
       selected: true,
     });
-    expect(activeTab).toBe(vizTab);
+    expect(activeTab).toBe(jsonTab);
 
     const activeTabPanel = screen.getByRole('tabpanel');
-    expect(activeTabPanel).toHaveTextContent('settings configuration');
+    expect(activeTabPanel).toHaveTextContent('JSON editor');
   });
 
   it('switches selected tab on keyboard interactions', () => {
@@ -99,16 +103,17 @@ describe('OptionsEditorTabs', () => {
     expect(activeTabPanel).toHaveTextContent('settings configuration');
   });
 
-  it('renders custom tabs after common tabs', () => {
+  it('renders custom tabs between visual tabs and json editor', () => {
     renderCustomTabs();
 
     const tabList = screen.getByRole('tablist');
     const tabs = getAllByRole(tabList, 'tab');
-    expect(tabs).toHaveLength(4);
+    expect(tabs).toHaveLength(5);
     expect(tabs[0]).toHaveTextContent('Query');
     expect(tabs[1]).toHaveTextContent('Settings');
     expect(tabs[2]).toHaveTextContent('Table column');
     expect(tabs[3]).toHaveTextContent('Table options');
+    expect(tabs[4]).toHaveTextContent('JSON');
   });
 
   it('shows the correct content when selecting a custom tab', () => {
@@ -133,6 +138,9 @@ describe('OptionsEditorTabs', () => {
           settings: {
             content: <div>settings are alone</div>,
           },
+          json: {
+            content: <div>JSON is at the end</div>,
+          },
           other: [
             {
               id: 'custom',
@@ -145,8 +153,9 @@ describe('OptionsEditorTabs', () => {
     );
     const tabList = screen.getByRole('tablist');
     const tabs = getAllByRole(tabList, 'tab');
-    expect(tabs).toHaveLength(2);
+    expect(tabs).toHaveLength(3);
     expect(tabs[0]).toHaveTextContent('Settings');
     expect(tabs[1]).toHaveTextContent('Another tab');
+    expect(tabs[2]).toHaveTextContent('JSON');
   });
 });
