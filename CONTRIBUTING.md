@@ -37,7 +37,7 @@ Building and starting the backend API server requires the following tools:
 
 With these dependencies installed, you can proceed as follows:
 
-* Change to the `dev` folder and generate the local database by running the `populate.sh` script You will then be able
+* Change to the `dev` folder and generate the local database by running the `populate.sh` script. You will then be able
   to modify it on the fly.
 
 ```bash
