@@ -16,10 +16,22 @@ import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 
 /**
+ * An object containing all the dependencies of a TimeSeriesQuery.
+ */
+type TimeSeriesQueryPluginDependencies = {
+  /**
+   * Returns a list of variables name this time series query depends on.
+   */
+  variables?: string[];
+};
+
+/**
  * A plugin for running time series queries.
  */
 export interface TimeSeriesQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getTimeSeriesData: (spec: Spec, ctx: TimeSeriesQueryContext) => Promise<TimeSeriesData>;
+
+  dependsOn?: (spec: Spec, ctx: TimeSeriesQueryContext) => TimeSeriesQueryPluginDependencies;
 }
 
 /**
