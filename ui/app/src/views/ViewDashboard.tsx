@@ -56,6 +56,7 @@ function ViewDashboard() {
               dashboardTitleComponent={
                 <DashboardBreadcrumbs dashboardName={data.metadata.name} dashboardProject={data.metadata.project} />
               }
+              initialVariableIsSticky={true}
             />
           </ErrorBoundary>
         </PluginRegistry>

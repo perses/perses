@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- [FEATURE] User can collapse / expand queries in the panel editor #718
+- [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
+- [ENHANCEMENT] Disable initial panel animation #710
+
 ## 0.14.0 / 2022-11-02
 
 - [FEATURE] Add a Project view with a dashboard list section #697

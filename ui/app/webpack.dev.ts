@@ -13,7 +13,7 @@
 
 import fs from 'fs';
 import { Configuration } from 'webpack';
-import { Configuration as DevServerConfig } from 'webpack-dev-server';
+import { Configuration as DevServerConfig, ServerConfiguration } from 'webpack-dev-server';
 import { merge } from 'webpack-merge';
 import { commonConfig } from './webpack.common';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -25,21 +25,26 @@ declare module 'webpack' {
   }
 }
 
-// Get dev server HTTPS options
-function getHttpsConfig() {
-  // in case you would like to disable explicitly the https config of Perses (dev environment only).
-  // It's useful in a gitpod environment since the https config is blocking the preview of the UI.
-  if (process.env.PERSES_DISABLE_HTTPS === 'true') {
-    return false;
-  }
-  // If key/cert not specified, just use the default self-signed cert
-  if (process.env.SSL_KEY_FILE === undefined || process.env.SSL_CRT_FILE === undefined) {
-    return true;
+// Get dev server HTTP options (note: HTTP2 is not currently supported by webpack since we're on Node 16)
+function getServerConfig(): ServerConfiguration | undefined {
+  // Just use regular HTTP by default
+  if (process.env.HTTPS !== 'true') {
+    return undefined;
   }
 
+  // Support the same HTTPS options as Creact React App if HTTPS is set
+  if (process.env.SSL_KEY_FILE === undefined || process.env.SSL_CRT_FILE === undefined) {
+    // Use the default self-signed cert
+    return { type: 'https' };
+  }
+
+  // Use a custom cert
   return {
-    key: fs.readFileSync(process.env.SSL_KEY_FILE),
-    cert: fs.readFileSync(process.env.SSL_CRT_FILE),
+    type: 'https',
+    options: {
+      key: fs.readFileSync(process.env.SSL_KEY_FILE),
+      cert: fs.readFileSync(process.env.SSL_CRT_FILE),
+    },
   };
 }
 
@@ -59,8 +64,7 @@ const devConfig: Configuration = {
   devServer: {
     port: parseInt(process.env.PORT ?? '3000'),
     open: true,
-    https: getHttpsConfig(),
-    http2: process.env.HTTP2 === 'true',
+    server: getServerConfig(),
     historyApiFallback: true,
     allowedHosts: 'all',
     proxy: {

@@ -178,7 +178,7 @@ type Config struct {
 	// URL is the url required to contact the datasource
 	URL *url.URL `json:"url" yaml:"url"`
 	// AllowedEndpoints is a list of tuple of http method and http endpoint that will be accessible.
-	// These parameters are only used when access is set to 'server'
+	// If not set, then everything is accessible.
 	AllowedEndpoints []AllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
 	// Headers can be used to provide additional header that needs to be forwarded when requesting the datasource
 	// When defined, it's impossible to set the value of Access with 'browser'
