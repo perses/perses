@@ -12,24 +12,27 @@
 // limitations under the License.
 
 import React from 'react';
-import { Box, ListItemText, ListItem } from '@mui/material';
+import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
 import { LegendItem } from '../model';
+import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
 
-interface ListLegendItemProps {
+interface ListLegendItemProps extends ListItemProps {
   item: LegendItem;
 }
 
-export const ListLegendItem = React.memo(function ListLegendItem({ item }: ListLegendItemProps) {
+export const ListLegendItem = React.memo(function ListLegendItem({ item, sx, ...others }: ListLegendItemProps) {
   return (
     <ListItem
+      {...others}
+      sx={combineSx(
+        {
+          padding: 0,
+          cursor: 'pointer',
+        },
+        sx
+      )}
       dense={true}
-      sx={{
-        display: 'flex',
-        maxWidth: 270, // TODO: adjust spacing depending on number of series
-        padding: 0,
-        cursor: 'pointer',
-      }}
       data-testid={`legend-item-${item.color}`}
       key={item.id}
       onClick={item.onClick}

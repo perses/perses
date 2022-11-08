@@ -21,6 +21,7 @@ import {
   getRangeStep,
   replaceTemplateVariables,
   DEFAULT_PROM,
+  formatSeriesName,
 } from '../../model';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
@@ -77,9 +78,14 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
         .join(', ');
       if (name === '') name = query;
 
+      // query editor allows you to define an optional series_name_format
+      // property to customize legend and tooltip display
+      const formattedName = spec.series_name_format ? formatSeriesName(spec.series_name_format, metric) : name;
+
       return {
         name,
         values: values.map(parseValueTuple),
+        formattedName,
       };
     }),
   };

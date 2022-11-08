@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseTemplateVariables, replaceTemplateVariable, replaceTemplateVariables } from './utils';
+import { parseTemplateVariables, replaceTemplateVariable, replaceTemplateVariables, formatSeriesName } from './utils';
 
 describe('parseTemplateVariables()', () => {
   const tests = [
@@ -87,5 +87,23 @@ describe('replaceTemplateVariables()', () => {
     it(`replaces ${text} ${JSON.stringify(state)}`, () => {
       expect(replaceTemplateVariables(text, state)).toEqual(expected);
     });
+  });
+});
+
+describe('formatSeriesName', () => {
+  it('should resolve label name tokens to label values from query response', () => {
+    // example from query: node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}
+    const inputFormat = 'Test {{job}} {{instance}}';
+
+    const metric = {
+      __name__: 'node_load15',
+      env: 'demo',
+      instance: 'demo.do.prometheus.io:9100',
+      job: 'node',
+    };
+
+    const output = 'Test node demo.do.prometheus.io:9100';
+
+    expect(formatSeriesName(inputFormat, metric)).toEqual(output);
   });
 });

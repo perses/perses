@@ -41,6 +41,7 @@ export interface TimeSeriesData {
 export interface TimeSeries {
   name: string;
   values: Iterable<TimeSeriesValueTuple>;
+  formattedName?: string;
 }
 
 export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];

@@ -19,11 +19,31 @@ interface ListLegendProps {
   items: LegendItem[];
 }
 
+/**
+ * ListLegend is used when legend.position is 'right' since legend items are stacked
+ */
 export function ListLegend({ items }: ListLegendProps) {
+  // show full labels on hover when there are many total series
+  const truncateLabels = items.length > 5;
   return (
     <List>
       {items.map((item) => (
-        <ListLegendItem key={item.id} item={item} />
+        <ListLegendItem
+          key={item.id}
+          item={item}
+          sx={{
+            width: 190,
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-word',
+            overflow: truncateLabels ? 'hidden' : 'visible',
+            whiteSpace: truncateLabels ? 'nowrap' : 'normal',
+            // TODO: add optional hover effect to show unformatted label
+            '&:hover': {
+              overflow: 'visible',
+              whiteSpace: 'normal', // this allow you to see the full label on hover
+            },
+          }}
+        />
       ))}
     </List>
   );

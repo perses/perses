@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- [FEATURE] custom legend formatting in TimeSeriesChart using `series_name_format` query option #709
 - [FEATURE] User can collapse / expand queries in the panel editor #718
 - [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
 - [ENHANCEMENT] Disable initial panel animation #710
