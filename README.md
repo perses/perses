@@ -45,6 +45,7 @@ progress. The current pieces that are in place are:
         * Markdown panels (as an alternative to the Text panel)
     * The editing of dashboard is well advanced. Most of the remaining work is in panel options, right now you have to
       use the JSON editor for a lot of properties, but those will be form controls soon.
+* A migration script that will help to move from Grafana to Perses is on going.
 * The dashboard data model is still evolving along with the dashboard implementation and new requirements. Before
   reaching a stable state regarding the data model, we are waiting for feedback to know if we need to adjust and
   potentially break things.
