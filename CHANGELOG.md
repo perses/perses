@@ -9,6 +9,7 @@
 - [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the backend. #734
 - [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
   becomes `display.name` #734
+- [ENHANCEMENT] Organize time series options in tabs #741
 
 ## 0.14.0 / 2022-11-02
 
