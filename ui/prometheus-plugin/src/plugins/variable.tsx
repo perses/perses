@@ -63,7 +63,9 @@ export const StaticListVariable: VariablePlugin<StaticListVariableOptions> = {
       data: values,
     };
   },
-  dependsOn: () => [],
+  dependsOn: () => {
+    return { variables: [] };
+  },
   OptionsEditorComponent: StaticListVariableOptionEditor,
   createInitialOptions: () => ({ values: [] }),
 };

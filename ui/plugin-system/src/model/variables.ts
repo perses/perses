@@ -24,22 +24,23 @@ export interface GetVariableOptionsContext {
 }
 
 /**
+ * An object containing all the dependencies of a VariablePlugin.
+ */
+type VariablePluginDependencies = {
+  /**
+   * Returns a list of variables name this time series query depends on.
+   */
+  variables?: string[];
+};
+
+/**
  * Plugin for handling custom VariableDefinitions.
  */
 export interface VariablePlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  getVariableOptions: GetVariableOptions<Spec>;
+  getVariableOptions: (definition: Spec, ctx: GetVariableOptionsContext) => Promise<{ data: VariableOption[] }>;
 
   /**
    * Returns a list of variables name this variable depends on. Used to optimize fetching
    */
-  dependsOn?: (definition: Spec) => string[];
+  dependsOn?: (definition: Spec, ctx: GetVariableOptionsContext) => VariablePluginDependencies;
 }
-
-/**
- * Plugin hook responsible for getting the options of a custom variable
- * definition.
- */
-export type GetVariableOptions<Spec> = (
-  definition: Spec,
-  ctx: GetVariableOptionsContext
-) => Promise<{ data: VariableOption[] }>;
