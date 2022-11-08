@@ -23,7 +23,7 @@ describe('Add Panel Group', () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(
-      <DashboardProvider initialState={{ dashboardSpec: getTestDashboard().spec, isEditMode: true }}>
+      <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
         <DashboardProviderSpy />
         <PanelGroupDialog />
       </DashboardProvider>

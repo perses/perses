@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import { produce } from 'immer';
 import {
   Button,
@@ -27,6 +28,8 @@ import {
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import ChevronDown from 'mdi-material-ui/ChevronDown';
+import ChevronUp from 'mdi-material-ui/ChevronUp';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions, DEFAULT_LEGEND, LEGEND_POSITIONS, LegendPosition } from './time-series-chart-model';
@@ -45,6 +48,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     useErrorBoundary: true,
     enabled: true,
   });
+
+  // State for which queries are collapsed
+  // TODO: Would be easier if we had IDs for queries.
+  const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
 
   // Query handlers
   const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
@@ -67,6 +74,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
         });
       })
     );
+    setQueriesCollapsed((queriesCollapsed) => {
+      queriesCollapsed.push(false);
+      return [...queriesCollapsed];
+    });
   };
 
   const handleQueryDelete = (index: number) => {
@@ -75,6 +86,17 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
         draft.queries.splice(index, 1);
       })
     );
+    setQueriesCollapsed((queriesCollapsed) => {
+      queriesCollapsed.splice(index, 1);
+      return [...queriesCollapsed];
+    });
+  };
+
+  const handleQueryCollapseExpand = (index: number) => {
+    setQueriesCollapsed((queriesCollapsed) => {
+      queriesCollapsed[index] = !queriesCollapsed[index];
+      return [...queriesCollapsed];
+    });
   };
 
   // Legend options handlers
@@ -102,23 +124,31 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
       <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
         Add Query
       </Button>
-      {queries.map((query, i) => (
+      {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
         <Stack key={i} spacing={1}>
-          <Stack direction="row" borderBottom={1} borderColor="grey.300">
-            <Typography variant="overline" component="h3">
+          <Stack direction="row" alignItems="center" borderBottom={1} borderColor="grey.300">
+            <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
+              {queriesCollapsed[i] ? <ChevronUp /> : <ChevronDown />}
+            </IconButton>
+            <Typography variant="overline" component="h4">
               Query {i + 1}
             </Typography>
-            {hasMoreThanOneQuery && (
-              <IconButton sx={{ marginLeft: 'auto' }} onClick={() => handleQueryDelete(i)}>
-                <DeleteIcon />
-              </IconButton>
-            )}
+            <IconButton
+              size="small"
+              // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
+              sx={{ marginLeft: 'auto', visibility: `${hasMoreThanOneQuery ? 'visible' : 'hidden'}` }}
+              onClick={() => handleQueryDelete(i)}
+            >
+              <DeleteIcon />
+            </IconButton>
           </Stack>
-          <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
+          {!queriesCollapsed[i] && (
+            <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
+          )}
         </Stack>
       ))}
       <Stack spacing={1}>
-        <Typography variant="overline" component="h3">
+        <Typography variant="overline" component="h4">
           Legend
         </Typography>
         <FormControlLabel

@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-system",
-  "version": "0.11.0",
+  "version": "0.14.0",
   "description": "The plugin feature in Pereses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -14,6 +14,7 @@
   "module": "dist/index.js",
   "main": "dist//cjs/index.js",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -26,8 +27,8 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "^0.11.0",
-    "@perses-dev/core": "^0.11.0",
+    "@perses-dev/components": "^0.14.0",
+    "@perses-dev/core": "^0.14.0",
     "immer": "^9.0.15",
     "use-immer": "^0.7.0"
   },

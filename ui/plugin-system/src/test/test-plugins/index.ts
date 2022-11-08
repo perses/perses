@@ -11,29 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginModuleResource } from '../../model';
-import { PluginRegistryProps } from '../../components/PluginRegistry/PluginRegistry';
+import { dynamicImportPluginLoader, PluginLoader, PluginModuleResource } from '../../model';
 import bertResource from './bert/plugin.json';
 import ernieResource from './ernie/plugin.json';
 
-// Put all the test plugins into a Map
-const testPlugins = new Map<PluginModuleResource, () => Promise<unknown>>();
-testPlugins.set(bertResource as PluginModuleResource, () => import('./bert'));
-testPlugins.set(ernieResource as PluginModuleResource, () => import('./ernie'));
-
 /**
- * Some props for testing the PluginRegistry that use the test plugins/metadata in this folder.
+ * A PluginLoader for tests that will dynamically load the plugins in this folder.
  */
-export const testRegistryProps: Omit<PluginRegistryProps, 'children'> = {
-  getInstalledPlugins: () => {
-    const resources = Array.from(testPlugins.keys());
-    return Promise.resolve(resources);
-  },
-  importPluginModule: (resource) => {
-    const importFn = testPlugins.get(resource);
-    if (importFn === undefined) {
-      throw new Error('Plugin not found');
-    }
-    return importFn();
-  },
-};
+export const testPluginLoader: PluginLoader = dynamicImportPluginLoader([
+  { resource: bertResource as PluginModuleResource, importPlugin: () => import('./bert') },
+  { resource: ernieResource as PluginModuleResource, importPlugin: () => import('./ernie') },
+]);

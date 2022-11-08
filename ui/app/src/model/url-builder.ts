@@ -17,6 +17,7 @@ export type URLParams = {
   resource: string;
   name?: string;
   project?: string;
+  queryParams?: URLSearchParams;
 };
 
 export default function buildURL(params: URLParams): string {
@@ -27,6 +28,10 @@ export default function buildURL(params: URLParams): string {
   url = `${url}/${params.resource}`;
   if (params.name !== undefined && params.name.length > 0) {
     url = `${url}/${encodeURIComponent(params.name)}`;
+  }
+
+  if (params.queryParams !== undefined) {
+    url = `${url}?${params.queryParams.toString()}`;
   }
   return url;
 }

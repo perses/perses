@@ -217,27 +217,37 @@ func TestValidateVariables(t *testing.T) {
 						{
 							Kind: "ListVariable",
 							Spec: &dashboard.ListVariableSpec{
-								Name:          "my1rstVar",
+								CommonVariableSpec: dashboard.CommonVariableSpec{
+									Name: "my1rstVar",
+									Display: &dashboard.VariableDisplay{
+										Display: common.Display{
+											Name:        "My First Variable",
+											Description: "A simple variable of type FirstVariable",
+										},
+										Hidden: false,
+									},
+								},
 								AllowAllValue: true,
 								AllowMultiple: false,
-								Display: &common.Display{
-									Name:        "My First Variable",
-									Description: "A simple variable of type FirstVariable",
-								},
-								Plugin: validFirstVariable,
+								Plugin:        validFirstVariable,
 							},
 						},
 						{
 							Kind: "ListVariable",
 							Spec: &dashboard.ListVariableSpec{
-								Name:          "my2ndVar",
+								CommonVariableSpec: dashboard.CommonVariableSpec{
+									Name: "my2ndVar",
+									Display: &dashboard.VariableDisplay{
+										Display: common.Display{
+											Name:        "My Second Variable",
+											Description: "A simple variable of type SecondVariable",
+										},
+										Hidden: false,
+									},
+								},
 								AllowAllValue: true,
 								AllowMultiple: false,
-								Display: &common.Display{
-									Name:        "My Second Variable",
-									Description: "A simple variable of type SecondVariable",
-								},
-								Plugin: validSecondVariable,
+								Plugin:        validSecondVariable,
 							},
 						},
 					},
@@ -258,14 +268,19 @@ func TestValidateVariables(t *testing.T) {
 						{
 							Kind: "ListVariable",
 							Spec: &dashboard.ListVariableSpec{
-								Name:          "myUnknownVar",
+								CommonVariableSpec: dashboard.CommonVariableSpec{
+									Name: "myUnknownVar",
+									Display: &dashboard.VariableDisplay{
+										Display: common.Display{
+											Name:        "My Unknown Variable",
+											Description: "A simple variable of type UnknownVariable",
+										},
+										Hidden: false,
+									},
+								},
 								AllowAllValue: false,
 								AllowMultiple: true,
-								Display: &common.Display{
-									Name:        "My Unknown Variable",
-									Description: "A simple variable of type UnknownVariable",
-								},
-								Plugin: invalidUnknownVariable,
+								Plugin:        invalidUnknownVariable,
 							},
 						},
 					},

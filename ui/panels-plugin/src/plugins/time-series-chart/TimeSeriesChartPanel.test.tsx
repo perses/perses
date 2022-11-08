@@ -20,8 +20,10 @@ import {
   useTimeSeriesQueries,
   TimeRangeContext,
   TimeSeriesQueryPlugin,
+  mockPluginRegistry,
+  MockPlugin,
 } from '@perses-dev/plugin-system';
-import { mockPluginRegistryProps, MOCK_TIME_SERIES_QUERY_RESULT, MOCK_TIME_SERIES_DATA } from '../../test';
+import { MOCK_TIME_SERIES_QUERY_RESULT, MOCK_TIME_SERIES_DATA } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
@@ -31,7 +33,7 @@ jest.mock('@perses-dev/plugin-system', () => {
   };
 });
 
-const FAKE_PROM_QUERY_PLUGIN: TimeSeriesQueryPlugin<UnknownSpec> = {
+const FakeTimeSeriesQuery: TimeSeriesQueryPlugin<UnknownSpec> = {
   getTimeSeriesData: async () => {
     return MOCK_TIME_SERIES_DATA;
   },
@@ -39,6 +41,12 @@ const FAKE_PROM_QUERY_PLUGIN: TimeSeriesQueryPlugin<UnknownSpec> = {
     return <div>Edit options here</div>;
   },
   createInitialOptions: () => ({}),
+};
+
+const MOCK_PROM_QUERY_PLUGIN: MockPlugin = {
+  pluginType: 'TimeSeriesQuery',
+  kind: 'PrometheusTimeSeriesQuery',
+  plugin: FakeTimeSeriesQuery,
 };
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
@@ -77,18 +85,14 @@ describe('TimeSeriesChartPanel', () => {
 
   // Helper to render the panel with some context set
   const renderPanel = () => {
-    const { addMockPlugin, pluginRegistryProps } = mockPluginRegistryProps();
-    // not actually used yet, until rest of runtime deps are mocked
-    addMockPlugin('TimeSeriesQuery', 'PrometheusTimeSeriesQuery', FAKE_PROM_QUERY_PLUGIN);
-
     const mockTimeRangeContext = {
       timeRange: TEST_TIME_RANGE,
       setTimeRange: () => ({}),
     };
 
     render(
-      <PluginRegistry {...pluginRegistryProps}>
-        <ChartsThemeProvider themeName="perses" chartsTheme={testChartsTheme}>
+      <PluginRegistry {...mockPluginRegistry(MOCK_PROM_QUERY_PLUGIN)}>
+        <ChartsThemeProvider chartsTheme={testChartsTheme}>
           <TimeRangeContext.Provider value={mockTimeRangeContext}>
             <TimeSeriesChartPanel {...TEST_TIME_SERIES_PANEL} />
           </TimeRangeContext.Provider>

@@ -3,6 +3,51 @@
 ## Unreleased
 
 - [FEATURE] custom legend formatting in TimeSeriesChart using `series_name_format` query option #709
+- [FEATURE] User can collapse / expand queries in the panel editor #718
+- [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
+- [ENHANCEMENT] Disable initial panel animation #710
+- [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the backend. #734
+- [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
+  becomes `display.name` #734
+
+## 0.14.0 / 2022-11-02
+
+- [FEATURE] Add a Project view with a dashboard list section #697
+- [FEATURE] Add a breadcrumbs as a dashboard title #702
+- [ENHANCEMENT] Adjust panel editor padding #716
+- [ENHANCEMENT] Clean up imports and exports to help with package and bundle size #721
+- [BUGFIX] ECharts theme performance fix #722
+- [BUGFIX] Fix query border #717
+- [BUGFIX] Adjust gauge chart radius to avoid clipping #714
+- [BREAKINGCHANGE] Chart theme provider `themeName` prop removed #722
+
+## 0.13.0 / 2022-10-31
+
+- [FEATURE] Add endpoint /api/config that will provide the config of the server #700
+- [FEATURE] Warn users of any unsaved changes when canceling edit mode #699
+- [FEATURE] Update variables based on time range #692
+- [FEATURE] Sync variable state with URL #690
+- [ENHANCEMENT] Run queries in panel editor on input blur #705
+- [ENHANCEMENT] Edit icons no longer appear when previewing a panel in the editor #694
+- [BREAKINGCHANGE] DashboardProvider API changes #711
+- [BREAKINGCHANGE] Add PluginLoader type to PluginRegistry #704
+
+## 0.12.0 / 2022-10-25
+
+- [FEATURE] Cancel variable editing #673
+- [FEATURE] Display dashboard list #677
+- [FEATURE] Get dashboard from backend #663
+- [ENHANCEMENT] Add border to each query in time series chart editor #676
+- [ENHANCEMENT] Save dashboard layout changes #684
+- [ENHANCEMENT] Add middleware to verify project exists during a request #680
+- [ENHANCEMENT] Review of API e2e tests and remove user endpoint
+- [ENHANCEMENT] Add missing datasources definition in dashboard #688
+- [ENHANCEMENT] Fallback to text field for gauge and stat editors #678
+- [BUGFIX] Fix dao file to be able to return the list when we are at the root of the resources #671
+- [BUGFIX] Fix variable editor styling #674
+- [BUGFIX] Fix tooltip and other stylings #675
+- [BUGFIX] Remove suggested step from time series query key #686
+- [BREAKINGCHANGE] `DashboardProvider` API changes #670
 
 ## 0.11.0 / 2022-10-19
 
@@ -55,7 +100,8 @@
 - [ENHANCEMENT] Upgrade react-query to v4 #578
 - [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #583, #585, #586
 - [ENHANCEMENT] Update Perses Header, refactor embeddable components #580
-- [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553, #563
+- [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553,
+  #563
 - [ENHANCEMENT] Add optional Datasource selector spec to Prom variables and queries #587
 - [BUGFIX] Fix overlapping header issue #580
 - [BREAKINGCHANGE] Initial Datasources v2 spec support in UI #577
@@ -127,7 +173,8 @@
 
 ## 0.5.0 / 2022-07-20
 
-- [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at runtime #422 #434 #435 #457 #459 #478
+- [FEATURE] Introduce Cuelang schemas to handle the `Panel` data-model. It gives the ability to add new panel & query at
+  runtime #422 #434 #435 #457 #459 #478
 - [FEATURE] echarts theme customization which allows flexibility when Perses is embedded in other apps #480
 - [FEATURE] Add ability to show info icon next to panel header using `display.description` #465
 - [FEATURE] `thresholds` support in line chart #462
@@ -137,7 +184,8 @@
 - [ENHANCEMENT] add `Bytes` formatting to line and stats charts #462
 - [ENHANCEMENT] stat chart selectable text and theme improvements #462
 - [ENHANCEMENT] release process and license header improvements #452, #456
-- [ENHANCEMENT] add a version number on every resources managed. This number is increased when a resource is updated. #453
+- [ENHANCEMENT] add a version number on every resources managed. This number is increased when a resource is updated.
+  #453
 - [ENHANCEMENT] add documentation regarding how Perses might work on k8s #448
 - [BUGFIX] line chart query error handling #479
 - [BUGFIX] line chart fill empty data regression #462
@@ -183,7 +231,8 @@
 
 ## 0.2.1 / 2022-03-28
 
-- [ENHANCEMENT] Merge GitHub workflow for build and release in a single one. It also fixed the publishing of the docker images.
+- [ENHANCEMENT] Merge GitHub workflow for build and release in a single one. It also fixed the publishing of the docker
+  images.
 
 ## 0.2.0 / 2022-03-24
 

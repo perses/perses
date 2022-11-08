@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
@@ -19,16 +20,53 @@ import {
   Dashboard,
   PanelGroupDialog,
   DeletePanelGroupDialog,
-  DeletePanelDialog,
+  UnsavedChangesConfirmationDialog,
   DashboardToolbar,
+  DeletePanelDialog,
 } from '../../components';
+import { useDashboard, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
+  dashboardTitleComponent?: JSX.Element;
+  initialVariableIsSticky?: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource } = props;
+  const { dashboardResource, dashboardTitleComponent, initialVariableIsSticky } = props;
+  const { setEditMode } = useEditMode();
+  const { dashboard, setDashboard } = useDashboard();
+  const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
+  const [isUnsavedDashboardDialogOpen, setUnsavedDashboardDialogIsOpen] = useState(false);
+
+  const saveDashboard = async () => {
+    setEditMode(false);
+    setUnsavedDashboardDialogIsOpen(false);
+  };
+
+  const cancelDashboard = () => {
+    // Reset to the original spec and exit edit mode
+    if (originalDashboard) {
+      setDashboard(originalDashboard);
+    }
+    setUnsavedDashboardDialogIsOpen(false);
+    setEditMode(false);
+  };
+
+  const onEditButtonClick = () => {
+    setEditMode(true);
+    setOriginalDashboard(dashboard);
+  };
+
+  const onCancelButtonClick = () => {
+    // check if dashboard has been modified
+    if (JSON.stringify(dashboard) === JSON.stringify(originalDashboard)) {
+      setEditMode(false);
+    } else {
+      setUnsavedDashboardDialogIsOpen(true);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -39,7 +77,13 @@ export const DashboardApp = (props: DashboardAppProps) => {
         flexDirection: 'column',
       }}
     >
-      <DashboardToolbar dashboardName={dashboardResource.metadata.name} />
+      <DashboardToolbar
+        dashboardName={dashboardResource.metadata.name}
+        dashboardTitleComponent={dashboardTitleComponent}
+        initialVariableIsSticky={initialVariableIsSticky}
+        onEditButtonClick={onEditButtonClick}
+        onCancelButtonClick={onCancelButtonClick}
+      />
       <Box sx={{ padding: (theme) => theme.spacing(2) }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard />
@@ -48,6 +92,11 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <PanelGroupDialog />
         <DeletePanelGroupDialog />
         <DeletePanelDialog />
+        <UnsavedChangesConfirmationDialog
+          isOpen={isUnsavedDashboardDialogOpen}
+          onSave={saveDashboard}
+          onClose={cancelDashboard}
+        />
       </Box>
     </Box>
   );

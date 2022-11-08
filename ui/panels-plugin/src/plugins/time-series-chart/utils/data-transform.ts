@@ -14,9 +14,9 @@
 import { AbsoluteTimeRange } from '@perses-dev/core';
 import { EChartsTimeSeries } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
-import { gcd } from 'mathjs';
-import { getRandomColor } from '../utils/palette-gen';
+import { gcd } from '../../../utils/mathjs';
 import { StepOptions } from '../../../model/thresholds';
+import { getRandomColor } from './palette-gen';
 
 export interface TimeScale {
   startMs: number;

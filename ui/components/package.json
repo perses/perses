@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/components",
-  "version": "0.11.0",
+  "version": "0.14.0",
   "description": "Common UI components used across Perses features",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -14,6 +14,11 @@
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
+  "sideEffects": [
+    "./dist/GaugeChart/GaugeChart.js",
+    "./dist/LineChart/LineChart.js",
+    "./dist/StatChart/StatChart.js"
+  ],
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -28,7 +33,7 @@
   },
   "dependencies": {
     "@mui/x-date-pickers": "^5.0.0-beta.1",
-    "@perses-dev/core": "^0.11.0",
+    "@perses-dev/core": "^0.14.0",
     "date-fns": "^2.28.0",
     "echarts": "^5.3.3",
     "lodash-es": "^4.17.21",

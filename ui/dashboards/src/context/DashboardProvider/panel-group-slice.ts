@@ -31,14 +31,6 @@ export interface PanelGroupSlice {
   panelGroupOrder: PanelGroupId[];
 
   /**
-   * previous state
-   */
-  previousPanelGroupState: {
-    panelGroups: PanelGroupSlice['panelGroups'];
-    panelGroupIdOrder: PanelGroupSlice['panelGroupOrder'];
-  };
-
-  /**
    * Rearrange the order of panel groups by swapping the positions
    */
   swapPanelGroups: (xIndex: number, yIndex: number) => void;
@@ -47,16 +39,6 @@ export interface PanelGroupSlice {
    * Update the item layouts for a panel group when, for example, a panel is moved or resized.
    */
   updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupDefinition['itemLayouts']) => void;
-
-  /**
-   * save
-   */
-  savePanelGroups: () => void;
-
-  /**
-   * reset to previous panel group states
-   */
-  resetPanelGroups: () => void;
 }
 
 export type PanelGroupId = number;
@@ -89,6 +71,44 @@ export interface PanelGroupItemId {
 export function createPanelGroupSlice(
   layouts: LayoutDefinition[]
 ): StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> {
+  const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
+
+  // Return the state creator function for Zustand
+  return (set) => ({
+    panelGroups,
+    panelGroupOrder,
+
+    swapPanelGroups(x, y) {
+      set((state) => {
+        if (x < 0 || x >= state.panelGroupOrder.length || y < 0 || y >= state.panelGroupOrder.length) {
+          throw new Error('index out of bound');
+        }
+        const xPanelGroup = state.panelGroupOrder[x];
+        const yPanelGroup = state.panelGroupOrder[y];
+
+        if (xPanelGroup === undefined || yPanelGroup === undefined) {
+          throw new Error('panel group is undefined');
+        }
+        // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
+        [state.panelGroupOrder[x], state.panelGroupOrder[y]] = [yPanelGroup, xPanelGroup];
+      });
+    },
+
+    updatePanelGroupLayouts(panelGroupId, itemLayouts) {
+      set((state) => {
+        const group = state.panelGroups[panelGroupId];
+        if (group === undefined) {
+          throw new Error(`Cannot find panel group ${panelGroupId}`);
+        }
+        group.itemLayouts = itemLayouts;
+      });
+    },
+  });
+}
+
+export function convertLayoutsToPanelGroups(
+  layouts: LayoutDefinition[]
+): Pick<PanelGroupSlice, 'panelGroups' | 'panelGroupOrder'> {
   // Convert the initial layouts from the JSON
   const panelGroups: PanelGroupSlice['panelGroups'] = {};
   const panelGroupIdOrder: PanelGroupSlice['panelGroupOrder'] = [];
@@ -120,54 +140,8 @@ export function createPanelGroupSlice(
     };
     panelGroupIdOrder.push(panelGroupId);
   }
-
-  // Return the state creator function for Zustand
-  return (set) => ({
+  return {
     panelGroups,
     panelGroupOrder: panelGroupIdOrder,
-
-    previousPanelGroupState: { panelGroups, panelGroupIdOrder },
-
-    savePanelGroups() {
-      set((state) => {
-        state.previousPanelGroupState = {
-          panelGroups: state.panelGroups,
-          panelGroupIdOrder: state.panelGroupOrder,
-        };
-      });
-    },
-
-    resetPanelGroups() {
-      set((state) => {
-        state.panelGroups = state.previousPanelGroupState.panelGroups;
-        state.panelGroupOrder = state.previousPanelGroupState.panelGroupIdOrder;
-      });
-    },
-
-    swapPanelGroups(x, y) {
-      set((state) => {
-        if (x < 0 || x >= state.panelGroupOrder.length || y < 0 || y >= state.panelGroupOrder.length) {
-          throw new Error('index out of bound');
-        }
-        const xPanelGroup = state.panelGroupOrder[x];
-        const yPanelGroup = state.panelGroupOrder[y];
-
-        if (xPanelGroup === undefined || yPanelGroup === undefined) {
-          throw new Error('panel group is undefined');
-        }
-        // assign yPanelGroup to layouts[x] and assign xGroup to layouts[y], swapping two panel groups
-        [state.panelGroupOrder[x], state.panelGroupOrder[y]] = [yPanelGroup, xPanelGroup];
-      });
-    },
-
-    updatePanelGroupLayouts(panelGroupId, itemLayouts) {
-      set((state) => {
-        const group = state.panelGroups[panelGroupId];
-        if (group === undefined) {
-          throw new Error(`Cannot find panel group ${panelGroupId}`);
-        }
-        group.itemLayouts = itemLayouts;
-      });
-    },
-  });
+  };
 }

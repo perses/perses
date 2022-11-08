@@ -14,7 +14,7 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PluginRegistry } from '../components/PluginRegistry';
-import { testRegistryProps } from './test-plugins';
+import { testPluginLoader } from './test-plugins';
 
 const testLogger = {
   log: console.log,
@@ -36,7 +36,7 @@ export function renderWithContext(ui: React.ReactNode, options?: Omit<RenderOpti
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <PluginRegistry {...testRegistryProps}>{ui}</PluginRegistry>
+      <PluginRegistry pluginLoader={testPluginLoader}>{ui}</PluginRegistry>
     </QueryClientProvider>,
     options
   );
