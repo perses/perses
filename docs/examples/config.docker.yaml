@@ -4,5 +4,8 @@ database:
     file_extension: "json"
 
 schemas:
-  path: "/etc/perses/schemas"
+  panels_path: "/etc/perses/schemas/panels"
+  queries_path: "/etc/perses/schemas/queries"
+  datasources_path: "/etc/perses/schemas/datasources"
+  variables_path: "/etc/perses/schemas/variables"
   interval: "5m"
