@@ -11,13 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './layout';
-export * from './panels';
-export * from './resource';
-export * from './time';
-export * from './time-series-queries';
-export * from './variables';
-export * from './display';
+import { Box } from '@mui/material';
+
+interface TabPanelProps {
+  children: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+export function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  const isActive = value === index;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={!isActive}
+      id={`options-editor-tabpanel-${index}`}
+      aria-labelledby={`options-editor-tab-${index}`}
+      {...other}
+    >
+      {isActive && <Box mt={2}>{children}</Box>}
+    </div>
+  );
+}

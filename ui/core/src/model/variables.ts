@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Definition, UnknownSpec } from './definitions';
+import { Display } from './display';
 
 export type VariableName = string;
 
@@ -19,8 +20,7 @@ export type VariableValue = string | string[] | null;
 
 interface VariableSpec {
   name: VariableName;
-  display?: {
-    label?: string;
+  display?: Display & {
     hidden?: boolean;
   };
   default_value?: VariableValue;

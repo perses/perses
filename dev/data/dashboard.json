@@ -11,32 +11,18 @@
     "spec": {
       "duration": "5m",
       "variables": [
-        {
-          "kind": "ListVariable",
-          "spec": {
-            "name": "job",
-            "allow_multiple": true,
-            "allow_all_value": true,
-            "default_value": "node",
-            "plugin": {
-              "kind": "PrometheusLabelValuesVariable",
-              "spec": {
-                "label_name": "job"
-              }
-            }
-          }
-        },
+        { "kind": "TextVariable", "spec": { "name": "job", "value": "node" } },
         {
           "kind": "ListVariable",
           "spec": {
             "name": "instance",
-            "allow_all_value": true,
             "plugin": {
-              "kind": "PrometheusLabelValuesVariable",
+              "kind": "StaticListVariable",
               "spec": {
-                "label_name": "instance",
-                "matchers": [
-                  "up{job=\"$job\"}"
+                "values": [
+                  "demo.do.prometheus.io:9100",
+                  "demo.do.prometheus.io:3000",
+                  "demo.promlabs.com:9100"
                 ]
               }
             }
@@ -48,12 +34,7 @@
             "name": "interval",
             "plugin": {
               "kind": "StaticListVariable",
-              "spec": {
-                "values": [
-                  "1m",
-                  "5m"
-                ]
-              }
+              "spec": { "values": ["1m", "5m"] }
             }
           }
         }
@@ -82,9 +63,7 @@
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "Bytes"
-                }
+                "unit": { "kind": "Bytes" }
               }
             }
           }
@@ -112,13 +91,7 @@
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "Decimal",
-                  "decimal_places": 2
-                },
-                "legend": {
-                  "position": "right"
-                }
+                "unit": { "kind": "Bytes" }
               }
             }
           }
@@ -126,9 +99,7 @@
         "basicEx": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "Single Query"
-            },
+            "display": { "name": "Single Query" },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -139,16 +110,14 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "1 - node_filesystem_free_bytes{job=\"node\",instance=~\"$instance\",fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job=\"node\",instance=~\"$instance\"}"
+                          "series_name_format": "Node memory - {{device}} {{instance}}",
+                          "query": "1 - node_filesystem_free_bytes{job='$job',instance=~'$instance',fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "PercentDecimal",
-                  "decimal_places": 0
-                },
+                "unit": { "kind": "Decimal" },
                 "legend": {
                   "position": "right"
                 }
@@ -159,9 +128,7 @@
         "legendEx": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "Legend Example"
-            },
+            "display": { "name": "Legend Example" },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -172,7 +139,8 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_MemTotal_bytes{job=\"node\",instance=~\"$instance\"} - node_memory_MemFree_bytes{job=\"node\",instance=~\"$instance\"} - node_memory_Buffers_bytes{job=\"node\",instance=~\"$instance\"} - node_memory_Cached_bytes{job=\"node\",instance=~\"$instance\"}"
+                          "series_name_format": "Node memory total",
+                          "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
@@ -183,7 +151,8 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_Buffers_bytes{job=\"node\",instance=~\"$instance\"}"
+                          "series_name_format": "Memory (buffers) - {{instance}}",
+                          "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
@@ -194,7 +163,8 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_Cached_bytes{job=\"node\",instance=~\"$instance\"}"
+                          "series_name_format": "Cached Bytes",
+                          "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
@@ -205,16 +175,15 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_MemFree_bytes{job=\"node\",instance=~\"$instance\"}"
+                          "series_name_format": "MemFree Bytes",
+                          "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
                   }
                 ],
                 "legend": {},
-                "unit": {
-                  "kind": "Bytes"
-                }
+                "unit": { "kind": "Bytes" }
               }
             }
           }
@@ -236,15 +205,16 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job=\"node\"}"
+                          "query": "node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}",
+                          "series_name_format": "Test {{job}} {{instance}}"
                         }
                       }
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "PercentDecimal",
-                  "decimal_places": 1
+                "unit": { "kind": "Decimal", "decimal_places": 2 },
+                "legend": {
+                  "position": "right"
                 }
               }
             }
@@ -267,16 +237,16 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_load1{instance=~\"(demo.do.prometheus.io:9100)\",job=\"node\"}"
+                          "query": "node_load1{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}"
                         }
                       }
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "PercentDecimal",
-                  "decimal_places": 1
+                "legend": {
+                  "position": "right"
                 },
+                "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
                 "thresholds": {
                   "steps": [
                     {
@@ -296,10 +266,7 @@
         "cpu": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "CPU",
-              "description": "This is a line chart"
-            },
+            "display": { "name": "CPU", "description": "This is a line chart" },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -310,17 +277,20 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\",mode!=\"idle\"}[$interval]))"
+                          "series_name_format": "Custom {{job}} - {{device}} {{instance}}",
+                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
                         }
                       }
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "Decimal",
-                  "decimal_places": 2
+                "unit": { "kind": "PercentDecimal", "decimal_places": 0 },
+                "legend": {
+                  "position": "bottom"
                 },
-                "legend": {}
+                "thresholds": {
+                  "steps": [{ "value": 0.01 }, { "value": 0.02 }]
+                }
               }
             }
           }
@@ -328,9 +298,7 @@
         "statSm": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "Stat Sm"
-            },
+            "display": { "name": "Stat Sm" },
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -340,7 +308,7 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "node_time_seconds{job=\"node\",instance=~\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=~\"$instance\"}"
+                        "query": "node_time_seconds{job='$job',instance=~'$instance'} - node_boot_time_seconds{job='$job',instance=~'$instance'}"
                       }
                     }
                   }
@@ -351,6 +319,34 @@
                   "decimal_places": 1,
                   "abbreviate": true
                 }
+              }
+            }
+          }
+        },
+        "gaugeRAM": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "RAM Used",
+              "description": "This is a stat chart"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "100 - ((node_memory_MemAvailable_bytes{job='$job',instance=~'$instance'} * 100) / node_memory_MemTotal_bytes{job='$job',instance=~'$instance'})"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": { "kind": "Percent" },
+                "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
             }
           }
@@ -371,15 +367,13 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "100 - ((node_memory_MemAvailable_bytes{job=\"node\",instance=~\"$instance\"} * 100) / node_memory_MemTotal_bytes{job=\"node\",instance=~\"$instance\"})"
+                        "query": "100 - ((node_memory_MemAvailable_bytes{job='$job',instance=~'$instance'} * 100) / node_memory_MemTotal_bytes{job='$job',instance=~'$instance'})"
                       }
                     }
                   }
                 },
                 "calculation": "LastNumber",
-                "unit": {
-                  "kind": "Percent"
-                }
+                "unit": { "kind": "Percent" }
               }
             }
           }
@@ -400,16 +394,13 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "node_memory_MemTotal_bytes{job=\"node\",instance=~\"$instance\"}"
+                        "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'}"
                       }
                     }
                   }
                 },
                 "calculation": "LastNumber",
-                "unit": {
-                  "kind": "Bytes",
-                  "decimal_places": 1
-                }
+                "unit": { "kind": "Bytes", "decimal_places": 1 }
               }
             }
           }
@@ -417,9 +408,7 @@
         "statMd": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "Stat Md"
-            },
+            "display": { "name": "Stat Md" },
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -429,7 +418,7 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "avg(node_load15{job=\"node\",instance=~\"$instance\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu)) * 100"
+                        "query": "avg(node_load15{job='node',instance=~'$instance'}) /  count(count(node_cpu_seconds_total{job='node',instance=~'$instance'}) by (cpu)) * 100"
                       }
                     }
                   }
@@ -440,10 +429,7 @@
                   "decimal_places": 2,
                   "abbreviate": true
                 },
-                "sparkline": {
-                  "color": "#e65013",
-                  "width": 1.5
-                }
+                "sparkline": { "color": "#e65013", "width": 1.5 }
               }
             }
           }
@@ -464,18 +450,14 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=~\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))"
+                        "query": "(((count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job='$job',instance=~'$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))"
                       }
                     }
                   }
                 },
                 "calculation": "Mean",
-                "unit": {
-                  "kind": "Percent"
-                },
-                "sparkline": {
-                  "area_opacity": 0.2
-                }
+                "unit": { "kind": "Percent" },
+                "sparkline": { "area_opacity": 0.2 }
               }
             }
           }
@@ -496,25 +478,14 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=~\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=~\"$instance\"}) by (cpu))"
+                        "query": "(((count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job='$job',instance=~'$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))"
                       }
                     }
                   }
                 },
                 "calculation": "LastNumber",
-                "unit": {
-                  "kind": "Percent"
-                },
-                "thresholds": {
-                  "steps": [
-                    {
-                      "value": 85
-                    },
-                    {
-                      "value": 95
-                    }
-                  ]
-                }
+                "unit": { "kind": "Percent" },
+                "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
             }
           }
@@ -535,16 +506,13 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "node_load15{instance=~\"$instance\",job=\"node\"}"
+                        "query": "node_load15{instance=~'$instance',job='$job'}"
                       }
                     }
                   }
                 },
                 "calculation": "LastNumber",
-                "unit": {
-                  "kind": "PercentDecimal",
-                  "decimal_places": 1
-                },
+                "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
                 "thresholds": {
                   "steps": [
                     {
@@ -564,9 +532,7 @@
         "gaugeFormatTest": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "Gauge Format Test"
-            },
+            "display": { "name": "Gauge Format Test" },
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
@@ -576,25 +542,16 @@
                     "plugin": {
                       "kind": "PrometheusTimeSeriesQuery",
                       "spec": {
-                        "query": "node_time_seconds{job=\"node\",instance=~\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=~\"$instance\"}"
+                        "query": "node_time_seconds{job='$job',instance=~'$instance'} - node_boot_time_seconds{job='$job',instance=~'$instance'}"
                       }
                     }
                   }
                 },
                 "calculation": "LastNumber",
-                "unit": {
-                  "kind": "Decimal"
-                },
+                "unit": { "kind": "Bytes" },
                 "max": 95000000,
                 "thresholds": {
-                  "steps": [
-                    {
-                      "value": 71000000
-                    },
-                    {
-                      "value": 82000000
-                    }
-                  ]
+                  "steps": [{ "value": 71000000 }, { "value": 82000000 }]
                 }
               }
             }
@@ -605,128 +562,93 @@
         {
           "kind": "Grid",
           "spec": {
-            "display": {
-              "title": "Row 1",
-              "collapse": {
-                "open": true
-              }
-            },
-            "items": [
-              {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/legendEx"
-                }
-              },
-              {
-                "x": 12,
-                "y": 0,
-                "width": 12,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/basicEx"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "Grid",
-          "spec": {
-            "display": {
-              "title": "Row 2",
-              "collapse": {
-                "open": false
-              }
-            },
-            "items": [
-              {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/testNodeQuery"
-                }
-              },
-              {
-                "x": 12,
-                "y": 0,
-                "width": 12,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/testQueryAlt"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "Grid",
-          "spec": {
-            "display": {
-              "title": "Row 3",
-              "collapse": {
-                "open": false
-              }
-            },
+            "display": { "title": "Row 1", "collapse": { "open": true } },
             "items": [
               {
                 "x": 0,
                 "y": 0,
                 "width": 2,
-                "height": 2,
-                "content": {
-                  "$ref": "#/spec/panels/statSm"
-                }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "width": 2,
-                "height": 2,
-                "content": {
-                  "$ref": "#/spec/panels/statRAM"
-                }
+                "height": 3,
+                "content": { "$ref": "#/spec/panels/statRAM" }
               },
               {
                 "x": 0,
                 "y": 4,
                 "width": 2,
-                "height": 2,
-                "content": {
-                  "$ref": "#/spec/panels/statTotalRAM"
-                }
+                "height": 3,
+                "content": { "$ref": "#/spec/panels/statTotalRAM" }
               },
               {
                 "x": 2,
                 "y": 0,
                 "width": 4,
                 "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/statMd"
-                }
+                "content": { "$ref": "#/spec/panels/statMd" }
               },
               {
                 "x": 6,
                 "y": 0,
                 "width": 10,
                 "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/statLg"
-                }
+                "content": { "$ref": "#/spec/panels/statLg" }
               },
               {
                 "x": 16,
                 "y": 0,
-                "width": 8,
+                "width": 4,
                 "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/gaugeFormatTest"
-                }
+                "content": { "$ref": "#/spec/panels/gaugeFormatTest" }
+              },
+              {
+                "x": 20,
+                "y": 0,
+                "width": 4,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/gaugeRAM" }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": { "title": "Row 2", "collapse": { "open": true } },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/legendEx" }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/basicEx" }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": { "title": "Row 3", "collapse": { "open": false } },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/cpu" }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/testNodeQuery" }
               }
             ]
           }
@@ -784,10 +706,7 @@
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
-                "values": [
-                  "1m",
-                  "5m"
-                ]
+                "values": ["1m", "5m"]
               }
             }
           }

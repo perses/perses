@@ -15,7 +15,7 @@ import { produce } from 'immer';
 import { Box, TextField, FormControl, InputLabel } from '@mui/material';
 import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector } from '../../model';
-import { PrometheusTimeSeriesQueryEditorProps, useQueryState } from './query-editor-model';
+import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } from './query-editor-model';
 
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
@@ -25,6 +25,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { datasource } = value;
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+  const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {
@@ -49,6 +50,14 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         value={query}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
+        margin="dense"
+      />
+      <TextField
+        fullWidth
+        label="Series Name Format"
+        value={format ?? ''}
+        onChange={handleFormatChange}
+        onBlur={handleFormatBlur}
         margin="dense"
       />
       <FormControl margin="dense" fullWidth={false}>

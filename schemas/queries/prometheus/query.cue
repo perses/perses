@@ -24,9 +24,10 @@ spec: {
 			datasource: {
 				kind: prometheus.kind
 			}
-			query:       string
-			min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-			resolution?: number
+			query:               string
+			series_name_format?: string
+			min_step?:           =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+			resolution?:         number
 		})
 	}
 }

@@ -153,7 +153,9 @@ func TestMarshalDashboard(t *testing.T) {
 						{
 							Kind: dashboard.ListVariable,
 							Spec: &dashboard.ListVariableSpec{
-								Name: "labelName",
+								CommonVariableSpec: dashboard.CommonVariableSpec{
+									Name: "labelName",
+								},
 								Plugin: common.Plugin{
 									Kind: "PrometheusLabelNamesVariable",
 									Spec: map[string]interface{}{
@@ -167,7 +169,9 @@ func TestMarshalDashboard(t *testing.T) {
 						{
 							Kind: dashboard.ListVariable,
 							Spec: &dashboard.ListVariableSpec{
-								Name: "labelValue",
+								CommonVariableSpec: dashboard.CommonVariableSpec{
+									Name: "labelValue",
+								},
 								Plugin: common.Plugin{
 									Kind: "PrometheusLabelValuesVariable",
 									Spec: map[string]interface{}{
@@ -426,7 +430,9 @@ func TestUnmarshallDashboard(t *testing.T) {
 				{
 					Kind: dashboard.ListVariable,
 					Spec: &dashboard.ListVariableSpec{
-						Name: "labelName",
+						CommonVariableSpec: dashboard.CommonVariableSpec{
+							Name: "labelName",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelNamesVariable",
 							Spec: map[string]interface{}{
@@ -440,7 +446,9 @@ func TestUnmarshallDashboard(t *testing.T) {
 				{
 					Kind: dashboard.ListVariable,
 					Spec: &dashboard.ListVariableSpec{
-						Name: "labelValue",
+						CommonVariableSpec: dashboard.CommonVariableSpec{
+							Name: "labelValue",
+						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{

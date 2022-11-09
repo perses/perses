@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useQueries, UseQueryOptions } from '@tanstack/react-query';
 import { PluginImplementation, PluginMetadata, PluginType } from '../model';
 
 export interface PluginRegistryContextType {
@@ -51,6 +51,21 @@ export function usePlugin<T extends PluginType>(pluginType: T, kind: string, opt
   };
   const { getPlugin } = usePluginRegistry();
   return useQuery(['getPlugin', pluginType, kind], () => getPlugin(pluginType, kind), options);
+}
+
+/**
+ * Loads a list of plugins and returns the plugin implementation, along with loading/error state.
+ */
+export function usePlugins<T extends PluginType>(pluginType: T, plugins: Array<{ kind: string }>) {
+  const { getPlugin } = usePluginRegistry();
+  return useQueries({
+    queries: plugins.map((p) => {
+      return {
+        queryKey: ['getPlugin', pluginType, p.kind],
+        queryFn: () => getPlugin(pluginType, p.kind),
+      };
+    }),
+  });
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata

@@ -20,7 +20,14 @@ import { LineChart, EChartsDataFormat, ZoomEventData, Legend } from '@perses-dev
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { TimeSeriesChartOptions, DEFAULT_LEGEND } from './time-series-chart-model';
-import { getLineSeries, getCommonTimeScale, getYValues, getXValues, EMPTY_GRAPH_DATA } from './utils/data-transform';
+import {
+  getLineSeries,
+  getThresholdSeries,
+  getCommonTimeScale,
+  getYValues,
+  getXValues,
+  EMPTY_GRAPH_DATA,
+} from './utils/data-transform';
 import { getRandomColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
@@ -84,15 +91,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       if (query.isLoading || query.data === undefined) continue;
 
       for (const timeSeries of query.data.series) {
+        const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries = getLineSeries(timeSeries.name, yValues, selectedSeriesName);
+        const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, selectedSeriesName);
         if (selectedSeriesName === null || selectedSeriesName === timeSeries.name) {
           graphData.timeSeries.push(lineSeries);
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name, // TODO: should query generate an id instead of using name here and in getRandomColor?
-            label: timeSeries.name,
+            id: timeSeries.name, // TODO: should query generate an id instead of using full name here and in getRandomColor?
+            label: formattedSeriesName,
             isSelected: selectedSeriesName === timeSeries.name,
             color: getRandomColor(timeSeries.name),
             onClick: () => onLegendItemClick(timeSeries.name),
@@ -115,7 +123,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
         // TODO: switch back to markLine once alternate tooltip created
         const thresholdData = Array(xAxisData.length).fill(step.value);
-        const thresholdLineSeries = getLineSeries(thresholdName, thresholdData, selectedSeriesName, stepOption);
+        const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
         graphData.timeSeries.push(thresholdLineSeries);
       });
     }
@@ -144,6 +152,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   }
 
   const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;
+  const legendHeight = legend && legend.position === 'right' ? contentDimensions.height : 35;
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
   const gridOverrides: GridComponentOption = {
@@ -152,7 +161,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const lineChartHeight =
     legend && legend.position === 'bottom' && graphData.legendItems && graphData.legendItems.length > 0
-      ? contentDimensions.height - 50
+      ? contentDimensions.height - legendHeight
       : contentDimensions.height;
 
   const handleDataZoom = (event: ZoomEventData) => {
@@ -170,7 +179,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         onDataZoom={handleDataZoom}
       />
       {legend && graphData.legendItems && (
-        <Legend width={legendWidth} height={contentDimensions.width} options={legend} data={graphData.legendItems} />
+        <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
       )}
     </>
   );

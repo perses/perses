@@ -74,11 +74,21 @@ type VariableSpec interface {
 	GetName() string
 }
 
+type VariableDisplay struct {
+	common.Display `json:",inline" yaml:",inline"`
+	Hidden         bool `json:"hidden" yaml:"hidden"`
+}
+
+type CommonVariableSpec struct {
+	Name         string           `json:"name" yaml:"name"`
+	DefaultValue string           `json:"default_value,omitempty" yaml:"default_value,omitempty"`
+	Display      *VariableDisplay `json:"display,omitempty" yaml:"display,omitempty"`
+}
+
 type TextVariableSpec struct {
-	VariableSpec `json:"-" yaml:"-"`
-	Name         string          `json:"name" yaml:"name"`
-	Value        string          `json:"value" yaml:"value"`
-	Display      *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
+	VariableSpec       `json:"-" yaml:"-"`
+	CommonVariableSpec `json:",inline" yaml:",inline"`
+	Value              string `json:"value" yaml:"value"`
 }
 
 func (v *TextVariableSpec) GetName() string {
@@ -122,12 +132,13 @@ func (v *TextVariableSpec) validate() error {
 }
 
 type ListVariableSpec struct {
-	VariableSpec  `json:"-" yaml:"-"`
-	Name          string          `json:"name" yaml:"name"`
-	AllowAllValue bool            `json:"allow_all_value" yaml:"allow_all_value"`
-	AllowMultiple bool            `json:"allow_multiple" yaml:"allow_multiple"`
-	Display       *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
-	Plugin        common.Plugin   `json:"plugin" yaml:"plugin"`
+	VariableSpec       `json:"-" yaml:"-"`
+	CommonVariableSpec `json:",inline" yaml:",inline"`
+	AllowAllValue      bool `json:"allow_all_value" yaml:"allow_all_value"`
+	AllowMultiple      bool `json:"allow_multiple" yaml:"allow_multiple"`
+	// CustomAllValue is a custom value that will be used if AllowAllValue is true and if then `all` is selected
+	CustomAllValue string        `json:"custom_all_value,omitempty" yaml:"custom_all_value,omitempty"`
+	Plugin         common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 func (v *ListVariableSpec) GetName() string {
@@ -163,6 +174,9 @@ func (v *ListVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) erro
 func (v *ListVariableSpec) validate() error {
 	if err := common.ValidateID(v.Name); err != nil {
 		return err
+	}
+	if len(v.CustomAllValue) > 0 && !v.AllowAllValue {
+		return fmt.Errorf("custom_all_value cannot be set if allow_all_value is not set to true")
 	}
 	return nil
 }
