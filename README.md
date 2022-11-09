@@ -81,6 +81,9 @@ You can launch a Perses container for trying it out with:
 docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 ```
 
+Note: The config file included in the docker image doesn't have the right format and so the binary is crashing, yelling at this config.
+This is already adressed in a PR. While waiting for the next release, you will need to override the config file included in the docker image to see it working.
+
 ### Building from source
 
 To build Perses from source code, You need:
