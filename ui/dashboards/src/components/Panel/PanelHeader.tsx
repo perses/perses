@@ -35,38 +35,35 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
 
-  // Don't show any actions unless panel is hovered
   let action: CardHeaderProps['action'] = undefined;
-  if (isHovered) {
-    if (editHandlers !== undefined) {
-      // If there are edit handlers, always just show the edit buttons
-      action = (
-        <Stack direction="row" alignItems="center" spacing={0.5}>
-          <HeaderIconButton aria-label="edit panel" size="small" onClick={editHandlers.onEditPanelClick}>
-            <PencilIcon />
-          </HeaderIconButton>
-          <HeaderIconButton aria-label="delete panel" size="small" onClick={editHandlers.onDeletePanelClick}>
-            <DeleteIcon />
-          </HeaderIconButton>
-          <HeaderIconButton aria-label="drag handle" size="small">
-            <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
-          </HeaderIconButton>
-        </Stack>
-      );
-    } else if (description !== undefined) {
-      // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
-      action = (
-        <InfoTooltip id={descriptionTooltipId} description={description} placement={TooltipPlacement.Bottom}>
-          <HeaderIconButton aria-label="Panel Description">
-            <InformationOutlineIcon
-              aria-describedby="info-tooltip"
-              aria-hidden={false}
-              sx={{ color: (theme) => theme.palette.grey[700] }}
-            />
-          </HeaderIconButton>
-        </InfoTooltip>
-      );
-    }
+  if (editHandlers !== undefined) {
+    // If there are edit handlers, always just show the edit buttons
+    action = (
+      <Stack direction="row" alignItems="center" spacing={0.5}>
+        <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
+          <PencilIcon />
+        </HeaderIconButton>
+        <HeaderIconButton aria-label={`delete panel ${title}`} size="small" onClick={editHandlers.onDeletePanelClick}>
+          <DeleteIcon />
+        </HeaderIconButton>
+        <HeaderIconButton aria-label={`move panel ${title}`} size="small">
+          <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
+        </HeaderIconButton>
+      </Stack>
+    );
+  } else if (description !== undefined && isHovered) {
+    // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
+    action = (
+      <InfoTooltip id={descriptionTooltipId} description={description} placement={TooltipPlacement.Bottom}>
+        <HeaderIconButton aria-label="Panel Description">
+          <InformationOutlineIcon
+            aria-describedby="info-tooltip"
+            aria-hidden={false}
+            sx={{ color: (theme) => theme.palette.grey[700] }}
+          />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
   }
 
   return (
@@ -77,7 +74,15 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
       aria-describedby={descriptionTooltipId}
       disableTypography
       title={
-        <Typography id={titleElementId} variant="subtitle1">
+        <Typography
+          id={titleElementId}
+          variant="subtitle1"
+          sx={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {title}
         </Typography>
       }
@@ -87,9 +92,7 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
           padding: theme.spacing(1),
           borderBottom: `solid 1px ${theme.palette.divider}`,
           '.MuiCardHeader-content': {
-            whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
           },
         }),
         sx

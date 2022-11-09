@@ -15,6 +15,7 @@
 - [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
 - [BREAKINGCHANGE] Variable plugins `dependsOn` now returns an object #742
   becomes `display.name` #734
+- [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
 
 ## 0.14.0 / 2022-11-02
 
