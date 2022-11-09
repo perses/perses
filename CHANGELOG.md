@@ -6,10 +6,13 @@
 - [FEATURE] User can collapse / expand queries in the panel editor #718
 - [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
 - [ENHANCEMENT] Disable initial panel animation #710
+- [ENHANCEMENT] time range components styling improvements #733
+- [ENHANCEMENT] Organize time series options in tabs #741
 - [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the backend. #734
+- [BUGFIX] Back button to dashboard listing broken #735
+- [BREAKINGCHANGE] TimeRangeProvider props changed, `paramsEnabled` added #735
 - [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
   becomes `display.name` #734
-- [ENHANCEMENT] Organize time series options in tabs #741
 
 ## 0.14.0 / 2022-11-02
 
