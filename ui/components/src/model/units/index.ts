@@ -11,19 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './InfoTooltip';
-export * from './JSONEditor';
-export * from './Legend';
-export * from './LineChart';
-export * from './StatChart';
-export * from './TimeRangeSelector';
-export * from './UnitSelector';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test-utils';
+export * from './units';
+export * from './constants';
+export * from './types';

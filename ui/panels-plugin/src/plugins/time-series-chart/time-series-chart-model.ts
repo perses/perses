@@ -37,6 +37,11 @@ export type LegendPositionOptions = {
   position: LegendPosition;
 };
 
+export const DEFAULT_UNIT: UnitOptions = {
+  kind: 'Decimal',
+  decimal_places: 2,
+};
+
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
  */
