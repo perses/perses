@@ -7,66 +7,113 @@ Perses
 
 ## Overview
 
-Perses is part of the [CoreDash community](https://github.com/coredashio/community).
+Perses is part of the [CoreDash community](https://github.com/coredashio/community). It belongs to the Linux Foundation.
+At a later stage, we want to promote the project to the [Cloud Native Computing Foundation](https://www.cncf.io/) and be
+part of the monitoring tools like Prometheus or Thanos.
 
-Perses aims to become a dashboard visualization tool for Prometheus and other datasources. It will focus on being
-GitOps-compatible and thus enabling a smooth "dashboards as code" workflow via a new and well-defined dashboard definition model.
+Perses is going to tackle multiple different goals:
 
-It also aims to offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from individual application namespaces.
+1. It aims to become a **standard** dashboard visualization tool for Prometheus and other datasources. It will focus on
+   being GitOps-compatible and thus enabling a smooth "dashboards as code" workflow via a new and well-defined dashboard
+   definition model.
+2. While becoming another visualization tool, Perses also aims to provide different npm packages, so it can benefit to
+   anyone that would like to embed charts and dashboards in their UI. For example, these packages might be used to
+   improve the display of the data in the Prometheus UI.
+3. It also aims to offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from
+   individual application namespaces (Using CRDs). For more information you can take a look
+   at [the doc](./docs/kubernetes.md) that would give you an idea of how it would work.
+4. To be friendly to dashboard as code users, we want to provide a complete static validation of the dashboard format.
+   That means you will be able to validate your dashboard in a CI/CD using the Perses CLI (named `percli`)
+5. The architecture should support plugins (at least for the panels)
 
 ## Status
 
-Perses is an early work in progress and is far from production-ready. The current pieces that are in place are:
+While we already released a certain amount of versions, Perses is still in an early alpha stage and still work in
+progress. The current pieces that are in place are:
 
-* A backend API that allows read and write access to dashboard and datasource definitions.
-* A beginning of a frontend implementation with a plugin-oriented architecture.
+* The Plugin architecture has finally reached a stable point.
+    * The plugins concerned the Variables, the Panels, The Queries and the Datasources definitions.
+    * To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
+      All schemas are available in the [schemas](./schemas) folder.
+* A backend REST API provides R/W access to dashboard and datasource definitions.
+* While the UI is still in progress, we already have:
+    * a beginning of navigation that will help to move from a dashboard to another.
+    * a support of the following panel types:
+        * Time series charts.
+        * Gauge panels.
+        * Stat panels (single value with sparkline).
+        * Markdown panels (as an alternative to the Text panel)
+    * The editing of dashboard is well advanced. Most of the remaining work is in panel options, right now you have to
+      use the JSON editor for a lot of properties, but those will be form controls soon.
+* A migration script that will help to move from Grafana to Perses is on going.
+* The dashboard data model is still evolving along with the dashboard implementation and new requirements. Before
+  reaching a stable state regarding the data model, we are waiting for feedback to know if we need to adjust and
+  potentially break things.
 
-The dashboard data model is still evolving along with the dashboard implementation and new requirements.
+## What's next
 
-### Roadmap
+Here is a not ordered list of what it can come in the future in Perses:
 
-Here is an overview of what we aim to implement / provide in the short term:
+* Perses native on Kubernetes using CRDs
+* Traces Visualization support
+* Docs, a lot of docs :)
+* Generating Panel #200
+* Sub folder management #183
+* Datasource discovery #74
 
-#### First Milestone - Reading and displaying dashboards
+## Install
 
-* Define a proper dashboard data model.
-    * The data model should be easy to use by SREs and developers in a GitOps / "dashboards as code" mode.
-    * The architecture should support plugins (at least for panels, but likely for
-      datasources as well). We are still discussing the plugin architecture design in https://github.com/perses/perses/discussions/72.
-    * The initial focus is to support Prometheus as a datasource.
-* A REST API that provides a [CRUD interface](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) to manage dashboards and datasources.
-* The UI will initially focus on displaying dashboards. Editing dashboards through the UI will be addressed in the next milestone.
-* We will initially support the following panel types:
-    * Time series charts.
-    * Gauge panels.
-    * Stat panels (single value with sparkline).
-    * Tables (possibly).
-* The UI will support light and dark themes.
-* The UI will use responsive layout principles to adapt to different screen sizes.
-* Large dashboards should not freeze the UI / the browser.
-* We want to be able to load an equivalent of the Grafana [Node Exporter dashboard](https://grafana.com/grafana/dashboards/1860).
-* Perses will be released as binaries and Docker images, with initial support for Linux, Windows, and Darwin / Mac OS X on amd64.
-* To enable initial dashboard-as-code use cases, Perses will be able to read dashboard definitions from local files. This will also allow quick iteration and experimentation when editing YAML/JSON dashboard representations.
+There are various ways of installing Perses.
 
-#### Second Milestone - Native Kubernetes mode and UI-based dashboard editing
+### Precompiled binaries
 
-The goal of the second milestone is to support "dashboard as a service" use cases on Kubernetes, as well as allowing UI-based dashboard editing:
+Precompiled binaries for released versions are available in
+the [GitHub release](https://github.com/perses/perses/releases). Using the latest release binary is the recommended way
+of installing Perses.
 
-* Define Kubernetes CRDs containing dashboard definitions that will be read by Perses. This will allow defining and deploying dashboards along their respective applications in the same namespace. Perses will then allow reading and displaying dashboard definitions across multiple namespaces.
-* Allow dynamic discovery of datasources on Kubernetes, rather than hard-coding datasource URLs.
-* Allow defining datasources that are local and private to a namespace (e.g. for use cases where each namespace has its own Prometheus server).
-* Allow editing dashboards directly through the UI.
-* Depending on how Perses is configured (using Kubernetes CRDs or a database), modifying dashboards directly through Perses will or will not be possible (no matter whether the editing happens via the UI or using the API directly).
+### Docker images
 
-#### Future Milestone - Not yet scoped
+Docker images are available on [Docker Hub](https://hub.docker.com/r/persesdev/perses).
 
-* Define access restrictions and a security model for different resources.
-* Add support for datasources other than Prometheus.
-* Support creating dashboard snapshots.
+You can launch a Perses container for trying it out with:
+
+```bash
+docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
+```
+
+Note: The config file included in the docker image doesn't have the right format and so the binary is crashing, yelling at this config.
+This is already adressed in a PR. While waiting for the next release, you will need to override the config file included in the docker image to see it working.
+
+### Building from source
+
+To build Perses from source code, You need:
+
+* Go [version 1.18 or greater](https://golang.org/doc/install).
+* NodeJS [version 16 or greater](https://nodejs.org/).
+* npm [version 8 or greater](https://www.npmjs.com/).
+
+Start by cloning the repository:
+
+```bash
+git clone https://github.com/perses/perses.git
+cd perses
+```
+
+Then you can use `make build` that would build the web assets and then Perses itself (and also the Perses CLI that can
+be used to interact directly with the Perses API in case you prefer to browser the API using a terminal).
+
+```bash
+make build
+./bin/perses --config=your_config.yml
+```
 
 ## Contributing and development
 
-Refer to [CONTRIBUTING.md](CONTRIBUTING.md).
+General instructions about how you can contribute to Perses are available in the
+document [CONTRIBUTING.md](CONTRIBUTING.md).
+
+In case you are more interested into the React UI development, please refer to [UI Readme](./ui/README.md). It will give
+you instruction about how to build, run or test the React UI. It will also some insight about how it is designed.
 
 ## License
 
