@@ -74,7 +74,15 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
       aria-describedby={descriptionTooltipId}
       disableTypography
       title={
-        <Typography id={titleElementId} variant="subtitle1">
+        <Typography
+          id={titleElementId}
+          variant="subtitle1"
+          sx={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {title}
         </Typography>
       }
@@ -84,9 +92,7 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
           padding: theme.spacing(1),
           borderBottom: `solid 1px ${theme.palette.divider}`,
           '.MuiCardHeader-content': {
-            whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
           },
         }),
         sx
