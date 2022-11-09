@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { Grid, Box, Stack, TextField, Typography } from '@mui/material';
+import { Box, Stack, TextField, Typography } from '@mui/material';
 import { LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
@@ -135,38 +135,28 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
             />
           </Box>
         )}
-        <Grid
-          container
-          spacing={1}
-          sx={{
-            maxWidth: 312,
-          }}
-        >
-          <Grid item xs={6}>
-            <TextField
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                // TODO: add helperText, fix validation after we decide on form state solution
-                updateDateRange(event.target.value, true);
-              }}
-              value={format(timeRange.start, DATE_TIME_FORMAT)}
-              label="Start Time"
-              placeholder="mm/dd/yyyy hh:mm"
-              // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
-              type="tel"
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                updateDateRange(event.target.value, false);
-              }}
-              value={format(timeRange.end, DATE_TIME_FORMAT)}
-              label="End Time"
-              placeholder="mm/dd/yyyy hh:mm"
-              type="tel"
-            />
-          </Grid>
-        </Grid>
+        <Stack direction="row" alignItems="center" gap={1} pl={1} pr={1}>
+          <TextField
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              // TODO: add helperText, fix validation after we decide on form state solution
+              updateDateRange(event.target.value, true);
+            }}
+            value={format(timeRange.start, DATE_TIME_FORMAT)}
+            label="Start Time"
+            placeholder="mm/dd/yyyy hh:mm"
+            // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
+            type="tel"
+          />
+          <TextField
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              updateDateRange(event.target.value, false);
+            }}
+            value={format(timeRange.end, DATE_TIME_FORMAT)}
+            label="End Time"
+            placeholder="mm/dd/yyyy hh:mm"
+            type="tel"
+          />
+        </Stack>
       </Stack>
     </LocalizationProvider>
   );
