@@ -32,8 +32,15 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { UnitSelector, UnitSelectorProps } from '@perses-dev/components';
 import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs } from '@perses-dev/plugin-system';
-import { TimeSeriesChartOptions, DEFAULT_LEGEND, LEGEND_POSITIONS, LegendPosition } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_LEGEND,
+  LEGEND_POSITIONS,
+  LegendPosition,
+  DEFAULT_UNIT,
+} from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
@@ -120,6 +127,14 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
+  const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.unit = newUnit;
+      })
+    );
+  };
+
   return (
     <OptionsEditorTabs
       tabs={{
@@ -189,6 +204,12 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
                   ))}
                 </Select>
               </FormControl>
+              <Stack spacing={1} alignItems="flex-start">
+                <Typography variant="overline" component="h4">
+                  Y Axis
+                </Typography>
+                <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+              </Stack>
             </Stack>
           ),
         },
