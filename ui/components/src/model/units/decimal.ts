@@ -43,6 +43,7 @@ export function formatDecimal(value: number, unitOptions: DecimalUnitOptions): s
   const formatParams: Intl.NumberFormatOptions = {
     style: 'decimal',
     minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
     useGrouping: true,
   };
   const decimalFormatter = new Intl.NumberFormat('en-US', formatParams);
