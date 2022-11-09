@@ -36,9 +36,11 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
     label: 'Percent (0.0-1.0)',
   },
   '%': {
+    // This option is not shown in the selector because it is a shorthand
+    // duplicate of `Percent`.
+    disableSelectorOption: true,
     group: PERCENT_GROUP,
-    // TODO: figure out how this is different
-    label: '% (TBD???)',
+    label: '%',
   },
 };
 

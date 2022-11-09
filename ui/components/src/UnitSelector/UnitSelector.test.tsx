@@ -190,4 +190,15 @@ describe('UnitSelector', () => {
       expect(getAbbreviateSwitch()).toBeDisabled();
     });
   });
+
+  it('should not show an option for disabled units', () => {
+    const onChange = jest.fn();
+    renderUnitSelector({ kind: 'Decimal' }, onChange);
+
+    userEvent.click(getUnitSelector());
+    const percentShorthandOption = screen.queryByRole('option', {
+      name: '%',
+    });
+    expect(percentShorthandOption).not.toBeInTheDocument();
+  });
 });
