@@ -16,6 +16,7 @@
 - [BREAKINGCHANGE] Variable plugins `dependsOn` now returns an object #742
   becomes `display.name` #734
 - [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
+- [ENHANCEMENT] Add unit selector to time series chart options #744
 
 ## 0.14.0 / 2022-11-02
 
