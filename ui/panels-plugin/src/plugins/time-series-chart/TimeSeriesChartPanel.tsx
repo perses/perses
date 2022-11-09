@@ -19,7 +19,7 @@ import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, ZoomEventData, Legend } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { TimeSeriesChartOptions, DEFAULT_LEGEND } from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT } from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -41,10 +41,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // popuate default 'position' and other future properties
   const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
 
-  const unit = props.spec.unit ?? {
-    kind: 'Decimal',
-    decimal_places: 2,
-  };
+  const unit = props.spec.unit ?? DEFAULT_UNIT;
 
   // TODO: change to array, support multi select on Shift-click
   const [selectedSeriesName, setSelectedSeriesName] = useState<string | null>(null);
