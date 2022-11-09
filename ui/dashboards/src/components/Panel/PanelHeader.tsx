@@ -40,13 +40,13 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
     // If there are edit handlers, always just show the edit buttons
     action = (
       <Stack direction="row" alignItems="center" spacing={0.5}>
-        <HeaderIconButton aria-label="edit panel" size="small" onClick={editHandlers.onEditPanelClick}>
+        <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
           <PencilIcon />
         </HeaderIconButton>
-        <HeaderIconButton aria-label="delete panel" size="small" onClick={editHandlers.onDeletePanelClick}>
+        <HeaderIconButton aria-label={`delete panel ${title}`} size="small" onClick={editHandlers.onDeletePanelClick}>
           <DeleteIcon />
         </HeaderIconButton>
-        <HeaderIconButton aria-label="drag handle" size="small">
+        <HeaderIconButton aria-label={`move panel ${title}`} size="small">
           <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
         </HeaderIconButton>
       </Stack>

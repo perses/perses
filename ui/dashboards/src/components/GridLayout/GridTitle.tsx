@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronUp';
 import CollapsedIcon from 'mdi-material-ui/ChevronDown';
-import AddIcon from 'mdi-material-ui/Plus';
+import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
@@ -38,7 +37,6 @@ export interface GridTitleProps {
 export function GridTitle(props: GridTitleProps) {
   const { panelGroupId, title, collapse } = props;
 
-  const [isHovered, setIsHovered] = useState(false);
   const { openAddPanel, openEditPanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
   const { isEditMode } = useEditMode();
@@ -58,8 +56,6 @@ export function GridTitle(props: GridTitleProps) {
         padding: (theme) => theme.spacing(1),
         backgroundColor: (theme) => theme.palette.background.default,
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       {collapse ? (
         <>
@@ -67,21 +63,21 @@ export function GridTitle(props: GridTitleProps) {
             {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
           </IconButton>
           {text}
-          {isEditMode && isHovered && (
+          {isEditMode && (
             <Stack direction="row" sx={{ marginLeft: 'auto' }}>
-              <IconButton aria-label="add panel to group" onClick={openAddPanel}>
-                <AddIcon />
+              <IconButton aria-label={`add panel to group ${title}`} onClick={openAddPanel}>
+                <AddPanelIcon />
               </IconButton>
-              <IconButton aria-label="edit group" onClick={openEditPanelGroup}>
+              <IconButton aria-label={`edit group ${title}`} onClick={openEditPanelGroup}>
                 <PencilIcon />
               </IconButton>
-              <IconButton aria-label="delete group" onClick={() => openDeletePanelGroupDialog(panelGroupId)}>
+              <IconButton aria-label={`delete group ${title}`} onClick={() => openDeletePanelGroupDialog(panelGroupId)}>
                 <DeleteIcon />
               </IconButton>
-              <IconButton aria-label="move group down" disabled={moveDown === undefined} onClick={moveDown}>
+              <IconButton aria-label={`move group ${title} down`} disabled={moveDown === undefined} onClick={moveDown}>
                 <ArrowDownIcon />
               </IconButton>
-              <IconButton aria-label="move group up" disabled={moveUp === undefined} onClick={moveUp}>
+              <IconButton aria-label={`move group ${title} up`} disabled={moveUp === undefined} onClick={moveUp}>
                 <ArrowUpIcon />
               </IconButton>
             </Stack>
