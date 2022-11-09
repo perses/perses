@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { Box, Stack, TextField, Divider } from '@mui/material';
+import { Grid, Box, Stack, TextField, Typography } from '@mui/material';
 import { LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
@@ -56,7 +56,12 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Stack spacing={3} sx={{ padding: (theme) => theme.spacing(1, 2, 3) }}>
+      <Stack
+        spacing={2}
+        sx={(theme) => ({
+          padding: theme.spacing(1, 0, 2),
+        })}
+      >
         {showStartCalendar && (
           <Box
             sx={(theme) => ({
@@ -72,7 +77,9 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               },
             })}
           >
-            <h3>Select Start Time</h3>
+            <Typography variant="h3" padding={1}>
+              Select Start Time
+            </Typography>
             <StaticDateTimePicker
               displayStaticWrapperAs="desktop"
               openTo="day"
@@ -105,7 +112,9 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               },
             })}
           >
-            <h3>Select End Time</h3>
+            <Typography variant="h3" padding={1}>
+              Select End Time
+            </Typography>
             <StaticDateTimePicker
               displayStaticWrapperAs="desktop"
               openTo="day"
@@ -126,34 +135,38 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
             />
           </Box>
         )}
-        <TextField
-          fullWidth
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            // TODO: add helperText, fix validation after we decide on form state solution
-            updateDateRange(event.target.value, true);
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            maxWidth: 312,
           }}
-          value={format(timeRange.start, DATE_TIME_FORMAT)}
-          label="Start Time"
-          placeholder="mm/dd/yyyy hh:mm"
-          // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
-          type="tel"
-        />
-        <Divider
-          sx={(theme) => ({
-            margin: theme.spacing(2, 0),
-            borderColor: theme.palette.grey['500'],
-          })}
-        />
-        <TextField
-          fullWidth
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            updateDateRange(event.target.value, false);
-          }}
-          value={format(timeRange.end, DATE_TIME_FORMAT)}
-          label="End Time"
-          placeholder="mm/dd/yyyy hh:mm"
-          type="tel"
-        />
+        >
+          <Grid item xs={6}>
+            <TextField
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                // TODO: add helperText, fix validation after we decide on form state solution
+                updateDateRange(event.target.value, true);
+              }}
+              value={format(timeRange.start, DATE_TIME_FORMAT)}
+              label="Start Time"
+              placeholder="mm/dd/yyyy hh:mm"
+              // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
+              type="tel"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                updateDateRange(event.target.value, false);
+              }}
+              value={format(timeRange.end, DATE_TIME_FORMAT)}
+              label="End Time"
+              placeholder="mm/dd/yyyy hh:mm"
+              type="tel"
+            />
+          </Grid>
+        </Grid>
       </Stack>
     </LocalizationProvider>
   );

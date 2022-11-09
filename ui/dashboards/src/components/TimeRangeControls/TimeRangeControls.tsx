@@ -11,19 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState, useMemo } from 'react';
-import { Box, FormControl, Popover, Stack } from '@mui/material';
-import { AbsoluteTimePicker, TimeRangeSelector, TimeOption } from '@perses-dev/components';
-import {
-  DurationString,
-  RelativeTimeRange,
-  AbsoluteTimeRange,
-  isRelativeTimeRange,
-  toAbsoluteTimeRange,
-} from '@perses-dev/core';
+import { DateTimeRangePicker, TimeOption } from '@perses-dev/components';
+import { isDurationString } from '@perses-dev/core';
 import { useDashboardTimeRange } from '../../context';
+import { useDefaultTimeRange } from '../../context';
 
-// TODO: add time shortcut if one does not match duration
 export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
   { value: { pastDuration: '15m' }, display: 'Last 15 minutes' },
@@ -38,56 +30,16 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 export function TimeRangeControls() {
   const { timeRange, setTimeRange } = useDashboardTimeRange();
+  const defaultTimeRange = useDefaultTimeRange();
 
-  const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
-  const anchorEl = useRef();
-
-  const convertedTimeRange = useMemo(() => {
-    return isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-  }, [timeRange]);
-
-  return (
-    <Stack direction="row" spacing={1}>
-      <Popover
-        anchorEl={anchorEl.current}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        open={showCustomDateSelector}
-        onClose={() => setShowCustomDateSelector(false)}
-        sx={(theme) => ({
-          padding: theme.spacing(2),
-        })}
-      >
-        <AbsoluteTimePicker
-          initialTimeRange={convertedTimeRange}
-          onChange={(timeRange: AbsoluteTimeRange) => {
-            setTimeRange(timeRange);
-            setShowCustomDateSelector(false);
-          }}
-        />
-      </Popover>
-      <FormControl fullWidth>
-        <Box ref={anchorEl}>
-          <TimeRangeSelector
-            timeOptions={TIME_OPTIONS}
-            value={timeRange}
-            onSelectChange={(event) => {
-              const duration = event.target.value;
-              const relativeTimeInput: RelativeTimeRange = {
-                pastDuration: duration as DurationString,
-                end: new Date(),
-              };
-              setTimeRange(relativeTimeInput);
-              setShowCustomDateSelector(false);
-            }}
-            onCustomClick={() => {
-              setShowCustomDateSelector(true);
-            }}
-          />
-        </Box>
-      </FormControl>
-    </Stack>
-  );
+  // add time shortcut if one does not match duration from dashboard JSON
+  if (!TIME_OPTIONS.some((option) => option.value.pastDuration === defaultTimeRange.pastDuration)) {
+    if (isDurationString(defaultTimeRange.pastDuration)) {
+      TIME_OPTIONS.push({
+        value: { pastDuration: defaultTimeRange.pastDuration },
+        display: `Last ${defaultTimeRange.pastDuration}`,
+      });
+    }
+  }
+  return <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} />;
 }
