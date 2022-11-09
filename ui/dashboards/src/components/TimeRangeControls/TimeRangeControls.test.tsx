@@ -14,7 +14,7 @@
 import { generatePath } from 'react-router';
 import { createMemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import { renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
 import { DashboardProvider, DashboardStoreProps, TimeRangeProvider } from '../../context';
@@ -70,7 +70,9 @@ describe('TimeRangeControls', () => {
     expect(history.location.search).toEqual('?start=12h');
 
     // back button should return to first option selected
-    history.back();
+    act(() => {
+      history.back();
+    });
     expect(history.location.search).toEqual('?start=5m');
   });
 
