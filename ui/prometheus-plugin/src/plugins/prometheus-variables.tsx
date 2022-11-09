@@ -78,7 +78,9 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn: () => [],
+  dependsOn: () => {
+    return { variables: [] };
+  },
   OptionsEditorComponent: PrometheusLabelNamesVariableEditor,
   createInitialOptions: () => ({}),
 };
@@ -103,7 +105,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
     };
   },
   dependsOn: (spec) => {
-    return spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [];
+    return { variables: spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [] };
   },
   OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
   createInitialOptions: () => ({ label_name: '' }),
