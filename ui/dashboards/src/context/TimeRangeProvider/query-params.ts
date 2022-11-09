@@ -114,23 +114,29 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
 }
 
 /**
- * Returns time range getter and setter, set paramsEnabled to false to disable query string serialization
+ * Returns time range getter and setter, set enabledURLParams to false to disable query string serialization
  */
-export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEnabled = true): TimeRange {
+export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, enabledURLParams = true): TimeRange {
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
 
-  // fallback when app does not want query string as source of truth
+  // determine whether initial param had previously been populated to fix back btn
+  const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);
+
+  // optional fallback when app does not want query string as source of truth
+  // this occurs when enabledURLParams is set to false on TimeRangeProvider
   const [timeRangeState, setTimeRangeState] = useState<TimeRangeValue>(initialTimeRange);
 
   const { start } = query;
 
   useEffect(() => {
-    if (paramsEnabled && !start) {
+    // when dashboard loaded with no params, default to dashboard duration
+    if (enabledURLParams && !paramsLoaded && !start) {
       if (isRelativeTimeRange(initialTimeRange)) {
         setQuery({ start: initialTimeRange.pastDuration, end: undefined });
+        setParamsLoaded(true);
       }
     }
-  }, [initialTimeRange, paramsEnabled, start, setQuery]);
+  }, [initialTimeRange, enabledURLParams, paramsLoaded, start, setQuery]);
 
   const setTimeRange: TimeRange['setTimeRange'] = useCallback(
     (value: TimeRangeValue) => {
@@ -143,7 +149,7 @@ export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, paramsEn
     [setQuery]
   );
 
-  if (!paramsEnabled) {
+  if (!enabledURLParams) {
     return { timeRange: timeRangeState, setTimeRange: setTimeRangeState };
   }
   return { timeRange: initialTimeRange, setTimeRange: setTimeRange };
