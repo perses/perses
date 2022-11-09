@@ -14,7 +14,7 @@
 - [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the backend. #734
 - [BUGFIX] Back button to dashboard listing broken #735
 - [BUGFIX] Fix setDashboard to set metadata #743
-- [BREAKINGCHANGE] TimeRangeProvider props changed, `paramsEnabled` added #735
+- [BREAKINGCHANGE] TimeRangeProvider props changed, `enabledURLParams` added #735
 - [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
 - [BREAKINGCHANGE] Variable plugins `dependsOn` now returns an object #742
   becomes `display.name` #734
