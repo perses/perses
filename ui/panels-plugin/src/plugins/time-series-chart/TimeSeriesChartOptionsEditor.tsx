@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { produce } from 'immer';
 import {
   Button,
+  Box,
   FormControl,
   FormControlLabel,
   IconButton,
@@ -44,6 +45,7 @@ import {
   LEGEND_POSITIONS,
   LegendPosition,
   DEFAULT_UNIT,
+  DEFAULT_POINT_RADIUS,
 } from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
@@ -156,6 +158,15 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   //   );
   // };
 
+  const handlePointRadiusChange: SliderProps['onChange'] = (e) => {
+    const target = e.target as HTMLInputElement;
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.point_radius = Number(target.value) ?? DEFAULT_LINE_WIDTH;
+      })
+    );
+  };
+
   const handleLineWidthChange: SliderProps['onChange'] = (e) => {
     const target = e.target as HTMLInputElement;
     onChange(
@@ -238,31 +249,32 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
               <Typography variant="overline" component="h4">
                 Visual
               </Typography>
-              <Slider
-                aria-label="Line Width"
-                defaultValue={DEFAULT_LINE_WIDTH}
-                valueLabelDisplay="auto"
-                step={0.5}
-                marks
-                min={0}
-                max={10}
-                onChange={handleLineWidthChange}
-              />
-              <TextField
-                // fullWidth
-                sx={{ maxWidth: 100 }}
-                label="Line Width"
-                value={value.line_width ?? DEFAULT_LINE_WIDTH}
-                // onChange={handleLineWidthChange}
-                onChange={(v) => {
-                  onChange(
-                    produce(value, (draft: TimeSeriesChartOptions) => {
-                      // draft.line_width = lineWidth ? DEFAULT_LINE_WIDTH : undefined;
-                      draft.line_width = Number(v.target.value) ?? DEFAULT_LINE_WIDTH;
-                    })
-                  );
-                }}
-              />
+              <Box sx={{ maxWidth: 200 }}>
+                <Typography variant="h5">Point Radius</Typography>
+                <Slider
+                  aria-label="Point Radius"
+                  defaultValue={DEFAULT_POINT_RADIUS}
+                  valueLabelDisplay="auto"
+                  step={0.5}
+                  marks
+                  min={0}
+                  max={20}
+                  onChange={handlePointRadiusChange}
+                />
+              </Box>
+              <Box sx={{ maxWidth: 200 }}>
+                <Typography variant="h5">Line Width</Typography>
+                <Slider
+                  aria-label="Line Width"
+                  defaultValue={DEFAULT_LINE_WIDTH}
+                  valueLabelDisplay="auto"
+                  step={0.5}
+                  marks
+                  min={0}
+                  max={20}
+                  onChange={handleLineWidthChange}
+                />
+              </Box>
               <Stack spacing={1} alignItems="flex-start">
                 <Typography variant="overline" component="h4">
                   Y Axis
