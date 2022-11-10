@@ -14,10 +14,11 @@
 import React, { useMemo } from 'react';
 import { TimeRangeValue } from '@perses-dev/core';
 import { TimeRangeContext, useTimeRangeContext } from '@perses-dev/plugin-system';
+import { useSetTimeRangeParams } from './query-params';
 
 export interface TimeRangeProviderProps {
-  timeRange: TimeRangeValue;
-  setTimeRange?: (value: TimeRangeValue) => void;
+  initialTimeRange: TimeRangeValue;
+  enabledURLParams?: boolean;
   children?: React.ReactNode;
 }
 
@@ -25,17 +26,14 @@ export interface TimeRangeProviderProps {
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { timeRange, children, setTimeRange } = props;
+  const { initialTimeRange, enabledURLParams, children } = props;
 
-  // TODO: fix no-op, pass paramsEnabled as false in useSetTimeRangeParams as workaround
+  const { timeRange, setTimeRange } = useSetTimeRangeParams(initialTimeRange, enabledURLParams);
+
   const ctx = useMemo(
     () => ({
       timeRange,
-      setTimeRange:
-        setTimeRange ??
-        (() => {
-          /* no-op */
-        }),
+      setTimeRange,
     }),
     [timeRange, setTimeRange]
   );

@@ -23,7 +23,7 @@ const testDashboard: DashboardResource = {
     version: 0,
   },
   spec: {
-    duration: '5m',
+    duration: '30m',
     variables: [
       {
         kind: 'TextVariable',

@@ -27,12 +27,14 @@ export interface UnitSelectorProps {
 
 type AutocompleteKindOption = UnitConfig & { id: UnitOptions['kind'] };
 
-const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG).map(([id, config]) => {
-  return {
-    id: id as UnitOptions['kind'],
-    ...config,
-  };
-});
+const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG)
+  .map(([id, config]) => {
+    return {
+      id: id as UnitOptions['kind'],
+      ...config,
+    };
+  })
+  .filter((config) => !config.disableSelectorOption);
 
 const DECIMAL_OPTIONS = [0, 1, 2, 3, 4];
 

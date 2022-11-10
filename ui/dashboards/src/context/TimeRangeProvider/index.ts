@@ -11,5 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TimeRangeSelector';
-export * from './AbsoluteTimePicker';
+export * from './TimeRangeProvider';
+export * from './query-params';

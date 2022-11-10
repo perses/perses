@@ -57,12 +57,17 @@ function ListVariable({ name }: TemplateVariableProps) {
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
   const datasourceStore = useDatasourceStore();
+  const allVariables = useTemplateVariableValues();
+  const { timeRange } = useTimeRange();
+
+  const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
 
   const spec = definition.spec.plugin.spec;
 
   let dependsOnVariables: string[] | undefined;
   if (variablePlugin?.dependsOn) {
-    dependsOnVariables = variablePlugin.dependsOn(spec);
+    const dependencies = variablePlugin.dependsOn(spec, variablePluginCtx);
+    dependsOnVariables = dependencies.variables;
   }
 
   const variables = useTemplateVariableValues(dependsOnVariables);
@@ -76,7 +81,6 @@ function ListVariable({ name }: TemplateVariableProps) {
   }
 
   const variablesValueKey = getVariableValuesKey(variables);
-  const { timeRange } = useTimeRange();
 
   const variablesOptionsQuery = useQuery(
     [name, definition, variablesValueKey, timeRange],

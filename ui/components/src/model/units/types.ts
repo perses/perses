@@ -45,6 +45,12 @@ export type UnitConfig = {
   group: UnitGroup;
 
   /**
+   * When true, this unit will not be displayed in the unit selector. This is
+   * useful for units that are shorthand variants of other units.
+   */
+  disableSelectorOption?: boolean;
+
+  /**
    * The label that is shown in the UI.
    */
   label: string;

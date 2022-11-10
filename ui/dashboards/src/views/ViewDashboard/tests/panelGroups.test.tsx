@@ -20,7 +20,7 @@ import { DashboardApp } from '../DashboardApp';
 describe('Panel Groups', () => {
   const renderDashboard = () => {
     renderWithContext(
-      <TimeRangeProvider timeRange={{ pastDuration: '30m' }}>
+      <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
         <TemplateVariableProvider>
           <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
             <DashboardApp dashboardResource={getTestDashboard()} />
@@ -31,37 +31,35 @@ describe('Panel Groups', () => {
   };
   it('should delete panel', () => {
     renderDashboard();
-    const panel = screen.getByText('CPU');
-    userEvent.hover(panel);
-    const deletePanelButton = screen.getByLabelText('delete panel');
+    const panelTitle = 'CPU';
+    const deletePanelButton = screen.getByLabelText(`delete panel ${panelTitle}`);
     userEvent.click(deletePanelButton);
     screen.getByText('Delete Panel');
     const deleteButton = screen.getByText('Delete');
     userEvent.click(deleteButton);
 
     // The panel should disappear
-    const deletedPanel = screen.queryByText('CPU');
+    const deletedPanel = screen.queryByText(panelTitle);
     expect(deletedPanel).not.toBeInTheDocument();
   });
 
   it('should only delete panel from panel group if panel is not referenced more than once', () => {
     renderDashboard();
 
-    const panels = screen.getAllByText('Disk I/O Utilization');
+    const panelTitle = 'Disk I/O Utilization';
+    const panels = screen.getAllByText(panelTitle);
     expect(panels).toHaveLength(2);
 
-    const panel = panels[0];
-    if (panel === undefined) throw new Error('Missing panel');
+    const deletePanelButton = screen.getAllByLabelText(`delete panel ${panelTitle}`)[0];
+    if (deletePanelButton === undefined) throw new Error('Missing delete button');
 
-    userEvent.hover(panel);
-    const deletePanelButton = screen.getByLabelText('delete panel');
     userEvent.click(deletePanelButton);
     screen.getByText('Delete Panel');
     const deleteButton = screen.getByText('Delete');
     userEvent.click(deleteButton);
 
     // The deleted panel should still be on screen in the other group
-    const deletedPanel = screen.queryByText('Disk I/O Utilization');
+    const deletedPanel = screen.queryByText(panelTitle);
     expect(deletedPanel).toBeInTheDocument();
   });
 
@@ -69,16 +67,13 @@ describe('Panel Groups', () => {
     renderDashboard();
 
     // should move panel down
-    const group1 = screen.getByText('CPU Stats');
-    userEvent.hover(group1);
-    const moveGroupDownBtn = screen.getByLabelText('move group down');
+    const groupTitle1 = 'CPU Stats';
+    const moveGroupDownBtn = screen.getByLabelText(`move group ${groupTitle1} down`);
     userEvent.click(moveGroupDownBtn);
-    userEvent.unhover(moveGroupDownBtn);
 
     // should move panel up
-    const group2 = screen.getByText('Disk Stats');
-    userEvent.hover(group2);
-    const moveGroupUpBtn = screen.getByLabelText('move group up');
+    const groupTitle2 = 'Disk Stats';
+    const moveGroupUpBtn = screen.getByLabelText(`move group ${groupTitle2} up`);
     userEvent.click(moveGroupUpBtn);
 
     /* TODO: Figure out how to test this visually without coupling to the store
@@ -91,16 +86,15 @@ describe('Panel Groups', () => {
 
   it('should delete a panel group', () => {
     renderDashboard();
-    const group = screen.getByText('CPU Stats');
-    userEvent.hover(group);
-    const deleteGroupIcon = screen.getByLabelText('delete group');
+    const groupTitle = 'CPU Stats';
+    const deleteGroupIcon = screen.getByLabelText(`delete group ${groupTitle}`);
     userEvent.click(deleteGroupIcon);
     screen.getByText('Delete Panel Group');
     const deleteButton = screen.getByText('Delete');
     userEvent.click(deleteButton);
 
     // should remove group
-    const deletedGroup = screen.queryByText('CPU Stats');
+    const deletedGroup = screen.queryByText(groupTitle);
     expect(deletedGroup).not.toBeInTheDocument();
 
     // CPU panel should be completely gone since it wasn't in any other group

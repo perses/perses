@@ -6,11 +6,15 @@ As Perses is still a work in progress, the contribution process is still evolvin
 We are using GitHub as our main development and discussion forum.
 
 * All PRs should go there.
-* We use pull requests and issues for tracking the development of features that are either uncontroversial and/or small and don't need much up-front discussion.
-* If you are thinking about contributing something more involved, you can use the [GitHub discussions](https://github.com/perses/perses/discussions) feature for design discussions before sending a pull request or creating a feature request issue.
+* We use pull requests and issues for tracking the development of features that are either uncontroversial and/or small
+  and don't need much up-front discussion.
+* If you are thinking about contributing something more involved, you can use
+  the [GitHub discussions](https://github.com/perses/perses/discussions) feature for design discussions before sending a
+  pull request or creating a feature request issue.
 * Be sure to add [DCO signoffs](https://github.com/probot/dco#how-it-works) to all of your commits.
 
-If you are unsure about what to do, and you are eager to contribute, you can reach us on the development channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) on [Matrix](https://matrix.org/).
+If you are unsure about what to do, and you are eager to contribute, you can reach us on the development
+channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) on [Matrix](https://matrix.org/).
 
 ## Development
 
@@ -33,7 +37,8 @@ Building and starting the backend API server requires the following tools:
 
 With these dependencies installed, you can proceed as follows:
 
-* Change to the `dev` folder and generate the local database by running the `populate.sh` script You will then be able to modify it on the fly.
+* Change to the `dev` folder and generate the local database by running the `populate.sh` script. You will then be able
+  to modify it on the fly.
 
 ```bash
 bash populate.sh
@@ -77,4 +82,4 @@ The API backend is now available on port 8080 :).
 
 ### Web App
 
-See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI. The web UI currently still shows a canned test dashboard that is not loaded from the Perses API backend yet, but it already runs health checks that require the backend to be running in order to not show errors in the UI.
+See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI.
