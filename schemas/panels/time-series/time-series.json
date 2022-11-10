@@ -32,10 +32,12 @@
           "name": "Alert: Warning condition example"
         },
         {
-          "value": 0.80,
+          "value": 0.8,
           "name": "Alert: Critical condition example"
         }
       ]
-    }
+    },
+    "line_width": 2,
+    "point_radius": 3
   }
 }

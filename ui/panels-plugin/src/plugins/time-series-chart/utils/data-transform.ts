@@ -132,7 +132,8 @@ export function getLineSeries(
   name: string,
   formattedName: string,
   data: EChartsTimeSeries['data'],
-  selectedSeriesName: string | null
+  lineWidth: number,
+  pointRadius: number
 ): EChartsTimeSeries {
   return {
     type: 'line',
@@ -141,12 +142,13 @@ export function getLineSeries(
     color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
+    symbolSize: pointRadius,
     lineStyle: {
-      width: selectedSeriesName && selectedSeriesName === name ? 2 : 1,
+      width: lineWidth,
     },
     emphasis: {
       lineStyle: {
-        width: selectedSeriesName && selectedSeriesName === name ? 2.5 : 1.5,
+        width: lineWidth + 1,
       },
     },
   };

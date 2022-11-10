@@ -23,6 +23,8 @@ export interface TimeSeriesChartOptions {
   legend?: LegendOptions;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
+  point_radius?: number;
+  line_width?: number;
 }
 
 export const DEFAULT_LEGEND: LegendOptions = {
@@ -41,6 +43,10 @@ export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
   decimal_places: 2,
 };
+
+export const DEFAULT_LINE_WIDTH = 1.5;
+
+export const DEFAULT_POINT_RADIUS = 4;
 
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.

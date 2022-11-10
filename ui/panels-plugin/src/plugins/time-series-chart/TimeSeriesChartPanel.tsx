@@ -19,7 +19,13 @@ import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, ZoomEventData, Legend } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_LEGEND,
+  DEFAULT_LINE_WIDTH,
+  DEFAULT_POINT_RADIUS,
+  DEFAULT_UNIT,
+} from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -42,6 +48,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
 
   const unit = props.spec.unit ?? DEFAULT_UNIT;
+
+  const lineWidth = props.spec.line_width ?? DEFAULT_LINE_WIDTH;
+
+  const pointRadius = props.spec.point_radius ?? DEFAULT_POINT_RADIUS;
 
   // TODO: change to array, support multi select on Shift-click
   const [selectedSeriesName, setSelectedSeriesName] = useState<string | null>(null);
@@ -90,7 +100,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       for (const timeSeries of query.data.series) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, selectedSeriesName);
+        const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, lineWidth, pointRadius);
         if (selectedSeriesName === null || selectedSeriesName === timeSeries.name) {
           graphData.timeSeries.push(lineSeries);
         }

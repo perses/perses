@@ -24,9 +24,11 @@ import (
 kind: "TimeSeriesChart"
 spec: close({
 	queries: [...#ts_query]
-	legend?:     #legend
-	unit?:       common.#unit
-	thresholds?: common.#thresholds
+	legend?:       #legend
+	unit?:         common.#unit
+	thresholds?:   common.#thresholds
+	line_width?:   number
+	point_radius?: number
 })
 
 #ts_query: _
