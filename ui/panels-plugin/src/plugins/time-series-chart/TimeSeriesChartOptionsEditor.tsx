@@ -141,23 +141,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
-  // // const handleLineWidthChange: UnitSelectorProps['onChange'] = (newUnit) => {
-  // //   onChange(
-  // //     produce(value, (draft: TimeSeriesChartOptions) => {
-  // //       draft.unit = newUnit;
-  // //     })
-  // //   );
-  // // };
-  // // const handleLineWidthChange = (lineWidth: number) => {
-  // const handleLineWidthChange = (lineWidth: number) => {
-  //   onChange(
-  //     produce(value, (draft: TimeSeriesChartOptions) => {
-  //       // draft.line_width = lineWidth ? DEFAULT_LINE_WIDTH : undefined;
-  //       draft.line_width = lineWidth ?? DEFAULT_LINE_WIDTH;
-  //     })
-  //   );
-  // };
-
+  // TODO: fix types, break out visual options into separate components
   const handlePointRadiusChange: SliderProps['onChange'] = (e) => {
     const target = e.target as HTMLInputElement;
     onChange(
@@ -213,10 +197,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
         },
         settings: {
           content: (
-            <Grid container spacing={2}>
+            <Grid container spacing={4}>
               <Grid item xs={6}>
                 <Stack spacing={1}>
-                  <Typography variant="overline" component="h4">
+                  <Typography variant="overline" component="h3">
                     Legend
                   </Typography>
                   <FormControlLabel
@@ -241,6 +225,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
                       onChange={handleLegendPositionChange}
                     >
                       {LEGEND_POSITIONS.map((position) => (
+                        // TODO: add display names to capitalize position values
                         <MenuItem key={position} value={position}>
                           {position}
                         </MenuItem>
@@ -277,12 +262,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
                 </Stack>
               </Grid>
               <Grid item xs={6}>
-                <Stack spacing={1} alignItems="flex-start">
-                  <Typography variant="overline" component="h4">
-                    Y Axis
-                  </Typography>
-                  <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
-                </Stack>
+                <Typography variant="overline" component="h4">
+                  Y Axis
+                </Typography>
+                <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
               </Grid>
             </Grid>
           ),

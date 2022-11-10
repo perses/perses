@@ -140,7 +140,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       loading: queriesFinished === 0,
       allQueriesLoaded: queriesFinished === queryResults.length,
     };
-  }, [queryResults, thresholds, selectedSeriesName, legend]);
+  }, [queryResults, thresholds, selectedSeriesName, legend, lineWidth, pointRadius]);
 
   if (contentDimensions === undefined) {
     return null;
