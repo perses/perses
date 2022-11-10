@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.15.0 / 2022-11-09
+
 - [FEATURE] custom legend formatting in TimeSeriesChart using `series_name_format` query option #709
 - [FEATURE] User can collapse / expand queries in the panel editor #718
 - [FEATURE] TimeSeriesQuery plugins now accept a `dependsOn` function to optimize loading based on dashboard context #732
@@ -11,7 +13,8 @@
 - [ENHANCEMENT] Organize time series options in tabs #741
 - [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the backend. #734
 - [BUGFIX] Back button to dashboard listing broken #735
-- [BREAKINGCHANGE] TimeRangeProvider props changed, `paramsEnabled` added #735
+- [BUGFIX] Fix setDashboard to set metadata #743
+- [BREAKINGCHANGE] TimeRangeProvider props changed, `enabledURLParams` added #735
 - [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
 - [BREAKINGCHANGE] Variable plugins `dependsOn` now returns an object #742
   becomes `display.name` #734
