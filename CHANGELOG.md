@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
+- [ENHANCEMENT] Add unit selector to time series chart options #744
+
 ## 0.15.0 / 2022-11-09
 
 - [FEATURE] custom legend formatting in TimeSeriesChart using `series_name_format` query option #709
@@ -18,8 +21,6 @@
 - [BREAKINGCHANGE] Variable display configuration has been aligned with panel display configuration. `display.label`
 - [BREAKINGCHANGE] Variable plugins `dependsOn` now returns an object #742
   becomes `display.name` #734
-- [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
-- [ENHANCEMENT] Add unit selector to time series chart options #744
 
 ## 0.14.0 / 2022-11-02
 
