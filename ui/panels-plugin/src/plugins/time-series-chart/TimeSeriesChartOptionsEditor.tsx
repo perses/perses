@@ -22,8 +22,11 @@ import {
   MenuItem,
   Select,
   SelectProps,
+  Slider,
+  SliderProps,
   Stack,
   Switch,
+  TextField,
   Typography,
 } from '@mui/material';
 import { JSONEditor } from '@perses-dev/components';
@@ -37,6 +40,7 @@ import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs
 import {
   TimeSeriesChartOptions,
   DEFAULT_LEGEND,
+  DEFAULT_LINE_WIDTH,
   LEGEND_POSITIONS,
   LegendPosition,
   DEFAULT_UNIT,
@@ -135,6 +139,32 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
+  // // const handleLineWidthChange: UnitSelectorProps['onChange'] = (newUnit) => {
+  // //   onChange(
+  // //     produce(value, (draft: TimeSeriesChartOptions) => {
+  // //       draft.unit = newUnit;
+  // //     })
+  // //   );
+  // // };
+  // // const handleLineWidthChange = (lineWidth: number) => {
+  // const handleLineWidthChange = (lineWidth: number) => {
+  //   onChange(
+  //     produce(value, (draft: TimeSeriesChartOptions) => {
+  //       // draft.line_width = lineWidth ? DEFAULT_LINE_WIDTH : undefined;
+  //       draft.line_width = lineWidth ?? DEFAULT_LINE_WIDTH;
+  //     })
+  //   );
+  // };
+
+  const handleLineWidthChange: SliderProps['onChange'] = (e) => {
+    const target = e.target as HTMLInputElement;
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.line_width = Number(target.value) ?? DEFAULT_LINE_WIDTH;
+      })
+    );
+  };
+
   return (
     <OptionsEditorTabs
       tabs={{
@@ -204,6 +234,35 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
                   ))}
                 </Select>
               </FormControl>
+              {/* TODO (sjcobb): separate out component, fix types and Visual section styles */}
+              <Typography variant="overline" component="h4">
+                Visual
+              </Typography>
+              <Slider
+                aria-label="Line Width"
+                defaultValue={DEFAULT_LINE_WIDTH}
+                valueLabelDisplay="auto"
+                step={0.5}
+                marks
+                min={0}
+                max={10}
+                onChange={handleLineWidthChange}
+              />
+              <TextField
+                // fullWidth
+                sx={{ maxWidth: 100 }}
+                label="Line Width"
+                value={value.line_width ?? DEFAULT_LINE_WIDTH}
+                // onChange={handleLineWidthChange}
+                onChange={(v) => {
+                  onChange(
+                    produce(value, (draft: TimeSeriesChartOptions) => {
+                      // draft.line_width = lineWidth ? DEFAULT_LINE_WIDTH : undefined;
+                      draft.line_width = Number(v.target.value) ?? DEFAULT_LINE_WIDTH;
+                    })
+                  );
+                }}
+              />
               <Stack spacing={1} alignItems="flex-start">
                 <Typography variant="overline" component="h4">
                   Y Axis
