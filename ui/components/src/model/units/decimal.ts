@@ -42,7 +42,7 @@ export function formatDecimal(value: number, unitOptions: DecimalUnitOptions): s
 
   const formatParams: Intl.NumberFormatOptions = {
     style: 'decimal',
-    minimumFractionDigits: 0,
+    minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
     useGrouping: true,
   };
