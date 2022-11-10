@@ -18,6 +18,7 @@ import {
   Box,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -27,7 +28,6 @@ import {
   SliderProps,
   Stack,
   Switch,
-  TextField,
   Typography,
 } from '@mui/material';
 import { JSONEditor } from '@perses-dev/components';
@@ -213,75 +213,78 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
         },
         settings: {
           content: (
-            <Stack spacing={1}>
-              <Typography variant="overline" component="h4">
-                Legend
-              </Typography>
-              <FormControlLabel
-                label="Show"
-                control={
-                  <Switch
-                    checked={value.legend !== undefined}
-                    onChange={(e) => {
-                      handleLegendShowChange(e.target.checked);
-                    }}
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Stack spacing={1}>
+                  <Typography variant="overline" component="h4">
+                    Legend
+                  </Typography>
+                  <FormControlLabel
+                    label="Show"
+                    control={
+                      <Switch
+                        checked={value.legend !== undefined}
+                        onChange={(e) => {
+                          handleLegendShowChange(e.target.checked);
+                        }}
+                      />
+                    }
                   />
-                }
-              />
-              <FormControl>
-                <InputLabel id="legend-position-select-label">Position</InputLabel>
-                <Select
-                  sx={{ maxWidth: 100 }}
-                  labelId="legend-position-select-label"
-                  id="legend-position-select"
-                  label="Position"
-                  value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
-                  onChange={handleLegendPositionChange}
-                >
-                  {LEGEND_POSITIONS.map((position) => (
-                    <MenuItem key={position} value={position}>
-                      {position}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {/* TODO (sjcobb): separate out component, fix types and Visual section styles */}
-              <Typography variant="overline" component="h4">
-                Visual
-              </Typography>
-              <Box sx={{ maxWidth: 200 }}>
-                <Typography variant="h5">Point Radius</Typography>
-                <Slider
-                  aria-label="Point Radius"
-                  defaultValue={DEFAULT_POINT_RADIUS}
-                  valueLabelDisplay="auto"
-                  step={0.5}
-                  marks
-                  min={0}
-                  max={20}
-                  onChange={handlePointRadiusChange}
-                />
-              </Box>
-              <Box sx={{ maxWidth: 200 }}>
-                <Typography variant="h5">Line Width</Typography>
-                <Slider
-                  aria-label="Line Width"
-                  defaultValue={DEFAULT_LINE_WIDTH}
-                  valueLabelDisplay="auto"
-                  step={0.5}
-                  marks
-                  min={0}
-                  max={20}
-                  onChange={handleLineWidthChange}
-                />
-              </Box>
-              <Stack spacing={1} alignItems="flex-start">
-                <Typography variant="overline" component="h4">
-                  Y Axis
-                </Typography>
-                <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
-              </Stack>
-            </Stack>
+                  <FormControl>
+                    <InputLabel id="legend-position-select-label">Position</InputLabel>
+                    <Select
+                      sx={{ maxWidth: 100 }}
+                      labelId="legend-position-select-label"
+                      id="legend-position-select"
+                      label="Position"
+                      value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
+                      onChange={handleLegendPositionChange}
+                    >
+                      {LEGEND_POSITIONS.map((position) => (
+                        <MenuItem key={position} value={position}>
+                          {position}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Stack>
+                <Stack spacing={1} alignItems="flex-start">
+                  <Typography variant="overline" component="h4">
+                    Visual
+                  </Typography>
+                  <Typography variant="h5">Point Radius</Typography>
+                  <Slider
+                    aria-label="Point Radius"
+                    defaultValue={DEFAULT_POINT_RADIUS}
+                    valueLabelDisplay="auto"
+                    step={0.5}
+                    marks
+                    min={0}
+                    max={20}
+                    onChange={handlePointRadiusChange}
+                  />
+                  <Typography variant="h5">Line Width</Typography>
+                  <Slider
+                    aria-label="Line Width"
+                    defaultValue={DEFAULT_LINE_WIDTH}
+                    valueLabelDisplay="auto"
+                    step={0.5}
+                    marks
+                    min={0}
+                    max={20}
+                    onChange={handleLineWidthChange}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={6}>
+                <Stack spacing={1} alignItems="flex-start">
+                  <Typography variant="overline" component="h4">
+                    Y Axis
+                  </Typography>
+                  <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+                </Stack>
+              </Grid>
+            </Grid>
           ),
         },
         json: {
