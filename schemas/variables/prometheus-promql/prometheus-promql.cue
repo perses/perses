@@ -15,6 +15,6 @@ package prometheusPromQL
 
 kind: "PrometheusPromQLVariable"
 spec: close({
-	expr: string
+	expr:       string
 	label_name: string
 })
