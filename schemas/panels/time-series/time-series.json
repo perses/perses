@@ -37,7 +37,9 @@
         }
       ]
     },
-    "line_width": 2,
-    "point_radius": 3
+    "visual": {
+      "line_width": 2,
+      "point_radius": 3
+    }
   }
 }
