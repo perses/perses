@@ -49,7 +49,7 @@ describe('VisualOptionsEditor', () => {
     expect(sliderInput).toBeInTheDocument();
 
     // to move slider and update visual options
-    fireEvent.mouseDown(sliderInput, { clientX: 180, clientY: 100 });
-    expect(onChange).toHaveBeenCalledWith({ line_width: 6, point_radius: 2 });
+    fireEvent.mouseDown(sliderInput, { clientX: 240, clientY: 100 });
+    expect(onChange).toHaveBeenCalledWith({ line_width: 4, point_radius: 2 });
   });
 });
