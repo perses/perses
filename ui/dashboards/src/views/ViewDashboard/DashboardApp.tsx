@@ -40,6 +40,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
   const [isUnsavedDashboardDialogOpen, setUnsavedDashboardDialogIsOpen] = useState(false);
 
+  console.log('dashboard', dashboard);
   const saveDashboard = async () => {
     setEditMode(false);
     setUnsavedDashboardDialogIsOpen(false);
