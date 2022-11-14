@@ -23,9 +23,15 @@ export interface TimeSeriesChartOptions {
   legend?: LegendOptions;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
+  visual?: VisualOptions;
+}
+
+export type VisualOptions = {
+  // TODO: refactor LineChart component to allow changing series type
+  // type: 'line' | 'bar' | 'scatter';
   point_radius?: number;
   line_width?: number;
-}
+};
 
 export const DEFAULT_LEGEND: LegendOptions = {
   position: 'bottom',
@@ -47,6 +53,12 @@ export const DEFAULT_UNIT: UnitOptions = {
 export const DEFAULT_LINE_WIDTH = 1.5;
 
 export const DEFAULT_POINT_RADIUS = 4;
+
+export const DEFAULT_VISUAL: VisualOptions = {
+  // type: 'line',
+  line_width: DEFAULT_LINE_WIDTH,
+  point_radius: DEFAULT_POINT_RADIUS,
+};
 
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.

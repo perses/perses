@@ -19,13 +19,7 @@ import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, ZoomEventData, Legend } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_LEGEND,
-  DEFAULT_LINE_WIDTH,
-  DEFAULT_POINT_RADIUS,
-  DEFAULT_UNIT,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -49,9 +43,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const unit = props.spec.unit ?? DEFAULT_UNIT;
 
-  const lineWidth = props.spec.line_width ?? DEFAULT_LINE_WIDTH;
-
-  const pointRadius = props.spec.point_radius ?? DEFAULT_POINT_RADIUS;
+  // ensures there are fallbacks for unset properties since most
+  // users should not need to customize visual display
+  const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
 
   // TODO: change to array, support multi select on Shift-click
   const [selectedSeriesName, setSelectedSeriesName] = useState<string | null>(null);
@@ -100,7 +94,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       for (const timeSeries of query.data.series) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, lineWidth, pointRadius);
+        const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, visual);
         if (selectedSeriesName === null || selectedSeriesName === timeSeries.name) {
           graphData.timeSeries.push(lineSeries);
         }
@@ -140,7 +134,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       loading: queriesFinished === 0,
       allQueriesLoaded: queriesFinished === queryResults.length,
     };
-  }, [queryResults, thresholds, selectedSeriesName, legend, lineWidth, pointRadius]);
+  }, [queryResults, thresholds, selectedSeriesName, legend, visual]);
 
   if (contentDimensions === undefined) {
     return null;

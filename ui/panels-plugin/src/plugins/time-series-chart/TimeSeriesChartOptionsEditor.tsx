@@ -15,7 +15,6 @@ import { useState } from 'react';
 import { produce } from 'immer';
 import {
   Button,
-  Box,
   FormControl,
   FormControlLabel,
   Grid,
@@ -24,8 +23,6 @@ import {
   MenuItem,
   Select,
   SelectProps,
-  Slider,
-  SliderProps,
   Stack,
   Switch,
   Typography,
@@ -41,12 +38,12 @@ import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs
 import {
   TimeSeriesChartOptions,
   DEFAULT_LEGEND,
-  DEFAULT_LINE_WIDTH,
   LEGEND_POSITIONS,
   LegendPosition,
   DEFAULT_UNIT,
-  DEFAULT_POINT_RADIUS,
+  DEFAULT_VISUAL,
 } from './time-series-chart-model';
+import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
@@ -141,21 +138,10 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
-  // TODO: fix types, break out visual options into separate components
-  const handlePointRadiusChange: SliderProps['onChange'] = (e) => {
-    const target = e.target as HTMLInputElement;
+  const handleVisualChange: VisualOptionsEditorProps['onChange'] = (newVisual) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.point_radius = Number(target.value) ?? DEFAULT_LINE_WIDTH;
-      })
-    );
-  };
-
-  const handleLineWidthChange: SliderProps['onChange'] = (e) => {
-    const target = e.target as HTMLInputElement;
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.line_width = Number(target.value) ?? DEFAULT_LINE_WIDTH;
+        draft.visual = newVisual;
       })
     );
   };
@@ -225,7 +211,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
                       onChange={handleLegendPositionChange}
                     >
                       {LEGEND_POSITIONS.map((position) => (
-                        // TODO: add display names to capitalize position values
+                        // TODO: separate legend editor component, add display names to capitalize position values
                         <MenuItem key={position} value={position}>
                           {position}
                         </MenuItem>
@@ -233,39 +219,15 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
                     </Select>
                   </FormControl>
                 </Stack>
-                <Stack spacing={1} alignItems="flex-start">
-                  <Typography variant="overline" component="h4">
-                    Visual
-                  </Typography>
-                  <Typography variant="h5">Point Radius</Typography>
-                  <Slider
-                    aria-label="Point Radius"
-                    defaultValue={DEFAULT_POINT_RADIUS}
-                    valueLabelDisplay="auto"
-                    step={0.5}
-                    marks
-                    min={0}
-                    max={20}
-                    onChange={handlePointRadiusChange}
-                  />
-                  <Typography variant="h5">Line Width</Typography>
-                  <Slider
-                    aria-label="Line Width"
-                    defaultValue={DEFAULT_LINE_WIDTH}
-                    valueLabelDisplay="auto"
-                    step={0.5}
-                    marks
-                    min={0}
-                    max={20}
-                    onChange={handleLineWidthChange}
-                  />
-                </Stack>
+                <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="overline" component="h4">
                   Y Axis
                 </Typography>
-                <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+                <Stack spacing={1} alignItems="flex-start">
+                  <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+                </Stack>
               </Grid>
             </Grid>
           ),
