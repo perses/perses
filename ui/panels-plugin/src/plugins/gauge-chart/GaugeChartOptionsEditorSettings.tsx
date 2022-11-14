@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationSelector } from '@perses-dev/plugin-system';
+import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import { Stack, Typography } from '@mui/material';
@@ -22,7 +22,7 @@ import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps) {
   const { onChange, value } = props;
 
-  const handleCalculationChange = (newCalculation: GaugeChartOptions['calculation']) => {
+  const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation) => {
     onChange(
       produce(value, (draft: GaugeChartOptions) => {
         draft.calculation = newCalculation;
