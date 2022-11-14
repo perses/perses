@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { EChartsDataFormat } from '../model/graph';
+import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
 import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
 export interface FocusedSeriesInfo {
@@ -23,6 +23,7 @@ export interface FocusedSeriesInfo {
   markerColor: string;
   x: number;
   y: number;
+  formattedY: string;
 }
 
 export type FocusedSeriesArray = FocusedSeriesInfo[];
@@ -31,7 +32,12 @@ export type FocusedSeriesArray = FocusedSeriesInfo[];
  * Returns formatted series data for the points that are close to the user's cursor
  * Adjust yBuffer to increase or decrease number of series shown
  */
-export function getNearbySeries(data: EChartsDataFormat, pointInGrid: number[], yBuffer: number): FocusedSeriesArray {
+export function getNearbySeries(
+  data: EChartsDataFormat,
+  pointInGrid: number[],
+  yBuffer: number,
+  unit?: UnitOptions
+): FocusedSeriesArray {
   const currentFocusedData: FocusedSeriesArray = [];
   const focusedX: number | null = pointInGrid[0] ?? null;
   const focusedY: number | null = pointInGrid[1] ?? null;
@@ -56,6 +62,7 @@ export function getNearbySeries(data: EChartsDataFormat, pointInGrid: number[], 
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
                 const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
+                const formattedY = formatValue(yValue, unit);
                 currentFocusedData.push({
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,
@@ -63,6 +70,7 @@ export function getNearbySeries(data: EChartsDataFormat, pointInGrid: number[], 
                   date: formattedDate,
                   x: xValue,
                   y: yValue,
+                  formattedY: formattedY,
                   markerColor: markerColor.toString(),
                 });
               }
@@ -83,7 +91,8 @@ export function getFocusedSeriesData(
   mousePos: CursorData['coords'],
   chartData: EChartsDataFormat,
   pinnedPos: CursorData['coords'],
-  chart?: EChartsInstance
+  chart?: EChartsInstance,
+  unit?: UnitOptions
 ) {
   if (chart === undefined || mousePos === null) return [];
 
@@ -122,7 +131,7 @@ export function getFocusedSeriesData(
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return getNearbySeries(chartData, pointInGrid, yBuffer);
+      return getNearbySeries(chartData, pointInGrid, yBuffer, unit);
     }
   }
   return [];

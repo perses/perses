@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChartsDataFormat } from '../model';
+import { EChartsDataFormat, UnitOptions } from '../model';
 import { getNearbySeries } from './focused-series';
 
 describe('getNearbySeries', () => {
@@ -53,10 +53,27 @@ describe('getNearbySeries', () => {
       seriesIdx: 1,
       x: 1654007895000,
       y: 0.0524463040446356,
+      formattedY: '0.05',
     },
   ];
 
   it('should return focused series data for points nearby the cursor', () => {
-    expect(getNearbySeries(chartData, pointInGrid, yBuffer)).toEqual(focusedSeriesOutput);
+    const decimalUnit: UnitOptions = {
+      kind: 'Decimal',
+      decimal_places: 2,
+    };
+    expect(getNearbySeries(chartData, pointInGrid, yBuffer, decimalUnit)).toEqual(focusedSeriesOutput);
+  });
+
+  it('should return series values formatted as a percent', () => {
+    const percentFormattedOutput = [...focusedSeriesOutput];
+    if (percentFormattedOutput[0]) {
+      percentFormattedOutput[0].formattedY = '5%';
+    }
+    const percentFormattedUnit: UnitOptions = {
+      kind: 'PercentDecimal',
+      decimal_places: 0,
+    };
+    expect(getNearbySeries(chartData, pointInGrid, yBuffer, percentFormattedUnit)).toEqual(percentFormattedOutput);
   });
 });
