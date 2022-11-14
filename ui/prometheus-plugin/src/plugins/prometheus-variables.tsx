@@ -78,8 +78,8 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn: () => {
-    return { variables: [] };
+  dependsOn: (spec) => {
+    return { variables: spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [] };
   },
   OptionsEditorComponent: PrometheusLabelNamesVariableEditor,
   createInitialOptions: () => ({}),
@@ -96,7 +96,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
 
     const { data: options } = await client.labelValues({
-      labelName: pluginDef.label_name,
+      labelName: replaceTemplateVariables(pluginDef.label_name, ctx.variables),
       'match[]': match,
       ...timeRange,
     });
@@ -105,7 +105,13 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
     };
   },
   dependsOn: (spec) => {
-    return { variables: spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [] };
+    return {
+      variables:
+        spec.matchers
+          ?.map((m) => parseTemplateVariables(m))
+          .flat()
+          .concat(parseTemplateVariables(spec.label_name)) || [],
+    };
   },
   OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
   createInitialOptions: () => ({ label_name: '' }),
