@@ -4,6 +4,7 @@
 
 - [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
 - [ENHANCEMENT] Add unit selector to time series chart options #744
+- [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 
 ## 0.15.0 / 2022-11-09
 
@@ -14,7 +15,7 @@
 - [ENHANCEMENT] Disable initial panel animation #710
 - [ENHANCEMENT] time range components styling improvements #733
 - [ENHANCEMENT] Organize time series options in tabs #741
-- [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the backend. #734
+- [BUGFIX] Fix Variable data model in the backend to be aligned with what is available in the frontend. #734
 - [BUGFIX] Back button to dashboard listing broken #735
 - [BUGFIX] Fix setDashboard to set metadata #743
 - [BREAKINGCHANGE] TimeRangeProvider props changed, `enabledURLParams` added #735

@@ -4,5 +4,8 @@ database:
     file_extension: "json"
 
 schemas:
-  path: "./schemas"
+  panels_path: "./schemas/panels"
+  queries_path: "./schemas/queries"
+  datasources_path: "./schemas/datasources"
+  variables_path: "./schemas/variables"
   interval: "5m"
