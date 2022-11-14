@@ -62,7 +62,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         step={0.5}
         marks
         min={0}
-        max={20}
+        max={10}
         onChange={handleLineWidthChange}
       />
     </Stack>
