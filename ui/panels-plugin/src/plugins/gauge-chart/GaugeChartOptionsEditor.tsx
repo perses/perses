@@ -12,12 +12,24 @@
 // limitations under the License.
 
 import { JSONEditor } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { OptionsEditorProps, OptionsEditorTabs } from '@perses-dev/plugin-system';
 import { GaugeChartOptions } from './gauge-chart-model';
+import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
 export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
 
 export function GaugeChartOptionsEditor(props: GaugeChartOptionsEditorProps) {
   // TODO: replace with form controls for visual editing, leave temp JSON editor for thresholds
-  return <JSONEditor {...props} />;
+  return (
+    <OptionsEditorTabs
+      tabs={{
+        settings: {
+          content: <GaugeChartOptionsEditorSettings {...props} />,
+        },
+        json: {
+          content: <JSONEditor {...props} />,
+        },
+      }}
+    />
+  );
 }

@@ -12,14 +12,13 @@
 // limitations under the License.
 
 import type { GaugeSeriesOption } from 'echarts';
-import { useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
+import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeChartData } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
-import { CalculationsMap } from '../../model/calculations';
 import { useSuggestedStepMs } from '../../model/time';
-import { GaugeChartOptions } from './gauge-chart-model';
+import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
@@ -27,7 +26,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
   const { query, calculation, max } = pluginSpec;
 
-  const unit = pluginSpec.unit ?? { kind: 'PercentDecimal', decimal_places: 1 };
+  const unit = pluginSpec.unit ?? DEFAULT_UNIT;
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
