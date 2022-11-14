@@ -169,11 +169,12 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
     const { data: options } = await client.instantQuery({
       query: replaceTemplateVariables(spec.expr, ctx.variables),
     });
+    const labelName = replaceTemplateVariables(spec.label_name, ctx.variables);
     let values: string[] = [];
     if (options?.resultType === 'matrix') {
-      values = capturingMatrix(options, spec.label_name);
+      values = capturingMatrix(options, labelName);
     } else if (options?.resultType === 'vector') {
-      values = capturingVector(options, spec.label_name);
+      values = capturingVector(options, labelName);
     }
 
     return {
