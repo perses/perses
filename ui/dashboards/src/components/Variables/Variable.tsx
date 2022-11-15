@@ -172,7 +172,7 @@ function ListVariable({ name }: TemplateVariableProps) {
           )}
 
           {finalOptions.length === 0 && (
-            <MenuItem value="loading" disabled>
+            <MenuItem value="empty" disabled>
               No options
             </MenuItem>
           )}
