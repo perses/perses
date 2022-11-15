@@ -7,6 +7,7 @@
 - [ENHANCEMENT] Add unit selector to time series chart options #744
 - [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 - [ENHANCEMENT] Add UI for configuring gauge panel options #761
+- [ENHANCEMENT] Add UI for configuring stat panel options #762
 
 ## 0.15.0 / 2022-11-09
 
