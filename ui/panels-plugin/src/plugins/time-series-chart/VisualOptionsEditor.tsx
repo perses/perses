@@ -20,7 +20,7 @@ export interface VisualOptionsEditorProps {
 }
 
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
-  const handlePointRadiusChange = (_: unknown, sliderValue: number | number[]) => {
+  const handlePointRadiusChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     onChange({
       ...value,
@@ -28,7 +28,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     });
   };
 
-  const handleLineWidthChange = (_: unknown, sliderValue: number | number[]) => {
+  const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     onChange({
       ...value,
@@ -61,7 +61,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         valueLabelDisplay="auto"
         step={0.5}
         marks
-        min={0}
+        min={0.5}
         max={10}
         onChange={handleLineWidthChange}
       />

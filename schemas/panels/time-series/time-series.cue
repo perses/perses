@@ -22,8 +22,8 @@ import (
 }
 
 #visual: {
-	line_width?:   number
-	point_radius?: number
+	line_width?:   number & >=0.5 & <=10
+	point_radius?: number & >=0 & <=20
 }
 
 kind: "TimeSeriesChart"
