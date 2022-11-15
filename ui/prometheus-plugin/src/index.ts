@@ -14,7 +14,11 @@
 import { PrometheusTimeSeriesQuery } from './plugins/prometheus-time-series-query';
 // @TODO: Move this to a more generic location;
 import { StaticListVariable } from './plugins/variable';
-import { PrometheusLabelNamesVariable, PrometheusLabelValuesVariable } from './plugins/prometheus-variables';
+import {
+  PrometheusLabelNamesVariable,
+  PrometheusLabelValuesVariable,
+  PrometheusPromQLVariable,
+} from './plugins/prometheus-variables';
 import { PrometheusDatasource } from './plugins/prometheus-datasource';
 
 // Export plugins under the same name as the kinds they handle from the plugin.json
@@ -23,5 +27,6 @@ export {
   StaticListVariable,
   PrometheusLabelNamesVariable,
   PrometheusLabelValuesVariable,
+  PrometheusPromQLVariable,
   PrometheusDatasource,
 };
