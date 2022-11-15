@@ -21,6 +21,8 @@ import {
   PanelGroupId,
   PanelGroupDefinition,
   PanelGroupItemLayout,
+  addPanelGroup,
+  createEmptyPanelGroup,
 } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
@@ -178,13 +180,8 @@ export function createPanelEditorSlice(): StateCreator<
       if (panelGroupId === undefined) {
         panelGroupId = get().panelGroupOrder[0];
         if (panelGroupId === undefined) {
-          newGroup = {
-            id: generateId(),
-            title: 'Panel Group',
-            isCollapsed: false,
-            itemLayouts: [],
-            itemPanelKeys: {},
-          };
+          newGroup = createEmptyPanelGroup();
+          newGroup.title = 'Panel Group';
           panelGroupId = newGroup.id;
         }
       }
@@ -233,8 +230,7 @@ export function createPanelEditorSlice(): StateCreator<
       set((state) => {
         // Add the new panel group if one was created for the panel
         if (newGroup !== undefined) {
-          state.panelGroups[newGroup.id] = newGroup;
-          state.panelGroupOrder.push(newGroup.id);
+          addPanelGroup(state, newGroup);
         }
 
         // Open the editor with the new state
