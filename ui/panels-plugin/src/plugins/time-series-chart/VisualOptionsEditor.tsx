@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Slider, Stack, Typography } from '@mui/material';
-import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS } from './time-series-chart-model';
+import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS, VISUAL_CONFIG } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
   value: VisualOptions;
@@ -41,10 +41,9 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
       <Typography variant="overline" component="h4">
         Visual
       </Typography>
-      <Typography variant="h5">Point Radius</Typography>
+      <Typography variant="h5">{VISUAL_CONFIG.point_radius.label}</Typography>
       <Slider
-        aria-label="Point Radius"
-        data-testid="slider-point-radius"
+        data-testid={VISUAL_CONFIG.point_radius.testId}
         defaultValue={DEFAULT_POINT_RADIUS}
         valueLabelDisplay="auto"
         step={0.5}
@@ -53,10 +52,9 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         max={20}
         onChange={handlePointRadiusChange}
       />
-      <Typography variant="h5">Line Width</Typography>
+      <Typography variant="h5">{VISUAL_CONFIG.line_width.label}</Typography>
       <Slider
-        aria-label="Line Width"
-        data-testid="slider-line-width"
+        data-testid={VISUAL_CONFIG.line_width.testId}
         defaultValue={DEFAULT_LINE_WIDTH}
         valueLabelDisplay="auto"
         step={0.5}

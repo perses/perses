@@ -58,6 +58,11 @@ export const DEFAULT_VISUAL: VisualOptions = {
   point_radius: DEFAULT_POINT_RADIUS,
 };
 
+export const VISUAL_CONFIG = {
+  line_width: { label: 'Line Width', testId: 'slider-line-width' },
+  point_radius: { label: 'Point Radius', testId: 'slider-point-radius' },
+};
+
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
  */

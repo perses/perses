@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { VisualOptions } from './time-series-chart-model';
+import { VisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
@@ -21,14 +21,14 @@ describe('VisualOptionsEditor', () => {
   };
 
   const getLineWidthSlider = () => {
-    return screen.getByTestId('slider-line-width');
+    return screen.getByTestId(VISUAL_CONFIG.line_width.testId);
   };
 
   it('can update the line width visual option', () => {
     const onChange = jest.fn();
     renderVisualOptionsEditor({ line_width: 3, point_radius: 2 }, onChange);
 
-    expect(screen.getByText('Line Width')).toBeInTheDocument();
+    expect(screen.getByText(VISUAL_CONFIG.line_width.label)).toBeInTheDocument();
 
     const sliderInput = getLineWidthSlider();
 
@@ -49,7 +49,7 @@ describe('VisualOptionsEditor', () => {
     expect(sliderInput).toBeInTheDocument();
 
     // to move slider and update visual options
-    fireEvent.mouseDown(sliderInput, { clientX: 240, clientY: 100 });
+    fireEvent.mouseDown(sliderInput, { clientX: 220, clientY: 100 });
     expect(onChange).toHaveBeenCalledWith({ line_width: 4, point_radius: 2 });
   });
 });
