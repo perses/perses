@@ -1,0 +1,6 @@
+if #panel.type == "text" if #panel.options.mode == "markdown" { // the second if has to be nested, otherwise getting "undefined field: mode" error everytime the panel doesn't match the first condition
+    kind: "Markdown"
+    spec: {
+        text: #panel.options.content
+    }
+}

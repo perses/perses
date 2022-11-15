@@ -18,6 +18,7 @@ import (
 	echoUtils "github.com/perses/common/echo"
 	"github.com/perses/perses/internal/api/config"
 	configendpoint "github.com/perses/perses/internal/api/impl/config"
+	migrateendpoint "github.com/perses/perses/internal/api/impl/migrate"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
 	"github.com/perses/perses/internal/api/impl/v1/folder"
@@ -50,6 +51,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) e
 	}
 	apiEndpoints := []endpoint{
 		configendpoint.New(cfg),
+		migrateendpoint.New(cfg.Schemas),
 	}
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,

@@ -1,0 +1,110 @@
+import (
+    "regexp"
+)
+
+kind: "Dashboard",
+metadata: {
+    name: #grafanaDashboard.title
+},
+spec: {
+    duration: "1h" // fixed value, we don't really care translating this one
+    variables: [ for _, grafanaVar in #grafanaDashboard.templating.list {
+        if grafanaVar.type == "constant" {
+            kind: "TextVariable"
+            spec: {
+                name: grafanaVar.name
+                value: grafanaVar.query
+            }
+        }
+        if grafanaVar.type != "constant" {
+            kind: "ListVariable",
+            spec: {
+                name: grafanaVar.name,
+                allow_all_value: grafanaVar.includeAll | *false, // the default value tackles the case of variables of type `interval` that don't have such field
+                allow_multiple: grafanaVar.multi | *false,       // the default value tackles the case of variables of type `interval` that don't have such field
+                plugin: {
+                    #var: grafanaVar
+                    %(conditional_variables)
+                }
+            }
+        }
+    }]
+    // go through the top-level panels a 1rst time, to fill the panels section of Perses
+    panels: { for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels {
+        // if the current panel is a row, go through its children panels
+        if grafanaPanel.panels != _|_ {
+            for innerPanelId, innerPanel in grafanaPanel.panels {
+                "\(grafanaPanelId)_\(innerPanelId)": {
+                    kind: "Panel"
+                    spec: {
+                        display: {
+                            name: innerPanel.title
+                            description: innerPanel.description | *""
+                        }
+                        plugin: {
+                            #panel: innerPanel
+                            %(conditional_panels)
+                        }
+                    }
+                }
+            }
+        }
+        if grafanaPanel.panels == _|_ { // else
+            "\(grafanaPanelId)": {
+                kind: "Panel"
+                spec: {
+                    display: {
+                        name: grafanaPanel.title
+                        description: grafanaPanel.description | *""
+                    }
+                    plugin: {
+                        #panel: grafanaPanel
+                        %(conditional_panels)
+                    }
+                }
+            }
+        }
+    }},
+    // we have to go through the panels again here, since in Grafana a panel embeds its position info while in Perses panels & layouts are split
+    layouts: [
+        // create a first grid to gather standalone panels
+        {
+            kind: "Grid"
+            spec: {
+                // go through the top-level panels a 2nd time and append an item only for the ones that are not rows neither belong to a row
+                items: [ for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels == _|_ {
+                    x: grafanaPanel.gridPos.x
+                    y: grafanaPanel.gridPos.y
+                    width: grafanaPanel.gridPos.w
+                    height: grafanaPanel.gridPos.h
+                    content: {
+                        "$ref": "#/spec/panels/\(grafanaPanelId)"
+                    }
+                }]
+            }
+        },
+        // go through the top-level panels a 3rd time & match only the rows, to create the corresponding grids
+        for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels != _|_ { // if the panel is a row
+            #row: grafanaPanel
+            kind: "Grid",
+            spec: {
+                display: {
+                    title: #row.title,
+                    collapse: {
+                        open: !#row.collapsed
+                    }
+                },
+                // go through the children panels of the current row
+                items: [ for innerPanelId, innnerPanel in #row.panels {
+                    x: innnerPanel.gridPos.x
+                    y: innnerPanel.gridPos.y
+                    width: innnerPanel.gridPos.w
+                    height: innnerPanel.gridPos.h
+                    content: {
+                        "$ref": "#/spec/panels/\(grafanaPanelId)_\(innerPanelId)"
+                    }
+                }]
+            }
+        }
+    ]
+}
