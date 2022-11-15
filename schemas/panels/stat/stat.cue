@@ -21,7 +21,7 @@ kind: "StatChart"
 spec: close({
 	query:       #ts_query
 	calculation: common.#calculation
-	unit:        common.#unit
+	unit?:       common.#unit
 	thresholds?: common.#thresholds
 	sparkline?:  #sparkline
 
