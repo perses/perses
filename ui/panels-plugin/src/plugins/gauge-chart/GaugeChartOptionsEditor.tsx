@@ -20,6 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { GaugeChartOptions } from './gauge-chart-model';
+import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
 export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
 
@@ -43,6 +44,9 @@ export function GaugeChartOptionsEditor(props: GaugeChartOptionsEditorProps) {
       tabs={{
         query: {
           content: <TimeSeriesQueryEditor value={query} onChange={handleQueryChange} />,
+        },
+        settings: {
+          content: <GaugeChartOptionsEditorSettings {...props} />,
         },
         json: {
           content: <JSONEditor {...props} />,

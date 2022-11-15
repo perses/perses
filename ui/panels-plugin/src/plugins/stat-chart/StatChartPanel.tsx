@@ -16,7 +16,7 @@ import { Box, Skeleton } from '@mui/material';
 import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { TimeSeriesData, useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
-import { CalculationsMap, CalculationType } from '../../model/calculations';
+import { CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
 import { SparklineOptions, StatChartOptions } from './stat-chart-model';
 

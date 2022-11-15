@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesValueTuple } from '@perses-dev/plugin-system';
 import { findLast, meanBy, sumBy } from 'lodash-es';
+import { TimeSeriesValueTuple } from './time-series-queries';
 
 export const CalculationsMap = {
   First: first,
@@ -23,6 +23,29 @@ export const CalculationsMap = {
 };
 
 export type CalculationType = keyof typeof CalculationsMap;
+
+export type CalculationConfig = {
+  label: string;
+};
+export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationConfig>> = {
+  First: {
+    label: 'First',
+  },
+  Last: {
+    label: 'Last',
+  },
+  LastNumber: {
+    label: 'Last number',
+  },
+  Mean: {
+    label: 'Mean',
+  },
+  Sum: {
+    label: 'Sum',
+  },
+} as const;
+
+export const DEFAULT_CALCULATION: CalculationType = 'Sum';
 
 function first(values: TimeSeriesValueTuple[]): number | undefined {
   const tuple = values[0];

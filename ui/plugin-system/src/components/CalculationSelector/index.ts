@@ -12,10 +12,3 @@
 // limitations under the License.
 
 export * from './CalculationSelector';
-export * from './DatasourceSelect';
-export * from './OptionsEditorTabs';
-export * from './PluginEditor';
-export * from './PluginKindSelect';
-export * from './PluginRegistry';
-export * from './PluginSpecEditor';
-export * from './TimeSeriesQueryEditor';
