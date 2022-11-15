@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './CalculationSelector';
 export * from './DatasourceSelect';
 export * from './OptionsEditorTabs';
 export * from './PluginEditor';

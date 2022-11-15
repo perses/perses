@@ -63,4 +63,7 @@ func main() {
 	validateSchemas(config.DefaultDatasourcesPath, func(plugin common.Plugin, _ string) error {
 		return sch.ValidateDatasource(plugin)
 	})
+	validateSchemas(config.DefaultVariablesPath, func(plugin common.Plugin, name string) error {
+		return sch.ValidateVariable(plugin, name)
+	})
 }

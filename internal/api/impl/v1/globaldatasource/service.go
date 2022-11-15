@@ -75,8 +75,8 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters shared.Paramete
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	if entity.Metadata.Name != parameters.Name {
-		logrus.Debugf("name in Datasource %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
-		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
+		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
+		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request don't match", shared.BadRequestError)
 	}
 	// find the previous version of the Datasource
 	oldEntity, err := s.Get(parameters)

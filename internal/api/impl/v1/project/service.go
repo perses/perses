@@ -65,8 +65,8 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 
 func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.Project, error) {
 	if entity.Metadata.Name != parameters.Name {
-		logrus.Debugf("name in project %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
-		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
+		logrus.Debugf("name in project %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
+		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request don't match", shared.BadRequestError)
 	}
 	// find the previous version of the project
 	oldEntity, err := s.Get(parameters)

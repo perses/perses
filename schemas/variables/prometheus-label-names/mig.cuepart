@@ -1,0 +1,6 @@
+if #var.type == "query" if #var.query.query =~ "^label_names\\(\\)$" {
+    kind: "PrometheusLabelNamesVariable"
+    spec: {
+        matchers: []
+    }
+}
