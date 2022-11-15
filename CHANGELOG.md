@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- [FEATURE] add line_width and point_radius visual options in time series panel #754
 - [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
 - [ENHANCEMENT] Add unit selector to time series chart options #744
 - [BUGFIX] Fix the default config file used in the docker images and in the archive #745
