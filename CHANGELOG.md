@@ -4,8 +4,8 @@
 
 - [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
 - [ENHANCEMENT] Add unit selector to time series chart options #744
-- [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 - [ENHANCEMENT] Add UI for configuring gauge panel options #761
+- [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 - [BUGFIX] Automatically add a Panel Group when adding a Panel to an empty dashboard #766
 
 ## 0.15.0 / 2022-11-09
