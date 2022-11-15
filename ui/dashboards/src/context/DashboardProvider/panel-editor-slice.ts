@@ -173,13 +173,20 @@ export function createPanelEditorSlice(): StateCreator<
     },
 
     openAddPanel(panelGroupId) {
-      // If a panel group isn't supplied, add to the first group
+      // If a panel group isn't supplied, add to the first group or create a group if there aren't any
+      let newGroup: PanelGroupDefinition | undefined = undefined;
       if (panelGroupId === undefined) {
-        const firstGroupId = get().panelGroupOrder[0];
-        if (firstGroupId === undefined) {
-          throw new Error('No panel groups to add a panel to');
+        panelGroupId = get().panelGroupOrder[0];
+        if (panelGroupId === undefined) {
+          newGroup = {
+            id: generateId(),
+            title: 'Panel Group',
+            isCollapsed: false,
+            itemLayouts: [],
+            itemPanelKeys: {},
+          };
+          panelGroupId = newGroup.id;
         }
-        panelGroupId = firstGroupId;
       }
 
       const editorState: PanelEditorState = {
@@ -223,8 +230,14 @@ export function createPanelEditorSlice(): StateCreator<
         },
       };
 
-      // Open the editor with the new state
       set((state) => {
+        // Add the new panel group if one was created for the panel
+        if (newGroup !== undefined) {
+          state.panelGroups[newGroup.id] = newGroup;
+          state.panelGroupOrder.push(newGroup.id);
+        }
+
+        // Open the editor with the new state
         state.panelEditor = editorState;
       });
     },
