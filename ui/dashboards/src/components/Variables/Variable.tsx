@@ -21,6 +21,7 @@ import {
   VariableStateMap,
   useDatasourceStore,
   useTimeRange,
+  VariableOption,
 } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
@@ -40,6 +41,25 @@ export function TemplateVariable({ name }: TemplateVariableProps) {
   }
 
   return <div>Unsupported Variable Kind: ${kind}</div>;
+}
+
+function filterVariableList(data: VariableOption[], capturedRegexp: RegExp): VariableOption[] {
+  const result = new Set<string>();
+  for (const variableValue of data) {
+    const matches = variableValue.value.matchAll(capturedRegexp);
+    for (const match of matches) {
+      for (let i = 1; i < match.length; i++) {
+        const m = match[i];
+        if (m !== undefined) {
+          result.add(m);
+        }
+      }
+    }
+  }
+  return Array.from(result.values()).map((value) => ({
+    value,
+    label: value,
+  }));
 }
 
 /**
@@ -63,6 +83,10 @@ function ListVariable({ name }: TemplateVariableProps) {
   const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
 
   const spec = definition.spec.plugin.spec;
+  const capturingRegexp =
+    definition.spec.capturing_regexp !== undefined && definition.spec.capturing_regexp !== ''
+      ? new RegExp(definition.spec.capturing_regexp, 'g')
+      : undefined;
 
   let dependsOnVariables: string[] | undefined;
   if (variablePlugin?.dependsOn) {
@@ -86,7 +110,13 @@ function ListVariable({ name }: TemplateVariableProps) {
     [name, definition, variablesValueKey, timeRange],
     async () => {
       const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
-      return resp?.data ?? [];
+      if (resp === undefined) {
+        return [];
+      }
+      if (capturingRegexp === undefined) {
+        return resp.data;
+      }
+      return filterVariableList(resp.data, capturingRegexp);
     },
     { enabled: !!variablePlugin || waitToLoad }
   );

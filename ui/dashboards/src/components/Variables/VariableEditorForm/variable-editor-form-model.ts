@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableDefinition, TextVariableDefinition, ListVariableDefinition, Display } from '@perses-dev/core';
+import { Display, TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
 
 export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const textVariableFields = {
@@ -21,6 +21,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const listVariableFields = {
     allowMultiple: false,
     allowAll: false,
+    capturing_regexp: '',
     plugin: {
       kind: '',
       spec: {},
@@ -29,6 +30,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
   if (initialVariableDefinition.kind === 'ListVariable') {
     listVariableFields.allowMultiple = initialVariableDefinition.spec.allow_all_value ?? false;
     listVariableFields.allowAll = initialVariableDefinition.spec.allow_all_value ?? false;
+    listVariableFields.capturing_regexp = initialVariableDefinition.spec.capturing_regexp ?? '';
     listVariableFields.plugin = initialVariableDefinition.spec.plugin;
   }
 
@@ -55,28 +57,26 @@ export function getVariableDefinitionFromState(state: VariableEditorState): Vari
   };
 
   if (kind === 'TextVariable') {
-    const textVariableDefinition: TextVariableDefinition = {
+    return {
       kind,
       spec: {
         ...commonSpec,
         ...state.textVariableFields,
       },
     };
-    return textVariableDefinition;
   }
 
   if (kind === 'ListVariable') {
-    const listVariableDefinition: ListVariableDefinition = {
+    return {
       kind,
       spec: {
         ...commonSpec,
         allow_multiple: state.listVariableFields.allowMultiple,
         allow_all_value: state.listVariableFields.allowAll,
+        capturing_regexp: state.listVariableFields.capturing_regexp,
         plugin: state.listVariableFields.plugin,
       },
     };
-
-    return listVariableDefinition;
   }
   throw new Error(`Unknown variable kind: ${kind}`);
 }
