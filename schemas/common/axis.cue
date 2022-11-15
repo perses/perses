@@ -11,29 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package timeserie
+package common
 
-import (
-	"github.com/perses/perses/schemas/common"
-)
-
-#legend: {
-	position?: "bottom" | "right"
+#yAxis: {
+	label?: string
+	min?:   number
+	max?:   number
 }
-
-#visual: {
-	line_width?:   number & >=0.5 & <=10
-	point_radius?: number & >=0 & <=20
-}
-
-kind: "TimeSeriesChart"
-spec: close({
-	queries: [...#ts_query]
-	legend?:     #legend
-	y_axis?:     common#yAxis
-	unit?:       common.#unit
-	thresholds?: common.#thresholds
-	visual?:     #visual
-})
-
-#ts_query: _
