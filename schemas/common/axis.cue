@@ -13,7 +13,7 @@
 
 package common
 
-#yAxis: {
+#y_axis: {
 	label?: string
 	min?:   number
 	max?:   number
