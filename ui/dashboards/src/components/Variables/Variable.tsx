@@ -170,6 +170,12 @@ function ListVariable({ name }: TemplateVariableProps) {
               Loading
             </MenuItem>
           )}
+
+          {finalOptions.length === 0 && (
+            <MenuItem value="loading" disabled>
+              No options
+            </MenuItem>
+          )}
           {finalOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
