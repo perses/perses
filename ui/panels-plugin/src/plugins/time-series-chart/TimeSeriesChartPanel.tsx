@@ -34,7 +34,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { queries, thresholds },
+    spec: { queries, thresholds, y_axis },
     contentDimensions,
   } = props;
 
@@ -46,6 +46,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
   const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
+
+  // convert Perses dashboard format to be ECharts compatible
+  const yAxis = {
+    name: y_axis?.label ?? '',
+    min: y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
+    max: y_axis?.max,
+  };
 
   // TODO: change to array, support multi select on Shift-click
   const [selectedSeriesName, setSelectedSeriesName] = useState<string | null>(null);
@@ -157,6 +164,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
   const gridOverrides: GridComponentOption = {
+    left: y_axis && y_axis.label ? 40 : 20,
     right: legend && legend.position === 'right' ? legendWidth : 20,
   };
 
@@ -175,6 +183,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       <LineChart
         height={lineChartHeight}
         data={graphData}
+        yAxis={yAxis}
         unit={unit}
         grid={gridOverrides}
         onDataZoom={handleDataZoom}

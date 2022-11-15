@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MouseEvent, useMemo, useRef, useState } from 'react';
+import { merge } from 'lodash-es';
 import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
@@ -20,6 +21,7 @@ import type {
   LineSeriesOption,
   LegendComponentOption,
   VisualMapComponentOption,
+  YAXisComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
@@ -61,6 +63,7 @@ use([
 interface LineChartProps {
   height: number;
   data: EChartsDataFormat;
+  yAxis?: YAXisComponentOption;
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
@@ -69,7 +72,17 @@ interface LineChartProps {
   onDoubleClick?: (e: MouseEvent) => void;
 }
 
-export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZoom, onDoubleClick }: LineChartProps) {
+export function LineChart({
+  height,
+  data,
+  yAxis,
+  unit,
+  grid,
+  legend,
+  visualMap,
+  onDataZoom,
+  onDoubleClick,
+}: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -150,6 +163,17 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
+    const yAxisDefault = {
+      type: 'value',
+      boundaryGap: [0, '10%'],
+      axisLabel: {
+        formatter: (value: number) => {
+          return formatValue(value, unit);
+        },
+      },
+    };
+    const yAxisPrimary = merge(yAxisDefault, yAxis);
+
     const option: EChartsCoreOption = {
       series: data.timeSeries,
       xAxis: {
@@ -162,15 +186,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
           },
         },
       },
-      yAxis: {
-        type: 'value',
-        boundaryGap: [0, '10%'],
-        axisLabel: {
-          formatter: (value: number) => {
-            return formatValue(value, unit);
-          },
-        },
-      },
+      yAxis: [yAxisPrimary], // TODO: support alternate yAxis that shows on right side
       animation: false,
       tooltip: {
         show: showPointsOnHover,
@@ -194,7 +210,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
     };
 
     return option;
-  }, [data, grid, legend, visualMap]);
+  }, [data, yAxis, grid, legend, visualMap]);
 
   return (
     <Box
