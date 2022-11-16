@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -32,6 +32,24 @@ import { VariableEditorState, getVariableDefinitionFromState, getInitialState } 
 
 const VARIABLE_TYPES = ['ListVariable', 'TextVariable'] as const;
 
+// TODO: Replace with proper validation library
+function getValidation(state: ReturnType<typeof getInitialState>) {
+  /** Name validation */
+  let name = null;
+  if (!state.name) {
+    name = 'Name is required';
+  }
+  // name can only contain alphanumeric characters and underscores and no spaces
+  if (state.name && !/^[a-zA-Z0-9_-]+$/.test(state.name)) {
+    name = 'Name can only contain alphanumeric characters, underscores, and dashes';
+  }
+
+  return {
+    name,
+    isValid: !name,
+  };
+}
+
 const SectionHeader = ({ children }: React.PropsWithChildren) => (
   <Typography pb={2} variant="subtitle1">
     {children}
@@ -48,6 +66,7 @@ export function VariableEditForm({
   onCancel: () => void;
 }) {
   const [state, setState] = useImmer(getInitialState(initialVariableDefinition));
+  const validation = useMemo(() => getValidation(state), [state]);
 
   return (
     <Box>
@@ -55,9 +74,12 @@ export function VariableEditForm({
       <Grid container spacing={2} mb={2}>
         <Grid item xs={6}>
           <TextField
+            required
+            error={!!validation.name}
             fullWidth
             label="Name"
             value={state.name}
+            helperText={validation.name}
             onChange={(v) => {
               setState((draft) => {
                 draft.name = v.target.value as string;
@@ -181,6 +203,7 @@ export function VariableEditForm({
 
       <Stack direction={'row'} spacing={2} justifyContent="end">
         <Button
+          disabled={!validation.isValid}
           variant="contained"
           onClick={() => {
             onChange(getVariableDefinitionFromState(state));
