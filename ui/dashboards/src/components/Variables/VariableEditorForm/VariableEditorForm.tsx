@@ -27,6 +27,7 @@ import {
   Alert,
   Chip,
   IconButton,
+  ClickAwayListener,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { PluginEditor } from '@perses-dev/plugin-system';
@@ -208,6 +209,11 @@ export function VariableEditForm({
           <SectionHeader>List Options</SectionHeader>
           <Grid container spacing={2} mb={2}>
             <Grid item xs={6}>
+              {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
+              <ClickAwayListener onClickAway={() => refreshPreview()}>
+                <Box />
+              </ClickAwayListener>
+              {/** */}
               <PluginEditor
                 width={500}
                 pluginType="Variable"
