@@ -13,31 +13,16 @@
 
 import { useState } from 'react';
 import { produce } from 'immer';
-import { Button, IconButton, MenuItem, Select, SelectProps, Stack, Switch, Typography } from '@mui/material';
+import { Button, IconButton, Stack, Typography } from '@mui/material';
 import { JSONEditor } from '@perses-dev/components';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import {
-  UnitSelector,
-  UnitSelectorProps,
-  OptionsEditorGroup,
-  OptionsEditorGrid,
-  OptionsEditorColumn,
-  OptionsEditorControl,
-} from '@perses-dev/components';
 import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs } from '@perses-dev/plugin-system';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_LEGEND,
-  LEGEND_POSITIONS,
-  LegendPosition,
-  DEFAULT_UNIT,
-  DEFAULT_VISUAL,
-} from './time-series-chart-model';
-import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
+import { TimeSeriesChartOptions } from './time-series-chart-model';
+import { TimeSeriesChartOptionsEditorSettings } from './TimeSeriesChartOptionsEditorSettings';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
@@ -104,42 +89,6 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     });
   };
 
-  // Legend options handlers
-  const handleLegendShowChange = (show: boolean) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.legend = show ? DEFAULT_LEGEND : undefined;
-      })
-    );
-  };
-
-  const handleLegendPositionChange: SelectProps<LegendPosition>['onChange'] = (e) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        // TODO: type cast should not be necessary
-        if (draft.legend) {
-          draft.legend.position = e.target.value as LegendPosition;
-        }
-      })
-    );
-  };
-
-  const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.unit = newUnit;
-      })
-    );
-  };
-
-  const handleVisualChange: VisualOptionsEditorProps['onChange'] = (newVisual) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.visual = newVisual;
-      })
-    );
-  };
-
   return (
     <OptionsEditorTabs
       tabs={{
@@ -176,48 +125,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
           ),
         },
         settings: {
-          content: (
-            <OptionsEditorGrid>
-              <OptionsEditorColumn>
-                <OptionsEditorGroup title="Legend">
-                  <OptionsEditorControl
-                    label="Show"
-                    control={
-                      <Switch
-                        checked={value.legend !== undefined}
-                        onChange={(e) => {
-                          handleLegendShowChange(e.target.checked);
-                        }}
-                      />
-                    }
-                  />
-                  <OptionsEditorControl
-                    label="Position"
-                    control={
-                      <Select
-                        sx={{ maxWidth: 100 }}
-                        value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
-                        onChange={handleLegendPositionChange}
-                      >
-                        {LEGEND_POSITIONS.map((position) => (
-                          // TODO: separate legend editor component, add display names to capitalize position values
-                          <MenuItem key={position} value={position}>
-                            {position}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    }
-                  />
-                </OptionsEditorGroup>
-                <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
-              </OptionsEditorColumn>
-              <OptionsEditorColumn>
-                <OptionsEditorGroup title="Y Axis">
-                  <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
-                </OptionsEditorGroup>
-              </OptionsEditorColumn>
-            </OptionsEditorGrid>
-          ),
+          content: <TimeSeriesChartOptionsEditorSettings {...props} />,
         },
         json: {
           content: <JSONEditor {...props} />,
