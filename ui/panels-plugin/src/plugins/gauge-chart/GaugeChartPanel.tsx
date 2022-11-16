@@ -25,6 +25,7 @@ export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
   const { query, calculation, max } = pluginSpec;
+  const hasEmptyQuery = query.spec.plugin.spec.query === '';
 
   const unit = pluginSpec.unit ?? DEFAULT_UNIT;
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
@@ -49,7 +50,9 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
 
   if (contentDimensions === undefined) return null;
 
-  if (isLoading === true) {
+  if (hasEmptyQuery) return null;
+
+  if (isLoading) {
     return (
       <Skeleton
         sx={{ margin: '0 auto' }}

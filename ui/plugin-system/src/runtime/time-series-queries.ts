@@ -63,7 +63,11 @@ function getQueryOptions({
   if (variableDependencies) {
     waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
   }
-  const queryEnabled = plugin !== undefined && !waitToLoad;
+
+  const isNotEmptyQuery = definition.spec.plugin.spec.query !== '';
+
+  const queryEnabled = plugin !== undefined && !waitToLoad && isNotEmptyQuery;
+
   return {
     queryKey,
     queryEnabled,

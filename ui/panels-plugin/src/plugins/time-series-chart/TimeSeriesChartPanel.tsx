@@ -38,6 +38,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
 
+  const hasOnlyEmptyQueries = queries.every((q) => q.spec.plugin.spec.query === '');
+
   // popuate default 'position' and other future properties
   const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
 
@@ -127,12 +129,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     return {
       graphData,
-      loading: queriesFinished === 0,
-      allQueriesLoaded: queriesFinished === queryResults.length,
+      loading: hasOnlyEmptyQueries ? false : queriesFinished === 0,
     };
-  }, [queryResults, thresholds, selectedSeriesName, legend]);
+  }, [queryResults, thresholds, selectedSeriesName, legend, hasOnlyEmptyQueries]);
 
   if (contentDimensions === undefined) {
+    return null;
+  }
+
+  if (hasOnlyEmptyQueries) {
     return null;
   }
 

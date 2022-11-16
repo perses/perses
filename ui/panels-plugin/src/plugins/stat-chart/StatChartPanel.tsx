@@ -27,6 +27,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
     spec: { query, calculation, unit, sparkline },
     contentDimensions,
   } = props;
+  const hasEmptyQuery = query.spec.plugin.spec.query === '';
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
   const chartData = useChartData(data, calculation);
@@ -36,7 +37,9 @@ export function StatChartPanel(props: StatChartPanelProps) {
 
   if (contentDimensions === undefined) return null;
 
-  if (isLoading === true) {
+  if (hasEmptyQuery) return null;
+
+  if (isLoading) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
