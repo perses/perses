@@ -14,8 +14,13 @@
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
-import { Stack, Typography } from '@mui/material';
-import { UnitSelector, UnitSelectorProps } from '@perses-dev/components';
+import {
+  UnitSelector,
+  UnitSelectorProps,
+  OptionsEditorGroup,
+  OptionsEditorGrid,
+  OptionsEditorColumn,
+} from '@perses-dev/components';
 import { GaugeChartOptionsEditorProps } from './GaugeChartOptionsEditor';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 
@@ -39,12 +44,13 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
   };
 
   return (
-    <Stack spacing={1} alignItems="flex-start">
-      <Typography variant="overline" component="h4">
-        Misc
-      </Typography>
-      <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
-      <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
-    </Stack>
+    <OptionsEditorGrid>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Misc">
+          <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+          <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+    </OptionsEditorGrid>
   );
 }
