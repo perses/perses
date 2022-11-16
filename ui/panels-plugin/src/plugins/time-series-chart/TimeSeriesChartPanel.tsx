@@ -41,7 +41,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // popuate default 'position' and other future properties
   const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
 
-  const unit = props.spec.unit ?? DEFAULT_UNIT;
+  // TODO: eventually remove props.spec.unit, add support for y_axis_alt.unit
+  let unit = DEFAULT_UNIT;
+  if (props.spec.y_axis?.unit) {
+    unit = props.spec.y_axis.unit;
+  } else if (props.spec.unit) {
+    unit = props.spec.unit;
+  }
 
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display

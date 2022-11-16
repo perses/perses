@@ -29,6 +29,7 @@ export interface TimeSeriesChartOptions {
 
 export interface YAxisOptions {
   label?: string;
+  unit?: UnitOptions;
   min?: number;
   max?: number;
 }
