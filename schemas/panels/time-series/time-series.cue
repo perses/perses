@@ -30,7 +30,7 @@ kind: "TimeSeriesChart"
 spec: close({
 	queries: [...#ts_query]
 	legend?:     #legend
-	y_axis?:     common#y_axis
+	y_axis?:     common.#y_axis
 	unit?:       common.#unit
 	thresholds?: common.#thresholds
 	visual?:     #visual
