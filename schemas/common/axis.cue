@@ -13,8 +13,13 @@
 
 package common
 
+// import (
+//  "github.com/perses/perses/schemas/common/unit"
+// )
+
 #y_axis: {
 	label?: string
-	min?:   number
-	max?:   number
+	// unit?:  #unit
+	min?: number
+	max?: number
 }
