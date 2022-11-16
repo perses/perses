@@ -13,26 +13,21 @@
 
 import { useState } from 'react';
 import { produce } from 'immer';
-import {
-  Button,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectProps,
-  Stack,
-  Switch,
-  Typography,
-} from '@mui/material';
+import { Button, IconButton, MenuItem, Select, SelectProps, Stack, Switch, Typography } from '@mui/material';
 import { JSONEditor } from '@perses-dev/components';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { UnitSelector, UnitSelectorProps } from '@perses-dev/components';
+import {
+  UnitSelector,
+  UnitSelectorProps,
+  OptionsEditorGroup,
+  OptionsEditorGrid,
+  OptionsEditorColumn,
+  OptionsEditorControl,
+} from '@perses-dev/components';
 import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs } from '@perses-dev/plugin-system';
 import {
   TimeSeriesChartOptions,
@@ -40,7 +35,9 @@ import {
   LEGEND_POSITIONS,
   LegendPosition,
   DEFAULT_UNIT,
+  DEFAULT_VISUAL,
 } from './time-series-chart-model';
+import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
@@ -135,6 +132,14 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
+  const handleVisualChange: VisualOptionsEditorProps['onChange'] = (newVisual) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.visual = newVisual;
+      })
+    );
+  };
+
   return (
     <OptionsEditorTabs
       tabs={{
@@ -172,45 +177,46 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
         },
         settings: {
           content: (
-            <Stack spacing={1}>
-              <Typography variant="overline" component="h4">
-                Legend
-              </Typography>
-              <FormControlLabel
-                label="Show"
-                control={
-                  <Switch
-                    checked={value.legend !== undefined}
-                    onChange={(e) => {
-                      handleLegendShowChange(e.target.checked);
-                    }}
+            <OptionsEditorGrid>
+              <OptionsEditorColumn>
+                <OptionsEditorGroup title="Legend">
+                  <OptionsEditorControl
+                    label="Show"
+                    control={
+                      <Switch
+                        checked={value.legend !== undefined}
+                        onChange={(e) => {
+                          handleLegendShowChange(e.target.checked);
+                        }}
+                      />
+                    }
                   />
-                }
-              />
-              <FormControl>
-                <InputLabel id="legend-position-select-label">Position</InputLabel>
-                <Select
-                  sx={{ maxWidth: 100 }}
-                  labelId="legend-position-select-label"
-                  id="legend-position-select"
-                  label="Position"
-                  value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
-                  onChange={handleLegendPositionChange}
-                >
-                  {LEGEND_POSITIONS.map((position) => (
-                    <MenuItem key={position} value={position}>
-                      {position}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Stack spacing={1} alignItems="flex-start">
-                <Typography variant="overline" component="h4">
-                  Y Axis
-                </Typography>
-                <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
-              </Stack>
-            </Stack>
+                  <OptionsEditorControl
+                    label="Position"
+                    control={
+                      <Select
+                        sx={{ maxWidth: 100 }}
+                        value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
+                        onChange={handleLegendPositionChange}
+                      >
+                        {LEGEND_POSITIONS.map((position) => (
+                          // TODO: separate legend editor component, add display names to capitalize position values
+                          <MenuItem key={position} value={position}>
+                            {position}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    }
+                  />
+                </OptionsEditorGroup>
+                <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
+              </OptionsEditorColumn>
+              <OptionsEditorColumn>
+                <OptionsEditorGroup title="Y Axis">
+                  <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+                </OptionsEditorGroup>
+              </OptionsEditorColumn>
+            </OptionsEditorGrid>
           ),
         },
         json: {
