@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { generateId, Middleware } from './common';
-import { PanelGroupSlice, PanelGroupDefinition, PanelGroupId } from './panel-group-slice';
+import { Middleware } from './common';
+import { PanelGroupSlice, PanelGroupId, addPanelGroup, createEmptyPanelGroup } from './panel-group-slice';
 
 export interface PanelGroupEditor {
   mode: 'Add' | 'Edit';
@@ -65,15 +65,11 @@ export const createPanelGroupEditorSlice: StateCreator<
         isCollapsed: false,
       },
       applyChanges(next) {
-        const newGroup: PanelGroupDefinition = {
-          id: generateId(),
-          itemLayouts: [],
-          itemPanelKeys: {},
-          ...next,
-        };
+        const newGroup = createEmptyPanelGroup();
+        newGroup.title = next.title;
+        newGroup.isCollapsed = next.isCollapsed;
         set((draft) => {
-          draft.panelGroups[newGroup.id] = newGroup;
-          draft.panelGroupOrder.unshift(newGroup.id);
+          addPanelGroup(draft, newGroup);
         });
       },
       close() {
