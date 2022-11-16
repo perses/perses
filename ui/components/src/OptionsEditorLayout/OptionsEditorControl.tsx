@@ -18,8 +18,8 @@ import { useId } from '../utils';
 export type OptionsEditorControlProps = Pick<FormControlLabelProps, 'label' | 'control'>;
 
 export const OptionsEditorControl = ({ label, control }: OptionsEditorControlProps) => {
-  // Make sure we have an ID we can use for associating labels and controls for
-  // a11y
+  // Make sure we have a unique ID we can use for associating labels and
+  // controls for a11y.
   const generatedControlId = useId('EditorSectionControl');
   const controlId = `${generatedControlId}-control`;
 
