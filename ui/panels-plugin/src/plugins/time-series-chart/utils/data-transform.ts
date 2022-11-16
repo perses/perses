@@ -43,7 +43,7 @@ export function getCommonTimeScale(queryResults: RunningQueriesState): TimeScale
   let timeRange: AbsoluteTimeRange | undefined = undefined;
   const steps: number[] = [];
   for (const { isLoading, data } of queryResults) {
-    if (isLoading || data === undefined) continue;
+    if (isLoading || data === undefined || data.stepMs === undefined || data.timeRange === undefined) continue;
 
     // Keep track of query steps so we can calculate a common one for the graph
     steps.push(data.stepMs);
