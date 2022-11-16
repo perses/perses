@@ -74,14 +74,14 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 
 func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v1.Dashboard, error) {
 	if entity.Metadata.Name != parameters.Name {
-		logrus.Debugf("name in dashboard %q and coming from the http request: %q doesn't match", entity.Metadata.Name, parameters.Name)
-		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
+		logrus.Debugf("name in dashboard %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
+		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request don't match", shared.BadRequestError)
 	}
 	if len(entity.Metadata.Project) == 0 {
 		entity.Metadata.Project = parameters.Project
 	} else if entity.Metadata.Project != parameters.Project {
-		logrus.Debugf("project in dashboard %q and coming from the http request: %q doesn't match", entity.Metadata.Project, parameters.Project)
-		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request doesn't match", shared.BadRequestError)
+		logrus.Debugf("project in dashboard %q and project from the http request %q don't match", entity.Metadata.Project, parameters.Project)
+		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request don't match", shared.BadRequestError)
 	}
 
 	// verify this new dashboard passes the validation

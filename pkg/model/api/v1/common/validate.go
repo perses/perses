@@ -25,12 +25,7 @@ func ValidateID(name string) error {
 	if len(name) == 0 {
 		return fmt.Errorf("name cannot be empty")
 	}
-	keyMinLength := 2
 	keyMaxLength := 75
-
-	if len(name) < keyMinLength {
-		return fmt.Errorf("cannot contain less than %d characters", keyMinLength)
-	}
 
 	if len(name) > keyMaxLength {
 		return fmt.Errorf("cannot contain more than %d characters", keyMaxLength)

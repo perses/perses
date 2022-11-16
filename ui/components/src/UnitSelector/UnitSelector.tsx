@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Box, FormControl, FormControlLabel, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material';
+import { Box, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material';
 import {
   UnitOptions,
   UNIT_CONFIG,
@@ -19,6 +19,7 @@ import {
   isUnitWithDecimalPlaces,
   isUnitWithAbbreviate,
 } from '../model';
+import { OptionsEditorControl } from '../OptionsEditorLayout';
 
 export interface UnitSelectorProps {
   value: UnitOptions;
@@ -70,7 +71,7 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
 
   return (
     <>
-      <FormControlLabel
+      <OptionsEditorControl
         label="Abbreviate"
         control={
           <Switch
@@ -80,37 +81,43 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
           />
         }
       />
-      <FormControl sx={{ minWidth: 200 }}>
-        <Autocomplete
-          value={{ id: value.kind, ...kindConfig }}
-          options={KIND_OPTIONS}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          groupBy={(option) => option.group}
-          renderInput={(params) => <TextField {...params} label="Units" />}
-          renderOption={(renderOptsProps, option) => {
-            // Custom option needed to get some increased left padding to make
-            // the items more distinct from the group label.
-            return (
-              <li {...renderOptsProps}>
-                <Box paddingLeft={(theme) => theme.spacing(1)}>{option.label}</Box>
-              </li>
-            );
-          }}
-          onChange={handleKindChange}
-          disableClearable
-        ></Autocomplete>
-      </FormControl>
-      <FormControl sx={{ minWidth: 200 }}>
-        <Autocomplete
-          value={hasDecimalPlaces ? value.decimal_places ?? DEFAULT_DECIMAL_PLACES : 0}
-          options={DECIMAL_OPTIONS}
-          getOptionLabel={(option) => `${option}`}
-          renderInput={(params) => <TextField {...params} label="Decimal" />}
-          onChange={handleDecimalChange}
-          disabled={!hasDecimalPlaces}
-          disableClearable
-        ></Autocomplete>
-      </FormControl>
+      <OptionsEditorControl
+        label="Units"
+        control={
+          <Autocomplete
+            value={{ id: value.kind, ...kindConfig }}
+            options={KIND_OPTIONS}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            groupBy={(option) => option.group}
+            renderInput={(params) => <TextField {...params} />}
+            renderOption={(renderOptsProps, option) => {
+              // Custom option needed to get some increased left padding to make
+              // the items more distinct from the group label.
+              return (
+                <li {...renderOptsProps}>
+                  <Box paddingLeft={(theme) => theme.spacing(1)}>{option.label}</Box>
+                </li>
+              );
+            }}
+            onChange={handleKindChange}
+            disableClearable
+          ></Autocomplete>
+        }
+      />
+      <OptionsEditorControl
+        label="Decimal"
+        control={
+          <Autocomplete
+            value={hasDecimalPlaces ? value.decimal_places ?? DEFAULT_DECIMAL_PLACES : 0}
+            options={DECIMAL_OPTIONS}
+            getOptionLabel={(option) => `${option}`}
+            renderInput={(params) => <TextField {...params} />}
+            onChange={handleDecimalChange}
+            disabled={!hasDecimalPlaces}
+            disableClearable
+          ></Autocomplete>
+        }
+      />
     </>
   );
 }

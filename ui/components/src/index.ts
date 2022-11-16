@@ -21,6 +21,7 @@ export * from './InfoTooltip';
 export * from './JSONEditor';
 export * from './Legend';
 export * from './LineChart';
+export * from './OptionsEditorLayout';
 export * from './StatChart';
 export * from './UnitSelector';
 export * from './context/ChartsThemeProvider';

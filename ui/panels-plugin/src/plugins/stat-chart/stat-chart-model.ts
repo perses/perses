@@ -13,8 +13,8 @@
 
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
+import { CalculationType } from '@perses-dev/plugin-system';
 import { ThresholdOptions } from '../../model/thresholds';
-import { CalculationType } from '../../model/calculations';
 
 export interface SparklineOptions {
   color?: string;

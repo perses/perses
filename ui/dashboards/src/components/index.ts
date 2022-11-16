@@ -15,6 +15,7 @@ export * from './Dashboard';
 export * from './DashboardToolbar';
 export * from './DeletePanelDialog';
 export * from './DeletePanelGroupDialog';
+export * from './DownloadButton';
 export * from './GridLayout';
 export * from './Panel';
 export * from './PanelDrawer';
