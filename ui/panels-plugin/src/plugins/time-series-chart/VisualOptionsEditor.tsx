@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider, Typography } from '@mui/material';
+import { Slider } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
 import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS, VISUAL_CONFIG } from './time-series-chart-model';
 

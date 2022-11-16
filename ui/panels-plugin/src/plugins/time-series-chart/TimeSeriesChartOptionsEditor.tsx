@@ -13,20 +13,7 @@
 
 import { useState } from 'react';
 import { produce } from 'immer';
-import {
-  Button,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectProps,
-  Stack,
-  Switch,
-  Typography,
-} from '@mui/material';
+import { Button, IconButton, MenuItem, Select, SelectProps, Stack, Switch, Typography } from '@mui/material';
 import { JSONEditor } from '@perses-dev/components';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
