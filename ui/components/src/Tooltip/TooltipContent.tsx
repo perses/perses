@@ -64,10 +64,17 @@ export function TooltipContent(props: TooltipContentProps) {
             display: 'table',
           }}
         >
-          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor }) => {
+          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, seriesType, y, formattedY, markerColor }) => {
             if (datumIdx === null || seriesIdx === null) return null;
             const key = seriesIdx.toString() + datumIdx.toString();
 
+            if (seriesType === 'scatter') {
+              return (
+                <section>
+                  <h2>Scatter Series Component Goes Here</h2>
+                </section>
+              );
+            }
             return (
               <SeriesInfo
                 key={key}

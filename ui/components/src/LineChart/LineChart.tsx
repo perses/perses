@@ -22,7 +22,7 @@ import type {
   VisualMapComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
-import { LineChart as EChartsLineChart } from 'echarts/charts';
+import { LineChart as EChartsLineChart, ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import {
   GridComponent,
   DataZoomComponent,
@@ -45,6 +45,7 @@ import { enableDataZoom, restoreChart, getDateRange, getFormattedDate, ZoomEvent
 
 use([
   EChartsLineChart,
+  EChartsScatterChart,
   GridComponent,
   DataZoomComponent,
   MarkAreaComponent,

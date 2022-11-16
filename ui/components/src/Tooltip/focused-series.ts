@@ -16,6 +16,7 @@ import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
 import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
 export interface FocusedSeriesInfo {
+  seriesType: 'line' | 'scatter';
   seriesIdx: number | null;
   datumIdx: number | null;
   seriesName: string;
@@ -67,6 +68,7 @@ export function getNearbySeries(
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,
                   seriesName: currentSeriesName,
+                  seriesType: currentSeries.type ?? 'line',
                   date: formattedDate,
                   x: xValue,
                   y: yValue,

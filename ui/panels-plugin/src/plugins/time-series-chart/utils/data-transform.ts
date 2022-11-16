@@ -167,7 +167,7 @@ export function getThresholdSeries(
   threshold: StepOptions
 ): EChartsTimeSeries {
   return {
-    type: 'line',
+    type: 'scatter',
     name: name,
     data: data,
     color: threshold.color,
