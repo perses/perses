@@ -21,12 +21,18 @@ import (
 	position?: "bottom" | "right"
 }
 
+#visual: {
+	line_width?:   number & >=0.5 & <=10
+	point_radius?: number & >=0 & <=20
+}
+
 kind: "TimeSeriesChart"
 spec: close({
 	queries: [...#ts_query]
 	legend?:     #legend
 	unit?:       common.#unit
 	thresholds?: common.#thresholds
+	visual?:     #visual
 })
 
 #ts_query: _

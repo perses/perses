@@ -23,7 +23,14 @@ export interface TimeSeriesChartOptions {
   legend?: LegendOptions;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
+  visual?: VisualOptions;
 }
+
+export type VisualOptions = {
+  // type: 'line' | 'bar' | 'scatter'; // TODO: new option to change series type
+  point_radius?: number;
+  line_width?: number;
+};
 
 export const DEFAULT_LEGEND: LegendOptions = {
   position: 'bottom',
@@ -40,6 +47,20 @@ export type LegendPositionOptions = {
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
   decimal_places: 2,
+};
+
+export const DEFAULT_LINE_WIDTH = 1.5;
+
+export const DEFAULT_POINT_RADIUS = 4;
+
+export const DEFAULT_VISUAL: VisualOptions = {
+  line_width: DEFAULT_LINE_WIDTH,
+  point_radius: DEFAULT_POINT_RADIUS,
+};
+
+export const VISUAL_CONFIG = {
+  line_width: { label: 'Line Width', testId: 'slider-line-width' },
+  point_radius: { label: 'Point Radius', testId: 'slider-point-radius' },
 };
 
 /**
@@ -60,7 +81,6 @@ export function createInitialTimeSeriesChartOptions(): TimeSeriesChartOptions {
         },
       },
     ],
-    legend: DEFAULT_LEGEND,
     unit: {
       kind: 'Decimal',
     },

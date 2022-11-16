@@ -17,6 +17,7 @@ import {
   Button,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -40,7 +41,9 @@ import {
   LEGEND_POSITIONS,
   LegendPosition,
   DEFAULT_UNIT,
+  DEFAULT_VISUAL,
 } from './time-series-chart-model';
+import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
@@ -135,6 +138,14 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
     );
   };
 
+  const handleVisualChange: VisualOptionsEditorProps['onChange'] = (newVisual) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.visual = newVisual;
+      })
+    );
+  };
+
   return (
     <OptionsEditorTabs
       tabs={{
@@ -172,45 +183,53 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
         },
         settings: {
           content: (
-            <Stack spacing={1}>
-              <Typography variant="overline" component="h4">
-                Legend
-              </Typography>
-              <FormControlLabel
-                label="Show"
-                control={
-                  <Switch
-                    checked={value.legend !== undefined}
-                    onChange={(e) => {
-                      handleLegendShowChange(e.target.checked);
-                    }}
+            <Grid container spacing={4}>
+              <Grid item xs={6}>
+                <Stack spacing={1}>
+                  <Typography variant="overline" component="h3">
+                    Legend
+                  </Typography>
+                  <FormControlLabel
+                    label="Show"
+                    control={
+                      <Switch
+                        checked={value.legend !== undefined}
+                        onChange={(e) => {
+                          handleLegendShowChange(e.target.checked);
+                        }}
+                      />
+                    }
                   />
-                }
-              />
-              <FormControl>
-                <InputLabel id="legend-position-select-label">Position</InputLabel>
-                <Select
-                  sx={{ maxWidth: 100 }}
-                  labelId="legend-position-select-label"
-                  id="legend-position-select"
-                  label="Position"
-                  value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
-                  onChange={handleLegendPositionChange}
-                >
-                  {LEGEND_POSITIONS.map((position) => (
-                    <MenuItem key={position} value={position}>
-                      {position}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Stack spacing={1} alignItems="flex-start">
+                  <FormControl>
+                    <InputLabel id="legend-position-select-label">Position</InputLabel>
+                    <Select
+                      sx={{ maxWidth: 100 }}
+                      labelId="legend-position-select-label"
+                      id="legend-position-select"
+                      label="Position"
+                      value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
+                      onChange={handleLegendPositionChange}
+                    >
+                      {LEGEND_POSITIONS.map((position) => (
+                        // TODO: separate legend editor component, add display names to capitalize position values
+                        <MenuItem key={position} value={position}>
+                          {position}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Stack>
+                <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
+              </Grid>
+              <Grid item xs={6}>
                 <Typography variant="overline" component="h4">
                   Y Axis
                 </Typography>
-                <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
-              </Stack>
-            </Stack>
+                <Stack spacing={1} alignItems="flex-start">
+                  <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+                </Stack>
+              </Grid>
+            </Grid>
           ),
         },
         json: {

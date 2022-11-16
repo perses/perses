@@ -20,6 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { StatChartOptions } from './stat-chart-model';
+import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 
 export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
@@ -43,6 +44,9 @@ export function StatChartOptionsEditor(props: StatChartOptionsEditorProps) {
       tabs={{
         query: {
           content: <TimeSeriesQueryEditor value={query} onChange={handleQueryChange} />,
+        },
+        settings: {
+          content: <StatChartOptionsEditorSettings {...props} />,
         },
         json: {
           content: <JSONEditor {...props} />,
