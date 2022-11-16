@@ -120,8 +120,8 @@ export function createPanelEditorSlice(): StateCreator<
         },
         applyChanges: (next) => {
           const panelDefinititon = createPanelDefinitionFromEditorValues(next);
-          set((draft) => {
-            draft.panels[panelKey] = panelDefinititon;
+          set((state) => {
+            state.panels[panelKey] = panelDefinititon;
 
             // If the panel didn't change groups, nothing else to do
             if (next.groupId === panelGroupId) {
@@ -129,7 +129,7 @@ export function createPanelEditorSlice(): StateCreator<
             }
 
             // Move panel to the new group
-            const existingGroup = draft.panelGroups[panelGroupId];
+            const existingGroup = state.panelGroups[panelGroupId];
             if (existingGroup === undefined) {
               throw new Error(`Missing panel group ${panelGroupId}`);
             }
@@ -146,7 +146,7 @@ export function createPanelEditorSlice(): StateCreator<
             delete existingGroup.itemPanelKeys[panelGroupLayoutId];
 
             // Add item to the end of the new group
-            const newGroup = draft.panelGroups[next.groupId];
+            const newGroup = state.panelGroups[next.groupId];
             if (newGroup === undefined) {
               throw new Error(`Could not find new group ${next.groupId}`);
             }
@@ -177,13 +177,11 @@ export function createPanelEditorSlice(): StateCreator<
     openAddPanel(panelGroupId) {
       // If a panel group isn't supplied, add to the first group or create a group if there aren't any
       let newGroup: PanelGroupDefinition | undefined = undefined;
+      panelGroupId ??= get().panelGroupOrder[0];
       if (panelGroupId === undefined) {
-        panelGroupId = get().panelGroupOrder[0];
-        if (panelGroupId === undefined) {
-          newGroup = createEmptyPanelGroup();
-          newGroup.title = 'Panel Group';
-          panelGroupId = newGroup.id;
-        }
+        newGroup = createEmptyPanelGroup();
+        newGroup.title = 'Panel Group';
+        panelGroupId = newGroup.id;
       }
 
       const editorState: PanelEditorState = {
@@ -200,12 +198,12 @@ export function createPanelEditorSlice(): StateCreator<
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
           const panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
-          set((draft) => {
+          set((state) => {
             // Add a panel
-            draft.panels[panelKey] = panelDef;
+            state.panels[panelKey] = panelDef;
 
             // Also add a panel group item referencing the panel
-            const group = draft.panelGroups[next.groupId];
+            const group = state.panelGroups[next.groupId];
             if (group === undefined) {
               throw new Error(`Missing panel group ${next.groupId}`);
             }
