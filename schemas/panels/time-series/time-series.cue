@@ -26,11 +26,18 @@ import (
 	point_radius?: number & >=0 & <=20
 }
 
+#y_axis: {
+	label?: string
+	unit?:  common.#unit
+	min?:   number
+	max?:   number
+}
+
 kind: "TimeSeriesChart"
 spec: close({
 	queries: [...#ts_query]
 	legend?:     #legend
-	y_axis?:     common.#y_axis
+	y_axis?:     #y_axis
 	unit?:       common.#unit
 	thresholds?: common.#thresholds
 	visual?:     #visual
