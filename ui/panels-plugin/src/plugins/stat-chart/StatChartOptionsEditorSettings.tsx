@@ -14,8 +14,15 @@
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
-import { FormControlLabel, Stack, Switch, SwitchProps, Typography } from '@mui/material';
-import { UnitSelector, UnitSelectorProps } from '@perses-dev/components';
+import { Switch, SwitchProps } from '@mui/material';
+import {
+  UnitSelector,
+  UnitSelectorProps,
+  OptionsEditorGroup,
+  OptionsEditorGrid,
+  OptionsEditorColumn,
+  OptionsEditorControl,
+} from '@perses-dev/components';
 import { StatChartOptionsEditorProps } from './StatChartOptionsEditor';
 import { StatChartOptions } from './stat-chart-model';
 
@@ -50,16 +57,17 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
   };
 
   return (
-    <Stack spacing={1} alignItems="flex-start">
-      <Typography variant="overline" component="h4">
-        Misc
-      </Typography>
-      <FormControlLabel
-        label="Sparkline"
-        control={<Switch checked={!!value.sparkline} onChange={handleSparklineChange} />}
-      />
-      <UnitSelector value={value.unit} onChange={handleUnitChange} />
-      <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
-    </Stack>
+    <OptionsEditorGrid>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Misc">
+          <OptionsEditorControl
+            label="Sparkline"
+            control={<Switch checked={!!value.sparkline} onChange={handleSparklineChange} />}
+          />
+          <UnitSelector value={value.unit} onChange={handleUnitChange} />
+          <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+    </OptionsEditorGrid>
   );
 }
