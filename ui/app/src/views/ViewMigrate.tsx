@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { JSONEditor } from '@perses-dev/components';
 import { useMigrate } from '../model/migrate-client';
 
@@ -32,6 +32,16 @@ function ViewMigrate() {
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const [grafanaDashboard, setGrafanaDashboard] = useState<string>('');
   const mutation = useMigrate();
+  const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files === null) {
+      return;
+    }
+    const value = await files[0]?.text();
+    if (value !== undefined) {
+      setGrafanaDashboard(value);
+    }
+  };
   return (
     <Container maxWidth="md">
       <Stack direction="row" alignItems="center" gap={1} mb={2}>
@@ -53,7 +63,7 @@ function ViewMigrate() {
           sx={{ width: isLaptopSize ? '25%' : '50%' }}
         >
           Upload JSON file
-          <input type="file" hidden />
+          <input type="file" onChange={fileUploadOnChange} hidden />
         </Button>
         <TextareaAutosize
           value={grafanaDashboard}
