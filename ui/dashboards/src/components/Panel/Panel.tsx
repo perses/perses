@@ -107,7 +107,7 @@ export function Panel(props: PanelProps) {
         }}
         ref={setContentElement}
       >
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
+        <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec.plugin.spec]}>
           {inView === true && (
             <PanelContent
               panelPluginKind={definition.spec.plugin.kind}
