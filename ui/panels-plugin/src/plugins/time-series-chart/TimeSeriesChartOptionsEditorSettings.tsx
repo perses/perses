@@ -51,7 +51,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     );
   };
 
-  // Legend options handlers
+  // TODO: separate legend editor component
   const handleLegendShowChange = (show: boolean) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -95,7 +95,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
                 onChange={handleLegendPositionChange}
               >
                 {LEGEND_POSITIONS.map((position) => (
-                  // TODO: separate legend editor component, add display names to capitalize position values
+                  // TODO: add LEGEND_CONFIG with display names to capitalize position values
                   <MenuItem key={position} value={position}>
                     {position}
                   </MenuItem>
