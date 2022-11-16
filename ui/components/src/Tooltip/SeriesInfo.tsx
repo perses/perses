@@ -18,13 +18,14 @@ import { TOOLTIP_LABELS_MAX_WIDTH } from './tooltip-model';
 interface SeriesInfoProps {
   seriesName: string;
   y: number;
+  formattedY: string;
   markerColor: string;
   totalSeries: number;
   wrapLabels?: boolean;
 }
 
 export function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, y, markerColor, totalSeries, wrapLabels } = props;
+  const { seriesName, formattedY, markerColor, totalSeries, wrapLabels } = props;
 
   // TODO (sjcobb): regex to remove __name__, improve series labels
   const formattedSeriesLabels = seriesName.replace(/[{}"]/g, '');
@@ -55,7 +56,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
                 paddingLeft: '2px',
               })}
             >
-              {y}
+              {formattedY}
             </Box>
           </Box>
         </Box>
@@ -133,7 +134,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
           verticalAlign: 'top',
         }}
       >
-        {y}
+        {formattedY}
       </Box>
     </Box>
   );

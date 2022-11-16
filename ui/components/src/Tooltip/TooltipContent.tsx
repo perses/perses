@@ -64,7 +64,7 @@ export function TooltipContent(props: TooltipContentProps) {
             display: 'table',
           }}
         >
-          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, markerColor }) => {
+          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor }) => {
             if (datumIdx === null || seriesIdx === null) return null;
             const key = seriesIdx.toString() + datumIdx.toString();
 
@@ -73,6 +73,7 @@ export function TooltipContent(props: TooltipContentProps) {
                 key={key}
                 seriesName={seriesName}
                 y={y}
+                formattedY={formattedY}
                 markerColor={markerColor}
                 totalSeries={sortedFocusedSeries.length}
                 wrapLabels={wrapLabels}
