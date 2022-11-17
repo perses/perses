@@ -21,6 +21,8 @@ import {
   PanelGroupId,
   PanelGroupDefinition,
   PanelGroupItemLayout,
+  addPanelGroup,
+  createEmptyPanelGroup,
 } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
@@ -118,8 +120,8 @@ export function createPanelEditorSlice(): StateCreator<
         },
         applyChanges: (next) => {
           const panelDefinititon = createPanelDefinitionFromEditorValues(next);
-          set((draft) => {
-            draft.panels[panelKey] = panelDefinititon;
+          set((state) => {
+            state.panels[panelKey] = panelDefinititon;
 
             // If the panel didn't change groups, nothing else to do
             if (next.groupId === panelGroupId) {
@@ -127,7 +129,7 @@ export function createPanelEditorSlice(): StateCreator<
             }
 
             // Move panel to the new group
-            const existingGroup = draft.panelGroups[panelGroupId];
+            const existingGroup = state.panelGroups[panelGroupId];
             if (existingGroup === undefined) {
               throw new Error(`Missing panel group ${panelGroupId}`);
             }
@@ -144,7 +146,7 @@ export function createPanelEditorSlice(): StateCreator<
             delete existingGroup.itemPanelKeys[panelGroupLayoutId];
 
             // Add item to the end of the new group
-            const newGroup = draft.panelGroups[next.groupId];
+            const newGroup = state.panelGroups[next.groupId];
             if (newGroup === undefined) {
               throw new Error(`Could not find new group ${next.groupId}`);
             }
@@ -173,13 +175,13 @@ export function createPanelEditorSlice(): StateCreator<
     },
 
     openAddPanel(panelGroupId) {
-      // If a panel group isn't supplied, add to the first group
+      // If a panel group isn't supplied, add to the first group or create a group if there aren't any
+      let newGroup: PanelGroupDefinition | undefined = undefined;
+      panelGroupId ??= get().panelGroupOrder[0];
       if (panelGroupId === undefined) {
-        const firstGroupId = get().panelGroupOrder[0];
-        if (firstGroupId === undefined) {
-          throw new Error('No panel groups to add a panel to');
-        }
-        panelGroupId = firstGroupId;
+        newGroup = createEmptyPanelGroup();
+        newGroup.title = 'Panel Group';
+        panelGroupId = newGroup.id;
       }
 
       const editorState: PanelEditorState = {
@@ -195,13 +197,18 @@ export function createPanelEditorSlice(): StateCreator<
         },
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
-          const panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
-          set((draft) => {
+          const uniquePanelKeys = getUniquePanelKeys(get().panels);
+          let panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
+          // append count if panel key already exists
+          if (uniquePanelKeys[panelKey]) {
+            panelKey += `-${uniquePanelKeys[panelKey]}`;
+          }
+          set((state) => {
             // Add a panel
-            draft.panels[panelKey] = panelDef;
+            state.panels[panelKey] = panelDef;
 
             // Also add a panel group item referencing the panel
-            const group = draft.panelGroups[next.groupId];
+            const group = state.panelGroups[next.groupId];
             if (group === undefined) {
               throw new Error(`Missing panel group ${next.groupId}`);
             }
@@ -223,8 +230,13 @@ export function createPanelEditorSlice(): StateCreator<
         },
       };
 
-      // Open the editor with the new state
       set((state) => {
+        // Add the new panel group if one was created for the panel
+        if (newGroup !== undefined) {
+          addPanelGroup(state, newGroup);
+        }
+
+        // Open the editor with the new state
         state.panelEditor = editorState;
       });
     },
@@ -258,4 +270,20 @@ function getYForNewRow(group: PanelGroupDefinition) {
     }
   }
   return newRowY;
+}
+
+// Find all the unique panel keys
+// ex: cpu, cpu-1, cpu-2 count as the same panel key since these panels have the same name
+function getUniquePanelKeys(panels: Record<string, PanelDefinition>): Record<string, number> {
+  const uniquePanelKeys: Record<string, number> = {};
+  Object.keys(panels).forEach((panelKey) => {
+    const key = panelKey.replace(/-([0-9]+)/, '');
+    const count = uniquePanelKeys[key];
+    if (count) {
+      uniquePanelKeys[key] = count + 1;
+    } else {
+      uniquePanelKeys[key] = 1;
+    }
+  });
+  return uniquePanelKeys;
 }

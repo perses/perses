@@ -65,6 +65,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
+  const loading = queryResults.some((result) => result.isLoading);
+  const hasData = queryResults.some((result) => result.data && Array.from(result.data.series).length > 0);
 
   const { setTimeRange } = useTimeRange();
 
@@ -77,17 +79,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     });
   };
 
-  // populate series data based on query results
-  const { graphData, loading } = useMemo(() => {
+  // Populate series data based on query results
+  const { graphData } = useMemo(() => {
     const timeScale = getCommonTimeScale(queryResults);
     if (timeScale === undefined) {
-      for (const query of queryResults) {
-        // does not show error message if any query is successful (due to timeScale check)
-        if (query.error) throw query.error;
-      }
       return {
         graphData: EMPTY_GRAPH_DATA,
-        loading: true,
       };
     }
 
@@ -99,12 +96,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
     const xAxisData = [...getXValues(timeScale)];
 
-    let queriesFinished = 0;
-    for (const query of queryResults) {
+    for (const result of queryResults) {
       // Skip queries that are still loading and don't have data
-      if (query.isLoading || query.data === undefined) continue;
+      if (result.isLoading || result.data === undefined) continue;
 
-      for (const timeSeries of query.data.series) {
+      for (const timeSeries of result.data.series) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, visual);
@@ -121,7 +117,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           });
         }
       }
-      queriesFinished++;
     }
     graphData.xAxis = xAxisData;
 
@@ -144,8 +139,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     return {
       graphData,
-      loading: queriesFinished === 0,
-      allQueriesLoaded: queriesFinished === queryResults.length,
     };
   }, [queryResults, thresholds, selectedSeriesName, legend, visual]);
 
@@ -163,6 +156,17 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
       </Box>
     );
+  }
+
+  // At this point, we have a response from the backend for all queries. (We're past loading === true).
+  // If we don't data from any of the queries, then check if we want to show an error.
+  // Put another way: If any queries have data, even if other queries failed, we will show the data (not the error).
+  // Unfortunately, partial errors get swallowed in this case.
+  // This could be refactored when someone takes a look at validation and error-handling.
+  if (!hasData) {
+    for (const result of queryResults) {
+      if (result.error) throw result.error;
+    }
   }
 
   const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;

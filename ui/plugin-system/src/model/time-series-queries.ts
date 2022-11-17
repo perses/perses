@@ -45,8 +45,8 @@ export interface TimeSeriesQueryContext {
 }
 
 export interface TimeSeriesData {
-  timeRange: AbsoluteTimeRange;
-  stepMs: number;
+  timeRange?: AbsoluteTimeRange;
+  stepMs?: number;
   series: Iterable<TimeSeries>;
 }
 

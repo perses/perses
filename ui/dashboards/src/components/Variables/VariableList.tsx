@@ -37,7 +37,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
   return (
     <Box>
-      <Drawer anchor={'right'} open={isEditing}>
+      <Drawer anchor={'right'} open={isEditing} PaperProps={{ sx: { width: '50%' } }}>
         <VariableEditor
           onCancel={() => {
             setIsEditing(false);

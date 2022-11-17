@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Box, TextField, FormControl, InputLabel } from '@mui/material';
+import { Stack, TextField, FormControl, InputLabel } from '@mui/material';
 import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector } from '../../model';
 import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } from './query-editor-model';
@@ -43,7 +43,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   };
 
   return (
-    <Box>
+    <Stack spacing={2}>
       <TextField
         fullWidth
         label="Query"
@@ -72,6 +72,6 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           label="Prometheus Datasource"
         />
       </FormControl>
-    </Box>
+    </Stack>
   );
 }

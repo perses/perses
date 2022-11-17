@@ -14,22 +14,24 @@
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
+import { Switch, SwitchProps } from '@mui/material';
 import {
   UnitSelector,
   UnitSelectorProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
+  OptionsEditorControl,
 } from '@perses-dev/components';
-import { GaugeChartOptionsEditorProps } from './GaugeChartOptionsEditor';
-import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
+import { StatChartOptionsEditorProps } from './StatChartOptionsEditor';
+import { StatChartOptions } from './stat-chart-model';
 
-export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps) {
+export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProps) {
   const { onChange, value } = props;
 
   const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation) => {
     onChange(
-      produce(value, (draft: GaugeChartOptions) => {
+      produce(value, (draft: StatChartOptions) => {
         draft.calculation = newCalculation;
       })
     );
@@ -37,8 +39,19 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
 
   const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit) => {
     onChange(
-      produce(value, (draft: GaugeChartOptions) => {
+      produce(value, (draft: StatChartOptions) => {
         draft.unit = newUnit;
+      })
+    );
+  };
+
+  const handleSparklineChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
+    onChange(
+      produce(value, (draft: StatChartOptions) => {
+        // For now, setting to an empty object when checked, so the stat chart
+        // uses the default chart color and line styles. In the future, this
+        // will likely be configurable in the UI.
+        draft.sparkline = checked ? {} : undefined;
       })
     );
   };
@@ -47,7 +60,11 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
-          <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+          <OptionsEditorControl
+            label="Sparkline"
+            control={<Switch checked={!!value.sparkline} onChange={handleSparklineChange} />}
+          />
+          <UnitSelector value={value.unit} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>

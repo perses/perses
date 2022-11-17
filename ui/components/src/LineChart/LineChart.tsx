@@ -225,7 +225,7 @@ export function LineChart({
       onMouseEnter={handleOnMouseEnter}
     >
       {showTooltip === true && (
-        <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip}></Tooltip>
+        <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit}></Tooltip>
       )}
 
       <EChart

@@ -78,6 +78,10 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
           id={titleElementId}
           variant="subtitle1"
           sx={{
+            // `minHeight` guarantees that the header has the correct height
+            // when there is no title (i.e. in the preview)
+            lineHeight: '24px',
+            minHeight: '24px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',

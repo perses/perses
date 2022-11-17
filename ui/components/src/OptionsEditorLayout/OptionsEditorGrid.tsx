@@ -11,20 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DateTimeRangePicker';
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './InfoTooltip';
-export * from './JSONEditor';
-export * from './Legend';
-export * from './LineChart';
-export * from './OptionsEditorLayout';
-export * from './StatChart';
-export * from './UnitSelector';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test-utils';
+import { Grid } from '@mui/material';
+
+export type OptionsEditorGridProps = {
+  /**
+   * 1-3 `OptionsEditorColumn` components to render content in columns.
+   */
+  children: React.ReactNode;
+};
+
+/**
+ * Top level grid container used to lay out content for editing in panel
+ * options.
+ */
+export const OptionsEditorGrid = ({ children }: OptionsEditorGridProps) => {
+  return (
+    <Grid container spacing={8}>
+      {children}
+    </Grid>
+  );
+};
