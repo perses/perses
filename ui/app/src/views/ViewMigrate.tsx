@@ -70,7 +70,7 @@ function ViewMigrate() {
           onChange={(e) => setGrafanaDashboard(e.target.value)}
           minRows={10}
           maxRows={20}
-          placeholder="Past your Grafana dashboard"
+          placeholder="Paste your Grafana dashboard"
         />
         <Button
           startIcon={<AutoFix />}
