@@ -17,7 +17,6 @@ import {
   CircularProgress,
   Container,
   Stack,
-  TextareaAutosize,
   TextField,
   Typography,
   useMediaQuery,
@@ -82,11 +81,14 @@ function ViewMigrate() {
           Upload JSON file
           <input type="file" onChange={fileUploadOnChange} hidden />
         </Button>
-        <TextareaAutosize
+        <TextField
           value={grafanaDashboard}
-          onChange={(e) => setGrafanaDashboard(e.target.value)}
+          onBlur={(e) => setGrafanaDashboard(e.target.value)}
+          multiline
+          fullWidth
           minRows={10}
           maxRows={20}
+          label="Grafana dashboard"
           placeholder="Paste your Grafana dashboard"
         />
         <Button
@@ -111,13 +113,13 @@ function ViewMigrate() {
               <TextField
                 required
                 label={'Project Name'}
-                onChange={(event) => {
+                onBlur={(event) => {
                   setProjectName(event.target.value);
                 }}
               />
               <Button
                 variant="contained"
-                disabled={dashboardMutation.isLoading}
+                disabled={dashboardMutation.isLoading || projectName.length === 0}
                 startIcon={<Import />}
                 onClick={importOnClick}
               >
