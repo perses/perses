@@ -29,6 +29,11 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   spec,
   context
 ) => {
+  if (spec.query === undefined || spec.query === null || spec.query === '') {
+    // Do not make a request to the backend, instead return an empty TimeSeriesData
+    return { series: [] };
+  }
+
   const minStep = getDurationStringSeconds(spec.min_step);
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs);
@@ -89,5 +94,6 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
       };
     }),
   };
+
   return chartData;
 };

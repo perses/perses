@@ -64,6 +64,7 @@ function getQueryOptions({
     waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
   }
   const queryEnabled = plugin !== undefined && !waitToLoad;
+
   return {
     queryKey,
     queryEnabled,
