@@ -64,6 +64,31 @@ describe('Panel Drawer', () => {
     });
   });
 
+  it('should add panel with duplicate panel name', async () => {
+    const storeApi = renderPanelDrawer();
+
+    act(() => storeApi.getState().openAddPanel());
+
+    const nameInput = await screen.findByLabelText(/Name/);
+    userEvent.type(nameInput, 'cpu');
+    userEvent.click(screen.getByText('Add'));
+
+    const panels = storeApi.getState().panels;
+    expect(panels).toMatchObject({
+      // make sure we don't have duplicate panel key by appending "-1"
+      'cpu-1': {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'cpu' },
+          plugin: {
+            kind: '',
+            spec: {},
+          },
+        },
+      },
+    });
+  });
+
   it('should edit an existing panel', async () => {
     const storeApi = renderPanelDrawer();
 

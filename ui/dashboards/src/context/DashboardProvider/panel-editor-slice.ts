@@ -197,7 +197,12 @@ export function createPanelEditorSlice(): StateCreator<
         },
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
-          const panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
+          const uniquePanelKeys = getUniquePanelKeys(get().panels);
+          let panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
+          // append count if panel key already exists
+          if (uniquePanelKeys[panelKey]) {
+            panelKey += `-${uniquePanelKeys[panelKey]}`;
+          }
           set((state) => {
             // Add a panel
             state.panels[panelKey] = panelDef;
@@ -265,4 +270,20 @@ function getYForNewRow(group: PanelGroupDefinition) {
     }
   }
   return newRowY;
+}
+
+// Find all the unique panel keys
+// ex: cpu, cpu-1, cpu-2 count as the same panel key since these panels have the same name
+function getUniquePanelKeys(panels: Record<string, PanelDefinition>): Record<string, number> {
+  const uniquePanelKeys: Record<string, number> = {};
+  Object.keys(panels).forEach((panelKey) => {
+    const key = panelKey.replace(/-([0-9]+)/, '');
+    const count = uniquePanelKeys[key];
+    if (count) {
+      uniquePanelKeys[key] = count + 1;
+    } else {
+      uniquePanelKeys[key] = 1;
+    }
+  });
+  return uniquePanelKeys;
 }
