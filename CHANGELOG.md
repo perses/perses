@@ -2,16 +2,23 @@
 
 ## Unreleased
 
-- [FEATURE] add line_width and point_radius visual options in time series panel #754
-- [FEATURE] Add ability to download dashboard json #764
+## 0.16.0 / 2022-11-17
+
+- [FEATURE] Add UI for configuring gauge panel options #761
+- [FEATURE] Add UI for configuring stat panel options #762
+- [FEATURE] add new variable plugin: PrometheusPromQLVariable #758
+- [FEATURE] add `line_width` and `point_radius` visual options in time series panel #754
+- [FEATURE] Add ability to download dashboard JSON #764
 - [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
 - [ENHANCEMENT] Add unit selector to time series chart options #744
-- [ENHANCEMENT] Add UI for configuring gauge panel options #761
-- [ENHANCEMENT] Add UI for configuring stat panel options #762
 - [ENHANCEMENT] Add validation for Variables #768
 - [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 - [BUGFIX] Fix duplicate panel keys #765
 - [BUGFIX] Automatically add a Panel Group when adding a Panel to an empty dashboard #766
+- [BUGFIX] fix dependsOn for labelValues and labelNames variables #755
+- [BUGFIX] Do not send empty queries #770
+- [BUGFIX] Reset error boundary on spec change #771
+- [BUGFIX] tooltip in LineChart should use unit passed from panel #775
 
 ## 0.15.0 / 2022-11-09
 
