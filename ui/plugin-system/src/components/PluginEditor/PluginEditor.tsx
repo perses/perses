@@ -30,7 +30,7 @@ export function PluginEditor(props: PluginEditorProps) {
   const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);
   return (
     <Box {...others}>
-      <FormControl margin="dense" fullWidth={false} disabled={isLoading} error={error !== null} sx={{ mb: 2 }}>
+      <FormControl margin="dense" fullWidth={false} disabled={isLoading} error={error !== null} sx={{ mb: 1 }}>
         {/* TODO: How to ensure ids are unique? */}
         <InputLabel id="plugin-kind-label">{pluginKindLabel}</InputLabel>
         <PluginKindSelect
