@@ -94,7 +94,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
       tabs={{
         query: {
           content: (
-            <Stack spacing={2}>
+            <Stack spacing={1}>
               <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
                 Add Query
               </Button>
