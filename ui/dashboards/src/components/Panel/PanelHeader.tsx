@@ -39,7 +39,7 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
   if (editHandlers !== undefined) {
     // If there are edit handlers, always just show the edit buttons
     action = (
-      <Stack direction="row" alignItems="center" spacing={0.5}>
+      <Stack direction="row" spacing={0.5} alignItems="center">
         <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
           <PencilIcon />
         </HeaderIconButton>
