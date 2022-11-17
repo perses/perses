@@ -113,6 +113,10 @@ export function VariableEditForm({
     setPreviewKey((prev) => prev + 1);
   };
 
+  /** We use the `previewKey` that we increment to know when to explicity update the
+   * spec that will be used for preview. The reason why we do this is to avoid
+   * having to re-fetch the values when the user is still editing the spec.
+   */
   const previewSpec = useMemo(() => {
     return getVariableDefinitionFromState(state) as ListVariableDefinition;
     // eslint-disable-next-line react-hooks/exhaustive-deps
