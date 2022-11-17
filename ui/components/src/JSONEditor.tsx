@@ -40,6 +40,7 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
       onChange={(event) => {
         setValue(event.target.value);
       }}
+      maxRows={20}
       onBlur={() => {
         try {
           const json = JSON.parse(value ?? '{}');
