@@ -11,6 +11,7 @@
 - [ENHANCEMENT] Add validation for Variables #768
 - [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 - [BUGFIX] Automatically add a Panel Group when adding a Panel to an empty dashboard #766
+- [BUGFIX] Fix bug with grid layout responsive behavior #778
 
 ## 0.15.0 / 2022-11-09
 
