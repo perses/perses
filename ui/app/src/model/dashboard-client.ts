@@ -11,11 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { DashboardResource, fetchJson } from '@perses-dev/core';
 import buildURL from './url-builder';
 
 const resource = 'dashboards';
+
+export function useCreateDashboard(
+  onSuccess?: (data: DashboardResource, variables: DashboardResource) => Promise<unknown> | unknown
+) {
+  return useMutation<DashboardResource, Error, DashboardResource>({
+    mutationKey: [resource],
+    mutationFn: (dashboard) => {
+      const url = buildURL({ resource: resource, project: dashboard.metadata.project });
+      return fetchJson<DashboardResource>(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dashboard),
+      });
+    },
+    onSuccess: onSuccess,
+  });
+}
 
 export function useDashboard(project: string, name: string) {
   return useQuery<DashboardResource, Error>([resource, project, name], () => {

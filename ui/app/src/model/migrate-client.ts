@@ -20,7 +20,7 @@ const resource = 'migrate';
 export function useMigrate() {
   return useMutation<DashboardResource, Error, string>({
     mutationKey: [resource],
-    mutationFn: (grafanaDashboard: string) => {
+    mutationFn: (grafanaDashboard) => {
       const url = buildURL({ apiPrefix: '/api', resource: resource });
       return fetchJson<DashboardResource>(url, {
         method: 'POST',

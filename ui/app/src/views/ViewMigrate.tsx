@@ -18,20 +18,29 @@ import {
   Container,
   Stack,
   TextareaAutosize,
+  TextField,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
+import Import from 'mdi-material-ui/Import';
 import { ChangeEvent, useState } from 'react';
 import { JSONEditor } from '@perses-dev/components';
+import { useNavigate } from 'react-router-dom';
 import { useMigrate } from '../model/migrate-client';
+import { useCreateDashboard } from '../model/dashboard-client';
 
 function ViewMigrate() {
-  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const [grafanaDashboard, setGrafanaDashboard] = useState<string>('');
-  const mutation = useMigrate();
+  const [projectName, setProjectName] = useState<string>('');
+  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
+  const navigate = useNavigate();
+  const migrateMutation = useMigrate();
+  const dashboardMutation = useCreateDashboard((data) => {
+    navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
+  });
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files === null) {
@@ -41,6 +50,14 @@ function ViewMigrate() {
     if (value !== undefined) {
       setGrafanaDashboard(value);
     }
+  };
+  const importOnClick = () => {
+    const dashboard = migrateMutation.data;
+    if (dashboard === undefined) {
+      return;
+    }
+    dashboard.metadata.project = projectName;
+    dashboardMutation.mutate(dashboard);
   };
   return (
     <Container maxWidth="md">
@@ -73,20 +90,47 @@ function ViewMigrate() {
           placeholder="Paste your Grafana dashboard"
         />
         <Button
+          disabled={migrateMutation.isLoading}
           startIcon={<AutoFix />}
           onClick={() => {
-            mutation.mutate(grafanaDashboard);
+            migrateMutation.mutate(grafanaDashboard);
           }}
         >
           Migrate
         </Button>
-        {mutation.isLoading && <CircularProgress sx={{ alignSelf: 'center' }} />}
-        {mutation.isError && (
+        {migrateMutation.isLoading && <CircularProgress sx={{ alignSelf: 'center' }} />}
+        {migrateMutation.isError && (
           <Alert variant={'outlined'} severity={'error'}>
-            {mutation.error.message}
+            {migrateMutation.error.message}
           </Alert>
         )}
-        {mutation.isSuccess && <JSONEditor value={mutation.data} />}
+        {migrateMutation.isSuccess && (
+          <Stack direction={'row'} spacing={2}>
+            <JSONEditor value={migrateMutation.data} />
+            <Stack spacing={1}>
+              <TextField
+                required
+                label={'Project Name'}
+                onChange={(event) => {
+                  setProjectName(event.target.value);
+                }}
+              />
+              <Button
+                variant="contained"
+                disabled={dashboardMutation.isLoading}
+                startIcon={<Import />}
+                onClick={importOnClick}
+              >
+                Import
+              </Button>
+              {dashboardMutation.isError && (
+                <Alert variant={'outlined'} severity={'error'}>
+                  {dashboardMutation.error.message}
+                </Alert>
+              )}
+            </Stack>
+          </Stack>
+        )}
       </Stack>
     </Container>
   );
