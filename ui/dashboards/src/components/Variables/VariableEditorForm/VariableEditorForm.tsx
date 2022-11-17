@@ -18,10 +18,6 @@ import {
   Switch,
   TextField,
   Grid,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Button,
   Stack,
   Alert,
@@ -36,9 +32,8 @@ import { ErrorBoundary } from '@perses-dev/components';
 import Refresh from 'mdi-material-ui/Refresh';
 
 import { useListVariablePluginValues } from '../variable-model';
-import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
+import { getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
-const VARIABLE_TYPES = ['ListVariable', 'TextVariable'] as const;
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
 // TODO: Replace with proper validation library
@@ -212,7 +207,7 @@ export function VariableEditForm({
               Allow Multiple
               <Switch
                 checked={state.listVariableFields.allowMultiple}
-                onChange={(e) => {
+                onChange={(v) => {
                   setState((draft) => {
                     draft.title = v.target.value;
                   });
