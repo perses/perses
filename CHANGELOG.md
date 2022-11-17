@@ -12,7 +12,6 @@
 - [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
 - [ENHANCEMENT] Add unit selector to time series chart options #744
 - [ENHANCEMENT] Add validation for Variables #768
-- [ENHANCEMENT] Always show the edit icons in edit mode (instead of on hover) #748
 - [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 - [BUGFIX] Fix duplicate panel keys #765
 - [BUGFIX] Automatically add a Panel Group when adding a Panel to an empty dashboard #766
