@@ -10,6 +10,7 @@
 - [ENHANCEMENT] Add UI for configuring gauge panel options #761
 - [ENHANCEMENT] Add UI for configuring stat panel options #762
 - [ENHANCEMENT] Add validation for Variables #768
+- [ENHANCEMENT] Standardize headers for editors
 - [BUGFIX] Fix the default config file used in the docker images and in the archive #745
 - [BUGFIX] Fix duplicate panel keys #765
 - [BUGFIX] Automatically add a Panel Group when adding a Panel to an empty dashboard #766
