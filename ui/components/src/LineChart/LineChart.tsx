@@ -20,6 +20,7 @@ import type {
   LineSeriesOption,
   LegendComponentOption,
   VisualMapComponentOption,
+  YAXisComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
@@ -38,10 +39,10 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from '../model/graph';
-import { formatValue, UnitOptions } from '../model/units';
+import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { Tooltip } from '../Tooltip/Tooltip';
-import { enableDataZoom, restoreChart, getDateRange, getFormattedDate, ZoomEventData } from './utils';
+import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -61,6 +62,7 @@ use([
 interface LineChartProps {
   height: number;
   data: EChartsDataFormat;
+  yAxis?: YAXisComponentOption;
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
@@ -69,7 +71,17 @@ interface LineChartProps {
   onDoubleClick?: (e: MouseEvent) => void;
 }
 
-export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZoom, onDoubleClick }: LineChartProps) {
+export function LineChart({
+  height,
+  data,
+  yAxis,
+  unit,
+  grid,
+  legend,
+  visualMap,
+  onDataZoom,
+  onDoubleClick,
+}: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -162,15 +174,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
           },
         },
       },
-      yAxis: {
-        type: 'value',
-        boundaryGap: [0, '10%'],
-        axisLabel: {
-          formatter: (value: number) => {
-            return formatValue(value, unit);
-          },
-        },
-      },
+      yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
         show: showPointsOnHover,
@@ -194,7 +198,7 @@ export function LineChart({ height, data, unit, grid, legend, visualMap, onDataZ
     };
 
     return option;
-  }, [data, grid, legend, visualMap]);
+  }, [data, yAxis, grid, legend, visualMap]);
 
   return (
     <Box
