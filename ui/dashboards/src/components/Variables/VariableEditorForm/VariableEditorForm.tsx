@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -24,13 +24,22 @@ import {
   Select,
   Button,
   Stack,
+  Alert,
+  Chip,
+  IconButton,
+  ClickAwayListener,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { PluginEditor } from '@perses-dev/plugin-system';
-import { VariableDefinition } from '@perses-dev/core';
+import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
+import { ErrorBoundary } from '@perses-dev/components';
+import Refresh from 'mdi-material-ui/Refresh';
+
+import { useListVariablePluginValues } from '../variable-model';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
 const VARIABLE_TYPES = ['ListVariable', 'TextVariable'] as const;
+const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
 // TODO: Replace with proper validation library
 function getValidation(state: ReturnType<typeof getInitialState>) {
@@ -56,6 +65,36 @@ const SectionHeader = ({ children }: React.PropsWithChildren) => (
   </Typography>
 );
 
+function VariableListPreview({ definition }: { definition: ListVariableDefinition }) {
+  const { data, isFetching, error } = useListVariablePluginValues(definition);
+  const [maxValues, setMaxValues] = useState<number | undefined>(DEFAULT_MAX_PREVIEW_VALUES);
+  const showAll = () => {
+    setMaxValues(undefined);
+  };
+  let notShown = 0;
+
+  if (data && data?.length > 0 && maxValues) {
+    notShown = data.length - maxValues;
+  }
+  const errorMessage = (error as Error)?.message;
+
+  return (
+    <Box>
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      {isFetching && 'Loading...'}
+      {data?.length === 0 && <Alert severity="info">No results</Alert>}
+      <>
+        {data?.slice(0, maxValues).map((val) => (
+          <Chip sx={{ mr: 1, mb: 1 }} size="small" key={val.value} label={val.label} />
+        ))}
+        {notShown > 0 && (
+          <Chip onClick={showAll} variant="outlined" sx={{ mr: 1, mb: 1 }} size="small" label={`+${notShown} more`} />
+        )}
+      </>
+    </Box>
+  );
+}
+
 export function VariableEditForm({
   initialVariableDefinition,
   onChange,
@@ -67,6 +106,21 @@ export function VariableEditForm({
 }) {
   const [state, setState] = useImmer(getInitialState(initialVariableDefinition));
   const validation = useMemo(() => getValidation(state), [state]);
+
+  const [previewKey, setPreviewKey] = React.useState(0);
+
+  const refreshPreview = () => {
+    setPreviewKey((prev) => prev + 1);
+  };
+
+  /** We use the `previewKey` that we increment to know when to explicity update the
+   * spec that will be used for preview. The reason why we do this is to avoid
+   * having to re-fetch the values when the user is still editing the spec.
+   */
+  const previewSpec = useMemo(() => {
+    return getVariableDefinitionFromState(state) as ListVariableDefinition;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewKey]);
 
   return (
     <Box>
@@ -159,6 +213,11 @@ export function VariableEditForm({
           <SectionHeader>List Options</SectionHeader>
           <Grid container spacing={2} mb={2}>
             <Grid item xs={6}>
+              {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
+              <ClickAwayListener onClickAway={() => refreshPreview()}>
+                <Box />
+              </ClickAwayListener>
+              {/** */}
               <PluginEditor
                 width={500}
                 pluginType="Variable"
@@ -170,6 +229,17 @@ export function VariableEditForm({
                   });
                 }}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <ErrorBoundary FallbackComponent={() => <div>Error</div>}>
+                <Stack direction={'row'} spacing={1} alignItems="center">
+                  <Typography variant="caption">Preview Values</Typography>
+                  <IconButton onClick={refreshPreview} size="small">
+                    <Refresh />
+                  </IconButton>
+                </Stack>
+                <VariableListPreview definition={previewSpec} />
+              </ErrorBoundary>
             </Grid>
           </Grid>
 
