@@ -80,7 +80,7 @@ function ViewMigrate() {
         >
           Migrate
         </Button>
-        {mutation.isLoading && <CircularProgress />}
+        {mutation.isLoading && <CircularProgress sx={{ alignSelf: 'center' }} />}
         {mutation.isError && (
           <Alert variant={'outlined'} severity={'error'}>
             {mutation.error.message}
