@@ -19,6 +19,7 @@ import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
+import { DownloadButton } from '../DownloadButton';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -90,6 +91,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             {dashboardTitle}
             <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
               <TimeRangeControls />
+              <DownloadButton />
               {isLaptopSize && (
                 <Button
                   variant="outlined"
