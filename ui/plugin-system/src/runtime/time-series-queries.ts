@@ -68,6 +68,7 @@ function getQueryOptions({
   return {
     queryKey,
     queryEnabled,
+    queryRetries: 1,
   };
 }
 
@@ -78,11 +79,11 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
-  const { queryEnabled: pluginEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
-
-  return useQuery(
-    queryKey,
-    () => {
+  const { queryEnabled, queryKey, queryRetries } = getQueryOptions({ plugin, definition, context });
+  return useQuery({
+    enabled: queryEnabled,
+    queryKey: queryKey,
+    queryFn: () => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
         throw new Error('Expected plugin to be loaded');
@@ -91,8 +92,8 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
       const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
       return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
     },
-    { enabled: pluginEnabled }
-  );
+    retry: queryRetries,
+  });
 };
 
 /**
@@ -109,9 +110,8 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
 
   return useQueries({
     queries: definitions.map((definition, idx) => {
-      const resp = pluginLoaderResponse[idx];
-      const plugin = resp?.data;
-      const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
+      const plugin = pluginLoaderResponse[idx]?.data;
+      const { queryEnabled, queryKey, queryRetries } = getQueryOptions({ plugin, definition, context });
       return {
         enabled: queryEnabled,
         queryKey: queryKey,
@@ -122,6 +122,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
           return data;
         },
+        retry: queryRetries,
       };
     }),
   });
