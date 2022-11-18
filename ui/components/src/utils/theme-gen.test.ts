@@ -157,8 +157,6 @@ describe('generateChartsTheme', () => {
             "axisLine": Object {
               "show": false,
             },
-            "nameGap": 50,
-            "nameLocation": "middle",
             "show": true,
             "splitLine": Object {
               "lineStyle": Object {
