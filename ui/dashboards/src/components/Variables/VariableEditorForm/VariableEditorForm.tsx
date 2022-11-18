@@ -153,7 +153,7 @@ export function VariableEditForm({
           </Button>
         </Stack>
       </Box>
-      <Box padding={2}>
+      <Box padding={2} sx={{ overflowY: 'scroll' }}>
         <Typography variant="h3" mb={2}>
           Edit Variable
         </Typography>
