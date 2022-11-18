@@ -53,7 +53,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
             <Box padding={2} display="flex">
               {dashboardTitle}
-              <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+              <Stack direction="row" spacing={1} marginLeft="auto">
                 <Button variant="contained" onClick={onSave}>
                   Save
                 </Button>
@@ -74,7 +74,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <TemplateVariableList initialVariableIsSticky={initialVariableIsSticky} />
             </ErrorBoundary>
-            <Stack direction={'row'} spacing={1} sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" spacing={1} marginLeft="auto">
               <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
                 Add Panel Group
               </Button>
@@ -86,10 +86,10 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
         </Stack>
       ) : (
-        <Stack spacing={2} padding={2}>
+        <Stack spacing={1} padding={2}>
           <Box sx={{ display: 'flex', width: '100%' }}>
             {dashboardTitle}
-            <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" spacing={1} marginLeft="auto">
               <TimeRangeControls />
               <DownloadButton />
               {isLaptopSize && (

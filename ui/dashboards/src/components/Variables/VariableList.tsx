@@ -62,7 +62,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
 
       <AppBar color={'inherit'} position={isSticky ? 'fixed' : 'static'} elevation={isSticky ? 4 : 0}>
         <Box display={'flex'} justifyContent="space-between" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
-          <Stack direction={'row'} spacing={2}>
+          <Stack direction="row" spacing={1}>
             {showVariables &&
               variableDefinitions.map((v) => (
                 <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>

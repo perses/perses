@@ -144,7 +144,7 @@ export function VariableEditor(props: {
             }}
           >
             <Typography variant="h2">Template Variables</Typography>
-            <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" spacing={1} marginLeft="auto">
               <Button
                 disabled={props.variableDefinitions === variableDefinitions || !validation.isValid}
                 variant="contained"
