@@ -14,8 +14,6 @@
 import { MenuItem, Select, SelectProps, Switch } from '@mui/material';
 import { produce } from 'immer';
 import {
-  UnitSelector,
-  UnitSelectorProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -27,26 +25,27 @@ import {
   DEFAULT_LEGEND,
   LEGEND_POSITIONS,
   LegendPosition,
-  DEFAULT_UNIT,
   DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
 } from './time-series-chart-model';
 import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
+import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEditor';
 
 export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
-
-  const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.unit = newUnit;
-      })
-    );
-  };
 
   const handleVisualChange: VisualOptionsEditorProps['onChange'] = (newVisual) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.visual = newVisual;
+      })
+    );
+  };
+
+  const handleYAxisChange: YAxisOptionsEditorProps['onChange'] = (newYAxis) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.y_axis = newYAxis;
       })
     );
   };
@@ -107,9 +106,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
-        <OptionsEditorGroup title="Y Axis">
-          <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
-        </OptionsEditorGroup>
+        <YAxisOptionsEditor value={value.y_axis ?? DEFAULT_Y_AXIS} onChange={handleYAxisChange} />
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );

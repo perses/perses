@@ -15,8 +15,8 @@ import { useMemo, useState } from 'react';
 import { merge } from 'lodash-es';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
-import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, ZoomEventData, Legend } from '@perses-dev/components';
+import { Box, Skeleton, Typography } from '@mui/material';
+import { LineChart, EChartsDataFormat, ZoomEventData, Legend, AxisLabel } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
@@ -55,7 +55,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // convert Perses dashboard format to be ECharts compatible
   const yAxis = {
-    name: y_axis?.label ?? '',
     min: y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
     max: y_axis?.max,
   };
@@ -174,7 +173,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
   const gridOverrides: GridComponentOption = {
-    left: y_axis && y_axis.label ? 40 : 20,
+    left: y_axis && y_axis.label ? 30 : 20,
     right: legend && legend.position === 'right' ? legendWidth : 20,
   };
 
@@ -190,6 +189,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   return (
     <>
+      {y_axis && y_axis.label && <AxisLabel name={y_axis.label} height={contentDimensions.height} />}
       <LineChart
         height={lineChartHeight}
         data={graphData}
