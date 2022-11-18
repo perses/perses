@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Box, IconButton, Stack, Typography } from '@mui/material';
-import ExpandedIcon from 'mdi-material-ui/ChevronUp';
-import CollapsedIcon from 'mdi-material-ui/ChevronDown';
+import ExpandedIcon from 'mdi-material-ui/ChevronDown';
+import CollapsedIcon from 'mdi-material-ui/ChevronRight';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
