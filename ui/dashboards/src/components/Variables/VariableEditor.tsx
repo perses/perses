@@ -164,7 +164,7 @@ export function VariableEditor(props: {
               </Button>
             </Stack>
           </Box>
-          <Box padding={2}>
+          <Box padding={2} sx={{ overflowY: 'scroll' }}>
             <Typography variant="h3" mb={2}>
               Variable List
             </Typography>
