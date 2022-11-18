@@ -25,7 +25,7 @@ export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
 }
 
-const STORED_LAYOUT_BREAKPOINT = 'sm' as const;
+const SMALL_LAYOUT_BREAKPOINT = 'sm' as const;
 
 /**
  * Layout component that arranges children in a Grid based on the definition.
@@ -44,7 +44,7 @@ export function GridLayout(props: GridLayoutProps) {
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
     // when going to a smaller breakpoint and then back to a larger breakpoint.
     // https://github.com/react-grid-layout/react-grid-layout/issues/1663
-    const smallLayout = allLayouts[STORED_LAYOUT_BREAKPOINT];
+    const smallLayout = allLayouts[SMALL_LAYOUT_BREAKPOINT];
     if (smallLayout) {
       updatePanelGroupLayouts(smallLayout);
     }
@@ -74,7 +74,7 @@ export function GridLayout(props: GridLayoutProps) {
           isDraggable={isEditMode}
           isResizable={isEditMode}
           containerPadding={[0, 10]}
-          layouts={{ [STORED_LAYOUT_BREAKPOINT]: groupDefinition.itemLayouts }}
+          layouts={{ [SMALL_LAYOUT_BREAKPOINT]: groupDefinition.itemLayouts }}
           onLayoutChange={handleLayoutChange}
         >
           {groupDefinition.itemLayouts.map(({ i }) => (
