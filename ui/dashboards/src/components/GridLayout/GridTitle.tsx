@@ -64,7 +64,7 @@ export function GridTitle(props: GridTitleProps) {
           </IconButton>
           {text}
           {isEditMode && (
-            <Stack direction="row" sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" marginLeft="auto">
               <IconButton aria-label={`add panel to group ${title}`} onClick={openAddPanel}>
                 <AddPanelIcon />
               </IconButton>

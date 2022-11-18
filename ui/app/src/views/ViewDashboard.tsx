@@ -54,7 +54,10 @@ function ViewDashboard() {
               dashboardResource={data}
               datasourceApi={datasourceApi}
               dashboardTitleComponent={
-                <DashboardBreadcrumbs dashboardName={data.metadata.name} dashboardProject={data.metadata.project} />
+                <DashboardBreadcrumbs
+                  dashboardName={data.spec.display ? data.spec.display.name : data.metadata.name}
+                  dashboardProject={data.metadata.project}
+                />
               }
               initialVariableIsSticky={true}
             />

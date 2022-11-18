@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] Standardize headers for editors #784
+- [ENHANCEMENT] Reduce the number of retries #788
+
 ## 0.16.0 / 2022-11-17
 
 - [FEATURE] Add UI for configuring gauge panel options #761

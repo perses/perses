@@ -17,6 +17,7 @@ import { PanelDefinition } from './panels';
 import { ProjectMetadata } from './resource';
 import { DurationString } from './time';
 import { VariableDefinition } from './variables';
+import { Display } from './display';
 
 export interface DashboardResource {
   kind: 'Dashboard';
@@ -25,6 +26,7 @@ export interface DashboardResource {
 }
 
 export interface DashboardSpec {
+  display?: Display;
   datasources?: Record<string, DatasourceSpec>;
   duration: DurationString;
   variables: VariableDefinition[];

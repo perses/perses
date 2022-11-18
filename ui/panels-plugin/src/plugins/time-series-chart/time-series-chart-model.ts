@@ -21,9 +21,17 @@ import { ThresholdOptions } from '../../model/thresholds';
 export interface TimeSeriesChartOptions {
   queries: TimeSeriesQueryDefinition[];
   legend?: LegendOptions;
+  y_axis?: YAxisOptions;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
   visual?: VisualOptions;
+}
+
+export interface YAxisOptions {
+  label?: string;
+  unit?: UnitOptions;
+  min?: number;
+  max?: number;
 }
 
 export type VisualOptions = {

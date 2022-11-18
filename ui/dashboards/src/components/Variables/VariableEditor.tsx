@@ -120,111 +120,118 @@ export function VariableEditor(props: {
   };
 
   return (
-    <Box p={4}>
+    <>
       {currentEditingVariableDefinition && (
-        <>
-          <Typography variant="h3" mb={2}>
-            Edit Variable
-          </Typography>
-          <VariableEditForm
-            initialVariableDefinition={currentEditingVariableDefinition}
-            onChange={(definition) => {
-              setVariableDefinitions((draft) => {
-                draft[variableEditIdx] = definition;
-                setVariableEditIdx(null);
-              });
-            }}
-            onCancel={() => setVariableEditIdx(null)}
-          />
-        </>
+        <VariableEditForm
+          initialVariableDefinition={currentEditingVariableDefinition}
+          onChange={(definition) => {
+            setVariableDefinitions((draft) => {
+              draft[variableEditIdx] = definition;
+              setVariableEditIdx(null);
+            });
+          }}
+          onCancel={() => setVariableEditIdx(null)}
+        />
       )}
       {!currentEditingVariableDefinition && (
         <>
-          <Stack direction="row" spacing={1} justifyContent="end">
-            <Button
-              disabled={props.variableDefinitions === variableDefinitions || !validation.isValid}
-              variant="contained"
-              onClick={() => {
-                props.onChange(variableDefinitions);
-              }}
-            >
-              Apply
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                props.onCancel();
-              }}
-            >
-              Cancel
-            </Button>
-          </Stack>
-          <Typography variant="h3" mb={2}>
-            Variable List
-          </Typography>
-          <Stack spacing={2}>
-            {!validation.isValid &&
-              validation.errors.map((error) => (
-                <Alert severity="error" key={error}>
-                  {error}
-                </Alert>
-              ))}
-            <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Visibility</TableCell>
-                    <TableCell>Variable Name</TableCell>
-                    <TableCell>Variable Type</TableCell>
-                    <TableCell align="right">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {variableDefinitions.map((v, idx) => (
-                    <TableRow key={v.spec.name}>
-                      <TableCell component="th" scope="row">
-                        <Switch
-                          checked={v.spec.display?.hidden !== true}
-                          onChange={(e) => {
-                            toggleVariableVisibility(idx, e.target.checked);
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        {v.spec.name}
-                      </TableCell>
-                      <TableCell>{v.kind}</TableCell>
-                      <TableCell align="right">
-                        <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
-                          <ArrowUp />
-                        </IconButton>
-                        <IconButton
-                          onClick={() => changeVariableOrder(idx, 'down')}
-                          disabled={idx === variableDefinitions.length - 1}
-                        >
-                          <ArrowDown />
-                        </IconButton>
-
-                        <IconButton onClick={() => setVariableEditIdx(idx)}>
-                          <PencilIcon />
-                        </IconButton>
-                        <IconButton onClick={() => removeVariable(idx)}>
-                          <TrashIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Box display="flex">
-              <Button onClick={addVariable} variant="contained">
-                Add New Variable
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: (theme) => theme.spacing(1, 2),
+              borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
+            }}
+          >
+            <Typography variant="h2">Template Variables</Typography>
+            <Stack direction="row" spacing={1} marginLeft="auto">
+              <Button
+                disabled={props.variableDefinitions === variableDefinitions || !validation.isValid}
+                variant="contained"
+                onClick={() => {
+                  props.onChange(variableDefinitions);
+                }}
+              >
+                Apply
               </Button>
-            </Box>
-          </Stack>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  props.onCancel();
+                }}
+              >
+                Cancel
+              </Button>
+            </Stack>
+          </Box>
+          <Box padding={2} sx={{ overflowY: 'scroll' }}>
+            <Typography variant="h3" mb={2}>
+              Variable List
+            </Typography>
+            <Stack spacing={2}>
+              {!validation.isValid &&
+                validation.errors.map((error) => (
+                  <Alert severity="error" key={error}>
+                    {error}
+                  </Alert>
+                ))}
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Visibility</TableCell>
+                      <TableCell>Variable Name</TableCell>
+                      <TableCell>Variable Type</TableCell>
+                      <TableCell align="right">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {variableDefinitions.map((v, idx) => (
+                      <TableRow key={v.spec.name}>
+                        <TableCell component="th" scope="row">
+                          <Switch
+                            checked={v.spec.display?.hidden !== true}
+                            onChange={(e) => {
+                              toggleVariableVisibility(idx, e.target.checked);
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                          {v.spec.name}
+                        </TableCell>
+                        <TableCell>{v.kind}</TableCell>
+                        <TableCell align="right">
+                          <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
+                            <ArrowUp />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => changeVariableOrder(idx, 'down')}
+                            disabled={idx === variableDefinitions.length - 1}
+                          >
+                            <ArrowDown />
+                          </IconButton>
+
+                          <IconButton onClick={() => setVariableEditIdx(idx)}>
+                            <PencilIcon />
+                          </IconButton>
+                          <IconButton onClick={() => removeVariable(idx)}>
+                            <TrashIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Box display="flex">
+                <Button onClick={addVariable} variant="contained">
+                  Add New Variable
+                </Button>
+              </Box>
+            </Stack>
+          </Box>
         </>
       )}
-    </Box>
+    </>
   );
 }
