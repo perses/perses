@@ -19,7 +19,13 @@ import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, ZoomEventData, Legend, YAxisLabel } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_LEGEND,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
+} from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -55,6 +61,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // convert Perses dashboard format to be ECharts compatible
   const yAxis = {
+    show: y_axis?.show ?? DEFAULT_Y_AXIS.show,
     min: y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
     max: y_axis?.max,
   };
@@ -173,7 +180,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
   const gridOverrides: GridComponentOption = {
-    left: y_axis && y_axis.label ? 30 : 20,
+    // left: y_axis && y_axis.label ? 30 : 20,
+    left: !yAxis.show ? 10 : 20,
     right: legend && legend.position === 'right' ? legendWidth : 20,
   };
 

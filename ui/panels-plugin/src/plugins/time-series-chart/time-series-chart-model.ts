@@ -28,6 +28,7 @@ export interface TimeSeriesChartOptions {
 }
 
 export interface YAxisOptions {
+  show?: boolean;
   label?: string;
   unit?: UnitOptions;
   min?: number;
@@ -72,6 +73,7 @@ export const VISUAL_CONFIG = {
 };
 
 export const DEFAULT_Y_AXIS: YAxisOptions = {
+  show: true,
   label: '',
   unit: DEFAULT_UNIT,
   min: undefined,
@@ -79,6 +81,7 @@ export const DEFAULT_Y_AXIS: YAxisOptions = {
 };
 
 export const Y_AXIS_CONFIG = {
+  show: { label: 'Show' },
   label: { label: 'Label' },
   unit: { label: 'Unit' },
   min: { label: 'Min' },
