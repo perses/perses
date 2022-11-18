@@ -55,10 +55,12 @@ function getQueryOptions({
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
 
+  // Determine queryKey
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariabledState);
   const queryKey = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey] as const;
 
+  // Determine queryEnabled
   let waitToLoad = false;
   if (variableDependencies) {
     waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
@@ -68,7 +70,6 @@ function getQueryOptions({
   return {
     queryKey,
     queryEnabled,
-    queryRetries: 1,
   };
 }
 
@@ -79,7 +80,7 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
-  const { queryEnabled, queryKey, queryRetries } = getQueryOptions({ plugin, definition, context });
+  const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
   return useQuery({
     enabled: queryEnabled,
     queryKey: queryKey,
@@ -92,7 +93,6 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
       const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
       return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
     },
-    retry: queryRetries,
   });
 };
 
@@ -111,7 +111,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
   return useQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
-      const { queryEnabled, queryKey, queryRetries } = getQueryOptions({ plugin, definition, context });
+      const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
         enabled: queryEnabled,
         queryKey: queryKey,
@@ -122,7 +122,6 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
           return data;
         },
-        retry: queryRetries,
       };
     }),
   });
