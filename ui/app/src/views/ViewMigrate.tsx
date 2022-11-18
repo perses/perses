@@ -83,7 +83,7 @@ function ViewMigrate() {
         </Button>
         <TextField
           value={grafanaDashboard}
-          onBlur={(e) => setGrafanaDashboard(e.target.value)}
+          onChange={(e) => setGrafanaDashboard(e.target.value)}
           multiline
           fullWidth
           minRows={10}
