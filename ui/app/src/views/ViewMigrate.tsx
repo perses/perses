@@ -64,7 +64,7 @@ function ViewMigrate() {
         <AutoFix fontSize={'large'} />
         <Typography variant="h1">Migrate</Typography>
       </Stack>
-      <Stack direction={'column'} spacing={2} mt={2}>
+      <Stack direction={'column'} spacing={1} mt={2}>
         <Alert variant={'outlined'} severity={'warning'}>
           <Typography>
             As we do not support every feature from Grafana, the migration to Perses can only be partial. Some panels
@@ -107,7 +107,7 @@ function ViewMigrate() {
           </Alert>
         )}
         {migrateMutation.isSuccess && (
-          <Stack direction={'row'} spacing={2}>
+          <Stack direction={'row'} spacing={1}>
             <JSONEditor value={migrateMutation.data} />
             <Stack spacing={1}>
               <TextField
