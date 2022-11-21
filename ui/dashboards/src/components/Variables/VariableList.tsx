@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import React, { useState } from 'react';
-import { Button, Stack, Box, Drawer, AppBar, useScrollTrigger, IconButton } from '@mui/material';
+import { Button, Stack, Box, AppBar, useScrollTrigger, IconButton } from '@mui/material';
 import EyeIcon from 'mdi-material-ui/Eye';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
+import { Drawer } from '@perses-dev/components';
 import { useTemplateVariableDefinitions, useEditMode, useTemplateVariableActions } from '../../context';
 import { TemplateVariable } from './Variable';
 import { VariableEditor } from './VariableEditor';
@@ -35,14 +36,17 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
   const { setVariableDefinitions } = useTemplateVariableActions();
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
+
+  const onClose = () => {
+    setIsEditing(false);
+  };
+
   return (
     <Box>
-      <Drawer anchor={'right'} open={isEditing} PaperProps={{ sx: { width: '50%' } }}>
+      <Drawer isOpen={isEditing} onClose={onClose} PaperProps={{ sx: { width: '50%' } }}>
         <VariableEditor
-          onCancel={() => {
-            setIsEditing(false);
-          }}
           variableDefinitions={variableDefinitions}
+          onCancel={onClose}
           onChange={(v) => {
             setVariableDefinitions(v);
             setIsEditing(false);
@@ -62,7 +66,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
 
       <AppBar color={'inherit'} position={isSticky ? 'fixed' : 'static'} elevation={isSticky ? 4 : 0}>
         <Box display={'flex'} justifyContent="space-between" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
-          <Stack direction={'row'} spacing={2}>
+          <Stack direction="row" spacing={1}>
             {showVariables &&
               variableDefinitions.map((v) => (
                 <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>

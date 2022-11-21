@@ -28,8 +28,8 @@ func GenerateDashboardID(project string, name string) string {
 }
 
 type PanelSpec struct {
-	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
-	Plugin  common.Plugin   `json:"plugin" yaml:"plugin"`
+	Display common.Display `json:"display" yaml:"display"`
+	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
 }
 
 type Panel struct {
@@ -38,6 +38,7 @@ type Panel struct {
 }
 
 type DashboardSpec struct {
+	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
 	// Datasources is an optional list of datasource definition.
 	Datasources map[string]*DatasourceSpec `json:"datasources,omitempty" yaml:"datasources,omitempty"`
 	// Duration is the default time you would like to use to looking in the past when getting data to fill the

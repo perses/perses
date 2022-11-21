@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider, Stack, Typography } from '@mui/material';
+import { Slider } from '@mui/material';
+import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
 import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS, VISUAL_CONFIG } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
@@ -37,32 +38,37 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
   };
 
   return (
-    <Stack spacing={1} alignItems="flex-start">
-      <Typography variant="overline" component="h4">
-        Visual
-      </Typography>
-      <Typography variant="h5">{VISUAL_CONFIG.point_radius.label}</Typography>
-      <Slider
-        data-testid={VISUAL_CONFIG.point_radius.testId}
-        defaultValue={DEFAULT_POINT_RADIUS}
-        valueLabelDisplay="auto"
-        step={0.5}
-        marks
-        min={0}
-        max={20}
-        onChange={handlePointRadiusChange}
+    <OptionsEditorGroup title="Visual">
+      <OptionsEditorControl
+        label={VISUAL_CONFIG.point_radius.label}
+        control={
+          <Slider
+            data-testid={VISUAL_CONFIG.point_radius.testId}
+            defaultValue={DEFAULT_POINT_RADIUS}
+            valueLabelDisplay="auto"
+            step={0.5}
+            marks
+            min={0}
+            max={20}
+            onChange={handlePointRadiusChange}
+          />
+        }
       />
-      <Typography variant="h5">{VISUAL_CONFIG.line_width.label}</Typography>
-      <Slider
-        data-testid={VISUAL_CONFIG.line_width.testId}
-        defaultValue={DEFAULT_LINE_WIDTH}
-        valueLabelDisplay="auto"
-        step={0.5}
-        marks
-        min={0.5}
-        max={10}
-        onChange={handleLineWidthChange}
+      <OptionsEditorControl
+        label={VISUAL_CONFIG.line_width.label}
+        control={
+          <Slider
+            data-testid={VISUAL_CONFIG.line_width.testId}
+            defaultValue={DEFAULT_LINE_WIDTH}
+            valueLabelDisplay="auto"
+            step={0.5}
+            marks
+            min={0.5}
+            max={10}
+            onChange={handleLineWidthChange}
+          />
+        }
       />
-    </Stack>
+    </OptionsEditorGroup>
   );
 }

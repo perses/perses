@@ -59,7 +59,7 @@ export const PanelDrawer = () => {
             }}
           >
             <Typography variant="h2">{panelEditor.mode} Panel</Typography>
-            <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" spacing={1} marginLeft="auto">
               {/* Using the 'form' attribute lets us have a submit button like this outside the form element */}
               <Button type="submit" variant="contained" form={panelEditorFormId}>
                 {panelEditor.mode === 'Add' ? 'Add' : 'Apply'}

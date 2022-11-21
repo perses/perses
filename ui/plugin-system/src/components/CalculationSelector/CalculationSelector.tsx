@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, TextField, Autocomplete } from '@mui/material';
+import { TextField, Autocomplete } from '@mui/material';
+import { OptionsEditorControl } from '@perses-dev/components';
 import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '../../model/calculations';
 
 type AutocompleteCalculationOption = CalculationConfig & { id: CalculationType };
@@ -35,18 +36,21 @@ export function CalculationSelector({ value, onChange }: CalculationSelectorProp
   const calcConfig = CALCULATIONS_CONFIG[value];
 
   return (
-    <FormControl sx={{ minWidth: 200 }}>
-      <Autocomplete
-        value={{
-          ...calcConfig,
-          id: value,
-        }}
-        options={CALC_OPTIONS}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        renderInput={(params) => <TextField {...params} label="Calculation" />}
-        onChange={handleCalculationChange}
-        disableClearable
-      ></Autocomplete>
-    </FormControl>
+    <OptionsEditorControl
+      label="Calculation"
+      control={
+        <Autocomplete
+          value={{
+            ...calcConfig,
+            id: value,
+          }}
+          options={CALC_OPTIONS}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          renderInput={(params) => <TextField {...params} />}
+          onChange={handleCalculationChange}
+          disableClearable
+        ></Autocomplete>
+      }
+    />
   );
 }

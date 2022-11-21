@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { merge } from 'lodash-es';
+import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
+import { formatValue, UnitOptions } from '../model';
 
 export interface ZoomEventData {
   start: number;
@@ -20,7 +23,9 @@ export interface ZoomEventData {
   endIndex: number;
 }
 
-// enable dataZoom without requring user to click toolbox icon
+/**
+ * Enable dataZoom without requring user to click toolbox icon
+ */
 export function enableDataZoom(chart: EChartsInstance) {
   const chartModel = chart['_model'];
   if (chartModel === undefined) return;
@@ -36,15 +41,19 @@ export function enableDataZoom(chart: EChartsInstance) {
   }
 }
 
-// restore chart to original state before zoom or other actions were dispatched
-// TODO: support incremental unzoom instead of restore to original state
+/**
+ * Restore chart to original state before zoom or other actions were dispatched
+ */
 export function restoreChart(chart: EChartsInstance) {
+  // TODO: support incremental unzoom instead of restore to original state
   chart.dispatchAction({
     type: 'restore', // https://echarts.apache.org/en/api.html#events.restore
   });
 }
 
-// fallback when xAxis time range not passed as prop
+/**
+ * Calculate date range, used as a fallback when xAxis time range not passed as prop
+ */
 export function getDateRange(data: number[]) {
   const defaultRange = 3600000; // hour in ms
   if (data.length === 0) return defaultRange;
@@ -53,7 +62,9 @@ export function getDateRange(data: number[]) {
   return lastDatum - data[0];
 }
 
-// determines time granularity for axis labels, defaults to hh:mm
+/*
+ * Determines time granularity for axis labels, defaults to hh:mm
+ */
 export function getFormattedDate(value: number, rangeMs: number) {
   const dateFormatOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
@@ -71,4 +82,21 @@ export function getFormattedDate(value: number, rangeMs: number) {
   const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
   // remove comma when month / day present
   return DATE_FORMAT.format(value).replace(/, /g, ' ');
+}
+
+/*
+ * Populate yAxis properties, returns an Array since multiple y axes will be supported in the future
+ */
+export function getYAxes(yAxis?: YAXisComponentOption, unit?: UnitOptions) {
+  // TODO: support alternate yAxis that shows on right side
+  const Y_AXIS_DEFAULT = {
+    type: 'value',
+    boundaryGap: [0, '10%'],
+    axisLabel: {
+      formatter: (value: number) => {
+        return formatValue(value, unit);
+      },
+    },
+  };
+  return [merge(Y_AXIS_DEFAULT, yAxis)];
 }

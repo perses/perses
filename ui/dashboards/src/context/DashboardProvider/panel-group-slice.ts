@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { getPanelKeyFromRef, LayoutDefinition } from '@perses-dev/core';
+import { WritableDraft } from 'immer/dist/internal';
 import { Layout } from 'react-grid-layout';
 import { StateCreator } from 'zustand';
 import { generateId, Middleware } from './common';
@@ -144,4 +145,25 @@ export function convertLayoutsToPanelGroups(
     panelGroups,
     panelGroupOrder: panelGroupIdOrder,
   };
+}
+
+/**
+ * Private helper function for creating an empty panel group.
+ */
+export function createEmptyPanelGroup(): PanelGroupDefinition {
+  return {
+    id: generateId(),
+    title: undefined,
+    isCollapsed: false,
+    itemLayouts: [],
+    itemPanelKeys: {},
+  };
+}
+
+/**
+ * Private helper function that modifies panel group state to add a new panel
+ */
+export function addPanelGroup(draft: WritableDraft<PanelGroupSlice>, newGroup: PanelGroupDefinition) {
+  draft.panelGroups[newGroup.id] = newGroup;
+  draft.panelGroupOrder.unshift(newGroup.id);
 }
