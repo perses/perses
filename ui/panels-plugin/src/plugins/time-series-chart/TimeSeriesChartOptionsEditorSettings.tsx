@@ -87,7 +87,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
           }}
           startIcon={<Replay />}
         >
-          Reset
+          Use Default Settings
         </Button>
         <OptionsEditorGroup title="Legend">
           <OptionsEditorControl
