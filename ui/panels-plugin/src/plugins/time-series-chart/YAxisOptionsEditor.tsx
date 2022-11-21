@@ -21,27 +21,28 @@ export interface YAxisOptionsEditorProps {
 }
 
 export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps) {
-  const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit) => {
-    onChange({
-      ...value,
-      unit: newUnit,
-    });
-  };
-
   return (
     <OptionsEditorGroup title="Y Axis">
-      <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+      <UnitSelector
+        value={value.unit ?? DEFAULT_UNIT}
+        onChange={(newUnit) =>
+          onChange({
+            ...value,
+            unit: newUnit,
+          })
+        }
+      />
       <OptionsEditorControl
         label={Y_AXIS_CONFIG.label.label}
         control={
           <TextField
             value={value.label ?? ''}
-            onChange={(e) => {
+            onChange={(e) =>
               onChange({
                 ...value,
                 label: e.target.value,
-              });
-            }}
+              })
+            }
             placeholder="Default"
           />
         }
