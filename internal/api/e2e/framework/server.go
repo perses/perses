@@ -32,6 +32,14 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 )
 
+func getRepositoryPath(t *testing.T) string {
+	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.TrimSpace(string(projectPathByte))
+}
+
 func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
 	for _, key := range keys {
 		err := dao.Delete(key)
@@ -49,11 +57,7 @@ func defaultFileConfig() *config.File {
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
-	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
-	if err != nil {
-		t.Fatal(err)
-	}
-	projectPath := strings.TrimSpace(string(projectPathByte))
+	projectPath := getRepositoryPath(t)
 	handler := echo.New()
 	conf := config.Config{
 		Database: config.Database{
@@ -63,6 +67,7 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
 			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
 			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
+			VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
 			Interval:        0,
 		},
 	}

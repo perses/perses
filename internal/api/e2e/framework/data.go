@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -57,6 +59,13 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 		}
 		upsertFunc = func() error {
 			return persistenceManager.GetGlobalDatasource().Update(entity)
+		}
+	case *v1.Dashboard:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetDashboard().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetDashboard().Update(entity)
 		}
 	default:
 		t.Fatalf("%T is not managed", object)
@@ -179,4 +188,26 @@ func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 	}
 	entity.Metadata.CreateNow()
 	return entity
+}
+
+func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
+	// Creating a full dashboard is quite long and to ensure the changes are still matching the dev environment,
+	// it's better to use the dashboard written in the dev/data/dashboard.json
+	persesRepositoryPath := getRepositoryPath(t)
+	dashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "dashboard.json")
+	var list []*v1.Dashboard
+	data, err := os.ReadFile(dashboardJSONFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unmarshallErr := json.Unmarshal(data, &list); unmarshallErr != nil {
+		t.Fatal(unmarshallErr)
+	}
+	if len(list) == 0 {
+		t.Fatal("dashboard list is empty")
+	}
+	dashboard := list[0]
+	dashboard.Metadata.Name = name
+	dashboard.Metadata.Project = projectName
+	return dashboard
 }
