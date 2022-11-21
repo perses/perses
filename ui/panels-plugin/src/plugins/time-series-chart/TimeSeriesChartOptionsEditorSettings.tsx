@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MenuItem, Select, SelectProps, Switch } from '@mui/material';
+import Replay from 'mdi-material-ui/Replay';
+import { Button, MenuItem, Select, SelectProps, Switch } from '@mui/material';
 import { produce } from 'immer';
 import {
   OptionsEditorGroup,
@@ -73,6 +74,21 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            onChange(
+              produce(value, (draft: TimeSeriesChartOptions) => {
+                draft.y_axis = undefined;
+                draft.legend = undefined;
+                draft.visual = undefined;
+              })
+            );
+          }}
+          startIcon={<Replay />}
+        >
+          Reset
+        </Button>
         <OptionsEditorGroup title="Legend">
           <OptionsEditorControl
             label="Show"
