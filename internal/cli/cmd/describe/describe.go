@@ -57,7 +57,7 @@ func (o *option) Complete(args []string) error {
 
 	// Complete the output
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
-		return err
+		return outputErr
 	}
 	if !resource.IsGlobal(o.kind) {
 		// Complete the project only if the user want to get project resources

@@ -23,6 +23,23 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+func Unmarshal(file string, obj interface{}) error {
+	data, isJSON, err := readAndDetect(file)
+	if err != nil {
+		return err
+	}
+	if isJSON {
+		if jsonErr := json.Unmarshal(data, obj); jsonErr != nil {
+			return jsonErr
+		}
+	} else {
+		if yamlErr := yaml.Unmarshal(data, obj); yamlErr != nil {
+			return yamlErr
+		}
+	}
+	return nil
+}
+
 func UnmarshalEntity(file string) ([]modelAPI.Entity, error) {
 	u := &unmarshaller{}
 	return u.unmarshal(file)
