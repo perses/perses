@@ -107,8 +107,8 @@ github.com/fatih/structs v1.0.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
-github.com/gavv/httpexpect/v2 v2.4.0 h1:YPYAnGRzSfWB663jdCVEAe/5QwfjnXiAHpSwUMWcigo=
-github.com/gavv/httpexpect/v2 v2.4.0/go.mod h1:MvAp9Dft2y+AAJnnU4zOrx6mnqe1TUkPYkNpIhZAUdM=
+github.com/gavv/httpexpect/v2 v2.4.1 h1:U5iZ+ZVok1OdmSmUt3wM4qs0cgbOG8KWiaN0y0WPQbk=
+github.com/gavv/httpexpect/v2 v2.4.1/go.mod h1:qddn0sNk5sM+Uh/AVStNaqNkZPDIadaQvq6vd1AyORI=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
