@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- [FEATURE] Add `migrate` command in the CLI #795
 - [ENHANCEMENT] Standardize headers for editors #784
 - [ENHANCEMENT] Reduce the number of retries #788
 
