@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps, TextField } from '@mui/material';
+import { Switch, TextField } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, UnitSelector } from '@perses-dev/components';
 import { DEFAULT_UNIT, DEFAULT_Y_AXIS, YAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
 
@@ -21,18 +21,21 @@ export interface YAxisOptionsEditorProps {
 }
 
 export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps) {
-  const handleShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
-    onChange({
-      ...value,
-      show: checked,
-    });
-  };
-
   return (
     <OptionsEditorGroup title="Y Axis">
       <OptionsEditorControl
         label="Show"
-        control={<Switch checked={value.show ?? DEFAULT_Y_AXIS.show} onChange={handleShowChange} />}
+        control={
+          <Switch
+            checked={value.show ?? DEFAULT_Y_AXIS.show}
+            onChange={(e) => {
+              onChange({
+                ...value,
+                show: e.target.checked,
+              });
+            }}
+          />
+        }
       />
       <UnitSelector
         value={value.unit ?? DEFAULT_UNIT}
