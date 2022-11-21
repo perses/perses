@@ -5,7 +5,7 @@ go 1.18
 require (
 	cuelang.org/go v0.4.2
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gavv/httpexpect/v2 v2.4.0
+	github.com/gavv/httpexpect/v2 v2.4.1
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.16.0
