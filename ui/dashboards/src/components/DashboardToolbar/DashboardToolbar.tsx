@@ -82,6 +82,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 Add Panel
               </Button>
               <TimeRangeControls />
+              <DownloadButton />
             </Stack>
           </Box>
         </Stack>
