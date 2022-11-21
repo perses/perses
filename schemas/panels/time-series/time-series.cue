@@ -27,6 +27,7 @@ import (
 }
 
 #y_axis: {
+	show?:  bool
 	label?: string
 	unit?:  common.#unit
 	min?:   number
