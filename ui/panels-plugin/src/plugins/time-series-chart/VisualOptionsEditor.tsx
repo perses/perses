@@ -49,7 +49,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             step={0.5}
             marks
             min={0}
-            max={20}
+            max={5}
             onChange={handlePointRadiusChange}
           />
         }
@@ -64,7 +64,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             step={0.5}
             marks
             min={0.5}
-            max={10}
+            max={4}
             onChange={handleLineWidthChange}
           />
         }
