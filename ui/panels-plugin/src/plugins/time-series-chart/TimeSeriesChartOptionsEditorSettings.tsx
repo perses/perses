@@ -74,22 +74,6 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <Button
-          variant="outlined"
-          onClick={() => {
-            onChange(
-              produce(value, (draft: TimeSeriesChartOptions) => {
-                // reset button removes all optional panel options
-                draft.y_axis = undefined;
-                draft.legend = undefined;
-                draft.visual = undefined;
-              })
-            );
-          }}
-          startIcon={<Replay />}
-        >
-          Use Default Settings
-        </Button>
         <OptionsEditorGroup title="Legend">
           <OptionsEditorControl
             label="Show"
@@ -124,6 +108,24 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <YAxisOptionsEditor value={value.y_axis ?? DEFAULT_Y_AXIS} onChange={handleYAxisChange} />
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            onChange(
+              produce(value, (draft: TimeSeriesChartOptions) => {
+                // reset button removes all optional panel options
+                draft.y_axis = undefined;
+                draft.legend = undefined;
+                draft.visual = undefined;
+              })
+            );
+          }}
+          startIcon={<Replay />}
+        >
+          Use Default Settings
+        </Button>
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );
