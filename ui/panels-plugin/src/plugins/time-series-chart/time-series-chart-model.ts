@@ -71,6 +71,20 @@ export const VISUAL_CONFIG = {
   point_radius: { label: 'Point Radius', testId: 'slider-point-radius' },
 };
 
+export const DEFAULT_Y_AXIS: YAxisOptions = {
+  label: '',
+  unit: DEFAULT_UNIT,
+  min: undefined,
+  max: undefined,
+};
+
+export const Y_AXIS_CONFIG = {
+  label: { label: 'Label' },
+  unit: { label: 'Unit' },
+  min: { label: 'Min' },
+  max: { label: 'Max' },
+};
+
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
  */
@@ -89,8 +103,5 @@ export function createInitialTimeSeriesChartOptions(): TimeSeriesChartOptions {
         },
       },
     ],
-    unit: {
-      kind: 'Decimal',
-    },
   };
 }
