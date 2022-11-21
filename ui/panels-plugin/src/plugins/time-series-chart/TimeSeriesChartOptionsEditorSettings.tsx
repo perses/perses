@@ -79,6 +79,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
           onClick={() => {
             onChange(
               produce(value, (draft: TimeSeriesChartOptions) => {
+                // reset button removes all optional panel options
                 draft.y_axis = undefined;
                 draft.legend = undefined;
                 draft.visual = undefined;

@@ -178,10 +178,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;
   const legendHeight = legend && legend.position === 'right' ? contentDimensions.height : 35;
 
-  // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
+  // override default spacing, see: https://echarts.apache.org/en/option.html#grid
+  const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
-    // left: y_axis && y_axis.label ? 30 : 20,
-    left: !yAxis.show ? 10 : 20,
+    left: !yAxis.show ? 0 : gridLeft,
     right: legend && legend.position === 'right' ? legendWidth : 20,
   };
 
@@ -197,7 +197,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   return (
     <>
-      {y_axis && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
+      {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
       <LineChart
         height={lineChartHeight}
         data={graphData}
