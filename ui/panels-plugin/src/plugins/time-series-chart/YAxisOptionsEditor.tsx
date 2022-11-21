@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TextField } from '@mui/material';
-import { OptionsEditorControl, OptionsEditorGroup, UnitSelector, UnitSelectorProps } from '@perses-dev/components';
+import { OptionsEditorControl, OptionsEditorGroup, UnitSelector } from '@perses-dev/components';
 import { DEFAULT_UNIT, YAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
 
 export interface YAxisOptionsEditorProps {
