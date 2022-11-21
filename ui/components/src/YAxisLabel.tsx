@@ -13,12 +13,12 @@
 
 import { Box, Typography } from '@mui/material';
 
-interface AxisLabelProps {
+interface YAxisLabelProps {
   name: string;
   height: number;
 }
 
-export function AxisLabel({ name, height }: AxisLabelProps) {
+export function YAxisLabel({ name, height }: YAxisLabelProps) {
   return (
     <Box
       sx={{

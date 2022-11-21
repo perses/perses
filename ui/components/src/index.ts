@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './AxisLabel';
 export * from './DateTimeRangePicker';
 export * from './Drawer';
 export * from './EChart';
@@ -25,6 +24,7 @@ export * from './LineChart';
 export * from './OptionsEditorLayout';
 export * from './StatChart';
 export * from './UnitSelector';
+export * from './YAxisLabel';
 export * from './context/ChartsThemeProvider';
 export * from './utils';
 export * from './model';

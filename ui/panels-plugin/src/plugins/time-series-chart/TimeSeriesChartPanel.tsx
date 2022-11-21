@@ -16,7 +16,7 @@ import { merge } from 'lodash-es';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, ZoomEventData, Legend, AxisLabel } from '@perses-dev/components';
+import { LineChart, EChartsDataFormat, ZoomEventData, Legend, YAxisLabel } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
@@ -189,7 +189,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   return (
     <>
-      {y_axis && y_axis.label && <AxisLabel name={y_axis.label} height={contentDimensions.height} />}
+      {y_axis && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
       <LineChart
         height={lineChartHeight}
         data={graphData}
