@@ -30,7 +30,8 @@
     "@perses-dev/components": "^0.16.0",
     "@perses-dev/core": "^0.16.0",
     "immer": "^9.0.15",
-    "use-immer": "^0.7.0"
+    "use-immer": "^0.7.0",
+    "use-query-params": "^2.1.2"
   },
   "peerDependencies": {
     "@mui/material": "^5.6.0",

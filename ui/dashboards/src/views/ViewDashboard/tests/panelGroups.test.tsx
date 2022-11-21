@@ -13,7 +13,8 @@
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DashboardProvider, TemplateVariableProvider, TimeRangeProvider } from '../../../context';
+import { TimeRangeProvider } from '@perses-dev/plugin-system';
+import { DashboardProvider, TemplateVariableProvider } from '../../../context';
 import { getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 

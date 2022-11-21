@@ -14,7 +14,7 @@
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
-import { TimeRangeValue, UnknownSpec } from '@perses-dev/core';
+import { TimeRangeValue, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
 import {
   PluginRegistry,
   useTimeSeriesQueries,
@@ -88,6 +88,9 @@ describe('TimeSeriesChartPanel', () => {
     const mockTimeRangeContext = {
       timeRange: TEST_TIME_RANGE,
       setTimeRange: () => ({}),
+      absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
+      refresh: jest.fn(),
+      refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
     };
 
     render(

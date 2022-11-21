@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+- [FEATURE] Add ability to refresh dashboard #777
 - [FEATURE] Add `migrate` command in the CLI #795
 - [ENHANCEMENT] Standardize headers for editors #784
 - [ENHANCEMENT] Reduce the number of retries #788
+- [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 
 ## 0.16.0 / 2022-11-17
 
