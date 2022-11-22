@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Typography, Stack, Button, Box, useTheme, useMediaQuery } from '@mui/material';
+import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
@@ -61,7 +61,10 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Box padding={2} display="flex">
               {dashboardTitle}
               <Stack direction="row" spacing={1} marginLeft="auto">
-                <Button variant="contained" onClick={onSave}>
+                <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                  Dashboard managed via code only. Download JSON and commit changes to save.
+                </Alert>
+                <Button variant="contained" onClick={onSave} disabled={isReadonly}>
                   Save
                 </Button>
                 <Button variant="outlined" onClick={onCancelButtonClick}>
@@ -100,7 +103,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack direction="row" spacing={1} marginLeft="auto">
               <TimeRangeControls />
               <DownloadButton />
-              {isLaptopSize && !isReadonly && (
+              {isLaptopSize && (
                 <Button
                   variant="outlined"
                   startIcon={<PencilIcon />}
