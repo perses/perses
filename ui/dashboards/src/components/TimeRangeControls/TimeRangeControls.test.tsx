@@ -15,9 +15,10 @@ import { generatePath } from 'react-router';
 import { createMemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
 import { screen, act } from '@testing-library/react';
+import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import { DashboardProvider, DashboardStoreProps, TimeRangeProvider } from '../../context';
+import { DashboardProvider, DashboardStoreProps } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
 
 const history = createMemoryHistory({
@@ -49,7 +50,7 @@ describe('TimeRangeControls', () => {
   it('should default to dashboard duration and update selected time option when clicked', async () => {
     renderTimeRangeControls(false);
     expect(screen.getByText('Last 30 minutes')).toBeInTheDocument();
-    const dateButton = screen.getByRole('button');
+    const dateButton = screen.getByRole('button', { name: /last/i });
     userEvent.click(dateButton);
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);
@@ -58,7 +59,7 @@ describe('TimeRangeControls', () => {
 
   it('should update URL params with correct time range values', () => {
     renderTimeRangeControls(true);
-    const dateButton = screen.getByRole('button');
+    const dateButton = screen.getByRole('button', { name: /last/i });
     userEvent.click(dateButton);
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);

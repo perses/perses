@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- [FEATURE] Add ability to refresh dashboard #777
+- [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
+
 ## 0.17.0 / 2022-11-21
 
 - [FEATURE] custom y_axis `label`, `min`, and `max` properties in time series panel #767, #790

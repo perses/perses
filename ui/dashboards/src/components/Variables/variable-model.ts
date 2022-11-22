@@ -25,7 +25,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const datasourceStore = useDatasourceStore();
   const allVariables = useTemplateVariableValues();
-  const { timeRange } = useTimeRange();
+  const { absoluteTimeRange: timeRange, refreshKey } = useTimeRange();
 
   const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
 
@@ -47,7 +47,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
   const variablesValueKey = getVariableValuesKey(variables);
 
   const variablesOptionsQuery = useQuery(
-    [name, definition, variablesValueKey, timeRange],
+    [name, definition, variablesValueKey, timeRange, refreshKey],
     async () => {
       const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
       return resp?.data ?? [];
