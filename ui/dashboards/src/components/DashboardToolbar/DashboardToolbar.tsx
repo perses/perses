@@ -61,9 +61,11 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Box padding={2} display="flex">
               {dashboardTitle}
               <Stack direction="row" spacing={1} marginLeft="auto">
-                <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
-                  Dashboard managed via code only. Download JSON and commit changes to save.
-                </Alert>
+                {isReadonly && (
+                  <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                    Dashboard managed via code only. Download JSON and commit changes to save.
+                  </Alert>
+                )}
                 <Button variant="contained" onClick={onSave} disabled={isReadonly}>
                   Save
                 </Button>
