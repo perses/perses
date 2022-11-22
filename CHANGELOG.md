@@ -3,6 +3,7 @@
 ## Unreleased
 
 - [FEATURE] Add ability to refresh dashboard #777
+- [BREAKINGCHANGE] bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 
 ## 0.17.0 / 2022-11-21
