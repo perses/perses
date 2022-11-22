@@ -47,10 +47,9 @@ export function GaugeChart(props: GaugeChartProps) {
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data.value === null || data.value === undefined) return chartsTheme.noDataOption;
+    if (!data.value) return chartsTheme.noDataOption;
 
     const calculatedValue = data.value;
-
     return {
       title: {
         show: false,

@@ -20,6 +20,9 @@ import { convertThresholds, defaultThresholdInput } from '../../model/thresholds
 import { useSuggestedStepMs } from '../../model/time';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 
+const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
+const MAX_GAUGE_SERIES_DISPLAY = 6;
+
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
@@ -52,7 +55,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
 
   if (contentDimensions === undefined) return null;
 
-  // TODO: fix loading state
+  // TODO: remove Skeleton, add loading state to match mockups
   if (isLoading === true) {
     return (
       <Skeleton
@@ -82,21 +85,38 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     },
   };
 
-  const chartWidth = contentDimensions.width / gaugeData.length;
+  // no data message handled inside chart component
+  if (gaugeData.length === 0) {
+    return (
+      <GaugeChart
+        width={contentDimensions.width}
+        height={contentDimensions.height}
+        data={EMPTY_GAUGE_SERIES}
+        unit={unit}
+        axisLine={axisLine}
+        max={thresholdMax}
+      />
+    );
+  }
 
+  // show separate chart for each time series returned
+  const chartWidth = contentDimensions.width / gaugeData.length;
   return (
     <Stack direction="row">
-      {gaugeData.map((series, seriesIndex) => (
-        <GaugeChart
-          key={`gauge-series-${seriesIndex}`}
-          width={chartWidth}
-          height={contentDimensions.height}
-          data={series}
-          unit={unit}
-          axisLine={axisLine}
-          max={thresholdMax}
-        />
-      ))}
+      {gaugeData.map((series, seriesIndex) => {
+        if (seriesIndex >= MAX_GAUGE_SERIES_DISPLAY) return null;
+        return (
+          <GaugeChart
+            key={`gauge-series-${seriesIndex}`}
+            width={chartWidth}
+            height={contentDimensions.height}
+            data={series}
+            unit={unit}
+            axisLine={axisLine}
+            max={thresholdMax}
+          />
+        );
+      })}
     </Stack>
   );
 }
