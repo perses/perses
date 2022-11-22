@@ -456,8 +456,7 @@
                   }
                 },
                 "calculation": "Mean",
-                "unit": { "kind": "Percent" },
-                "sparkline": { "area_opacity": 0.2 }
+                "unit": { "kind": "Percent" }
               }
             }
           }
@@ -1115,9 +1114,6 @@
                 "calculation": "Mean",
                 "unit": {
                   "kind": "Percent"
-                },
-                "sparkline": {
-                  "area_opacity": 0.2
                 }
               }
             }

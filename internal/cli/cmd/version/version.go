@@ -18,6 +18,7 @@ import (
 
 	"github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/prometheus/common/version"
@@ -38,13 +39,17 @@ type outputVersion struct {
 
 type option struct {
 	persesCMD.Option
+	opt.OutputOption
 	writer    io.Writer
 	short     bool
-	output    string
 	apiClient api.ClientInterface
 }
 
 func (o *option) Complete(_ []string) error {
+	// Complete the output
+	if outputErr := o.OutputOption.Complete(); outputErr != nil {
+		return outputErr
+	}
 	apiClient, err := config.Global.GetAPIClient()
 	// In case you are not connected to any API, it is still fine.
 	logrus.WithError(err).Debug("unable to get the api client from config")
@@ -53,7 +58,7 @@ func (o *option) Complete(_ []string) error {
 }
 
 func (o *option) Validate() error {
-	return output.ValidateAndSet(&o.output)
+	return nil
 }
 
 func (o *option) Execute() error {
@@ -79,7 +84,7 @@ func (o *option) Execute() error {
 			}
 		}
 	}
-	return output.Handle(o.writer, o.output, v)
+	return output.Handle(o.writer, o.Output, v)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -95,7 +100,7 @@ func NewCMD() *cobra.Command {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
+	opt.AddOutputFlags(cmd, &o.OutputOption)
 	cmd.Flags().BoolVar(&o.short, "short", o.short, "If true, just print the version number.")
-	cmd.Flags().StringVarP(&o.output, "output", "o", o.output, "One of 'yaml' or 'json'. Default is 'yaml'.")
 	return cmd
 }

@@ -16,11 +16,13 @@ package api
 import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	V1() v1.ClientInterface
+	Migrate(grafanaDashboard interface{}) (*modelV1.Dashboard, error)
 }
 
 type client struct {
@@ -40,4 +42,15 @@ func (c *client) RESTClient() *perseshttp.RESTClient {
 
 func (c *client) V1() v1.ClientInterface {
 	return v1.NewWithClient(c.restClient)
+}
+
+func (c *client) Migrate(grafanaDashboard interface{}) (*modelV1.Dashboard, error) {
+	result := &modelV1.Dashboard{}
+	err := c.restClient.Post().
+		APIVersion("").
+		Resource("migrate").
+		Body(grafanaDashboard).
+		Do().
+		Object(result)
+	return result, err
 }

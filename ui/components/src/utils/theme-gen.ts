@@ -77,9 +77,6 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
     },
     valueAxis: {
       show: true,
-      nameGap: 50,
-      // TODO: change to 'outsideCenter' after new prop merged: https://github.com/apache/echarts/pull/16825
-      nameLocation: 'middle',
       axisLabel: {
         color: primaryTextColor,
         margin: 12,

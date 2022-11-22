@@ -18,7 +18,7 @@ import (
 	"regexp"
 )
 
-var idRegexp = regexp.MustCompile("[a-zA-Z0-9_-]+$")
+var idRegexp = regexp.MustCompile("(?m)^[a-zA-Z0-9_.:-]+$")
 
 // ValidateID checks for forbidden items in substring used inside id
 func ValidateID(name string) error {

@@ -21,7 +21,7 @@ import {
   DurationString,
   AbsoluteTimeRange,
 } from '@perses-dev/core';
-import { TimeRange } from '@perses-dev/plugin-system';
+import { TimeRange } from './TimeRangeProvider';
 
 export type TimeOptionValue = Date | DurationString | null | undefined;
 
@@ -116,7 +116,10 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
 /**
  * Returns time range getter and setter, set enabledURLParams to false to disable query string serialization
  */
-export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, enabledURLParams = true): TimeRange {
+export function useSetTimeRangeParams(
+  initialTimeRange: TimeRangeValue,
+  enabledURLParams = true
+): Pick<TimeRange, 'timeRange' | 'setTimeRange'> {
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
 
   // determine whether initial param had previously been populated to fix back btn
