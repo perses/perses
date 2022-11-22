@@ -71,7 +71,7 @@ function RenderDashboardList() {
 
 function ViewDashboardList() {
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="md" sx={{ marginY: 2 }}>
       <Typography variant="h2" mb={2}>
         Dashboards
       </Typography>
