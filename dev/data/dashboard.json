@@ -1316,7 +1316,7 @@
                 "width": 12,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/seriesTestAlt"
+                  "$ref": "#/spec/panels/doubleQueries"
                 }
               },
               {
@@ -1353,24 +1353,6 @@
               {
                 "x": 12,
                 "y": 0,
-                "width": 12,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/basicEx"
-                }
-              },
-              {
-                "x": 0,
-                "y": 6,
-                "width": 12,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/basicEx"
-                }
-              },
-              {
-                "x": 12,
-                "y": 6,
                 "width": 12,
                 "height": 6,
                 "content": {
@@ -1415,7 +1397,7 @@
           "kind": "Grid",
           "spec": {
             "display": {
-              "title": "Row 3",
+              "title": "Row 4",
               "collapse": {
                 "open": false
               }
