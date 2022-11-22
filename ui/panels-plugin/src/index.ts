@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EmptyChart } from './plugins/empty-chart';
 import { GaugeChart } from './plugins/gauge-chart';
 import { TimeSeriesChart } from './plugins/time-series-chart';
 import { Markdown } from './plugins/markdown';
 import { StatChart } from './plugins/stat-chart';
 
 // Just export the plugins under the same name as the kinds they handle from the plugin.json
-export { TimeSeriesChart, GaugeChart, EmptyChart, StatChart, Markdown };
+export { TimeSeriesChart, GaugeChart, StatChart, Markdown };
