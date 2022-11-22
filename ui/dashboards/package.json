@@ -46,7 +46,7 @@
     "intersection-observer": "^0.12.2"
   },
   "peerDependencies": {
-    "@mui/material": "^5.6.0",
+    "@mui/material": "^5.10.0",
     "@tanstack/react-query": "^4.7.1",
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0"
