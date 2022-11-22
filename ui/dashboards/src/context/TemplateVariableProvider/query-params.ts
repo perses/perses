@@ -54,7 +54,7 @@ export function useVariableQueryParams(defs: VariableDefinition[]) {
     const name = getURLQueryParamName(def.spec.name);
     config[name] = VariableValueParam;
   });
-  return useQueryParams(config, { updateType: 'replace' });
+  return useQueryParams(config, { updateType: 'replaceIn' });
 }
 
 export function getInitalValuesFromQueryParameters(
