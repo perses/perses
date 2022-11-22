@@ -34,7 +34,7 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
         if #panel.fieldConfig.defaults.thresholds != _|_ {
             thresholds: {
                 //default_color:                                                       // TODO how to fill this field?
-                steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps { // TODO how to manage the overrides part? 
+                steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part?
                     if step.value == null {
                         value: 0
                     }

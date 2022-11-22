@@ -18,14 +18,18 @@ import {
   Button,
   CircularProgress,
   Divider,
+  IconButton,
   Menu,
   MenuItem,
+  Stack,
   Switch,
   Theme,
   Toolbar,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
+import AutoFix from 'mdi-material-ui/AutoFix';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
 import { useProjectQuery } from '../model/project-client';
@@ -151,7 +155,23 @@ export default function Header(): JSX.Element {
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
-        <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
+        <Stack direction={'row'} alignItems={'center'}>
+          <Tooltip title="migration tool">
+            <IconButton
+              sx={(theme) => ({
+                color: theme.palette.common.white,
+              })}
+              onClick={() => {
+                navigate('/migrate');
+              }}
+            >
+              <AutoFix />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="theme">
+            <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
+          </Tooltip>
+        </Stack>
       </Toolbar>
     </AppBar>
   );
