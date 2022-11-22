@@ -263,17 +263,19 @@ export function VariableEditForm({
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <ErrorBoundary FallbackComponent={() => <div>Error</div>}>
-                  <Stack direction={'row'} spacing={1} alignItems="center">
-                    <Typography variant="caption">Preview Values</Typography>
-                    <IconButton onClick={refreshPreview} size="small">
-                      <Refresh />
-                    </IconButton>
-                  </Stack>
-                  <VariableListPreview definition={previewSpec} />
-                </ErrorBoundary>
-              </Grid>
+              {state.listVariableFields.plugin.kind && (
+                <Grid item xs={12}>
+                  <ErrorBoundary FallbackComponent={() => <div>Error previewing values</div>} resetKeys={[previewSpec]}>
+                    <Stack direction={'row'} spacing={1} alignItems="center">
+                      <Typography variant="caption">Preview Values</Typography>
+                      <IconButton onClick={refreshPreview} size="small">
+                        <Refresh />
+                      </IconButton>
+                    </Stack>
+                    <VariableListPreview definition={previewSpec} />
+                  </ErrorBoundary>
+                </Grid>
+              )}
             </Grid>
 
             <SectionHeader>Dropdown Options</SectionHeader>
