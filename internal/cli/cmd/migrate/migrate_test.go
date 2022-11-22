@@ -11,7 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DashboardProvider';
-export * from './DatasourceStoreProvider';
-export * from './TemplateVariableProvider';
-export * from './useDashboard';
+package migrate
+
+import (
+	"testing"
+
+	cmdTest "github.com/perses/perses/internal/cli/test"
+)
+
+func TestMigrateCMD(t *testing.T) {
+	testSuite := []cmdTest.Suite{
+		{
+			Title:           "empty args",
+			Args:            []string{},
+			IsErrorExpected: true,
+			ExpectedMessage: `required flag(s) "file" not set`,
+		},
+		{
+			Title:           "use args",
+			Args:            []string{"whatever", "-f", "file.json"},
+			IsErrorExpected: true,
+			ExpectedMessage: "no args are supported by the command 'migrate'",
+		},
+	}
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+}

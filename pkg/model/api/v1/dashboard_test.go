@@ -53,7 +53,7 @@ func TestMarshalDashboard(t *testing.T) {
 						"MyPanel": {
 							Kind: "Panel",
 							Spec: PanelSpec{
-								Display: &common.Display{
+								Display: common.Display{
 									Name: "simple line chart",
 								},
 								Plugin: common.Plugin{
@@ -188,7 +188,7 @@ func TestMarshalDashboard(t *testing.T) {
 						"MyPanel": {
 							Kind: "Panel",
 							Spec: PanelSpec{
-								Display: &common.Display{
+								Display: common.Display{
 									Name: "simple line chart",
 								},
 								Plugin: common.Plugin{
@@ -402,7 +402,7 @@ func TestUnmarshallDashboard(t *testing.T) {
 	panel := &Panel{
 		Kind: "Panel",
 		Spec: PanelSpec{
-			Display: &common.Display{
+			Display: common.Display{
 				Name: "simple line chart",
 			},
 			Plugin: common.Plugin{

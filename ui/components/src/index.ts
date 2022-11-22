@@ -24,6 +24,7 @@ export * from './LineChart';
 export * from './OptionsEditorLayout';
 export * from './StatChart';
 export * from './UnitSelector';
+export * from './YAxisLabel';
 export * from './context/ChartsThemeProvider';
 export * from './utils';
 export * from './model';

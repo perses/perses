@@ -14,17 +14,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
 import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
-import {
-  usePlugin,
-  DEFAULT_ALL_VALUE,
-  useTemplateVariableValues,
-  VariableStateMap,
-  useDatasourceStore,
-  useTimeRange,
-} from '@perses-dev/plugin-system';
-import { useQuery } from '@tanstack/react-query';
+import { DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
-
+import { useListVariablePluginValues } from './variable-model';
 type TemplateVariableProps = {
   name: VariableName;
 };
@@ -42,54 +34,15 @@ export function TemplateVariable({ name }: TemplateVariableProps) {
   return <div>Unsupported Variable Kind: ${kind}</div>;
 }
 
-/**
- * Returns a serialized string of the current state of variable values.
- */
-function getVariableValuesKey(v: VariableStateMap) {
-  return Object.values(v)
-    .map((v) => JSON.stringify(v.value))
-    .join(',');
-}
-
 function ListVariable({ name }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name);
   const definition = ctx.definition as ListVariableDefinition;
-  const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
+  const variablesOptionsQuery = useListVariablePluginValues(definition);
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
-  const datasourceStore = useDatasourceStore();
-  const allVariables = useTemplateVariableValues();
-  const { timeRange } = useTimeRange();
 
-  const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
-
-  const spec = definition.spec.plugin.spec;
-
-  let dependsOnVariables: string[] | undefined;
-  if (variablePlugin?.dependsOn) {
-    const dependencies = variablePlugin.dependsOn(spec, variablePluginCtx);
-    dependsOnVariables = dependencies.variables;
-  }
-
-  const variables = useTemplateVariableValues(dependsOnVariables);
   const allowMultiple = definition?.spec.allow_multiple === true;
   const allowAllValue = definition?.spec.allow_all_value === true;
   const title = definition?.spec.display?.name ?? name;
-
-  let waitToLoad = false;
-  if (dependsOnVariables) {
-    waitToLoad = dependsOnVariables.some((v) => variables[v]?.loading);
-  }
-
-  const variablesValueKey = getVariableValuesKey(variables);
-
-  const variablesOptionsQuery = useQuery(
-    [name, definition, variablesValueKey, timeRange],
-    async () => {
-      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
-      return resp?.data ?? [];
-    },
-    { enabled: !!variablePlugin || waitToLoad }
-  );
 
   useEffect(() => {
     setVariableLoading(name, variablesOptionsQuery.isFetching);

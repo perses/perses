@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useState } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
+import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
 import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useEditMode, usePanelGroup, usePanelGroupActions, PanelGroupId } from '../../context';
@@ -25,6 +25,8 @@ export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
 }
 
+const SMALL_LAYOUT_BREAKPOINT = 'sm' as const;
+
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
@@ -36,6 +38,17 @@ export function GridLayout(props: GridLayoutProps) {
 
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
   const { isEditMode } = useEditMode();
+
+  const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts) => {
+    // Using the value from `allLayouts` instead of `currentLayout` because of
+    // a bug in react-layout-grid where `currentLayout` does not adjust properly
+    // when going to a smaller breakpoint and then back to a larger breakpoint.
+    // https://github.com/react-grid-layout/react-grid-layout/issues/1663
+    const smallLayout = allLayouts[SMALL_LAYOUT_BREAKPOINT];
+    if (smallLayout) {
+      updatePanelGroupLayouts(smallLayout);
+    }
+  };
 
   return (
     <GridContainer>
@@ -61,8 +74,8 @@ export function GridLayout(props: GridLayoutProps) {
           isDraggable={isEditMode}
           isResizable={isEditMode}
           containerPadding={[0, 10]}
-          layouts={{ sm: groupDefinition.itemLayouts }}
-          onLayoutChange={updatePanelGroupLayouts}
+          layouts={{ [SMALL_LAYOUT_BREAKPOINT]: groupDefinition.itemLayouts }}
+          onLayoutChange={handleLayoutChange}
         >
           {groupDefinition.itemLayouts.map(({ i }) => (
             <div key={i}>

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableDefinition, TextVariableDefinition, ListVariableDefinition, Display } from '@perses-dev/core';
+import { VariableDefinition, ListVariableDefinition, TextVariableDefinition, Display } from '@perses-dev/core';
 
 export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const textVariableFields = {

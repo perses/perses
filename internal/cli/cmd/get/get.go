@@ -58,7 +58,7 @@ func (o *option) Complete(args []string) error {
 	// Complete the output only if it has been set by the user
 	if len(o.Output) > 0 {
 		if outputErr := o.OutputOption.Complete(); outputErr != nil {
-			return err
+			return outputErr
 		}
 	}
 	// Complete the Project field if only the flag all is not set

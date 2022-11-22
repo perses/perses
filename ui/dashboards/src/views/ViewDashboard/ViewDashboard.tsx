@@ -14,13 +14,12 @@
 import { Box, BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
+import { TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
 import {
-  TimeRangeProvider,
   TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
-  useInitialTimeRange,
 } from '../../context';
 import { DashboardApp } from './DashboardApp';
 
