@@ -7,6 +7,7 @@
 - [ENHANCEMENT] Standardize headers for editors #784
 - [ENHANCEMENT] Reduce the number of retries #788
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
+- [BUGFIX] Fix button wrapping when too many vars #803
 
 ## 0.16.0 / 2022-11-17
 
