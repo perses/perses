@@ -14,13 +14,17 @@
 import type { GaugeSeriesOption } from 'echarts';
 import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeChartData } from '@perses-dev/components';
-import { Skeleton } from '@mui/material';
+import { Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
 import { useSuggestedStepMs } from '../../model/time';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
+
+export type GaugeSeriesData = {
+  gaugeSeries: GaugeChartData[];
+};
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
@@ -32,23 +36,33 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
 
-  const chartData: GaugeChartData = useMemo(() => {
-    if (data === undefined) return undefined;
+  const chartData: GaugeSeriesData = useMemo(() => {
+    if (data === undefined) {
+      return {
+        gaugeSeries: [],
+      };
+    }
 
-    const series = Array.from(data.series)[0];
-    if (series === undefined) return undefined;
+    const graphData: GaugeSeriesData = {
+      gaugeSeries: [],
+    };
+    for (const timeSeries of data.series) {
+      const calculate = CalculationsMap[calculation];
+      const seriesData = {
+        value: calculate(Array.from(timeSeries.values)),
+        label: timeSeries.formattedName,
+      };
+      graphData.gaugeSeries.push(seriesData);
+    }
 
-    const calculate = CalculationsMap[calculation];
-    const value = calculate(Array.from(series.values));
-    if (value === undefined) return null;
-
-    return value;
+    return graphData;
   }, [data, calculation]);
 
   if (error) throw error;
 
   if (contentDimensions === undefined) return null;
 
+  // TODO: fix loading state
   if (isLoading === true) {
     return (
       <Skeleton
@@ -78,14 +92,21 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     },
   };
 
+  const chartWidth = contentDimensions.width / chartData.gaugeSeries.length;
+
   return (
-    <GaugeChart
-      width={contentDimensions.width}
-      height={contentDimensions.height}
-      data={chartData}
-      unit={unit}
-      axisLine={axisLine}
-      max={thresholdMax}
-    />
+    <Stack direction="row">
+      {chartData.gaugeSeries.map((series, seriesIndex) => (
+        <GaugeChart
+          key={`gauge-series-${seriesIndex}`}
+          width={chartWidth}
+          height={contentDimensions.height}
+          data={series}
+          unit={unit}
+          axisLine={axisLine}
+          max={thresholdMax}
+        />
+      ))}
+    </Stack>
   );
 }

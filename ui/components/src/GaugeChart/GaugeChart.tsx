@@ -22,12 +22,21 @@ import { EChart } from '../EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
-export type GaugeChartData = number | null | undefined;
+export type GaugeChartValue = number | null | undefined;
+
+export type GaugeSeries = {
+  value: GaugeChartValue;
+  label: string;
+};
+
+export type GaugeSeriesData = {
+  gaugeSeries: GaugeSeries[];
+};
 
 interface GaugeChartProps {
   width: number;
   height: number;
-  data: GaugeChartData;
+  data: GaugeSeries;
   unit: UnitOptions;
   axisLine: GaugeSeriesOption['axisLine'];
   max?: number;
@@ -35,13 +44,12 @@ interface GaugeChartProps {
 
 export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine, max } = props;
-
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data === null || data === undefined) return chartsTheme.noDataOption;
+    if (data.value === null || data.value === undefined) return chartsTheme.noDataOption;
 
-    const calculatedValue = data;
+    const calculatedValue = data.value;
     return {
       title: {
         show: false,
@@ -143,12 +151,22 @@ export function GaugeChart(props: GaugeChartProps) {
           data: [
             {
               value: calculatedValue,
+              name: data.label,
+              // TODO: new UX for series names, create separate React component or reuse ListLegendItem
+              // https://echarts.apache.org/en/option.html#series-gauge.data.title
+              title: {
+                show: true,
+                offsetCenter: [0, '58%'],
+                overflow: 'truncate', // 'breakAll'
+                fontSize: 11,
+                width: width * 0.8,
+              },
             },
           ],
         },
       ],
     };
-  }, [data, chartsTheme, unit, axisLine, max]);
+  }, [data, width, chartsTheme, unit, axisLine, max]);
 
   return (
     <EChart

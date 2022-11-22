@@ -638,16 +638,16 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 12,
+                "width": 24,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/cpu" }
+                "content": { "$ref": "#/spec/panels/cpuGauge" }
               },
               {
-                "x": 12,
-                "y": 0,
-                "width": 12,
-                "height": 6,
-                "content": { "$ref": "#/spec/panels/testNodeQuery" }
+                "x": 0,
+                "y": 6,
+                "width": 24,
+                "height": 8,
+                "content": { "$ref": "#/spec/panels/cpu" }
               }
             ]
           }
@@ -939,8 +939,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "CPU",
-              "description": "This is a line chart"
+              "name": "CPU - Line (Multi Series)",
+              "description": "This is a line chart test"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -952,17 +952,58 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=\"$instance\",mode!=\"idle\"}[$interval]))"
+                          "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
                         }
                       }
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "Decimal",
-                  "decimal_places": 2
+                "y_axis": {
+                  "show": false,
+                  "label": "CPU Label",
+                  "unit": {
+                    "kind": "PercentDecimal",
+                    "decimal_places": 0
+                  }
                 },
-                "legend": {}
+                "legend": {
+                  "position": "bottom"
+                },
+                "thresholds": {
+                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
+                }
+              }
+            }
+          }
+        },
+        "cpuGauge": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "CPU - Gauge (Multi Series)",
+              "description": "This is a gauge chart test"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                        "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": { "kind": "PercentDecimal" },
+                "thresholds": {
+                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
+                }
               }
             }
           }
