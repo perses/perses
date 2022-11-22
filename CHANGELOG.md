@@ -4,6 +4,7 @@
 
 - [FEATURE] Add ability to refresh dashboard #777
 - [FEATURE] Add a migration page #774
+- [ENHANCEMENT] Dashboard view can be configured to be readonly #731
 - [BREAKINGCHANGE] bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 
