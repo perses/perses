@@ -22,6 +22,10 @@ import { EChart } from '../EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
+const PROGRESS_WIDTH = 16;
+
+const GAUGE_SMALL_BREAKPOINT = 170;
+
 export type GaugeChartValue = number | null | undefined;
 
 export type GaugeSeries = {
@@ -46,6 +50,7 @@ export function GaugeChart(props: GaugeChartProps) {
     if (data.value === null || data.value === undefined) return chartsTheme.noDataOption;
 
     const calculatedValue = data.value;
+
     return {
       title: {
         show: false,
@@ -65,7 +70,7 @@ export function GaugeChart(props: GaugeChartProps) {
           silent: true,
           progress: {
             show: true,
-            width: 22,
+            width: PROGRESS_WIDTH,
             itemStyle: {
               color: 'auto',
             },
@@ -76,7 +81,7 @@ export function GaugeChart(props: GaugeChartProps) {
           axisLine: {
             lineStyle: {
               color: [[1, '#e1e5e9']], // TODO (sjcobb): use future chart theme colors
-              width: 22,
+              width: PROGRESS_WIDTH,
             },
           },
           axisTick: {
@@ -116,7 +121,11 @@ export function GaugeChart(props: GaugeChartProps) {
           min: 0,
           max,
           pointer: {
-            show: false,
+            show: true,
+            icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+            length: 15,
+            width: 6,
+            offsetCenter: width > GAUGE_SMALL_BREAKPOINT ? [0, '-38%'] : [0, 0],
             itemStyle: {
               color: 'auto',
             },
@@ -132,7 +141,7 @@ export function GaugeChart(props: GaugeChartProps) {
             show: false,
           },
           detail: {
-            show: true,
+            show: width > GAUGE_SMALL_BREAKPOINT, // hide center value at narrow chart widths
             width: '60%',
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
@@ -152,9 +161,9 @@ export function GaugeChart(props: GaugeChartProps) {
               // https://echarts.apache.org/en/option.html#series-gauge.data.title
               title: {
                 show: true,
-                offsetCenter: [0, '58%'],
+                offsetCenter: [0, '55%'],
                 overflow: 'truncate', // 'breakAll'
-                fontSize: 11,
+                fontSize: 12,
                 width: width * 0.8,
               },
             },

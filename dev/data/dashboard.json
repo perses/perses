@@ -263,10 +263,13 @@
             }
           }
         },
-        "cpu": {
+        "cpuLine": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "CPU", "description": "This is a line chart" },
+            "display": {
+              "name": "CPU - Line (Multi Series)",
+              "description": "This is a line chart test"
+            },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -277,19 +280,57 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "series_name_format": "Custom {{job}} - {{device}} {{instance}}",
-                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
+                          "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
                         }
                       }
                     }
                   }
                 ],
-                "unit": { "kind": "PercentDecimal", "decimal_places": 0 },
+                "y_axis": {
+                  "show": false,
+                  "label": "CPU Label",
+                  "unit": {
+                    "kind": "PercentDecimal",
+                    "decimal_places": 0
+                  }
+                },
                 "legend": {
                   "position": "bottom"
                 },
                 "thresholds": {
-                  "steps": [{ "value": 0.01 }, { "value": 0.02 }]
+                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
+                }
+              }
+            }
+          }
+        },
+        "cpuGauge": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "CPU - Gauge (Multi Series)",
+              "description": "This is a gauge chart test"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                        "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
+                      }
+                    }
+                  }
+                },
+                "calculation": "LastNumber",
+                "unit": { "kind": "PercentDecimal" },
+                "thresholds": {
+                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
                 }
               }
             }
@@ -647,7 +688,7 @@
                 "y": 6,
                 "width": 24,
                 "height": 8,
-                "content": { "$ref": "#/spec/panels/cpu" }
+                "content": { "$ref": "#/spec/panels/cpuLine" }
               }
             ]
           }
@@ -938,10 +979,7 @@
         "cpu": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "CPU - Line (Multi Series)",
-              "description": "This is a line chart test"
-            },
+            "display": { "name": "CPU", "description": "This is a line chart" },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -952,57 +990,19 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                          "series_name_format": "Custom {{job}} - {{device}} {{instance}}",
                           "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
                         }
                       }
                     }
                   }
                 ],
-                "y_axis": {
-                  "show": false,
-                  "label": "CPU Label",
-                  "unit": {
-                    "kind": "PercentDecimal",
-                    "decimal_places": 0
-                  }
-                },
+                "unit": { "kind": "PercentDecimal", "decimal_places": 0 },
                 "legend": {
                   "position": "bottom"
                 },
                 "thresholds": {
-                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
-                }
-              }
-            }
-          }
-        },
-        "cpuGauge": {
-          "kind": "Panel",
-          "spec": {
-            "display": {
-              "name": "CPU - Gauge (Multi Series)",
-              "description": "This is a gauge chart test"
-            },
-            "plugin": {
-              "kind": "GaugeChart",
-              "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
-                        "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
-                      }
-                    }
-                  }
-                },
-                "calculation": "LastNumber",
-                "unit": { "kind": "PercentDecimal" },
-                "thresholds": {
-                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
+                  "steps": [{ "value": 0.01 }, { "value": 0.02 }]
                 }
               }
             }
