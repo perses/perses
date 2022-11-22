@@ -86,7 +86,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <TemplateVariableList initialVariableIsSticky={initialVariableIsSticky} />
             </ErrorBoundary>
-            <Stack direction="row" spacing={1} marginLeft="auto">
+            <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
               <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
                 Add Panel Group
               </Button>
