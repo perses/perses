@@ -29,10 +29,6 @@ export type GaugeSeries = {
   label: string;
 };
 
-export type GaugeSeriesData = {
-  gaugeSeries: GaugeSeries[];
-};
-
 interface GaugeChartProps {
   width: number;
   height: number;

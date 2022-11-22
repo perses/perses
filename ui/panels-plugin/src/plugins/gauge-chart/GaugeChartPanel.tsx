@@ -13,7 +13,7 @@
 
 import type { GaugeSeriesOption } from 'echarts';
 import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
-import { GaugeChart, GaugeChartData } from '@perses-dev/components';
+import { GaugeChart, GaugeSeries } from '@perses-dev/components';
 import { Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
@@ -21,10 +21,6 @@ import { useSuggestedStepMs } from '../../model/time';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
-
-export type GaugeSeriesData = {
-  gaugeSeries: GaugeChartData[];
-};
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
@@ -36,26 +32,20 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
 
-  const chartData: GaugeSeriesData = useMemo(() => {
+  const gaugeData: GaugeSeries[] = useMemo(() => {
     if (data === undefined) {
-      return {
-        gaugeSeries: [],
-      };
+      return [];
     }
-
-    const graphData: GaugeSeriesData = {
-      gaugeSeries: [],
-    };
+    const seriesData: GaugeSeries[] = [];
     for (const timeSeries of data.series) {
       const calculate = CalculationsMap[calculation];
-      const seriesData = {
+      const series = {
         value: calculate(Array.from(timeSeries.values)),
-        label: timeSeries.formattedName,
+        label: timeSeries.formattedName ?? '',
       };
-      graphData.gaugeSeries.push(seriesData);
+      seriesData.push(series);
     }
-
-    return graphData;
+    return seriesData;
   }, [data, calculation]);
 
   if (error) throw error;
@@ -92,11 +82,11 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     },
   };
 
-  const chartWidth = contentDimensions.width / chartData.gaugeSeries.length;
+  const chartWidth = contentDimensions.width / gaugeData.length;
 
   return (
     <Stack direction="row">
-      {chartData.gaugeSeries.map((series, seriesIndex) => (
+      {gaugeData.map((series, seriesIndex) => (
         <GaugeChart
           key={`gauge-series-${seriesIndex}`}
           width={chartWidth}
