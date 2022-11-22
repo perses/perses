@@ -8,6 +8,7 @@
 - [BREAKINGCHANGE] bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 - [BUGFIX] Fix button wrapping when too many vars #803
+- [BREAKINGCHANGE] Remove empty chart #809
 
 ## 0.17.0 / 2022-11-21
 
