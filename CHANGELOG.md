@@ -3,10 +3,17 @@
 ## Unreleased
 
 - [FEATURE] Add ability to refresh dashboard #777
+- [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
+
+## 0.17.0 / 2022-11-21
+
+- [FEATURE] custom y_axis `label`, `min`, and `max` properties in time series panel #767, #790
 - [FEATURE] Add `migrate` command in the CLI #795
+- [FEATURE] Ability to preview ListVariable values while editing #776
 - [ENHANCEMENT] Standardize headers for editors #784
 - [ENHANCEMENT] Reduce the number of retries #788
-- [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
+- [ENHANCEMENT] add a display field for the dashboards #689
+- [BUGFIX] Update the expanded/collapsed icons for panel groups #794
 
 ## 0.16.0 / 2022-11-17
 
