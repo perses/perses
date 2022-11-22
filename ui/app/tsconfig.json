@@ -1,6 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": ["src", "../components/src/theme/palette/colors/types.ts", "../components/src/theme/palette/colors/grey.ts", "../components/src/theme/palette/secondary.ts", "../components/src/theme/palette/primary.ts"],
+  "include": ["src"],
   "compilerOptions": {
     "sourceMap": true
   }
