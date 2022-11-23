@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
@@ -19,11 +19,11 @@ import { DashboardProvider } from '../../context/DashboardProvider';
 import { PanelDrawer } from './PanelDrawer';
 
 describe('Panel Drawer', () => {
-  const renderPanelDrawer = () => {
+  const renderPanelDrawer = (defaultPanelKind?: string) => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(
-      <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
+      <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true, defaultPanelKind }}>
         <DashboardProviderSpy />
         <PanelDrawer />
       </DashboardProvider>
@@ -61,6 +61,20 @@ describe('Panel Drawer', () => {
           },
         },
       },
+    });
+  });
+
+  it('should default selected panel kind when specified', async () => {
+    const storeApi = renderPanelDrawer('TimeSeriesChart');
+
+    // Open the drawer for a new panel
+    act(() => storeApi.getState().openAddPanel());
+
+    await waitFor(() => {
+      const kindInput = screen.getByRole('button', {
+        name: 'Type',
+      });
+      expect(kindInput).toHaveTextContent('TimeSeriesChart');
     });
   });
 
