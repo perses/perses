@@ -23,7 +23,7 @@ import (
 
 #visual: {
 	line_width?:   number & >=0.5 & <=4
-	point_radius?: number & >=0 & <=5
+	point_radius?: number & >=0 & <=8
 }
 
 #y_axis: {

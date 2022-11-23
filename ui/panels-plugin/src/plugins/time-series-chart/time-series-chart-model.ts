@@ -68,8 +68,18 @@ export const DEFAULT_VISUAL: VisualOptions = {
 };
 
 export const VISUAL_CONFIG = {
-  line_width: { label: 'Line Width', testId: 'slider-line-width' },
-  point_radius: { label: 'Point Radius', testId: 'slider-point-radius' },
+  line_width: {
+    label: 'Line Width',
+    testId: 'slider-line-width',
+    min: 0.5,
+    max: 4,
+  },
+  point_radius: {
+    label: 'Point Radius',
+    testId: 'slider-point-radius',
+    min: 0,
+    max: 8,
+  },
 };
 
 export const DEFAULT_Y_AXIS: YAxisOptions = {

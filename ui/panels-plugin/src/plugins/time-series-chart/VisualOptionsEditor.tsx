@@ -48,8 +48,8 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             valueLabelDisplay="auto"
             step={0.5}
             marks
-            min={0}
-            max={5}
+            min={VISUAL_CONFIG.point_radius.min}
+            max={VISUAL_CONFIG.point_radius.max}
             onChange={handlePointRadiusChange}
           />
         }
@@ -63,8 +63,8 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             valueLabelDisplay="auto"
             step={0.5}
             marks
-            min={0.5}
-            max={4}
+            min={VISUAL_CONFIG.line_width.min}
+            max={VISUAL_CONFIG.line_width.max}
             onChange={handleLineWidthChange}
           />
         }
