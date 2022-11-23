@@ -18,7 +18,6 @@ import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useCallback, useContext, useState } from 'react';
 import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
-import { usePlugin } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
