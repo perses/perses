@@ -40,7 +40,7 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
         }}
       />
       <MatcherEditor
-        matchers={props.value.matchers || []}
+        matchers={props.value.matchers ?? []}
         onChange={(e) => {
           props.onChange({ ...props.value, matchers: e });
         }}
@@ -53,7 +53,7 @@ function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<Prometheus
   return (
     <Stack spacing={1}>
       <MatcherEditor
-        matchers={props.value.matchers || []}
+        matchers={props.value.matchers ?? []}
         onChange={(e) => {
           props.onChange({ ...props.value, matchers: e });
         }}
