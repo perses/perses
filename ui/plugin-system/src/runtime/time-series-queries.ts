@@ -17,7 +17,7 @@ import { TimeSeriesQueryContext } from '../model';
 import { TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap } from './template-variables';
 import { useTemplateVariableValues } from './template-variables';
-import { useTimeRange } from './time-range';
+import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 
@@ -50,7 +50,7 @@ function getQueryOptions({
   definition: TimeSeriesQueryDefinition;
   context: TimeSeriesQueryContext;
 }) {
-  const { timeRange, datasourceStore, suggestedStepMs, variableState } = context;
+  const { timeRange, datasourceStore, suggestedStepMs, variableState, refreshKey } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
@@ -58,7 +58,7 @@ function getQueryOptions({
   // Determine queryKey
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-  const queryKey = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey] as const;
+  const queryKey = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey, refreshKey] as const;
 
   // Determine queryEnabled
   let waitToLoad = false;
@@ -129,13 +129,14 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
 
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
   // Build the context object from data available at runtime
-  const { timeRange } = useTimeRange();
+  const { absoluteTimeRange, refreshKey } = useTimeRange();
   const variableState = useTemplateVariableValues();
   const datasourceStore = useDatasourceStore();
 
   return {
-    timeRange,
+    timeRange: absoluteTimeRange,
     variableState,
     datasourceStore,
+    refreshKey,
   };
 }
