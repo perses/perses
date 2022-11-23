@@ -8,6 +8,7 @@
 - [ENHANCEMENT] Dashboard view can be configured to be readonly #731
 - [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
 - [BUGFIX] Fix button wrapping when too many vars #803
+- [BUGFIX] Fix pressing back button removes query param individually #811
 - [BUGFIX] Fix dashboard.name when migrating from a Grafana dashboard #812
 - [BREAKINGCHANGE] bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
