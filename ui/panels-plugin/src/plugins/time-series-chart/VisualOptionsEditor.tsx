@@ -44,12 +44,12 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         control={
           <Slider
             data-testid={VISUAL_CONFIG.point_radius.testId}
-            defaultValue={DEFAULT_POINT_RADIUS}
+            value={value.point_radius ?? DEFAULT_POINT_RADIUS}
             valueLabelDisplay="auto"
             step={0.5}
             marks
-            min={0}
-            max={20}
+            min={VISUAL_CONFIG.point_radius.min}
+            max={VISUAL_CONFIG.point_radius.max}
             onChange={handlePointRadiusChange}
           />
         }
@@ -59,12 +59,12 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         control={
           <Slider
             data-testid={VISUAL_CONFIG.line_width.testId}
-            defaultValue={DEFAULT_LINE_WIDTH}
+            value={value.line_width ?? DEFAULT_LINE_WIDTH}
             valueLabelDisplay="auto"
             step={0.5}
             marks
-            min={0.5}
-            max={10}
+            min={VISUAL_CONFIG.line_width.min}
+            max={VISUAL_CONFIG.line_width.max}
             onChange={handleLineWidthChange}
           />
         }

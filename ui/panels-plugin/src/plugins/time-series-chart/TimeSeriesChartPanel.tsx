@@ -19,7 +19,13 @@ import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, ZoomEventData, Legend, YAxisLabel } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_LEGEND,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
+} from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -55,6 +61,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // convert Perses dashboard format to be ECharts compatible
   const yAxis = {
+    show: y_axis?.show ?? DEFAULT_Y_AXIS.show,
     min: y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
     max: y_axis?.max,
   };
@@ -171,9 +178,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;
   const legendHeight = legend && legend.position === 'right' ? contentDimensions.height : 35;
 
-  // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
+  // override default spacing, see: https://echarts.apache.org/en/option.html#grid
+  const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
-    left: y_axis && y_axis.label ? 30 : 20,
+    left: !yAxis.show ? 0 : gridLeft,
     right: legend && legend.position === 'right' ? legendWidth : 20,
   };
 
@@ -189,7 +197,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   return (
     <>
-      {y_axis && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
+      {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
       <LineChart
         height={lineChartHeight}
         data={graphData}
