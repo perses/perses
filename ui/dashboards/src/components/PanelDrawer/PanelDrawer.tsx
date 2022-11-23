@@ -69,7 +69,11 @@ export const PanelDrawer = () => {
               </Button>
             </Stack>
           </Box>
-          <PanelEditorForm onSubmit={handleSubmit} initialValues={panelEditor.initialValues} />
+          <PanelEditorForm
+            onSubmit={handleSubmit}
+            initialValues={panelEditor.initialValues}
+            defaultPanelKind={panelEditor.defaultPanelKind}
+          />
         </>
       )}
     </Drawer>

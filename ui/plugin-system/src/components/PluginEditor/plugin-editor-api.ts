@@ -28,6 +28,7 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   pluginType: PluginType;
   pluginKindLabel: string;
   value: Definition<UnknownSpec>;
+  defaultPanelKind?: string;
   onChange: (next: Definition<UnknownSpec>) => void;
 }
 
@@ -36,7 +37,7 @@ type PreviousSpecState = Record<string, Record<string, UnknownSpec>>;
 /**
  * Props needed by the usePluginEditor hook.
  */
-export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value' | 'onChange'>;
+export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value' | 'onChange' | 'defaultPanelKind'>;
 
 /**
  * Returns the state/handlers that power the `PluginEditor` component. Useful for custom components that want to provide
@@ -66,7 +67,7 @@ export function usePluginEditor(props: UsePluginEditorProps) {
 
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
-  const [pendingKind, setPendingKind] = useState('');
+  const [pendingKind, setPendingKind] = useState(props.defaultPanelKind || '');
   const { data: plugin, isFetching, error } = usePlugin(pluginType, pendingKind);
 
   useEffect(() => {

@@ -61,6 +61,7 @@ function ViewDashboard() {
               }
               initialVariableIsSticky={true}
               isReadonly={isReadonly}
+              defaultPanelKind="TimeSeriesChart"
             />
           </ErrorBoundary>
         </PluginRegistry>
