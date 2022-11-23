@@ -5,6 +5,7 @@
 - [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
 - [FEATURE] Add ability to refresh dashboard #777
 - [FEATURE] Add a migration page #774
+- [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
 - [ENHANCEMENT] Dashboard view can be configured to be readonly #731
 - [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
 - [BUGFIX] Fix button wrapping when too many vars #803
