@@ -12,6 +12,8 @@ COPY --chown=nobody:nobody cue.mod/                          /etc/perses/cue.mod
 COPY --chown=nobody:nobody docs/examples/config.docker.yaml  /etc/perses/config.yaml
 
 WORKDIR /perses
+RUN chown -R nobody:nobody /perses
+
 EXPOSE     8080
 VOLUME     ["/perses"]
 ENTRYPOINT [ "/bin/perses" ]
