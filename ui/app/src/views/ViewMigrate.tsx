@@ -31,8 +31,14 @@ import { useNavigate } from 'react-router-dom';
 import { useMigrate } from '../model/migrate-client';
 import { useCreateDashboard } from '../model/dashboard-client';
 
+interface GrafanaLightDashboard {
+  __inputs?: Array<{ name: string }>;
+}
+
 function ViewMigrate() {
   const [grafanaDashboard, setGrafanaDashboard] = useState<string>('');
+  const [lightGrafanaDashboard, setLightGrafanaDashboard] = useState<GrafanaLightDashboard>();
+  const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
   const [projectName, setProjectName] = useState<string>('');
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const navigate = useNavigate();
@@ -47,7 +53,7 @@ function ViewMigrate() {
     }
     const value = await files[0]?.text();
     if (value !== undefined) {
-      setGrafanaDashboard(value);
+      completeGrafanaDashboard(value);
     }
   };
   const importOnClick = () => {
@@ -57,6 +63,14 @@ function ViewMigrate() {
     }
     dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
+  };
+  const completeGrafanaDashboard = (dashboard: string) => {
+    setLightGrafanaDashboard(JSON.parse(dashboard));
+    setGrafanaDashboard(dashboard);
+  };
+  const setInput = (key: string, value: string) => {
+    grafanaInput[key] = value;
+    setGrafanaInput(grafanaInput);
   };
   return (
     <Container maxWidth="md">
@@ -83,7 +97,7 @@ function ViewMigrate() {
         </Button>
         <TextField
           value={grafanaDashboard}
-          onChange={(e) => setGrafanaDashboard(e.target.value)}
+          onChange={(e) => completeGrafanaDashboard(e.target.value)}
           multiline
           fullWidth
           minRows={10}
@@ -91,11 +105,22 @@ function ViewMigrate() {
           label="Grafana dashboard"
           placeholder="Paste your Grafana dashboard"
         />
+        {lightGrafanaDashboard?.__inputs &&
+          lightGrafanaDashboard.__inputs.map((input, index) => {
+            return (
+              <TextField
+                key={`input-${index}`}
+                label={input.name}
+                variant={'outlined'}
+                onBlur={(e) => setInput(input.name, e.target.value)}
+              />
+            );
+          })}
         <Button
-          disabled={migrateMutation.isLoading}
+          disabled={migrateMutation.isLoading || grafanaDashboard.length == 0}
           startIcon={<AutoFix />}
           onClick={() => {
-            migrateMutation.mutate(grafanaDashboard);
+            migrateMutation.mutate({ input: grafanaInput, grafana_dashboard: grafanaDashboard });
           }}
         >
           Migrate
