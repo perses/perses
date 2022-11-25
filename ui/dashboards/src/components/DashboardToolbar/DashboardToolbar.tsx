@@ -57,7 +57,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     <>
       {isEditMode ? (
         <Stack spacing={1}>
-          <Box p={2} display="flex">
+          <Box p={2} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
             {dashboardTitle}
             <Stack direction="row" spacing={1} marginLeft="auto">
               {isReadonly && (
