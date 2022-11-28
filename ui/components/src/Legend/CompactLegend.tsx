@@ -26,7 +26,7 @@ interface CompactLegendProps {
  */
 export function CompactLegend({ height, items }: CompactLegendProps) {
   return (
-    <Box sx={{ width: '100%', height, paddingTop: 1, overflowY: 'scroll' }}>
+    <Box component="ul" sx={{ width: '100%', height, padding: [0, 1, 0, 0], overflowY: 'scroll', margin: 0 }}>
       {items.map((item) => (
         <ListLegendItem
           key={item.id}

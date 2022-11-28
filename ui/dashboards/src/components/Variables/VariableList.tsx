@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useState } from 'react';
-import { Button, Stack, Box, AppBar, useScrollTrigger, IconButton } from '@mui/material';
+import { Button, Stack, Box, AppBar, useScrollTrigger, IconButton, SxProps, Theme } from '@mui/material';
 import EyeIcon from 'mdi-material-ui/Eye';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import PinOutline from 'mdi-material-ui/PinOutline';
@@ -24,6 +24,7 @@ import { VariableEditor } from './VariableEditor';
 
 interface TemplateVariableListProps {
   initialVariableIsSticky?: boolean;
+  sx?: SxProps<Theme>;
 }
 
 export function TemplateVariableList(props: TemplateVariableListProps) {
@@ -64,7 +65,12 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
         </Box>
       )}
 
-      <AppBar color={'inherit'} position={isSticky ? 'fixed' : 'static'} elevation={isSticky ? 4 : 0}>
+      <AppBar
+        color={'inherit'}
+        position={isSticky ? 'fixed' : 'static'}
+        elevation={isSticky ? 4 : 0}
+        sx={{ ...props.sx }}
+      >
         <Box display={'flex'} justifyContent="space-between" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
           <Stack direction="row" spacing={1}>
             {showVariables &&

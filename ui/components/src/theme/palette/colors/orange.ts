@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PaletteMode, PaletteOptions } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
-import { white } from './common';
+import { PersesColor } from './types';
 
-export const background = (mode: PaletteMode): PaletteOptions['background'] => {
-  return mode === 'light'
-    ? {
-        default: blueGrey[50],
-        paper: white,
-      }
-    : {
-        default: '#121212',
-        paper: '#191d21',
-      };
+export const orange: PersesColor = {
+  50: '#FFF5E8',
+  100: '#FFECD2',
+  150: '#FFE2BB',
+  200: '#FFD9A4',
+  300: '#FFC577',
+  400: '#FFB249',
+  500: '#FF9F1C',
+  600: '#CC7F16',
+  700: '#995F11',
+  800: '#66400B',
+  850: '#4D3008',
+  900: '#332006',
+  950: '#1A1003',
 };

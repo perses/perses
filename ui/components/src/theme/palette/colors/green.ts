@@ -11,22 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DateTimeRangePicker';
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './InfoTooltip';
-export * from './JSONEditor';
-export * from './Legend';
-export * from './LineChart';
-export * from './OptionsEditorLayout';
-export * from './StatChart';
-export * from './UnitSelector';
-export * from './YAxisLabel';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test-utils';
-export * from './theme';
+import { PersesColor } from './types';
+
+export const green: PersesColor = {
+  50: '#EAF9F1',
+  100: '#D5F2E3',
+  150: '#C1ECD4',
+  200: '#ACE5C6',
+  300: '#82D9AA',
+  400: '#59CC8D',
+  500: '#2FBF71',
+  600: '#26995A',
+  700: '#1C7344',
+  800: '#134C2D',
+  850: '#0E3922',
+  900: '#092617',
+  950: '#05130B',
+};
