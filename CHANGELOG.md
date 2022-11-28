@@ -15,6 +15,7 @@
 - [BREAKINGCHANGE] Bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 - [BREAKINGCHANGE] Remove empty chart #809
+- [ENHANCEMENT] Add ability to set default panel kind #815
 
 ## 0.17.0 / 2022-11-21
 
