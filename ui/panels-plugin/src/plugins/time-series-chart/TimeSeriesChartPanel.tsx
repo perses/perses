@@ -16,16 +16,17 @@ import { merge } from 'lodash-es';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, ZoomEventData, Legend, YAxisLabel } from '@perses-dev/components';
+import {
+  LineChart,
+  EChartsDataFormat,
+  ZoomEventData,
+  Legend,
+  YAxisLabel,
+  DEFAULT_Y_AXIS_UNIT,
+} from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_LEGEND,
-  DEFAULT_UNIT,
-  DEFAULT_VISUAL,
-  DEFAULT_Y_AXIS,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -48,7 +49,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
 
   // TODO: eventually remove props.spec.unit, add support for y_axis_alt.unit
-  let unit = DEFAULT_UNIT;
+  let unit = DEFAULT_Y_AXIS_UNIT;
   if (props.spec.y_axis?.unit) {
     unit = props.spec.y_axis.unit;
   } else if (props.spec.unit) {

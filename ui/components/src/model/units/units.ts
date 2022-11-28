@@ -33,6 +33,12 @@ export const UNIT_CONFIG = {
 
 export type UnitOptions = TimeUnitOptions | PercentUnitOptions | DecimalUnitOptions | BytesUnitOptions;
 
+export const DEFAULT_Y_AXIS_UNIT: UnitOptions = {
+  kind: 'Decimal',
+  decimal_places: 2,
+  abbreviate: true,
+};
+
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimal_places?: number } ? UnitOpt : never;
 type HasAbbreviate<UnitOpt> = UnitOpt extends { abbreviate?: boolean } ? UnitOpt : never;
 

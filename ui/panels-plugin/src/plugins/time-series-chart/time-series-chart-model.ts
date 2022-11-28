@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnitOptions, LegendOptions } from '@perses-dev/components';
+import { UnitOptions, LegendOptions, DEFAULT_Y_AXIS_UNIT } from '@perses-dev/components';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { ThresholdOptions } from '../../model/thresholds';
 
@@ -53,12 +53,6 @@ export type LegendPositionOptions = {
   position: LegendPosition;
 };
 
-export const DEFAULT_UNIT: UnitOptions = {
-  kind: 'Decimal',
-  decimal_places: 2,
-  abbreviate: true,
-};
-
 export const DEFAULT_LINE_WIDTH = 1.5;
 
 export const DEFAULT_POINT_RADIUS = 4;
@@ -86,7 +80,7 @@ export const VISUAL_CONFIG = {
 export const DEFAULT_Y_AXIS: YAxisOptions = {
   show: true,
   label: '',
-  unit: DEFAULT_UNIT,
+  unit: DEFAULT_Y_AXIS_UNIT,
   min: undefined,
   max: undefined,
 };

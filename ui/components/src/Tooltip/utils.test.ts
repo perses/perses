@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnitOptions } from '../model';
+import { DEFAULT_Y_AXIS_UNIT } from '../model';
 import { getTooltipUnit } from './utils';
 
 describe('getTooltipUnit', () => {
@@ -20,11 +20,7 @@ describe('getTooltipUnit', () => {
     abbreviate: false,
   };
 
-  it('should convert default tooltip unit to unabbreviated', () => {
-    const defaultUnit: UnitOptions = {
-      kind: 'Decimal',
-      abbreviate: true,
-    };
-    expect(getTooltipUnit(defaultUnit)).toEqual(unitOutput);
+  it('should convert default tooltip unit to show unabbreviated version', () => {
+    expect(getTooltipUnit(DEFAULT_Y_AXIS_UNIT)).toEqual(unitOutput);
   });
 });
