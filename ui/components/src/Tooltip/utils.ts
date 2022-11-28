@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { UnitOptions } from '../model';
 import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 
 /**
@@ -57,4 +58,18 @@ export function assembleTransform(
   return mousePos.plotCanvas.x > xPosAdjustThreshold && x > TOOLTIP_MAX_WIDTH
     ? `translate3d(${x - cursorPaddingX}px, ${y}px, 0) translateX(-100%)`
     : `translate3d(${x + cursorPaddingX}px, ${y}px, 0)`;
+}
+
+/**
+ * Default to abbreviated value in y_axis but full value in tooltip
+ */
+export function getTooltipUnit(unit?: UnitOptions) {
+  if (!unit) {
+    return undefined;
+  }
+  const tooltipUnit = { ...unit };
+  if (tooltipUnit.kind === 'Decimal' && tooltipUnit.abbreviate) {
+    tooltipUnit.abbreviate = false;
+  }
+  return tooltipUnit;
 }
