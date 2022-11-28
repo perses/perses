@@ -66,8 +66,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     max: y_axis?.max,
   };
 
-  // TODO: change to array, support multi select on Shift-click
-  const [selectedSeriesName, setSelectedSeriesName] = useState<string | null>(null);
+  const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
@@ -76,12 +75,30 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const { setTimeRange } = useTimeRange();
 
-  const onLegendItemClick = (seriesName: string) => {
-    setSelectedSeriesName((current) => {
-      if (current === null || current !== seriesName) {
-        return seriesName;
+  const onLegendItemClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, seriesName: string) => {
+    const isModifiedClick = e.metaKey || e.shiftKey;
+
+    setSelectedSeriesNames((current) => {
+      const isSelected = current.includes(seriesName);
+
+      // Clicks with modifier key can select multiple items.
+      if (isModifiedClick) {
+        if (isSelected) {
+          // Modified click on already selected item. Remove that item.
+          return current.filter((name) => name !== seriesName);
+        }
+
+        // Modified click on not-selected item. Add it.
+        return [...current, seriesName];
       }
-      return null;
+
+      if (isSelected) {
+        // Clicked item was already selected. Unselect it.
+        return [];
+      }
+
+      // Select clicked item.
+      return [seriesName];
     });
   };
 
@@ -110,16 +127,18 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, visual);
-        if (selectedSeriesName === null || selectedSeriesName === timeSeries.name) {
+        const isSelected = selectedSeriesNames.includes(timeSeries.name);
+
+        if (!selectedSeriesNames.length || isSelected) {
           graphData.timeSeries.push(lineSeries);
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
             id: timeSeries.name, // TODO: should query generate an id instead of using full name here and in getRandomColor?
             label: formattedSeriesName,
-            isSelected: selectedSeriesName === timeSeries.name,
+            isSelected,
             color: getRandomColor(timeSeries.name),
-            onClick: () => onLegendItemClick(timeSeries.name),
+            onClick: (e) => onLegendItemClick(e, timeSeries.name),
           });
         }
       }
@@ -146,7 +165,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesName, legend, visual]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual]);
 
   if (contentDimensions === undefined) {
     return null;
