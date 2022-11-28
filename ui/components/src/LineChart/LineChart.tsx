@@ -38,7 +38,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from '../model/graph';
+import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsDataFormat } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { Tooltip } from '../Tooltip/Tooltip';
@@ -158,7 +158,8 @@ export function LineChart({
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
 
-    const showHoverEmphasis = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
+    // show symbols and axisPointer dashed line on hover
+    const showHoverEmphasis = data.timeSeries.length < OPTIMIZED_MODE_SERIES_LIMIT;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 

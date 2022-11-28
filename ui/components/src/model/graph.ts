@@ -14,7 +14,7 @@
 import { MouseEventHandler } from 'react';
 import { LineSeriesOption } from 'echarts/charts';
 
-export const PROGRESSIVE_MODE_SERIES_LIMIT = 500;
+export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
 export type UnixTimeMs = number;
 
