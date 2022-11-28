@@ -13,13 +13,37 @@
 
 import { ListVariableDefinition } from '@perses-dev/core';
 import {
+  useDatasourceStore,
   usePlugin,
   useTemplateVariableValues,
-  useDatasourceStore,
   useTimeRange,
+  VariableOption,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
+
+export function filterVariableList(data: VariableOption[], capturedRegexp: RegExp): VariableOption[] {
+  const result: VariableOption[] = [];
+  const filteredSet = new Set<string>();
+  for (const variableValue of data) {
+    const matches = variableValue.value.matchAll(capturedRegexp);
+    let concat = '';
+    for (const match of matches) {
+      for (let i = 1; i < match.length; i++) {
+        const m = match[i];
+        if (m !== undefined) {
+          concat = `${concat}${m}`;
+        }
+      }
+    }
+    if (!filteredSet.has(concat)) {
+      // like that we are avoiding to have duplicating variable value
+      filteredSet.add(concat);
+      result.push({ label: variableValue.label, value: concat });
+    }
+  }
+  return result;
+}
 
 export function useListVariablePluginValues(definition: ListVariableDefinition) {
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
@@ -30,6 +54,10 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
   const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
 
   const spec = definition.spec.plugin.spec;
+  const capturingRegexp =
+    definition.spec.capturing_regexp !== undefined && definition.spec.capturing_regexp !== ''
+      ? new RegExp(definition.spec.capturing_regexp, 'g')
+      : undefined;
 
   let dependsOnVariables: string[] | undefined;
   if (variablePlugin?.dependsOn) {
@@ -46,16 +74,20 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
 
   const variablesValueKey = getVariableValuesKey(variables);
 
-  const variablesOptionsQuery = useQuery(
+  return useQuery(
     [name, definition, variablesValueKey, timeRange, refreshKey],
     async () => {
       const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
-      return resp?.data ?? [];
+      if (resp === undefined) {
+        return [];
+      }
+      if (capturingRegexp === undefined) {
+        return resp.data;
+      }
+      return filterVariableList(resp.data, capturingRegexp);
     },
     { enabled: !!variablePlugin || waitToLoad }
   );
-
-  return variablesOptionsQuery;
 }
 
 /**
