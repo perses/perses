@@ -8,6 +8,7 @@
 - [ENHANCEMENT] Dashboard view can be configured to be readonly #731
 - [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
 - [ENHANCEMENT] Add perses design system #804
+- [ENHANCEMENT] show axisPointer line on hover in time series panel #821
 - [BUGFIX] Fix button wrapping when too many vars #803
 - [BUGFIX] Fix pressing back button removes query param individually #811
 - [BUGFIX] Fix dashboard.name when migrating from a Grafana dashboard #812
