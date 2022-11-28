@@ -1,13 +1,18 @@
 import (
+	// regexp is not used at the current stage in this file. It is used when merging the different cuepart file together. This is a way to shared the import across the different files
     "regexp"
+    "strings"
 )
 
 kind: "Dashboard",
 metadata: {
-    name: #grafanaDashboard.title
+    name: strings.Replace(#grafanaDashboard.title, " ", "", -1)
 },
 spec: {
     duration: "1h" // fixed value, we don't really care translating this one
+    display: {
+    	name: #grafanaDashboard.title
+    }
     variables: [ for _, grafanaVar in #grafanaDashboard.templating.list {
         if grafanaVar.type == "constant" {
             kind: "TextVariable"

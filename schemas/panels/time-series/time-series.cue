@@ -22,11 +22,12 @@ import (
 }
 
 #visual: {
-	line_width?:   number & >=0.5 & <=10
-	point_radius?: number & >=0 & <=20
+	line_width?:   number & >=0.5 & <=4
+	point_radius?: number & >=0 & <=8
 }
 
 #y_axis: {
+	show?:  bool
 	label?: string
 	unit?:  common.#unit
 	min?:   number

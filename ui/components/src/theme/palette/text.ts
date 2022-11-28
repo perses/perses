@@ -12,31 +12,28 @@
 // limitations under the License.
 
 import { PaletteOptions, PaletteMode } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { grey, white, blue } from './colors';
 
-export const greyOption = (mode: PaletteMode): PaletteOptions['grey'] => {
+export const text = (mode: PaletteMode): PaletteOptions['text'] => {
+  const navigation = grey[800];
+  const accent = grey[300];
   return mode === 'light'
     ? {
-        100: grey[100],
-        200: grey[200],
-        300: grey[300],
-        400: grey[400],
-        500: grey[500],
-        600: grey[600],
-        700: grey[700],
-        800: grey[800],
-        900: grey[900],
+        navigation,
+        accent,
+        primary: grey[800],
+        secondary: grey[700],
+        disabled: grey[300],
+        link: blue[500],
+        linkHover: blue[600],
       }
-    : // Reverse greys from darkest to lightest for Dark mode
-      {
-        100: grey[900],
-        200: grey[800],
-        300: grey[700],
-        400: grey[600],
-        500: grey[500],
-        600: grey[400],
-        700: grey[300],
-        800: grey[200],
-        900: grey[100],
+    : {
+        navigation,
+        accent,
+        primary: white,
+        secondary: grey[50],
+        disabled: grey[600],
+        link: blue[400],
+        linkHover: blue[500],
       };
 };

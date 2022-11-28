@@ -11,22 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DateTimeRangePicker';
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './InfoTooltip';
-export * from './JSONEditor';
-export * from './Legend';
-export * from './LineChart';
-export * from './OptionsEditorLayout';
-export * from './StatChart';
-export * from './UnitSelector';
-export * from './YAxisLabel';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test-utils';
-export * from './theme';
+export type HexColor = `#${string}`;
+
+export interface PersesColor {
+  50: HexColor;
+  100: HexColor;
+  150: HexColor;
+  200: HexColor;
+  300: HexColor;
+  400: HexColor;
+  500: HexColor;
+  600: HexColor;
+  700: HexColor;
+  800: HexColor;
+  850: HexColor;
+  900: HexColor;
+  950: HexColor;
+}

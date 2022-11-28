@@ -135,7 +135,11 @@ export default function Header(): JSX.Element {
 
   return (
     <AppBar position="relative">
-      <Toolbar>
+      <Toolbar
+        sx={{
+          backgroundColor: (theme) => theme.palette.designSystem.blue[700],
+        }}
+      >
         <Box sx={style} flexGrow={1}>
           <Button
             onClick={() => {
