@@ -16,7 +16,7 @@ import { TextField } from '@mui/material';
 
 interface JSONEditorProps<Spec> {
   value: Spec;
-  onChange: (next: Spec) => void;
+  onChange?: (next: Spec) => void;
 }
 
 export function JSONEditor<T>(props: JSONEditorProps<T>) {
@@ -40,11 +40,14 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
       onChange={(event) => {
         setValue(event.target.value);
       }}
+      maxRows={20}
       onBlur={() => {
         try {
           const json = JSON.parse(value ?? '{}');
           setInvalidJSON(false);
-          props.onChange(json);
+          if (props.onChange !== undefined) {
+            props.onChange(json);
+          }
         } catch (e) {
           setInvalidJSON(true);
         }

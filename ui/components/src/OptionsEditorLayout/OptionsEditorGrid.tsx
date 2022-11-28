@@ -11,10 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { convertDashboardJson } from './convert/convert';
-import { GrafanaDashboardJson } from './convert/grafana-json-model';
-import json from './node-exporter-full_rev23.json';
+import { Grid } from '@mui/material';
 
-const converted = convertDashboardJson(json as GrafanaDashboardJson);
+export type OptionsEditorGridProps = {
+  /**
+   * 1-3 `OptionsEditorColumn` components to render content in columns.
+   */
+  children: React.ReactNode;
+};
 
-export default converted;
+/**
+ * Top level grid container used to lay out content for editing in panel
+ * options.
+ */
+export const OptionsEditorGrid = ({ children }: OptionsEditorGridProps) => {
+  return (
+    <Grid container spacing={8}>
+      {children}
+    </Grid>
+  );
+};

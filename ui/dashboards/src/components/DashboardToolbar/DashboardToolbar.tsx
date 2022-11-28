@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Typography, Stack, Button, Box, useTheme, useMediaQuery } from '@mui/material';
+import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
@@ -19,18 +19,26 @@ import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
+import { DownloadButton } from '../DownloadButton';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
   dashboardTitleComponent?: JSX.Element;
   initialVariableIsSticky?: boolean;
+  isReadonly: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
-  const { dashboardName, dashboardTitleComponent, initialVariableIsSticky, onEditButtonClick, onCancelButtonClick } =
-    props;
+  const {
+    dashboardName,
+    dashboardTitleComponent,
+    initialVariableIsSticky,
+    isReadonly,
+    onEditButtonClick,
+    onCancelButtonClick,
+  } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
   const { openAddPanelGroup, openAddPanel } = useDashboardActions();
@@ -52,8 +60,13 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
             <Box padding={2} display="flex">
               {dashboardTitle}
-              <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-                <Button variant="contained" onClick={onSave}>
+              <Stack direction="row" spacing={1} marginLeft="auto">
+                {isReadonly && (
+                  <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                    Dashboard managed via code only. Download JSON and commit changes to save.
+                  </Alert>
+                )}
+                <Button variant="contained" onClick={onSave} disabled={isReadonly}>
                   Save
                 </Button>
                 <Button variant="outlined" onClick={onCancelButtonClick}>
@@ -73,7 +86,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <TemplateVariableList initialVariableIsSticky={initialVariableIsSticky} />
             </ErrorBoundary>
-            <Stack direction={'row'} spacing={1} sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
               <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
                 Add Panel Group
               </Button>
@@ -81,15 +94,17 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 Add Panel
               </Button>
               <TimeRangeControls />
+              <DownloadButton />
             </Stack>
           </Box>
         </Stack>
       ) : (
-        <Stack spacing={2} padding={2}>
+        <Stack spacing={1} padding={2}>
           <Box sx={{ display: 'flex', width: '100%' }}>
             {dashboardTitle}
-            <Stack direction="row" spacing={2} sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" spacing={1} marginLeft="auto">
               <TimeRangeControls />
+              <DownloadButton />
               {isLaptopSize && (
                 <Button
                   variant="outlined"

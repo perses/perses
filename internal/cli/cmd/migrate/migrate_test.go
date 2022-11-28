@@ -11,16 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialEmptyChartOptions, EmptyChartOptions } from './empty-chart-model';
-import { EmptyChartOptionsEditor } from './EmptyChartOptionsEditor';
-import { EmptyChartPanel } from './EmptyChartPanel';
+package migrate
 
-/**
- * The core EmptyChart panel plugin for Perses.
- */
-export const EmptyChart: PanelPlugin<EmptyChartOptions> = {
-  PanelComponent: EmptyChartPanel,
-  OptionsEditorComponent: EmptyChartOptionsEditor,
-  createInitialOptions: createInitialEmptyChartOptions,
-};
+import (
+	"testing"
+
+	cmdTest "github.com/perses/perses/internal/cli/test"
+)
+
+func TestMigrateCMD(t *testing.T) {
+	testSuite := []cmdTest.Suite{
+		{
+			Title:           "empty args",
+			Args:            []string{},
+			IsErrorExpected: true,
+			ExpectedMessage: `required flag(s) "file" not set`,
+		},
+		{
+			Title:           "use args",
+			Args:            []string{"whatever", "-f", "file.json"},
+			IsErrorExpected: true,
+			ExpectedMessage: "no args are supported by the command 'migrate'",
+		},
+	}
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+}

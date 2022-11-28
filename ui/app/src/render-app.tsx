@@ -29,7 +29,17 @@ export function renderApp(container: Element | null) {
     return;
   }
 
-  const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        // react-query uses a default of 3 retries.
+        // This sets the default to 0 retries.
+        // If needed, the number of retries can be overridden in individual useQuery calls.
+        retry: 0,
+      },
+    },
+  });
 
   const root = ReactDOM.createRoot(container);
 

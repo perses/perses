@@ -17,7 +17,7 @@ import { TimeSeriesQueryContext } from '../model';
 import { TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap } from './template-variables';
 import { useTemplateVariableValues } from './template-variables';
-import { useTimeRange } from './time-range';
+import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 
@@ -50,20 +50,23 @@ function getQueryOptions({
   definition: TimeSeriesQueryDefinition;
   context: TimeSeriesQueryContext;
 }) {
-  const { timeRange, datasourceStore, suggestedStepMs, variableState } = context;
+  const { timeRange, datasourceStore, suggestedStepMs, variableState, refreshKey } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
 
+  // Determine queryKey
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-  const queryKey = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey] as const;
+  const queryKey = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey, refreshKey] as const;
 
+  // Determine queryEnabled
   let waitToLoad = false;
   if (variableDependencies) {
     waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
   }
   const queryEnabled = plugin !== undefined && !waitToLoad;
+
   return {
     queryKey,
     queryEnabled,
@@ -77,11 +80,11 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
   const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
-  const { queryEnabled: pluginEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
-
-  return useQuery(
-    queryKey,
-    () => {
+  const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
+  return useQuery({
+    enabled: queryEnabled,
+    queryKey: queryKey,
+    queryFn: () => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
         throw new Error('Expected plugin to be loaded');
@@ -90,8 +93,7 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
       const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
       return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
     },
-    { enabled: pluginEnabled }
-  );
+  });
 };
 
 /**
@@ -108,8 +110,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
 
   return useQueries({
     queries: definitions.map((definition, idx) => {
-      const resp = pluginLoaderResponse[idx];
-      const plugin = resp?.data;
+      const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
         enabled: queryEnabled,
@@ -128,13 +129,14 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
 
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
   // Build the context object from data available at runtime
-  const { timeRange } = useTimeRange();
+  const { absoluteTimeRange, refreshKey } = useTimeRange();
   const variableState = useTemplateVariableValues();
   const datasourceStore = useDatasourceStore();
 
   return {
-    timeRange,
+    timeRange: absoluteTimeRange,
     variableState,
     datasourceStore,
+    refreshKey,
   };
 }

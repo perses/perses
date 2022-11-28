@@ -31,14 +31,6 @@
       },
       {
         "pluginType": "Panel",
-        "kind": "EmptyChart",
-        "display": {
-          "name": "Empty Chart",
-          "description": ""
-        }
-      },
-      {
-        "pluginType": "Panel",
         "kind": "Markdown",
         "display": {
           "name": "Markdown",

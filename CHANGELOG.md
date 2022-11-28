@@ -2,9 +2,46 @@
 
 ## Unreleased
 
+- [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
+- [FEATURE] Add ability to refresh dashboard #777
+- [FEATURE] Add a migration page #774
+- [ENHANCEMENT] Dashboard view can be configured to be readonly #731
+- [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
+- [BUGFIX] Fix button wrapping when too many vars #803
+- [BUGFIX] Fix pressing back button removes query param individually #811
+- [BUGFIX] Fix dashboard.name when migrating from a Grafana dashboard #812
+- [BUGFIX] Fix the permission on the workdir `perses` in the docker images #817
+- [BREAKINGCHANGE] bump peer-dependencies @mui/material to v5.10.0 #782
+- [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
+- [BREAKINGCHANGE] Remove empty chart #809
+
+## 0.17.0 / 2022-11-21
+
+- [FEATURE] custom y_axis `label`, `min`, and `max` properties in time series panel #767, #790
+- [FEATURE] Add `migrate` command in the CLI #795
+- [FEATURE] Ability to preview ListVariable values while editing #776
+- [ENHANCEMENT] Standardize headers for editors #784
+- [ENHANCEMENT] Reduce the number of retries #788
+- [ENHANCEMENT] add a display field for the dashboards #689
+- [BUGFIX] Update the expanded/collapsed icons for panel groups #794
+
+## 0.16.0 / 2022-11-17
+
+- [FEATURE] Add UI for configuring gauge panel options #761
+- [FEATURE] Add UI for configuring stat panel options #762
+- [FEATURE] add new variable plugin: PrometheusPromQLVariable #758
+- [FEATURE] add `line_width` and `point_radius` visual options in time series panel #754
+- [FEATURE] Add ability to download dashboard JSON #764
 - [ENHANCEMENT] User always sees edit icons in edit mode (instead of only seeing on hover) #748
 - [ENHANCEMENT] Add unit selector to time series chart options #744
+- [ENHANCEMENT] Add validation for Variables #768
 - [BUGFIX] Fix the default config file used in the docker images and in the archive #745
+- [BUGFIX] Fix duplicate panel keys #765
+- [BUGFIX] Automatically add a Panel Group when adding a Panel to an empty dashboard #766
+- [BUGFIX] fix dependsOn for labelValues and labelNames variables #755
+- [BUGFIX] Do not send empty queries #770
+- [BUGFIX] Reset error boundary on spec change #771
+- [BUGFIX] tooltip in LineChart should use unit passed from panel #775
 
 ## 0.15.0 / 2022-11-09
 

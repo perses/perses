@@ -11,31 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Mapping of Grafana 7 reducers to Perses calculations
-export const TransformationsMap = {
-  sum: 'Sum',
-  max: null,
-  min: null,
-  logmin: null,
-  mean: 'Mean',
-  last: 'Last',
-  first: 'First',
-  count: null,
-  range: null,
-  diff: null,
-  diffperc: null,
-  delta: null,
-  step: null,
-  firstNotNull: null,
-  lastNotNull: 'LastNumber',
-  changeCount: null,
-  distinctCount: null,
-  allIsZero: null,
-  allIsNull: null,
-  allValues: null,
-  current: 'LastNumber',
+import { Grid, Stack } from '@mui/material';
+
+export type OptionsEditorColumnProps = {
+  /**
+   * Components to render in the column. These will usually be
+   * `OptionsEditorGroup` components.
+   */
+  children: React.ReactNode;
 };
 
-export function convertTransformation(name: string): string {
-  return TransformationsMap[name] ?? 'LastNumber';
-}
+/**
+ * Lay out content in a column within panel options.
+ */
+export const OptionsEditorColumn = ({ children }: OptionsEditorColumnProps) => {
+  return (
+    <Grid item xs={4}>
+      <Stack spacing={3}>{children}</Stack>
+    </Grid>
+  );
+};

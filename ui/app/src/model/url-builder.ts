@@ -18,10 +18,11 @@ export type URLParams = {
   name?: string;
   project?: string;
   queryParams?: URLSearchParams;
+  apiPrefix?: string;
 };
 
 export default function buildURL(params: URLParams): string {
-  let url = apiPrefix;
+  let url = params.apiPrefix === undefined ? apiPrefix : params.apiPrefix;
   if (params.project !== undefined && params.project.length > 0) {
     url = `${url}/projects/${encodeURIComponent(params.project)}`;
   }

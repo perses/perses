@@ -21,9 +21,25 @@ import { ThresholdOptions } from '../../model/thresholds';
 export interface TimeSeriesChartOptions {
   queries: TimeSeriesQueryDefinition[];
   legend?: LegendOptions;
+  y_axis?: YAxisOptions;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
+  visual?: VisualOptions;
 }
+
+export interface YAxisOptions {
+  show?: boolean;
+  label?: string;
+  unit?: UnitOptions;
+  min?: number;
+  max?: number;
+}
+
+export type VisualOptions = {
+  // type: 'line' | 'bar' | 'scatter'; // TODO: new option to change series type
+  point_radius?: number;
+  line_width?: number;
+};
 
 export const DEFAULT_LEGEND: LegendOptions = {
   position: 'bottom',
@@ -40,6 +56,46 @@ export type LegendPositionOptions = {
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
   decimal_places: 2,
+};
+
+export const DEFAULT_LINE_WIDTH = 1.5;
+
+export const DEFAULT_POINT_RADIUS = 4;
+
+export const DEFAULT_VISUAL: VisualOptions = {
+  line_width: DEFAULT_LINE_WIDTH,
+  point_radius: DEFAULT_POINT_RADIUS,
+};
+
+export const VISUAL_CONFIG = {
+  line_width: {
+    label: 'Line Width',
+    testId: 'slider-line-width',
+    min: 0.5,
+    max: 4,
+  },
+  point_radius: {
+    label: 'Point Radius',
+    testId: 'slider-point-radius',
+    min: 0,
+    max: 8,
+  },
+};
+
+export const DEFAULT_Y_AXIS: YAxisOptions = {
+  show: true,
+  label: '',
+  unit: DEFAULT_UNIT,
+  min: undefined,
+  max: undefined,
+};
+
+export const Y_AXIS_CONFIG = {
+  show: { label: 'Show' },
+  label: { label: 'Label' },
+  unit: { label: 'Unit' },
+  min: { label: 'Min' },
+  max: { label: 'Max' },
 };
 
 /**
@@ -60,9 +116,5 @@ export function createInitialTimeSeriesChartOptions(): TimeSeriesChartOptions {
         },
       },
     ],
-    legend: DEFAULT_LEGEND,
-    unit: {
-      kind: 'Decimal',
-    },
   };
 }

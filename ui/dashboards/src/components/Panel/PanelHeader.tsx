@@ -39,7 +39,7 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
   if (editHandlers !== undefined) {
     // If there are edit handlers, always just show the edit buttons
     action = (
-      <Stack direction="row" alignItems="center" spacing={0.5}>
+      <Stack direction="row" spacing={0.5} alignItems="center">
         <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
           <PencilIcon />
         </HeaderIconButton>
@@ -78,6 +78,10 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
           id={titleElementId}
           variant="subtitle1"
           sx={{
+            // `minHeight` guarantees that the header has the correct height
+            // when there is no title (i.e. in the preview)
+            lineHeight: '24px',
+            minHeight: '24px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',

@@ -16,6 +16,7 @@ import { EChartsTimeSeries } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
 import { StepOptions } from '../../../model/thresholds';
+import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS } from '../time-series-chart-model';
 import { getRandomColor } from './palette-gen';
 
 export interface TimeScale {
@@ -43,7 +44,7 @@ export function getCommonTimeScale(queryResults: RunningQueriesState): TimeScale
   let timeRange: AbsoluteTimeRange | undefined = undefined;
   const steps: number[] = [];
   for (const { isLoading, data } of queryResults) {
-    if (isLoading || data === undefined) continue;
+    if (isLoading || data === undefined || data.timeRange === undefined || data.stepMs === undefined) continue;
 
     // Keep track of query steps so we can calculate a common one for the graph
     steps.push(data.stepMs);
@@ -132,8 +133,10 @@ export function getLineSeries(
   name: string,
   formattedName: string,
   data: EChartsTimeSeries['data'],
-  selectedSeriesName: string | null
+  visual: VisualOptions
 ): EChartsTimeSeries {
+  const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
+  const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
   return {
     type: 'line',
     name: formattedName,
@@ -141,12 +144,13 @@ export function getLineSeries(
     color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
+    symbolSize: pointRadius,
     lineStyle: {
-      width: selectedSeriesName && selectedSeriesName === name ? 2 : 1,
+      width: lineWidth,
     },
     emphasis: {
       lineStyle: {
-        width: selectedSeriesName && selectedSeriesName === name ? 2.5 : 1.5,
+        width: lineWidth + 1,
       },
     },
   };

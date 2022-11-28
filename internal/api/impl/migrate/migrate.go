@@ -99,19 +99,22 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 	g.POST("/migrate", e.Migrate)
 }
 
-// Check is the endpoint that provides the perses dashboard corresponding to the provided grafana dashboard.
+// Migrate is the endpoint that provides the perses dashboard corresponding to the provided grafana dashboard.
 func (e *Endpoint) Migrate(ctx echo.Context) error {
 	grafanaDashboardBytes, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return shared.HandleError(err)
 	}
+	if len(grafanaDashboardBytes) == 0 {
+		return shared.HandleError(fmt.Errorf("%w: body is empty", shared.BadRequestError))
+	}
 
-	persesDashboardBytes, err := e.migrate(grafanaDashboardBytes)
+	persesDashboard, err := e.migrate(grafanaDashboardBytes)
 	if err != nil {
 		return shared.HandleError(err)
 	}
 
-	return ctx.JSON(http.StatusOK, persesDashboardBytes)
+	return ctx.JSON(http.StatusOK, persesDashboard)
 }
 
 func (e *Endpoint) migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {

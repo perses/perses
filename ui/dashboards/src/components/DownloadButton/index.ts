@@ -11,12 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { EmptyChartOptions } from './empty-chart-model';
-
-export type EmptyChartPanelProps = PanelProps<EmptyChartOptions>;
-
-export function EmptyChartPanel() {
-  return <Box sx={{ overflow: 'hidden' }}>EmptyChart</Box>;
-}
+export * from './DownloadButton';

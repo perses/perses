@@ -1,13 +1,16 @@
 {
     "kind": "Dashboard",
     "metadata": {
-        "name": "Simple grafana dashboard",
+        "name": "Simplegrafanadashboard",
         "created_at": "0001-01-01T00:00:00Z",
         "updated_at": "0001-01-01T00:00:00Z",
         "project": ""
     },
     "spec": {
         "duration": "1h",
+        "display": {
+            "name": "Simple grafana dashboard"
+        },
         "variables": [
             {
                 "kind": "ListVariable",

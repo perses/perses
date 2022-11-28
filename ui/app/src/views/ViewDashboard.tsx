@@ -20,6 +20,7 @@ import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
+import { useIsReadonly } from '../model/config-client';
 
 /**
  * The View for viewing a Dashboard.
@@ -32,12 +33,11 @@ function ViewDashboard() {
   }
 
   const datasourceApi = useDatasourceApi();
-
   const { data, isLoading } = useDashboard(projectName, dashboardName);
+  const isReadonly = useIsReadonly();
+  if (isLoading) return null;
 
-  if (isLoading === true) return null;
-
-  if (!data || data.spec === undefined) return null;
+  if (!data || data.spec === undefined || isReadonly === undefined) return null;
 
   return (
     <Box
@@ -54,9 +54,13 @@ function ViewDashboard() {
               dashboardResource={data}
               datasourceApi={datasourceApi}
               dashboardTitleComponent={
-                <DashboardBreadcrumbs dashboardName={data.metadata.name} dashboardProject={data.metadata.project} />
+                <DashboardBreadcrumbs
+                  dashboardName={data.spec.display ? data.spec.display.name : data.metadata.name}
+                  dashboardProject={data.metadata.project}
+                />
               }
               initialVariableIsSticky={true}
+              isReadonly={isReadonly}
             />
           </ErrorBoundary>
         </PluginRegistry>

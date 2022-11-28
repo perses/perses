@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Box, IconButton, Stack, Typography } from '@mui/material';
-import ExpandedIcon from 'mdi-material-ui/ChevronUp';
-import CollapsedIcon from 'mdi-material-ui/ChevronDown';
+import ExpandedIcon from 'mdi-material-ui/ChevronDown';
+import CollapsedIcon from 'mdi-material-ui/ChevronRight';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
@@ -64,7 +64,7 @@ export function GridTitle(props: GridTitleProps) {
           </IconButton>
           {text}
           {isEditMode && (
-            <Stack direction="row" sx={{ marginLeft: 'auto' }}>
+            <Stack direction="row" marginLeft="auto">
               <IconButton aria-label={`add panel to group ${title}`} onClick={openAddPanel}>
                 <AddPanelIcon />
               </IconButton>

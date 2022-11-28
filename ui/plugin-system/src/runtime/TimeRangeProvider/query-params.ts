@@ -21,7 +21,7 @@ import {
   DurationString,
   AbsoluteTimeRange,
 } from '@perses-dev/core';
-import { TimeRange } from '@perses-dev/plugin-system';
+import { TimeRange } from './TimeRangeProvider';
 
 export type TimeOptionValue = Date | DurationString | null | undefined;
 
@@ -96,7 +96,7 @@ export const timeRangeQueryConfig = {
  * Sets start query param if it is empty on page load
  */
 export function useInitialTimeRange(dashboardDuration: DurationString): TimeRangeValue {
-  const [query] = useQueryParams(timeRangeQueryConfig);
+  const [query] = useQueryParams(timeRangeQueryConfig, { updateType: 'replaceIn' });
   const { start, end } = query;
   return useMemo(() => {
     let initialTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
@@ -116,8 +116,11 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
 /**
  * Returns time range getter and setter, set enabledURLParams to false to disable query string serialization
  */
-export function useSetTimeRangeParams(initialTimeRange: TimeRangeValue, enabledURLParams = true): TimeRange {
-  const [query, setQuery] = useQueryParams(timeRangeQueryConfig);
+export function useSetTimeRangeParams(
+  initialTimeRange: TimeRangeValue,
+  enabledURLParams = true
+): Pick<TimeRange, 'timeRange' | 'setTimeRange'> {
+  const [query, setQuery] = useQueryParams(timeRangeQueryConfig, { updateType: 'replaceIn' });
 
   // determine whether initial param had previously been populated to fix back btn
   const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);

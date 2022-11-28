@@ -14,13 +14,12 @@
 import { Box, BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
+import { TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
 import {
-  TimeRangeProvider,
   TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
-  useInitialTimeRange,
 } from '../../context';
 import { DashboardApp } from './DashboardApp';
 
@@ -29,13 +28,22 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
   dashboardTitleComponent?: JSX.Element;
   initialVariableIsSticky?: boolean;
+  isReadonly: boolean;
 }
 
 /**
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
 export function ViewDashboard(props: ViewDashboardProps) {
-  const { dashboardResource, datasourceApi, dashboardTitleComponent, initialVariableIsSticky, sx, ...others } = props;
+  const {
+    dashboardResource,
+    datasourceApi,
+    dashboardTitleComponent,
+    initialVariableIsSticky,
+    isReadonly,
+    sx,
+    ...others
+  } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
@@ -62,6 +70,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                   dashboardResource={dashboardResource}
                   dashboardTitleComponent={dashboardTitleComponent}
                   initialVariableIsSticky={initialVariableIsSticky}
+                  isReadonly={isReadonly}
                 />
               </ErrorBoundary>
             </Box>

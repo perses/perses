@@ -18,9 +18,15 @@
         }
       }
     ],
-    "unit": {
-      "kind": "Decimal",
-      "decimal_places": 2
+    "y_axis": {
+      "show": true,
+      "label": "CPU",
+      "min": 0.2,
+      "max": 0.4,
+      "unit": {
+        "kind": "Decimal",
+        "decimal_places": 2
+      }
     },
     "legend": {
       "position": "bottom"
@@ -32,10 +38,14 @@
           "name": "Alert: Warning condition example"
         },
         {
-          "value": 0.80,
+          "value": 0.8,
           "name": "Alert: Critical condition example"
         }
       ]
+    },
+    "visual": {
+      "line_width": 2,
+      "point_radius": 3
     }
   }
 }
