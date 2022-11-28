@@ -17,6 +17,7 @@ import { getTooltipUnit } from './utils';
 describe('getTooltipUnit', () => {
   const unitOutput = {
     kind: 'Decimal',
+    decimal_places: 2,
     abbreviate: false,
   };
 
