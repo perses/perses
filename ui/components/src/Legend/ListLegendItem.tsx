@@ -33,7 +33,6 @@ export const ListLegendItem = React.memo(function ListLegendItem({ item, sx, ...
         sx
       )}
       dense={true}
-      data-testid={`legend-item-${item.color}`}
       key={item.id}
       onClick={item.onClick}
       selected={item.isSelected}
