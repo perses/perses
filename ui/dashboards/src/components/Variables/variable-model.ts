@@ -36,7 +36,7 @@ export function filterVariableList(data: VariableOption[], capturedRegexp: RegEx
         }
       }
     }
-    if (!filteredSet.has(concat)) {
+    if (concat !== '' && !filteredSet.has(concat)) {
       // like that we are avoiding to have duplicating variable value
       filteredSet.add(concat);
       result.push({ label: variableValue.label, value: concat });
