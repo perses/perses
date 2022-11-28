@@ -22,7 +22,7 @@ import { DashboardProvider, DashboardStoreProps } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
 
 const history = createMemoryHistory({
-  initialEntries: [generatePath('/dashboards/:id', { id: 'test' })],
+  initialEntries: [generatePath('/home'), generatePath('/dashboards/:id', { id: 'test' })],
 });
 
 describe('TimeRangeControls', () => {
@@ -70,11 +70,11 @@ describe('TimeRangeControls', () => {
     userEvent.click(secondSelected);
     expect(history.location.search).toEqual('?start=12h');
 
-    // back button should return to first option selected
+    // back button should return to previous page selected
     act(() => {
       history.back();
     });
-    expect(history.location.search).toEqual('?start=5m');
+    expect(history.location.pathname).toEqual('/home');
   });
 
   // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.

@@ -55,7 +55,7 @@ export const PanelDrawer = () => {
               display: 'flex',
               alignItems: 'center',
               padding: (theme) => theme.spacing(1, 2),
-              borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
+              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography variant="h2">{panelEditor.mode} Panel</Typography>
@@ -64,7 +64,7 @@ export const PanelDrawer = () => {
               <Button type="submit" variant="contained" form={panelEditorFormId}>
                 {panelEditor.mode === 'Add' ? 'Add' : 'Apply'}
               </Button>
-              <Button variant="outlined" onClick={handleClose}>
+              <Button color="secondary" variant="outlined" onClick={handleClose}>
                 Cancel
               </Button>
             </Stack>

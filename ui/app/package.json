@@ -14,7 +14,6 @@
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
-    "@fontsource/lato": "^4.5.8",
     "@loadable/component": "^5.15.2",
     "@mui/material": "^5.10.14",
     "@perses-dev/components": "^0.17.0",
