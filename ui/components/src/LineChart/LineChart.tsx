@@ -158,7 +158,7 @@ export function LineChart({
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
 
-    const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
+    const showHoverEmphasis = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -177,11 +177,11 @@ export function LineChart({
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
-        show: showPointsOnHover,
+        show: showHoverEmphasis,
         trigger: 'axis',
         showContent: false,
         axisPointer: {
-          type: 'none',
+          type: showHoverEmphasis ? 'line' : 'none',
         },
       },
       toolbox: {
