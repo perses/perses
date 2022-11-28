@@ -94,7 +94,7 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
 
   return (
     <>
-      <Box sx={{ borderBottom: 1, borderColor: 'grey.300' }}>
+      <Box sx={{ borderBottom: 1, borderColor: (theme) => theme.palette.divider }}>
         <Tabs value={activeTab} onChange={handleChange} aria-label="Panel configuration tabs">
           {normalizedTabs.map(({ id, label }, i) => {
             return (

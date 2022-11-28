@@ -96,8 +96,8 @@ const ReactGridLayoutContainer = styled('section')(({ theme }) => ({
     bottom: '3px',
     width: '5px',
     height: '5px',
-    borderRight: '2px solid rgba(0, 0, 0, 0.4)',
-    borderBottom: '2px solid rgba(0, 0, 0, 0.4)',
+    borderRight: `2px solid ${theme.palette.text.secondary}`,
+    borderBottom: `2px solid ${theme.palette.text.secondary}`,
   },
 
   '& .react-resizable-hide > .react-resizable-handle': {

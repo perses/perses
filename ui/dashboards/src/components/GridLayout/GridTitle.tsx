@@ -54,7 +54,8 @@ export function GridTitle(props: GridTitleProps) {
         justifyContent: 'start',
         alignItems: 'center',
         padding: (theme) => theme.spacing(1),
-        backgroundColor: (theme) => theme.palette.background.default,
+        backgroundColor: ({ palette }) =>
+          palette.mode === 'dark' ? palette.background.paper : palette.background.default,
       }}
     >
       {collapse ? (
