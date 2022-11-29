@@ -32,7 +32,11 @@ import { useMigrate } from '../model/migrate-client';
 import { useCreateDashboard } from '../model/dashboard-client';
 
 interface GrafanaLightDashboard {
+  // The only part that is interesting us is the list of the input that can exists in the Grafana dashboard definition.
   __inputs?: Array<{ name: string }>;
+  // In order to have an accurate type when matching this interface with the Grafana JSON,
+  // we just say we have an unknown list of key that exists, but we don't really care about what they are.
+  [key: string]: unknown;
 }
 
 function ViewMigrate() {
@@ -105,8 +109,11 @@ function ViewMigrate() {
           label="Grafana dashboard"
           placeholder="Paste your Grafana dashboard"
         />
-        {lightGrafanaDashboard?.__inputs &&
-          lightGrafanaDashboard.__inputs.map((input, index) => {
+        {
+          // When you are getting a dashboard from the Grafana marketplace, it can happen there is a list of input that shall be used in a later stage to replace some variables.
+          // The code below provide the possibility to the user to provide the list of the input value.
+          // These values will be provided to the backend that will take care to replace the variables called with the input name with the values provided.
+          lightGrafanaDashboard?.__inputs?.map((input, index) => {
             return (
               <TextField
                 key={`input-${index}`}
@@ -115,7 +122,8 @@ function ViewMigrate() {
                 onBlur={(e) => setInput(input.name, e.target.value)}
               />
             );
-          })}
+          })
+        }
         <Button
           disabled={migrateMutation.isLoading || grafanaDashboard.length == 0}
           startIcon={<AutoFix />}
