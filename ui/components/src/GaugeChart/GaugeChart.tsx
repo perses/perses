@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { useDeepMemo } from '@perses-dev/core';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
@@ -47,11 +47,13 @@ export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine, max } = props;
   const chartsTheme = useChartsTheme();
 
-  // adjusts fontSize depending on number of characters
-  const valueSizeClamp = getResponsiveValueSize(width, height, data.value);
+  // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
+  const option: EChartsCoreOption = useDeepMemo(() => {
+    if (data.value === undefined || data.value === null) return chartsTheme.noDataOption;
 
-  const option: EChartsCoreOption = useMemo(() => {
-    if (!data.value) return chartsTheme.noDataOption;
+    // adjusts fontSize depending on number of characters
+    const valueSizeClamp = getResponsiveValueSize(data.value, unit, width, height);
+
     return {
       title: {
         show: false,
@@ -174,7 +176,7 @@ export function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, width, chartsTheme, unit, axisLine, max, valueSizeClamp]);
+  }, [data, width, height, chartsTheme, unit, axisLine, max]);
 
   return (
     <EChart
@@ -192,11 +194,15 @@ export function GaugeChart(props: GaugeChartProps) {
  * Responsive font size depending on number of characters, clamp used
  * to ensure size stays within given range
  */
-export function getResponsiveValueSize(width: number, height: number, value: GaugeChartValue) {
+export function getResponsiveValueSize(value: number, unit: UnitOptions, width: number, height: number) {
   const MIN_SIZE = 2;
-  const MAX_SIZE = 36;
-  const SIZE_MULTIPLIER = 1.5;
-  const valueCharacters = value?.toString().length ?? 2;
+  const MAX_SIZE = 28;
+  const SIZE_MULTIPLIER = 0.5;
+  const formattedValue = formatValue(value, {
+    kind: unit.kind,
+    decimal_places: 0,
+  });
+  const valueCharacters = formattedValue.length ?? 2;
   const valueSize = (Math.min(width, height) / valueCharacters) * SIZE_MULTIPLIER;
   return `clamp(${MIN_SIZE}px, ${valueSize}px, ${MAX_SIZE}px)`;
 }
