@@ -11,37 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package timeserie
+package api
 
 import (
-	"github.com/perses/perses/schemas/common"
+	"encoding/json"
+	"fmt"
 )
 
-#legend: {
-	position?: "bottom" | "right"
+type Migrate struct {
+	Input            map[string]string `json:"input,omitempty"`
+	GrafanaDashboard json.RawMessage   `json:"grafana_dashboard"`
 }
 
-#visual: {
-	line_width?:   number & >=0.5 & <=4
-	point_radius?: number & >=0 & <=8
+func (m *Migrate) UnmarshalJSON(data []byte) error {
+	var tmp Migrate
+	type plain Migrate
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*m = tmp
+	return nil
 }
 
-#y_axis: {
-	show?:  bool
-	label?: string
-	unit?:  common.#unit
-	min?:   number
-	max?:   number
+func (m *Migrate) validate() error {
+	if len(m.GrafanaDashboard) == 0 {
+		return fmt.Errorf("grafana_dashboard cannot be empty")
+	}
+	return nil
 }
-
-kind: "TimeSeriesChart"
-spec: close({
-	queries: [...#ts_query]
-	legend?:     #legend
-	y_axis?:     #y_axis
-	unit?:       common.#unit
-	thresholds?: common.#thresholds
-	visual?:     #visual
-})
-
-#ts_query: _

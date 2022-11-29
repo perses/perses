@@ -11,12 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { EmptyChartOptions } from './empty-chart-model';
+import { PersesColor } from './types';
 
-export type EmptyChartPanelProps = PanelProps<EmptyChartOptions>;
-
-export function EmptyChartPanel() {
-  return <Box sx={{ overflow: 'hidden' }}>EmptyChart</Box>;
-}
+export const orange: PersesColor = {
+  50: '#FFF5E8',
+  100: '#FFECD2',
+  150: '#FFE2BB',
+  200: '#FFD9A4',
+  300: '#FFC577',
+  400: '#FFB249',
+  500: '#FF9F1C',
+  600: '#CC7F16',
+  700: '#995F11',
+  800: '#66400B',
+  850: '#4D3008',
+  900: '#332006',
+  950: '#1A1003',
+};

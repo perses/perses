@@ -11,18 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PaletteMode, PaletteOptions } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
-import { white } from './common';
+import { PaletteOptions, PaletteMode } from '@mui/material';
+import { grey, white, blue } from './colors';
 
-export const background = (mode: PaletteMode): PaletteOptions['background'] => {
+export const text = (mode: PaletteMode): PaletteOptions['text'] => {
+  const navigation = grey[800];
+  const accent = grey[300];
   return mode === 'light'
     ? {
-        default: blueGrey[50],
-        paper: white,
+        navigation,
+        accent,
+        primary: grey[800],
+        secondary: grey[700],
+        disabled: grey[300],
+        link: blue[500],
+        linkHover: blue[600],
       }
     : {
-        default: '#121212',
-        paper: '#191d21',
+        navigation,
+        accent,
+        primary: white,
+        secondary: grey[50],
+        disabled: grey[600],
+        link: blue[400],
+        linkHover: blue[500],
       };
 };

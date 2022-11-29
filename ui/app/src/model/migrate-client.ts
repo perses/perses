@@ -17,17 +17,24 @@ import buildURL from './url-builder';
 
 const resource = 'migrate';
 
+export interface MigrateBodyRequest {
+  input?: Record<string, string>;
+  grafana_dashboard: string;
+}
+
 export function useMigrate() {
-  return useMutation<DashboardResource, Error, string>({
+  return useMutation<DashboardResource, Error, MigrateBodyRequest>({
     mutationKey: [resource],
-    mutationFn: (grafanaDashboard) => {
+    mutationFn: (body) => {
       const url = buildURL({ apiPrefix: '/api', resource: resource });
       return fetchJson<DashboardResource>(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: grafanaDashboard,
+        body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafana_dashboard": ${
+          body.grafana_dashboard
+        }}`,
       });
     },
   });

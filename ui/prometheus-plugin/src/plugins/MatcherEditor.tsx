@@ -11,34 +11,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { Stack, TextField, Button, Box, IconButton } from '@mui/material';
+import { produce } from 'immer';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 
-export function MatcherEditor(props: { initialMatchers?: string[]; onChange: (matchers: string[]) => void }) {
-  const [matchers, setMatchers] = useState<string[]>(props.initialMatchers ?? []);
+type MatcherEditorProps = {
+  matchers: string[];
+  onChange: (matchers: string[]) => void;
+};
+
+export function MatcherEditor({ matchers, onChange }: MatcherEditorProps) {
   return (
     <Stack spacing={1}>
       {matchers.map((matcher, index) => (
         <Box key={index} display="flex">
           <TextField
             fullWidth
-            onBlur={() => {
-              props.onChange(matchers);
-            }}
             label="Series Selector"
             value={matcher}
             onChange={(e) => {
-              const newMatchers = [...matchers];
-              newMatchers[index] = e.target.value;
-              setMatchers(newMatchers);
+              const newMatchers = produce(matchers, (draft) => {
+                draft[index] = e.target.value;
+              });
+              onChange(newMatchers);
             }}
           />
           <IconButton
             onClick={() => {
-              const newMatchers = [...matchers];
-              newMatchers.splice(index, 1);
-              setMatchers(newMatchers);
+              const newMatchers = produce(matchers, (draft) => {
+                draft.splice(index, 1);
+              });
+              onChange(newMatchers);
             }}
           >
             <TrashIcon />
@@ -50,7 +53,10 @@ export function MatcherEditor(props: { initialMatchers?: string[]; onChange: (ma
           fullWidth={false}
           variant="outlined"
           onClick={() => {
-            setMatchers([...matchers, '']);
+            const newMatchers = produce(matchers, (draft) => {
+              draft.push('');
+            });
+            onChange(newMatchers);
           }}
         >
           Add Series Selector

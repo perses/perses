@@ -11,16 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialEmptyChartOptions, EmptyChartOptions } from './empty-chart-model';
-import { EmptyChartOptionsEditor } from './EmptyChartOptionsEditor';
-import { EmptyChartPanel } from './EmptyChartPanel';
+import { SimplePaletteColorOptions, PaletteMode } from '@mui/material';
+import { grey, white } from './colors';
 
-/**
- * The core EmptyChart panel plugin for Perses.
- */
-export const EmptyChart: PanelPlugin<EmptyChartOptions> = {
-  PanelComponent: EmptyChartPanel,
-  OptionsEditorComponent: EmptyChartOptionsEditor,
-  createInitialOptions: createInitialEmptyChartOptions,
+export const secondary = (mode: PaletteMode): SimplePaletteColorOptions => {
+  return mode === 'light'
+    ? {
+        main: grey[600],
+        dark: grey[900],
+        light: grey[100],
+      }
+    : {
+        main: white,
+        dark: white,
+        light: white,
+      };
 };

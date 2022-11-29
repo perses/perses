@@ -19,7 +19,13 @@ import { Box, Skeleton } from '@mui/material';
 import { LineChart, EChartsDataFormat, ZoomEventData, Legend, YAxisLabel } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { TimeSeriesChartOptions, DEFAULT_LEGEND, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_LEGEND,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
+} from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -55,12 +61,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // convert Perses dashboard format to be ECharts compatible
   const yAxis = {
+    show: y_axis?.show ?? DEFAULT_Y_AXIS.show,
     min: y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
     max: y_axis?.max,
   };
 
-  // TODO: change to array, support multi select on Shift-click
-  const [selectedSeriesName, setSelectedSeriesName] = useState<string | null>(null);
+  const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
@@ -69,12 +75,30 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const { setTimeRange } = useTimeRange();
 
-  const onLegendItemClick = (seriesName: string) => {
-    setSelectedSeriesName((current) => {
-      if (current === null || current !== seriesName) {
-        return seriesName;
+  const onLegendItemClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, seriesName: string) => {
+    const isModifiedClick = e.metaKey || e.shiftKey;
+
+    setSelectedSeriesNames((current) => {
+      const isSelected = current.includes(seriesName);
+
+      // Clicks with modifier key can select multiple items.
+      if (isModifiedClick) {
+        if (isSelected) {
+          // Modified click on already selected item. Remove that item.
+          return current.filter((name) => name !== seriesName);
+        }
+
+        // Modified click on not-selected item. Add it.
+        return [...current, seriesName];
       }
-      return null;
+
+      if (isSelected) {
+        // Clicked item was already selected. Unselect it.
+        return [];
+      }
+
+      // Select clicked item.
+      return [seriesName];
     });
   };
 
@@ -103,16 +127,18 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, visual);
-        if (selectedSeriesName === null || selectedSeriesName === timeSeries.name) {
+        const isSelected = selectedSeriesNames.includes(timeSeries.name);
+
+        if (!selectedSeriesNames.length || isSelected) {
           graphData.timeSeries.push(lineSeries);
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
             id: timeSeries.name, // TODO: should query generate an id instead of using full name here and in getRandomColor?
             label: formattedSeriesName,
-            isSelected: selectedSeriesName === timeSeries.name,
+            isSelected,
             color: getRandomColor(timeSeries.name),
-            onClick: () => onLegendItemClick(timeSeries.name),
+            onClick: (e) => onLegendItemClick(e, timeSeries.name),
           });
         }
       }
@@ -139,7 +165,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesName, legend, visual]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual]);
 
   if (contentDimensions === undefined) {
     return null;
@@ -171,9 +197,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;
   const legendHeight = legend && legend.position === 'right' ? contentDimensions.height : 35;
 
-  // override default spacing, see: https://echarts.apache.org/en/option.html#grid.right
+  // override default spacing, see: https://echarts.apache.org/en/option.html#grid
+  const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
-    left: y_axis && y_axis.label ? 30 : 20,
+    left: !yAxis.show ? 0 : gridLeft,
     right: legend && legend.position === 'right' ? legendWidth : 20,
   };
 
@@ -189,7 +216,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   return (
     <>
-      {y_axis && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
+      {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
       <LineChart
         height={lineChartHeight}
         data={graphData}

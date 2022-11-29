@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PaletteOptions, PaletteMode } from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { white } from './common';
+import { PersesColor } from './types';
 
-export const text = (mode: PaletteMode): PaletteOptions['text'] => {
-  return mode === 'light'
-    ? {
-        primary: grey[800],
-        secondary: grey[700],
-        disabled: grey[300],
-      }
-    : {
-        primary: white,
-        secondary: grey[50],
-        disabled: grey[300],
-      };
+export const green: PersesColor = {
+  50: '#EAF9F1',
+  100: '#D5F2E3',
+  150: '#C1ECD4',
+  200: '#ACE5C6',
+  300: '#82D9AA',
+  400: '#59CC8D',
+  500: '#2FBF71',
+  600: '#26995A',
+  700: '#1C7344',
+  800: '#134C2D',
+  850: '#0E3922',
+  900: '#092617',
+  950: '#05130B',
 };

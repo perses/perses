@@ -30,10 +30,11 @@ export interface DashboardAppProps {
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
   initialVariableIsSticky?: boolean;
+  isReadonly: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource, dashboardTitleComponent, initialVariableIsSticky } = props;
+  const { dashboardResource, dashboardTitleComponent, initialVariableIsSticky, isReadonly } = props;
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
@@ -81,6 +82,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         dashboardName={dashboardResource.metadata.name}
         dashboardTitleComponent={dashboardTitleComponent}
         initialVariableIsSticky={initialVariableIsSticky}
+        isReadonly={isReadonly}
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
       />

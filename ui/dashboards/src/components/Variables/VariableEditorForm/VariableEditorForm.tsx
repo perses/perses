@@ -246,6 +246,16 @@ export function VariableEditForm({
             <SectionHeader>List Options</SectionHeader>
             <Grid container spacing={2} mb={2}>
               <Grid item xs={6}>
+                <TextField
+                  sx={{ mb: 1 }}
+                  label="Capturing Regexp"
+                  value={state.listVariableFields.capturing_regexp}
+                  onChange={(e) => {
+                    setState((draft) => {
+                      draft.listVariableFields.capturing_regexp = e.target.value;
+                    });
+                  }}
+                />
                 {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
                 <ClickAwayListener onClickAway={() => refreshPreview()}>
                   <Box />
@@ -263,17 +273,19 @@ export function VariableEditForm({
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <ErrorBoundary FallbackComponent={() => <div>Error</div>}>
-                  <Stack direction={'row'} spacing={1} alignItems="center">
-                    <Typography variant="caption">Preview Values</Typography>
-                    <IconButton onClick={refreshPreview} size="small">
-                      <Refresh />
-                    </IconButton>
-                  </Stack>
-                  <VariableListPreview definition={previewSpec} />
-                </ErrorBoundary>
-              </Grid>
+              {state.listVariableFields.plugin.kind && (
+                <Grid item xs={12}>
+                  <ErrorBoundary FallbackComponent={() => <div>Error previewing values</div>} resetKeys={[previewSpec]}>
+                    <Stack direction={'row'} spacing={1} alignItems="center">
+                      <Typography variant="caption">Preview Values</Typography>
+                      <IconButton onClick={refreshPreview} size="small">
+                        <Refresh />
+                      </IconButton>
+                    </Stack>
+                    <VariableListPreview definition={previewSpec} />
+                  </ErrorBoundary>
+                </Grid>
+              )}
             </Grid>
 
             <SectionHeader>Dropdown Options</SectionHeader>

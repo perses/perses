@@ -183,7 +183,10 @@
                   }
                 ],
                 "legend": {},
-                "unit": { "kind": "Bytes" }
+                "y_axis": {
+                  "show": true,
+                  "unit": { "kind": "Bytes" }
+                }
               }
             }
           }
@@ -956,9 +959,12 @@
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "PercentDecimal",
-                  "decimal_places": 1
+                "y_axis": {
+                  "show": true,
+                  "unit": {
+                    "kind": "Percent",
+                    "decimal_places": 1
+                  }
                 },
                 "thresholds": {
                   "steps": [
@@ -1152,6 +1158,7 @@
                     }
                   }
                 },
+                "sparkline": {},
                 "calculation": "Mean",
                 "unit": {
                   "kind": "Percent"

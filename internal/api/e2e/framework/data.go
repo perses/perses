@@ -16,7 +16,6 @@
 package e2eframework
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
@@ -24,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -112,6 +112,7 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 	if err != nil {
 		t.Fatal(err)
 	}
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	pluginSpec := &datasource.Prometheus{
 		Proxy: datasourceHTTP.Proxy{
 			Kind: "HTTPProxy",
@@ -191,6 +192,7 @@ func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 }
 
 func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	// Creating a full dashboard is quite long and to ensure the changes are still matching the dev environment,
 	// it's better to use the dashboard written in the dev/data/dashboard.json
 	persesRepositoryPath := getRepositoryPath(t)

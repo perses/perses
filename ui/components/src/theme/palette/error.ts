@@ -11,13 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Box } from '@mui/material';
-import { EmptyChartOptions } from './empty-chart-model';
+import { PaletteMode, SimplePaletteColorOptions } from '@mui/material';
+import { red } from './colors';
 
-export type EmptyChartOptionsEditorProps = OptionsEditorProps<EmptyChartOptions>;
-
-export function EmptyChartOptionsEditor(props: EmptyChartOptionsEditorProps) {
-  const { value } = props;
-  return <Box>{JSON.stringify(value)}</Box>;
-}
+export const error = (mode: PaletteMode): SimplePaletteColorOptions => {
+  return mode === 'light'
+    ? {
+        main: red[500],
+        dark: red[600],
+        light: red[50],
+      }
+    : {
+        main: red[400],
+        dark: red[800],
+        light: red[300],
+      };
+};
