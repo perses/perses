@@ -55,9 +55,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
 
   const spec = definition.spec.plugin.spec;
   const capturingRegexp =
-    definition.spec.capturing_regexp !== undefined && definition.spec.capturing_regexp !== ''
-      ? new RegExp(definition.spec.capturing_regexp, 'g')
-      : undefined;
+    definition.spec.capturing_regexp !== undefined ? new RegExp(definition.spec.capturing_regexp, 'g') : undefined;
 
   let dependsOnVariables: string[] | undefined;
   if (variablePlugin?.dependsOn) {

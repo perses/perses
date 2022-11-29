@@ -21,7 +21,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const listVariableFields = {
     allowMultiple: false,
     allowAll: false,
-    capturing_regexp: '',
+    capturing_regexp: undefined as string | undefined,
     plugin: {
       kind: '',
       spec: {},
@@ -30,7 +30,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
   if (initialVariableDefinition.kind === 'ListVariable') {
     listVariableFields.allowMultiple = initialVariableDefinition.spec.allow_all_value ?? false;
     listVariableFields.allowAll = initialVariableDefinition.spec.allow_all_value ?? false;
-    listVariableFields.capturing_regexp = initialVariableDefinition.spec.capturing_regexp ?? '';
+    listVariableFields.capturing_regexp = initialVariableDefinition.spec.capturing_regexp;
     listVariableFields.plugin = initialVariableDefinition.spec.plugin;
   }
 
