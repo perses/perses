@@ -16,6 +16,7 @@
 - [BUGFIX] Fix `dashboard.name` when migrating from a Grafana dashboard #812
 - [BUGFIX] Fix the permission on the workdir `perses` in the docker images #817
 - [BUGFIX] Fix the backend proxy that wasn't working when using a datasource from a project. #816
+- [BUGFIX] Fix issue when translating a Perses dashboard from YAML to JSON. #822
 - [BREAKINGCHANGE] Bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 - [BREAKINGCHANGE] Remove empty chart #809
