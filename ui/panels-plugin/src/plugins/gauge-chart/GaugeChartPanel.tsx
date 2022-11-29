@@ -102,7 +102,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   // show separate chart for each time series returned
   const chartWidth = contentDimensions.width / gaugeData.length;
   return (
-    <Stack direction="row">
+    <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
       {gaugeData.map((series, seriesIndex) => {
         if (seriesIndex >= MAX_GAUGE_SERIES_DISPLAY) return null;
         return (
