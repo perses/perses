@@ -195,9 +195,9 @@ export function GaugeChart(props: GaugeChartProps) {
  * to ensure size stays within given range
  */
 export function getResponsiveValueSize(value: number, unit: UnitOptions, width: number, height: number) {
-  const MIN_SIZE = 2;
-  const MAX_SIZE = 28;
-  const SIZE_MULTIPLIER = 0.5;
+  const MIN_SIZE = 3;
+  const MAX_SIZE = 24;
+  const SIZE_MULTIPLIER = 0.7;
   const formattedValue = formatValue(value, {
     kind: unit.kind,
     decimal_places: 0,
