@@ -40,7 +40,7 @@ export function replaceTemplateVariable(text: string, varName: string, templateV
   return text.replaceAll(variableTemplate, replaceString);
 }
 
-// TODO: Fix this lint eror
+// TODO: Fix this lint error
 // eslint-disable-next-line no-useless-escape
 const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
 
@@ -49,18 +49,16 @@ const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?
  */
 export const parseTemplateVariables = (text: string) => {
   const regex = TEMPLATE_VARIABLE_REGEX;
-  const matches = [];
+  const matches = new Set<string>();
   let match;
 
   while ((match = regex.exec(text)) !== null) {
-    if (match) {
-      if (match && match.length > 1 && match[1]) {
-        matches.push(match[1]);
-      }
+    if (match && match.length > 1 && match[1]) {
+      matches.add(match[1]);
     }
   }
   // return unique matches
-  return Array.from(new Set(matches));
+  return Array.from(matches.values());
 };
 
 /**

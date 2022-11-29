@@ -32,6 +32,9 @@ const config: Config.InitialOptions = {
 
     // Tell Jest where other Perses packages live since it doesn't know about project references
     '^@perses-dev/(.*)$': '<rootDir>/../$1/src',
+
+    // Configure Jest to handle stylesheets
+    '\\.(css|less)$': '<rootDir>/../stylesMock.js',
   },
   transform: {
     // This does not do type-checking and assumes that's happening elsewhere for TS test files (e.g. as part of the

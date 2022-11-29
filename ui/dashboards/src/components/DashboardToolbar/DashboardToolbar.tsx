@@ -56,35 +56,39 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   return (
     <>
       {isEditMode ? (
-        <Stack spacing={2}>
-          <Box sx={{ backgroundColor: (theme) => theme.palette.primary.light + '20' }}>
-            <Box padding={2} display="flex">
-              {dashboardTitle}
-              <Stack direction="row" spacing={1} marginLeft="auto">
-                {isReadonly && (
-                  <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
-                    Dashboard managed via code only. Download JSON and commit changes to save.
-                  </Alert>
-                )}
-                <Button variant="contained" onClick={onSave} disabled={isReadonly}>
-                  Save
-                </Button>
-                <Button variant="outlined" onClick={onCancelButtonClick}>
-                  Cancel
-                </Button>
-              </Stack>
-            </Box>
+        <Stack spacing={1}>
+          <Box p={2} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
+            {dashboardTitle}
+            <Stack direction="row" spacing={1} marginLeft="auto">
+              {isReadonly && (
+                <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                  Dashboard managed via code only. Download JSON and commit changes to save.
+                </Alert>
+              )}
+              <Button variant="contained" onClick={onSave} disabled={isReadonly}>
+                Save
+              </Button>
+              <Button variant="outlined" onClick={onCancelButtonClick}>
+                Cancel
+              </Button>
+            </Stack>
           </Box>
           <Box
             sx={{
               display: 'flex',
               width: '100%',
               alignItems: 'flex-start',
-              padding: (theme) => theme.spacing(2),
+              padding: (theme) => theme.spacing(0, 2, 2, 2),
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList initialVariableIsSticky={initialVariableIsSticky} />
+              <TemplateVariableList
+                initialVariableIsSticky={initialVariableIsSticky}
+                sx={{
+                  backgroundColor: ({ palette }) =>
+                    palette.mode === 'dark' ? palette.background.default : palette.background.paper,
+                }}
+              />
             </ErrorBoundary>
             <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
               <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
@@ -119,7 +123,13 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
           <Box paddingY={2}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList initialVariableIsSticky={initialVariableIsSticky} />
+              <TemplateVariableList
+                initialVariableIsSticky={initialVariableIsSticky}
+                sx={{
+                  backgroundColor: ({ palette }) =>
+                    palette.mode === 'dark' ? palette.background.default : palette.background.paper,
+                }}
+              />
             </ErrorBoundary>
           </Box>
         </Stack>

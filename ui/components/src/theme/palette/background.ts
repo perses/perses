@@ -12,25 +12,26 @@
 // limitations under the License.
 
 import { PaletteMode, PaletteOptions } from '@mui/material';
-import { text } from './text';
-import { background } from './background';
-import { greyOption } from './grey';
-import { black, white } from './common';
+import { blue, grey, white } from './colors';
 
-/**
- * Returns the MUI PaletteOptions for the given mode.
- */
-export function getPaletteOptions(mode: PaletteMode): PaletteOptions {
-  // Palette options should be split out into their own files with functions
-  // for creating the option values based on light/dark mode
-  return {
-    mode,
-    common: {
-      white,
-      black,
-    },
-    grey: greyOption(mode),
-    text: text(mode),
-    background: background(mode),
-  };
-}
+export const background = (mode: PaletteMode): PaletteOptions['background'] => {
+  const navigation = blue[150];
+  const overlay = 'rgba(21, 23, 33, 0.75)'; // grey[900] with opacity 75%
+  return mode === 'light'
+    ? {
+        navigation,
+        overlay,
+        default: grey[50],
+        paper: white,
+        tooltip: grey[100],
+        border: grey[100],
+      }
+    : {
+        navigation,
+        overlay,
+        default: grey[900],
+        paper: grey[850],
+        tooltip: grey[700],
+        border: grey[600],
+      };
+};

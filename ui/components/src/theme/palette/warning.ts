@@ -11,22 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DateTimeRangePicker';
-export * from './Drawer';
-export * from './EChart';
-export * from './ErrorAlert';
-export * from './ErrorBoundary';
-export * from './GaugeChart';
-export * from './InfoTooltip';
-export * from './JSONEditor';
-export * from './Legend';
-export * from './LineChart';
-export * from './OptionsEditorLayout';
-export * from './StatChart';
-export * from './UnitSelector';
-export * from './YAxisLabel';
-export * from './context/ChartsThemeProvider';
-export * from './utils';
-export * from './model';
-export * from './test-utils';
-export * from './theme';
+import { PaletteMode, SimplePaletteColorOptions } from '@mui/material';
+import { orange } from './colors';
+
+export const warning = (mode: PaletteMode): SimplePaletteColorOptions => {
+  return mode === 'light'
+    ? {
+        main: orange[500],
+        dark: orange[700],
+        light: orange[50],
+      }
+    : {
+        main: orange[400],
+        dark: orange[800],
+        light: orange[300],
+      };
+};

@@ -100,7 +100,12 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
               </Button>
               {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
                 <Stack key={i} spacing={1}>
-                  <Stack direction="row" alignItems="center" borderBottom={1} borderColor="grey.300">
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    borderBottom={1}
+                    borderColor={(theme) => theme.palette.divider}
+                  >
                     <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
                       {queriesCollapsed[i] ? <ChevronUp /> : <ChevronDown />}
                     </IconButton>
