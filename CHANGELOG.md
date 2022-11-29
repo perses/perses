@@ -4,19 +4,23 @@
 
 - [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
 - [FEATURE] Add ability to refresh dashboard #777
-- [FEATURE] Add a migration page #774
+- [FEATURE] Add a migration page #774 #816
 - [FEATURE] add a new field `captured_regexp` to filter the variable list #763
 - [ENHANCEMENT] Dashboard view can be configured to be readonly #731
 - [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
 - [ENHANCEMENT] Add perses design system #804
+- [ENHANCEMENT] Add a new option `input` in the CLI command `migrate` #816
+- [ENHANCEMENT] Add ability to select multiple legend items #814
 - [BUGFIX] Fix button wrapping when too many vars #803
 - [BUGFIX] Fix pressing back button removes query param individually #811
-- [BUGFIX] Fix dashboard.name when migrating from a Grafana dashboard #812
+- [BUGFIX] Fix `dashboard.name` when migrating from a Grafana dashboard #812
 - [BUGFIX] Fix the permission on the workdir `perses` in the docker images #817
+- [BUGFIX] Fix the backend proxy that wasn't working when using a datasource from a project. #816
 - [BREAKINGCHANGE] Bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 - [BREAKINGCHANGE] Remove empty chart #809
-- [ENHANCEMENT] Add ability to select multiple legend items #814
+- [BREAKINGCHANGE] Body accepted by the endpoint `/api/migrate` has been reviewed to be able to provide a list of input
+  used later to replace some variables by the values provided in the JSON Grafana dashboard. #816
 
 ## 0.17.0 / 2022-11-21
 
@@ -50,7 +54,8 @@
 
 - [FEATURE] custom legend formatting in TimeSeriesChart using `series_name_format` query option #709
 - [FEATURE] User can collapse / expand queries in the panel editor #718
-- [FEATURE] TimeSeriesQuery plugins now accept a `dependsOn` function to optimize loading based on dashboard context #732
+- [FEATURE] TimeSeriesQuery plugins now accept a `dependsOn` function to optimize loading based on dashboard context
+  #732
 - [ENHANCEMENT] Dashboard variables list is displayed as a sticky header #703
 - [ENHANCEMENT] Disable initial panel animation #710
 - [ENHANCEMENT] time range components styling improvements #733

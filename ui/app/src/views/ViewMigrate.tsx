@@ -31,8 +31,18 @@ import { useNavigate } from 'react-router-dom';
 import { useMigrate } from '../model/migrate-client';
 import { useCreateDashboard } from '../model/dashboard-client';
 
+interface GrafanaLightDashboard {
+  // The only part that is interesting us is the list of the input that can exists in the Grafana dashboard definition.
+  __inputs?: Array<{ name: string }>;
+  // In order to have an accurate type when matching this interface with the Grafana JSON,
+  // we just say we have an unknown list of key that exists, but we don't really care about what they are.
+  [key: string]: unknown;
+}
+
 function ViewMigrate() {
   const [grafanaDashboard, setGrafanaDashboard] = useState<string>('');
+  const [lightGrafanaDashboard, setLightGrafanaDashboard] = useState<GrafanaLightDashboard>();
+  const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
   const [projectName, setProjectName] = useState<string>('');
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const navigate = useNavigate();
@@ -47,7 +57,7 @@ function ViewMigrate() {
     }
     const value = await files[0]?.text();
     if (value !== undefined) {
-      setGrafanaDashboard(value);
+      completeGrafanaDashboard(value);
     }
   };
   const importOnClick = () => {
@@ -57,6 +67,14 @@ function ViewMigrate() {
     }
     dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
+  };
+  const completeGrafanaDashboard = (dashboard: string) => {
+    setLightGrafanaDashboard(JSON.parse(dashboard));
+    setGrafanaDashboard(dashboard);
+  };
+  const setInput = (key: string, value: string) => {
+    grafanaInput[key] = value;
+    setGrafanaInput(grafanaInput);
   };
   return (
     <Container maxWidth="md">
@@ -83,7 +101,7 @@ function ViewMigrate() {
         </Button>
         <TextField
           value={grafanaDashboard}
-          onChange={(e) => setGrafanaDashboard(e.target.value)}
+          onChange={(e) => completeGrafanaDashboard(e.target.value)}
           multiline
           fullWidth
           minRows={10}
@@ -91,11 +109,26 @@ function ViewMigrate() {
           label="Grafana dashboard"
           placeholder="Paste your Grafana dashboard"
         />
+        {
+          // When you are getting a dashboard from the Grafana marketplace, it can happen there is a list of input that shall be used in a later stage to replace some variables.
+          // The code below provide the possibility to the user to provide the list of the input value.
+          // These values will be provided to the backend that will take care to replace the variables called with the input name with the values provided.
+          lightGrafanaDashboard?.__inputs?.map((input, index) => {
+            return (
+              <TextField
+                key={`input-${index}`}
+                label={input.name}
+                variant={'outlined'}
+                onBlur={(e) => setInput(input.name, e.target.value)}
+              />
+            );
+          })
+        }
         <Button
-          disabled={migrateMutation.isLoading}
+          disabled={migrateMutation.isLoading || grafanaDashboard.length == 0}
           startIcon={<AutoFix />}
           onClick={() => {
-            migrateMutation.mutate(grafanaDashboard);
+            migrateMutation.mutate({ input: grafanaInput, grafana_dashboard: grafanaDashboard });
           }}
         >
           Migrate
