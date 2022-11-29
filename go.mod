@@ -6,6 +6,7 @@ require (
 	cuelang.org/go v0.4.2
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.6.1
+	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.16.0
@@ -48,6 +49,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mpvl/unique v0.0.0-20150818121801-cbe035fff7de // indirect
 	github.com/nexucis/lamenv v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
