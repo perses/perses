@@ -10,6 +10,7 @@
 - [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
 - [ENHANCEMENT] Add perses design system #804
 - [ENHANCEMENT] Add a new option `input` in the CLI command `migrate` #816
+- [ENHANCEMENT] Add ability to select multiple legend items #814
 - [BUGFIX] Fix button wrapping when too many vars #803
 - [BUGFIX] Fix pressing back button removes query param individually #811
 - [BUGFIX] Fix `dashboard.name` when migrating from a Grafana dashboard #812
@@ -20,7 +21,6 @@
 - [BREAKINGCHANGE] Remove empty chart #809
 - [BREAKINGCHANGE] Body accepted by the endpoint `/api/migrate` has been reviewed to be able to provide a list of input
   used later to replace some variables by the values provided in the JSON Grafana dashboard. #816
-- [ENHANCEMENT] Add ability to select multiple legend items #814
 
 ## 0.17.0 / 2022-11-21
 
