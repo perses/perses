@@ -15,19 +15,24 @@ import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
+import { formatWithTimeZone } from '../utils';
 
 interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
   wrapLabels?: boolean;
+  timeZone?: string;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { focusedSeries, wrapLabels } = props;
+  const { focusedSeries, wrapLabels, timeZone } = props;
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
 
   const formatTimeSeriesHeader = (timeString: string) => {
-    const [month, year, time] = timeString.split(',');
+    const date = new Date(timeString);
+    const formattedDate = formatWithTimeZone(date, 'MMM dd, yyyy - ', timeZone);
+    const formattedTime = formatWithTimeZone(date, 'h:mm:ss a', timeZone);
+
     return (
       <>
         <Typography
@@ -36,10 +41,10 @@ export function TooltipContent(props: TooltipContentProps) {
             color: theme.palette.common.white,
           })}
         >
-          {month}, {year} –
+          {formattedDate}
         </Typography>
         <Typography variant="caption">
-          <strong>{time}</strong>
+          <strong>{formattedTime}</strong>
         </Typography>
       </>
     );

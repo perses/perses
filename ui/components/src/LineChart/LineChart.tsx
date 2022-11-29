@@ -43,6 +43,7 @@ import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { Tooltip } from '../Tooltip/Tooltip';
 import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
+import { useTimeZone } from '../context/TimeZoneProvider';
 
 use([
   EChartsLineChart,
@@ -86,6 +87,7 @@ export function LineChart({
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [pinTooltip, setPinTooltip] = useState<boolean>(false);
+  const timeZone = useTimeZone();
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
@@ -170,7 +172,7 @@ export function LineChart({
         max: data.xAxisMax,
         axisLabel: {
           formatter: (value: number) => {
-            return getFormattedDate(value, rangeMs);
+            return getFormattedDate(value, rangeMs, timeZone);
           },
         },
       },
@@ -198,7 +200,7 @@ export function LineChart({
     };
 
     return option;
-  }, [data, yAxis, grid, legend, visualMap]);
+  }, [data, yAxis, grid, legend, visualMap, timeZone]);
 
   return (
     <Box
@@ -213,7 +215,14 @@ export function LineChart({
       onMouseEnter={handleOnMouseEnter}
     >
       {showTooltip === true && (
-        <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit}></Tooltip>
+        <Tooltip
+          chartRef={chartRef}
+          chartData={data}
+          wrapLabels={true}
+          pinTooltip={pinTooltip}
+          unit={unit}
+          timeZone={timeZone}
+        ></Tooltip>
       )}
 
       <EChart

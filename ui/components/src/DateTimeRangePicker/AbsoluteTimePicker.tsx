@@ -15,8 +15,9 @@ import { useState } from 'react';
 import { Box, Stack, TextField, Typography } from '@mui/material';
 import { LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { format } from 'date-fns';
 import { AbsoluteTimeRange } from '@perses-dev/core';
+import { useTimeZone } from '../context/TimeZoneProvider';
+import { formatWithTimeZone } from '../utils';
 import { validateDateRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
@@ -29,6 +30,7 @@ interface AbsoluteTimeFormProps {
 export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeFormProps) => {
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
+  const timeZone = useTimeZone();
 
   // validate start and end time, propagate changes
   const updateDateRange = (input: string, isStartDate: boolean) => {
@@ -141,7 +143,7 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               // TODO: add helperText, fix validation after we decide on form state solution
               updateDateRange(event.target.value, true);
             }}
-            value={format(timeRange.start, DATE_TIME_FORMAT)}
+            value={formatWithTimeZone(timeRange.start, DATE_TIME_FORMAT, timeZone)}
             label="Start Time"
             placeholder="mm/dd/yyyy hh:mm"
             // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
@@ -151,7 +153,7 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               updateDateRange(event.target.value, false);
             }}
-            value={format(timeRange.end, DATE_TIME_FORMAT)}
+            value={formatWithTimeZone(timeRange.end, DATE_TIME_FORMAT, timeZone)}
             label="End Time"
             placeholder="mm/dd/yyyy hh:mm"
             type="tel"
