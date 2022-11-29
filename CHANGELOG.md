@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.18.0 / 2022-11-29
+
 - [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
 - [FEATURE] Add ability to refresh dashboard #777
 - [FEATURE] Add a migration page #774 #816
