@@ -24,6 +24,7 @@ use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasR
 
 const PROGRESS_WIDTH = 16;
 
+// adjusts when to show pointer icon
 const GAUGE_SMALL_BREAKPOINT = 170;
 
 export type GaugeChartValue = number | null | undefined;
@@ -46,10 +47,11 @@ export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine, max } = props;
   const chartsTheme = useChartsTheme();
 
+  // adjusts fontSize depending on number of characters
+  const valueSizeClamp = getResponsiveValueSize(width, height, data.value);
+
   const option: EChartsCoreOption = useMemo(() => {
     if (!data.value) return chartsTheme.noDataOption;
-
-    const calculatedValue = data.value;
     return {
       title: {
         show: false,
@@ -88,7 +90,7 @@ export function GaugeChart(props: GaugeChartProps) {
             distance: 0,
           },
           splitLine: {
-            show: true,
+            show: false,
           },
           axisLabel: {
             show: false,
@@ -107,7 +109,7 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           data: [
             {
-              value: calculatedValue,
+              value: data.value,
             },
           ],
         },
@@ -121,10 +123,11 @@ export function GaugeChart(props: GaugeChartProps) {
           max,
           pointer: {
             show: true,
-            icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
-            length: 15,
-            width: 6,
-            offsetCenter: width > GAUGE_SMALL_BREAKPOINT ? [0, '-38%'] : [0, 0],
+            // pointer hidden for small panels, path taken from ex: https://echarts.apache.org/examples/en/editor.html?c=gauge-grade
+            icon: width > GAUGE_SMALL_BREAKPOINT ? 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z' : 'none',
+            length: 10,
+            width: 5,
+            offsetCenter: [0, '-49%'],
             itemStyle: {
               color: 'auto',
             },
@@ -140,11 +143,12 @@ export function GaugeChart(props: GaugeChartProps) {
             show: false,
           },
           detail: {
-            show: width > GAUGE_SMALL_BREAKPOINT, // hide center value at narrow chart widths
+            show: true,
             width: '60%',
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
             color: 'inherit',
+            fontSize: valueSizeClamp,
             formatter: (value: number) => {
               return formatValue(value, {
                 kind: unit.kind,
@@ -154,7 +158,7 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           data: [
             {
-              value: calculatedValue,
+              value: data.value,
               name: data.label,
               // TODO: new UX for series names, create separate React component or reuse ListLegendItem
               // https://echarts.apache.org/en/option.html#series-gauge.data.title
@@ -170,7 +174,7 @@ export function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, width, chartsTheme, unit, axisLine, max]);
+  }, [data, width, chartsTheme, unit, axisLine, max, valueSizeClamp]);
 
   return (
     <EChart
@@ -182,4 +186,17 @@ export function GaugeChart(props: GaugeChartProps) {
       theme={chartsTheme.echartsTheme}
     />
   );
+}
+
+/**
+ * Responsive font size depending on number of characters, clamp used
+ * to ensure size stays within given range
+ */
+export function getResponsiveValueSize(width: number, height: number, value: GaugeChartValue) {
+  const MIN_SIZE = 2;
+  const MAX_SIZE = 36;
+  const SIZE_MULTIPLIER = 1.5;
+  const valueCharacters = value?.toString().length ?? 2;
+  const valueSize = (Math.min(width, height) / valueCharacters) * SIZE_MULTIPLIER;
+  return `clamp(${MIN_SIZE}px, ${valueSize}px, ${MAX_SIZE}px)`;
 }
