@@ -35,6 +35,7 @@ import { MouseEvent, useState } from 'react';
 import { useProjectQuery } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useDarkMode } from '../context/DarkMode';
+import { useUtcTimeZone } from '../context/UtcTimeZone';
 
 const ITEM_HEIGHT = 48;
 
@@ -125,6 +126,7 @@ export default function Header(): JSX.Element {
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
+  const { isUtcTimeZone, setUtcTimeZone } = useUtcTimeZone();
   const handleDarkModeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       await setDarkMode(e.target.checked);
@@ -172,7 +174,10 @@ export default function Header(): JSX.Element {
               <AutoFix />
             </IconButton>
           </Tooltip>
-          <Tooltip title="theme">
+          <Tooltip title={isUtcTimeZone ? 'UTC time zone' : 'browser time zone'}>
+            <Switch checked={isUtcTimeZone} onChange={(e) => setUtcTimeZone(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title={isDarkModeEnabled ? 'Dark theme' : 'light theme'}>
             <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
           </Tooltip>
         </Stack>

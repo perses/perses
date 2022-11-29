@@ -26,6 +26,7 @@ export * from './StatChart';
 export * from './UnitSelector';
 export * from './YAxisLabel';
 export * from './context/ChartsThemeProvider';
+export * from './context/TimeZoneProvider';
 export * from './utils';
 export * from './model';
 export * from './test-utils';
