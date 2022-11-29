@@ -27,8 +27,6 @@ export function TimeZoneProvider(props: TimeZoneProviderProps) {
 
 export function useTimeZone(): string {
   const timeZone = useContext(TimeZoneContext);
-  if (timeZone === undefined) {
-    throw new Error('No TimeZoneContext found. Did you forget a Provider?');
-  }
-  return timeZone;
+  // fallback to "local" timezone if TimeZoneProvider is not present in the React tree
+  return timeZone ?? 'local';
 }
