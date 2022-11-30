@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
+
 ## 0.18.0 / 2022-11-29
 
 - [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
