@@ -18,7 +18,7 @@ import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { UseMutationResult } from '@tanstack/react-query';
 import { DashboardResource } from '@perses-dev/core';
-import { useDashboardActions, useEditMode } from '../../context';
+import { useDashboard, useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
@@ -45,6 +45,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
+  const dashboard = useDashboard();
   const { openAddPanelGroup, openAddPanel } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const dashboardTitle = dashboardTitleComponent ? (
@@ -54,7 +55,14 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   );
 
   const onSave = () => {
-    setEditMode(false);
+    dashboardMutation?.mutate(dashboard.dashboard);
+    if (dashboardMutation !== undefined) {
+      if (dashboardMutation.isSuccess) {
+        setEditMode(false);
+      }
+    } else {
+      setEditMode(false);
+    }
   };
 
   return (
