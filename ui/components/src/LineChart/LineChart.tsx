@@ -159,7 +159,7 @@ export function LineChart({
     if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
 
     // show symbols and axisPointer dashed line on hover
-    const showHoverEmphasis = data.timeSeries.length < OPTIMIZED_MODE_SERIES_LIMIT;
+    const isOptimizedMode = data.timeSeries.length > OPTIMIZED_MODE_SERIES_LIMIT;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -178,11 +178,11 @@ export function LineChart({
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
-        show: showHoverEmphasis,
+        show: !isOptimizedMode,
         trigger: 'axis',
         showContent: false,
         axisPointer: {
-          type: showHoverEmphasis ? 'line' : 'none',
+          type: isOptimizedMode ? 'none' : 'line',
           z: 0, // ensure point symbol shows on top of dashed line
         },
       },

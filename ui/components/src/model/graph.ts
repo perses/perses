@@ -14,6 +14,8 @@
 import { MouseEventHandler } from 'react';
 import { LineSeriesOption } from 'echarts/charts';
 
+// adjust display when there are many time series to help with initial load and mousemove performance
+// currently set to 500 which is conservative, we can potentially increase this in the future
 export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
 export type UnixTimeMs = number;
