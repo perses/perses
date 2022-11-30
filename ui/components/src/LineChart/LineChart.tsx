@@ -199,7 +199,6 @@ export function LineChart({
     return option;
   }, [data, yAxis, grid, legend, visualMap]);
 
-  console.log(option);
   return (
     <Box
       sx={{
