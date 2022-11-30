@@ -246,6 +246,16 @@ export function VariableEditForm({
             <SectionHeader>List Options</SectionHeader>
             <Grid container spacing={2} mb={2}>
               <Grid item xs={6}>
+                <TextField
+                  sx={{ mb: 1 }}
+                  label="Capturing Regexp"
+                  value={state.listVariableFields.capturing_regexp}
+                  onChange={(e) => {
+                    setState((draft) => {
+                      draft.listVariableFields.capturing_regexp = e.target.value;
+                    });
+                  }}
+                />
                 {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
                 <ClickAwayListener onClickAway={() => refreshPreview()}>
                   <Box />

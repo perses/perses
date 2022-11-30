@@ -89,14 +89,14 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
 	path := "/"
-	if len(matchingGroups[0]) > 1 {
+	if len(matchingGroups[0]) > 2 {
 		path = matchingGroups[0][2]
 	}
 	return dts.Spec, path, nil
 }
 
 func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.DatasourceSpec, string, error) {
-	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
+	matchingGroups := localProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 2 {
 		return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
@@ -115,8 +115,8 @@ func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.Datas
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
 	path := "/"
-	if len(matchingGroups[0]) > 1 {
-		path = matchingGroups[0][2]
+	if len(matchingGroups[0]) > 3 {
+		path = matchingGroups[0][3]
 	}
 	return dts.Spec, path, nil
 }

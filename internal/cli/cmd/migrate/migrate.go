@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"regexp"
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
@@ -24,14 +25,19 @@ import (
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/spf13/cobra"
 )
+
+var inputRegexp = regexp.MustCompile("([a-zA-Z0-9_-]+)=(.+)")
 
 type option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.OutputOption
 	writer    io.Writer
+	rowInput  []string
+	input     map[string]string
 	apiClient api.ClientInterface
 }
 
@@ -42,12 +48,31 @@ func (o *option) Complete(args []string) error {
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
 		return outputErr
 	}
+	o.completeInput()
 	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err
 	}
 	o.apiClient = apiClient
 	return nil
+}
+
+func (o *option) completeInput() {
+	if len(o.rowInput) <= 0 {
+		return
+	}
+	o.input = make(map[string]string)
+	for _, label := range o.rowInput {
+		groups := inputRegexp.FindAllStringSubmatch(label, -1)
+		for _, group := range groups {
+			k := group[1]
+			v := ""
+			if len(group) == 3 {
+				v = group[2]
+			}
+			o.input[k] = v
+		}
+	}
 }
 
 func (o *option) Validate() error {
@@ -59,7 +84,10 @@ func (o *option) Execute() error {
 	if err := file.Unmarshal(o.File, &grafanaDashboard); err != nil {
 		return err
 	}
-	persesDashboard, err := o.apiClient.Migrate(&grafanaDashboard)
+	persesDashboard, err := o.apiClient.Migrate(&modelAPI.Migrate{
+		Input:            o.input,
+		GrafanaDashboard: grafanaDashboard,
+	})
 	if err != nil {
 		return err
 	}
@@ -75,11 +103,17 @@ func NewCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "migrate -f [GRAFANA_DASHBOARD_JSON_FILE]",
 		Short: "migrate a Grafana dashboard to the Perses format",
+		Example: `
+# Migrate a Grafana dashboard with input
+percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	opt.AddFileFlags(cmd, &o.FileOption)
+	opt.AddOutputFlags(cmd, &o.OutputOption)
 	opt.MarkFileFlagAsMandatory(cmd)
+	cmd.Flags().StringArrayVar(&o.rowInput, "input", o.rowInput, "Grafana input values. Syntax supported is InputName=InputValue")
 	return cmd
 }

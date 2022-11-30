@@ -17,7 +17,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -28,6 +27,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -99,17 +99,14 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 	g.POST("/migrate", e.Migrate)
 }
 
-// Migrate is the endpoint that provides the perses dashboard corresponding to the provided grafana dashboard.
+// Migrate is the endpoint that provides the Perses dashboard corresponding to the provided grafana dashboard.
 func (e *Endpoint) Migrate(ctx echo.Context) error {
-	grafanaDashboardBytes, err := io.ReadAll(ctx.Request().Body)
-	if err != nil {
-		return shared.HandleError(err)
+	body := &api.Migrate{}
+	if err := ctx.Bind(body); err != nil {
+		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
 	}
-	if len(grafanaDashboardBytes) == 0 {
-		return shared.HandleError(fmt.Errorf("%w: body is empty", shared.BadRequestError))
-	}
-
-	persesDashboard, err := e.migrate(grafanaDashboardBytes)
+	grafanaDashboard := replaceInputValue(body)
+	persesDashboard, err := e.migrate([]byte(grafanaDashboard))
 	if err != nil {
 		return shared.HandleError(err)
 	}
@@ -201,4 +198,13 @@ func getListOfConditions(schemasPath string, defaultValue string) (string, error
 	listOfConditions.WriteString("\n")
 
 	return listOfConditions.String(), nil
+}
+
+func replaceInputValue(body *api.Migrate) string {
+	grafanaDashboard := string(body.GrafanaDashboard)
+	for input, value := range body.Input {
+		grafanaDashboard = strings.Replace(grafanaDashboard, fmt.Sprintf("$%s", input), value, -1)
+		grafanaDashboard = strings.Replace(grafanaDashboard, fmt.Sprintf("${%s}", input), value, -1)
+	}
+	return grafanaDashboard
 }
