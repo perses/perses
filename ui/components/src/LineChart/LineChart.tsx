@@ -183,6 +183,7 @@ export function LineChart({
         showContent: false,
         axisPointer: {
           type: showHoverEmphasis ? 'line' : 'none',
+          z: 0, // ensure point symbol shows on top of dashed line
         },
       },
       toolbox: {
