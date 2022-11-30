@@ -24,13 +24,14 @@ function App() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: (theme) => theme.palette.background.paper,
+        backgroundColor: ({ palette }) =>
+          palette.mode === 'dark' ? palette.background.default : palette.background.paper,
       }}
     >
       <Header />
       <Box
         sx={{
-          padding: (theme) => theme.spacing(1, 0),
+          paddingBottom: (theme) => theme.spacing(1),
           flex: 1,
         }}
       >

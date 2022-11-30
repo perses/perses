@@ -77,6 +77,18 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
   },
 };
 
+function getLegendByName(name?: string) {
+  if (typeof name !== 'string') {
+    throw new Error('Legend name must be a string.');
+  }
+
+  return screen.getByRole('listitem', {
+    name: (content, element) => {
+      return element.innerHTML.includes(name);
+    },
+  });
+}
+
 describe('TimeSeriesChartPanel', () => {
   beforeEach(() => {
     // TODO: remove and instead use addMockPlugin after rest of runtime dependencies are mocked
@@ -115,7 +127,92 @@ describe('TimeSeriesChartPanel', () => {
 
   it('should toggle selected state when a legend item is clicked', async () => {
     renderPanel();
-    await userEvent.click(screen.getByTestId('legend-item-hsla(-141599372,50%,50%,0.8)'));
-    expect(screen.getByTestId('legend-item-hsla(-141599372,50%,50%,0.8)')).toHaveClass('Mui-selected');
+
+    const seriesArr = Array.from(MOCK_TIME_SERIES_DATA.series);
+    const firstLegend = getLegendByName(seriesArr[0]?.name);
+    const secondLegend = getLegendByName(seriesArr[1]?.name);
+
+    userEvent.click(firstLegend);
+    expect(firstLegend).toHaveClass('Mui-selected');
+    expect(secondLegend).not.toHaveClass('Mui-selected');
+
+    userEvent.click(secondLegend);
+    expect(firstLegend).not.toHaveClass('Mui-selected');
+    expect(secondLegend).toHaveClass('Mui-selected');
+  });
+
+  it('should modify selected state when a legend item is clicked with shift key', async () => {
+    renderPanel();
+    const seriesArr = Array.from(MOCK_TIME_SERIES_DATA.series);
+    const firstLegend = getLegendByName(seriesArr[0]?.name);
+    const secondLegend = getLegendByName(seriesArr[1]?.name);
+
+    // Add first legend item
+    userEvent.click(firstLegend, {
+      shiftKey: true,
+    });
+    expect(firstLegend).toHaveClass('Mui-selected');
+    expect(secondLegend).not.toHaveClass('Mui-selected');
+
+    // Add second legend item
+    userEvent.click(secondLegend, {
+      shiftKey: true,
+    });
+    expect(firstLegend).toHaveClass('Mui-selected');
+    expect(secondLegend).toHaveClass('Mui-selected');
+
+    // Remove first legend item
+    userEvent.click(firstLegend, {
+      shiftKey: true,
+    });
+    expect(firstLegend).not.toHaveClass('Mui-selected');
+    expect(secondLegend).toHaveClass('Mui-selected');
+
+    // Remove second legend item
+    userEvent.click(secondLegend, {
+      shiftKey: true,
+    });
+    expect(firstLegend).not.toHaveClass('Mui-selected');
+    expect(secondLegend).not.toHaveClass('Mui-selected');
+  });
+
+  it('should modify selected state when a legend item is clicked with meta key', async () => {
+    renderPanel();
+    const seriesArr = Array.from(MOCK_TIME_SERIES_DATA.series);
+
+    // Falling back to a bogus string if not set to appease typescript.
+    const firstName = seriesArr[0]?.name;
+    const secondName = seriesArr[1]?.name;
+
+    const firstLegend = getLegendByName(firstName);
+    const secondLegend = getLegendByName(secondName);
+
+    // Add first legend item
+    userEvent.click(firstLegend, {
+      metaKey: true,
+    });
+    expect(firstLegend).toHaveClass('Mui-selected');
+    expect(secondLegend).not.toHaveClass('Mui-selected');
+
+    // Add second legend item
+    userEvent.click(secondLegend, {
+      metaKey: true,
+    });
+    expect(firstLegend).toHaveClass('Mui-selected');
+    expect(secondLegend).toHaveClass('Mui-selected');
+
+    // Remove first legend item
+    userEvent.click(firstLegend, {
+      metaKey: true,
+    });
+    expect(firstLegend).not.toHaveClass('Mui-selected');
+    expect(secondLegend).toHaveClass('Mui-selected');
+
+    // Remove second legend item
+    userEvent.click(secondLegend, {
+      metaKey: true,
+    });
+    expect(firstLegend).not.toHaveClass('Mui-selected');
+    expect(secondLegend).not.toHaveClass('Mui-selected');
   });
 });
