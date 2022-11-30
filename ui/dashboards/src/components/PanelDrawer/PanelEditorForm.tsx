@@ -33,11 +33,10 @@ import { PanelPreview } from './PanelPreview';
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
   onSubmit: (values: PanelEditorValues) => void;
-  defaultPanelKind?: string;
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps) {
-  const { initialValues, onSubmit, defaultPanelKind } = props;
+  const { initialValues, onSubmit } = props;
 
   const panelGroups = useListPanelGroups();
 
@@ -51,7 +50,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const pluginEditor = usePluginEditor({
     pluginType: 'Panel',
     value: { kind, spec },
-    defaultPanelKind,
     onChange: (plugin) => {
       setKind(plugin.kind);
       setSpec(plugin.spec);

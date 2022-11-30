@@ -37,13 +37,11 @@ export interface DashboardStoreState
   defaultTimeRange: RelativeTimeRange;
   setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
-  defaultPanelKind?: string;
 }
 
 export interface DashboardStoreProps {
   dashboardResource: DashboardResource;
   isEditMode?: boolean;
-  defaultPanelKind?: string;
 }
 
 export interface DashboardProviderProps {
@@ -75,7 +73,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
 
 function initStore(props: DashboardProviderProps) {
   const {
-    initialState: { dashboardResource, isEditMode, defaultPanelKind },
+    initialState: { dashboardResource, isEditMode },
   } = props;
 
   const {
@@ -91,7 +89,7 @@ function initStore(props: DashboardProviderProps) {
           ...createPanelSlice(panels)(...args),
           ...createPanelGroupEditorSlice(...args),
           ...createDeletePanelGroupSlice(...args),
-          ...createPanelEditorSlice(defaultPanelKind)(...args),
+          ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
           metadata,
           defaultTimeRange: { pastDuration: duration },

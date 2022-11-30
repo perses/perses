@@ -29,11 +29,6 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardTitleComponent?: JSX.Element;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
-
-  /**
-   * Default kind of panel selected when adding a new panel.
-   */
-  defaultPanelKind?: string;
 }
 
 /**
@@ -47,15 +42,15 @@ export function ViewDashboard(props: ViewDashboardProps) {
     initialVariableIsSticky,
     isReadonly,
     sx,
-    defaultPanelKind,
     ...others
   } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
+
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardResource, defaultPanelKind }}>
+      <DashboardProvider initialState={{ dashboardResource }}>
         <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box

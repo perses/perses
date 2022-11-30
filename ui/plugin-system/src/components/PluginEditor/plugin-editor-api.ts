@@ -18,7 +18,7 @@ import { produce } from 'immer';
 import { PluginType } from '../../model';
 import { PluginKindSelectProps } from '../PluginKindSelect';
 import { PluginSpecEditorProps } from '../PluginSpecEditor';
-import { usePlugin } from '../../runtime';
+import { usePlugin, usePluginRegistry } from '../../runtime';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
@@ -28,7 +28,6 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   pluginType: PluginType;
   pluginKindLabel: string;
   value: Definition<UnknownSpec>;
-  defaultPanelKind?: string;
   onChange: (next: Definition<UnknownSpec>) => void;
 }
 
@@ -37,7 +36,7 @@ type PreviousSpecState = Record<string, Record<string, UnknownSpec>>;
 /**
  * Props needed by the usePluginEditor hook.
  */
-export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value' | 'onChange' | 'defaultPanelKind'>;
+export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value' | 'onChange'>;
 
 /**
  * Returns the state/handlers that power the `PluginEditor` component. Useful for custom components that want to provide
@@ -65,9 +64,15 @@ export function usePluginEditor(props: UsePluginEditorProps) {
     byPluginType[value.kind] = value.spec;
   });
 
+  const { defaultPanelKind } = usePluginRegistry();
+  let defaultKind = '';
+  if (pluginType === 'Panel' && !value.kind && defaultPanelKind) {
+    defaultKind = defaultPanelKind;
+  }
+
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
-  const [pendingKind, setPendingKind] = useState(props.defaultPanelKind || '');
+  const [pendingKind, setPendingKind] = useState(defaultKind);
   const { data: plugin, isFetching, error } = usePlugin(pluginType, pendingKind);
 
   useEffect(() => {

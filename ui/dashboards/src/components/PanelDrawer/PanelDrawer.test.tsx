@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
@@ -19,11 +19,11 @@ import { DashboardProvider } from '../../context/DashboardProvider';
 import { PanelDrawer } from './PanelDrawer';
 
 describe('Panel Drawer', () => {
-  const renderPanelDrawer = (defaultPanelKind?: string) => {
+  const renderPanelDrawer = () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(
-      <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true, defaultPanelKind }}>
+      <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
         <DashboardProviderSpy />
         <PanelDrawer />
       </DashboardProvider>
@@ -61,37 +61,6 @@ describe('Panel Drawer', () => {
           },
         },
       },
-    });
-  });
-
-  it('should not have default selected panel kind if not specified', async () => {
-    const storeApi = renderPanelDrawer();
-
-    // Open the drawer for a new panel
-    act(() => storeApi.getState().openAddPanel());
-
-    await waitFor(() => {
-      const kindButton = screen.getByRole('button', {
-        name: 'Type',
-      });
-
-      // Remove `&ZeroWidthSpace;` from MUI to text for empty text.
-      const normalizedTextContent = kindButton.textContent?.replace(/\u200B/g, '');
-      expect(normalizedTextContent).toBe('');
-    });
-  });
-
-  it('should default selected panel kind when specified', async () => {
-    const storeApi = renderPanelDrawer('TimeSeriesChart');
-
-    // Open the drawer for a new panel
-    act(() => storeApi.getState().openAddPanel());
-
-    await waitFor(() => {
-      const kindButton = screen.getByRole('button', {
-        name: 'Type',
-      });
-      expect(kindButton).toHaveTextContent('TimeSeriesChart');
     });
   });
 

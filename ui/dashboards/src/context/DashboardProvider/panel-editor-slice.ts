@@ -53,11 +53,6 @@ export interface PanelEditorState {
   mode: 'Add' | 'Edit';
 
   /**
-   * Default kind of panel selected when adding a new panel.
-   */
-  defaultPanelKind?: string;
-
-  /**
    * Initial values for the things that can be edited about a panel.
    */
   initialValues: PanelEditorValues;
@@ -87,7 +82,7 @@ export interface PanelEditorValues {
 /**
  * Curried function for creating the PanelEditorSlice.
  */
-export function createPanelEditorSlice(defaultPanelKind?: string): StateCreator<
+export function createPanelEditorSlice(): StateCreator<
   // Actions in here need to modify both Panels and Panel Groups state
   PanelEditorSlice & PanelSlice & PanelGroupSlice,
   Middleware,
@@ -198,7 +193,6 @@ export function createPanelEditorSlice(defaultPanelKind?: string): StateCreator<
           kind: '',
           spec: {},
         },
-        defaultPanelKind,
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
           const uniquePanelKeys = getUniquePanelKeys(get().panels);

@@ -48,7 +48,7 @@ function ViewDashboard() {
       }}
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={bundledPluginLoader}>
+        <PluginRegistry pluginLoader={bundledPluginLoader} defaultPanelKind="TimeSeriesChart">
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DashboardView
               dashboardResource={data}
@@ -61,7 +61,6 @@ function ViewDashboard() {
               }
               initialVariableIsSticky={true}
               isReadonly={isReadonly}
-              defaultPanelKind="TimeSeriesChart"
             />
           </ErrorBoundary>
         </PluginRegistry>

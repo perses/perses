@@ -18,9 +18,15 @@ import { renderWithContext } from '../../test';
 import { PluginEditor } from './PluginEditor';
 import { PluginEditorProps } from './plugin-editor-api';
 
+type RenderComponentOptions = {
+  pluginType?: PluginEditorProps['pluginType'];
+  defaultPanelKind?: string;
+  value?: PluginEditorProps['value'];
+};
+
 describe('PluginEditor', () => {
-  const renderComponent = () => {
-    const testValue: PluginEditorProps['value'] = { kind: 'BertPanel1', spec: { option1: 'Option1Value' } };
+  const renderComponent = ({ pluginType = 'Panel', defaultPanelKind, value }: RenderComponentOptions = {}) => {
+    const testValue: PluginEditorProps['value'] = value || { kind: 'BertPanel1', spec: { option1: 'Option1Value' } };
 
     // A test helper component that includes the state that's controlled from outside
     let onChange: jest.Mocked<PluginEditorProps['onChange']> = jest.fn();
@@ -28,10 +34,10 @@ describe('PluginEditor', () => {
       const [value, setValue] = useState(testValue);
       onChange = jest.fn((v) => setValue(v));
 
-      return <PluginEditor pluginType="Panel" pluginKindLabel="Panel Type" value={value} onChange={onChange} />;
+      return <PluginEditor pluginType={pluginType} pluginKindLabel="Panel Type" value={value} onChange={onChange} />;
     }
 
-    renderWithContext(<TestHelperForm />);
+    renderWithContext(<TestHelperForm />, undefined, { defaultPanelKind: defaultPanelKind });
     return { onChange };
   };
 
@@ -93,5 +99,23 @@ describe('PluginEditor', () => {
     // Make sure the editor from the first plugin appears and has our modified value from before the switch
     editor = await screen.findByLabelText('BertPanel1 editor');
     expect(editor).toHaveValue('MyNewValue');
+  });
+
+  describe('when defaultPanelKind specified in plugin registry', () => {
+    it('uses default kind when one is not provided', async () => {
+      renderComponent({ pluginType: 'Panel', defaultPanelKind: 'BertPanel2', value: { kind: '', spec: {} } });
+
+      // Wait for default panel kind to load.
+      const pluginKind = screen.getByRole('button', { name: 'Panel Type' });
+      await waitFor(() => expect(pluginKind).toHaveTextContent('Bert Panel 2'));
+    });
+
+    it('does not use default when kind is provided', async () => {
+      renderComponent({ pluginType: 'Panel', defaultPanelKind: 'BertPanel2' });
+
+      // Wait for specified panel kind to load.
+      const pluginKind = screen.getByRole('button', { name: 'Panel Type' });
+      await waitFor(() => expect(pluginKind).toHaveTextContent('Bert Panel 1'));
+    });
   });
 });
