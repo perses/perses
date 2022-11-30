@@ -65,14 +65,14 @@ export function usePluginEditor(props: UsePluginEditorProps) {
   });
 
   const { defaultPanelKind } = usePluginRegistry();
-  let defaultKind = '';
+  let initPendingKind = '';
   if (pluginType === 'Panel' && !value.kind && defaultPanelKind) {
-    defaultKind = defaultPanelKind;
+    initPendingKind = defaultPanelKind;
   }
 
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
-  const [pendingKind, setPendingKind] = useState(defaultKind);
+  const [pendingKind, setPendingKind] = useState(initPendingKind);
   const { data: plugin, isFetching, error } = usePlugin(pluginType, pendingKind);
 
   useEffect(() => {
