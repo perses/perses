@@ -14,6 +14,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { DashboardResource, fetchJson } from '@perses-dev/core';
 import buildURL from './url-builder';
+import { HTTPHeader, HTTPMethodPOST, HTTPMethodPUT } from './http';
 
 const resource = 'dashboards';
 
@@ -25,14 +26,31 @@ export function useCreateDashboard(
     mutationFn: (dashboard) => {
       const url = buildURL({ resource: resource, project: dashboard.metadata.project });
       return fetchJson<DashboardResource>(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: HTTPMethodPOST,
+        headers: HTTPHeader,
         body: JSON.stringify(dashboard),
       });
     },
     onSuccess: onSuccess,
+  });
+}
+
+export function useUpdateDashboard(
+  onSuccess: (data: DashboardResource) => Promise<unknown> | unknown,
+  onError?: (err: Error) => unknown
+) {
+  return useMutation<DashboardResource, Error, DashboardResource>({
+    mutationKey: [resource],
+    mutationFn: (dashboard) => {
+      const url = buildURL({ resource: resource, project: dashboard.metadata.project, name: dashboard.metadata.name });
+      return fetchJson<DashboardResource>(url, {
+        method: HTTPMethodPUT,
+        headers: HTTPHeader,
+        body: JSON.stringify(dashboard),
+      });
+    },
+    onSuccess: onSuccess,
+    onError: onError,
   });
 }
 

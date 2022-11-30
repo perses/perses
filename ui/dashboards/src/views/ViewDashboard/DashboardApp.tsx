@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
+import { UseMutationResult } from '@tanstack/react-query';
 import {
   PanelDrawer,
   Dashboard,
@@ -29,12 +30,13 @@ import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
+  dashboardMutation?: UseMutationResult<DashboardResource, Error, DashboardResource>;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource, dashboardTitleComponent, initialVariableIsSticky, isReadonly } = props;
+  const { dashboardResource, dashboardTitleComponent, dashboardMutation, initialVariableIsSticky, isReadonly } = props;
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
@@ -86,6 +88,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         dashboardName={dashboardResource.metadata.name}
         dashboardTitleComponent={dashboardTitleComponent}
         initialVariableIsSticky={initialVariableIsSticky}
+        dashboardMutation={dashboardMutation}
         isReadonly={isReadonly}
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}

@@ -17,10 +17,12 @@ import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../model/bundled-plugins';
-import { useDashboard } from '../model/dashboard-client';
+import { useDashboard, useUpdateDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 import { useIsReadonly } from '../model/config-client';
+import { useSnackbar } from '../context/SnackbarProvider';
+import { DashboardResource } from '@perses-dev/core';
 
 /**
  * The View for viewing a Dashboard.
@@ -34,6 +36,10 @@ function ViewDashboard() {
 
   const datasourceApi = useDatasourceApi();
   const { data, isLoading } = useDashboard(projectName, dashboardName);
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const dashboardUpdateMutation = useUpdateDashboard((data: DashboardResource) => {
+    successSnackbar(`dashboard ${data.metadata.name} has been successfully updated`);
+  }, exceptionSnackbar);
   const isReadonly = useIsReadonly();
   if (isLoading) return null;
 
@@ -64,6 +70,7 @@ function ViewDashboard() {
                   dashboardProject={data.metadata.project}
                 />
               }
+              dashboardMutation={dashboardUpdateMutation}
               initialVariableIsSticky={true}
               isReadonly={isReadonly}
             />

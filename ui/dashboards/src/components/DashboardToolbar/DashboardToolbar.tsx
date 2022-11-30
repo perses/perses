@@ -16,6 +16,8 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import { UseMutationResult } from '@tanstack/react-query';
+import { DashboardResource } from '@perses-dev/core';
 import { useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
@@ -24,6 +26,7 @@ import { DownloadButton } from '../DownloadButton';
 export interface DashboardToolbarProps {
   dashboardName: string;
   dashboardTitleComponent?: JSX.Element;
+  dashboardMutation?: UseMutationResult<DashboardResource, Error, DashboardResource>;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
   onEditButtonClick: () => void;
@@ -34,6 +37,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const {
     dashboardName,
     dashboardTitleComponent,
+    dashboardMutation,
     initialVariableIsSticky,
     isReadonly,
     onEditButtonClick,
@@ -65,7 +69,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <Button variant="contained" onClick={onSave} disabled={isReadonly}>
+              <Button variant="contained" onClick={onSave} disabled={isReadonly || dashboardMutation?.isLoading}>
                 Save
               </Button>
               <Button variant="outlined" onClick={onCancelButtonClick}>
