@@ -18,7 +18,7 @@ import { EChartsDataFormat, UnitOptions } from '../model';
 import { getFocusedSeriesData } from './focused-series';
 import { CursorCoordinates, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH, useMousePosition } from './tooltip-model';
 import { TooltipContent } from './TooltipContent';
-import { assembleTransform, getTooltipUnit } from './utils';
+import { assembleTransform } from './utils';
 
 interface TooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
@@ -38,10 +38,7 @@ const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, p
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-
-  const tooltipUnit = getTooltipUnit(unit);
-  const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart, tooltipUnit);
-
+  const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart, unit);
   const chartWidth = chart?.getWidth() ?? 750;
   const chartHeight = chart?.getHeight() ?? 230;
   const cursorTransform = assembleTransform(mousePos, focusedSeries.length, chartWidth, chartHeight, pinnedPos);

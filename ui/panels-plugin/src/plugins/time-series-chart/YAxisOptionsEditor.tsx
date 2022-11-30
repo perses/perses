@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Switch, TextField } from '@mui/material';
-import { OptionsEditorControl, OptionsEditorGroup, UnitSelector, DEFAULT_Y_AXIS_UNIT } from '@perses-dev/components';
-import { DEFAULT_Y_AXIS, YAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
+import { OptionsEditorControl, OptionsEditorGroup, UnitSelector } from '@perses-dev/components';
+import { DEFAULT_UNIT, DEFAULT_Y_AXIS, YAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
 
 export interface YAxisOptionsEditorProps {
   value: YAxisOptions;
@@ -38,7 +38,7 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
         }
       />
       <UnitSelector
-        value={value.unit ?? DEFAULT_Y_AXIS_UNIT}
+        value={value.unit ?? DEFAULT_UNIT}
         onChange={(newUnit) =>
           onChange({
             ...value,
