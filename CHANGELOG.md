@@ -28,7 +28,6 @@
 - [BREAKINGCHANGE] Bump peer-dependencies @mui/material to v5.10.0 #782
 - [BREAKINGCHANGE] useTimeRange now returns timeRange and absoluteTimeRange #777
 - [BREAKINGCHANGE] Remove empty chart #809
-- [ENHANCEMENT] Add ability to select multiple legend items #814
 - [BREAKINGCHANGE] Body accepted by the endpoint `/api/migrate` has been reviewed to be able to provide a list of input
   used later to replace some variables by the values provided in the JSON Grafana dashboard. #816
 
