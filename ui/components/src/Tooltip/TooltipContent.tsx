@@ -15,23 +15,23 @@ import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
-import { formatWithTimeZone } from '../utils';
+import { useTimeZone } from '../context/TimeZoneProvider';
 
 interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
   wrapLabels?: boolean;
-  timeZone?: string;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { focusedSeries, wrapLabels, timeZone } = props;
+  const { focusedSeries, wrapLabels } = props;
+  const { formatWithUserTimeZone } = useTimeZone();
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
 
   const formatTimeSeriesHeader = (timeString: string) => {
     const date = new Date(timeString);
-    const formattedDate = formatWithTimeZone(date, 'MMM dd, yyyy - ', timeZone);
-    const formattedTime = formatWithTimeZone(date, 'h:mm:ss a', timeZone);
+    const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
+    const formattedTime = formatWithUserTimeZone(date, 'h:mm:ss a');
 
     return (
       <>

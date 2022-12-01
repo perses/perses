@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import React, { createContext, useContext } from 'react';
+import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
 
 export const TimeZoneContext = createContext<string | undefined>(undefined);
 
@@ -25,8 +26,16 @@ export function TimeZoneProvider(props: TimeZoneProviderProps) {
   return <TimeZoneContext.Provider value={timeZone}>{children}</TimeZoneContext.Provider>;
 }
 
-export function useTimeZone(): string {
+export function useTimeZone() {
   const timeZone = useContext(TimeZoneContext);
-  // fallback to "local" timezone if TimeZoneProvider is not present in the React tree
-  return timeZone ?? 'local';
+  return {
+    // fallback to "local" timezone if TimeZoneProvider is not present in the React tree
+    timeZone: timeZone ?? 'local',
+    formatWithUserTimeZone(date: Date, formatString: string) {
+      return formatWithTimeZone(date, formatString, timeZone);
+    },
+    dateFormatOptionsWithUserTimeZone(dateFormatOptions: Intl.DateTimeFormatOptions) {
+      return dateFormatOptionsWithTimeZone(dateFormatOptions, timeZone);
+    },
+  };
 }

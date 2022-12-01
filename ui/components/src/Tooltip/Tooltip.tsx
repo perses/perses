@@ -26,17 +26,9 @@ interface TooltipProps {
   pinTooltip: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
-  timeZone?: string;
 }
 
-const Tooltip = React.memo(function Tooltip({
-  chartRef,
-  chartData,
-  wrapLabels,
-  pinTooltip,
-  unit,
-  timeZone,
-}: TooltipProps) {
+const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, pinTooltip, unit }: TooltipProps) {
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
 
@@ -85,7 +77,7 @@ const Tooltip = React.memo(function Tooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} timeZone={timeZone} />
+        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
       </Box>
     </Portal>
   );

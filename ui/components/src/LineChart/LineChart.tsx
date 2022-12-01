@@ -87,7 +87,7 @@ export function LineChart({
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [pinTooltip, setPinTooltip] = useState<boolean>(false);
-  const timeZone = useTimeZone();
+  const { timeZone } = useTimeZone();
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
@@ -215,14 +215,7 @@ export function LineChart({
       onMouseEnter={handleOnMouseEnter}
     >
       {showTooltip === true && (
-        <Tooltip
-          chartRef={chartRef}
-          chartData={data}
-          wrapLabels={true}
-          pinTooltip={pinTooltip}
-          unit={unit}
-          timeZone={timeZone}
-        ></Tooltip>
+        <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit}></Tooltip>
       )}
 
       <EChart

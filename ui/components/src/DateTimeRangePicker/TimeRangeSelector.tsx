@@ -33,7 +33,7 @@ interface TimeRangeSelectorProps {
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
   const { value, timeOptions, onSelectChange, onCustomClick } = props;
-  const timeZone = useTimeZone();
+  const { timeZone } = useTimeZone();
   const formattedValue = !isRelativeTimeRange(value)
     ? formatAbsoluteRange(value, DATE_TIME_FORMAT, timeZone)
     : value.pastDuration;
