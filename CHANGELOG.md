@@ -4,6 +4,7 @@
 
 - [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
 - [ENHANCEMENT] show axisPointer line on hover in time series panel #821
+- [BUGFIX] Fix browser crash when opening panel editor #828
 
 ## 0.18.0 / 2022-11-29
 
