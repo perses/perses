@@ -65,7 +65,8 @@ export function usePluginEditor(props: UsePluginEditorProps) {
   });
 
   const { defaultPluginKinds } = usePluginRegistry();
-  const initPendingKind = value.kind || defaultPluginKinds?.[pluginType] || '';
+  const defaultPluginKind = defaultPluginKinds?.[pluginType];
+  const initPendingKind = !value.kind && defaultPluginKind ? defaultPluginKind : '';
 
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
