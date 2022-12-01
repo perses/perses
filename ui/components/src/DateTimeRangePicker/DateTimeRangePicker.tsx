@@ -28,10 +28,11 @@ interface DateTimeRangePickerProps {
   value: TimeRangeValue;
   onChange: (value: TimeRangeValue) => void;
   timeOptions: TimeOption[];
+  size?: 'small' | 'medium' | 'large';
 }
 
 export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
-  const { value, onChange, timeOptions } = props;
+  const { value, onChange, timeOptions, size } = props;
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -67,6 +68,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
           <TimeRangeSelector
             timeOptions={timeOptions}
             value={value}
+            size={size}
             onSelectChange={(event) => {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {

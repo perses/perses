@@ -19,6 +19,12 @@ import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 
+const SIZE_TO_PADDING_Y = {
+  small: '4px',
+  medium: '6px',
+  large: '10px',
+};
+
 export interface TimeOption {
   value: RelativeTimeRange;
   display: string;
@@ -29,10 +35,11 @@ interface TimeRangeSelectorProps {
   timeOptions: TimeOption[];
   onSelectChange: (event: SelectChangeEvent<string>) => void;
   onCustomClick: () => void;
+  size?: 'small' | 'medium' | 'large';
 }
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
-  const { value, timeOptions, onSelectChange, onCustomClick } = props;
+  const { value, timeOptions, onSelectChange, onCustomClick, size } = props;
   const { timeZone } = useTimeZone();
   const formattedValue = !isRelativeTimeRange(value)
     ? formatAbsoluteRange(value, DATE_TIME_FORMAT, timeZone)
@@ -46,6 +53,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         '.MuiSelect-icon': {
           marginTop: '1px',
         },
+        '.MuiSelect-select': size ? { paddingY: SIZE_TO_PADDING_Y[size] } : {},
       }}
     >
       {timeOptions.map((item, idx) => (
