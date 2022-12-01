@@ -64,11 +64,8 @@ export function usePluginEditor(props: UsePluginEditorProps) {
     byPluginType[value.kind] = value.spec;
   });
 
-  const { defaultPanelKind } = usePluginRegistry();
-  let initPendingKind = '';
-  if (pluginType === 'Panel' && !value.kind && defaultPanelKind) {
-    initPendingKind = defaultPanelKind;
-  }
+  const { defaultPluginKinds } = usePluginRegistry();
+  const initPendingKind = value.kind || defaultPluginKinds?.[pluginType] || '';
 
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind

@@ -14,6 +14,7 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PluginRegistry } from '../components/PluginRegistry';
+import { DefaultPluginKinds } from '../model';
 import { testPluginLoader } from './test-plugins';
 
 const testLogger = {
@@ -25,7 +26,7 @@ const testLogger = {
 };
 
 type ContextOptions = {
-  defaultPanelKind?: string;
+  defaultPluginKinds?: DefaultPluginKinds;
 };
 
 /**
@@ -44,7 +45,7 @@ export function renderWithContext(
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <PluginRegistry pluginLoader={testPluginLoader} defaultPanelKind={contextOptions?.defaultPanelKind}>
+      <PluginRegistry pluginLoader={testPluginLoader} defaultPluginKinds={contextOptions?.defaultPluginKinds}>
         {ui}
       </PluginRegistry>
     </QueryClientProvider>,

@@ -13,17 +13,21 @@
 
 import { UnknownSpec, useEvent } from '@perses-dev/core';
 import { useRef, useCallback, useMemo } from 'react';
-import { PluginModuleResource, PluginType, PluginImplementation, Plugin, PluginLoader } from '../../model';
+import {
+  PluginModuleResource,
+  PluginType,
+  PluginImplementation,
+  Plugin,
+  PluginLoader,
+  DefaultPluginKinds,
+} from '../../model';
 import { PluginRegistryContext } from '../../runtime';
 import { usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
 
 export interface PluginRegistryProps {
   children?: React.ReactNode;
   pluginLoader: PluginLoader;
-  /**
-   * Default kind of panel selected when adding a new panel.
-   */
-  defaultPanelKind?: string;
+  defaultPluginKinds?: DefaultPluginKinds;
 }
 
 /**
@@ -34,7 +38,7 @@ export function PluginRegistry(props: PluginRegistryProps) {
   const {
     pluginLoader: { getInstalledPlugins, importPluginModule },
     children,
-    defaultPanelKind,
+    defaultPluginKinds,
   } = props;
 
   const getPluginIndexes = usePluginIndexes(getInstalledPlugins);
@@ -94,8 +98,8 @@ export function PluginRegistry(props: PluginRegistryProps) {
 
   // Create the registry's context value and render
   const context = useMemo(
-    () => ({ getPlugin, listPluginMetadata, defaultPanelKind }),
-    [getPlugin, listPluginMetadata, defaultPanelKind]
+    () => ({ getPlugin, listPluginMetadata, defaultPluginKinds }),
+    [getPlugin, listPluginMetadata, defaultPluginKinds]
   );
   return <PluginRegistryContext.Provider value={context}>{children}</PluginRegistryContext.Provider>;
 }

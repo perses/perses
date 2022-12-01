@@ -13,12 +13,12 @@
 
 import { createContext, useContext } from 'react';
 import { useQuery, useQueries, UseQueryOptions } from '@tanstack/react-query';
-import { PluginImplementation, PluginMetadata, PluginType } from '../model';
+import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } from '../model';
 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;
   listPluginMetadata(pluginType: PluginType): Promise<PluginMetadata[]>;
-  defaultPanelKind?: string;
+  defaultPluginKinds?: DefaultPluginKinds;
 }
 
 export const PluginRegistryContext = createContext<PluginRegistryContextType | undefined>(undefined);

@@ -67,3 +67,8 @@ export interface SupportedPlugins {
  * The implementation for a given plugin type.
  */
 export type PluginImplementation<Type extends PluginType> = SupportedPlugins[Type];
+
+/**
+ * Default plugin kinds by plugin type.
+ */
+export type DefaultPluginKinds = Partial<Record<PluginType, string>>;

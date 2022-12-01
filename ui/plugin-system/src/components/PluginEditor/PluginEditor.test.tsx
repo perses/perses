@@ -15,17 +15,18 @@ import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { renderWithContext } from '../../test';
+import { DefaultPluginKinds } from '../../model';
 import { PluginEditor } from './PluginEditor';
 import { PluginEditorProps } from './plugin-editor-api';
 
 type RenderComponentOptions = {
   pluginType?: PluginEditorProps['pluginType'];
-  defaultPanelKind?: string;
+  defaultPluginKinds?: DefaultPluginKinds;
   value?: PluginEditorProps['value'];
 };
 
 describe('PluginEditor', () => {
-  const renderComponent = ({ pluginType = 'Panel', defaultPanelKind, value }: RenderComponentOptions = {}) => {
+  const renderComponent = ({ pluginType = 'Panel', defaultPluginKinds, value }: RenderComponentOptions = {}) => {
     const testValue: PluginEditorProps['value'] = value || { kind: 'BertPanel1', spec: { option1: 'Option1Value' } };
 
     // A test helper component that includes the state that's controlled from outside
@@ -37,7 +38,7 @@ describe('PluginEditor', () => {
       return <PluginEditor pluginType={pluginType} pluginKindLabel="Panel Type" value={value} onChange={onChange} />;
     }
 
-    renderWithContext(<TestHelperForm />, undefined, { defaultPanelKind: defaultPanelKind });
+    renderWithContext(<TestHelperForm />, undefined, { defaultPluginKinds });
     return { onChange };
   };
 
@@ -101,9 +102,15 @@ describe('PluginEditor', () => {
     expect(editor).toHaveValue('MyNewValue');
   });
 
-  describe('when defaultPanelKind specified in plugin registry', () => {
+  describe('when defaultPluginKinds specified in plugin registry', () => {
     it('uses default kind when one is not provided', async () => {
-      renderComponent({ pluginType: 'Panel', defaultPanelKind: 'BertPanel2', value: { kind: '', spec: {} } });
+      renderComponent({
+        pluginType: 'Panel',
+        defaultPluginKinds: {
+          Panel: 'BertPanel2',
+        },
+        value: { kind: '', spec: {} },
+      });
 
       // Wait for default panel kind to load.
       const pluginKind = screen.getByRole('button', { name: 'Panel Type' });
@@ -111,7 +118,7 @@ describe('PluginEditor', () => {
     });
 
     it('does not use default when kind is provided', async () => {
-      renderComponent({ pluginType: 'Panel', defaultPanelKind: 'BertPanel2' });
+      renderComponent({ pluginType: 'Panel', defaultPluginKinds: { Panel: 'BertPanel2' } });
 
       // Wait for specified panel kind to load.
       const pluginKind = screen.getByRole('button', { name: 'Panel Type' });
