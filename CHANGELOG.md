@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 0.19.0 / 2022-12-2
+## 0.19.0 / 2022-12-02
 
 - [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
 - [ENHANCEMENT] show axisPointer line on hover in time series panel #821
