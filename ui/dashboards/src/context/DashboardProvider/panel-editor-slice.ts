@@ -190,8 +190,6 @@ export function createPanelEditorSlice(): StateCreator<
           name: '',
           description: '',
           groupId: panelGroupId,
-          // TODO: If we knew what plugins were available (and how to create the initial spec), we might be able to
-          // set a smarter default here?
           kind: '',
           spec: {},
         },

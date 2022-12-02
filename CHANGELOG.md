@@ -18,6 +18,7 @@
 - [ENHANCEMENT] Add a new option `input` in the CLI command `migrate` #816
 - [ENHANCEMENT] Add ability to select multiple legend items #814
 - [ENHANCEMENT] Add download button in edit mode #801
+- [ENHANCEMENT] Add ability to set default plugin kinds #815
 - [BUGFIX] Fix variable preview #808
 - [BUGFIX] Fix button wrapping when too many vars #803
 - [BUGFIX] Fix pressing back button removes query param individually #811

@@ -47,6 +47,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
+
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource }}>
