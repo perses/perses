@@ -1,4 +1,15 @@
-if #panel.type == "text" if #panel.options.mode == "markdown" { // the second if has to be nested, otherwise getting "undefined field: mode" error everytime the panel doesn't match the first condition
+
+// NB: Convert text panels with mode=html as markdown panels as best effort while we dont provide a proper panel type for this
+// NB: We cannot factorize the first part of the condition (`#panel.type == "text"`) in a wrapping if, otherwise the default condition `if kind == _|_` from the
+// migration feature gets wrongly applied, because in this case the assignations done here live in a nested scope, thus `if kind == _|_` always evaluates to true.
+
+if #panel.type == "text" if #panel.mode != _|_ {
+    kind: "Markdown"
+    spec: {
+        text: #panel.content
+    }
+}
+if #panel.type == "text" if #panel.options != _|_ {
     kind: "Markdown"
     spec: {
         text: #panel.options.content

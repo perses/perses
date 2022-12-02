@@ -24,19 +24,27 @@ import (
 )
 
 func TestMigrate(t *testing.T) {
-	grafanaDashboard, _ := os.ReadFile("testdata/grafana_dashboard.json")
-	resultDashboard, _ := os.ReadFile("testdata/perses_dashboard.json")
+	simpleGrafanaDashboard, _ := os.ReadFile("testdata/simple_grafana_dashboard.json")
+	simplePersesDashboard, _ := os.ReadFile("testdata/simple_perses_dashboard.json")
+	oldFormatGrafanaDashboard, _ := os.ReadFile("testdata/old_format_grafana_dashboard.json")
+	oldFormatPersesDashboard, _ := os.ReadFile("testdata/old_format_perses_dashboard.json")
 
 	testSuite := []struct {
 		title            string
-		grafanaDashboard []byte
+		initialDashboard []byte
 		resultDashboard  []byte
 		errMsg           string
 	}{
 		{
 			title:            "grafana dashboard containing simple vars & panels",
-			grafanaDashboard: grafanaDashboard,
-			resultDashboard:  resultDashboard,
+			initialDashboard: simpleGrafanaDashboard,
+			resultDashboard:  simplePersesDashboard,
+			errMsg:           "",
+		},
+		{
+			title:            "grafana dashboard containing old-formatted elements (text panels without `options` field & a legacy graph panel)",
+			initialDashboard: oldFormatGrafanaDashboard,
+			resultDashboard:  oldFormatPersesDashboard,
 			errMsg:           "",
 		},
 	}
@@ -50,7 +58,7 @@ func TestMigrate(t *testing.T) {
 				QueriesPath:   "../../../../schemas/queries",
 			})
 
-			persesDashboardStruct, err := migrateEndpoint.migrate(test.grafanaDashboard)
+			persesDashboardStruct, err := migrateEndpoint.migrate(test.initialDashboard)
 			errString := ""
 			if err != nil {
 				errString = err.Error()

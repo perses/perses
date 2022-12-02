@@ -160,7 +160,7 @@ export default function Header(): JSX.Element {
           <ProjectMenu />
         </Box>
         <Stack direction={'row'} alignItems={'center'}>
-          <Tooltip title="migration tool">
+          <Tooltip title="Migration tool">
             <IconButton
               sx={(theme) => ({
                 color: theme.palette.common.white,
@@ -172,7 +172,7 @@ export default function Header(): JSX.Element {
               <AutoFix />
             </IconButton>
           </Tooltip>
-          <Tooltip title="theme">
+          <Tooltip title="Theme">
             <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
           </Tooltip>
         </Stack>
