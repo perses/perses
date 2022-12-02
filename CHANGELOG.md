@@ -2,8 +2,11 @@
 
 ## Unreleased
 
+## 0.19.0 / 2022-12-2
+
 - [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
 - [ENHANCEMENT] show axisPointer line on hover in time series panel #821
+- [ENHANCEMENT] Add ability to set default plugin kinds #815
 - [BUGFIX] Fix browser crash when opening panel editor #828
 
 ## 0.18.0 / 2022-11-29
@@ -18,7 +21,6 @@
 - [ENHANCEMENT] Add a new option `input` in the CLI command `migrate` #816
 - [ENHANCEMENT] Add ability to select multiple legend items #814
 - [ENHANCEMENT] Add download button in edit mode #801
-- [ENHANCEMENT] Add ability to set default plugin kinds #815
 - [BUGFIX] Fix variable preview #808
 - [BUGFIX] Fix button wrapping when too many vars #803
 - [BUGFIX] Fix pressing back button removes query param individually #811
