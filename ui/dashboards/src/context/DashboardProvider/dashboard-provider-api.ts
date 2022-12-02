@@ -225,3 +225,16 @@ const selectDefaultTimeRange = (state: DashboardStoreState) => state.defaultTime
 export function useDefaultTimeRange() {
   return useDashboardStore(selectDefaultTimeRange);
 }
+
+const selectDiscardChangesConfirmationDialog = ({
+  discardChangesConfirmationDialog,
+  openDiscardChangesConfirmationDialog,
+  closeDiscardChangesConfirmationDialog,
+}: DashboardStoreState) => ({
+  discardChangesConfirmationDialog,
+  openDiscardChangesConfirmationDialog,
+  closeDiscardChangesConfirmationDialog,
+});
+export function useDiscardChangesConfirmationDialog() {
+  return useDashboardStore(selectDiscardChangesConfirmationDialog);
+}

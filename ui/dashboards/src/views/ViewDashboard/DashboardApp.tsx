@@ -20,11 +20,11 @@ import {
   Dashboard,
   PanelGroupDialog,
   DeletePanelGroupDialog,
-  UnsavedChangesConfirmationDialog,
+  DiscardChangesConfirmationDialog,
   DashboardToolbar,
   DeletePanelDialog,
 } from '../../components';
-import { useDashboard, useEditMode } from '../../context';
+import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
@@ -38,20 +38,17 @@ export const DashboardApp = (props: DashboardAppProps) => {
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
-  const [isUnsavedDashboardDialogOpen, setUnsavedDashboardDialogIsOpen] = useState(false);
 
-  const saveDashboard = async () => {
-    setEditMode(false);
-    setUnsavedDashboardDialogIsOpen(false);
-  };
+  const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
+    useDiscardChangesConfirmationDialog();
 
-  const cancelDashboard = () => {
+  const handleDiscardChanges = () => {
     // Reset to the original spec and exit edit mode
     if (originalDashboard) {
       setDashboard(originalDashboard);
     }
-    setUnsavedDashboardDialogIsOpen(false);
     setEditMode(false);
+    closeDiscardChangesConfirmationDialog();
   };
 
   const onEditButtonClick = () => {
@@ -64,7 +61,14 @@ export const DashboardApp = (props: DashboardAppProps) => {
     if (JSON.stringify(dashboard) === JSON.stringify(originalDashboard)) {
       setEditMode(false);
     } else {
-      setUnsavedDashboardDialogIsOpen(true);
+      openDiscardChangesConfirmationDialog({
+        onDiscardChanges: () => {
+          handleDiscardChanges();
+        },
+        onCancel: () => {
+          closeDiscardChangesConfirmationDialog();
+        },
+      });
     }
   };
 
@@ -94,11 +98,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <PanelGroupDialog />
         <DeletePanelGroupDialog />
         <DeletePanelDialog />
-        <UnsavedChangesConfirmationDialog
-          isOpen={isUnsavedDashboardDialogOpen}
-          onSave={saveDashboard}
-          onClose={cancelDashboard}
-        />
+        <DiscardChangesConfirmationDialog />
       </Box>
     </Box>
   );

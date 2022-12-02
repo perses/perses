@@ -21,4 +21,5 @@ export type {
 } from './panel-group-slice';
 export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-editor-slice';
 export type { DeletePanelDialogState } from './delete-panel-slice';
+export type { DiscardChangesConfirmationDialogState } from './discard-changes-dialog-slice';
 export type { PanelEditorValues } from './panel-editor-slice';
