@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { MouseEvent, useMemo, useRef, useState } from 'react';
-import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
