@@ -154,7 +154,7 @@ export function LineChart({
     setPinTooltip(false);
   };
 
-  const option: EChartsCoreOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
 
