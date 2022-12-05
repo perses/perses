@@ -19,7 +19,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import { DarkModeContextProvider } from './context/DarkMode';
-import { UtcTimeZoneProvider } from './context/UtcTimeZone';
 import App from './App';
 
 /**
@@ -50,11 +49,9 @@ export function renderApp(container: Element | null) {
         <QueryClientProvider client={queryClient}>
           <QueryParamProvider adapter={ReactRouter6Adapter}>
             <DarkModeContextProvider>
-              <UtcTimeZoneProvider>
-                <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                  <App />
-                </SnackbarProvider>
-              </UtcTimeZoneProvider>
+              <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <App />
+              </SnackbarProvider>
             </DarkModeContextProvider>
           </QueryParamProvider>
         </QueryClientProvider>

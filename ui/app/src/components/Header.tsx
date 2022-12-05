@@ -18,7 +18,6 @@ import {
   Button,
   CircularProgress,
   Divider,
-  FormControlLabel,
   IconButton,
   Menu,
   MenuItem,
@@ -36,7 +35,6 @@ import { MouseEvent, useState } from 'react';
 import { useProjectQuery } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useDarkMode } from '../context/DarkMode';
-import { useUtcTimeZone } from '../context/UtcTimeZone';
 
 const ITEM_HEIGHT = 48;
 
@@ -127,7 +125,6 @@ export default function Header(): JSX.Element {
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
-  const { isUtcTimeZone, setUtcTimeZone } = useUtcTimeZone();
   const handleDarkModeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       await setDarkMode(e.target.checked);
@@ -162,42 +159,22 @@ export default function Header(): JSX.Element {
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
-        <Stack direction={'row'} alignItems={'center'} spacing={2}>
-          <FormControlLabel
-            control={
-              <Tooltip title="migration tool">
-                <IconButton
-                  sx={(theme) => ({
-                    color: theme.palette.common.white,
-                  })}
-                  onClick={() => {
-                    navigate('/migrate');
-                  }}
-                >
-                  <AutoFix />
-                </IconButton>
-              </Tooltip>
-            }
-            label="Migration Tool"
-          />
-
-          <FormControlLabel
-            control={
-              <Tooltip title={isUtcTimeZone ? 'UTC time zone' : 'browser time zone'}>
-                <Switch checked={isUtcTimeZone} onChange={(e) => setUtcTimeZone(e.target.checked)} />
-              </Tooltip>
-            }
-            label="Time Zone"
-          />
-
-          <FormControlLabel
-            control={
-              <Tooltip title={isDarkModeEnabled ? 'dark theme' : 'light theme'}>
-                <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
-              </Tooltip>
-            }
-            label="Theme"
-          />
+        <Stack direction={'row'} alignItems={'center'}>
+          <Tooltip title="migration tool">
+            <IconButton
+              sx={(theme) => ({
+                color: theme.palette.common.white,
+              })}
+              onClick={() => {
+                navigate('/migrate');
+              }}
+            >
+              <AutoFix />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="theme">
+            <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
+          </Tooltip>
         </Stack>
       </Toolbar>
     </AppBar>
