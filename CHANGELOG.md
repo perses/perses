@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 0.20.0 / 2022-12-5
+## 0.20.0 / 2022-12-05
 
 - [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
 - [BUGFIX] Time series panel edit preview shows stale properties #835
