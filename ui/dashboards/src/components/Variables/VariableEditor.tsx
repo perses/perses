@@ -79,6 +79,7 @@ export function VariableEditor(props: {
         },
       });
     });
+    setVariableEditIdx(variableDefinitions.length);
   };
 
   const toggleVariableVisibility = (index: number, visible: boolean) => {
@@ -194,7 +195,7 @@ export function VariableEditor(props: {
                             }}
                           />
                         </TableCell>
-                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        <TableCell component="th" scope="row">
                           {v.spec.name}
                         </TableCell>
                         <TableCell>{v.kind}</TableCell>
