@@ -18,6 +18,7 @@ import {
   Button,
   CircularProgress,
   Divider,
+  FormControlLabel,
   IconButton,
   Menu,
   MenuItem,
@@ -161,25 +162,42 @@ export default function Header(): JSX.Element {
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
         </Box>
-        <Stack direction={'row'} alignItems={'center'}>
-          <Tooltip title="migration tool">
-            <IconButton
-              sx={(theme) => ({
-                color: theme.palette.common.white,
-              })}
-              onClick={() => {
-                navigate('/migrate');
-              }}
-            >
-              <AutoFix />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={isUtcTimeZone ? 'UTC time zone' : 'browser time zone'}>
-            <Switch checked={isUtcTimeZone} onChange={(e) => setUtcTimeZone(e.target.checked)} />
-          </Tooltip>
-          <Tooltip title={isDarkModeEnabled ? 'Dark theme' : 'light theme'}>
-            <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
-          </Tooltip>
+        <Stack direction={'row'} alignItems={'center'} spacing={2}>
+          <FormControlLabel
+            control={
+              <Tooltip title="migration tool">
+                <IconButton
+                  sx={(theme) => ({
+                    color: theme.palette.common.white,
+                  })}
+                  onClick={() => {
+                    navigate('/migrate');
+                  }}
+                >
+                  <AutoFix />
+                </IconButton>
+              </Tooltip>
+            }
+            label="Migration Tool"
+          />
+
+          <FormControlLabel
+            control={
+              <Tooltip title={isUtcTimeZone ? 'UTC time zone' : 'browser time zone'}>
+                <Switch checked={isUtcTimeZone} onChange={(e) => setUtcTimeZone(e.target.checked)} />
+              </Tooltip>
+            }
+            label="Time Zone"
+          />
+
+          <FormControlLabel
+            control={
+              <Tooltip title={isDarkModeEnabled ? 'dark theme' : 'light theme'}>
+                <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
+              </Tooltip>
+            }
+            label="Theme"
+          />
         </Stack>
       </Toolbar>
     </AppBar>

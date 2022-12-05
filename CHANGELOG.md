@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider
 - [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
 - [FEATURE] Add ability to refresh dashboard #777
 - [FEATURE] Add a migration page #774
