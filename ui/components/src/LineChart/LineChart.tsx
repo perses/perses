@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { MouseEvent, useMemo, useRef, useState } from 'react';
-import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -154,7 +153,7 @@ export function LineChart({
     setPinTooltip(false);
   };
 
-  const option: EChartsCoreOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
 

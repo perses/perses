@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- [BUGFIX] time series panel edit preview shows stale properties
+
 ## 0.19.0 / 2022-12-02
 
 - [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
