@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { MouseEvent, useMemo, useRef, useState } from 'react';
-import { useDeepMemo } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -38,7 +37,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { PROGRESSIVE_MODE_SERIES_LIMIT, EChartsDataFormat } from '../model/graph';
+import { EChartsDataFormat } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { Tooltip } from '../Tooltip/Tooltip';
@@ -156,11 +155,9 @@ export function LineChart({
     setPinTooltip(false);
   };
 
-  const option: EChartsCoreOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
-
-    const showPointsOnHover = data.timeSeries.length < PROGRESSIVE_MODE_SERIES_LIMIT;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -179,11 +176,12 @@ export function LineChart({
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
-        show: showPointsOnHover,
+        show: true,
         trigger: 'axis',
-        showContent: false,
+        showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
         axisPointer: {
-          type: 'none',
+          type: 'line',
+          z: 0, // ensure point symbol shows on top of dashed line
         },
       },
       toolbox: {

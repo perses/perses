@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange } from '@perses-dev/core';
+import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
 import { EChartsTimeSeries } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
@@ -26,8 +27,6 @@ export interface TimeScale {
 }
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
-
-export const OPTIMIZED_MODE_SERIES_LIMIT = 500;
 
 export const EMPTY_GRAPH_DATA = {
   timeSeries: [],
@@ -143,7 +142,7 @@ export function getLineSeries(
     data: data,
     color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
     sampling: 'lttb',
-    progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT,
+    progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,

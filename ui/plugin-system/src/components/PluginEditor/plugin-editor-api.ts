@@ -18,7 +18,7 @@ import { produce } from 'immer';
 import { PluginType } from '../../model';
 import { PluginKindSelectProps } from '../PluginKindSelect';
 import { PluginSpecEditorProps } from '../PluginSpecEditor';
-import { usePlugin } from '../../runtime';
+import { usePlugin, usePluginRegistry } from '../../runtime';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
@@ -64,9 +64,13 @@ export function usePluginEditor(props: UsePluginEditorProps) {
     byPluginType[value.kind] = value.spec;
   });
 
+  const { defaultPluginKinds } = usePluginRegistry();
+  const defaultPluginKind = defaultPluginKinds?.[pluginType];
+  const initPendingKind = !value.kind && defaultPluginKind ? defaultPluginKind : '';
+
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
-  const [pendingKind, setPendingKind] = useState('');
+  const [pendingKind, setPendingKind] = useState(initPendingKind);
   const { data: plugin, isFetching, error } = usePlugin(pluginType, pendingKind);
 
   useEffect(() => {
