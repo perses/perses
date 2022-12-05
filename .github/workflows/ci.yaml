@@ -29,6 +29,11 @@ jobs:
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         run: ./scripts/ui_release.sh --check-package "${{ github.ref_name }}"
 
+      - name: Use snapshot version
+        ## This step only runs for "snapshot" branches starting with "snapshot/"
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'snapshot/') }}
+        run: ./scripts/ui_release.sh --snapshot-version "${{ github.ref_name }}" "${{ github.sha }}"
+
       - name: Install UI deps
         run: cd ./ui && npm install
       - name: Build the app and all packages
@@ -64,6 +69,22 @@ jobs:
       - name: Publish libraries
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         run: ./scripts/ui_release.sh --publish
+        env:
+          # The setup-node action writes an .npmrc file with this env variable
+          # as the placeholder for the auth token
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Use snapshot version
+        ## This step only runs for "snapshot" branches starting with "snapshot/"
+        ## We have to snapshot-version again in this job because the version
+        ## change in build-frontend only impacts the compiled assets. We need
+        ## the correct version again here for the publish to work properly.
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'snapshot/') }}
+        run: ./scripts/ui_release.sh --snapshot-version "${{ github.ref_name }}" "${{ github.sha }}" && cd ./ui && npm install
+      - name: Publish snapshot libraries
+        ## This step only runs for "snapshot" branches starting with "snapshot/"
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'snapshot/') }}
+        run: ./scripts/ui_release.sh --publish-snapshot "${{ github.ref_name }}"
         env:
           # The setup-node action writes an .npmrc file with this env variable
           # as the placeholder for the auth token
