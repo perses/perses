@@ -4,6 +4,9 @@
 
 - [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider #825
 - [BUGFIX] time series panel edit preview shows stale properties
+
+## 0.19.0 / 2022-12-02
+
 - [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
 - [ENHANCEMENT] show axisPointer line on hover in time series panel #821
 - [ENHANCEMENT] Add ability to set default plugin kinds #815
@@ -13,6 +16,9 @@
 - [FEATURE] Add a migration page #774 #816
 - [FEATURE] add a new field `captured_regexp` to filter the variable list #763
 - [ENHANCEMENT] Dashboard view can be configured to be readonly #731
+
+## 0.18.0 / 2022-11-29
+
 - [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
 - [ENHANCEMENT] Add perses design system #804
 - [ENHANCEMENT] Add a new option `input` in the CLI command `migrate` #816
