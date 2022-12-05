@@ -15,6 +15,7 @@ import { merge } from 'lodash-es';
 import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatValue, UnitOptions } from '../model';
+import { dateFormatOptionsWithTimeZone } from '../utils';
 
 export interface ZoomEventData {
   start: number;
@@ -65,12 +66,15 @@ export function getDateRange(data: number[]) {
 /*
  * Determines time granularity for axis labels, defaults to hh:mm
  */
-export function getFormattedDate(value: number, rangeMs: number) {
-  const dateFormatOptions: Intl.DateTimeFormatOptions = {
-    hour: 'numeric',
-    minute: 'numeric',
-    hourCycle: 'h23',
-  };
+export function getFormattedDate(value: number, rangeMs: number, timeZone?: string) {
+  const dateFormatOptions: Intl.DateTimeFormatOptions = dateFormatOptionsWithTimeZone(
+    {
+      hour: 'numeric',
+      minute: 'numeric',
+      hourCycle: 'h23',
+    },
+    timeZone
+  );
   const thirtyMinMs = 1800000;
   const dayMs = 86400000;
   if (rangeMs <= thirtyMinMs) {

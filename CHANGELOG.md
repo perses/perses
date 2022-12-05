@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider #825
 - [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
 - [BUGFIX] Time series panel edit preview shows stale properties #835
 - [BUGFIX] Fix time unit value format inconsistencies #837
