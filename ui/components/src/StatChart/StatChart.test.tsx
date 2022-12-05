@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
 import { UnitOptions } from '../model';
@@ -19,14 +18,16 @@ import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
 
 describe('StatChart', () => {
-  const contentDimensions = {
-    width: 200,
-    height: 200,
-  };
-
-  const unit: UnitOptions = {
-    kind: 'Decimal',
-    decimal_places: 2,
+  const renderChart = (unit: UnitOptions) => {
+    const contentDimensions = {
+      width: 200,
+      height: 200,
+    };
+    render(
+      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+        <StatChart width={contentDimensions.width} height={contentDimensions.height} data={mockStatData} unit={unit} />
+      </ChartsThemeProvider>
+    );
   };
 
   const mockStatData: StatChartData = {
@@ -44,19 +45,28 @@ describe('StatChart', () => {
     },
   };
 
-  describe('Render default options (no sparkline)', () => {
-    it('should render', () => {
-      render(
-        <ChartsThemeProvider chartsTheme={testChartsTheme}>
-          <StatChart
-            width={contentDimensions.width}
-            height={contentDimensions.height}
-            data={mockStatData}
-            unit={unit}
-          />
-        </ChartsThemeProvider>
-      );
-      expect(screen.getByText('7.73')).toBeInTheDocument();
-    });
+  it('render default options (no sparkline)', () => {
+    const unit: UnitOptions = {
+      kind: 'Decimal',
+      decimal_places: 2,
+    };
+    renderChart(unit);
+    expect(screen.getByText('7.73')).toBeInTheDocument();
+  });
+
+  it('show value with time unit formatting', () => {
+    const unit: UnitOptions = {
+      kind: 'Seconds',
+    };
+    renderChart(unit);
+    expect(screen.getByText('7.729 seconds')).toBeInTheDocument();
+  });
+
+  it('show value with time unit formatting', () => {
+    const unit: UnitOptions = {
+      kind: 'Months',
+    };
+    renderChart(unit);
+    expect(screen.getByText('7.729 months')).toBeInTheDocument();
   });
 });
