@@ -2,9 +2,13 @@
 
 ## Unreleased
 
+## 0.20.0 / 2022-12-5
+
 - [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
 - [BUGFIX] Time series panel edit preview shows stale properties #835
 - [BUGFIX] Fix time unit value format inconsistencies #837
+- [BUGFIX] Fix variable editor dark mode #836
+- [BUGFIX] Fix mapping issues with the migrate feature #830
 
 ## 0.19.0 / 2022-12-02
 
