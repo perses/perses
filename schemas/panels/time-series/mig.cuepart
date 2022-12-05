@@ -11,7 +11,17 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
             }
         }]
         legend: {
-            position: #panel.options.legend.placement
+            if #panel.type == "timeseries" {
+                position: #panel.options.legend.placement
+            }
+            if #panel.type == "graph" {
+                if #panel.legend.rightSide {
+                    position: "right"
+                }
+                if !#panel.legend.rightSide {
+                    position: "bottom"
+                }
+            }
         }
         // mapping table for the `unit` attribute
         // TODO: factorize this for all panels?

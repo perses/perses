@@ -51,6 +51,7 @@ export function MatcherEditor({ matchers, onChange }: MatcherEditorProps) {
       <Box>
         <Button
           fullWidth={false}
+          color="secondary"
           variant="outlined"
           onClick={() => {
             const newMatchers = produce(matchers, (draft) => {

@@ -19,14 +19,14 @@ import {
   TableContainer,
   TableBody,
   TableRow,
-  TableCell,
+  TableCell as MuiTableCell,
   Table,
-  Paper,
   TableHead,
   Switch,
   Typography,
   IconButton,
   Alert,
+  styled,
 } from '@mui/material';
 import { VariableDefinition } from '@perses-dev/core';
 import { useImmer } from 'use-immer';
@@ -140,7 +140,7 @@ export function VariableEditor(props: {
               display: 'flex',
               alignItems: 'center',
               padding: (theme) => theme.spacing(1, 2),
-              borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
+              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography variant="h2">Template Variables</Typography>
@@ -155,6 +155,7 @@ export function VariableEditor(props: {
                 Apply
               </Button>
               <Button
+                color="secondary"
                 variant="outlined"
                 onClick={() => {
                   props.onCancel();
@@ -175,7 +176,7 @@ export function VariableEditor(props: {
                     {error}
                   </Alert>
                 ))}
-              <TableContainer component={Paper}>
+              <TableContainer>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                   <TableHead>
                     <TableRow>
@@ -235,3 +236,7 @@ export function VariableEditor(props: {
     </>
   );
 }
+
+const TableCell = styled(MuiTableCell)(({ theme }) => ({
+  borderBottom: `solid 1px ${theme.palette.divider}`,
+}));

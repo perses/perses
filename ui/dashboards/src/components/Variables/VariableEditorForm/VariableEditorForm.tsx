@@ -129,7 +129,7 @@ export function VariableEditForm({
           display: 'flex',
           alignItems: 'center',
           padding: (theme) => theme.spacing(1, 2),
-          borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
         <Typography variant="h2">Template Variables / Edit Variable</Typography>
@@ -144,6 +144,7 @@ export function VariableEditForm({
             Update
           </Button>
           <Button
+            color="secondary"
             variant="outlined"
             onClick={() => {
               onCancel();
