@@ -144,11 +144,6 @@ describe('UnitSelector', () => {
   });
 
   describe('with a time unit selected', () => {
-    it('does not allow the user to modify the decimal places', () => {
-      renderUnitSelector({ kind: 'Hours' });
-      expect(getDecimalSelector()).toBeDisabled();
-    });
-
     it('does not allow the user to set abbreviate', () => {
       renderUnitSelector({ kind: 'Minutes' });
       expect(getAbbreviateSwitch()).toBeDisabled();

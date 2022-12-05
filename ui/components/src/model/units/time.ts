@@ -11,16 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 
 const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'] as const;
 type TimeUnitKind = typeof timeUnitKinds[number];
 export type TimeUnitOptions = {
   kind: TimeUnitKind;
+  decimal_places?: number;
 };
 const TIME_GROUP = 'Time';
 export const TIME_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Time',
+  decimal_places: true,
 };
 export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnitKind, UnitConfig>> = {
   Milliseconds: {
@@ -71,11 +74,14 @@ export enum TimeIntlDuration {
 }
 
 export function formatTime(value: number, unitOptions: TimeUnitOptions): string {
+  const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
   const timeUnit: string = TimeIntlDuration[unitOptions.kind];
   const formatter = new Intl.NumberFormat('en', {
     style: 'unit',
     unit: timeUnit,
     unitDisplay: 'long',
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   });
   return formatter.format(value);
 }
