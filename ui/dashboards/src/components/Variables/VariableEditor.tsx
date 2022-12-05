@@ -35,6 +35,7 @@ import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 
+import { useDiscardChangesConfirmationDialog } from '../../context';
 import { VariableEditForm } from './VariableEditorForm';
 
 function getValidation(variableDefinitions: VariableDefinition[]) {
@@ -62,6 +63,26 @@ export function VariableEditor(props: {
 
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
+
+  const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
+    useDiscardChangesConfirmationDialog();
+  const handleCancel = () => {
+    if (JSON.stringify(props.variableDefinitions) !== JSON.stringify(variableDefinitions)) {
+      openDiscardChangesConfirmationDialog({
+        onDiscardChanges: () => {
+          closeDiscardChangesConfirmationDialog();
+          props.onCancel();
+        },
+        onCancel: () => {
+          closeDiscardChangesConfirmationDialog();
+        },
+        description:
+          'You have unapplied changes. Are you sure you want to discard these changes? Changes cannot be recovered.',
+      });
+    } else {
+      props.onCancel();
+    }
+  };
 
   const removeVariable = (index: number) => {
     setVariableDefinitions((draft) => {
@@ -154,13 +175,7 @@ export function VariableEditor(props: {
               >
                 Apply
               </Button>
-              <Button
-                color="secondary"
-                variant="outlined"
-                onClick={() => {
-                  props.onCancel();
-                }}
-              >
+              <Button color="secondary" variant="outlined" onClick={handleCancel}>
                 Cancel
               </Button>
             </Stack>
