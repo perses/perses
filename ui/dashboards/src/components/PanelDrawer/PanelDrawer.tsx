@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Stack, Box, Button, Typography } from '@mui/material';
 import { Drawer } from '@perses-dev/components';
 import { PanelEditorValues, useDiscardChangesConfirmationDialog, usePanelEditor } from '../../context';
@@ -67,9 +67,9 @@ export const PanelDrawer = () => {
     setIsClosing(true);
   };
 
-  const handleChange: PanelEditorFormProps['onChange'] = (values) => {
+  const handleChange: PanelEditorFormProps['onChange'] = useCallback((values) => {
     setValues(values);
-  };
+  }, []);
 
   return (
     <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }}>
