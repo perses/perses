@@ -11,9 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createTheme, PaletteMode, ThemeOptions } from '@mui/material';
+import { createTheme, PaletteMode, ThemeOptions, Theme } from '@mui/material';
 import { getPaletteOptions } from './palette/palette-options';
 import { typography } from './typography';
+
+const getModalBackgroundStyle = ({ theme }: { theme: Omit<Theme, 'components'> }) => {
+  const backgroundStyle =
+    theme.palette.mode === 'light'
+      ? {}
+      : {
+          backgroundImage: 'unset',
+          backgroundColor: theme.palette.designSystem.grey[800],
+        };
+  return {
+    ...backgroundStyle,
+  };
+};
 
 /**
  * Gets theme used by all components for the provided mode. For more details, see:
@@ -45,6 +58,16 @@ const components: ThemeOptions['components'] = {
   MuiTextField: {
     defaultProps: {
       size: 'small',
+    },
+  },
+  MuiDrawer: {
+    styleOverrides: {
+      paper: getModalBackgroundStyle,
+    },
+  },
+  MuiDialog: {
+    styleOverrides: {
+      paper: getModalBackgroundStyle,
     },
   },
 };
