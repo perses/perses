@@ -11,14 +11,14 @@
 - [ENHANCEMENT] show axisPointer line on hover in time series panel #821
 - [ENHANCEMENT] Add ability to set default plugin kinds #815
 - [BUGFIX] Fix browser crash when opening panel editor #828
+
+## 0.18.0 / 2022-11-29
+
 - [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
 - [FEATURE] Add ability to refresh dashboard #777
 - [FEATURE] Add a migration page #774 #816
 - [FEATURE] add a new field `captured_regexp` to filter the variable list #763
 - [ENHANCEMENT] Dashboard view can be configured to be readonly #731
-
-## 0.18.0 / 2022-11-29
-
 - [ENHANCEMENT] reduce line_width and point_radius max allowed values #798
 - [ENHANCEMENT] Add perses design system #804
 - [ENHANCEMENT] Add a new option `input` in the CLI command `migrate` #816
