@@ -17,6 +17,7 @@ package common
 
 #timeUnit: {
 	kind: "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
+	decimal_places?: number
 }
 
 #percentUnit: {
