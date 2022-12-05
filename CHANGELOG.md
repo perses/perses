@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] Use consistent formatting for time (24 hour) #840
 - [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider #825
 - [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
 - [BUGFIX] Time series panel edit preview shows stale properties #835
