@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import Replay from 'mdi-material-ui/Replay';
-import { Button, MenuItem, Select, SelectProps, Switch } from '@mui/material';
+import { Button, MenuItem, Select, SelectProps } from '@mui/material';
 import { produce } from 'immer';
 import {
+  LegendSelector,
+  LegendSelectorProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -35,6 +37,14 @@ import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEdito
 export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
 
+  const handleLegendChange: LegendSelectorProps['onChange'] = (newLegend) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.legend = newLegend;
+      })
+    );
+  };
+
   const handleVisualChange: VisualOptionsEditorProps['onChange'] = (newVisual) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -51,14 +61,14 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     );
   };
 
-  // TODO: separate legend editor component
-  const handleLegendShowChange = (show: boolean) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.legend = show ? DEFAULT_LEGEND : undefined;
-      })
-    );
-  };
+  // // TODO: separate legend editor component
+  // const handleLegendShowChange = (show: boolean) => {
+  //   onChange(
+  //     produce(value, (draft: TimeSeriesChartOptions) => {
+  //       draft.legend = show ? DEFAULT_LEGEND : undefined;
+  //     })
+  //   );
+  // };
 
   const handleLegendPositionChange: SelectProps<LegendPosition>['onChange'] = (e) => {
     onChange(
@@ -75,7 +85,8 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Legend">
-          <OptionsEditorControl
+          <LegendSelector value={value.legend} onChange={handleLegendChange} />
+          {/* <OptionsEditorControl
             label="Show"
             control={
               <Switch
@@ -85,7 +96,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
                 }}
               />
             }
-          />
+          /> */}
           <OptionsEditorControl
             label="Position"
             control={
