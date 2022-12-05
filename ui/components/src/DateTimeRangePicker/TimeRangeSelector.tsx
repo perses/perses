@@ -19,11 +19,15 @@ import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 
-const SIZE_TO_PADDING_Y = {
-  small: '4px',
-  medium: '6px',
-  large: '10px',
-};
+function heightToPaddingY(height: string): string {
+  const heightNum = parseFloat(height);
+
+  if (heightNum >= 20) {
+    return `${(heightNum - 20) / 2}px`;
+  } else {
+    return '0px';
+  }
+}
 
 export interface TimeOption {
   value: RelativeTimeRange;
@@ -35,11 +39,11 @@ interface TimeRangeSelectorProps {
   timeOptions: TimeOption[];
   onSelectChange: (event: SelectChangeEvent<string>) => void;
   onCustomClick: () => void;
-  size?: 'small' | 'medium' | 'large';
+  height?: string;
 }
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
-  const { value, timeOptions, onSelectChange, onCustomClick, size } = props;
+  const { value, timeOptions, onSelectChange, onCustomClick, height } = props;
   const { timeZone } = useTimeZone();
   const formattedValue = !isRelativeTimeRange(value)
     ? formatAbsoluteRange(value, DATE_TIME_FORMAT, timeZone)
@@ -53,7 +57,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         '.MuiSelect-icon': {
           marginTop: '1px',
         },
-        '.MuiSelect-select': size ? { paddingY: SIZE_TO_PADDING_Y[size] } : {},
+        '.MuiSelect-select': height ? { paddingY: heightToPaddingY(height) } : {},
       }}
     >
       {timeOptions.map((item, idx) => (

@@ -30,17 +30,11 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
 
-const SIZE_TO_HEIGHT = {
-  small: '28px',
-  medium: '32px',
-  large: '40px',
-};
-
 interface TimeRangeControlsProps {
-  size?: 'small' | 'medium' | 'large';
+  height?: string;
 }
 
-export function TimeRangeControls({ size }: TimeRangeControlsProps) {
+export function TimeRangeControls({ height }: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh } = useTimeRange();
   const defaultTimeRange = useDefaultTimeRange();
 
@@ -56,18 +50,8 @@ export function TimeRangeControls({ size }: TimeRangeControlsProps) {
 
   return (
     <>
-      <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} size={size} />
-      <RefreshIconButton
-        aria-label="Refresh Dashboard"
-        onClick={refresh}
-        sx={
-          size
-            ? {
-                height: SIZE_TO_HEIGHT[size],
-              }
-            : {}
-        }
-      >
+      <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
+      <RefreshIconButton aria-label="Refresh Dashboard" onClick={refresh} sx={height ? { height } : {}}>
         <RefreshIcon />
       </RefreshIconButton>
     </>
