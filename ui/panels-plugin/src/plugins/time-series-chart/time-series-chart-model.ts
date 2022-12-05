@@ -56,6 +56,7 @@ export type LegendPositionOptions = {
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
   decimal_places: 2,
+  abbreviate: true,
 };
 
 export const DEFAULT_LINE_WIDTH = 1.5;
