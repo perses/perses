@@ -3,6 +3,7 @@
 ## Unreleased
 
 - [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider
+- [BUGFIX] time series panel edit preview shows stale properties
 - [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
 - [ENHANCEMENT] show axisPointer line on hover in time series panel #821
 - [ENHANCEMENT] Add ability to set default plugin kinds #815
