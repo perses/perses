@@ -30,13 +30,13 @@ import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
-  dashboardMutation?: UseMutationResult<DashboardResource, Error, DashboardResource>;
+  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource, dashboardTitleComponent, dashboardMutation, initialVariableIsSticky, isReadonly } = props;
+  const { dashboardResource, dashboardTitleComponent, onSave, initialVariableIsSticky, isReadonly } = props;
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
@@ -88,7 +88,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         dashboardName={dashboardResource.metadata.name}
         dashboardTitleComponent={dashboardTitleComponent}
         initialVariableIsSticky={initialVariableIsSticky}
-        dashboardMutation={dashboardMutation}
+        onSave={onSave}
         isReadonly={isReadonly}
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}

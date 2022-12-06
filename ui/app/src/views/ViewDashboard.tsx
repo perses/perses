@@ -16,13 +16,13 @@ import { useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
+import { DashboardResource } from '@perses-dev/core';
 import { bundledPluginLoader } from '../model/bundled-plugins';
-import { useDashboard, useUpdateDashboard } from '../model/dashboard-client';
+import { updateDashboard, useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 import { useIsReadonly } from '../model/config-client';
 import { useSnackbar } from '../context/SnackbarProvider';
-import { DashboardResource } from '@perses-dev/core';
 
 /**
  * The View for viewing a Dashboard.
@@ -37,9 +37,17 @@ function ViewDashboard() {
   const datasourceApi = useDatasourceApi();
   const { data, isLoading } = useDashboard(projectName, dashboardName);
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const dashboardUpdateMutation = useUpdateDashboard((data: DashboardResource) => {
-    successSnackbar(`dashboard ${data.metadata.name} has been successfully updated`);
-  }, exceptionSnackbar);
+  const dashboardUpdatePromise = (data: DashboardResource) => {
+    return updateDashboard(data)
+      .then((data) => {
+        successSnackbar(`dashboard ${data.metadata.name} has been successfully updated`);
+        return data;
+      })
+      .catch((err) => {
+        exceptionSnackbar(err);
+        throw err;
+      });
+  };
   const isReadonly = useIsReadonly();
   if (isLoading) return null;
 
@@ -70,7 +78,7 @@ function ViewDashboard() {
                   dashboardProject={data.metadata.project}
                 />
               }
-              dashboardMutation={dashboardUpdateMutation}
+              onSave={dashboardUpdatePromise}
               initialVariableIsSticky={true}
               isReadonly={isReadonly}
             />

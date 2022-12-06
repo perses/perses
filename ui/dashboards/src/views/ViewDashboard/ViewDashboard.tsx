@@ -15,7 +15,6 @@ import { Box, BoxProps } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import { TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
-import { UseMutationResult } from '@tanstack/react-query';
 import {
   TemplateVariableProvider,
   DashboardProvider,
@@ -28,7 +27,7 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
   dashboardTitleComponent?: JSX.Element;
-  dashboardMutation?: UseMutationResult<DashboardResource, Error, DashboardResource>;
+  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
 }
@@ -41,7 +40,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
     dashboardResource,
     datasourceApi,
     dashboardTitleComponent,
-    dashboardMutation,
+    onSave,
     initialVariableIsSticky,
     isReadonly,
     sx,
@@ -73,7 +72,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 <DashboardApp
                   dashboardResource={dashboardResource}
                   dashboardTitleComponent={dashboardTitleComponent}
-                  dashboardMutation={dashboardMutation}
+                  onSave={onSave}
                   initialVariableIsSticky={initialVariableIsSticky}
                   isReadonly={isReadonly}
                 />

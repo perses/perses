@@ -35,22 +35,12 @@ export function useCreateDashboard(
   });
 }
 
-export function useUpdateDashboard(
-  onSuccess: (data: DashboardResource) => Promise<unknown> | unknown,
-  onError?: (err: Error) => unknown
-) {
-  return useMutation<DashboardResource, Error, DashboardResource>({
-    mutationKey: [resource],
-    mutationFn: (dashboard) => {
-      const url = buildURL({ resource: resource, project: dashboard.metadata.project, name: dashboard.metadata.name });
-      return fetchJson<DashboardResource>(url, {
-        method: HTTPMethodPUT,
-        headers: HTTPHeader,
-        body: JSON.stringify(dashboard),
-      });
-    },
-    onSuccess: onSuccess,
-    onError: onError,
+export function updateDashboard(entity: DashboardResource) {
+  const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetchJson<DashboardResource>(url, {
+    method: HTTPMethodPUT,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
   });
 }
 
