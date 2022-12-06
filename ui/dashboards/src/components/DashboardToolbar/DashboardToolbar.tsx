@@ -17,11 +17,11 @@ import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
+import { useState } from 'react';
 import { useDashboard, useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
-import { useState } from 'react';
 
 export interface DashboardToolbarProps {
   dashboardName: string;

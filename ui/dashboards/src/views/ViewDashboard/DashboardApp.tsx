@@ -15,7 +15,6 @@ import { useState } from 'react';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { UseMutationResult } from '@tanstack/react-query';
 import {
   PanelDrawer,
   Dashboard,
