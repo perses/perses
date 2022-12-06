@@ -107,7 +107,7 @@ The creation of snapshots is automated by Github actions based on branch naming 
 
 ### Using a snapshot branch
 
-- Install the snapshot branch for all relevant packages using the `snapshot-NAME` tag (e.g. `npm install @perses-dev/core@snapshot-theme-updates`).
+- Install the snapshot branch for all relevant packages using the `snapshot-NAME` tag (e.g. `npm install  --save-exact @perses-dev/core@snapshot-theme-updates`). Recommend using `--save-exact` to avoid inconsistencies with how snapshot version names may match using `^`.
 
 ### Removing a snapshot
 

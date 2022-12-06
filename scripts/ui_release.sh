@@ -79,9 +79,9 @@ function bumpVersion() {
   for workspace in ${workspaces}; do
     # sed -i syntax is different on mac and linux
     if [[ "$OSTYPE" == "darwin"* ]]; then
-      sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"\^${version}\"|" "${workspace}"/package.json
+      sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
     else
-      sed -E -i "s|(\"@perses-dev/.+\": )\".+\"|\1\"\^${version}\"|" "${workspace}"/package.json
+      sed -E -i "s|(\"@perses-dev/.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
     fi
   done
 
