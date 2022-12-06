@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] Use consistent formatting for time (24 hour) #840
+- [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider #825
+
 ## 0.20.0 / 2022-12-05
 
 - [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
