@@ -2,9 +2,17 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] Use consistent formatting for time (24 hour) #840
+- [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider #825
+- [ENHANCEMENT] Multiple enhancements to variable editing UX #842
+
+## 0.20.0 / 2022-12-05
+
 - [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
 - [BUGFIX] Time series panel edit preview shows stale properties #835
 - [BUGFIX] Fix time unit value format inconsistencies #837
+- [BUGFIX] Fix variable editor dark mode #836
+- [BUGFIX] Fix mapping issues with the migrate feature #830
 
 ## 0.19.0 / 2022-12-02
 

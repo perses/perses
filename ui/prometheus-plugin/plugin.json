@@ -9,7 +9,7 @@
         "pluginType": "Variable",
         "kind": "StaticListVariable",
         "display": {
-          "name": "Static List Variable",
+          "name": "[Static] Custom List",
           "description": "Static list variables allow you to define an array of values"
         }
       },
@@ -17,7 +17,7 @@
         "pluginType": "Variable",
         "kind": "PrometheusLabelValuesVariable",
         "display": {
-          "name": "PrometheusLabelValuesVariable",
+          "name": "[Prometheus] Label Values",
           "description": ""
         }
       },
@@ -25,7 +25,7 @@
         "pluginType": "Variable",
         "kind": "PrometheusLabelNamesVariable",
         "display": {
-          "name": "PrometheusLabelNamesVariable",
+          "name": "[Prometheus] Label Names",
           "description": ""
         }
       },
@@ -33,7 +33,7 @@
         "pluginType": "Variable",
         "kind": "PrometheusPromQLVariable",
         "display": {
-          "name": "PrometheusPromQLVariable",
+          "name": "[Prometheus] PromQL Result Values",
           "description": ""
         }
       },

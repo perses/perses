@@ -36,6 +36,11 @@ import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 
 import { VariableEditForm } from './VariableEditorForm';
+import { VARIABLE_TYPES } from './variable-model';
+
+function getVariableLabelByKind(kind: string) {
+  return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
+}
 
 function getValidation(variableDefinitions: VariableDefinition[]) {
   const errors = [];
@@ -79,6 +84,7 @@ export function VariableEditor(props: {
         },
       });
     });
+    setVariableEditIdx(variableDefinitions.length);
   };
 
   const toggleVariableVisibility = (index: number, visible: boolean) => {
@@ -143,7 +149,7 @@ export function VariableEditor(props: {
               borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h2">Template Variables</Typography>
+            <Typography variant="h2">Variables</Typography>
             <Stack direction="row" spacing={1} marginLeft="auto">
               <Button
                 disabled={props.variableDefinitions === variableDefinitions || !validation.isValid}
@@ -166,9 +172,6 @@ export function VariableEditor(props: {
             </Stack>
           </Box>
           <Box padding={2} sx={{ overflowY: 'scroll' }}>
-            <Typography variant="h3" mb={2}>
-              Variable List
-            </Typography>
             <Stack spacing={2}>
               {!validation.isValid &&
                 validation.errors.map((error) => (
@@ -181,8 +184,8 @@ export function VariableEditor(props: {
                   <TableHead>
                     <TableRow>
                       <TableCell>Visibility</TableCell>
-                      <TableCell>Variable Name</TableCell>
-                      <TableCell>Variable Type</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Type</TableCell>
                       <TableCell align="right">Action</TableCell>
                     </TableRow>
                   </TableHead>
@@ -200,7 +203,7 @@ export function VariableEditor(props: {
                         <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                           {v.spec.name}
                         </TableCell>
-                        <TableCell>{v.kind}</TableCell>
+                        <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
                         <TableCell align="right">
                           <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
                             <ArrowUp />
@@ -226,7 +229,7 @@ export function VariableEditor(props: {
               </TableContainer>
               <Box display="flex">
                 <Button onClick={addVariable} variant="contained">
-                  Add New Variable
+                  Add New
                 </Button>
               </Box>
             </Stack>

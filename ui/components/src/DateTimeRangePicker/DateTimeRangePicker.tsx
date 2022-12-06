@@ -28,10 +28,11 @@ interface DateTimeRangePickerProps {
   value: TimeRangeValue;
   onChange: (value: TimeRangeValue) => void;
   timeOptions: TimeOption[];
+  height?: string;
 }
 
 export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
-  const { value, onChange, timeOptions } = props;
+  const { value, onChange, timeOptions, height } = props;
 
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
   const anchorEl = useRef();
@@ -41,7 +42,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
   }, [value]);
 
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction="row" spacing={1} height={height}>
       <Popover
         anchorEl={anchorEl.current}
         anchorOrigin={{
@@ -67,6 +68,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
           <TimeRangeSelector
             timeOptions={timeOptions}
             value={value}
+            height={height}
             onSelectChange={(event) => {
               const duration = event.target.value;
               const relativeTimeInput: RelativeTimeRange = {

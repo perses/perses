@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isBefore, isValid, format } from 'date-fns';
+import { isBefore, isValid } from 'date-fns';
 import { AbsoluteTimeRange } from '@perses-dev/core';
+import { formatWithTimeZone } from '../utils';
 
 /*
  * Date validation and check if end is after start
@@ -33,8 +34,8 @@ export function validateDateRange(startDate: Date, endDate: Date) {
 /**
  * Format start and end time based on provided date format
  */
-export function formatAbsoluteRange(timeRange: AbsoluteTimeRange, dateFormat: string) {
-  const formattedStart = format(timeRange.start, dateFormat);
-  const formattedEnd = format(timeRange.end, dateFormat);
+export function formatAbsoluteRange(timeRange: AbsoluteTimeRange, dateFormat: string, timeZone?: string) {
+  const formattedStart = formatWithTimeZone(timeRange.start, dateFormat, timeZone);
+  const formattedEnd = formatWithTimeZone(timeRange.end, dateFormat, timeZone);
   return `${formattedStart} - ${formattedEnd}`;
 }

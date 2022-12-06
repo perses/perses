@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, TextField, Typography } from '@mui/material';
 
 type StaticListOption = string | VariableOption;
 
@@ -40,13 +40,26 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
   return (
     <div>
       <Autocomplete
+        onPaste={(e) => {
+          // Append new values on paste
+          const v = e.clipboardData.getData('text/plain');
+          if (v) {
+            const values = v.split(',');
+            onChange(null, value.concat(values));
+            e.preventDefault();
+          }
+        }}
         multiple
         value={value}
         onChange={onChange}
         options={[]}
         freeSolo
+        clearOnBlur
         renderInput={(params) => <TextField {...params} label="Values" placeholder="Values" />}
       />
+      <Typography variant="caption">
+        Type new value then press {`"`}Enter{`"`} to add.
+      </Typography>
     </div>
   );
 }
