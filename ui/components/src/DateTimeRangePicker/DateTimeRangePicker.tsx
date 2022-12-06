@@ -42,7 +42,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
   }, [value]);
 
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction="row" spacing={1} height={height}>
       <Popover
         anchorEl={anchorEl.current}
         anchorOrigin={{

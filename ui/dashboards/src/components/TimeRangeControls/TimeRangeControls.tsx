@@ -30,6 +30,8 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
 
+const DEFAULT_HEIGHT = '34px';
+
 interface TimeRangeControlsProps {
   // Height of the controls in pixels.
   // The controls look best at heights >= 28 pixels.
@@ -42,7 +44,7 @@ export function TimeRangeControls({ heightPx }: TimeRangeControlsProps) {
   const defaultTimeRange = useDefaultTimeRange();
 
   // Convert height as a number to height as a string, then use this value for styling
-  const height = heightPx === undefined ? undefined : `${heightPx}px`;
+  const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
   // add time shortcut if one does not match duration from dashboard JSON
   if (!TIME_OPTIONS.some((option) => option.value.pastDuration === defaultTimeRange.pastDuration)) {
