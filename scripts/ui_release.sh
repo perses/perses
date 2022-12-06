@@ -74,7 +74,7 @@ function bumpVersion() {
   fi
   # upgrade the @perses-dev/* dependencies on all packages
   for workspace in ${workspaces}; do
-    sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"\^${version}\"|" "${workspace}"/package.json
+    sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
   done
 
   # increase the version on all packages
