@@ -37,7 +37,7 @@ import { ErrorBoundary } from '@perses-dev/components';
 import Refresh from 'mdi-material-ui/Refresh';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 
-import { useListVariablePluginValues } from '../variable-model';
+import { useListVariablePluginValues, VARIABLE_TYPES } from '../variable-model';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
