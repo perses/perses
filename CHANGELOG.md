@@ -4,6 +4,7 @@
 
 - [ENHANCEMENT] Use consistent formatting for time (24 hour) #840
 - [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider #825
+- [ENHANCEMENT] Multiple enhancements to variable editing UX #842
 
 ## 0.20.0 / 2022-12-05
 
