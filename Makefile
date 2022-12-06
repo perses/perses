@@ -140,6 +140,10 @@ generate: assets-compress
 extract-changelog:
 	$(GO) run ./scripts/extract-changelog/extract-changelog.go --version="${VERSION}"
 
+.PHONY: generate-changelog
+generate-changelog:
+	$(GO) run ./scripts/generate-changelog/generate-changelog.go --version="${VERSION}"
+
 .PHONY: clean
 clean:
 	rm -rf ./bin
