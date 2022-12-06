@@ -54,17 +54,6 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     );
   };
 
-  // const handleLegendPositionChange: SelectProps<LegendPosition>['onChange'] = (e) => {
-  //   onChange(
-  //     produce(value, (draft: TimeSeriesChartOptions) => {
-  //       // TODO: type cast should not be necessary
-  //       if (draft.legend) {
-  //         draft.legend.position = e.target.value as LegendPosition;
-  //       }
-  //     })
-  //   );
-  // };
-
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
