@@ -19,16 +19,6 @@ import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 
-function heightToPaddingY(height: string): string {
-  const heightNum = parseFloat(height);
-
-  if (heightNum >= 20) {
-    return `${(heightNum - 20) / 2}px`;
-  } else {
-    return '0px';
-  }
-}
-
 export interface TimeOption {
   value: RelativeTimeRange;
   display: string;
@@ -57,7 +47,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         '.MuiSelect-icon': {
           marginTop: '1px',
         },
-        '.MuiSelect-select': height ? { paddingY: heightToPaddingY(height) } : {},
+        '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
       }}
     >
       {timeOptions.map((item, idx) => (
