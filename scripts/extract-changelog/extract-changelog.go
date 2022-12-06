@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// This script is extracting the changelog for the current version from the file CHANGELOG.md available at the root of the project.
+// This script must run from the root of the project.
 package main
 
 import (
@@ -33,7 +35,7 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to get the entry in the changelog for the version %q", *version)
 	}
-	err = os.WriteFile("GENERATED_CHANGELOG.md", []byte(entry.Text), 0600)
+	err = os.WriteFile("EXTRACTED_CHANGELOG.md", []byte(entry.Text), 0600)
 	if err != nil {
 		logrus.WithError(err).Fatal("error when generating the changelog")
 	}

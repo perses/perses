@@ -136,9 +136,9 @@ build-cli:
 generate: assets-compress
 	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./internal/api
 
-.PHONY: generate-changelog
-generate-changelog:
-	$(GO) run ./scripts/generate-changelog/generate-changelog.go --version="${VERSION}"
+.PHONY: extract-changelog
+extract-changelog:
+	$(GO) run ./scripts/extract-changelog/extract-changelog.go --version="${VERSION}"
 
 .PHONY: clean
 clean:
