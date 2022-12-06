@@ -29,10 +29,11 @@ interface TimeRangeSelectorProps {
   timeOptions: TimeOption[];
   onSelectChange: (event: SelectChangeEvent<string>) => void;
   onCustomClick: () => void;
+  height?: string;
 }
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
-  const { value, timeOptions, onSelectChange, onCustomClick } = props;
+  const { value, timeOptions, onSelectChange, onCustomClick, height } = props;
   const { timeZone } = useTimeZone();
   const formattedValue = !isRelativeTimeRange(value)
     ? formatAbsoluteRange(value, DATE_TIME_FORMAT, timeZone)
@@ -46,6 +47,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         '.MuiSelect-icon': {
           marginTop: '1px',
         },
+        '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
       }}
     >
       {timeOptions.map((item, idx) => (
