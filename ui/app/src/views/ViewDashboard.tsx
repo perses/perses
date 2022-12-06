@@ -39,9 +39,9 @@ function ViewDashboard() {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const dashboardUpdatePromise = (data: DashboardResource) => {
     return updateDashboard(data)
-      .then((data) => {
-        successSnackbar(`dashboard ${data.metadata.name} has been successfully updated`);
-        return data;
+      .then((updatedDashboard) => {
+        successSnackbar(`dashboard ${updatedDashboard.metadata.name} has been successfully updated`);
+        return updatedDashboard;
       })
       .catch((err) => {
         exceptionSnackbar(err);
