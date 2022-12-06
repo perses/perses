@@ -74,17 +74,17 @@ jobs:
           # as the placeholder for the auth token
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Use snapshot version
-        ## This step only runs for "snapshot" branches starting with "snapshot/"
-        ## We have to snapshot-version again in this job because the version
-        ## change in build-frontend only impacts the compiled assets. We need
-        ## the correct version again here for the publish to work properly.
-        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'snapshot/') }}
-        run: ./scripts/ui_release.sh --snapshot-version "${{ github.ref_name }}" "${{ github.sha }}" && cd ./ui && npm install
       - name: Publish snapshot libraries
         ## This step only runs for "snapshot" branches starting with "snapshot/"
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'snapshot/') }}
-        run: ./scripts/ui_release.sh --publish-snapshot "${{ github.ref_name }}"
+        ## The previous job that is building the UI assets doesn't persist the different `package.json`
+        ## files that were modified by the script. In order to be able to publish the snapshot, we
+        ## need to ensure the different `package.json` files contain the correct version.
+        ## That's why we are running the script again to bump the snapshot version.
+        run: |
+          ./scripts/ui_release.sh --snapshot-version "${{ github.ref_name }}" "${{ github.sha }}"
+          cd ./ui && npm install && cd ..
+          ./scripts/ui_release.sh --publish-snapshot "${{ github.ref_name }}"
         env:
           # The setup-node action writes an .npmrc file with this env variable
           # as the placeholder for the auth token

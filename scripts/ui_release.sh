@@ -144,10 +144,9 @@ function removeSnapshot() {
   tagName=$(getBranchSnapshotName $branch)
 
   echo "Removing snapshot for tag ${tagName}"
-  cmd="npm publish --access public --tag ${tagName}"
   for workspace in ${publish_workspaces}; do
     cd "${workspace}"
-    eval "npm dist-tag rm @julie-test-changesets/${workspace} ${tagName}"
+    eval "npm dist-tag rm @perses-dev/${workspace} ${tagName}"
     cd ../
   done
 }
