@@ -37,12 +37,12 @@ const POSITION_OPTIONS: LegendPositionOption[] = Object.entries(LEGEND_POSITIONS
   };
 });
 
-export interface LegendSelectorProps {
+export interface LegendOptionsEditorProps {
   value?: LegendOptions;
   onChange: (legend?: LegendOptions) => void;
 }
 
-export function LegendSelector({ value, onChange }: LegendSelectorProps) {
+export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProps) {
   const handleLegendShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     // legend is hidden when legend obj is undefined
     const legendValue = checked === true ? {} : undefined;

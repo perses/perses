@@ -15,8 +15,8 @@ import Replay from 'mdi-material-ui/Replay';
 import { Button } from '@mui/material';
 import { produce } from 'immer';
 import {
-  LegendSelector,
-  LegendSelectorProps,
+  LegendOptionsEditor,
+  LegendOptionsEditorProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -29,7 +29,7 @@ import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEdito
 export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
 
-  const handleLegendChange: LegendSelectorProps['onChange'] = (newLegend) => {
+  const handleLegendChange: LegendOptionsEditorProps['onChange'] = (newLegend) => {
     // TODO (sjcobb): fix type, add position, fix glitch
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -58,7 +58,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Legend">
-          <LegendSelector value={value.legend} onChange={handleLegendChange} />
+          <LegendOptionsEditor value={value.legend} onChange={handleLegendChange} />
         </OptionsEditorGroup>
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
       </OptionsEditorColumn>
