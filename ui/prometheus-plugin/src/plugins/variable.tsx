@@ -58,7 +58,7 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
         renderInput={(params) => <TextField {...params} label="Values" placeholder="Values" />}
       />
       <Typography variant="caption">
-        Type new value then press {`"`}Enter{`"`} to add
+        Type new value then press {`"`}Enter{`"`} to add.
       </Typography>
     </div>
   );

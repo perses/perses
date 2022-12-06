@@ -40,11 +40,6 @@ import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { useListVariablePluginValues } from '../variable-model';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
-const VARIABLE_TYPES = [
-  { label: 'List', kind: 'ListVariable' },
-  { label: 'Text', kind: 'TextVariable' },
-] as const;
-
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
 // TODO: Replace with proper validation library
@@ -106,7 +101,6 @@ function VariableListPreview({ definition, onRefresh }: { definition: ListVariab
             <Clipboard />
           </IconButton>
         </Tooltip>
-        <IconButton size="small"></IconButton>
       </Stack>
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       {isFetching && 'Loading...'}

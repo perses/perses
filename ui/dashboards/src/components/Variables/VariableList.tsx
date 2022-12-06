@@ -31,7 +31,6 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
   const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
   const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
-  const showVariables = isEditMode;
   const { setVariableDefinitions } = useTemplateVariableActions();
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
@@ -68,7 +67,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
       >
         <Box display={'flex'} justifyContent="space-between" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
           <Stack direction="row" spacing={1}>
-            {showVariables &&
+            {isEditMode &&
               variableDefinitions.map((v) => (
                 <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>
                   <TemplateVariable key={v.spec.name} name={v.spec.name} />

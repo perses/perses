@@ -36,6 +36,11 @@ import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 
 import { VariableEditForm } from './VariableEditorForm';
+import { VARIABLE_TYPES } from './variable-model';
+
+function getVariableLabelByKind(kind: string) {
+  return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
+}
 
 function getValidation(variableDefinitions: VariableDefinition[]) {
   const errors = [];
@@ -195,10 +200,10 @@ export function VariableEditor(props: {
                             }}
                           />
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                           {v.spec.name}
                         </TableCell>
-                        <TableCell>{v.kind}</TableCell>
+                        <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
                         <TableCell align="right">
                           <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
                             <ArrowUp />
