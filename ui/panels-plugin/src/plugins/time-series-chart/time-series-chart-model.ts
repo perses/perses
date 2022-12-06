@@ -41,18 +41,6 @@ export type VisualOptions = {
   line_width?: number;
 };
 
-export const DEFAULT_LEGEND: LegendOptions = {
-  position: 'bottom',
-};
-
-export const LEGEND_POSITIONS = ['bottom', 'right'] as const;
-
-export type LegendPosition = typeof LEGEND_POSITIONS[number];
-
-export type LegendPositionOptions = {
-  position: LegendPosition;
-};
-
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
   decimal_places: 2,

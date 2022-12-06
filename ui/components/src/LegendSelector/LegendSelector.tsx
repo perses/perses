@@ -11,9 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps } from '@mui/material';
-import { LegendOptions } from '../model';
+import { Autocomplete, Switch, SwitchProps, TextField } from '@mui/material';
+import { DEFAULT_LEGEND_POSITION, LegendOptions } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
+
+type LegendPositionConfig = {
+  label: string;
+};
+
+const LEGEND_POSITIONS = ['bottom', 'right'] as const;
+
+type LegendPositions = typeof LEGEND_POSITIONS[number];
+
+const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendPositionConfig>> = {
+  bottom: { label: 'Bottom' },
+  right: { label: 'Right' },
+};
+
+type LegendPositionOption = LegendPositionConfig & { id: LegendOptions['position'] };
+
+const POSITION_OPTIONS: LegendPositionOption[] = Object.entries(LEGEND_POSITIONS_CONFIG).map(([id, config]) => {
+  return {
+    id: id as LegendOptions['position'],
+    ...config,
+  };
+});
 
 export interface LegendSelectorProps {
   value?: LegendOptions;
@@ -27,11 +49,37 @@ export function LegendSelector({ value, onChange }: LegendSelectorProps) {
     onChange(legendValue);
   };
 
+  const handleLegendPositionChange = (_: unknown, newValue: LegendPositionOption) => {
+    onChange({
+      ...value,
+      position: newValue.id,
+    });
+  };
+
+  const legendConfig = LEGEND_POSITIONS_CONFIG[value?.position ?? DEFAULT_LEGEND_POSITION];
+
   return (
     <>
       <OptionsEditorControl
         label="Show"
         control={<Switch checked={value !== undefined} onChange={handleLegendShowChange} />}
+      />
+      <OptionsEditorControl
+        label="Position"
+        control={
+          <Autocomplete
+            value={{
+              ...legendConfig,
+              id: value?.position ?? DEFAULT_LEGEND_POSITION,
+            }}
+            options={POSITION_OPTIONS}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => <TextField {...params} />}
+            onChange={handleLegendPositionChange}
+            disabled={value === undefined}
+            disableClearable
+          ></Autocomplete>
+        }
       />
     </>
   );

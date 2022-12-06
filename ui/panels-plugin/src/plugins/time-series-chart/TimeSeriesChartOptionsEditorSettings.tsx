@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import Replay from 'mdi-material-ui/Replay';
-import { Button, MenuItem, Select, SelectProps } from '@mui/material';
+import { Button } from '@mui/material';
 import { produce } from 'immer';
 import {
   LegendSelector,
@@ -20,17 +20,9 @@ import {
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
-  OptionsEditorControl,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptionsEditorProps } from './TimeSeriesChartOptionsEditor';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_LEGEND,
-  LEGEND_POSITIONS,
-  LegendPosition,
-  DEFAULT_VISUAL,
-  DEFAULT_Y_AXIS,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
 import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
 import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEditor';
 
@@ -38,6 +30,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
   const { onChange, value } = props;
 
   const handleLegendChange: LegendSelectorProps['onChange'] = (newLegend) => {
+    // TODO (sjcobb): fix type, add position, fix glitch
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.legend = newLegend;
@@ -61,59 +54,22 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     );
   };
 
-  // // TODO: separate legend editor component
-  // const handleLegendShowChange = (show: boolean) => {
+  // const handleLegendPositionChange: SelectProps<LegendPosition>['onChange'] = (e) => {
   //   onChange(
   //     produce(value, (draft: TimeSeriesChartOptions) => {
-  //       draft.legend = show ? DEFAULT_LEGEND : undefined;
+  //       // TODO: type cast should not be necessary
+  //       if (draft.legend) {
+  //         draft.legend.position = e.target.value as LegendPosition;
+  //       }
   //     })
   //   );
   // };
-
-  const handleLegendPositionChange: SelectProps<LegendPosition>['onChange'] = (e) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        // TODO: type cast should not be necessary
-        if (draft.legend) {
-          draft.legend.position = e.target.value as LegendPosition;
-        }
-      })
-    );
-  };
 
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Legend">
           <LegendSelector value={value.legend} onChange={handleLegendChange} />
-          {/* <OptionsEditorControl
-            label="Show"
-            control={
-              <Switch
-                checked={value.legend !== undefined}
-                onChange={(e) => {
-                  handleLegendShowChange(e.target.checked);
-                }}
-              />
-            }
-          /> */}
-          <OptionsEditorControl
-            label="Position"
-            control={
-              <Select
-                sx={{ maxWidth: 100 }}
-                value={value.legend && value.legend.position ? value.legend.position : DEFAULT_LEGEND.position}
-                onChange={handleLegendPositionChange}
-              >
-                {LEGEND_POSITIONS.map((position) => (
-                  // TODO: add LEGEND_CONFIG with display names to capitalize position values
-                  <MenuItem key={position} value={position}>
-                    {position}
-                  </MenuItem>
-                ))}
-              </Select>
-            }
-          />
         </OptionsEditorGroup>
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
       </OptionsEditorColumn>
