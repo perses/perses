@@ -18,7 +18,6 @@ import type {
   GridComponentOption,
   LineSeriesOption,
   LegendComponentOption,
-  VisualMapComponentOption,
   YAXisComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
@@ -33,7 +32,6 @@ import {
   ToolboxComponent,
   TooltipComponent,
   LegendComponent,
-  VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
@@ -41,8 +39,8 @@ import { EChartsDataFormat } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { Tooltip } from '../Tooltip/Tooltip';
-import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 import { useTimeZone } from '../context/TimeZoneProvider';
+import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -55,7 +53,6 @@ use([
   ToolboxComponent,
   TooltipComponent,
   LegendComponent,
-  VisualMapComponent,
   CanvasRenderer,
 ]);
 
@@ -66,22 +63,11 @@ interface LineChartProps {
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
-  visualMap?: VisualMapComponentOption[];
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
 }
 
-export function LineChart({
-  height,
-  data,
-  yAxis,
-  unit,
-  grid,
-  legend,
-  visualMap,
-  onDataZoom,
-  onDoubleClick,
-}: LineChartProps) {
+export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom, onDoubleClick }: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -155,9 +141,12 @@ export function LineChart({
     setPinTooltip(false);
   };
 
+  const yAxisArr = getYAxes(yAxis, unit);
+  const { noDataOption } = chartsTheme;
+
   const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
-    if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
+    if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -173,7 +162,7 @@ export function LineChart({
           },
         },
       },
-      yAxis: getYAxes(yAxis, unit),
+      yAxis: yAxisArr,
       animation: false,
       tooltip: {
         show: true,
@@ -194,11 +183,10 @@ export function LineChart({
       },
       grid,
       legend,
-      visualMap,
     };
 
     return option;
-  }, [data, yAxis, grid, legend, visualMap, timeZone]);
+  }, [data, yAxisArr, grid, legend, noDataOption, timeZone]);
 
   return (
     <Box

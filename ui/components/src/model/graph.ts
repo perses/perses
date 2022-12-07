@@ -30,7 +30,7 @@ export type EChartsValues = number | null | '-';
 
 export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
   // TODO: support dataset and both category / time xAxis types
-  data: Iterable<GraphSeriesValueTuple> | EChartsValues[];
+  data: EChartsValues[];
 }
 
 export type EChartsDataFormat = {
