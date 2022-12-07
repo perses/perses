@@ -1,0 +1,18 @@
+name: Branch Deleted
+on: delete
+jobs:
+  remove-snapshot-tag:
+    if: ${{ github.event.ref_type == 'branch'  && startsWith(github.event.ref, 'snapshot/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_npm: true
+      - name: Remove npm snapshot tag
+        run: ./scripts/ui_release.sh --remove-snapshot "${{ github.event.ref }}"
+        env:
+          # The setup-node action writes an .npmrc file with this env variable
+          # as the placeholder for the auth token
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
