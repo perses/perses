@@ -18,7 +18,6 @@ import type {
   GridComponentOption,
   LineSeriesOption,
   LegendComponentOption,
-  VisualMapComponentOption,
   YAXisComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
@@ -33,7 +32,6 @@ import {
   ToolboxComponent,
   TooltipComponent,
   LegendComponent,
-  VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
@@ -55,7 +53,6 @@ use([
   ToolboxComponent,
   TooltipComponent,
   LegendComponent,
-  VisualMapComponent,
   CanvasRenderer,
 ]);
 
@@ -66,7 +63,6 @@ interface LineChartProps {
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
-  visualMap?: VisualMapComponentOption[];
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
 }
