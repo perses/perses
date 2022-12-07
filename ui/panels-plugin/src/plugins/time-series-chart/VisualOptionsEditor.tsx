@@ -46,7 +46,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             data-testid={VISUAL_CONFIG.point_radius.testId}
             value={value.point_radius ?? DEFAULT_POINT_RADIUS}
             valueLabelDisplay="auto"
-            step={0.5}
+            step={VISUAL_CONFIG.point_radius.step}
             marks
             min={VISUAL_CONFIG.point_radius.min}
             max={VISUAL_CONFIG.point_radius.max}
@@ -61,7 +61,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             data-testid={VISUAL_CONFIG.line_width.testId}
             value={value.line_width ?? DEFAULT_LINE_WIDTH}
             valueLabelDisplay="auto"
-            step={0.5}
+            step={VISUAL_CONFIG.line_width.step}
             marks
             min={VISUAL_CONFIG.line_width.min}
             max={VISUAL_CONFIG.line_width.max}
