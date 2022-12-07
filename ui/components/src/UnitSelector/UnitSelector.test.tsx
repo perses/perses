@@ -58,8 +58,7 @@ describe('UnitSelector', () => {
     renderUnitSelector({ kind: 'Bytes' }, onChange);
 
     const unitSelector = getUnitSelector();
-    // Note that this tab order can change depending on the type because the
-    // abbreviate comes first and is disabled in some cases.
+    userEvent.tab();
     userEvent.tab();
     expect(unitSelector).toHaveFocus();
 
@@ -182,7 +181,7 @@ describe('UnitSelector', () => {
 
     it('does not allow the user to set abbreviate', () => {
       renderUnitSelector({ kind: 'Bytes' });
-      expect(getAbbreviateSwitch()).toBeDisabled();
+      expect(getAbbreviateSwitch()).toBeEnabled();
     });
   });
 
