@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Autocomplete, Switch, SwitchProps, TextField } from '@mui/material';
-import { DEFAULT_LEGEND, DEFAULT_LEGEND_POSITION, LegendOptions } from '../model';
+import { DEFAULT_LEGEND, LegendOptions } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 
 type LegendPositionConfig = {
@@ -56,7 +56,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
-  const legendConfig = LEGEND_POSITIONS_CONFIG[value?.position ?? DEFAULT_LEGEND_POSITION];
+  const legendConfig = LEGEND_POSITIONS_CONFIG[value?.position ?? DEFAULT_LEGEND.position];
 
   return (
     <>
@@ -70,7 +70,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
           <Autocomplete
             value={{
               ...legendConfig,
-              id: value?.position ?? DEFAULT_LEGEND_POSITION,
+              id: value?.position ?? DEFAULT_LEGEND.position,
             }}
             options={POSITION_OPTIONS}
             isOptionEqualToValue={(option, value) => option.id === value.id}
