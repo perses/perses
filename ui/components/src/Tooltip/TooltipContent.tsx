@@ -13,9 +13,9 @@
 
 import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
+import { useTimeZone } from '../context/TimeZoneProvider';
 import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
-import { useTimeZone } from '../context/TimeZoneProvider';
 
 interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
