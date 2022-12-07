@@ -34,4 +34,5 @@ package common
 #bytesUnit: {
 	kind:            "Bytes"
 	decimal_places?: number
+	abbreviate?:     bool
 }
