@@ -55,3 +55,9 @@ export interface LegendItem {
   color: string;
   onClick: MouseEventHandler<HTMLLIElement>;
 }
+
+export const DEFAULT_LEGEND_POSITION = 'bottom';
+
+export const DEFAULT_LEGEND: LegendOptions = {
+  position: DEFAULT_LEGEND_POSITION,
+};
