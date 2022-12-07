@@ -35,7 +35,7 @@ describe('LegendOptionsEditor', () => {
 
     userEvent.click(getLegendShowSwitch());
 
-    expect(onChange).toHaveBeenCalledWith({});
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom' });
   });
 
   // TODO: additional test for legend position change, disabled state
