@@ -182,7 +182,9 @@
                     }
                   }
                 ],
-                "legend": {},
+                "legend": {
+                  "position": "bottom"
+                },
                 "y_axis": {
                   "show": true,
                   "unit": { "kind": "Bytes" }
@@ -876,7 +878,9 @@
                     }
                   }
                 ],
-                "legend": {},
+                "legend": {
+                  "position": "bottom"
+                },
                 "unit": {
                   "kind": "Bytes"
                 }
@@ -968,7 +972,9 @@
                   "kind": "Decimal",
                   "decimal_places": 2
                 },
-                "legend": {}
+                "legend": {
+                  "position": "bottom"
+                }
               }
             }
           }
