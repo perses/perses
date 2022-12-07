@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEventHandler, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   FormControl,
@@ -32,11 +32,11 @@ import { PanelPreview } from './PanelPreview';
 
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
-  onSubmit: (values: PanelEditorValues) => void;
+  onChange: (values: PanelEditorValues) => void;
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps) {
-  const { initialValues, onSubmit } = props;
+  const { initialValues, onChange } = props;
 
   const panelGroups = useListPanelGroups();
 
@@ -65,18 +65,16 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     setGroupId(value);
   };
 
-  const handleSubmit: FormEventHandler = (e) => {
-    e.preventDefault();
+  useEffect(() => {
     const values: PanelEditorValues = { name, description, groupId, kind, spec };
-    onSubmit(values);
-  };
+    onChange(values);
+  }, [name, description, groupId, kind, spec, onChange]);
 
   return (
     // Grid maxHeight allows user to scroll inside Drawer to see all content
     <Box
       component="form"
       id={panelEditorFormId}
-      onSubmit={handleSubmit}
       sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}
     >
       <Grid container spacing={2}>

@@ -45,7 +45,7 @@ export const DeletePanelGroupDialog = () => {
         <CloseIcon />
       </IconButton>
       <form onSubmit={handleDelete}>
-        <DialogContent sx={{ width: '500px' }}>
+        <DialogContent dividers sx={{ width: '500px' }}>
           Are you sure you want to delete {deletePanelGroupDialog?.panelGroupName ?? 'panel group'}? This will delete
           all the panels within the group.
         </DialogContent>
@@ -53,7 +53,9 @@ export const DeletePanelGroupDialog = () => {
           <Button variant="contained" type="submit">
             Delete
           </Button>
-          <Button onClick={() => closeDeletePanelGroupDialog()}>Cancel</Button>
+          <Button variant="outlined" onClick={() => closeDeletePanelGroupDialog()}>
+            Cancel
+          </Button>
         </DialogActions>
       </form>
     </Dialog>
