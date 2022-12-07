@@ -21,5 +21,5 @@ export * from './Panel';
 export * from './PanelDrawer';
 export * from './PanelGroupDialog';
 export * from './TimeRangeControls';
-export * from './UnsavedChangesConfirmationDialog';
+export * from './DiscardChangesConfirmationDialog';
 export * from './Variables';

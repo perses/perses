@@ -13,7 +13,6 @@
 
 import React, { useState } from 'react';
 import { Button, Stack, Box, AppBar, useScrollTrigger, IconButton, SxProps, Theme } from '@mui/material';
-import EyeIcon from 'mdi-material-ui/Eye';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
@@ -32,8 +31,6 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
   const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
   const variableDefinitions = useTemplateVariableDefinitions();
   const { isEditMode } = useEditMode();
-  const [showVariablesInEditMode, setShowVariablesInEditMode] = useState(true);
-  const showVariables = isEditMode ? showVariablesInEditMode : true;
   const { setVariableDefinitions } = useTemplateVariableActions();
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
@@ -56,9 +53,6 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
       </Drawer>
       {isEditMode && (
         <Box pb={2}>
-          <Button onClick={() => setShowVariablesInEditMode(!showVariablesInEditMode)} startIcon={<EyeIcon />}>
-            {showVariablesInEditMode ? 'Hide' : 'Show'} Variables
-          </Button>
           <Button onClick={() => setIsEditing(true)} startIcon={<PencilIcon />}>
             Edit Variables
           </Button>
@@ -73,7 +67,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
       >
         <Box display={'flex'} justifyContent="space-between" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
           <Stack direction="row" spacing={1}>
-            {showVariables &&
+            {isEditMode &&
               variableDefinitions.map((v) => (
                 <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>
                   <TemplateVariable key={v.spec.name} name={v.spec.name} />

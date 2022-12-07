@@ -32,11 +32,7 @@ describe('LegendOptionsEditor', () => {
   it('can change legend visibility by clicking', () => {
     const onChange = jest.fn();
     renderLegendOptionsEditor(undefined, onChange);
-
     userEvent.click(getLegendShowSwitch());
-
     expect(onChange).toHaveBeenCalledWith({ position: 'bottom' });
   });
-
-  // TODO: additional test for legend position change, disabled state
 });

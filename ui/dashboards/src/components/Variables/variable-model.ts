@@ -96,3 +96,8 @@ export function getVariableValuesKey(v: VariableStateMap) {
     .map((v) => JSON.stringify(v.value))
     .join(',');
 }
+
+export const VARIABLE_TYPES = [
+  { label: 'List', kind: 'ListVariable' },
+  { label: 'Text', kind: 'TextVariable' },
+] as const;
