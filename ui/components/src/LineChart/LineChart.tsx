@@ -141,7 +141,6 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
     setPinTooltip(false);
   };
 
-  const yAxisArr = getYAxes(yAxis, unit);
   const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
@@ -162,7 +161,7 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
           },
         },
       },
-      yAxis: yAxisArr,
+      yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
         show: true,
@@ -186,7 +185,7 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
     };
 
     return option;
-  }, [data, yAxisArr, grid, legend, noDataOption, timeZone]);
+  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone]);
 
   return (
     <Box
