@@ -24,6 +24,7 @@ export type BytesUnitOptions = {
 export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Bytes',
   decimal_places: true,
+  abbreviate: true,
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
   Bytes: {
@@ -34,26 +35,28 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
 
 // https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript/18650828#18650828
 export function formatBytes(bytes: number, unitOptions: BytesUnitOptions) {
+  // default to full 'Bytes' formatting
+  const options = unitOptions.abbreviate === undefined ? { ...unitOptions, abbreviate: false } : unitOptions;
+
   if (bytes === 0) return '0 Bytes';
 
-  let decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
-  // avoids RangeError toFixed() digits argument must be between 0 and 100
+  let decimals = options.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+  // avoids minimumFractionDigits value is out of range error
   if (decimals < 0) {
     decimals = 0;
   } else if (decimals > 100) {
     decimals = 100;
   }
 
-  if (unitOptions.abbreviate === false) {
-    // return `${bytes.toFixed(decimals)} Bytes`;
-    const formatter = new Intl.NumberFormat('en', {
-      style: 'unit',
-      unit: 'byte',
-      unitDisplay: 'narrow',
+  if (options.abbreviate === false) {
+    const formatParams: Intl.NumberFormatOptions = {
+      style: 'decimal',
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
-    });
-    return formatter.format(bytes);
+      useGrouping: true,
+    };
+    const formatter = new Intl.NumberFormat('en-US', formatParams);
+    return `${formatter.format(bytes)} Bytes`;
   }
 
   const k = 1024;
