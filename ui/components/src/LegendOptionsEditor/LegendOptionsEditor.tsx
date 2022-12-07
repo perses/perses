@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Autocomplete, Switch, SwitchProps, TextField } from '@mui/material';
-import { DEFAULT_LEGEND_POSITION, LegendOptions } from '../model';
+import { DEFAULT_LEGEND, DEFAULT_LEGEND_POSITION, LegendOptions } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 
 type LegendPositionConfig = {
@@ -45,7 +45,7 @@ export interface LegendOptionsEditorProps {
 export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProps) {
   const handleLegendShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     // legend is hidden when legend obj is undefined
-    const legendValue = checked === true ? {} : undefined;
+    const legendValue = checked === true ? { position: DEFAULT_LEGEND.position } : undefined;
     onChange(legendValue);
   };
 
