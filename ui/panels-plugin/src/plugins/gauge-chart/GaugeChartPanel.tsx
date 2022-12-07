@@ -14,14 +14,16 @@
 import type { GaugeSeriesOption } from 'echarts';
 import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeSeries } from '@perses-dev/components';
-import { Skeleton, Stack } from '@mui/material';
+import { Box, Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
 import { useSuggestedStepMs } from '../../model/time';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
-const MAX_GAUGE_SERIES_DISPLAY = 6;
+const MAX_GAUGE_SERIES_DISPLAY = 12;
+const GAUGE_MIN_WIDTH = 90;
+const GAUGE_MAX_WIDTH = 180;
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
@@ -100,21 +102,25 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   }
 
   // show separate chart for each time series returned
-  const chartWidth = contentDimensions.width / gaugeData.length;
+  // scroll horizontally when overflows outside of panel
+  const panelSegmentWidth = contentDimensions.width / gaugeData.length;
+  const chartWidth = panelSegmentWidth > GAUGE_MIN_WIDTH ? panelSegmentWidth : GAUGE_MIN_WIDTH;
+
   return (
-    <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+    <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ overflowX: 'scroll' }}>
       {gaugeData.map((series, seriesIndex) => {
         if (seriesIndex >= MAX_GAUGE_SERIES_DISPLAY) return null;
         return (
-          <GaugeChart
-            key={`gauge-series-${seriesIndex}`}
-            width={chartWidth}
-            height={contentDimensions.height}
-            data={series}
-            unit={unit}
-            axisLine={axisLine}
-            max={thresholdMax}
-          />
+          <Box key={`gauge-series-${seriesIndex}`} sx={{ maxWidth: GAUGE_MAX_WIDTH }}>
+            <GaugeChart
+              width={chartWidth}
+              height={contentDimensions.height}
+              data={series}
+              unit={unit}
+              axisLine={axisLine}
+              max={thresholdMax}
+            />
+          </Box>
         );
       })}
     </Stack>
