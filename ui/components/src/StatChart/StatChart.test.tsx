@@ -54,7 +54,15 @@ describe('StatChart', () => {
     expect(screen.getByText('7.73')).toBeInTheDocument();
   });
 
-  it('show value with time unit formatting', () => {
+  it('show value with bytes unit formatting', () => {
+    const unit: UnitOptions = {
+      kind: 'Bytes',
+    };
+    renderChart(unit);
+    expect(screen.getByText('7.73 Bytes')).toBeInTheDocument();
+  });
+
+  it('show value with seconds time unit formatting', () => {
     const unit: UnitOptions = {
       kind: 'Seconds',
     };
@@ -62,7 +70,7 @@ describe('StatChart', () => {
     expect(screen.getByText('7.73 seconds')).toBeInTheDocument();
   });
 
-  it('show value with time unit formatting', () => {
+  it('show value with months time unit formatting', () => {
     const unit: UnitOptions = {
       kind: 'Months',
     };
