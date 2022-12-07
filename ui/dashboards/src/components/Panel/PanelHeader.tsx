@@ -40,21 +40,27 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
     // If there are edit handlers, always just show the edit buttons
     action = (
       <Stack direction="row" spacing={0.5} alignItems="center">
-        <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
-          <PencilIcon />
-        </HeaderIconButton>
-        <HeaderIconButton aria-label={`delete panel ${title}`} size="small" onClick={editHandlers.onDeletePanelClick}>
-          <DeleteIcon />
-        </HeaderIconButton>
-        <HeaderIconButton aria-label={`move panel ${title}`} size="small">
-          <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
-        </HeaderIconButton>
+        <InfoTooltip description="Edit">
+          <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
+            <PencilIcon />
+          </HeaderIconButton>
+        </InfoTooltip>
+        <InfoTooltip description="Delete">
+          <HeaderIconButton aria-label={`delete panel ${title}`} size="small" onClick={editHandlers.onDeletePanelClick}>
+            <DeleteIcon />
+          </HeaderIconButton>
+        </InfoTooltip>
+        <InfoTooltip description="Drag and drop panel to reorganize">
+          <HeaderIconButton aria-label={`move panel ${title}`} size="small">
+            <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
+          </HeaderIconButton>
+        </InfoTooltip>
       </Stack>
     );
   } else if (description !== undefined && isHovered) {
     // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
     action = (
-      <InfoTooltip id={descriptionTooltipId} description={description} placement={TooltipPlacement.Bottom}>
+      <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
         <HeaderIconButton aria-label="Panel Description">
           <InformationOutlineIcon
             aria-describedby="info-tooltip"
