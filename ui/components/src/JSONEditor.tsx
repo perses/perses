@@ -32,26 +32,23 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
     setValue(JSON.stringify(props.value, null, 2));
   }, [props.value]);
 
-  // TODO: replace with CodeMirror editor
   return (
-    <>
-      <CodeMirror
-        theme={isDarkMode ? 'dark' : 'light'}
-        extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
-        value={value}
-        onChange={(newValue) => {
-          setValue(newValue);
-        }}
-        onBlur={() => {
-          try {
-            const json = JSON.parse(value ?? '{}');
-            if (props.onChange !== undefined) {
-              props.onChange(json);
-            }
-            // eslint-disable-next-line no-empty
-          } catch (e) {}
-        }}
-      />
-    </>
+    <CodeMirror
+      theme={isDarkMode ? 'dark' : 'light'}
+      extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
+      value={value}
+      onChange={(newValue) => {
+        setValue(newValue);
+      }}
+      onBlur={() => {
+        try {
+          const json = JSON.parse(value ?? '{}');
+          if (props.onChange !== undefined) {
+            props.onChange(json);
+          }
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }}
+    />
   );
 }
