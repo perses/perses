@@ -40,7 +40,7 @@ function ViewDashboard() {
   const dashboardUpdatePromise = (data: DashboardResource) => {
     return updateDashboard(data)
       .then((updatedDashboard) => {
-        successSnackbar(`dashboard ${updatedDashboard.metadata.name} has been successfully updated`);
+        successSnackbar(`dashboard ${updatedDashboard.metadata.name} is successfully updated`);
         return updatedDashboard;
       })
       .catch((err) => {

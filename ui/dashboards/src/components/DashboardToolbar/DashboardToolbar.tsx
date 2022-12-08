@@ -45,7 +45,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
-  const [isSaveDashboard, setSaveDashboard] = useState<boolean>(false);
+  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const dashboard = useDashboard();
   const { openAddPanelGroup, openAddPanel } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
@@ -56,15 +56,15 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   );
 
   const onSaveButtonClick = () => {
-    if (onSave != undefined) {
-      setSaveDashboard(true);
+    if (onSave !== undefined) {
+      setSavingDashboard(true);
       onSave(dashboard.dashboard)
         .then(() => {
-          setSaveDashboard(false);
+          setSavingDashboard(false);
           setEditMode(false);
         })
         .catch(() => {
-          setSaveDashboard(false);
+          setSavingDashboard(false);
         });
     } else {
       setEditMode(false);
@@ -83,7 +83,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <Button variant="contained" onClick={onSaveButtonClick} disabled={isReadonly || isSaveDashboard}>
+              <Button variant="contained" onClick={onSaveButtonClick} disabled={isReadonly || isSavingDashboard}>
                 Save
               </Button>
               <Button variant="outlined" onClick={onCancelButtonClick}>
