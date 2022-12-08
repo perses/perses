@@ -14,9 +14,11 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -42,6 +44,20 @@ const (
 	KindToBeIgnored
 )
 
+func getStringInBetweenTwoString(str string, startS string, endS string) (result string, found bool) {
+	s := strings.Index(str, startS)
+	if s == -1 {
+		return result, false
+	}
+	newS := str[s+len(startS):]
+	e := strings.Index(newS, endS)
+	if e == -1 {
+		return result, false
+	}
+	result = newS[:e]
+	return result, true
+}
+
 func getPreviousTag() string {
 	previousVersion, err := exec.Command("git", "describe", "--abbrev=0").Output()
 	if err != nil {
@@ -66,11 +82,28 @@ func formatChangelogCategory(category string) string {
 	return fmt.Sprintf("[%s]", category)
 }
 
-func removeChangelogCategory(entry string, category string) string {
-	return strings.ReplaceAll(entry, formatChangelogCategory(category), "")
+// parseCatalogEntry returns the catalog kind and the catalog entry found.
+func parseCatalogEntry(entry string) (kind, string) {
+	catalog, found := getStringInBetweenTwoString(entry, "[", "]")
+	if !found {
+		return KindToBeIgnored, ""
+	}
+	switch strings.ToUpper(catalog) {
+	case feature:
+		return kindFeature, catalog
+	case enhancement:
+		return kindEnhancement, catalog
+	case bugfix:
+		return kindBugfix, catalog
+	case breakingChange:
+		return kindBreakingChange, catalog
+	default:
+		return KindToBeIgnored, ""
+	}
 }
 
-func parseEntry(entry string) (kind, string) {
+// parseAndFormatEntry will extract the commit message and detect what is the catalog entry
+func parseAndFormatEntry(entry string) (kind, string) {
 	// remove commit ID
 	entryAsRune := []rune(entry)
 	newEntry := entry
@@ -81,20 +114,11 @@ func parseEntry(entry string) (kind, string) {
 		}
 	}
 	// extract catalog entry and remove it to get a cleaner message
-	if strings.Contains(newEntry, formatChangelogCategory(feature)) {
-		newEntry = removeChangelogCategory(newEntry, feature)
-		return kindFeature, newEntry
-	} else if strings.Contains(newEntry, formatChangelogCategory(enhancement)) {
-		newEntry = removeChangelogCategory(newEntry, enhancement)
-		return kindEnhancement, newEntry
-	} else if strings.Contains(newEntry, formatChangelogCategory(bugfix)) {
-		newEntry = removeChangelogCategory(newEntry, bugfix)
-		return kindBugfix, newEntry
-	} else if strings.Contains(newEntry, formatChangelogCategory(breakingChange)) {
-		newEntry = removeChangelogCategory(newEntry, breakingChange)
-		return kindBreakingChange, newEntry
+	catalogKind, catalogEntry := parseCatalogEntry(entry)
+	if catalogKind == KindToBeIgnored {
+		return KindToBeIgnored, ""
 	}
-	return KindToBeIgnored, ""
+	return catalogKind, strings.TrimSpace(strings.ReplaceAll(newEntry, fmt.Sprintf("[%s]", catalogEntry), ""))
 }
 
 type changelog struct {
@@ -107,7 +131,7 @@ type changelog struct {
 func newChangelog(entries []string) *changelog {
 	clog := &changelog{}
 	for _, entry := range entries {
-		kindEntry, newEntry := parseEntry(entry)
+		kindEntry, newEntry := parseAndFormatEntry(entry)
 		switch kindEntry {
 		case kindFeature:
 			clog.features = append(clog.features, newEntry)
@@ -140,7 +164,28 @@ func (c *changelog) generateChangelog(version string) string {
 }
 
 func (c *changelog) write(version string) {
-	generatedChangelog := c.generateChangelog(version)
+	f, err := os.Open("CHANGELOG.md")
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to open the file CHANGELOG.md")
+	}
+	fileScanner := bufio.NewScanner(f)
+	fileScanner.Split(bufio.ScanLines)
+	var buffer bytes.Buffer
+	i := 0
+	for fileScanner.Scan() {
+		buffer.WriteString(fileScanner.Text())
+		i++
+		if i == 1 {
+			// inject the new changelog entries after the title
+			buffer.WriteString(c.generateChangelog(version))
+		}
+	}
+	if closeErr := f.Close(); closeErr != nil {
+		logrus.WithError(closeErr).Fatal("unable to close the file CHANGELOG.md")
+	}
+	if writeErr := os.WriteFile("CHANGELOG.md", buffer.Bytes(), 0644); writeErr != nil {
+		logrus.WithError(writeErr).Fatal("unable to inject the new changelog entries in CHANGELOG.md")
+	}
 }
 
 func main() {
