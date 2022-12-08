@@ -21,9 +21,8 @@ import { useSuggestedStepMs } from '../../model/time';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
-const MAX_GAUGE_SERIES_DISPLAY = 12;
 const GAUGE_MIN_WIDTH = 90;
-const GAUGE_MAX_WIDTH = 180;
+const PANEL_PADDING_OFFSET = 20;
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
@@ -101,17 +100,27 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     );
   }
 
-  // show separate chart for each time series returned
-  // scroll horizontally when overflows outside of panel
-  const panelSegmentWidth = contentDimensions.width / gaugeData.length;
-  const chartWidth = panelSegmentWidth > GAUGE_MIN_WIDTH ? panelSegmentWidth : GAUGE_MIN_WIDTH;
+  // accounts for showing a separate chart for each time series
+  let chartWidth = contentDimensions.width / gaugeData.length - PANEL_PADDING_OFFSET;
+  if (chartWidth < GAUGE_MIN_WIDTH && gaugeData.length > 1) {
+    // enables horizontal scroll charts overflow outside of panel
+    chartWidth = GAUGE_MIN_WIDTH;
+  }
 
   return (
-    <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ overflowX: 'scroll' }}>
+    <Stack
+      direction="row"
+      spacing={2}
+      justifyContent="center"
+      alignItems="center"
+      sx={{
+        // so scrollbar only shows when necessary
+        overflowX: gaugeData.length > 1 ? 'scroll' : 'auto',
+      }}
+    >
       {gaugeData.map((series, seriesIndex) => {
-        if (seriesIndex >= MAX_GAUGE_SERIES_DISPLAY) return null;
         return (
-          <Box key={`gauge-series-${seriesIndex}`} sx={{ maxWidth: GAUGE_MAX_WIDTH }}>
+          <Box key={`gauge-series-${seriesIndex}`}>
             <GaugeChart
               width={chartWidth}
               height={contentDimensions.height}
