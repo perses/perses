@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { TextFieldProps } from '@mui/material';
 import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
@@ -40,13 +39,13 @@ export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps) {
   }
 
   // Update our local state's copy as the user types
-  const handleQueryChange: TextFieldProps['onChange'] = (e) => {
-    setQuery(e.target.value);
+  const handleQueryChange = (e: string) => {
+    setQuery(e);
   };
 
   // Propagate changes to the query's value when the input is blurred to avoid constantly re-running queries in the
   // PanelPreview
-  const handleQueryBlur: TextFieldProps['onBlur'] = () => {
+  const handleQueryBlur = () => {
     setLastSyncedQuery(query);
     onChange(
       produce(value, (draft) => {
@@ -73,12 +72,12 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
   }
 
   // Update our local state as the user types
-  const handleFormatChange: TextFieldProps['onChange'] = (e) => {
-    setFormat(e.target.value);
+  const handleFormatChange = (e: string) => {
+    setFormat(e);
   };
 
   // Propagate changes to the panel preview component when series_name_format TextField is blurred
-  const handleFormatBlur: TextFieldProps['onBlur'] = () => {
+  const handleFormatBlur = () => {
     setLastSyncedFormat(format);
     onChange(
       produce(value, (draft) => {

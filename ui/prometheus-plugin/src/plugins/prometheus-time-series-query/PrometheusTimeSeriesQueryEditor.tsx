@@ -15,6 +15,7 @@ import { produce } from 'immer';
 import { Stack, TextField, FormControl, InputLabel } from '@mui/material';
 import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector } from '../../model';
+import { PromQLEditor } from '../../components';
 import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } from './query-editor-model';
 
 /**
@@ -23,6 +24,9 @@ import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } f
 export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps) {
   const { onChange, value } = props;
   const { datasource } = value;
+
+  // TODO: Need to get the Prometheus URL here from the selected datasource
+  const promURL = 'https://demo.promlabs.com';
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
@@ -44,19 +48,17 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   return (
     <Stack spacing={2}>
-      <TextField
-        fullWidth
-        label="Query"
+      <PromQLEditor
+        completeConfig={{ remote: { url: promURL } }}
         value={query}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
-        margin="dense"
       />
       <TextField
         fullWidth
         label="Series Name Format"
         value={format ?? ''}
-        onChange={handleFormatChange}
+        onChange={(e) => handleFormatChange(e.target.value)}
         onBlur={handleFormatBlur}
         margin="dense"
       />
