@@ -155,7 +155,7 @@ func injectEntries(buffer *bytes.Buffer, entries []string, catalogEntry string) 
 func (c *changelog) generateChangelog(version string) string {
 	now := time.Now()
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("## %s / %s\n\n", version, now.Format("2022-12-06")))
+	buffer.WriteString(fmt.Sprintf("## %s / %s\n\n", version, now.Format("2006-01-02")))
 	injectEntries(&buffer, c.features, feature)
 	injectEntries(&buffer, c.enhancements, enhancement)
 	injectEntries(&buffer, c.bugfixes, bugfix)
@@ -174,9 +174,11 @@ func (c *changelog) write(version string) {
 	i := 0
 	for fileScanner.Scan() {
 		buffer.WriteString(fileScanner.Text())
+		buffer.WriteString("\n")
 		i++
 		if i == 1 {
 			// inject the new changelog entries after the title
+			buffer.WriteString("\n")
 			buffer.WriteString(c.generateChangelog(version))
 		}
 	}

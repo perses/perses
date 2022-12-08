@@ -123,7 +123,7 @@ func TestParseAndFormatEntry(t *testing.T) {
 
 func TestGenerateChangelog(t *testing.T) {
 	now := time.Now()
-	title := fmt.Sprintf("## 0.20.0 / %s", now.Format("2022-12-06"))
+	title := fmt.Sprintf("## 0.20.0 / %s", now.Format("2006-01-02"))
 	testSuite := []struct {
 		title    string
 		clog     *changelog
