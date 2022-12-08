@@ -107,8 +107,6 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
     enableDataZoom(chartRef.current);
   }
 
-  const handleOnClick = () => setPinTooltip((current) => !current);
-
   const handleOnDoubleClick = (e: MouseEvent) => {
     setPinTooltip(false);
     // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
@@ -119,26 +117,6 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
     } else {
       onDoubleClick(e);
     }
-  };
-
-  const handleOnMouseDown = (e: MouseEvent) => {
-    // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
-    if (e.target instanceof HTMLCanvasElement) {
-      setShowTooltip(false);
-    }
-  };
-
-  const handleOnMouseUp = () => {
-    setShowTooltip(true);
-  };
-
-  const handleOnMouseEnter = () => {
-    setShowTooltip(true);
-  };
-
-  const handleOnMouseLeave = () => {
-    setShowTooltip(false);
-    setPinTooltip(false);
   };
 
   const { noDataOption } = chartsTheme;
@@ -189,15 +167,30 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
 
   return (
     <Box
-      sx={{
-        height,
+      sx={{ height }}
+      onClick={() => {
+        setPinTooltip((current) => !current);
       }}
-      onClick={handleOnClick}
+      onMouseDown={(e) => {
+        // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
+        if (e.target instanceof HTMLCanvasElement) {
+          setShowTooltip(false);
+        }
+      }}
+      onMouseUp={() => {
+        setShowTooltip(true);
+      }}
+      onMouseLeave={() => {
+        setShowTooltip(false);
+        setPinTooltip(false);
+      }}
+      onMouseEnter={() => {
+        setShowTooltip(true);
+        if (chartRef.current !== undefined) {
+          enableDataZoom(chartRef.current);
+        }
+      }}
       onDoubleClick={handleOnDoubleClick}
-      onMouseDown={handleOnMouseDown}
-      onMouseUp={handleOnMouseUp}
-      onMouseLeave={handleOnMouseLeave}
-      onMouseEnter={handleOnMouseEnter}
     >
       {showTooltip === true && (
         <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit}></Tooltip>
