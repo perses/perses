@@ -67,6 +67,7 @@ func getPreviousTag() string {
 }
 
 func getGitLogs(previousVersion string) []string {
+	// nolint: gosec
 	gitLogs, err := exec.Command("git", "log", fmt.Sprintf("%s...HEAD", previousVersion), "--pretty=oneline", "--no-decorate").Output()
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the git logs")
@@ -185,7 +186,7 @@ func (c *changelog) write(version string) {
 	if closeErr := f.Close(); closeErr != nil {
 		logrus.WithError(closeErr).Fatal("unable to close the file CHANGELOG.md")
 	}
-	if writeErr := os.WriteFile("CHANGELOG.md", buffer.Bytes(), 0644); writeErr != nil {
+	if writeErr := os.WriteFile("CHANGELOG.md", buffer.Bytes(), 0600); writeErr != nil {
 		logrus.WithError(writeErr).Fatal("unable to inject the new changelog entries in CHANGELOG.md")
 	}
 }
