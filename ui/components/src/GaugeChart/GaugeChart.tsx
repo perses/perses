@@ -149,7 +149,7 @@ export function GaugeChart(props: GaugeChartProps) {
             width: '60%',
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
-            color: 'inherit',
+            color: 'inherit', // allows value color to match active threshold color
             fontSize: valueSizeClamp,
             formatter: (value: number) => {
               return formatValue(value, {
@@ -166,6 +166,7 @@ export function GaugeChart(props: GaugeChartProps) {
               // https://echarts.apache.org/en/option.html#series-gauge.data.title
               title: {
                 show: true,
+                color: chartsTheme.echartsTheme.textStyle?.color ?? 'inherit', // series name font color
                 offsetCenter: [0, '55%'],
                 overflow: 'truncate', // 'breakAll'
                 fontSize: 12,
