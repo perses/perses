@@ -30,9 +30,21 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
 
-export function TimeRangeControls() {
+const DEFAULT_HEIGHT = '34px';
+
+interface TimeRangeControlsProps {
+  // Height of the controls in pixels.
+  // The controls look best at heights >= 28 pixels.
+  // You can use values less than 28, but it won't look great.
+  heightPx?: number;
+}
+
+export function TimeRangeControls({ heightPx }: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh } = useTimeRange();
   const defaultTimeRange = useDefaultTimeRange();
+
+  // Convert height as a number to height as a string, then use this value for styling
+  const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
   // add time shortcut if one does not match duration from dashboard JSON
   if (!TIME_OPTIONS.some((option) => option.value.pastDuration === defaultTimeRange.pastDuration)) {
@@ -46,8 +58,8 @@ export function TimeRangeControls() {
 
   return (
     <>
-      <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} />
-      <RefreshIconButton aria-label="Refresh Dashboard" onClick={refresh}>
+      <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
+      <RefreshIconButton aria-label="Refresh Dashboard" onClick={refresh} sx={{ height }}>
         <RefreshIcon />
       </RefreshIconButton>
     </>

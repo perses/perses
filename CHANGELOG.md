@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- [ENHANCEMENT] Use consistent formatting for time (24 hour) #840
+- [ENHANCEMENT] Add ability to specify time zone via TimeZoneProvider #825
+- [ENHANCEMENT] Multiple enhancements to variable editing UX #842
+
+## 0.20.0 / 2022-12-05
+
+- [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
+- [BUGFIX] Time series panel edit preview shows stale properties #835
+- [BUGFIX] Fix time unit value format inconsistencies #837
+- [BUGFIX] Fix variable editor dark mode #836
+- [BUGFIX] Fix mapping issues with the migrate feature #830
+
+## 0.19.0 / 2022-12-02
+
+- [ENHANCEMENT] set abbreviate to true in default Decimal unit #813
+- [ENHANCEMENT] show axisPointer line on hover in time series panel #821
+- [ENHANCEMENT] Add ability to set default plugin kinds #815
+- [BUGFIX] Fix browser crash when opening panel editor #828
+
+## 0.18.0 / 2022-11-29
+
 - [FEATURE] `y_axis.show` and reset optional props support in TimeSeriesChart #798
 - [FEATURE] Add ability to refresh dashboard #777
 - [FEATURE] Add a migration page #774 #816
@@ -11,6 +32,8 @@
 - [ENHANCEMENT] Add perses design system #804
 - [ENHANCEMENT] Add a new option `input` in the CLI command `migrate` #816
 - [ENHANCEMENT] Add ability to select multiple legend items #814
+- [ENHANCEMENT] Add download button in edit mode #801
+- [BUGFIX] Fix variable preview #808
 - [BUGFIX] Fix button wrapping when too many vars #803
 - [BUGFIX] Fix pressing back button removes query param individually #811
 - [BUGFIX] Fix `dashboard.name` when migrating from a Grafana dashboard #812

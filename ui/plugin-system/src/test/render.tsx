@@ -14,6 +14,7 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PluginRegistry } from '../components/PluginRegistry';
+import { DefaultPluginKinds } from '../model';
 import { testPluginLoader } from './test-plugins';
 
 const testLogger = {
@@ -24,11 +25,19 @@ const testLogger = {
   },
 };
 
+type ContextOptions = {
+  defaultPluginKinds?: DefaultPluginKinds;
+};
+
 /**
  * Test helper to render a React component with some common app-level providers, as well as the PluginRegistry
  * wrapped around it.
  */
-export function renderWithContext(ui: React.ReactNode, options?: Omit<RenderOptions, 'queries'>) {
+export function renderWithContext(
+  ui: React.ReactNode,
+  renderOptions?: Omit<RenderOptions, 'queries'>,
+  contextOptions?: ContextOptions
+) {
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
@@ -36,8 +45,10 @@ export function renderWithContext(ui: React.ReactNode, options?: Omit<RenderOpti
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <PluginRegistry pluginLoader={testPluginLoader}>{ui}</PluginRegistry>
+      <PluginRegistry pluginLoader={testPluginLoader} defaultPluginKinds={contextOptions?.defaultPluginKinds}>
+        {ui}
+      </PluginRegistry>
     </QueryClientProvider>,
-    options
+    renderOptions
   );
 }

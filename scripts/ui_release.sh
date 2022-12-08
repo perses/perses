@@ -9,6 +9,12 @@ cd ui/
 
 files=("../LICENSE" "../CHANGELOG.md")
 workspaces=$(jq -r '.workspaces[]' < package.json)
+publish_workspaces=$(for workspace in ${workspaces}; do 
+  # package "app" is private so we shouldn't try to publish it.
+  if [[ "${workspace}" != "app" ]]; then
+    echo $workspace;
+  fi 
+done)
 
 function copy() {
   for file in "${files[@]}"; do
@@ -26,13 +32,10 @@ function publish() {
   if [[ "${dry_run}" == "dry-run" ]]; then
     cmd+=" --dry-run"
   fi
-  for workspace in ${workspaces}; do
-    # package "app" is private so we shouldn't try to publish it.
-    if [[ "${workspace}" != "app" ]]; then
-      cd "${workspace}"
-      eval "${cmd}"
-      cd ../
-    fi
+  for workspace in ${publish_workspaces}; do
+    cd "${workspace}"
+    eval "${cmd}"
+    cd ../
   done
 
 }
@@ -74,11 +77,78 @@ function bumpVersion() {
   fi
   # upgrade the @perses-dev/* dependencies on all packages
   for workspace in ${workspaces}; do
-    sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"\^${version}\"|" "${workspace}"/package.json
+    # sed -i syntax is different on mac and linux
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      sed -E -i "" "s|(\"@perses-dev/.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
+    else
+      sed -E -i "s|(\"@perses-dev/.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
+    fi
   done
 
   # increase the version on all packages
   npm version "${version}" --workspaces
+}
+
+# Validates branch name and extracts snapshot name from it.
+function getBranchSnapshotName() {
+  branch="${1}"
+
+  snapshotRegex="^snapshot\/[-a-zA-Z0-9]+$"
+
+  if [[ ! $branch =~ $snapshotRegex ]]; then 
+    echo "Snapshot branch '${branch}' must start with 'snapshot/' and end with a kebab-case name (e.g. 'snapshot/my-feature')." 1>&2
+    exit 1
+  fi
+
+  # Replace "/"" with "-"
+  echo "$(echo "${branch}" | sed -E  's/\//-/')"
+}
+
+function snapshotVersion() {
+  # Use version 0.0.0 to keep snapshots at the bottom of the npm versions UI to 
+  # avoid confusion for consumers of the package. This also helps differentiate
+  # snapshots from the concept of prereleases.
+  version="0.0.0"
+  
+  branch="${1}"
+  sha="${2}"
+  shortSha=$(echo $sha | cut -c 1-7)
+
+  branchSnapshotName=$(getBranchSnapshotName $branch)
+  snapshotVersion="${version}-${branchSnapshotName}-${shortSha}"
+  echo "Creating snapshot ${snapshotVersion}"
+
+  # Save snapshot version
+  echo "${snapshotVersion}" > ../VERSION
+
+  bumpVersion "${snapshotVersion}"
+  checkPackage "${snapshotVersion}"
+}
+
+
+function publishSnapshot() {
+  branch="${1}"
+  tagName=$(getBranchSnapshotName $branch)
+
+  echo "Publishing snapshot to tag ${tagName}"
+  cmd="npm publish --access public --tag ${tagName}"
+  for workspace in ${publish_workspaces}; do
+    cd "${workspace}"
+    eval "${cmd}"
+    cd ../
+  done
+}
+
+function removeSnapshot() {
+  branch="${1}"
+  tagName=$(getBranchSnapshotName $branch)
+
+  echo "Removing snapshot for tag ${tagName}"
+  for workspace in ${publish_workspaces}; do
+    cd "${workspace}"
+    eval "npm dist-tag rm @perses-dev/${workspace} ${tagName}"
+    cd ../
+  done
 }
 
 if [[ "$1" == "--copy" ]]; then
@@ -99,4 +169,16 @@ fi
 
 if [[ $1 == "--clean" ]]; then
   clean
+fi
+
+if [[ $1 == "--snapshot-version" ]]; then
+  snapshotVersion "${@:2}" "${@:3}"
+fi
+
+if [[ $1 == "--publish-snapshot" ]]; then
+  publishSnapshot "${@:2}"
+fi
+
+if [[ $1 == "--remove-snapshot" ]]; then
+  removeSnapshot "${@:2}"
 fi

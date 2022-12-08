@@ -13,6 +13,7 @@
 
 import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
+import { useTimeZone } from '../context/TimeZoneProvider';
 import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
 
@@ -23,11 +24,15 @@ interface TooltipContentProps {
 
 export function TooltipContent(props: TooltipContentProps) {
   const { focusedSeries, wrapLabels } = props;
+  const { formatWithUserTimeZone } = useTimeZone();
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
 
   const formatTimeSeriesHeader = (timeString: string) => {
-    const [month, year, time] = timeString.split(',');
+    const date = new Date(timeString);
+    const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
+    const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
+
     return (
       <>
         <Typography
@@ -36,10 +41,10 @@ export function TooltipContent(props: TooltipContentProps) {
             color: theme.palette.common.white,
           })}
         >
-          {month}, {year} –
+          {formattedDate}
         </Typography>
         <Typography variant="caption">
-          <strong>{time}</strong>
+          <strong>{formattedTime}</strong>
         </Typography>
       </>
     );

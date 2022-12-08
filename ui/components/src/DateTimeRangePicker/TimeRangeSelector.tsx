@@ -14,6 +14,7 @@
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
 import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
+import { useTimeZone } from '../context/TimeZoneProvider';
 import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
@@ -28,12 +29,14 @@ interface TimeRangeSelectorProps {
   timeOptions: TimeOption[];
   onSelectChange: (event: SelectChangeEvent<string>) => void;
   onCustomClick: () => void;
+  height?: string;
 }
 
 export function TimeRangeSelector(props: TimeRangeSelectorProps) {
-  const { value, timeOptions, onSelectChange, onCustomClick } = props;
+  const { value, timeOptions, onSelectChange, onCustomClick, height } = props;
+  const { timeZone } = useTimeZone();
   const formattedValue = !isRelativeTimeRange(value)
-    ? formatAbsoluteRange(value, DATE_TIME_FORMAT)
+    ? formatAbsoluteRange(value, DATE_TIME_FORMAT, timeZone)
     : value.pastDuration;
   return (
     <Select
@@ -44,6 +47,7 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         '.MuiSelect-icon': {
           marginTop: '1px',
         },
+        '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
       }}
     >
       {timeOptions.map((item, idx) => (

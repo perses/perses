@@ -2,6 +2,7 @@ import (
 	// regexp is not used at the current stage in this file. It is used when merging the different cuepart file together. This is a way to shared the import across the different files
     "regexp"
     "strings"
+    "math"
 )
 
 kind: "Dashboard",
@@ -78,10 +79,11 @@ spec: {
             spec: {
                 // go through the top-level panels a 2nd time and append an item only for the ones that are not rows neither belong to a row
                 items: [ for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels == _|_ {
-                    x: grafanaPanel.gridPos.x
-                    y: grafanaPanel.gridPos.y
-                    width: grafanaPanel.gridPos.w
-                    height: grafanaPanel.gridPos.h
+                    // it may happen that a grafana panel coordinate has a decimal
+                    x: math.Round(grafanaPanel.gridPos.x)
+                    y: math.Round(grafanaPanel.gridPos.y)
+                    width: math.Round(grafanaPanel.gridPos.w)
+                    height: math.Round(grafanaPanel.gridPos.h)
                     content: {
                         "$ref": "#/spec/panels/\(grafanaPanelId)"
                     }
@@ -101,10 +103,11 @@ spec: {
                 },
                 // go through the children panels of the current row
                 items: [ for innerPanelId, innnerPanel in #row.panels {
-                    x: innnerPanel.gridPos.x
-                    y: innnerPanel.gridPos.y
-                    width: innnerPanel.gridPos.w
-                    height: innnerPanel.gridPos.h
+                    // it may happen that a grafana panel coordinate has a decimal
+                    x: math.Round(innnerPanel.gridPos.x)
+                    y: math.Round(innnerPanel.gridPos.y)
+                    width: math.Round(innnerPanel.gridPos.w)
+                    height: math.Round(innnerPanel.gridPos.h)
                     content: {
                         "$ref": "#/spec/panels/\(grafanaPanelId)_\(innerPanelId)"
                     }

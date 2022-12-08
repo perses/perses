@@ -19,14 +19,14 @@ import {
   TableContainer,
   TableBody,
   TableRow,
-  TableCell,
+  TableCell as MuiTableCell,
   Table,
-  Paper,
   TableHead,
   Switch,
   Typography,
   IconButton,
   Alert,
+  styled,
 } from '@mui/material';
 import { VariableDefinition } from '@perses-dev/core';
 import { useImmer } from 'use-immer';
@@ -35,7 +35,13 @@ import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 
+import { useDiscardChangesConfirmationDialog } from '../../context';
 import { VariableEditForm } from './VariableEditorForm';
+import { VARIABLE_TYPES } from './variable-model';
+
+function getVariableLabelByKind(kind: string) {
+  return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
+}
 
 function getValidation(variableDefinitions: VariableDefinition[]) {
   const errors = [];
@@ -63,6 +69,26 @@ export function VariableEditor(props: {
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
 
+  const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
+    useDiscardChangesConfirmationDialog();
+  const handleCancel = () => {
+    if (JSON.stringify(props.variableDefinitions) !== JSON.stringify(variableDefinitions)) {
+      openDiscardChangesConfirmationDialog({
+        onDiscardChanges: () => {
+          closeDiscardChangesConfirmationDialog();
+          props.onCancel();
+        },
+        onCancel: () => {
+          closeDiscardChangesConfirmationDialog();
+        },
+        description:
+          'You have unapplied changes. Are you sure you want to discard these changes? Changes cannot be recovered.',
+      });
+    } else {
+      props.onCancel();
+    }
+  };
+
   const removeVariable = (index: number) => {
     setVariableDefinitions((draft) => {
       draft.splice(index, 1);
@@ -79,6 +105,7 @@ export function VariableEditor(props: {
         },
       });
     });
+    setVariableEditIdx(variableDefinitions.length);
   };
 
   const toggleVariableVisibility = (index: number, visible: boolean) => {
@@ -140,10 +167,10 @@ export function VariableEditor(props: {
               display: 'flex',
               alignItems: 'center',
               padding: (theme) => theme.spacing(1, 2),
-              borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
+              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h2">Template Variables</Typography>
+            <Typography variant="h2">Variables</Typography>
             <Stack direction="row" spacing={1} marginLeft="auto">
               <Button
                 disabled={props.variableDefinitions === variableDefinitions || !validation.isValid}
@@ -154,20 +181,12 @@ export function VariableEditor(props: {
               >
                 Apply
               </Button>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  props.onCancel();
-                }}
-              >
+              <Button color="secondary" variant="outlined" onClick={handleCancel}>
                 Cancel
               </Button>
             </Stack>
           </Box>
           <Box padding={2} sx={{ overflowY: 'scroll' }}>
-            <Typography variant="h3" mb={2}>
-              Variable List
-            </Typography>
             <Stack spacing={2}>
               {!validation.isValid &&
                 validation.errors.map((error) => (
@@ -175,13 +194,13 @@ export function VariableEditor(props: {
                     {error}
                   </Alert>
                 ))}
-              <TableContainer component={Paper}>
+              <TableContainer>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                   <TableHead>
                     <TableRow>
                       <TableCell>Visibility</TableCell>
-                      <TableCell>Variable Name</TableCell>
-                      <TableCell>Variable Type</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Type</TableCell>
                       <TableCell align="right">Action</TableCell>
                     </TableRow>
                   </TableHead>
@@ -199,7 +218,7 @@ export function VariableEditor(props: {
                         <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                           {v.spec.name}
                         </TableCell>
-                        <TableCell>{v.kind}</TableCell>
+                        <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
                         <TableCell align="right">
                           <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
                             <ArrowUp />
@@ -225,7 +244,7 @@ export function VariableEditor(props: {
               </TableContainer>
               <Box display="flex">
                 <Button onClick={addVariable} variant="contained">
-                  Add New Variable
+                  Add New
                 </Button>
               </Box>
             </Stack>
@@ -235,3 +254,7 @@ export function VariableEditor(props: {
     </>
   );
 }
+
+const TableCell = styled(MuiTableCell)(({ theme }) => ({
+  borderBottom: `solid 1px ${theme.palette.divider}`,
+}));

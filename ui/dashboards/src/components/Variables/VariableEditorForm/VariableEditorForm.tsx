@@ -28,17 +28,18 @@ import {
   Chip,
   IconButton,
   ClickAwayListener,
+  Tooltip,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { PluginEditor } from '@perses-dev/plugin-system';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { ErrorBoundary } from '@perses-dev/components';
 import Refresh from 'mdi-material-ui/Refresh';
+import Clipboard from 'mdi-material-ui/ClipboardOutline';
 
-import { useListVariablePluginValues } from '../variable-model';
+import { useListVariablePluginValues, VARIABLE_TYPES } from '../variable-model';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
-const VARIABLE_TYPES = ['ListVariable', 'TextVariable'] as const;
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
 // TODO: Replace with proper validation library
@@ -65,7 +66,7 @@ const SectionHeader = ({ children }: React.PropsWithChildren) => (
   </Typography>
 );
 
-function VariableListPreview({ definition }: { definition: ListVariableDefinition }) {
+function VariableListPreview({ definition, onRefresh }: { definition: ListVariableDefinition; onRefresh: () => void }) {
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const [maxValues, setMaxValues] = useState<number | undefined>(DEFAULT_MAX_PREVIEW_VALUES);
   const showAll = () => {
@@ -80,6 +81,27 @@ function VariableListPreview({ definition }: { definition: ListVariableDefinitio
 
   return (
     <Box>
+      <Stack direction={'row'} spacing={1} alignItems="center">
+        <Typography variant="caption">Preview Values</Typography>
+        <Tooltip title="Refresh Values" placement="right">
+          <IconButton onClick={onRefresh} size="small">
+            <Refresh />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Copy Values to Clipboard" placement="right">
+          <IconButton
+            onClick={async () => {
+              if (data?.length) {
+                await navigator.clipboard.writeText(data.map((d) => d.label).join(','));
+                alert('Copied to clipboard!');
+              }
+            }}
+            size="small"
+          >
+            <Clipboard />
+          </IconButton>
+        </Tooltip>
+      </Stack>
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       {isFetching && 'Loading...'}
       {data?.length === 0 && <Alert severity="info">No results</Alert>}
@@ -129,10 +151,10 @@ export function VariableEditForm({
           display: 'flex',
           alignItems: 'center',
           padding: (theme) => theme.spacing(1, 2),
-          borderBottom: (theme) => `1px solid ${theme.palette.grey[100]}`,
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography variant="h2">Template Variables / Edit Variable</Typography>
+        <Typography variant="h2">Edit Variable</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           <Button
             disabled={!validation.isValid}
@@ -144,6 +166,7 @@ export function VariableEditForm({
             Update
           </Button>
           <Button
+            color="secondary"
             variant="outlined"
             onClick={() => {
               onCancel();
@@ -154,9 +177,6 @@ export function VariableEditForm({
         </Stack>
       </Box>
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
-        <Typography variant="h3" mb={2}>
-          Edit Variable
-        </Typography>
         <SectionHeader>General</SectionHeader>
         <Grid container spacing={2} mb={2}>
           <Grid item xs={6}>
@@ -189,8 +209,8 @@ export function VariableEditForm({
                 }}
               >
                 {VARIABLE_TYPES.map((v) => (
-                  <MenuItem key={v} value={v}>
-                    {v}
+                  <MenuItem key={v.kind} value={v.kind}>
+                    {v.label}
                   </MenuItem>
                 ))}
               </Select>
@@ -199,7 +219,7 @@ export function VariableEditForm({
           <Grid item xs={6}>
             <TextField
               fullWidth
-              label="Label"
+              label="Display Label"
               value={state.title}
               onChange={(v) => {
                 setState((draft) => {
@@ -246,16 +266,6 @@ export function VariableEditForm({
             <SectionHeader>List Options</SectionHeader>
             <Grid container spacing={2} mb={2}>
               <Grid item xs={6}>
-                <TextField
-                  sx={{ mb: 1 }}
-                  label="Capturing Regexp"
-                  value={state.listVariableFields.capturing_regexp}
-                  onChange={(e) => {
-                    setState((draft) => {
-                      draft.listVariableFields.capturing_regexp = e.target.value;
-                    });
-                  }}
-                />
                 {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
                 <ClickAwayListener onClickAway={() => refreshPreview()}>
                   <Box />
@@ -273,16 +283,21 @@ export function VariableEditForm({
                   }}
                 />
               </Grid>
+
               {state.listVariableFields.plugin.kind && (
                 <Grid item xs={12}>
+                  <TextField
+                    sx={{ mb: 1 }}
+                    label="Capturing Regexp Filter"
+                    value={state.listVariableFields.capturing_regexp}
+                    onChange={(e) => {
+                      setState((draft) => {
+                        draft.listVariableFields.capturing_regexp = e.target.value;
+                      });
+                    }}
+                  />
                   <ErrorBoundary FallbackComponent={() => <div>Error previewing values</div>} resetKeys={[previewSpec]}>
-                    <Stack direction={'row'} spacing={1} alignItems="center">
-                      <Typography variant="caption">Preview Values</Typography>
-                      <IconButton onClick={refreshPreview} size="small">
-                        <Refresh />
-                      </IconButton>
-                    </Stack>
-                    <VariableListPreview definition={previewSpec} />
+                    <VariableListPreview onRefresh={refreshPreview} definition={previewSpec} />
                   </ErrorBoundary>
                 </Grid>
               )}

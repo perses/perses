@@ -1,0 +1,160 @@
+{
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "queues-test",
+      "created_at": "0001-01-01T00:00:00Z",
+      "updated_at": "0001-01-01T00:00:00Z",
+      "project": ""
+    },
+    "spec": {
+      "display": {
+        "name": "queues-test"
+      },
+      "duration": "1h",
+      "variables": [
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "datasource",
+            "allow_all_value": false,
+            "allow_multiple": false,
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  "grafana",
+                  "migration",
+                  "not",
+                  "supported"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "panels": {
+        "0_0": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Purpose of the Dashboard"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "<p>This dashboard provides information on OTF Front-End queues.<br/>Minimum OTF FE version required: 18.0.0.68 / 19.0.0.29<br/>\nMore information on FE metrics used here: <a href=\"https://rndwww.nce.amadeus.net/confluence/display/OTFTeam/OTF+Monitoring+-+FE+metrics\">Confluence link</a>\n</p>"
+              }
+            }
+          }
+        },
+        "0_1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Point of Contact"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "<p>In case of issue with the dashboard, please contact the OTF team<br/><old><ol><li>Chorus Team: TPE-OTP-AFC-CPF</li><li>Win@proach Group: DAOTF</li><li>MS Teams: <a href=\"https://teams.microsoft.com/l/channel/19%3ac3e958d9e7ca4ff2b46b7e19fe971d48%40thread.skype/OTF%2520Monitoring%2520-%2520Prometheus?groupId=a690f775-792a-44f1-9b9b-35763376cf50&tenantId=b3f4f7c2-72ce-4192-aba4-d6c7719b5766\">Channel Link</a></li></ol></p>"
+              }
+            }
+          }
+        },
+        "1_0": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Queueing rate"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "MigrationFromGrafanaNotSupported"
+                          },
+                          "query": "migration_from_grafana_not_supported"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "items": []
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Dashboard Info",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/0_0"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/0_1"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Overview",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/1_0"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }

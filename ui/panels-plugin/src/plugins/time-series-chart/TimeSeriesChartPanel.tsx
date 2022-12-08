@@ -11,21 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { merge } from 'lodash-es';
+import { useDeepMemo } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, ZoomEventData, Legend, YAxisLabel } from '@perses-dev/components';
+import {
+  DEFAULT_LEGEND,
+  LineChart,
+  EChartsDataFormat,
+  ZoomEventData,
+  Legend,
+  YAxisLabel,
+} from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_LEGEND,
-  DEFAULT_UNIT,
-  DEFAULT_VISUAL,
-  DEFAULT_Y_AXIS,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -70,6 +72,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
+  const fetching = queryResults.some((result) => result.isFetching);
   const loading = queryResults.some((result) => result.isLoading);
   const hasData = queryResults.some((result) => result.data && Array.from(result.data.series).length > 0);
 
@@ -103,7 +106,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   // Populate series data based on query results
-  const { graphData } = useMemo(() => {
+  const { graphData } = useDeepMemo(() => {
+    // If loading or fetching, we display a loading indicator.
+    // We skip the expensive loops below until we are done loading or fetching.
+    if (loading || fetching) {
+      return {
+        graphData: EMPTY_GRAPH_DATA,
+      };
+    }
+
     const timeScale = getCommonTimeScale(queryResults);
     if (timeScale === undefined) {
       return {
@@ -120,8 +131,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     const xAxisData = [...getXValues(timeScale)];
 
     for (const result of queryResults) {
-      // Skip queries that are still loading and don't have data
-      if (result.isLoading || result.data === undefined) continue;
+      // Skip queries that are still loading or don't have data
+      if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
       for (const timeSeries of result.data.series) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
@@ -165,13 +176,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading]);
 
   if (contentDimensions === undefined) {
     return null;
   }
 
-  if (loading === true) {
+  if (loading === true || fetching == true) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}

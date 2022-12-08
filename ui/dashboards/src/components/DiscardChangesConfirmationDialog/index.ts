@@ -11,7 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './combine-sx';
-export * from './theme-gen';
-export * from './component-ids';
-export * from './format';
+export * from './DiscardChangesConfirmationDialog';

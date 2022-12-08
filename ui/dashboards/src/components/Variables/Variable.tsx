@@ -142,7 +142,7 @@ function ListVariable({ name }: TemplateVariableProps) {
 }
 
 function TextVariable({ name }: TemplateVariableProps) {
-  const { state } = useTemplateVariable(name);
+  const { state, definition } = useTemplateVariable(name);
   const [tempValue, setTempValue] = useState(state?.value ?? '');
   const { setVariableValue } = useTemplateVariableActions();
 
@@ -156,7 +156,7 @@ function TextVariable({ name }: TemplateVariableProps) {
       onChange={(e) => setTempValue(e.target.value)}
       onBlur={() => setVariableValue(name, tempValue)}
       placeholder={name}
-      label={name}
+      label={definition?.spec.display?.name ?? name}
     />
   );
 }

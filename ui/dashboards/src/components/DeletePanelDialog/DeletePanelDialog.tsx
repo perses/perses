@@ -53,7 +53,7 @@ const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
   };
   return (
     <form onSubmit={handleDelete}>
-      <DialogContent sx={{ width: '500px' }}>
+      <DialogContent dividers sx={{ width: '500px' }}>
         Are you sure you want to delete {deletePanelDialog.panelName} from {deletePanelDialog.panelGroupName}? This
         action cannot be undone.
       </DialogContent>
@@ -61,7 +61,9 @@ const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
         <Button variant="contained" type="submit">
           Delete
         </Button>
-        <Button onClick={() => closeDeletePanelDialog()}>Cancel</Button>
+        <Button variant="outlined" onClick={() => closeDeletePanelDialog()}>
+          Cancel
+        </Button>
       </DialogActions>
     </form>
   );
