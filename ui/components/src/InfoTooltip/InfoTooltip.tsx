@@ -33,15 +33,27 @@ interface InfoTooltipProps {
   id?: string;
   title?: string;
   placement?: TooltipPlacement;
+  enterDelay?: number; // default is 500ms
+  enterNextDelay?: number; // default is 500ms
 }
 
-export const InfoTooltip = ({ id, title, description, placement, children }: InfoTooltipProps) => {
+export const InfoTooltip = ({
+  id,
+  title,
+  description,
+  placement,
+  children,
+  enterDelay,
+  enterNextDelay,
+}: InfoTooltipProps) => {
   return (
     <StyledTooltip
       arrow
       id={id}
-      placement={placement}
+      placement={placement ?? TooltipPlacement.Top}
       title={<TooltipContent title={title} description={description} />}
+      enterDelay={enterDelay ?? 500}
+      enterNextDelay={enterNextDelay ?? 500}
     >
       <div>{children}</div>
     </StyledTooltip>
