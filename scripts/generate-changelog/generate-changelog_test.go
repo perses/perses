@@ -31,6 +31,12 @@ func TestParseCatalogEntry(t *testing.T) {
 		{
 			title:                "no catalog entry",
 			entry:                "a commit message without a catalog entry",
+			expectedKind:         kindUnknown,
+			expectedCatalogEntry: "",
+		},
+		{
+			title:                "explicit ignore catalog entry",
+			entry:                "[IGNORE] my awesome commit message",
 			expectedKind:         KindToBeIgnored,
 			expectedCatalogEntry: "",
 		},
@@ -94,8 +100,26 @@ func TestParseAndFormatEntry(t *testing.T) {
 		expectedEntry string
 	}{
 		{
-			title:         "commit to be ignored",
+			title:         "unknown catalog",
 			entry:         "b75e042daac589548d85ead05a9ef47fa0e62df0 add a way to generate the changelog entries",
+			expectedKind:  kindUnknown,
+			expectedEntry: "add a way to generate the changelog entries",
+		},
+		{
+			title:         "merge commit is ignored (1)",
+			entry:         "a6918dc9bdfb7e8a50dde0eba2d1ea9f45193086 Merge pull request #843 from perses/release/v0.20",
+			expectedKind:  KindToBeIgnored,
+			expectedEntry: "",
+		},
+		{
+			title:         "merge commit is ignored (2)",
+			entry:         "21771bce89849b46b6dc938e9983e49a3dc9eb07 Merge branch 'main' into release/v0.20",
+			expectedKind:  KindToBeIgnored,
+			expectedEntry: "",
+		},
+		{
+			title:         "release commit is ignored",
+			entry:         "944ef44d198f368e784d6239469a60a9212a4dca Release v0.20.0 (#839)",
 			expectedKind:  KindToBeIgnored,
 			expectedEntry: "",
 		},
@@ -144,6 +168,7 @@ func TestGenerateChangelog(t *testing.T) {
 				},
 				bugfixes:        []string{"Fix time units display, allow decimal_places to be used (#837)"},
 				breakingChanges: []string{"legend.position now required in time series panel (#848)"},
+				unknown:         []string{"Use exact versions for internal npm dependencies (#846)", "Support snapshot UI releases (#844)"},
 			},
 			expected: fmt.Sprintf("%s\n%s", title, `
 - [FEATURE] Discard Changes Confirmation Dialog (#834)
@@ -152,6 +177,11 @@ func TestGenerateChangelog(t *testing.T) {
 - [ENHANCEMENT] Make it possible to adjust the height of the time range controls (#829)
 - [BUGFIX] Fix time units display, allow decimal_places to be used (#837)
 - [BREAKINGCHANGE] legend.position now required in time series panel (#848)
+
+[//]: <UNKNOWN ENTRIES. Release shepherd, please review the following list and categorize them or remove them>
+
+- [UNKNOWN] Use exact versions for internal npm dependencies (#846)
+- [UNKNOWN] Support snapshot UI releases (#844)
 `),
 		},
 	}

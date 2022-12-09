@@ -31,6 +31,8 @@ const (
 	enhancement    = "ENHANCEMENT"
 	bugfix         = "BUGFIX"
 	breakingChange = "BREAKINGCHANGE"
+	unknown        = "UNKNOWN"
+	ignore         = "IGNORE"
 )
 
 // kind represents the type of change.
@@ -41,6 +43,7 @@ const (
 	kindFeature
 	kindEnhancement
 	kindBugfix
+	kindUnknown
 	KindToBeIgnored
 )
 
@@ -87,7 +90,7 @@ func formatChangelogCategory(category string) string {
 func parseCatalogEntry(entry string) (kind, string) {
 	catalog, found := getStringInBetweenTwoString(entry, "[", "]")
 	if !found {
-		return KindToBeIgnored, ""
+		return kindUnknown, ""
 	}
 	switch strings.ToUpper(catalog) {
 	case feature:
@@ -98,8 +101,10 @@ func parseCatalogEntry(entry string) (kind, string) {
 		return kindBugfix, catalog
 	case breakingChange:
 		return kindBreakingChange, catalog
-	default:
+	case ignore:
 		return KindToBeIgnored, ""
+	default:
+		return kindUnknown, ""
 	}
 }
 
@@ -115,9 +120,19 @@ func parseAndFormatEntry(entry string) (kind, string) {
 		}
 	}
 	// extract catalog entry and remove it to get a cleaner message
-	catalogKind, catalogEntry := parseCatalogEntry(entry)
+	catalogKind, catalogEntry := parseCatalogEntry(newEntry)
 	if catalogKind == KindToBeIgnored {
 		return KindToBeIgnored, ""
+	} else if catalogKind == kindUnknown {
+		// list of exception that would make the commit ignored
+		lowerEntry := strings.ToLower(newEntry)
+		if strings.HasPrefix(lowerEntry, "merge branch") ||
+			strings.HasPrefix(lowerEntry, "merge pull request") ||
+			strings.HasPrefix(lowerEntry, "release") ||
+			strings.HasPrefix(lowerEntry, "sync release") {
+			return KindToBeIgnored, ""
+		}
+		return kindUnknown, newEntry
 	}
 	return catalogKind, strings.TrimSpace(strings.ReplaceAll(newEntry, fmt.Sprintf("[%s]", catalogEntry), ""))
 }
@@ -127,6 +142,7 @@ type changelog struct {
 	enhancements    []string
 	bugfixes        []string
 	breakingChanges []string
+	unknown         []string
 }
 
 func newChangelog(entries []string) *changelog {
@@ -142,6 +158,8 @@ func newChangelog(entries []string) *changelog {
 			clog.bugfixes = append(clog.bugfixes, newEntry)
 		case kindBreakingChange:
 			clog.breakingChanges = append(clog.breakingChanges, newEntry)
+		case kindUnknown:
+			clog.unknown = append(clog.unknown, newEntry)
 		}
 	}
 	return clog
@@ -161,6 +179,10 @@ func (c *changelog) generateChangelog(version string) string {
 	injectEntries(&buffer, c.enhancements, enhancement)
 	injectEntries(&buffer, c.bugfixes, bugfix)
 	injectEntries(&buffer, c.breakingChanges, breakingChange)
+	if len(c.unknown) > 0 {
+		buffer.WriteString("\n[//]: <UNKNOWN ENTRIES. Release shepherd, please review the following list and categorize them or remove them>\n\n")
+		injectEntries(&buffer, c.unknown, unknown)
+	}
 	return buffer.String()
 }
 
