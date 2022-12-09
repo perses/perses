@@ -111,7 +111,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     <Stack
       direction="row"
       spacing={2}
-      justifyContent="center"
+      justifyContent="left"
       alignItems="center"
       sx={{
         // so scrollbar only shows when necessary
