@@ -34,7 +34,6 @@ import (
 type option struct {
 	persesCMD.Option
 	opt.FileOption
-	opt.ProjectOption
 	writer             io.Writer
 	chartsSchemas      string
 	queriesSchemas     string
@@ -56,9 +55,6 @@ func (o *option) Complete(args []string) error {
 		})
 	}
 	if o.online {
-		// complete the project value. We don't catch the issue here in case it's empty because for many cases we don't need it.
-		// We will check at the runtime when it is necessary / makes sense
-		_ = o.ProjectOption.Complete()
 		// Finally, get the api client we will need later.
 		apiClient, err := config.Global.GetAPIClient()
 		if err != nil {
@@ -89,40 +85,34 @@ func (o *option) SetWriter(writer io.Writer) {
 }
 
 func (o *option) validate(objects []modelAPI.Entity) error {
-	var gdtsList []*modelV1.GlobalDatasource
-	var dtsList []*modelV1.Datasource
-	if o.sch == nil {
+	if o.sch == nil && !o.online {
 		return nil
 	}
 	for _, object := range objects {
 		switch entity := object.(type) {
 		case *modelV1.Dashboard:
-			if err := validate.Dashboard(entity, o.sch); err != nil {
-				return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
-			}
-		case *modelV1.GlobalDatasource:
-			if o.online && len(gdtsList) == 0 {
-				var err error
-				gdtsList, err = o.apiClient.V1().GlobalDatasource().List("")
-				if err != nil {
+			if o.online {
+				if err := o.apiClient.Validate().Dashboard(entity); err != nil {
 					return err
 				}
+			} else if err := validate.Dashboard(entity, o.sch); err != nil {
+				return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
 			}
-			if err := validate.Datasource(entity, gdtsList, o.sch); err != nil {
+
+		case *modelV1.GlobalDatasource:
+			if o.online {
+				if err := o.apiClient.Validate().GlobalDatasource(entity); err != nil {
+					return err
+				}
+			} else if err := validate.Datasource(entity, nil, o.sch); err != nil {
 				return err
 			}
 		case *modelV1.Datasource:
-			if o.online && len(dtsList) == 0 {
-				var err error
-				if len(o.Project) == 0 {
-					return fmt.Errorf("project is not defined. Please set it using the flag --project or using the command perses project <project_name>")
-				}
-				dtsList, err = o.apiClient.V1().Datasource(o.Project).List("")
-				if err != nil {
+			if o.online {
+				if err := o.apiClient.Validate().Datasource(entity); err != nil {
 					return err
 				}
-			}
-			if err := validate.Datasource(entity, dtsList, o.sch); err != nil {
+			} else if err := validate.Datasource(entity, nil, o.sch); err != nil {
 				return err
 			}
 		}
@@ -156,12 +146,17 @@ percli lint -f ./resources.json --online
 		},
 	}
 	opt.AddFileFlags(cmd, &o.FileOption)
-	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	opt.MarkFileFlagAsMandatory(cmd)
 	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for charts.")
 	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for queries.")
 	cmd.Flags().StringVar(&o.datasourcesSchemas, "schemas.datasources", "", "Path to the CUE schemas for the datasources")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
+
 	cmd.MarkFlagsRequiredTogether("schemas.charts", "schemas.queries")
+	// when online flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
+	// So no need to use / load the schemas with the CLI.
+	cmd.MarkFlagsMutuallyExclusive("schemas.charts", "online")
+	cmd.MarkFlagsMutuallyExclusive("schemas.queries", "online")
+	cmd.MarkFlagsMutuallyExclusive("schemas.datasources", "online")
 	return cmd
 }
