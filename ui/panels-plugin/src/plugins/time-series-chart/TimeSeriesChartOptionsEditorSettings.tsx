@@ -67,6 +67,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
       <OptionsEditorColumn>
         <Button
           variant="outlined"
+          color="secondary"
           onClick={() => {
             onChange(
               produce(value, (draft: TimeSeriesChartOptions) => {
