@@ -16,7 +16,9 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { useDashboardActions, useEditMode } from '../../context';
+import { DashboardResource } from '@perses-dev/core';
+import { useState } from 'react';
+import { useDashboard, useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
@@ -28,6 +30,7 @@ export interface DashboardToolbarProps {
   isReadonly: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
+  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
@@ -38,9 +41,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     isReadonly,
     onEditButtonClick,
     onCancelButtonClick,
+    onSave,
   } = props;
 
   const { isEditMode, setEditMode } = useEditMode();
+  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
+  const dashboard = useDashboard();
   const { openAddPanelGroup, openAddPanel } = useDashboardActions();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const dashboardTitle = dashboardTitleComponent ? (
@@ -49,8 +55,20 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     <Typography variant="h2">{dashboardName}</Typography>
   );
 
-  const onSave = () => {
-    setEditMode(false);
+  const onSaveButtonClick = () => {
+    if (onSave !== undefined) {
+      setSavingDashboard(true);
+      onSave(dashboard.dashboard)
+        .then(() => {
+          setSavingDashboard(false);
+          setEditMode(false);
+        })
+        .catch(() => {
+          setSavingDashboard(false);
+        });
+    } else {
+      setEditMode(false);
+    }
   };
 
   return (
@@ -65,7 +83,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <Button variant="contained" onClick={onSave} disabled={isReadonly}>
+              <Button variant="contained" onClick={onSaveButtonClick} disabled={isReadonly || isSavingDashboard}>
                 Save
               </Button>
               <Button variant="outlined" onClick={onCancelButtonClick}>
