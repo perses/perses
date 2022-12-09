@@ -168,7 +168,7 @@ export function GaugeChart(props: GaugeChartProps) {
                 show: true,
                 color: chartsTheme.echartsTheme.textStyle?.color ?? 'inherit', // series name font color
                 offsetCenter: [0, '55%'],
-                overflow: 'truncate', // 'breakAll'
+                overflow: 'truncate',
                 fontSize: 12,
                 width: width * 0.8,
               },

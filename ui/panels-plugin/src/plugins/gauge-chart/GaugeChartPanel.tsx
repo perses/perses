@@ -103,7 +103,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   // accounts for showing a separate chart for each time series
   let chartWidth = contentDimensions.width / gaugeData.length - PANEL_PADDING_OFFSET;
   if (chartWidth < GAUGE_MIN_WIDTH && gaugeData.length > 1) {
-    // enables horizontal scroll charts overflow outside of panel
+    // enables horizontal scroll when charts overflow outside of panel
     chartWidth = GAUGE_MIN_WIDTH;
   }
 
