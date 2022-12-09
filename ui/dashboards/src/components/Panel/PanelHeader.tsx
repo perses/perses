@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { CardHeader, Typography, Stack, IconButton, CardHeaderProps, styled } from '@mui/material';
-import { InfoTooltip, TooltipPlacement, combineSx } from '@perses-dev/components';
+import { InfoTooltip, combineSx } from '@perses-dev/components';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
