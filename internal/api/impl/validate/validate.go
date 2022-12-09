@@ -51,22 +51,18 @@ func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {
 }
 
 func (e *Endpoint) ValidateDatasource(ctx echo.Context) error {
-	entity := &v1.Datasource{}
-	if err := ctx.Bind(entity); err != nil {
-		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
-	}
-	if err := validate.Datasource(entity, nil, e.sch); err != nil {
-		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
-	}
-	return ctx.NoContent(http.StatusOK)
+	return validateDatasource(&v1.Datasource{}, e.sch, ctx)
 }
 
 func (e *Endpoint) ValidateGlobalDatasource(ctx echo.Context) error {
-	entity := &v1.GlobalDatasource{}
+	return validateDatasource(&v1.GlobalDatasource{}, e.sch, ctx)
+}
+
+func validateDatasource[T v1.DatasourceInterface](entity T, sch schemas.Schemas, ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
 	}
-	if err := validate.Datasource(entity, nil, e.sch); err != nil {
+	if err := validate.Datasource(entity, nil, sch); err != nil {
 		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
 	}
 	return ctx.NoContent(http.StatusOK)
