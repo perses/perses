@@ -33,6 +33,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
   return (
     <CodeMirror
       {...rest}
+      style={{ border: `1px solid ${theme.palette.divider}` }}
       theme={isDarkMode ? 'dark' : 'light'}
       basicSetup={{
         highlightActiveLine: false,

@@ -13,8 +13,8 @@
 
 import { produce } from 'immer';
 import { Stack, TextField, FormControl, InputLabel } from '@mui/material';
-import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
-import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector } from '../../model';
+import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
+import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector, PrometheusClient } from '../../model';
 import { PromQLEditor } from '../../components';
 import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } from './query-editor-model';
 
@@ -24,9 +24,10 @@ import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } f
 export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps) {
   const { onChange, value } = props;
   const { datasource } = value;
+  const selectedDatasource = datasource ?? DEFAULT_PROM;
 
-  // TODO: Need to get the Prometheus URL here from the selected datasource
-  const promURL = 'https://demo.promlabs.com';
+  const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
+  const promURL = client?.options.proxyUrl;
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
@@ -68,7 +69,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind="PrometheusDatasource"
-          value={datasource ?? DEFAULT_PROM}
+          value={selectedDatasource}
           onChange={handleDatasourceChange}
           labelId="prom-datasource-label"
           label="Prometheus Datasource"

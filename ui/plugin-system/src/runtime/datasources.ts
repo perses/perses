@@ -53,3 +53,11 @@ export function useListDatasources(datasourcePluginKind: string) {
   const { listDatasourceMetadata } = useDatasourceStore();
   return useQuery(['listDatasourceMetadata', datasourcePluginKind], () => listDatasourceMetadata(datasourcePluginKind));
 }
+
+/**
+ * Provides a convience hook for getting a DatasourceClient for a given DatasourceSelector.
+ */
+export function useDatasourceClient<Client>(selector: DatasourceSelector) {
+  const store = useDatasourceStore();
+  return useQuery<Client>(['getDatasourceClient', selector], () => store.getDatasourceClient(selector) as Client);
+}

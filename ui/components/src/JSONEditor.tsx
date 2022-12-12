@@ -34,6 +34,7 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
 
   return (
     <CodeMirror
+      style={{ border: `1px solid ${theme.palette.divider}` }}
       theme={isDarkMode ? 'dark' : 'light'}
       extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
       value={value}

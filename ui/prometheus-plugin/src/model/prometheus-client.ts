@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/core';
+import { DatasourceClientOptions } from '@perses-dev/plugin-system';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -24,6 +25,7 @@ import {
 } from './api-types';
 
 export interface PrometheusClient {
+  options: DatasourceClientOptions;
   instantQuery(params: InstantQueryRequestParameters): Promise<InstantQueryResponse>;
   rangeQuery(params: RangeQueryRequestParameters): Promise<RangeQueryResponse>;
   labelNames(params: LabelNamesRequestParameters): Promise<LabelNamesResponse>;
