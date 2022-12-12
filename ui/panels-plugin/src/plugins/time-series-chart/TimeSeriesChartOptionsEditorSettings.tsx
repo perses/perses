@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Replay from 'mdi-material-ui/Replay';
 import { Button } from '@mui/material';
 import { produce } from 'immer';
 import {
@@ -68,6 +67,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
       <OptionsEditorColumn>
         <Button
           variant="outlined"
+          color="secondary"
           onClick={() => {
             onChange(
               produce(value, (draft: TimeSeriesChartOptions) => {
@@ -78,9 +78,8 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
               })
             );
           }}
-          startIcon={<Replay />}
         >
-          Use Default Settings
+          Reset to Default
         </Button>
       </OptionsEditorColumn>
     </OptionsEditorGrid>

@@ -24,6 +24,7 @@ type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	V1() v1.ClientInterface
 	Migrate(body *api.Migrate) (*modelV1.Dashboard, error)
+	Validate() ValidateInterface
 }
 
 type client struct {
@@ -54,4 +55,8 @@ func (c *client) Migrate(body *api.Migrate) (*modelV1.Dashboard, error) {
 		Do().
 		Object(result)
 	return result, err
+}
+
+func (c *client) Validate() ValidateInterface {
+	return newValidate(c.restClient)
 }

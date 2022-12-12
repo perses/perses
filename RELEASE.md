@@ -45,18 +45,19 @@ You should start to create a branch that follows the pattern `release/v<X.Y>`. R
 for any given major or minor release happen in the same release/v<major>.<minor> branch. Do not create release/<version>
 for patch or release candidate releases.
 
-- Update the file `VERSION` with the new version to be created.
-
-- Update the file `CHANGELOG.md` and the different `package.json` with the corresponding version:
-
-```bash
-make bump-version
-```
-
 - Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release
   in general and on the addition to the changelog in particular.
 
-- Create a proper title for the release following this template : `## <version_number> / <Date>`
+- Update the file `VERSION` with the new version to be created.
+
+- Update the file `CHANGELOG.md` :
+
+```bash
+make generate-changelog
+```
+
+Note: it will generate a first changelog version based on the git history. You should review what has been generated.
+Error can happen ;)
 
 - Entries in the `CHANGELOG.md` are meant to be in this order:
 
@@ -67,6 +68,12 @@ make bump-version
 
 As we have many libraries we publish, it's better if you also put a clear indication about what library is affected by
 these changes.
+
+- Update the different `package.json` with the corresponding version:
+
+```bash
+make bump-version
+```
 
 ### 2. Draft the new release
 
@@ -89,27 +96,39 @@ changelog there. It won't hurt if you check quickly if it does not miss anything
 
 ## How to cut a UI snapshot release
 
-Occasionally, it is helpful to test a packaged version of the UI to validate specific functionality before cutting a real release. Where there are difficulties doing this via tools like `npm link` and `npm pack` because of complexities with workspaces, a maintainer can create a "snapshot" release of the UI.
+Occasionally, it is helpful to test a packaged version of the UI to validate specific functionality before cutting a
+real release. Where there are difficulties doing this via tools like `npm link` and `npm pack` because of complexities
+with workspaces, a maintainer can create a "snapshot" release of the UI.
 
 ### Limits of snapshot releases
 
 - **DO NOT** merge snapshot branches into `main`. They are intended only as a tool for testing.
-- **DO NOT** recommend using snapshot branches in production code. They are intended to be ephemeral for testing purposes.
+- **DO NOT** recommend using snapshot branches in production code. They are intended to be ephemeral for testing
+  purposes.
 
 ### Creating a snapshot branch
 
 The creation of snapshots is automated by Github actions based on branch naming schemes.
 
-- Create a branch following the naming scheme `snapshot/tag-name` (e.g. `snapshot/theme-updates`) with the changes you want to test. The `tag-name` should be short and kebab-case because it will be used as part of a version name and tag name in npm.
-- Github actions will build the UI and release a version named `0.0.0-snapshot-tag-name-SHA` at a tag named `snapshot-tag-name` where `tag-name` comes from your branch name and `SHA` is a short version of the git sha for the latest commit on the branch.
-  - We use `0.0.0` as the version prefix to keep snapshots at the bottom of the npm versions UI to avoid confusion for consumers of the package. This also helps differentiate snapshots from the concept of prereleases, which we do not currently provide, but may add in the future.
+- Create a branch following the naming scheme `snapshot/tag-name` (e.g. `snapshot/theme-updates`) with the changes you
+  want to test. The `tag-name` should be short and kebab-case because it will be used as part of a version name and tag
+  name in npm.
+- Github actions will build the UI and release a version named `0.0.0-snapshot-tag-name-SHA` at a tag
+  named `snapshot-tag-name` where `tag-name` comes from your branch name and `SHA` is a short version of the git sha for
+  the latest commit on the branch.
+    - We use `0.0.0` as the version prefix to keep snapshots at the bottom of the npm versions UI to avoid confusion for
+      consumers of the package. This also helps differentiate snapshots from the concept of prereleases, which we do not
+      currently provide, but may add in the future.
 - Github actions will release a new version with the latest sha each time you push to the snapshot branch.
 
 ### Using a snapshot branch
 
-- Install the snapshot branch for all relevant packages using the `snapshot-NAME` tag (e.g. `npm install  --save-exact @perses-dev/core@snapshot-theme-updates`). Recommend using `--save-exact` to avoid inconsistencies with how snapshot version names may match using `^`.
+- Install the snapshot branch for all relevant packages using the `snapshot-NAME` tag (
+  e.g. `npm install --save-exact @perses-dev/core@snapshot-theme-updates`). Recommend using `--save-exact` to avoid
+  inconsistencies with how snapshot version names may match using `^`.
 
 ### Removing a snapshot
 
 - Delete the branch.
-- Github actions will automatically remove the tag from npm. The version will still show up in the "version history" section of npm.
+- Github actions will automatically remove the tag from npm. The version will still show up in the "version history"
+  section of npm.

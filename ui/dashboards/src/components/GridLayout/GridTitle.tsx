@@ -19,6 +19,7 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import { InfoTooltip } from '@perses-dev/components';
 import { usePanelGroupActions, useEditMode, PanelGroupId, useDeletePanelGroupDialog } from '../../context';
 
 export interface GridTitleProps {
@@ -66,21 +67,38 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && (
             <Stack direction="row" marginLeft="auto">
-              <IconButton aria-label={`add panel to group ${title}`} onClick={openAddPanel}>
-                <AddPanelIcon />
-              </IconButton>
-              <IconButton aria-label={`edit group ${title}`} onClick={openEditPanelGroup}>
-                <PencilIcon />
-              </IconButton>
-              <IconButton aria-label={`delete group ${title}`} onClick={() => openDeletePanelGroupDialog(panelGroupId)}>
-                <DeleteIcon />
-              </IconButton>
-              <IconButton aria-label={`move group ${title} down`} disabled={moveDown === undefined} onClick={moveDown}>
-                <ArrowDownIcon />
-              </IconButton>
-              <IconButton aria-label={`move group ${title} up`} disabled={moveUp === undefined} onClick={moveUp}>
-                <ArrowUpIcon />
-              </IconButton>
+              <InfoTooltip description={`Add a new panel to ${title}`}>
+                <IconButton aria-label={`add panel to group ${title}`} onClick={openAddPanel}>
+                  <AddPanelIcon />
+                </IconButton>
+              </InfoTooltip>
+              <InfoTooltip description="Edit">
+                <IconButton aria-label={`edit group ${title}`} onClick={openEditPanelGroup}>
+                  <PencilIcon />
+                </IconButton>
+              </InfoTooltip>
+              <InfoTooltip description="Delete">
+                <IconButton
+                  aria-label={`delete group ${title}`}
+                  onClick={() => openDeletePanelGroupDialog(panelGroupId)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </InfoTooltip>
+              <InfoTooltip description="Move panel group down">
+                <IconButton
+                  aria-label={`move group ${title} down`}
+                  disabled={moveDown === undefined}
+                  onClick={moveDown}
+                >
+                  <ArrowDownIcon />
+                </IconButton>
+              </InfoTooltip>
+              <InfoTooltip description="Move panel group up">
+                <IconButton aria-label={`move group ${title} up`} disabled={moveUp === undefined} onClick={moveUp}>
+                  <ArrowUpIcon />
+                </IconButton>
+              </InfoTooltip>
             </Stack>
           )}
         </>

@@ -16,6 +16,32 @@ We are using GitHub as our main development and discussion forum.
 If you are unsure about what to do, and you are eager to contribute, you can reach us on the development
 channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) on [Matrix](https://matrix.org/).
 
+## Opening a PR
+
+To help during the release process, we created a script that generates the changelog based on the git history.
+
+To make it works correctly, commit or PR's title should follow the following naming convention:
+
+`[<catalog_entry>] <commit message>`
+
+where `catalog_entry` can be :
+
+- FEATURE
+- ENHANCEMENT
+- BUGFIX
+- BREAKINGCHANGE
+
+This catalog entry will indicate the purpose of your PR.
+
+In the usual workflow, all PRs are squashed. There is two exceptions to this rule:
+
+1. During the release process, the release branch is merge back in the `main` branch. To avoid to lose the commit
+   message that holds the tag, this kind of PR **MUST** be merged and not squashed.
+
+2. In case your PR contains multiple kind of changes (aka, feature, bugfix ..etc.) and you took care about having
+   different commit following the convention described above, then the PR will be merged and not squashed. Like that we
+   are preserving the works you did and the effort you made when creating meaningful commit. 
+
 ## Development
 
 This section explains how to build, launch, and start using Perses.

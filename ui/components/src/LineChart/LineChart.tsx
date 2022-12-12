@@ -18,7 +18,6 @@ import type {
   GridComponentOption,
   LineSeriesOption,
   LegendComponentOption,
-  VisualMapComponentOption,
   YAXisComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
@@ -33,16 +32,15 @@ import {
   ToolboxComponent,
   TooltipComponent,
   LegendComponent,
-  VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat } from '../model/graph';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { Tooltip } from '../Tooltip/Tooltip';
-import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 import { useTimeZone } from '../context/TimeZoneProvider';
+import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -55,7 +53,6 @@ use([
   ToolboxComponent,
   TooltipComponent,
   LegendComponent,
-  VisualMapComponent,
   CanvasRenderer,
 ]);
 
@@ -66,22 +63,11 @@ interface LineChartProps {
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
-  visualMap?: VisualMapComponentOption[];
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
 }
 
-export function LineChart({
-  height,
-  data,
-  yAxis,
-  unit,
-  grid,
-  legend,
-  visualMap,
-  onDataZoom,
-  onDoubleClick,
-}: LineChartProps) {
+export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom, onDoubleClick }: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -121,8 +107,6 @@ export function LineChart({
     enableDataZoom(chartRef.current);
   }
 
-  const handleOnClick = () => setPinTooltip((current) => !current);
-
   const handleOnDoubleClick = (e: MouseEvent) => {
     setPinTooltip(false);
     // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
@@ -135,29 +119,14 @@ export function LineChart({
     }
   };
 
-  const handleOnMouseDown = (e: MouseEvent) => {
-    // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
-    if (e.target instanceof HTMLCanvasElement) {
-      setShowTooltip(false);
-    }
-  };
-
-  const handleOnMouseUp = () => {
-    setShowTooltip(true);
-  };
-
-  const handleOnMouseEnter = () => {
-    setShowTooltip(true);
-  };
-
-  const handleOnMouseLeave = () => {
-    setShowTooltip(false);
-    setPinTooltip(false);
-  };
+  const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
-    if (data.timeSeries === null || data.timeSeries.length === 0) return chartsTheme.noDataOption;
+    if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
+
+    // show symbols and axisPointer dashed line on hover
+    const isOptimizedMode = data.timeSeries.length > OPTIMIZED_MODE_SERIES_LIMIT;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -176,11 +145,11 @@ export function LineChart({
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
-        show: true,
+        show: !isOptimizedMode,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
         axisPointer: {
-          type: 'line',
+          type: isOptimizedMode ? 'none' : 'line',
           z: 0, // ensure point symbol shows on top of dashed line
         },
       },
@@ -194,23 +163,37 @@ export function LineChart({
       },
       grid,
       legend,
-      visualMap,
     };
 
     return option;
-  }, [data, yAxis, grid, legend, visualMap, timeZone]);
+  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone]);
 
   return (
     <Box
-      sx={{
-        height,
+      sx={{ height }}
+      onClick={() => {
+        setPinTooltip((current) => !current);
       }}
-      onClick={handleOnClick}
+      onMouseDown={(e) => {
+        // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
+        if (e.target instanceof HTMLCanvasElement) {
+          setShowTooltip(false);
+        }
+      }}
+      onMouseUp={() => {
+        setShowTooltip(true);
+      }}
+      onMouseLeave={() => {
+        setShowTooltip(false);
+        setPinTooltip(false);
+      }}
+      onMouseEnter={() => {
+        setShowTooltip(true);
+        if (chartRef.current !== undefined) {
+          enableDataZoom(chartRef.current);
+        }
+      }}
       onDoubleClick={handleOnDoubleClick}
-      onMouseDown={handleOnMouseDown}
-      onMouseUp={handleOnMouseUp}
-      onMouseLeave={handleOnMouseLeave}
-      onMouseEnter={handleOnMouseEnter}
     >
       {showTooltip === true && (
         <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit}></Tooltip>

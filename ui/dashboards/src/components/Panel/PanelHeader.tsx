@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { CardHeader, Typography, Stack, IconButton, CardHeaderProps, styled } from '@mui/material';
-import { InfoTooltip, TooltipPlacement, combineSx } from '@perses-dev/components';
+import { InfoTooltip, combineSx } from '@perses-dev/components';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -35,30 +35,37 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
 
-  let action: CardHeaderProps['action'] = undefined;
+  let actions: CardHeaderProps['action'] = undefined;
   if (editHandlers !== undefined) {
     // If there are edit handlers, always just show the edit buttons
-    action = (
-      <Stack direction="row" spacing={0.5} alignItems="center">
-        <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
-          <PencilIcon />
-        </HeaderIconButton>
-        <HeaderIconButton aria-label={`delete panel ${title}`} size="small" onClick={editHandlers.onDeletePanelClick}>
-          <DeleteIcon />
-        </HeaderIconButton>
-        <HeaderIconButton aria-label={`move panel ${title}`} size="small">
-          <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} />
-        </HeaderIconButton>
-      </Stack>
+    actions = (
+      <>
+        <InfoTooltip description="Edit">
+          <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
+            <PencilIcon fontSize="inherit" />
+          </HeaderIconButton>
+        </InfoTooltip>
+        <InfoTooltip description="Delete">
+          <HeaderIconButton aria-label={`delete panel ${title}`} size="small" onClick={editHandlers.onDeletePanelClick}>
+            <DeleteIcon fontSize="inherit" />
+          </HeaderIconButton>
+        </InfoTooltip>
+        <InfoTooltip description="Drag and drop panel to reorganize">
+          <HeaderIconButton aria-label={`move panel ${title}`} size="small">
+            <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
+          </HeaderIconButton>
+        </InfoTooltip>
+      </>
     );
   } else if (description !== undefined && isHovered) {
     // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
-    action = (
-      <InfoTooltip id={descriptionTooltipId} description={description} placement={TooltipPlacement.Bottom}>
-        <HeaderIconButton aria-label="Panel Description">
+    actions = (
+      <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
+        <HeaderIconButton aria-label="Panel Description" size="small">
           <InformationOutlineIcon
             aria-describedby="info-tooltip"
             aria-hidden={false}
+            fontSize="inherit"
             sx={{ color: (theme) => theme.palette.grey[700] }}
           />
         </HeaderIconButton>
@@ -90,13 +97,24 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
           {title}
         </Typography>
       }
-      action={action}
+      action={
+        <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
+          {actions}
+        </HeaderActionWrapper>
+      }
       sx={combineSx(
         (theme) => ({
           padding: theme.spacing(1),
           borderBottom: `solid 1px ${theme.palette.divider}`,
           '.MuiCardHeader-content': {
             overflow: 'hidden',
+          },
+          '.MuiCardHeader-action': {
+            // Overriding the negative margins from MUI's defaults, so we
+            // can vertically center the icons. Moving these values to a wrapper
+            // inside the action in `HeaderActionWrapper` below.
+            // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/CardHeader/CardHeader.js#L56-L58
+            margin: 'auto',
           },
         }),
         sx
@@ -109,4 +127,13 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
 const HeaderIconButton = styled(IconButton)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   padding: '4px',
+}));
+
+const HeaderActionWrapper = styled(Stack)(() => ({
+  // Adding back the negative margins from MUI's defaults for actions, so we
+  // avoid increasing the header size when actions are present while also being
+  // able to vertically center the actions.
+  // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/CardHeader/CardHeader.js#L56-L58
+  marginTop: -4,
+  marginBottom: -4,
 }));
