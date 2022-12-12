@@ -59,5 +59,5 @@ export function useListDatasources(datasourcePluginKind: string) {
  */
 export function useDatasourceClient<Client>(selector: DatasourceSelector) {
   const store = useDatasourceStore();
-  return useQuery<Client>(['getDatasourceClient', selector], () => store.getDatasourceClient(selector) as Client);
+  return useQuery<Client>(['getDatasourceClient', selector], () => store.getDatasourceClient<Client>(selector));
 }
