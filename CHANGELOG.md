@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.21.1 / 2022-12-12
+
+- [BUGFIX] Fix extracted changelog file name (#868)
+
 ## 0.21.0 / 2022-12-12
 
 - [FEATURE] Add new endpoints to validate dashboard and datasource (#860)
