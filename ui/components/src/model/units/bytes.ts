@@ -35,27 +35,29 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
 
 // https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript/18650828#18650828
 export function formatBytes(bytes: number, unitOptions: BytesUnitOptions) {
+  if (bytes === 0) return '0 Bytes';
+
   // default to full 'Bytes' formatting
   const options = unitOptions.abbreviate === undefined ? { ...unitOptions, abbreviate: false } : unitOptions;
 
-  if (bytes === 0) return '0 Bytes';
-
   let decimals = options.decimal_places ?? DEFAULT_DECIMAL_PLACES;
-  // avoids minimumFractionDigits value is out of range error
+  // avoids minimumFractionDigits value is out of range error, possible values are 0 to 20
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
   if (decimals < 0) {
     decimals = 0;
-  } else if (decimals > 100) {
-    decimals = 100;
+  } else if (decimals > 20) {
+    decimals = 20;
   }
 
+  const formatParams: Intl.NumberFormatOptions = {
+    style: 'decimal',
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+    useGrouping: true,
+  };
+  const formatter = new Intl.NumberFormat('en-US', formatParams);
+
   if (options.abbreviate === false) {
-    const formatParams: Intl.NumberFormatOptions = {
-      style: 'decimal',
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-      useGrouping: true,
-    };
-    const formatter = new Intl.NumberFormat('en-US', formatParams);
     return `${formatter.format(bytes)} Bytes`;
   }
 
@@ -66,5 +68,6 @@ export function formatBytes(bytes: number, unitOptions: BytesUnitOptions) {
   // Why? When the number of bytes are between -1 and 1, Math.floor(Math.log(bytes)/Math.log(1024)) returns -1.
   const i = Math.max(0, Math.floor(Math.log(bytes) / Math.log(k)));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+  const abbreviatedValue = bytes / Math.pow(k, i);
+  return `${formatter.format(abbreviatedValue)} ${sizes[i]}`;
 }
