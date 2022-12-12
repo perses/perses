@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { BytesUnitOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG, formatBytes } from './bytes';
-import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { DecimalUnitOptions, DECIMAL_UNIT_CONFIG, formatDecimal, PERCENT_GROUP_CONFIG } from './decimal';
 import { DECIMAL_GROUP_CONFIG, formatPercent, PercentUnitOptions, PERCENT_UNIT_CONFIG } from './percent';
 import { formatTime, TimeUnitOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
@@ -54,8 +53,7 @@ export function formatValue(value: number, unitOptions?: UnitOptions): string {
   }
 
   if (isBytesUnit(unitOptions)) {
-    const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
-    return formatBytes(value, decimals);
+    return formatBytes(value, unitOptions);
   }
 
   const exhaustive: never = unitOptions;
