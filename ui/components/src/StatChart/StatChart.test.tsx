@@ -59,7 +59,7 @@ describe('StatChart', () => {
       kind: 'Bytes',
     };
     renderChart(unit);
-    expect(screen.getByText('7.73 Bytes')).toBeInTheDocument();
+    expect(screen.getByText('7.73 bytes')).toBeInTheDocument();
   });
 
   it('show value with seconds time unit formatting', () => {

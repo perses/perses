@@ -43,12 +43,12 @@ describe('formatValue()', () => {
     {
       value: 100,
       unit: { kind: 'Bytes', decimal_places: 0, abbreviate: false },
-      expected: '100 Bytes',
+      expected: '100 bytes',
     },
     {
       value: 100,
       unit: { kind: 'Bytes', decimal_places: -1, abbreviate: false },
-      expected: '100 Bytes',
+      expected: '100 bytes',
     },
     {
       value: 225000,
@@ -58,7 +58,7 @@ describe('formatValue()', () => {
     {
       value: 505200,
       unit: { kind: 'Bytes' },
-      expected: '505,200.00 Bytes',
+      expected: '505,200.00 bytes',
     },
     {
       value: 8000,
