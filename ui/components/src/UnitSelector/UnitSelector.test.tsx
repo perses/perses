@@ -179,7 +179,7 @@ describe('UnitSelector', () => {
       expect(getDecimalSelector()).toBeEnabled();
     });
 
-    it('does not allow the user to set abbreviate', () => {
+    it('allows the user to set abbreviate', () => {
       renderUnitSelector({ kind: 'Bytes' });
       expect(getAbbreviateSwitch()).toBeEnabled();
     });
