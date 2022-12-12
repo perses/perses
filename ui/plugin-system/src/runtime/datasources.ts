@@ -55,7 +55,7 @@ export function useListDatasources(datasourcePluginKind: string) {
 }
 
 /**
- * Provides a convience hook for getting a DatasourceClient for a given DatasourceSelector.
+ * Provides a convenience hook for getting a DatasourceClient for a given DatasourceSelector.
  */
 export function useDatasourceClient<Client>(selector: DatasourceSelector) {
   const store = useDatasourceStore();

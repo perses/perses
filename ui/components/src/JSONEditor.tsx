@@ -47,8 +47,9 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
           if (props.onChange !== undefined) {
             props.onChange(json);
           }
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch (e) {
+          // ignore this error
+        }
       }}
     />
   );
