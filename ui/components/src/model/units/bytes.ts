@@ -33,7 +33,10 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
   },
 };
 
-// https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript/18650828#18650828
+/**
+ * Format value as bytes, use abbreviate option for more readable sizes (KB, MB, GB, etc.)
+ * https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript/18650828#18650828
+ */
 export function formatBytes(bytes: number, unitOptions: BytesUnitOptions) {
   if (bytes === 0) return '0 Bytes';
 
@@ -67,7 +70,6 @@ export function formatBytes(bytes: number, unitOptions: BytesUnitOptions) {
   // Math.max(0, ...) ensures that we don't return -1 as a value for the index.
   // Why? When the number of bytes are between -1 and 1, Math.floor(Math.log(bytes)/Math.log(1024)) returns -1.
   const i = Math.max(0, Math.floor(Math.log(bytes) / Math.log(k)));
-
   const abbreviatedValue = bytes / Math.pow(k, i);
   return `${formatter.format(abbreviatedValue)} ${sizes[i]}`;
 }
