@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.21.0 / 2022-12-12
+
+- [FEATURE] Add new endpoints to validate dashboard and datasource (#860)
+- [FEATURE] Persist dashboard modification when clicking on save button (#827)
+- [FEATURE] gauge panel multiple time series support (#805)
+- [FEATURE] Add tooltips to icons in panel and panel group header (#855)
+- [FEATURE] Discard Changes Confirmation Dialog (#834)
+- [ENHANCEMENT] Bytes unit default changed to unabbreviated (#847)
+- [ENHANCEMENT] visual options and reset btn ux feedback (#850)
+- [ENHANCEMENT] legend options editor UX improvements (#845)
+- [ENHANCEMENT] Make it possible to adjust the height of the time range controls (#829)
+- [ENHANCEMENT] Variable UX fixes (#842)
+- [BUGFIX] show variables when not in edit mode (#866)
+- [BUGFIX] add back optimized mode to LineChart (#865)
+- [BUGFIX] Decrease size of icons in panel headers (#861)
+- [BUGFIX] reset btn dark mode font color (#858)
+- [BUGFIX] Fix the way to write file when using the filesystem as a database (#856)
+- [BUGFIX] enable data zoom on hover (#851)
+- [BREAKINGCHANGE] legend.position now required in time series panel (#848)
+
+[//]: <UNKNOWN ENTRIES. Release shepherd, please review the following list and categorize them or remove them>
+
+- [UNKNOWN] update VERSION to 0.21.0
+- [UNKNOWN] remove unreleased section with PRs 840, 825, 842
+- [UNKNOWN] Bump github.com/prometheus/common from 0.37.0 to 0.38.0 (#864)
+- [UNKNOWN] Bump github.com/gavv/httpexpect/v2 from 2.6.1 to 2.8.0 (#863)
+- [UNKNOWN] Bump github.com/prometheus/promu from 0.13.0 to 0.14.0 (#862)
+- [UNKNOWN] Update query editor collapse/expand chevrons to match the rest of the dashboard (#854)
+- [UNKNOWN] fix LineChart timeZone warnings, clean up unused props / types (#849)
+- [UNKNOWN] Support snapshot UI releases (#844)
+- [UNKNOWN] Use exact versions for internal npm dependencies (#846)
+- [UNKNOWN] Use 24hr time formatting in tooltip (#840)
+- [UNKNOWN] Update package lock (#841)
+- [UNKNOWN] Introduce TimeZoneProvider for specifying a timezone other than browser/local (#825)
+
 ## 0.20.0 / 2022-12-05
 
 - [ENHANCEMENT] Allow `decimal_places` to be used with time units #837
