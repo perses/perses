@@ -35,7 +35,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat } from '../model/graph';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { Tooltip } from '../Tooltip/Tooltip';
@@ -125,6 +125,9 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
     if (data.timeSeries === undefined) return {};
     if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
 
+    // show symbols and axisPointer dashed line on hover
+    const isOptimizedMode = data.timeSeries.length > OPTIMIZED_MODE_SERIES_LIMIT;
+
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
     const option: EChartsCoreOption = {
@@ -142,11 +145,11 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
-        show: true,
+        show: !isOptimizedMode,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
         axisPointer: {
-          type: 'line',
+          type: isOptimizedMode ? 'none' : 'line',
           z: 0, // ensure point symbol shows on top of dashed line
         },
       },
