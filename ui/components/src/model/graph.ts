@@ -30,7 +30,7 @@ export type EChartsValues = number | null | '-';
 
 export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
   // TODO: support dataset and both category / time xAxis types
-  data: Iterable<GraphSeriesValueTuple> | EChartsValues[];
+  data: EChartsValues[];
 }
 
 export type EChartsDataFormat = {
@@ -45,7 +45,7 @@ export type EChartsDataFormat = {
  * Supported legend options
  */
 export interface LegendOptions {
-  position?: 'bottom' | 'right';
+  position: 'bottom' | 'right';
 }
 
 export interface LegendItem {
@@ -55,3 +55,9 @@ export interface LegendItem {
   color: string;
   onClick: MouseEventHandler<HTMLLIElement>;
 }
+
+export const DEFAULT_LEGEND_POSITION = 'bottom';
+
+export const DEFAULT_LEGEND: LegendOptions = {
+  position: DEFAULT_LEGEND_POSITION,
+};

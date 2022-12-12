@@ -65,9 +65,9 @@ describe('convertThresholds', () => {
       ],
     };
     const bytesOutput = [
-      [0.8, 'rgba(115, 191, 105, 1)'],
-      [0.9, 'rgba(253, 126, 20, 0.9)'],
-      [1, 'rgba(220, 53, 69, 1)'],
+      [0.8, 'rgba(47, 191, 114, 1)'],
+      [0.9, 'rgba(255, 159, 28, 0.9)'],
+      [1, 'rgba(234, 71, 71, 1)'],
     ];
     expect(convertThresholds(bytesInput, { kind: 'Bytes' }, 10000)).toEqual(bytesOutput);
   });

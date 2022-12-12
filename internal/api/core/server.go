@@ -25,6 +25,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
+	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
 )
@@ -52,6 +53,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) e
 	apiEndpoints := []endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(cfg.Schemas),
+		validateendpoint.New(serviceManager.GetSchemas()),
 	}
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,

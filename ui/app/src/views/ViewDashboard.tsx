@@ -16,11 +16,13 @@ import { useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
+import { DashboardResource } from '@perses-dev/core';
 import { bundledPluginLoader } from '../model/bundled-plugins';
-import { useDashboard } from '../model/dashboard-client';
+import { updateDashboard, useDashboard } from '../model/dashboard-client';
 import { useDatasourceApi } from '../model/datasource-api';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 import { useIsReadonly } from '../model/config-client';
+import { useSnackbar } from '../context/SnackbarProvider';
 
 /**
  * The View for viewing a Dashboard.
@@ -34,6 +36,18 @@ function ViewDashboard() {
 
   const datasourceApi = useDatasourceApi();
   const { data, isLoading } = useDashboard(projectName, dashboardName);
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const dashboardUpdatePromise = (data: DashboardResource) => {
+    return updateDashboard(data)
+      .then((updatedDashboard) => {
+        successSnackbar(`dashboard ${updatedDashboard.metadata.name} is successfully updated`);
+        return updatedDashboard;
+      })
+      .catch((err) => {
+        exceptionSnackbar(err);
+        throw err;
+      });
+  };
   const isReadonly = useIsReadonly();
   if (isLoading) return null;
 
@@ -64,6 +78,7 @@ function ViewDashboard() {
                   dashboardProject={data.metadata.project}
                 />
               }
+              onSave={dashboardUpdatePromise}
               initialVariableIsSticky={true}
               isReadonly={isReadonly}
             />

@@ -17,16 +17,17 @@ import { useDeepMemo } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
-import { LineChart, EChartsDataFormat, ZoomEventData, Legend, YAxisLabel } from '@perses-dev/components';
+import {
+  DEFAULT_LEGEND,
+  LineChart,
+  EChartsDataFormat,
+  ZoomEventData,
+  Legend,
+  YAxisLabel,
+} from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_LEGEND,
-  DEFAULT_UNIT,
-  DEFAULT_VISUAL,
-  DEFAULT_Y_AXIS,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,

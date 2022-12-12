@@ -13,12 +13,16 @@
 
 import type { GaugeSeriesOption } from 'echarts';
 import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
-import { GaugeChart, GaugeChartData } from '@perses-dev/components';
-import { Skeleton } from '@mui/material';
+import { GaugeChart, GaugeSeries } from '@perses-dev/components';
+import { Box, Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
 import { useSuggestedStepMs } from '../../model/time';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
+
+const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
+const GAUGE_MIN_WIDTH = 90;
+const PANEL_PADDING_OFFSET = 20;
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
@@ -32,23 +36,27 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
   const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
 
-  const chartData: GaugeChartData = useMemo(() => {
-    if (data === undefined) return undefined;
-
-    const series = Array.from(data.series)[0];
-    if (series === undefined) return undefined;
-
-    const calculate = CalculationsMap[calculation];
-    const value = calculate(Array.from(series.values));
-    if (value === undefined) return null;
-
-    return value;
+  const gaugeData: GaugeSeries[] = useMemo(() => {
+    if (data === undefined) {
+      return [];
+    }
+    const seriesData: GaugeSeries[] = [];
+    for (const timeSeries of data.series) {
+      const calculate = CalculationsMap[calculation];
+      const series = {
+        value: calculate(Array.from(timeSeries.values)),
+        label: timeSeries.formattedName ?? '',
+      };
+      seriesData.push(series);
+    }
+    return seriesData;
   }, [data, calculation]);
 
   if (error) throw error;
 
   if (contentDimensions === undefined) return null;
 
+  // TODO: remove Skeleton, add loading state to match mockups
   if (isLoading === true) {
     return (
       <Skeleton
@@ -78,14 +86,52 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     },
   };
 
+  // no data message handled inside chart component
+  if (gaugeData.length === 0) {
+    return (
+      <GaugeChart
+        width={contentDimensions.width}
+        height={contentDimensions.height}
+        data={EMPTY_GAUGE_SERIES}
+        unit={unit}
+        axisLine={axisLine}
+        max={thresholdMax}
+      />
+    );
+  }
+
+  // accounts for showing a separate chart for each time series
+  let chartWidth = contentDimensions.width / gaugeData.length - PANEL_PADDING_OFFSET;
+  if (chartWidth < GAUGE_MIN_WIDTH && gaugeData.length > 1) {
+    // enables horizontal scroll when charts overflow outside of panel
+    chartWidth = GAUGE_MIN_WIDTH;
+  }
+
   return (
-    <GaugeChart
-      width={contentDimensions.width}
-      height={contentDimensions.height}
-      data={chartData}
-      unit={unit}
-      axisLine={axisLine}
-      max={thresholdMax}
-    />
+    <Stack
+      direction="row"
+      spacing={2}
+      justifyContent="left"
+      alignItems="center"
+      sx={{
+        // so scrollbar only shows when necessary
+        overflowX: gaugeData.length > 1 ? 'scroll' : 'auto',
+      }}
+    >
+      {gaugeData.map((series, seriesIndex) => {
+        return (
+          <Box key={`gauge-series-${seriesIndex}`}>
+            <GaugeChart
+              width={chartWidth}
+              height={contentDimensions.height}
+              data={series}
+              unit={unit}
+              axisLine={axisLine}
+              max={thresholdMax}
+            />
+          </Box>
+        );
+      })}
+    </Stack>
   );
 }

@@ -77,20 +77,11 @@ func (d *fileDAO) Upsert(key string, entity interface{}) error {
 	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {
 		return err
 	}
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
+	data, err := d.marshal(entity)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	var data []byte
-	data, err = d.marshal(entity)
-	if err != nil {
-		return err
-	}
-	if _, err := file.Write(data); err != nil {
-		return err
-	}
-	return file.Sync()
+	return os.WriteFile(filePath, data, 0600)
 }
 func (d *fileDAO) Get(key string, entity interface{}) error {
 	filePath := d.buildPath(key)

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { useDeepMemo } from '@perses-dev/core';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
@@ -22,12 +22,22 @@ import { EChart } from '../EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
-export type GaugeChartData = number | null | undefined;
+const PROGRESS_WIDTH = 16;
+
+// adjusts when to show pointer icon
+const GAUGE_SMALL_BREAKPOINT = 170;
+
+export type GaugeChartValue = number | null | undefined;
+
+export type GaugeSeries = {
+  value: GaugeChartValue;
+  label: string;
+};
 
 interface GaugeChartProps {
   width: number;
   height: number;
-  data: GaugeChartData;
+  data: GaugeSeries;
   unit: UnitOptions;
   axisLine: GaugeSeriesOption['axisLine'];
   max?: number;
@@ -35,13 +45,15 @@ interface GaugeChartProps {
 
 export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine, max } = props;
-
   const chartsTheme = useChartsTheme();
 
-  const option: EChartsCoreOption = useMemo(() => {
-    if (data === null || data === undefined) return chartsTheme.noDataOption;
+  // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
+  const option: EChartsCoreOption = useDeepMemo(() => {
+    if (data.value === undefined || data.value === null) return chartsTheme.noDataOption;
 
-    const calculatedValue = data;
+    // adjusts fontSize depending on number of characters
+    const valueSizeClamp = getResponsiveValueSize(data.value, unit, width, height);
+
     return {
       title: {
         show: false,
@@ -61,7 +73,7 @@ export function GaugeChart(props: GaugeChartProps) {
           silent: true,
           progress: {
             show: true,
-            width: 22,
+            width: PROGRESS_WIDTH,
             itemStyle: {
               color: 'auto',
             },
@@ -72,7 +84,7 @@ export function GaugeChart(props: GaugeChartProps) {
           axisLine: {
             lineStyle: {
               color: [[1, '#e1e5e9']], // TODO (sjcobb): use future chart theme colors
-              width: 22,
+              width: PROGRESS_WIDTH,
             },
           },
           axisTick: {
@@ -80,7 +92,7 @@ export function GaugeChart(props: GaugeChartProps) {
             distance: 0,
           },
           splitLine: {
-            show: true,
+            show: false,
           },
           axisLabel: {
             show: false,
@@ -99,7 +111,7 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           data: [
             {
-              value: calculatedValue,
+              value: data.value,
             },
           ],
         },
@@ -112,7 +124,12 @@ export function GaugeChart(props: GaugeChartProps) {
           min: 0,
           max,
           pointer: {
-            show: false,
+            show: true,
+            // pointer hidden for small panels, path taken from ex: https://echarts.apache.org/examples/en/editor.html?c=gauge-grade
+            icon: width > GAUGE_SMALL_BREAKPOINT ? 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z' : 'none',
+            length: 10,
+            width: 5,
+            offsetCenter: [0, '-49%'],
             itemStyle: {
               color: 'auto',
             },
@@ -132,7 +149,8 @@ export function GaugeChart(props: GaugeChartProps) {
             width: '60%',
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
-            color: 'inherit',
+            color: 'inherit', // allows value color to match active threshold color
+            fontSize: valueSizeClamp,
             formatter: (value: number) => {
               return formatValue(value, {
                 kind: unit.kind,
@@ -142,13 +160,24 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           data: [
             {
-              value: calculatedValue,
+              value: data.value,
+              name: data.label,
+              // TODO: new UX for series names, create separate React component or reuse ListLegendItem
+              // https://echarts.apache.org/en/option.html#series-gauge.data.title
+              title: {
+                show: true,
+                color: chartsTheme.echartsTheme.textStyle?.color ?? 'inherit', // series name font color
+                offsetCenter: [0, '55%'],
+                overflow: 'truncate',
+                fontSize: 12,
+                width: width * 0.8,
+              },
             },
           ],
         },
       ],
     };
-  }, [data, chartsTheme, unit, axisLine, max]);
+  }, [data, width, height, chartsTheme, unit, axisLine, max]);
 
   return (
     <EChart
@@ -160,4 +189,21 @@ export function GaugeChart(props: GaugeChartProps) {
       theme={chartsTheme.echartsTheme}
     />
   );
+}
+
+/**
+ * Responsive font size depending on number of characters, clamp used
+ * to ensure size stays within given range
+ */
+export function getResponsiveValueSize(value: number, unit: UnitOptions, width: number, height: number) {
+  const MIN_SIZE = 3;
+  const MAX_SIZE = 24;
+  const SIZE_MULTIPLIER = 0.7;
+  const formattedValue = formatValue(value, {
+    kind: unit.kind,
+    decimal_places: 0,
+  });
+  const valueCharacters = formattedValue.length ?? 2;
+  const valueSize = (Math.min(width, height) / valueCharacters) * SIZE_MULTIPLIER;
+  return `clamp(${MIN_SIZE}px, ${valueSize}px, ${MAX_SIZE}px)`;
 }

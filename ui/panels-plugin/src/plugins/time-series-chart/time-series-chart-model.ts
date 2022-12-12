@@ -41,18 +41,6 @@ export type VisualOptions = {
   line_width?: number;
 };
 
-export const DEFAULT_LEGEND: LegendOptions = {
-  position: 'bottom',
-};
-
-export const LEGEND_POSITIONS = ['bottom', 'right'] as const;
-
-export type LegendPosition = typeof LEGEND_POSITIONS[number];
-
-export type LegendPositionOptions = {
-  position: LegendPosition;
-};
-
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
   decimal_places: 2,
@@ -72,14 +60,16 @@ export const VISUAL_CONFIG = {
   line_width: {
     label: 'Line Width',
     testId: 'slider-line-width',
-    min: 0.5,
-    max: 4,
+    min: 0.25,
+    max: 3,
+    step: 0.25,
   },
   point_radius: {
     label: 'Point Radius',
     testId: 'slider-point-radius',
     min: 0,
-    max: 8,
+    max: 6,
+    step: 0.25,
   },
 };
 

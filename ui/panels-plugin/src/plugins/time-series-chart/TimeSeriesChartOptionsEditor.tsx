@@ -18,7 +18,7 @@ import { JSONEditor } from '@perses-dev/components';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
-import ChevronUp from 'mdi-material-ui/ChevronUp';
+import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs } from '@perses-dev/plugin-system';
 import { TimeSeriesChartOptions } from './time-series-chart-model';
@@ -107,7 +107,7 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
                     borderColor={(theme) => theme.palette.divider}
                   >
                     <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
-                      {queriesCollapsed[i] ? <ChevronUp /> : <ChevronDown />}
+                      {queriesCollapsed[i] ? <ChevronRight /> : <ChevronDown />}
                     </IconButton>
                     <Typography variant="overline" component="h4">
                       Query {i + 1}

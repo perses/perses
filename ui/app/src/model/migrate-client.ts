@@ -14,6 +14,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { DashboardResource, fetchJson } from '@perses-dev/core';
 import buildURL from './url-builder';
+import { HTTPHeader, HTTPMethodPOST } from './http';
 
 const resource = 'migrate';
 
@@ -28,10 +29,8 @@ export function useMigrate() {
     mutationFn: (body) => {
       const url = buildURL({ apiPrefix: '/api', resource: resource });
       return fetchJson<DashboardResource>(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: HTTPMethodPOST,
+        headers: HTTPHeader,
         body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafana_dashboard": ${
           body.grafana_dashboard
         }}`,
