@@ -67,12 +67,11 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
       >
         <Box display={'flex'} justifyContent="space-between" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
           <Stack direction="row" spacing={1}>
-            {isEditMode &&
-              variableDefinitions.map((v) => (
-                <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>
-                  <TemplateVariable key={v.spec.name} name={v.spec.name} />
-                </Box>
-              ))}
+            {variableDefinitions.map((v) => (
+              <Box key={v.spec.name} display={v.spec.display?.hidden ? 'none' : undefined}>
+                <TemplateVariable key={v.spec.name} name={v.spec.name} />
+              </Box>
+            ))}
           </Stack>
           {props.initialVariableIsSticky && (
             <IconButton onClick={() => setIsPin(!isPin)}>{isPin ? <PinOutline /> : <PinOffOutline />}</IconButton>
