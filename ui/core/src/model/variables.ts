@@ -23,7 +23,6 @@ interface VariableSpec {
   display?: Display & {
     hidden?: boolean;
   };
-  default_value?: VariableValue;
 }
 
 export interface TextVariableDefinition extends Definition<TextVariableSpec> {
@@ -39,6 +38,7 @@ export interface ListVariableDefinition<PluginSpec = UnknownSpec> extends Defini
 }
 
 export interface ListVariableSpec<PluginSpec> extends VariableSpec {
+  default_value?: VariableValue;
   allow_multiple?: boolean;
   allow_all_value?: boolean;
   custom_all_value?: string;
