@@ -33,6 +33,7 @@ export function Legend({ width, height, options, data }: LegendProps) {
           position: 'absolute',
           top: 0,
           right: 0,
+          overflowX: 'hidden',
           overflowY: 'scroll',
         }}
       >
