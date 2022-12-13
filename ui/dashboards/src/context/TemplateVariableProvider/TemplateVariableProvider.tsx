@@ -210,22 +210,22 @@ export function TemplateVariableProvider({
 
 /** Helpers */
 
-function hydrateTemplateVariableState(definition: VariableDefinition, initialValue?: VariableValue) {
-  const v = definition;
+function hydrateTemplateVariableState(variable: VariableDefinition, initialValue?: VariableValue) {
   const varState: VariableState = {
-    value: initialValue ?? v.spec.default_value ?? null,
+    value: null,
     loading: false,
   };
-  switch (v.kind) {
+  switch (variable.kind) {
     case 'TextVariable':
-      varState.value = initialValue ?? v.spec.value;
+      varState.value = initialValue ?? variable.spec.value;
       break;
     case 'ListVariable':
       varState.options = [];
+      varState.value = initialValue ?? variable.spec.default_value ?? null;
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {
-          varState.value = v.spec.allow_multiple ? [firstOptionValue] : firstOptionValue;
+          varState.value = variable.spec.allow_multiple ? [firstOptionValue] : firstOptionValue;
         }
       }
       break;

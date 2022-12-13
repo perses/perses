@@ -81,11 +81,8 @@ type VariableDisplay struct {
 }
 
 type CommonVariableSpec struct {
-	Name string `json:"name" yaml:"name"`
-	// TODO default value should be moved to the VariableList and be a string or an array of string
-	// TODO to be aligned with the front end
-	DefaultValue string           `json:"default_value,omitempty" yaml:"default_value,omitempty"`
-	Display      *VariableDisplay `json:"display,omitempty" yaml:"display,omitempty"`
+	Name    string           `json:"name" yaml:"name"`
+	Display *VariableDisplay `json:"display,omitempty" yaml:"display,omitempty"`
 }
 
 type TextVariableSpec struct {
@@ -140,8 +137,11 @@ func (v *TextVariableSpec) validate() error {
 type ListVariableSpec struct {
 	VariableSpec       `json:"-" yaml:"-"`
 	CommonVariableSpec `json:",inline" yaml:",inline"`
-	AllowAllValue      bool `json:"allow_all_value" yaml:"allow_all_value"`
-	AllowMultiple      bool `json:"allow_multiple" yaml:"allow_multiple"`
+	// TODO default value should be a string or an array of string
+	// TODO to be aligned with the front end
+	DefaultValue  string `json:"default_value,omitempty" yaml:"default_value,omitempty"`
+	AllowAllValue bool   `json:"allow_all_value" yaml:"allow_all_value"`
+	AllowMultiple bool   `json:"allow_multiple" yaml:"allow_multiple"`
 	// CustomAllValue is a custom value that will be used if AllowAllValue is true and if then `all` is selected
 	CustomAllValue string `json:"custom_all_value,omitempty" yaml:"custom_all_value,omitempty"`
 	// CapturingRegexp is the regexp used to catch and filter the result of the query.
