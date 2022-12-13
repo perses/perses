@@ -165,6 +165,20 @@ func (v *DefaultVariableValue) UnmarshalYAML(unmarshal func(interface{}) error) 
 	return nil
 }
 
+func (v *DefaultVariableValue) MarshalJSON() ([]byte, error) {
+	if len(v.SingleValue) > 0 {
+		return json.Marshal(v.SingleValue)
+	}
+	return json.Marshal(v.SliceValues)
+}
+
+func (v *DefaultVariableValue) MarshalYAML() (interface{}, error) {
+	if len(v.SingleValue) > 0 {
+		return v.SingleValue, nil
+	}
+	return v.SliceValues, nil
+}
+
 type ListVariableSpec struct {
 	VariableSpec       `json:"-" yaml:"-"`
 	CommonVariableSpec `json:",inline" yaml:",inline"`
