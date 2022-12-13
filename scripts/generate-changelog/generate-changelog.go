@@ -108,6 +108,15 @@ func parseCatalogEntry(entry string) (kind, string) {
 	}
 }
 
+func ignoreEntry(entry string) bool {
+	lowerEntry := strings.ToLower(entry)
+	return strings.HasPrefix(lowerEntry, "merge branch") ||
+		strings.HasPrefix(lowerEntry, "merge pull request") ||
+		strings.HasPrefix(lowerEntry, "release") ||
+		strings.HasPrefix(lowerEntry, "sync release") ||
+		strings.HasPrefix(lowerEntry, "bump")
+}
+
 // parseAndFormatEntry will extract the commit message and detect what is the catalog entry
 func parseAndFormatEntry(entry string) (kind, string) {
 	// remove commit ID
@@ -125,11 +134,7 @@ func parseAndFormatEntry(entry string) (kind, string) {
 		return KindToBeIgnored, ""
 	} else if catalogKind == kindUnknown {
 		// list of exception that would make the commit ignored
-		lowerEntry := strings.ToLower(newEntry)
-		if strings.HasPrefix(lowerEntry, "merge branch") ||
-			strings.HasPrefix(lowerEntry, "merge pull request") ||
-			strings.HasPrefix(lowerEntry, "release") ||
-			strings.HasPrefix(lowerEntry, "sync release") {
+		if ignoreEntry(newEntry) {
 			return KindToBeIgnored, ""
 		}
 		return kindUnknown, newEntry

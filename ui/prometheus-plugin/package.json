@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/prometheus-plugin",
-  "version": "0.20.0",
+  "version": "0.21.1",
   "description": "Prometheus plugin for Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -31,8 +31,8 @@
     "@lezer/highlight": "^1.0.0",
     "@lezer/lr": "^1.2.0",
     "@perses-dev/components": "0.20.0",
-    "@perses-dev/core": "0.20.0",
-    "@perses-dev/plugin-system": "0.20.0",
+    "@perses-dev/core": "0.21.1",
+    "@perses-dev/plugin-system": "0.21.1",
     "@prometheus-io/codemirror-promql": "^0.40.5",
     "@prometheus-io/lezer-promql": "^0.37.0",
     "@uiw/react-codemirror": "^4.19.1",
