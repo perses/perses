@@ -213,13 +213,11 @@ func (v *ListVariableSpec) validate() error {
 	if err := common.ValidateID(v.Name); err != nil {
 		return err
 	}
-	if !v.AllowAllValue {
-		if len(v.CustomAllValue) > 0 {
-			return fmt.Errorf("custom_all_value cannot be set if allow_all_value is not set to true")
-		}
-		if v.DefaultValue != nil && len(v.DefaultValue.SliceValues) > 0 {
-			return fmt.Errorf("you can not use a list of default values if allow_multiple is set to false")
-		}
+	if len(v.CustomAllValue) > 0 && !v.AllowAllValue {
+		return fmt.Errorf("custom_all_value cannot be set if allow_all_value is not set to true")
+	}
+	if v.DefaultValue != nil && len(v.DefaultValue.SliceValues) > 0 && !v.AllowMultiple {
+		return fmt.Errorf("you can not use a list of default values if allow_multiple is set to false")
 	}
 
 	return nil

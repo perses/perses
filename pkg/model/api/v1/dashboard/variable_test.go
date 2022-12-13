@@ -172,6 +172,100 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 				},
 			},
 		},
+		{
+			title: "default value as a single string",
+			jason: `
+{
+  "kind": "ListVariable",
+  "spec": {
+    "name": "MyList",
+    "display": {
+      "name": "my awesome variable"
+    },
+    "default_value": "default",
+    "plugin": {
+      "kind": "PrometheusLabelValuesVariable",
+      "spec": {
+        "label_name": "instance",
+        "matchers": [
+          "up"
+        ]
+      }
+    }
+  }
+}
+`,
+			result: &Variable{
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
+					},
+					DefaultValue: &DefaultVariableValue{SingleValue: "default"},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelValuesVariable",
+						Spec: map[string]interface{}{
+							"label_name": "instance",
+							"matchers":   []interface{}{"up"},
+						},
+					},
+				},
+			},
+		},
+		{
+			title: "default list of values",
+			jason: `
+{
+  "kind": "ListVariable",
+  "spec": {
+    "name": "MyList",
+    "display": {
+      "name": "my awesome variable"
+    },
+    "allow_multiple" : true,
+    "default_value": ["default1", "default2"],
+    "plugin": {
+      "kind": "PrometheusLabelValuesVariable",
+      "spec": {
+        "label_name": "instance",
+        "matchers": [
+          "up"
+        ]
+      }
+    }
+  }
+}
+`,
+			result: &Variable{
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
+					},
+					AllowMultiple: true,
+					DefaultValue:  &DefaultVariableValue{SliceValues: []string{"default1", "default2"}},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelValuesVariable",
+						Spec: map[string]interface{}{
+							"label_name": "instance",
+							"matchers":   []interface{}{"up"},
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -297,6 +391,88 @@ spec:
 							Hidden: false,
 						},
 					},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelValuesVariable",
+						Spec: map[interface{}]interface{}{
+							"label_name": "instance",
+							"matchers":   []interface{}{"up"},
+						},
+					},
+				},
+			},
+		},
+		{
+			title: "default value as a single string",
+			yamele: `
+kind: "ListVariable"
+spec:
+  name: "MyList"
+  display:
+    name: "my awesome variable"
+  default_value: "default"
+  plugin:
+    kind: "PrometheusLabelValuesVariable"
+    spec:
+      label_name: "instance"
+      matchers:
+        - "up"
+`,
+			result: &Variable{
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
+					},
+					DefaultValue: &DefaultVariableValue{SingleValue: "default"},
+					Plugin: common.Plugin{
+						Kind: "PrometheusLabelValuesVariable",
+						Spec: map[interface{}]interface{}{
+							"label_name": "instance",
+							"matchers":   []interface{}{"up"},
+						},
+					},
+				},
+			},
+		},
+		{
+			title: "default list of values",
+			yamele: `
+kind: "ListVariable"
+spec:
+  name: "MyList"
+  display:
+    name: "my awesome variable"
+  allow_multiple: true
+  default_value:
+    - "default1"
+    - "default2"
+  plugin:
+    kind: "PrometheusLabelValuesVariable"
+    spec:
+      label_name: "instance"
+      matchers:
+        - "up"
+`,
+			result: &Variable{
+				Kind: ListVariable,
+				Spec: &ListVariableSpec{
+					CommonVariableSpec: CommonVariableSpec{
+						Name: "MyList",
+						Display: &VariableDisplay{
+							Display: common.Display{
+								Name: "my awesome variable",
+							},
+							Hidden: false,
+						},
+					},
+					AllowMultiple: true,
+					DefaultValue:  &DefaultVariableValue{SliceValues: []string{"default1", "default2"}},
 					Plugin: common.Plugin{
 						Kind: "PrometheusLabelValuesVariable",
 						Spec: map[interface{}]interface{}{
