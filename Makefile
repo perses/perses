@@ -113,7 +113,7 @@ cross-build: ## Cross build binaries for all platforms (Use "make build" in deve
 
 .PHONY: cross-release
 cross-release:
-	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL} --release-notes GENERATED_CHANGELOG.md
+	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL} --release-notes EXTRACTED_CHANGELOG.md
 
 .PHONY: build
 build: build-ui build-api build-cli
@@ -147,7 +147,7 @@ generate-changelog:
 .PHONY: clean
 clean:
 	rm -rf ./bin
-	rm GENERATED_CHANGELOG.md
+	rm EXTRACTED_CHANGELOG.md
 	./scripts/ui_release.sh --clean
 	cd ./ui && npm run clean
 
