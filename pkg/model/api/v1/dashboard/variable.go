@@ -16,6 +16,7 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"gopkg.in/yaml.v2"
@@ -127,6 +128,9 @@ func (v *TextVariableSpec) validate() error {
 	if err := common.ValidateID(v.Name); err != nil {
 		return err
 	}
+	if _, err := strconv.Atoi(v.Name); err == nil {
+		return fmt.Errorf("variable name cannot contain only digits. That's not a meaningful name for a variable")
+	}
 	if len(v.Value) == 0 {
 		return fmt.Errorf("value for the variable %q cannot be empty", v.Name)
 	}
@@ -187,7 +191,7 @@ func (v *ListVariableSpec) validate() error {
 }
 
 type Variable struct {
-	// Kind is the type of the variable. Depending of the value of Kind, it will change the content of Spec.
+	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
 	Kind VariableKind `json:"kind" yaml:"kind"`
 	Spec VariableSpec `json:"spec" yaml:"spec"`
 }
