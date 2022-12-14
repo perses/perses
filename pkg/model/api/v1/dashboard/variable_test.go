@@ -73,9 +73,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -113,9 +111,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -136,7 +132,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
   "spec": {
     "name": "MyList",
     "display": {
-      "name": "my awesome variable"
+      "name": "my awesome variable",
+      "hidden": true
     },
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
@@ -156,10 +153,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
-							Hidden: false,
+							Name:   "my awesome variable",
+							Hidden: true,
 						},
 					},
 					Plugin: common.Plugin{
@@ -201,9 +196,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -248,9 +241,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -317,9 +308,7 @@ spec:
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -349,9 +338,7 @@ spec:
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -372,6 +359,7 @@ spec:
   name: "MyList"
   display:
     name: "my awesome variable"
+    hidden: true
   plugin:
     kind: "PrometheusLabelValuesVariable"
     spec:
@@ -385,10 +373,8 @@ spec:
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
-							Hidden: false,
+							Name:   "my awesome variable",
+							Hidden: true,
 						},
 					},
 					Plugin: common.Plugin{
@@ -423,9 +409,7 @@ spec:
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -465,9 +449,7 @@ spec:
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -585,9 +567,7 @@ func TestMarshalListVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -622,9 +602,7 @@ func TestMarshalListVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -665,9 +643,7 @@ func TestMarshalListVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -710,9 +686,7 @@ func TestMarshalListVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
@@ -757,9 +731,7 @@ func TestMarshalListVariable(t *testing.T) {
 					CommonVariableSpec: CommonVariableSpec{
 						Name: "MyList",
 						Display: &VariableDisplay{
-							Display: common.Display{
-								Name: "my awesome variable",
-							},
+							Name:   "my awesome variable",
 							Hidden: false,
 						},
 					},
