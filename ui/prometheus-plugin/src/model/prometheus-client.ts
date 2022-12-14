@@ -23,7 +23,12 @@ import {
   RangeQueryResponse,
 } from './api-types';
 
+interface PrometheusClientOptions {
+  datasourceUrl: string;
+}
+
 export interface PrometheusClient {
+  options: PrometheusClientOptions;
   instantQuery(params: InstantQueryRequestParameters): Promise<InstantQueryResponse>;
   rangeQuery(params: RangeQueryRequestParameters): Promise<RangeQueryResponse>;
   labelNames(params: LabelNamesRequestParameters): Promise<LabelNamesResponse>;

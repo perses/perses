@@ -12,7 +12,10 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import { TextField } from '@mui/material';
+import CodeMirror from '@uiw/react-codemirror';
+import { json, jsonParseLinter } from '@codemirror/lang-json';
+import { linter, lintGutter } from '@codemirror/lint';
+import { useTheme } from '@mui/material';
 
 interface JSONEditorProps<Spec> {
   value: Spec;
@@ -20,36 +23,32 @@ interface JSONEditorProps<Spec> {
 }
 
 export function JSONEditor<T>(props: JSONEditorProps<T>) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
   const [value, setValue] = useState(() => JSON.stringify(props.value, null, 2));
-  const [invalidJSON, setInvalidJSON] = useState(false);
 
   useEffect(() => {
     setValue(JSON.stringify(props.value, null, 2));
-    setInvalidJSON(false);
   }, [props.value]);
 
-  // TODO: replace with CodeMirror editor
   return (
-    <TextField
-      label="JSON"
-      error={invalidJSON}
-      helperText={invalidJSON ? 'Invalid JSON' : ''}
-      multiline
-      fullWidth
+    <CodeMirror
+      style={{ border: `1px solid ${theme.palette.divider}` }}
+      theme={isDarkMode ? 'dark' : 'light'}
+      extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
       value={value}
-      onChange={(event) => {
-        setValue(event.target.value);
+      onChange={(newValue) => {
+        setValue(newValue);
       }}
-      maxRows={20}
       onBlur={() => {
         try {
           const json = JSON.parse(value ?? '{}');
-          setInvalidJSON(false);
           if (props.onChange !== undefined) {
             props.onChange(json);
           }
         } catch (e) {
-          setInvalidJSON(true);
+          // ignore this error
         }
       }}
     />
