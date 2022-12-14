@@ -130,6 +130,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               {isLaptopSize && (
                 <Button
                   variant="outlined"
+                  color="secondary"
                   startIcon={<PencilIcon />}
                   onClick={onEditButtonClick}
                   sx={{ marginLeft: 'auto' }}
