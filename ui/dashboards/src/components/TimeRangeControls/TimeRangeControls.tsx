@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import RefreshIcon from 'mdi-material-ui/Refresh';
-import { Button, styled } from '@mui/material';
 import { DateTimeRangePicker, TimeOption } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isDurationString } from '@perses-dev/core';
