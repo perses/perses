@@ -7,4 +7,4 @@ if #target.datasource.type != _|_ if #target.datasource.type == "prometheus" { /
         }
         query: #target.expr
     }
-}
+},

@@ -4,10 +4,10 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
         queries: [ for _, target in #panel.targets {
             kind: "TimeSeriesQuery"
             spec: {
-                plugin: {
-                    #target: target
+                #target: target
+                plugin: [ // switch
                     %(conditional_timeserie_queries)
-                }
+                ][0]
             }
         }]
         legend: {
@@ -15,45 +15,29 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                 position: #panel.options.legend.placement
             }
             if #panel.type == "graph" {
-                if #panel.legend.rightSide {
-                    position: "right"
-                }
-                if !#panel.legend.rightSide {
-                    position: "bottom"
-                }
+                position: [ // switch
+                    if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "right" },
+                    { "bottom" }
+                ][0]
             }
         }
-        // mapping table for the `unit` attribute
-        // TODO: factorize this for all panels?
-        #unitMapping: {
-            ms: "Milliseconds"
-            s: "Seconds"
-            m: "Minutes"
-            h: "Hours"
-            d: "Days"
-            percent: "Percent"
-            percentunit: "PercentDecimal"
-            bytes: "Bytes"
-            decbytes: "Bytes"
-        }
-        if #panel.fieldConfig.defaults.unit != _|_ if #unitMapping["\(#panel.fieldConfig.defaults.unit)"] != _|_ {
+        #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
+        if #unitPath != null if #mapping.unit[#unitPath] != _|_ {
             unit: {
-                kind: #unitMapping["\(#panel.fieldConfig.defaults.unit)"]
+                kind: #mapping.unit[#unitPath]
             }
         }
         if #panel.fieldConfig.defaults.thresholds != _|_ {
             thresholds: {
-                //default_color:                                                       // TODO how to fill this field?
+                //default_color: TODO how to fill this one?
                 steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part?
-                    if step.value == null {
-                        value: 0
-                    }
-                    if step.value != null {
-                        value: step.value
-                    }
+                    value: [ // switch
+                        if step.value == null { 0 },
+                        { step.value }
+                    ][0]
                     color: step.color
                 }]
             }
         }
     }
-}
+},

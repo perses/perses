@@ -1,696 +1,753 @@
 {
-    "annotations": {
-        "list": [
-            {
-                "builtIn": 1,
-                "datasource": {
-                    "type": "grafana",
-                    "uid": "-- Grafana --"
-                },
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "target": {
-                    "limit": 100,
-                    "matchAny": false,
-                    "tags": [],
-                    "type": "dashboard"
-                },
-                "type": "dashboard"
-            }
-        ]
+  "annotations": {
+    "list": [{
+      "builtIn": 1,
+      "datasource": {
+        "type": "grafana",
+        "uid": "-- Grafana --"
+      },
+      "enable": true,
+      "hide": true,
+      "iconColor": "rgba(0, 211, 255, 1)",
+      "name": "Annotations & Alerts",
+      "target": {
+        "limit": 100,
+        "matchAny": false,
+        "tags": [],
+        "type": "dashboard"
+      },
+      "type": "dashboard"
+    }]
+  },
+  "description": " A simple grafana dashboard to be converted to perses format",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 34819,
+  "links": [],
+  "liveNow": false,
+  "panels": [{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "argos-world"
+      },
+      "description": "a stat chart that is basically showing stats as a chart",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "pressurekbar"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [{
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "editorMode": "code",
+        "expr": "vector(4)",
+        "legendFormat": "__auto",
+        "range": true,
+        "refId": "A"
+      }],
+      "title": "My Stat chart",
+      "type": "stat"
     },
-    "description": " A simple grafana dashboard to be converted to perses format",
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": 34342,
-    "links": [],
-    "liveNow": false,
-    "panels": [
-        {
-            "datasource": {
-                "type": "prometheus",
-                "uid": "argos-world"
-            },
-            "description": "a stat chart that is basically showing stats as a chart",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "pressurekbar"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 0
-            },
-            "id": 13,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "pluginVersion": "9.2.3",
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "argos-world"
-                    },
-                    "editorMode": "code",
-                    "expr": "vector(4)",
-                    "legendFormat": "__auto",
-                    "range": true,
-                    "refId": "A"
-                }
-            ],
-            "title": "My Stat chart",
-            "type": "stat"
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "argos-world"
+      },
+      "description": "my second panel is a gauge",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "h"
         },
-        {
-            "datasource": {
-                "type": "prometheus",
-                "uid": "argos-world"
-            },
-            "description": "my second panel is a gauge",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 80
-                            }
-                        ]
-                    },
-                    "unit": "h"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 0
-            },
-            "id": 5,
-            "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true
-            },
-            "pluginVersion": "9.2.3",
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "argos-world"
-                    },
-                    "editorMode": "code",
-                    "expr": "vector(2)",
-                    "legendFormat": "__auto",
-                    "range": true,
-                    "refId": "A"
-                }
-            ],
-            "title": "My 2nd panel",
-            "type": "gauge"
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        {
-            "datasource": {
-                "type": "prometheus",
-                "uid": "argos-world"
-            },
-            "description": "my first panel is a timeseries",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisCenteredZero": false,
-                        "axisColorMode": "text",
-                        "axisLabel": "",
-                        "axisPlacement": "auto",
-                        "barAlignment": 0,
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "hideFrom": {
-                            "legend": false,
-                            "tooltip": false,
-                            "viz": false
-                        },
-                        "lineInterpolation": "linear",
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "scaleDistribution": {
-                            "type": "linear"
-                        },
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 80
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 8
-            },
-            "id": 2,
-            "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
-                },
-                "tooltip": {
-                    "mode": "single",
-                    "sort": "none"
-                }
-            },
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "argos-world"
-                    },
-                    "editorMode": "code",
-                    "expr": "vector(1)",
-                    "legendFormat": "__auto",
-                    "range": true,
-                    "refId": "A"
-                }
-            ],
-            "title": "My 1rst panel",
-            "type": "timeseries"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [{
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
         },
-        {
-            "collapsed": true,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 16
+        "editorMode": "code",
+        "expr": "vector(2)",
+        "legendFormat": "__auto",
+        "range": true,
+        "refId": "A"
+      }],
+      "title": "My 2nd panel",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "argos-world"
+      },
+      "description": "my first panel is a timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             },
-            "id": 11,
-            "panels": [
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "argos-world"
-                    },
-                    "description": "my third panel is a timeseries",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisCenteredZero": false,
-                                "axisColorMode": "text",
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 0,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 1,
-                                "pointSize": 5,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "none"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "mappings": [],
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 80
-                                    }
-                                ]
-                            }
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 0,
-                        "y": 17
-                    },
-                    "id": 3,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "list",
-                            "placement": "bottom",
-                            "showLegend": true
-                        },
-                        "tooltip": {
-                            "mode": "single",
-                            "sort": "none"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "prometheus",
-                                "uid": "argos-world"
-                            },
-                            "editorMode": "code",
-                            "expr": "vector(3)",
-                            "legendFormat": "__auto",
-                            "range": true,
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "My 3rd panel",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "argos-world"
-                    },
-                    "fieldConfig": {
-                        "defaults": {
-                            "custom": {
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                }
-                            }
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 5,
-                        "w": 6,
-                        "x": 12,
-                        "y": 17
-                    },
-                    "id": 7,
-                    "options": {
-                        "calculate": false,
-                        "cellGap": 1,
-                        "color": {
-                            "exponent": 0.5,
-                            "fill": "dark-orange",
-                            "mode": "scheme",
-                            "reverse": false,
-                            "scale": "exponential",
-                            "scheme": "Oranges",
-                            "steps": 64
-                        },
-                        "exemplars": {
-                            "color": "rgba(255,0,255,0.7)"
-                        },
-                        "filterValues": {
-                            "le": 1e-9
-                        },
-                        "legend": {
-                            "show": true
-                        },
-                        "rowsFrame": {
-                            "layout": "auto"
-                        },
-                        "tooltip": {
-                            "show": true,
-                            "yHistogram": false
-                        },
-                        "yAxis": {
-                            "axisPlacement": "left",
-                            "reverse": false
-                        }
-                    },
-                    "pluginVersion": "9.2.3",
-                    "title": "Empty heatmap",
-                    "type": "heatmap"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "argos-world"
-                    },
-                    "description": "",
-                    "gridPos": {
-                        "h": 8,
-                        "w": 6,
-                        "x": 18,
-                        "y": 17
-                    },
-                    "id": 9,
-                    "options": {
-                        "code": {
-                            "language": "plaintext",
-                            "showLineNumbers": false,
-                            "showMiniMap": false
-                        },
-                        "content": "# Title\n\nFor markdown syntax help: [commonmark.org/help](https://commonmark.org/help/)",
-                        "mode": "markdown"
-                    },
-                    "pluginVersion": "9.2.3",
-                    "title": "My Text panel",
-                    "type": "text"
-                }
-            ],
-            "title": "My row title",
-            "type": "row"
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
         }
-    ],
-    "schemaVersion": 37,
-    "style": "dark",
-    "tags": [],
-    "templating": {
-        "list": [
-            {
-                "current": {
-                    "selected": false,
-                    "text": "one",
-                    "value": "one"
+      },
+      "targets": [{
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "editorMode": "code",
+        "expr": "vector(1)",
+        "legendFormat": "__auto",
+        "range": true,
+        "refId": "A"
+      }],
+      "title": "My 1rst panel",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 11,
+      "panels": [{
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "description": "my third panel is a timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
                 },
-                "hide": 0,
-                "includeAll": false,
-                "multi": false,
-                "name": "listVar",
-                "options": [
-                    {
-                        "selected": true,
-                        "text": "one",
-                        "value": "one"
-                    },
-                    {
-                        "selected": false,
-                        "text": "two",
-                        "value": "two"
-                    },
-                    {
-                        "selected": false,
-                        "text": "three",
-                        "value": "three"
-                    }
-                ],
-                "query": "one,two,three",
-                "skipUrlSync": false,
-                "type": "custom"
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
             },
-            {
-                "hide": 2,
-                "name": "myConst",
-                "query": "HelloWorld",
-                "skipUrlSync": false,
-                "type": "constant"
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 17
+          },
+          "id": 3,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            {
-                "current": {
-                    "selected": false,
-                    "text": "alice",
-                    "value": "alice"
-                },
-                "hide": 0,
-                "includeAll": false,
-                "multi": false,
-                "name": "firstNames",
-                "options": [
-                    {
-                        "selected": true,
-                        "text": "alice",
-                        "value": "alice"
-                    },
-                    {
-                        "selected": false,
-                        "text": "bob",
-                        "value": "bob"
-                    },
-                    {
-                        "selected": false,
-                        "text": "chris",
-                        "value": "chris"
-                    }
-                ],
-                "query": "alice,bob,chris",
-                "skipUrlSync": false,
-                "type": "custom"
-            },
-            {
-                "current": {
-                    "selected": false,
-                    "text": "net6",
-                    "value": "net6"
-                },
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "argos-world"
-                },
-                "definition": "label_values(stack)",
-                "hide": 0,
-                "includeAll": true,
-                "multi": false,
-                "name": "Stack",
-                "options": [],
-                "query": {
-                    "query": "label_values(stack)",
-                    "refId": "StandardVariableQuery"
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 0,
-                "type": "query"
-            },
-            {
-                "current": {
-                    "selected": false,
-                    "text": "net6",
-                    "value": "net6"
-                },
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "argos-world"
-                },
-                "definition": "label_values(thanos_build_info, stack)",
-                "hide": 0,
-                "includeAll": true,
-                "multi": false,
-                "name": "stack_with_metric",
-                "options": [],
-                "query": {
-                    "query": "label_values(thanos_build_info, stack)",
-                    "refId": "StandardVariableQuery"
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 0,
-                "type": "query"
-            },
-            {
-                "auto": false,
-                "auto_count": 30,
-                "auto_min": "10s",
-                "current": {
-                    "selected": false,
-                    "text": "1m",
-                    "value": "1m"
-                },
-                "description": "ad hoc filter",
-                "hide": 0,
-                "name": "interval",
-                "options": [
-                    {
-                        "selected": true,
-                        "text": "1m",
-                        "value": "1m"
-                    },
-                    {
-                        "selected": false,
-                        "text": "10m",
-                        "value": "10m"
-                    },
-                    {
-                        "selected": false,
-                        "text": "30m",
-                        "value": "30m"
-                    },
-                    {
-                        "selected": false,
-                        "text": "1h",
-                        "value": "1h"
-                    },
-                    {
-                        "selected": false,
-                        "text": "6h",
-                        "value": "6h"
-                    },
-                    {
-                        "selected": false,
-                        "text": "12h",
-                        "value": "12h"
-                    },
-                    {
-                        "selected": false,
-                        "text": "1d",
-                        "value": "1d"
-                    },
-                    {
-                        "selected": false,
-                        "text": "7d",
-                        "value": "7d"
-                    },
-                    {
-                        "selected": false,
-                        "text": "14d",
-                        "value": "14d"
-                    },
-                    {
-                        "selected": false,
-                        "text": "30d",
-                        "value": "30d"
-                    }
-                ],
-                "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
-                "refresh": 2,
-                "skipUrlSync": false,
-                "type": "interval"
-            },
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "argos-world"
-                },
-                "description": "adHocFilter",
-                "filters": [],
-                "hide": 0,
-                "name": "AHF",
-                "skipUrlSync": false,
-                "type": "adhoc"
-            },
-            {
-                "current": {
-                    "selected": false,
-                    "text": "API",
-                    "value": "API"
-                },
-                "definition": "label_names()",
-                "hide": 0,
-                "includeAll": false,
-                "multi": false,
-                "name": "LabelNamesTest",
-                "options": [],
-                "query": {
-                    "query": "label_names()",
-                    "refId": "StandardVariableQuery"
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 0,
-                "type": "query"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
             }
-        ]
-    },
-    "time": {
-        "from": "now-6h",
-        "to": "now"
-    },
-    "timepicker": {},
-    "timezone": "",
-    "title": "Simple grafana dashboard",
-    "uid": "DuJ3dcNVk",
-    "version": 13,
-    "weekStart": ""
+          },
+          "targets": [{
+            "datasource": {
+              "type": "prometheus",
+              "uid": "argos-world"
+            },
+            "editorMode": "code",
+            "expr": "vector(3)",
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          }],
+          "title": "My 3rd panel",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 17
+          },
+          "id": 7,
+          "options": {
+            "calculate": false,
+            "cellGap": 1,
+            "color": {
+              "exponent": 0.5,
+              "fill": "dark-orange",
+              "mode": "scheme",
+              "reverse": false,
+              "scale": "exponential",
+              "scheme": "Oranges",
+              "steps": 64
+            },
+            "exemplars": {
+              "color": "rgba(255,0,255,0.7)"
+            },
+            "filterValues": {
+              "le": 1e-9
+            },
+            "legend": {
+              "show": true
+            },
+            "rowsFrame": {
+              "layout": "auto"
+            },
+            "tooltip": {
+              "show": true,
+              "yHistogram": false
+            },
+            "yAxis": {
+              "axisPlacement": "left",
+              "reverse": false
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "title": "Empty heatmap",
+          "type": "heatmap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 18,
+            "y": 17
+          },
+          "id": 9,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# Title\n\nFor markdown syntax help: [commonmark.org/help](https://commonmark.org/help/)",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.2.3",
+          "title": "My Text panel",
+          "type": "text"
+        }
+      ],
+      "title": "My row title",
+      "type": "row"
+    }
+  ],
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [{
+        "current": {
+          "selected": false,
+          "text": "one",
+          "value": "one"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "listVar",
+        "options": [{
+            "selected": true,
+            "text": "one",
+            "value": "one"
+          },
+          {
+            "selected": false,
+            "text": "two",
+            "value": "two"
+          },
+          {
+            "selected": false,
+            "text": "three",
+            "value": "three"
+          }
+        ],
+        "query": "one,two,three",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "hide": 2,
+        "name": "myConst",
+        "query": "HelloWorld",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "alice",
+          "value": "alice"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "firstNames",
+        "options": [{
+            "selected": true,
+            "text": "alice",
+            "value": "alice"
+          },
+          {
+            "selected": false,
+            "text": "bob",
+            "value": "bob"
+          },
+          {
+            "selected": false,
+            "text": "chris",
+            "value": "chris"
+          }
+        ],
+        "query": "alice,bob,chris",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "net6",
+          "value": "net6"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "definition": "label_values(stack)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": false,
+        "name": "Stack",
+        "options": [],
+        "query": {
+          "query": "label_values(stack)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "net6",
+          "value": "net6"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "definition": "label_values(thanos_build_info, stack)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": false,
+        "name": "stack_with_metric",
+        "options": [],
+        "query": {
+          "query": "label_values(thanos_build_info, stack)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "auto": false,
+        "auto_count": 30,
+        "auto_min": "10s",
+        "current": {
+          "selected": false,
+          "text": "1m",
+          "value": "1m"
+        },
+        "description": "ad hoc filter",
+        "hide": 0,
+        "name": "interval",
+        "options": [{
+            "selected": true,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          },
+          {
+            "selected": false,
+            "text": "7d",
+            "value": "7d"
+          },
+          {
+            "selected": false,
+            "text": "14d",
+            "value": "14d"
+          },
+          {
+            "selected": false,
+            "text": "30d",
+            "value": "30d"
+          }
+        ],
+        "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+        "refresh": 2,
+        "skipUrlSync": false,
+        "type": "interval"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "description": "adHocFilter",
+        "filters": [],
+        "hide": 0,
+        "name": "AHF",
+        "skipUrlSync": false,
+        "type": "adhoc"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "API",
+          "value": "API"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "definition": "label_names()",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "LabelNamesTest",
+        "options": [],
+        "query": {
+          "query": "label_names()",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Azure",
+          "value": "Azure"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "definition": "query_result(group by(type) (up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}))",
+        "description": "variable using query_result clause",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Query Result Variable",
+        "multi": false,
+        "name": "queryResVar",
+        "options": [],
+        "query": {
+          "query": "query_result(group by(type) (up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}))",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": ".*type=\\\"(.*)\\\".*",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "{type=\"Azure\"} 1 1670489608000",
+          "value": "{type=\"Azure\"} 1 1670489608000"
+        },
+        "definition": "query_result(group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range])))",
+        "description": "query result var for volatile series (relies $__range global var)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "queryResVarVolatile",
+        "options": [],
+        "query": {
+          "query": "query_result(group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range])))",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "{app_part_of=\"1ASMTP\",application=\"1ASMTP\",applicationdetailed=\"1ASMTP\",componentmodel=\"UNDEFINED\",componentname=\"UNDEFINED\",firecell=\"UNDEFINED\",hostname=\"mrelay-dev-vm-01\",instance=\"10.56.163.36:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"mrelay-dev-vm-01\",osname=\"Linux\",owner=\"UNDEFINED\",partition=\"-\",phase=\"DEV\",prometheus=\"system\",prometheus_instance=\"iaasvms\",prometheus_namespace=\"argos-external\",region=\"azure\",role=\"UNDEFINED\",serversite=\"rnd-we\",stack=\"external\",type=\"Azure\",virtual=\"yes\"} 1 1670489615000",
+          "value": "{app_part_of=\"1ASMTP\",application=\"1ASMTP\",applicationdetailed=\"1ASMTP\",componentmodel=\"UNDEFINED\",componentname=\"UNDEFINED\",firecell=\"UNDEFINED\",hostname=\"mrelay-dev-vm-01\",instance=\"10.56.163.36:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"mrelay-dev-vm-01\",osname=\"Linux\",owner=\"UNDEFINED\",partition=\"-\",phase=\"DEV\",prometheus=\"system\",prometheus_instance=\"iaasvms\",prometheus_namespace=\"argos-external\",region=\"azure\",role=\"UNDEFINED\",serversite=\"rnd-we\",stack=\"external\",type=\"Azure\",virtual=\"yes\"} 1 1670489615000"
+        },
+        "definition": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
+        "description": "query result var with no <aggr> by clause",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "queryResVarOther",
+        "options": [],
+        "query": {
+          "query": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Simple grafana dashboard",
+  "uid": "DuJ3dcNVk",
+  "version": 1,
+  "weekStart": ""
 }

@@ -101,10 +101,10 @@ if #var.type == "custom" || #var.type == "interval" {
             option.value
         }]
     }
-}
+},
 ```
 - The file is named `mig.cuepart`.
-- The file content is made of **one or more conditional block(s)**.
+- The file content is made of **one or more conditional block(s)**, separated by a coma (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#var` definition. 
   - `#var` is a variable object from Grafana. You can access the different fields with like `#var.field.subfield`. To know the list of fields available, check the Grafana datamodel for this variable (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
   - You most certainly want a check on the `#var.type` value like shown in above example.
@@ -131,10 +131,10 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
             position: #panel.options.legend.placement
         }
     }
-}
+},
 ```
 - The file is named `mig.cuepart`.
-- The file content is made of **one or more conditional block(s)**.
+- The file content is made of **one or more conditional block(s)**, separated by a coma (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#panel` definition. 
   - `#panel` is a panel object from Grafana. You can access the different fields with like `#panel.field.subfield`. To know the list of fields available, check the Grafana datamodel for this panel (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
   - You most certainly want a check on the `#panel.type` value like shown in above example.
@@ -145,6 +145,13 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
   %(conditional_timeserie_queries)
   ``` 
   the `%(conditional_timeserie_queries)` placeholder will get replaced by conditionals later in the translation process. `#target` is the standard alias expected for the target object, just like `#panel` is for panels.
+
+### Utilities
+
+There are some utilities that you can use in your panel plugin:
+- `#mapping.unit`: mapping table for the unit attribute (key = grafana unit, value = perses equivalent)
+- `#mapping.calc`: mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
+- `#defaultCalc`: standard default value for the calculation attribute
 
 ## Query
 
@@ -160,10 +167,10 @@ if #target.datasource.type != _|_ if #target.datasource.type == "prometheus" {
         }
         query: #target.expr
     }
-}
+},
 ```
 - The file is named `mig.cuepart`.
-- The file content is made of **one or more conditional block(s)**.
+- The file content is made of **one or more conditional block(s)**, separated by a coma (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#target` definition. 
   - `#target` is a target object from Grafana. You can access the different fields with like `#target.field.subfield`. To know the list of fields available, check the Grafana datamodel for the targets (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
   - You most certainly want a check on the `#target.datasource.type` value like shown in above example.

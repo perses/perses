@@ -33,9 +33,39 @@ import (
 )
 
 //go:embed mapping.cuepart
-var mappingFileBytes []byte
+var migrationFileBytes []byte
 
-const grafanaDefID = "#grafanaDashboard"
+const (
+	grafanaDefID = "#grafanaDashboard"
+
+	variableDefaultValue = `
+		kind: "StaticListVariable"
+		spec: {
+			values: ["grafana", "migration", "not", "supported"]
+		}
+	`
+	variablePlaceholderText = "%(conditional_variables)"
+
+	panelDefaultValue = `
+		kind: "Markdown"
+		spec: {
+			text: "**Migration from Grafana not supported !**"
+		}
+	`
+	panelPlaceholderText = "%(conditional_panels)"
+
+	queryDefaultValue = `
+		kind: "PrometheusTimeSeriesQuery"
+		spec: {
+			datasource: {
+				kind: "PrometheusDatasource"
+				name: "MigrationFromGrafanaNotSupported"
+			}
+			query: "migration_from_grafana_not_supported"
+		}
+	`
+	queryPlaceholderText = "%(conditional_timeserie_queries)"
+)
 
 type migrateConf struct {
 	schemasPath     string
@@ -45,52 +75,55 @@ type migrateConf struct {
 
 // Endpoint is the struct that define all endpoint delivered by the path /migrate
 type Endpoint struct {
-	schemasConf  config.Schemas
-	migrateConfs []migrateConf
+	cuectx                *cue.Context
+	migrateConfs          []migrateConf
+	migrationSchemaString string
 }
 
 // New create an instance of the object Endpoint.
 // You should have at most one instance of this object as it is only used by the struct api in the method api.registerRoute
 func New(schemasConf config.Schemas) *Endpoint {
-	return &Endpoint{
-		schemasConf: schemasConf,
+	endpoint := &Endpoint{
+		cuectx: cuecontext.New(),
 		migrateConfs: []migrateConf{
 			{
-				schemasPath: schemasConf.VariablesPath,
-				defaultValue: `
-					kind: "StaticListVariable"
-					spec: {
-						values: ["grafana", "migration", "not", "supported"]
-					}
-				`,
-				placeholderText: "%(conditional_variables)",
+				schemasPath:     schemasConf.VariablesPath,
+				defaultValue:    variableDefaultValue,
+				placeholderText: variablePlaceholderText,
 			},
 			{
-				schemasPath: schemasConf.PanelsPath,
-				defaultValue: `
-					kind: "Markdown"
-					spec: {
-						text: "**Migration from Grafana not supported !**"
-					}
-				`,
-				placeholderText: "%(conditional_panels)",
+				schemasPath:     schemasConf.PanelsPath,
+				defaultValue:    panelDefaultValue,
+				placeholderText: panelPlaceholderText,
 			},
 			{
-				schemasPath: schemasConf.QueriesPath,
-				defaultValue: `
-					kind: "PrometheusTimeSeriesQuery"
-					spec: {
-						datasource: {
-							kind: "PrometheusDatasource"
-							name: "MigrationFromGrafanaNotSupported"
-						}
-						query: "migration_from_grafana_not_supported"
-					}
-				`,
-				placeholderText: "%(conditional_timeserie_queries)",
+				schemasPath:     schemasConf.QueriesPath,
+				defaultValue:    queryDefaultValue,
+				placeholderText: queryPlaceholderText,
 			},
 		},
 	}
+	// TODO: preload to be activated when filewatch is implemented
+	// endpoint.buildMigrationSchemaString()
+
+	return endpoint
+}
+
+func (e *Endpoint) buildMigrationSchemaString() {
+	// start building the migration schema from the base .cuepart file
+	migrationSchemaString := string(migrationFileBytes)
+
+	// generate the blocks of conditionals from the mig.cuepart files of each plugin & replace the placeholders with them
+	for _, conf := range e.migrateConfs {
+		conditionals, err := getListOfConditions(conf.schemasPath, conf.defaultValue)
+		if err != nil {
+			logrus.WithError(err).Errorf("Unable to get list of conditions for %s", conf.schemasPath)
+		}
+		migrationSchemaString = strings.Replace(migrationSchemaString, conf.placeholderText, conditionals, -1)
+	}
+	logrus.Tracef("migrationSchemaString: %s", migrationSchemaString)
+
+	e.migrationSchemaString = migrationSchemaString
 }
 
 // RegisterRoutes is the method to use to register the routes prefixed by /api
@@ -115,42 +148,31 @@ func (e *Endpoint) Migrate(ctx echo.Context) error {
 }
 
 func (e *Endpoint) migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
-	cuectx := cuecontext.New()
+	// TODO to be replaced by filewatch-triggered refreshes, to avoid recomputing the schema when nothing changed
+	e.buildMigrationSchemaString()
 
-	// start building the mapping string from the base cuepart file
-	mappingString := string(mappingFileBytes)
-
-	// generate the blocks of conditionals from the plugins mig.cuepart files & replace the placeholders with them
-	for _, conf := range e.migrateConfs {
-		conditionals, err := getListOfConditions(conf.schemasPath, conf.defaultValue)
-		if err != nil {
-			logrus.WithError(err).Errorf("Unable to get list of conditions for %s", e.schemasConf.VariablesPath)
-		}
-		mappingString = strings.Replace(mappingString, conf.placeholderText, conditionals, -1)
-	}
-	logrus.Tracef("mappingString after placeholders replacement: %s", mappingString)
-
-	// Build a CUE value that is just the received grafana dashboard wrapped in a definition & append this to the mapping string.
-	// By putting the dashboard under a def we isolate the fields from the Grafana dashboard together in a common namespace, so that they are not mixed with the
-	// ones from the remapping engine. This make sure we have no wrong overlapping between Grafana & Perses objects, and also makes the
+	// Build a CUE value that is just the received grafana dashboard wrapped in a definition. By doing this we isolate the
+	// fields from the Grafana dashboard together in a common namespace, so that they are not mixed with the ones from the
+	// migration schema. This make sure we have no wrong overlapping between Grafana & Perses objects, and also makes the
 	// remapping operations more explicit, with e.g `name: #grafanaDashboard.title` instead of `name: title`.
-	grafanaDashboardCueVal := cuectx.CompileString(fmt.Sprintf("%s: _", grafanaDefID))
-	grafanaDashboardCueVal = grafanaDashboardCueVal.FillPath(
+	grafanaDashboardVal := e.cuectx.CompileString(fmt.Sprintf("%s: _", grafanaDefID))
+	grafanaDashboardVal = grafanaDashboardVal.FillPath(
 		cue.ParsePath(grafanaDefID),
-		cuectx.CompileBytes(grafanaDashboard),
+		e.cuectx.CompileBytes(grafanaDashboard),
 	)
-	if err := grafanaDashboardCueVal.Validate(cue.Final()); err != nil {
+	if err := grafanaDashboardVal.Validate(cue.Final()); err != nil {
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
-	mappingString = fmt.Sprintf("%s\n%#v", mappingString, grafanaDashboardCueVal)
-	logrus.Tracef("mappingString after grafanaDashboardCueVal injection: \"%s\"", mappingString)
 
-	// build the CUE value from the mapping string
-	mappingCueVal := cuectx.CompileString(mappingString)
-	logrus.Tracef("final value: %#v", mappingCueVal)
+	// Compile the migration schema using the grafana def to resolve the paths
+	mappingVal := e.cuectx.CompileString(e.migrationSchemaString, cue.Scope(grafanaDashboardVal))
+	if mappingVal.Err() != nil {
+		return nil, fmt.Errorf("%w: %s", shared.InternalError, mappingVal.Err())
+	}
+	logrus.Tracef("final value: %#v", mappingVal)
 
 	// marshall to Json then unmarshall in v1.Dashboard struct to pass the final checks & build the final dashboard to return
-	persesDashboardJSON, err := json.Marshal(mappingCueVal)
+	persesDashboardJSON, err := json.Marshal(mappingVal)
 	if err != nil {
 		logrus.WithError(err).Error("Unable to marshall Cue Value to json")
 		return nil, fmt.Errorf("%w: %s", shared.InternalError, err)
@@ -174,9 +196,6 @@ func getListOfConditions(schemasPath string, defaultValue string) (string, error
 
 	var listOfConditions strings.Builder
 
-	// first append an empty kind field in order to be able to append a default, fallback case for not covered plugins at the end of the conditions list (see below)
-	listOfConditions.WriteString("kind: _\n")
-
 	// process each schema plugin to convert it into a CUE Value
 	for _, file := range files {
 		migFilePath := filepath.Join(schemasPath, file.Name(), "mig.cuepart")
@@ -192,7 +211,7 @@ func getListOfConditions(schemasPath string, defaultValue string) (string, error
 
 	// append a default conditional for any Grafana plugin that has no corresponding Perses plugin
 	listOfConditions.WriteString(fmt.Sprintf(`
-	if kind == _|_ {
+	{
 		%s
 	}`, defaultValue))
 	listOfConditions.WriteString("\n")

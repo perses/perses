@@ -1,429 +1,486 @@
 {
-    "kind": "Dashboard",
-    "metadata": {
-        "name": "Simplegrafanadashboard",
-        "created_at": "0001-01-01T00:00:00Z",
-        "updated_at": "0001-01-01T00:00:00Z",
-        "project": ""
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "DuJ3dcNVk",
+    "created_at": "0001-01-01T00:00:00Z",
+    "updated_at": "0001-01-01T00:00:00Z",
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Simple grafana dashboard"
     },
-    "spec": {
-        "duration": "1h",
-        "display": {
-            "name": "Simple grafana dashboard"
-        },
-        "variables": [
-            {
-                "kind": "ListVariable",
-                "spec": {
-                    "name": "listVar",
-                    "allow_all_value": false,
-                    "allow_multiple": false,
-                    "plugin": {
-                        "kind": "StaticListVariable",
-                        "spec": {
-                            "values": [
-                                "one",
-                                "two",
-                                "three"
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "kind": "TextVariable",
-                "spec": {
-                    "name": "myConst",
-                    "value": "HelloWorld"
-                }
-            },
-            {
-                "kind": "ListVariable",
-                "spec": {
-                    "name": "firstNames",
-                    "allow_all_value": false,
-                    "allow_multiple": false,
-                    "plugin": {
-                        "kind": "StaticListVariable",
-                        "spec": {
-                            "values": [
-                                "alice",
-                                "bob",
-                                "chris"
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "kind": "ListVariable",
-                "spec": {
-                    "name": "Stack",
-                    "allow_all_value": false,
-                    "allow_multiple": false,
-                    "plugin": {
-                        "kind": "PrometheusLabelValuesVariable",
-                        "spec": {
-                            "label_name": "stack",
-                            "matchers": []
-                        }
-                    }
-                }
-            },
-            {
-                "kind": "ListVariable",
-                "spec": {
-                    "name": "stack_with_metric",
-                    "allow_all_value": false,
-                    "allow_multiple": false,
-                    "plugin": {
-                        "kind": "PrometheusLabelValuesVariable",
-                        "spec": {
-                            "label_name": "stack",
-                            "matchers": []
-                        }
-                    }
-                }
-            },
-            {
-                "kind": "ListVariable",
-                "spec": {
-                    "name": "interval",
-                    "allow_all_value": false,
-                    "allow_multiple": false,
-                    "plugin": {
-                        "kind": "StaticListVariable",
-                        "spec": {
-                            "values": [
-                                "1m",
-                                "10m",
-                                "30m",
-                                "1h",
-                                "6h",
-                                "12h",
-                                "1d",
-                                "7d",
-                                "14d",
-                                "30d"
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "kind": "ListVariable",
-                "spec": {
-                    "name": "AHF",
-                    "allow_all_value": false,
-                    "allow_multiple": false,
-                    "plugin": {
-                        "kind": "StaticListVariable",
-                        "spec": {
-                            "values": [
-                                "grafana",
-                                "migration",
-                                "not",
-                                "supported"
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "kind": "ListVariable",
-                "spec": {
-                    "name": "LabelNamesTest",
-                    "allow_all_value": false,
-                    "allow_multiple": false,
-                    "plugin": {
-                        "kind": "PrometheusLabelNamesVariable",
-                        "spec": {
-                            "matchers": []
-                        }
-                    }
-                }
+    "duration": "1h",
+    "variables": [{
+        "kind": "ListVariable",
+        "spec": {
+          "name": "listVar",
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [
+                "one",
+                "two",
+                "three"
+              ]
             }
-        ],
-        "panels": {
-            "0": {
-                "kind": "Panel",
-                "spec": {
-                    "display": {
-                        "name": "My Stat chart"
-                    },
-                    "plugin": {
-                        "kind": "StatChart",
-                        "spec": {
-                            "calculation": "LastNumber",
-                            "query": {
-                                "kind": "TimeSeriesQuery",
-                                "spec": {
-                                    "plugin": {
-                                        "kind": "PrometheusTimeSeriesQuery",
-                                        "spec": {
-                                            "datasource": {
-                                                "kind": "PrometheusDatasource",
-                                                "name": "argos-world"
-                                            },
-                                            "query": "vector(4)"
-                                        }
-                                    }
-                                }
-                            },
-                            "thresholds": {
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": 0
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 5
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "1": {
-                "kind": "Panel",
-                "spec": {
-                    "display": {
-                        "name": "My 2nd panel"
-                    },
-                    "plugin": {
-                        "kind": "GaugeChart",
-                        "spec": {
-                            "calculation": "LastNumber",
-                            "query": {
-                                "kind": "TimeSeriesQuery",
-                                "spec": {
-                                    "plugin": {
-                                        "kind": "PrometheusTimeSeriesQuery",
-                                        "spec": {
-                                            "datasource": {
-                                                "kind": "PrometheusDatasource",
-                                                "name": "argos-world"
-                                            },
-                                            "query": "vector(2)"
-                                        }
-                                    }
-                                }
-                            },
-                            "thresholds": {
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": 0
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 80
-                                    }
-                                ]
-                            },
-                            "unit": {
-                                "kind": "Hours"
-                            }
-                        }
-                    }
-                }
-            },
-            "2": {
-                "kind": "Panel",
-                "spec": {
-                    "display": {
-                        "name": "My 1rst panel"
-                    },
-                    "plugin": {
-                        "kind": "TimeSeriesChart",
-                        "spec": {
-                            "legend": {
-                                "position": "bottom"
-                            },
-                            "queries": [
-                                {
-                                    "kind": "TimeSeriesQuery",
-                                    "spec": {
-                                        "plugin": {
-                                            "kind": "PrometheusTimeSeriesQuery",
-                                            "spec": {
-                                                "datasource": {
-                                                    "kind": "PrometheusDatasource",
-                                                    "name": "argos-world"
-                                                },
-                                                "query": "vector(1)"
-                                            }
-                                        }
-                                    }
-                                }
-                            ],
-                            "thresholds": {
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": 0
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 80
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "3_0": {
-                "kind": "Panel",
-                "spec": {
-                    "display": {
-                        "name": "My 3rd panel"
-                    },
-                    "plugin": {
-                        "kind": "TimeSeriesChart",
-                        "spec": {
-                            "legend": {
-                                "position": "bottom"
-                            },
-                            "queries": [
-                                {
-                                    "kind": "TimeSeriesQuery",
-                                    "spec": {
-                                        "plugin": {
-                                            "kind": "PrometheusTimeSeriesQuery",
-                                            "spec": {
-                                                "datasource": {
-                                                    "kind": "PrometheusDatasource",
-                                                    "name": "argos-world"
-                                                },
-                                                "query": "vector(3)"
-                                            }
-                                        }
-                                    }
-                                }
-                            ],
-                            "thresholds": {
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": 0
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 80
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "3_1": {
-                "kind": "Panel",
-                "spec": {
-                    "display": {
-                        "name": "Empty heatmap"
-                    },
-                    "plugin": {
-                        "kind": "Markdown",
-                        "spec": {
-                            "text": "**Migration from Grafana not supported !**"
-                        }
-                    }
-                }
-            },
-            "3_2": {
-                "kind": "Panel",
-                "spec": {
-                    "display": {
-                        "name": "My Text panel"
-                    },
-                    "plugin": {
-                        "kind": "Markdown",
-                        "spec": {
-                            "text": "# Title\n\nFor markdown syntax help: [commonmark.org/help](https://commonmark.org/help/)"
-                        }
-                    }
-                }
+          }
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "myConst",
+          "value": "HelloWorld"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "firstNames",
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [
+                "alice",
+                "bob",
+                "chris"
+              ]
             }
-        },
-        "layouts": [
-            {
-                "kind": "Grid",
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "Stack",
+          "allow_all_value": true,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "stack",
+              "matchers": []
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "stack_with_metric",
+          "allow_all_value": true,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "stack",
+              "matchers": []
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "interval",
+          "display": {
+            "name": "interval",
+            "description": "ad hoc filter",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [
+                "1m",
+                "10m",
+                "30m",
+                "1h",
+                "6h",
+                "12h",
+                "1d",
+                "7d",
+                "14d",
+                "30d"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "AHF",
+          "display": {
+            "name": "AHF",
+            "description": "adHocFilter",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [
+                "grafana",
+                "migration",
+                "not",
+                "supported"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "LabelNamesTest",
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusLabelNamesVariable",
+            "spec": {
+              "matchers": []
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "queryResVar",
+          "display": {
+            "name": "Query Result Variable",
+            "description": "variable using query_result clause",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "expr": "group by(type) (up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"})",
+              "label_name": "type"
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "queryResVarVolatile",
+          "display": {
+            "name": "queryResVarVolatile",
+            "description": "query result var for volatile series (relies $__range global var)",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "expr": "group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
+              "label_name": "type"
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "queryResVarOther",
+          "display": {
+            "name": "queryResVarOther",
+            "description": "query result var with no <aggr> by clause",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "expr": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
+              "label_name": "migration_from_grafana_not_supported"
+            }
+          }
+        }
+      }
+    ],
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "My Stat chart",
+            "description": "a stat chart that is basically showing stats as a chart"
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "LastNumber",
+              "query": {
+                "kind": "TimeSeriesQuery",
                 "spec": {
-                    "items": [
-                        {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 8,
-                            "content": {
-                                "$ref": "#/spec/panels/0"
-                            }
-                        },
-                        {
-                            "x": 12,
-                            "y": 0,
-                            "width": 12,
-                            "height": 8,
-                            "content": {
-                                "$ref": "#/spec/panels/1"
-                            }
-                        },
-                        {
-                            "x": 0,
-                            "y": 8,
-                            "width": 12,
-                            "height": 8,
-                            "content": {
-                                "$ref": "#/spec/panels/2"
-                            }
-                        }
-                    ]
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "argos-world"
+                      },
+                      "query": "vector(4)"
+                    }
+                  }
                 }
+              },
+              "thresholds": {
+                "steps": [{
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "My 2nd panel",
+            "description": "my second panel is a gauge"
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "LastNumber",
+              "query": {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "argos-world"
+                      },
+                      "query": "vector(2)"
+                    }
+                  }
+                }
+              },
+              "thresholds": {
+                "steps": [{
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": {
+                "kind": "Hours"
+              }
+            }
+          }
+        }
+      },
+      "2": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "My 1rst panel",
+            "description": "my first panel is a timeseries"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "queries": [{
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "argos-world"
+                      },
+                      "query": "vector(1)"
+                    }
+                  }
+                }
+              }],
+              "thresholds": {
+                "steps": [{
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "3_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "My 3rd panel",
+            "description": "my third panel is a timeseries"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "queries": [{
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "argos-world"
+                      },
+                      "query": "vector(3)"
+                    }
+                  }
+                }
+              }],
+              "thresholds": {
+                "steps": [{
+                  "color": "red",
+                  "value": 80
+                }]
+              }
+            }
+          }
+        }
+      },
+      "3_1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Empty heatmap"
+          },
+          "plugin": {
+            "kind": "Markdown",
+            "spec": {
+              "text": "**Migration from Grafana not supported !**"
+            }
+          }
+        }
+      },
+      "3_2": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "My Text panel"
+          },
+          "plugin": {
+            "kind": "Markdown",
+            "spec": {
+              "text": "# Title\n\nFor markdown syntax help: [commonmark.org/help](https://commonmark.org/help/)"
+            }
+          }
+        }
+      }
+    },
+    "layouts": [{
+        "kind": "Grid",
+        "spec": {
+          "items": [{
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              }
             },
             {
-                "kind": "Grid",
-                "spec": {
-                    "display": {
-                        "title": "My row title",
-                        "collapse": {
-                            "open": false
-                        }
-                    },
-                    "items": [
-                        {
-                            "x": 0,
-                            "y": 17,
-                            "width": 12,
-                            "height": 8,
-                            "content": {
-                                "$ref": "#/spec/panels/3_0"
-                            }
-                        },
-                        {
-                            "x": 12,
-                            "y": 17,
-                            "width": 6,
-                            "height": 5,
-                            "content": {
-                                "$ref": "#/spec/panels/3_1"
-                            }
-                        },
-                        {
-                            "x": 18,
-                            "y": 17,
-                            "width": 6,
-                            "height": 8,
-                            "content": {
-                                "$ref": "#/spec/panels/3_2"
-                            }
-                        }
-                    ]
-                }
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/1"
+              }
+            },
+            {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/2"
+              }
             }
-        ]
-    }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "My row title",
+            "collapse": {
+              "open": false
+            }
+          },
+          "items": [{
+              "x": 0,
+              "y": 17,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/3_0"
+              }
+            },
+            {
+              "x": 12,
+              "y": 17,
+              "width": 6,
+              "height": 5,
+              "content": {
+                "$ref": "#/spec/panels/3_1"
+              }
+            },
+            {
+              "x": 18,
+              "y": 17,
+              "width": 6,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/3_2"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
 }
