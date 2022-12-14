@@ -27,7 +27,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const selectedDatasource = datasource ?? DEFAULT_PROM;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
-  const promURL = client?.options.proxyUrl;
+  const promURL = client?.options.datasourceUrl;
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);

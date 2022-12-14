@@ -33,7 +33,9 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
 
   // Could think about this becoming a class, although it definitely doesn't have to be
   return {
-    options: options,
+    options: {
+      datasourceUrl,
+    },
     instantQuery: (params) => instantQuery(params, { datasourceUrl }),
     rangeQuery: (params) => rangeQuery(params, { datasourceUrl }),
     labelNames: (params) => labelNames(params, { datasourceUrl }),
