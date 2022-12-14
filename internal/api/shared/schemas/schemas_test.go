@@ -220,11 +220,9 @@ func TestValidateVariables(t *testing.T) {
 								CommonVariableSpec: dashboard.CommonVariableSpec{
 									Name: "my1rstVar",
 									Display: &dashboard.VariableDisplay{
-										Display: common.Display{
-											Name:        "My First Variable",
-											Description: "A simple variable of type FirstVariable",
-										},
-										Hidden: false,
+										Name:        "My First Variable",
+										Description: "A simple variable of type FirstVariable",
+										Hidden:      false,
 									},
 								},
 								AllowAllValue: true,
@@ -238,11 +236,9 @@ func TestValidateVariables(t *testing.T) {
 								CommonVariableSpec: dashboard.CommonVariableSpec{
 									Name: "my2ndVar",
 									Display: &dashboard.VariableDisplay{
-										Display: common.Display{
-											Name:        "My Second Variable",
-											Description: "A simple variable of type SecondVariable",
-										},
-										Hidden: false,
+										Name:        "My Second Variable",
+										Description: "A simple variable of type SecondVariable",
+										Hidden:      false,
 									},
 								},
 								AllowAllValue: true,
@@ -271,11 +267,9 @@ func TestValidateVariables(t *testing.T) {
 								CommonVariableSpec: dashboard.CommonVariableSpec{
 									Name: "myUnknownVar",
 									Display: &dashboard.VariableDisplay{
-										Display: common.Display{
-											Name:        "My Unknown Variable",
-											Description: "A simple variable of type UnknownVariable",
-										},
-										Hidden: false,
+										Name:        "My Unknown Variable",
+										Description: "A simple variable of type UnknownVariable",
+										Hidden:      false,
 									},
 								},
 								AllowAllValue: false,

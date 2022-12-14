@@ -76,8 +76,42 @@ type VariableSpec interface {
 }
 
 type VariableDisplay struct {
-	common.Display `json:",inline" yaml:",inline"`
-	Hidden         bool `json:"hidden" yaml:"hidden"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	Hidden      bool   `json:"hidden" yaml:"hidden"`
+}
+
+func (d *VariableDisplay) UnmarshalJSON(data []byte) error {
+	var tmp VariableDisplay
+	type plain VariableDisplay
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *VariableDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp VariableDisplay
+	type plain VariableDisplay
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *VariableDisplay) validate() error {
+	if len(d.Name) == 0 {
+		return fmt.Errorf("name cannot be empty")
+	}
+	return nil
 }
 
 type CommonVariableSpec struct {
