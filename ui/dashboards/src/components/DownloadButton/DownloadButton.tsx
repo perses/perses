@@ -13,8 +13,8 @@
 
 import React, { useRef } from 'react';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
-import { IconButton, styled } from '@mui/material';
 import { useDashboard } from '../../context';
+import { ToolbarIconButton } from '../ToolbarIconButton';
 
 // Button to download the dashboard as a JSON file.
 export function DownloadButton() {
@@ -38,9 +38,9 @@ export function DownloadButton() {
 
   return (
     <>
-      <DownloadIconButton title="Download JSON" onClick={onDownloadButtonClick}>
+      <ToolbarIconButton title="Download JSON" onClick={onDownloadButtonClick}>
         <DownloadIcon />
-      </DownloadIconButton>
+      </ToolbarIconButton>
       {/* Hidden link to download the dashboard as a JSON file */}
       {/* eslint-disable jsx-a11y/anchor-has-content */}
       {/* eslint-disable jsx-a11y/anchor-is-valid  */}
@@ -48,10 +48,3 @@ export function DownloadButton() {
     </>
   );
 }
-
-const DownloadIconButton = styled(IconButton)(({ theme }) => ({
-  border: `1px solid ${theme.palette.grey[300]}`,
-  borderRadius: theme.shape.borderRadius,
-  padding: '4px',
-  color: theme.palette.grey[900],
-}));

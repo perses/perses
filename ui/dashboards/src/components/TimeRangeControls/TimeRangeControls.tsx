@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import RefreshIcon from 'mdi-material-ui/Refresh';
-import { IconButton, styled } from '@mui/material';
 import { DateTimeRangePicker, TimeOption } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isDurationString } from '@perses-dev/core';
 import { useDefaultTimeRange } from '../../context';
+import { ToolbarIconButton } from '../ToolbarIconButton';
 
 export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
@@ -59,16 +59,9 @@ export function TimeRangeControls({ heightPx }: TimeRangeControlsProps) {
   return (
     <>
       <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
-      <RefreshIconButton aria-label="Refresh Dashboard" onClick={refresh} sx={{ height }}>
+      <ToolbarIconButton aria-label="Refresh Dashboard" onClick={refresh} sx={{ height }}>
         <RefreshIcon />
-      </RefreshIconButton>
+      </ToolbarIconButton>
     </>
   );
 }
-
-const RefreshIconButton = styled(IconButton)(({ theme }) => ({
-  border: `1px solid ${theme.palette.grey[300]}`,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(0.5),
-  color: theme.palette.grey[900],
-}));

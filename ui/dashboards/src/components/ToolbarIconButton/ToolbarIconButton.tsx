@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Dashboard';
-export * from './DashboardToolbar';
-export * from './DeletePanelDialog';
-export * from './DeletePanelGroupDialog';
-export * from './DiscardChangesConfirmationDialog';
-export * from './DownloadButton';
-export * from './GridLayout';
-export * from './Panel';
-export * from './PanelDrawer';
-export * from './PanelGroupDialog';
-export * from './TimeRangeControls';
-export * from './ToolbarIconButton';
-export * from './Variables';
+import { Button, styled, ButtonProps } from '@mui/material';
+
+type ToolbarIconButtonProps = ButtonProps;
+
+export function ToolbarIconButton(props: ToolbarIconButtonProps) {
+  return <IconButton variant="outlined" color="secondary" {...props} />;
+}
+
+const IconButton = styled(Button)(({ theme }) => ({
+  // Using a button with some adjusted styles because it is easier to inherit
+  // styling and variants from themes than with an IconButton.
+  padding: theme.spacing(0.5),
+  minWidth: 'auto',
+}));
