@@ -38,6 +38,7 @@ type option struct {
 	chartsSchemas      string
 	queriesSchemas     string
 	datasourcesSchemas string
+	variablesSchemas   string
 	online             bool
 	sch                schemas.Schemas
 	apiClient          api.ClientInterface
@@ -47,11 +48,12 @@ func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'lint'")
 	}
-	if (len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0) || len(o.datasourcesSchemas) > 0 {
+	if (len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0) || len(o.datasourcesSchemas) > 0 || len(o.variablesSchemas) > 0 {
 		o.sch = schemas.New(apiConfig.Schemas{
 			PanelsPath:      o.chartsSchemas,
 			QueriesPath:     o.queriesSchemas,
 			DatasourcesPath: o.datasourcesSchemas,
+			VariablesPath:   o.variablesSchemas,
 		})
 	}
 	if o.online {
@@ -147,9 +149,10 @@ percli lint -f ./resources.json --online
 	}
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.MarkFileFlagAsMandatory(cmd)
-	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for charts.")
-	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for queries.")
+	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for dasbhoard charts.")
+	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for chart queries.")
 	cmd.Flags().StringVar(&o.datasourcesSchemas, "schemas.datasources", "", "Path to the CUE schemas for the datasources")
+	cmd.Flags().StringVar(&o.variablesSchemas, "schemas.variables", "", "Path to the CUE schemas for the dashboard variables")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
 
 	cmd.MarkFlagsRequiredTogether("schemas.charts", "schemas.queries")
@@ -158,5 +161,6 @@ percli lint -f ./resources.json --online
 	cmd.MarkFlagsMutuallyExclusive("schemas.charts", "online")
 	cmd.MarkFlagsMutuallyExclusive("schemas.queries", "online")
 	cmd.MarkFlagsMutuallyExclusive("schemas.datasources", "online")
+	cmd.MarkFlagsMutuallyExclusive("schemas.variables", "online")
 	return cmd
 }
