@@ -141,7 +141,7 @@ function ViewMigrate() {
         )}
         {migrateMutation.isSuccess && (
           <Stack direction={'row'} spacing={1}>
-            <JSONEditor value={migrateMutation.data} />
+            <JSONEditor value={migrateMutation.data} width={'80%'} />
             <Stack spacing={1}>
               <TextField
                 required

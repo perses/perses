@@ -15,14 +15,20 @@ import { useEffect, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter, lintGutter } from '@codemirror/lint';
-import { useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 
 interface JSONEditorProps<Spec> {
   value: Spec;
   onChange?: (next: Spec) => void;
+  maxHeight?: string;
+  height?: string;
+  width?: string;
+  maxWidth?: string;
 }
 
 export function JSONEditor<T>(props: JSONEditorProps<T>) {
+  const { onChange, height, width, maxWidth } = props;
+  const maxHeight = props.maxHeight ?? '50rem';
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
@@ -33,24 +39,29 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
   }, [props.value]);
 
   return (
-    <CodeMirror
-      style={{ border: `1px solid ${theme.palette.divider}` }}
-      theme={isDarkMode ? 'dark' : 'light'}
-      extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
-      value={value}
-      onChange={(newValue) => {
-        setValue(newValue);
-      }}
-      onBlur={() => {
-        try {
-          const json = JSON.parse(value ?? '{}');
-          if (props.onChange !== undefined) {
-            props.onChange(json);
+    <Box maxWidth={maxWidth} width={width}>
+      <CodeMirror
+        style={{ border: `1px solid ${theme.palette.divider}` }}
+        theme={isDarkMode ? 'dark' : 'light'}
+        extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
+        value={value}
+        maxHeight={maxHeight}
+        height={height}
+        maxWidth={'100%'}
+        onChange={(newValue) => {
+          setValue(newValue);
+        }}
+        onBlur={() => {
+          try {
+            const json = JSON.parse(value ?? '{}');
+            if (onChange !== undefined) {
+              onChange(json);
+            }
+          } catch (e) {
+            // ignore this error
           }
-        } catch (e) {
-          // ignore this error
-        }
-      }}
-    />
+        }}
+      />
+    </Box>
   );
 }
