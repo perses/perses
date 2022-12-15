@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Theme } from '@mui/material';
+import { Box, CircularProgress, Link, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import Github from 'mdi-material-ui/Github';
 import { useSnackbar } from '../context/SnackbarProvider';
@@ -39,7 +39,15 @@ export default function Footer(): JSX.Element {
           {isLoading ? (
             <CircularProgress size="1rem" />
           ) : data !== undefined && data.version !== '' ? (
-            data.version
+            <Link
+              color={'inherit'}
+              underline={'hover'}
+              target="_blank"
+              rel="noreferrer"
+              href={`https://github.com/perses/perses/releases/tag/v${data.version}`}
+            >
+              {data.version}
+            </Link>
           ) : (
             'development version'
           )}
