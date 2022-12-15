@@ -1,0 +1,21 @@
+if #var.type == "query" {
+    #qResRegexp: "^query_result\\((.*by\\s*\\((\\w+).*)\\)$"
+    #cleanedQuery: strings.Replace(#var.query.query, "$__range", "placeholder", -1) // this removes the grafana global vars that'd be causing validation issues later (e.g "__range is used but not defined")
+    // TODO replace above assignation by below one once we'll rely on cue > v0.5 (regexp.ReplaceAll was added in v0.4.3)
+    // #cleanedQuery: regexp.ReplaceAll("\\$__\\w+", #var.query.query, "placeholder") // this removes the grafana global vars that'd be causing validation issues later (e.g "__range is used but not defined")
+
+    if #var.query.query =~ #qResRegexp {
+        kind:          "PrometheusPromQLVariable"
+        spec: {
+            expr:       regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[1]
+            label_name: regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[2]
+        }
+    }
+    if #var.query.query !~ #qResRegexp {
+        kind:          "PrometheusPromQLVariable"
+        spec: {
+            expr:       #cleanedQuery
+            label_name: "migration_from_grafana_not_supported"
+        }
+    }
+},

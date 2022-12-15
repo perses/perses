@@ -3,4 +3,4 @@ if #var.type == "query" if #var.query.query =~ "^label_names\\(\\)$" {
     spec: {
         matchers: []
     }
-}
+},

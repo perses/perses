@@ -4,62 +4,35 @@ if #panel.type == "stat" {
         query: {
             kind: "TimeSeriesQuery"
             spec: {
-                plugin: {
-                    #target: #panel.targets[0] // Perses's StatChart doesn't support multi queries
+                #target: #panel.targets[0] // Perses's StatChart doesn't support multi queries
+                plugin: [ // switch
                     %(conditional_timeserie_queries)
-                }
+                ][0]
             }
         }
-        // mapping table for the `calculation` attribute
-        // TODO: factorize this for all panels?
-        #calcMapping: {
-            first: "First"
-            firstNotNull: "First"
-            last: "Last"
-            lastNotNull: "LastNumber"
-            mean: "Mean"
-            total: "Sum"
-        }
-        #defaultCalc: "Last"
-        // TODO manage full calcs array?
-        if #calcMapping["\(#panel.options.reduceOptions.calcs[0])"] != _|_ {
-            calculation: #calcMapping["\(#panel.options.reduceOptions.calcs[0])"]
-        }
-        if #calcMapping["\(#panel.options.reduceOptions.calcs[0])"] == _|_ {
-            calculation: #defaultCalc
-        }
-        // mapping table for the `unit` attribute
-        // TODO: factorize this for all panels?
-        #unitMapping: {
-            ms: "Milliseconds"
-            s: "Seconds"
-            m: "Minutes"
-            h: "Hours"
-            d: "Days"
-            percent: "Percent"
-            percentunit: "PercentDecimal"
-            bytes: "Bytes"
-            decbytes: "Bytes"
-        }
-        if #panel.fieldConfig.defaults.unit != _|_ if #unitMapping["\(#panel.fieldConfig.defaults.unit)"] != _|_ {
+        #calcPath: "\(#panel.options.reduceOptions.calcs[0])" // only consider [0] here as Perses's StatChart doesn't support multi queries
+        calculation: [ // switch
+            if #mapping.calc[#calcPath] != _|_ { #mapping.calc[#calcPath] },
+            { #defaultCalc }
+        ][0]
+        #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
+        if #unitPath != null if #mapping.unit[#unitPath] != _|_ {
             unit: {
-                kind: #unitMapping["\(#panel.fieldConfig.defaults.unit)"]
+                kind: #mapping.unit[#unitPath]
             }
         }
         if #panel.fieldConfig.defaults.thresholds != _|_ {
             thresholds: {
-                // default_color                                                       // TODO how to fill this field?
-                steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps { // TODO how to manage the overrides part? 
-                    if step.value == null {
-                        value: 0
-                    }
-                    if step.value != null {
-                        value: step.value
-                    }
+                //default_color: TODO how to fill this one?
+                steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part? 
+                    value: [ // switch
+                        if step.value == null { 0 },
+                        { step.value }
+                    ][0]
                     color: step.color
                 }]
             }
         }
         // nothing to map to the `sparkline` field yet
     }
-}
+},

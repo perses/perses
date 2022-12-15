@@ -1,13 +1,37 @@
 import (
-	// regexp is not used at the current stage in this file. It is used when merging the different cuepart file together. This is a way to shared the import across the different files
     "regexp"
-    "strings"
+    "strings" 
     "math"
 )
 
+#mapping: {
+    // mapping table for the unit attribute (key = grafana unit, value = perses equivalent)
+    unit: {
+        ms: "Milliseconds"
+        s: "Seconds"
+        m: "Minutes"
+        h: "Hours"
+        d: "Days"
+        percent: "Percent"
+        percentunit: "PercentDecimal"
+        bytes: "Bytes"
+        decbytes: "Bytes"
+    }
+    // mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
+    calc: {
+        first: "First"
+        firstNotNull: "First"
+        last: "Last"
+        lastNotNull: "LastNumber"
+        mean: "Mean"
+        total: "Sum"
+    }
+}
+#defaultCalc: "Last"
+
 kind: "Dashboard",
 metadata: {
-    name: strings.Replace(#grafanaDashboard.title, " ", "", -1)
+    name: #grafanaDashboard.uid
 },
 spec: {
     duration: "1h" // fixed value, we don't really care translating this one
@@ -23,15 +47,32 @@ spec: {
             }
         }
         if grafanaVar.type != "constant" {
-            kind: "ListVariable",
+            kind: "ListVariable"
             spec: {
-                name: grafanaVar.name,
-                allow_all_value: grafanaVar.includeAll | *false, // the default value tackles the case of variables of type `interval` that don't have such field
-                allow_multiple: grafanaVar.multi | *false,       // the default value tackles the case of variables of type `interval` that don't have such field
-                plugin: {
-                    #var: grafanaVar
-                    %(conditional_variables)
+                name: grafanaVar.name
+                if grafanaVar.label != _|_ || grafanaVar.description != _|_ || grafanaVar.hide > 0 {
+                    display: {
+                        name: [ // switch
+                            if grafanaVar.label != _|_ if grafanaVar.label != "" {
+                                grafanaVar.label
+                            },
+                            grafanaVar.name
+                        ][0]
+                        if grafanaVar.description != _|_ {
+                            description: grafanaVar.description
+                        }
+                        if grafanaVar.hide > 0 {
+                            hidden: true
+                        }
+                    }
                 }
+                allow_all_value: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
+                allow_multiple: *grafanaVar.multi | false       // the default value tackles the case of variables of type `interval` that don't have such field
+                // default_value: nothing to map to this field
+                #var: grafanaVar
+                plugin: [ // switch
+                    %(conditional_variables)
+                ][0]
             }
         }
     }]
@@ -44,13 +85,13 @@ spec: {
                     kind: "Panel"
                     spec: {
                         display: {
-                            name: innerPanel.title
-                            description: innerPanel.description | *""
+                            name: *innerPanel.title | "empty"
+                            description: *innerPanel.description | ""
                         }
-                        plugin: {
-                            #panel: innerPanel
+                        #panel: innerPanel
+                        plugin: [ // switch
                             %(conditional_panels)
-                        }
+                        ][0]
                     }
                 }
             }
@@ -60,13 +101,13 @@ spec: {
                 kind: "Panel"
                 spec: {
                     display: {
-                        name: grafanaPanel.title
-                        description: grafanaPanel.description | *""
+                        name: *grafanaPanel.title | "empty"
+                        description: *grafanaPanel.description | ""
                     }
-                    plugin: {
-                        #panel: grafanaPanel
+                    #panel: grafanaPanel
+                    plugin: [ // switch
                         %(conditional_panels)
-                    }
+                    ][0]
                 }
             }
         }
@@ -93,14 +134,14 @@ spec: {
         // go through the top-level panels a 3rd time & match only the rows, to create the corresponding grids
         for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels != _|_ { // if the panel is a row
             #row: grafanaPanel
-            kind: "Grid",
+            kind: "Grid"
             spec: {
                 display: {
                     title: #row.title,
                     collapse: {
                         open: !#row.collapsed
                     }
-                },
+                }
                 // go through the children panels of the current row
                 items: [ for innerPanelId, innnerPanel in #row.panels {
                     // it may happen that a grafana panel coordinate has a decimal
