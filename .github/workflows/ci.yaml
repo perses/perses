@@ -2,6 +2,12 @@ name: ci
 on:
   pull_request:
   push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
