@@ -13,6 +13,7 @@
 
 import {
   Alert,
+  Box,
   Button,
   CircularProgress,
   Container,
@@ -141,7 +142,9 @@ function ViewMigrate() {
         )}
         {migrateMutation.isSuccess && (
           <Stack direction={'row'} spacing={1}>
-            <JSONEditor value={migrateMutation.data} />
+            <Box width={'80%'}>
+              <JSONEditor value={migrateMutation.data} maxHeight={'50rem'} width={'100%'} />
+            </Box>
             <Stack spacing={1}>
               <TextField
                 required

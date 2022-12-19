@@ -16,11 +16,12 @@ import CodeMirror from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter, lintGutter } from '@codemirror/lint';
 import { useTheme } from '@mui/material';
+import { ReactCodeMirrorProps } from '@uiw/react-codemirror/src';
 
-interface JSONEditorProps<Spec> {
-  value: Spec;
-  onChange?: (next: Spec) => void;
-}
+type JSONEditorProps<T> = Omit<ReactCodeMirrorProps, 'onBlur' | 'theme' | 'extensions' | 'onChange' | 'value'> & {
+  value: T;
+  onChange?: (next: T) => void;
+};
 
 export function JSONEditor<T>(props: JSONEditorProps<T>) {
   const theme = useTheme();
@@ -34,6 +35,7 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
 
   return (
     <CodeMirror
+      {...props}
       style={{ border: `1px solid ${theme.palette.divider}` }}
       theme={isDarkMode ? 'dark' : 'light'}
       extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
