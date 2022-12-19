@@ -7,7 +7,8 @@
 # Populate database
 echo ">> populate the local database"
 cd dev 
-bash populate.sh
+rm -rf local_db
+./populate.sh
 
 # Make api
 echo ">> build the api server"
