@@ -1,17 +1,16 @@
-Contributing
-============
+# Contributing
 
 As Perses is still a work in progress, the contribution process is still evolving.
 
 We are using GitHub as our main development and discussion forum.
 
-* All PRs should go there.
-* We use pull requests and issues for tracking the development of features that are either uncontroversial and/or small
+- All PRs should go there.
+- We use pull requests and issues for tracking the development of features that are either uncontroversial and/or small
   and don't need much up-front discussion.
-* If you are thinking about contributing something more involved, you can use
+- If you are thinking about contributing something more involved, you can use
   the [GitHub discussions](https://github.com/perses/perses/discussions) feature for design discussions before sending a
   pull request or creating a feature request issue.
-* Be sure to add [DCO signoffs](https://github.com/probot/dco#how-it-works) to all of your commits.
+- Be sure to add [DCO signoffs](https://github.com/probot/dco#how-it-works) to all of your commits.
 
 If you are unsure about what to do, and you are eager to contribute, you can reach us on the development
 channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) on [Matrix](https://matrix.org/).
@@ -40,7 +39,7 @@ In the usual workflow, all PRs are squashed. There is two exceptions to this rul
 
 2. In case your PR contains multiple kind of changes (aka, feature, bugfix ..etc.) and you took care about having
    different commit following the convention described above, then the PR will be merged and not squashed. Like that we
-   are preserving the works you did and the effort you made when creating meaningful commit. 
+   are preserving the works you did and the effort you made when creating meaningful commit.
 
 ## Development
 
@@ -48,8 +47,8 @@ This section explains how to build, launch, and start using Perses.
 
 This repository contains two major components of Perses:
 
-* The backend API server written in Go.
-* The web application frontend written in TypeScript (using React).
+- The backend API server written in Go.
+- The web application frontend written in TypeScript (using React).
 
 Both components can be started and tested individually as described below.
 
@@ -57,27 +56,35 @@ Both components can be started and tested individually as described below.
 
 Building and starting the backend API server requires the following tools:
 
-* [Go](https://go.dev/doc/install) (usually the latest version as we are following upstream Go releases closely)
-* Make
-* [jq](https://stedolan.github.io/jq/download/) to run the populate.sh script below
+- [Go](https://go.dev/doc/install) (usually the latest version as we are following upstream Go releases closely)
+- Make
+- [jq](https://stedolan.github.io/jq/download/) to run the populate.sh script below
 
-With these dependencies installed, you can proceed as follows:
+#### Quick version
 
-* Change to the `dev` folder and generate the local database by running the `populate.sh` script. You will then be able
+With the required dependencies installed, you can run `bash scripts/api_backend_dev.sh` to automatically set up the api server for local development. The API backend will be available on port 8080.
+
+See "detailed version" for a summary of the steps automated by this script. Follow those instructions if you want more granular control over building and starting the API server.
+
+#### Detailed version
+
+With the required dependencies installed, you can proceed as follows:
+
+- Change to the `dev` folder and generate the local database by running the `populate.sh` script. You will then be able
   to modify it on the fly.
 
 ```bash
 bash populate.sh
 ```
 
-* Return to the root of the project and build the API server:
+- Return to the root of the project and build the API server:
 
 ```bash
 cd ../
 make build-api
 ```
 
-* Finally, run the built binary, using the simple configuration file found in the `dev` folder:
+- Finally, run the built binary, using the simple configuration file found in the `dev` folder:
 
 ```bash
 ./bin/perses -config ./dev/config.yaml
