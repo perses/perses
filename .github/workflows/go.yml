@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
   pull_request:
 
 concurrency:
@@ -22,59 +26,58 @@ jobs:
     name: "check code format"
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-    - uses: ./.github/actions/setup_environment
-      with:
-        enable_go: true
-    - name: install cue
-      run: go install cuelang.org/go/cmd/cue@v0.4.2
-    - name: check format
-      run: make checkformat
-    - name: check go.mod
-      run: make checkunused
+      - name: checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_go: true
+      - name: install cue
+        run: go install cuelang.org/go/cmd/cue@v0.4.2
+      - name: check format
+        run: make checkformat
+      - name: check go.mod
+        run: make checkunused
   test:
     name: "unit and integration tests"
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-    - uses: ./.github/actions/setup_environment
-      with:
-        enable_go: true
-    - name: test
-      run: make integration-test
+      - name: checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_go: true
+      - name: test
+        run: make integration-test
   golangci:
     name: lint
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-    - uses: ./.github/actions/setup_environment
-      with:
-        enable_go: true
-        enable_npm: false
-    - name: generate files
-      run: make generate
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3.3.1
-      with:
-        # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-        version: v1.49.0
-        args: --timeout 5m
+      - name: checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_go: true
+          enable_npm: false
+      - name: generate files
+        run: make generate
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3.3.1
+        with:
+          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+          version: v1.49.0
+          args: --timeout 5m
   cue-eval:
     name: cue
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-    - uses: ./.github/actions/setup_environment
-      with:
-        enable_go: true
-    - name: install cue
-      run: go install cuelang.org/go/cmd/cue@latest
-    - name: eval cue schema
-      run: make cue-eval
-    - name: test cue schema
-      run: make cue-test
-
+      - name: checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_go: true
+      - name: install cue
+        run: go install cuelang.org/go/cmd/cue@latest
+      - name: eval cue schema
+        run: make cue-eval
+      - name: test cue schema
+        run: make cue-test
