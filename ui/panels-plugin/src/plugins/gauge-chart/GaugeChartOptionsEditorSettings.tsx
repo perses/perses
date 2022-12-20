@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TextField } from '@mui/material';
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
@@ -20,6 +21,7 @@ import {
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
+  OptionsEditorControl,
 } from '@perses-dev/components';
 import { GaugeChartOptionsEditorProps } from './GaugeChartOptionsEditor';
 import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
@@ -49,6 +51,26 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
         <OptionsEditorGroup title="Misc">
           <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+          <OptionsEditorControl
+            label="Max"
+            control={
+              <TextField
+                type="number"
+                value={value.max ?? ''}
+                onChange={(e) => {
+                  // ensure empty value resets to undef to allow chart to calculate max
+                  // max only needs to be set explicitly for units other than Percent and PercentDecimal
+                  const newValue = e.target.value ? Number(e.target.value) : undefined;
+                  onChange(
+                    produce(value, (draft: GaugeChartOptions) => {
+                      draft.max = newValue;
+                    })
+                  );
+                }}
+                placeholder="Default"
+              />
+            }
+          />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>
