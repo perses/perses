@@ -152,10 +152,7 @@ export function GaugeChart(props: GaugeChartProps) {
             color: 'inherit', // allows value color to match active threshold color
             fontSize: valueSizeClamp,
             formatter: (value: number) => {
-              return formatValue(value, {
-                kind: unit.kind,
-                decimal_places: 0,
-              });
+              return formatValue(value, unit);
             },
           },
           data: [
@@ -199,10 +196,7 @@ export function getResponsiveValueSize(value: number, unit: UnitOptions, width: 
   const MIN_SIZE = 3;
   const MAX_SIZE = 24;
   const SIZE_MULTIPLIER = 0.7;
-  const formattedValue = formatValue(value, {
-    kind: unit.kind,
-    decimal_places: 0,
-  });
+  const formattedValue = formatValue(value, unit);
   const valueCharacters = formattedValue.length ?? 2;
   const valueSize = (Math.min(width, height) / valueCharacters) * SIZE_MULTIPLIER;
   return `clamp(${MIN_SIZE}px, ${valueSize}px, ${MAX_SIZE}px)`;
