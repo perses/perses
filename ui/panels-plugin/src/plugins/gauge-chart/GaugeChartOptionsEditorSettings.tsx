@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { merge } from 'lodash-es';
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
@@ -43,11 +44,14 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     );
   };
 
+  // ensures decimal_places defaults to correct value
+  const unit = merge({}, DEFAULT_UNIT, value.unit);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
-          <UnitSelector value={value.unit ?? DEFAULT_UNIT} onChange={handleUnitChange} />
+          <UnitSelector value={unit} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
