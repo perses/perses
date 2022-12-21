@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { GaugeSeriesOption } from 'echarts';
+import { merge } from 'lodash-es';
 import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeSeries } from '@perses-dev/components';
 import { Box, Skeleton, Stack } from '@mui/material';
@@ -30,7 +31,9 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
   const { query, calculation, max } = pluginSpec;
 
-  const unit = pluginSpec.unit ?? DEFAULT_UNIT;
+  // ensures decimal_places gets set if undef
+  const unit = merge({}, DEFAULT_UNIT, pluginSpec.unit);
+
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);

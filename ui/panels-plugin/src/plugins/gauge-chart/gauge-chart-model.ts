@@ -47,14 +47,14 @@ export function createInitialGaugeChartOptions(): GaugeChartOptions {
       },
     },
     calculation: 'LastNumber',
-    unit: { kind: 'Percent' },
+    unit: DEFAULT_UNIT,
     thresholds: {
       steps: [
         {
-          value: 80,
+          value: 0.8,
         },
         {
-          value: 90,
+          value: 0.9,
         },
       ],
     },
