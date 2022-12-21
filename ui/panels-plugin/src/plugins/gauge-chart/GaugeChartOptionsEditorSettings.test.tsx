@@ -95,7 +95,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Decimal',
         },
-        max: 50,
+        max: 1,
         calculation: 'LastNumber',
         query: MOCK_QUERY,
       },

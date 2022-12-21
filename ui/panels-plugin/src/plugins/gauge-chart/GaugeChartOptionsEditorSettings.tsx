@@ -58,7 +58,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
                 type="number"
                 value={value.max ?? ''}
                 onChange={(e) => {
-                  // ensure empty value resets to undef to allow chart to calculate max
+                  // ensure empty value resets to undef to allow chart to calculate max since
                   // max only needs to be set explicitly for units other than Percent and PercentDecimal
                   const newValue = e.target.value ? Number(e.target.value) : undefined;
                   onChange(
