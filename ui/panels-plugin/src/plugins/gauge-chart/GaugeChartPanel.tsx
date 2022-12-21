@@ -31,7 +31,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
   const { query, calculation, max } = pluginSpec;
 
-  // ensures decimal_places gets set if undef
+  // ensures all default unit properties set if undef
   const unit = merge({}, DEFAULT_UNIT, pluginSpec.unit);
 
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
