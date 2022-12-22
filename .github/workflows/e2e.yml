@@ -1,0 +1,46 @@
+name: e2e
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      # Do not run e2e tests on snapshots because they can be used for testing
+      # WIP changes and are never intended to be merged into `main` or released.
+    tags:
+      - v*
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref_name != 'main' }}
+
+jobs:
+  e2e:
+    name: end-to-end tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_npm: true
+          enable_go: true
+      - name: Install UI deps
+        working-directory: ./ui
+        run: npm ci
+      - name: Install Playwright Browsers
+        working-directory: ./ui
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright tests
+        working-directory: ./ui
+        run: npm run e2e
+        env:
+          # Outputs information from webservers started in the background by
+          # Playwright. Useful for understanding if something failing there
+          # breaks the tests.
+          DEBUG: pw:webserver
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: ui/e2e/playwright-report/

@@ -11,13 +11,15 @@
     "start": "turbo run start",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
-    "clear-turbo-cache": "rimraf node_modules/.cache/turbo"
+    "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
+    "e2e": "turbo run e2e"
   },
   "workspaces": [
     "app",
     "components",
     "core",
     "dashboards",
+    "e2e",
     "panels-plugin",
     "plugin-system",
     "prometheus-plugin"

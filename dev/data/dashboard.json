@@ -1473,5 +1473,115 @@
         }
       ]
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "PanelGroups",
+      "project": "EndToEndTesting",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2022-12-21T00:00:00Z",
+      "version": 0
+    },
+    "spec": {
+      "duration": "6h",
+      "variables": [],
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Dashboard Team Overview",
+              "description": "This is a markdown panel"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\nHere is `some inline code`.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n* two bullet\n* points\n\nDo you want to [visit the google](https://www.google.com)?\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>When inlining HTML, will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n"
+              }
+            }
+          }
+        }    
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "Panels",
+      "project": "EndToEndTesting",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2022-12-21T00:00:00Z",
+      "version": 0
+    },
+    "spec": {
+      "duration": "6h",
+      "variables": [],
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Markdown Example Zero",
+              "description": "This is a markdown panel"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Example"
+              }
+            }
+          }
+        }    
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 ]

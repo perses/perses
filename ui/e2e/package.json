@@ -1,0 +1,17 @@
+{
+  "name": "@perses-dev/e2e",
+  "version": "0.21.1",
+  "private": true,
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:report": "playwright show-report",
+    "e2e:watch": "chokidar src/tests/**/**.ts -c 'playwright test {path}'",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.29.0",
+    "chokidar-cli": "^3.0.0",
+    "eslint-plugin-playwright": "^0.11.2"
+  }
+}

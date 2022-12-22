@@ -10,5 +10,11 @@
     "metadata": {
       "name": "IncredibleProject"
     }
+  },
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "EndToEndTesting"
+    }
   }
 ]

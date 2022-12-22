@@ -58,10 +58,14 @@ export function GridTitle(props: GridTitleProps) {
         backgroundColor: ({ palette }) =>
           palette.mode === 'dark' ? palette.background.paper : palette.background.default,
       }}
+      data-testid="panel-group-header"
     >
       {collapse ? (
         <>
-          <IconButton onClick={collapse.onToggleOpen}>
+          <IconButton
+            onClick={collapse.onToggleOpen}
+            aria-label={`${collapse.isOpen ? 'collapse' : 'expand'} group ${title}`}
+          >
             {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
           </IconButton>
           {text}
