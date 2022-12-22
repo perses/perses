@@ -21,7 +21,27 @@ describe('TooltipContent', () => {
     render(<TooltipContent {...props} />);
   };
 
-  it('render tooltip content with a single series', () => {
+  it('render tooltip content with a single series name', () => {
+    const tooltipContent: TooltipContentProps = {
+      focusedSeries: [
+        {
+          seriesIdx: 0,
+          datumIdx: 73,
+          seriesName: '__name__="node_load1", env="demo", instance="demo.do.prometheus.io:9100", job="node"',
+          date: 'Dec 22, 2022, 10:38:00 AM',
+          x: 1671723480000,
+          y: 0.13,
+          formattedY: '13.0%',
+          markerColor: 'hsla(291443380,50%,50%,0.8)',
+        },
+      ],
+      wrapLabels: true,
+    };
+    renderComponent(tooltipContent);
+    expect(screen.getByText('instance:')).toBeInTheDocument();
+  });
+
+  it('render tooltip content with a single JSON formatted series name', () => {
     const tooltipContent: TooltipContentProps = {
       focusedSeries: [
         {

@@ -49,6 +49,20 @@ describe('SeriesInfo', () => {
     // expect(screen.getByText('test:')).toBeInTheDocument();
   });
 
+  it('render series name with abbreviated bytes formatting', () => {
+    const seriesInfo: SeriesInfoProps = {
+      seriesName: 'Node memory total',
+      y: 547594240,
+      formattedY: '522.23 MB',
+      markerColor: 'hsla(1232947988,50%,50%,0.8)',
+      totalSeries: 1,
+      wrapLabels: true,
+    };
+    renderComponent(seriesInfo);
+    expect(screen.getByText('value:')).toBeInTheDocument();
+    // expect(screen.getByText('test:')).toBeInTheDocument();
+  });
+
   it('render single JSON formatted series name', () => {
     const seriesInfo: SeriesInfoProps = {
       seriesName: '{"cluster":"demo","namespace":"demo-01","service":"alerting","window":"1h"}',
