@@ -15,7 +15,7 @@ import { Box, Divider, Stack, Typography } from '@mui/material';
 import { SeriesMarker } from './SeriesMarker';
 import { TOOLTIP_LABELS_MAX_WIDTH } from './tooltip-model';
 
-interface SeriesInfoProps {
+export interface SeriesInfoProps {
   seriesName: string;
   y: number;
   formattedY: string;
