@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { render } from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/dom';
 import { SeriesInfo, SeriesInfoProps } from './SeriesInfo';
 
@@ -21,58 +20,32 @@ describe('SeriesInfo', () => {
     render(<SeriesInfo {...props} />);
   };
 
-  it('render unformatted series name', () => {
+  it('render metric __name__ beside formattedY value', () => {
     const seriesInfo: SeriesInfoProps = {
-      seriesName: '__name__="node_load1", env="demo", instance="demo.do.prometheus.io:9100", job="node"',
-      y: 0.41,
-      formattedY: '41.0%',
-      markerColor: 'hsla(291443380,50%,50%,0.8)',
+      seriesName: 'node_load1{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+      y: 0.28,
+      formattedY: '28.0%',
+      markerColor: 'hsla(1016196180,50%,50%,0.8)',
       totalSeries: 1,
       wrapLabels: true,
     };
     renderComponent(seriesInfo);
-    expect(screen.getByText('value:')).toBeInTheDocument();
-    // expect(screen.getByText('test:')).toBeInTheDocument();
+    expect(screen.getByText('node_load1:')).toBeInTheDocument();
+    expect(screen.getByText('28.0%')).toBeInTheDocument();
+    expect(screen.getByText('instance="demo.do.prometheus.io:')).toBeInTheDocument();
   });
 
-  it('render formatted series name', () => {
-    const seriesInfo: SeriesInfoProps = {
-      seriesName: 'alerting slo',
-      y: 100,
-      formattedY: '100.00%',
-      markerColor: 'hsla(291443380,50%,50%,0.8)',
-      totalSeries: 1,
-      wrapLabels: true,
-    };
-    renderComponent(seriesInfo);
-    expect(screen.getByText('value:')).toBeInTheDocument();
-    // expect(screen.getByText('test:')).toBeInTheDocument();
-  });
-
-  it('render series name with abbreviated bytes formatting', () => {
+  it('render preformatted series name beside formattedY value', () => {
     const seriesInfo: SeriesInfoProps = {
       seriesName: 'Node memory total',
-      y: 547594240,
-      formattedY: '522.23 MB',
-      markerColor: 'hsla(1232947988,50%,50%,0.8)',
-      totalSeries: 1,
+      y: 552341504,
+      formattedY: '526.75 MB',
+      markerColor: 'hsla(-1756459732,50%,50%,0.8)',
+      totalSeries: 2,
       wrapLabels: true,
     };
     renderComponent(seriesInfo);
-    expect(screen.getByText('value:')).toBeInTheDocument();
-    // expect(screen.getByText('test:')).toBeInTheDocument();
-  });
-
-  it('render single JSON formatted series name', () => {
-    const seriesInfo: SeriesInfoProps = {
-      seriesName: '{"cluster":"demo","namespace":"demo-01","service":"alerting","window":"1h"}',
-      y: 1.111,
-      formattedY: '1.11',
-      markerColor: 'hsla(-1715826000,50%,50%,0.8)',
-      totalSeries: 1,
-      wrapLabels: true,
-    };
-    renderComponent(seriesInfo);
-    expect(screen.getByText('value:')).toBeInTheDocument();
+    expect(screen.getByText('Node memory total')).toBeInTheDocument();
+    expect(screen.getByText('526.75 MB')).toBeInTheDocument();
   });
 });

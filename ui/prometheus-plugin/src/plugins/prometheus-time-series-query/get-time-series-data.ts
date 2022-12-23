@@ -75,7 +75,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     series: result.map((value) => {
       const { metric, values } = value;
 
-      console.log(metric);
+      // Name the series after the metric labels or if no metric, use the query
       let name = getUniqueKeyForPrometheusResult(metric, false);
       if (name === '') {
         name = query;

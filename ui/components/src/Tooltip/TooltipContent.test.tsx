@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { render } from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/dom';
 import { TooltipContent, TooltipContentProps } from './TooltipContent';
 
@@ -26,73 +25,50 @@ describe('TooltipContent', () => {
       focusedSeries: [
         {
           seriesIdx: 0,
-          datumIdx: 73,
-          seriesName: '__name__="node_load1", env="demo", instance="demo.do.prometheus.io:9100", job="node"',
-          date: 'Dec 22, 2022, 10:38:00 AM',
-          x: 1671723480000,
-          y: 0.13,
-          formattedY: '13.0%',
-          markerColor: 'hsla(291443380,50%,50%,0.8)',
+          datumIdx: 84,
+          seriesName: 'Test node demo.do.prometheus.io:9100',
+          date: 'Dec 23, 2022, 1:53:00 PM',
+          x: 1671821580000,
+          y: 0.1,
+          formattedY: '0.1',
+          markerColor: 'hsla(19838016,50%,50%,0.8)',
         },
       ],
       wrapLabels: true,
     };
     renderComponent(tooltipContent);
-    expect(screen.getByText('instance:')).toBeInTheDocument();
+    expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
+    expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
   });
 
-  it('render tooltip content with a single JSON formatted series name', () => {
+  it('render tooltip content with multiple series data', () => {
     const tooltipContent: TooltipContentProps = {
       focusedSeries: [
         {
-          // seriesType: 'line',
-          seriesIdx: 0,
-          datumIdx: 0,
-          seriesName: '{"cluster":"rc","namespace":"uat-test","service":"alerting","slo":"correctness","window":"1h"}',
-          date: 'Dec 22, 2022, 8:54:00 AM',
-          x: 1671717240000,
-          y: 1,
-          formattedY: '1.00',
-          markerColor: 'hsla(2083592972,50%,50%,0.8)',
-        },
-      ],
-      wrapLabels: true,
-    };
-    renderComponent(tooltipContent);
-    expect(screen.getByText('correctness')).toBeInTheDocument();
-  });
-
-  it('render tooltip content with multiple series', () => {
-    const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
-        {
-          // seriesType: 'line',
-          seriesIdx: 0,
-          datumIdx: 0,
-          seriesName: '{"cluster":"rc","namespace":"uat-test","service":"alerting","slo":"correctness","window":"1h"}',
-          date: 'Dec 22, 2022, 8:54:00 AM',
-          x: 1671717240000,
-          y: 1,
-          formattedY: '1.00',
-          markerColor: 'hsla(2083592972,50%,50%,0.8)',
+          seriesIdx: 2,
+          datumIdx: 48,
+          seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 'Dec 23, 2022, 1:44:00 PM',
+          x: 1671821040000,
+          y: 84635648,
+          formattedY: '84.64M',
+          markerColor: 'hsla(1887856572,50%,50%,0.8)',
         },
         {
-          // seriesType: 'line',
           seriesIdx: 1,
-          datumIdx: 0,
-          seriesName: '{"cluster":"rc","namespace":"rc-9999","service":"alerting","slo":"correctness","window":"1h"}',
-          date: 'Dec 22, 2022, 8:54:00 AM',
-          x: 1671717240000,
-          y: 1,
-          formattedY: '1.00',
-          markerColor: 'hsla(-2012293108,50%,50%,0.8)',
+          datumIdx: 48,
+          seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 'Dec 23, 2022, 1:44:00 PM',
+          x: 1671821040000,
+          y: 33771520,
+          formattedY: '33.77M',
+          markerColor: 'hsla(158479636,50%,50%,0.8)',
         },
       ],
       wrapLabels: true,
     };
     renderComponent(tooltipContent);
-    expect(
-      screen.getByText('cluster: rc, namespace: rc-9999, service: alerting, slo: correctness, window: 1h')
-    ).toBeInTheDocument();
+    expect(screen.getByText('33.77M')).toBeInTheDocument();
+    expect(screen.getAllByText('env="demo", instance="demo.do.prometheus.io:9100", job="node"')).toHaveLength(2);
   });
 });
