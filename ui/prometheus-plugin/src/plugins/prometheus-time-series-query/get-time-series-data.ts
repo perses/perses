@@ -19,11 +19,9 @@ import {
   getDurationStringSeconds,
   getPrometheusTimeRange,
   getRangeStep,
-  getUniqueKeyForPrometheusResult,
-  replaceTemplateVariables,
   DEFAULT_PROM,
-  formatSeriesName,
 } from '../../model';
+import { getUniqueKeyForPrometheusResult, replaceTemplateVariables, formatSeriesName } from '../../utils';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
@@ -77,6 +75,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     series: result.map((value) => {
       const { metric, values } = value;
 
+      console.log(metric);
       let name = getUniqueKeyForPrometheusResult(metric, false);
       if (name === '') {
         name = query;

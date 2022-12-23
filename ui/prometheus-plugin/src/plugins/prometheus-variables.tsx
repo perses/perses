@@ -12,15 +12,8 @@
 // limitations under the License.
 import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Stack, TextField } from '@mui/material';
-import {
-  replaceTemplateVariables,
-  parseTemplateVariables,
-  PrometheusClient,
-  DEFAULT_PROM,
-  getPrometheusTimeRange,
-  MatrixData,
-  VectorData,
-} from '../model';
+import { PrometheusClient, DEFAULT_PROM, getPrometheusTimeRange, MatrixData, VectorData } from '../model';
+import { replaceTemplateVariables, parseTemplateVariables } from '../utils';
 import {
   PrometheusLabelNamesVariableOptions,
   PrometheusLabelValuesVariableOptions,

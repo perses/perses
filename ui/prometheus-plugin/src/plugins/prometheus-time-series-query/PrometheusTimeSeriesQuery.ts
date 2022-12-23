@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { parseTemplateVariables } from '../../model';
+import { parseTemplateVariables } from '../../utils';
 import { getTimeSeriesData } from './get-time-series-data';
 import { PrometheusTimeSeriesQueryEditor } from './PrometheusTimeSeriesQueryEditor';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';

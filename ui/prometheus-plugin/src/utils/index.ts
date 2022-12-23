@@ -11,9 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './api-types';
-export * from './parse-sample-values';
-export * from './prometheus-client';
-export * from './prometheus-selectors';
-export * from './templating';
-export * from './time';
+export * from './utils';

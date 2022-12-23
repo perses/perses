@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseTemplateVariables, replaceTemplateVariable, replaceTemplateVariables, formatSeriesName } from './utils';
+import {
+  parseTemplateVariables,
+  replaceTemplateVariable,
+  replaceTemplateVariables,
+  formatSeriesName,
+  getUniqueKeyForPrometheusResult,
+} from './utils';
 
 describe('parseTemplateVariables()', () => {
   const tests = [
@@ -105,5 +111,46 @@ describe('formatSeriesName', () => {
     const output = 'Test node demo.do.prometheus.io:9100';
 
     expect(formatSeriesName(inputFormat, metric)).toEqual(output);
+  });
+});
+
+describe('getUniqueKeyForPrometheusResult', () => {
+  let labels: { [key: string]: string } = {};
+  beforeEach(() => {
+    labels = {};
+  });
+
+  it('should be a formatted prometheus string', () => {
+    labels = { ['foo']: 'bar' };
+    const result = getUniqueKeyForPrometheusResult(labels);
+    expect(result).toEqual('{foo="bar"}');
+  });
+
+  it('should be formatted with "', () => {
+    labels = { ['foo']: 'bar' };
+    const result = getUniqueKeyForPrometheusResult(labels, true);
+    expect(result).toEqual('{"foo":"bar"}');
+  });
+
+  it('should be formatted with __name__ removed', () => {
+    labels = {
+      __name__: 'node_memory_Buffers_bytes',
+      env: 'demo',
+      instance: 'demo.do.prometheus.io:9100',
+      job: 'node',
+    };
+    const result = getUniqueKeyForPrometheusResult(labels, true);
+    expect(result).toEqual('{"env":"demo","instance":"demo.do.prometheus.io:9100","job":"node"}');
+  });
+
+  it('should return a valid query to filter by label', () => {
+    labels = {
+      __name__: 'node_memory_Buffers_bytes',
+      env: 'demo',
+      instance: 'demo.do.prometheus.io:9100',
+      job: 'node',
+    };
+    const result = getUniqueKeyForPrometheusResult(labels, false);
+    expect(result).toEqual('node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}');
   });
 });
