@@ -29,6 +29,8 @@ export function SeriesInfo(props: SeriesInfoProps) {
 
   // TODO (sjcobb): regex to remove __name__, improve series labels
   const formattedSeriesLabels = seriesName.replace(/[{}"]/g, '');
+  const splitLabels = formattedSeriesLabels.split(',');
+  // TODO (sjcobb): check for splitLabels.length === 1 and use inlineSeriesLabels condition instead
 
   if (totalSeries === 1) {
     const jsonFormattedSeries = seriesName[0] === '{' ? true : false;
@@ -70,7 +72,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             color: theme.palette.common.white,
           })}
         >
-          {formattedSeriesLabels.split(',').map((name) => {
+          {splitLabels.map((name) => {
             if (name) {
               const [key, value] = jsonFormattedSeries ? name.split(':') : name.split('=');
               const formattedKey = value !== undefined ? `${key}: ` : key;

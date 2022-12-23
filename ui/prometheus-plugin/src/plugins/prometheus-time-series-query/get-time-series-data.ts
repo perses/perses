@@ -76,10 +76,14 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     series: result.map((value) => {
       const { metric, values } = value;
 
-      // Name the series after the metric labels or if no metric, just use the
-      // overall query
+      // // Name the series after the metric labels or if no metric, just use the
+      // // overall query
+      // // let name = Object.entries(metric)
+      // //   .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`)
+      // //   .join(', ');
+      // // if (name === '') name = query;
       let name = Object.entries(metric)
-        .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`)
+        .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`) // TODO (sjcobb): remove .map, change to JSON.stringify or unformatted version instead?
         .join(', ');
       if (name === '') name = query;
 
