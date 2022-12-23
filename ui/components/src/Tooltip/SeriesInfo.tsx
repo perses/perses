@@ -27,13 +27,17 @@ export interface SeriesInfoProps {
 export function SeriesInfo(props: SeriesInfoProps) {
   const { seriesName, formattedY, markerColor, totalSeries, wrapLabels } = props;
 
-  // TODO (sjcobb): regex to remove __name__, improve series labels
-  const formattedSeriesLabels = seriesName.replace(/[{}"]/g, '');
-  const splitLabels = formattedSeriesLabels.split(',');
-  // TODO (sjcobb): check for splitLabels.length === 1 and use inlineSeriesLabels condition instead
+  // metric __name__ comes before opening curly brace, ignore if not populated
+  const nameSplit = seriesName.split('{');
+  const seriesLabels = nameSplit[1] ?? seriesName;
 
-  if (totalSeries === 1) {
-    const jsonFormattedSeries = seriesName[0] === '{' ? true : false;
+  // remove curly braces that wrap labels
+  const formattedSeriesLabels = seriesLabels.replace(/[{}]/g, '');
+
+  // determine whether to show labels on separate lines
+  const splitLabels = formattedSeriesLabels.split(',');
+  if (totalSeries === 1 && splitLabels.length > 1) {
+    const metricName = nameSplit[0] ? `${nameSplit[0]}:` : 'value:';
     return (
       <Stack spacing={0.5}>
         <Box
@@ -47,9 +51,9 @@ export function SeriesInfo(props: SeriesInfoProps) {
             fontSize: '11px',
           })}
         >
-          <SeriesMarker markerColor={markerColor} />
+          <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.25 }} />
           <Box component="span">
-            value:
+            {metricName}
             <Box
               component="span"
               sx={(theme) => ({
@@ -73,8 +77,9 @@ export function SeriesInfo(props: SeriesInfoProps) {
           })}
         >
           {splitLabels.map((name) => {
+            // show labels on separate lines when many labels and only one focused series
             if (name) {
-              const [key, value] = jsonFormattedSeries ? name.split(':') : name.split('=');
+              const [key, value] = name.split(':');
               const formattedKey = value !== undefined ? `${key}: ` : key;
               return (
                 <Box key={name} sx={{ display: 'flex', gap: '4px' }}>
@@ -97,7 +102,8 @@ export function SeriesInfo(props: SeriesInfoProps) {
     );
   }
 
-  const inlineSeriesLabels = formattedSeriesLabels.replace(/[,]/g, ', ').replace(/[:=]/g, ': ');
+  // add space after commas when more than one focused series
+  const inlineSeriesLabels = formattedSeriesLabels.replace(/[,]/g, ', ');
   return (
     <Box
       sx={{
@@ -111,17 +117,18 @@ export function SeriesInfo(props: SeriesInfoProps) {
           maxWidth: '520px',
         }}
       >
-        <SeriesMarker markerColor={markerColor} />
+        <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.7 }} />
         <Box
           component="span"
           sx={(theme) => ({
             color: theme.palette.common.white,
             display: 'inline-block',
+            width: 'calc(100% - 20px)',
+            minWidth: 150, // TODO: use clamp instead
             maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
-            width: 'calc(100% - 20px)',
           })}
         >
           {inlineSeriesLabels}

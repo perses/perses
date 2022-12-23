@@ -74,3 +74,55 @@ export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels
   const resolveLabelsRegex = /\{\{\s*(.+?)\s*\}\}/g;
   return inputFormat.replace(resolveLabelsRegex, (_, g) => (seriesLabels[g] ? seriesLabels[g] : g));
 }
+
+/*
+ * Stringifies object of labels into valid PromQL for querying metric by label
+ */
+function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, removeExprWrap?: boolean) {
+  const labelStrings: string[] = [];
+  Object.keys(labels)
+    .sort()
+    .forEach((labelName) => {
+      const labelValue = labels[labelName];
+      if (typeof labelValue === 'string') {
+        if (removeExprWrap) {
+          labelStrings.push(`"${labelName}":"${labelValue}"`);
+        } else {
+          labelStrings.push(`${labelName}="${labelValue}"`);
+        }
+      }
+    });
+  return `{${labelStrings.join(',')}}`;
+}
+
+/*
+ * Metric labels formatting, checks for __name__
+ */
+export function getUniqueKeyForPrometheusResult(
+  metricLabels: {
+    [key: string]: string;
+  },
+  removeExprWrap?: boolean
+) {
+  const metricNameKey = '__name__';
+  if (metricLabels) {
+    if (Object.prototype.hasOwnProperty.call(metricLabels, metricNameKey)) {
+      const stringifiedLabels = stringifyPrometheusMetricLabels(
+        {
+          ...metricLabels,
+          [metricNameKey]: undefined,
+        },
+        removeExprWrap
+      );
+      if (removeExprWrap === true) {
+        return `${stringifiedLabels}`;
+      } else {
+        return `${metricLabels[metricNameKey]}${stringifiedLabels}`;
+        // return `name=${metricLabels[metricNameKey]},${stringifiedLabels}`;
+      }
+    }
+    // TODO: for aggregated queries, metric object is empty and this returns {} as the name
+    return stringifyPrometheusMetricLabels(metricLabels, removeExprWrap);
+  }
+  return '';
+}

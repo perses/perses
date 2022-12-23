@@ -19,6 +19,7 @@ import {
   getDurationStringSeconds,
   getPrometheusTimeRange,
   getRangeStep,
+  getUniqueKeyForPrometheusResult,
   replaceTemplateVariables,
   DEFAULT_PROM,
   formatSeriesName,
@@ -76,16 +77,10 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     series: result.map((value) => {
       const { metric, values } = value;
 
-      // // Name the series after the metric labels or if no metric, just use the
-      // // overall query
-      // // let name = Object.entries(metric)
-      // //   .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`)
-      // //   .join(', ');
-      // // if (name === '') name = query;
-      let name = Object.entries(metric)
-        .map(([labelName, labelValue]) => `${labelName}="${labelValue}"`) // TODO (sjcobb): remove .map, change to JSON.stringify or unformatted version instead?
-        .join(', ');
-      if (name === '') name = query;
+      let name = getUniqueKeyForPrometheusResult(metric, false);
+      if (name === '') {
+        name = query;
+      }
 
       // query editor allows you to define an optional series_name_format
       // property to customize legend and tooltip display

@@ -11,25 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, BoxProps } from '@mui/material';
+import { combineSx } from '../utils';
 
-interface SeriesMarkerProps {
+interface SeriesMarkerProps extends BoxProps<'div'> {
   markerColor: string;
 }
 
 export function SeriesMarker(props: SeriesMarkerProps) {
-  const { markerColor } = props;
+  const { markerColor, sx } = props;
   return (
     <Box
-      sx={{
-        display: 'inline-block',
-        width: '12px',
-        borderRadius: '2px',
-        height: '12px',
-        marginTop: 0.25,
-        marginRight: 1,
-        verticalAlign: 'top',
-      }}
+      sx={combineSx(
+        {
+          display: 'inline-block',
+          width: '11px',
+          height: '11px',
+          borderRadius: '2px',
+          marginRight: 1,
+          verticalAlign: 'top',
+        },
+        sx
+      )}
       style={{ backgroundColor: markerColor }}
     ></Box>
   );
