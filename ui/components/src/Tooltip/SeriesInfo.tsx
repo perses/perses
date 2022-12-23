@@ -117,7 +117,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
           maxWidth: '520px',
         }}
       >
-        <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.7 }} />
+        <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.5 }} />
         <Box
           component="span"
           sx={(theme) => ({
@@ -131,7 +131,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
         >
-          {inlineSeriesLabels}
+          <Typography variant="body2">{inlineSeriesLabels}</Typography>
         </Box>
       </Box>
       <Box
