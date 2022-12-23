@@ -96,7 +96,7 @@ function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, rem
 }
 
 /*
- * Metric labels formatting, checks for __name__
+ * Metric labels formattter which checks for __name__ and outputs valid PromQL for series name
  */
 export function getUniqueKeyForPrometheusResult(
   metricLabels: {
@@ -118,10 +118,8 @@ export function getUniqueKeyForPrometheusResult(
         return `${stringifiedLabels}`;
       } else {
         return `${metricLabels[metricNameKey]}${stringifiedLabels}`;
-        // return `name=${metricLabels[metricNameKey]},${stringifiedLabels}`;
       }
     }
-    // TODO: for aggregated queries, metric object is empty and this returns {} as the name
     return stringifyPrometheusMetricLabels(metricLabels, removeExprWrap);
   }
   return '';
