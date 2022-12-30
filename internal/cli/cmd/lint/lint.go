@@ -144,7 +144,7 @@ percli lint -f ./resources.json
 # Check resources from stdin.
 cat resources.json | percli lint -f -
 
-# Use a remote server to make additional validation (useful only for the datasources for the moment)
+# Use a remote server to make additional validation (useful only for the datasources and the dashboards)
 percli lint -f ./resources.json --online
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {

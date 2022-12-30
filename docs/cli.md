@@ -237,3 +237,73 @@ $ percli delete dashboard Demo
 
 Dashboard Demo has been deleted
 ```
+
+## Advanced Commands
+
+### Linter
+
+The CLI provides a command `lint` that is able to validate any data supported by Perses.
+
+Note that it doesn't necessary mean you won't face any issues when applying them.
+
+```bash
+$ percli lint -f ./resource.json
+```
+
+By default, the command doesn't require any remote server. We are providing a flag `--online` that will tell the CLI to
+use a remote Perses server for additional validation. For example, when it will have to validate a dashboard, it will
+use the endpoint `/api/validate/dashboards`. That can be useful if you want to be sure that your dashboard is compatible
+with the server (because it will use the remote CUE schemas instead of the local one)
+
+### Migrate from Grafana dashboard to Perses format
+
+The command `migrate` is for the moment only use to translate a Grafana dashboard to the Perses format. This command
+cannot be run offline. It requires an active connection to a remote Perses server that holds the translation logic.
+
+If the command runs successfully, it will return the dashboard in the Perses format.
+
+```bash
+$ percli migrate -f ./grafana_dashboard.json
+
+kind: Dashboard
+metadata:
+  name: rYdddlPWk
+  created_at: 0001-01-01T00:00:00Z
+  updated_at: 0001-01-01T00:00:00Z
+  project: ""
+spec:
+  display:
+    name: Node Exporter Full
+  duration: 1h
+  variables:
+  - kind: ListVariable
+    spec:
+      name: DS_PROMETHEUS
+      display:
+        name: datasource
+        hidden: false
+      allow_all_value: false
+      allow_multiple: false
+      plugin:
+        kind: StaticListVariable
+        spec:
+          values:
+          - grafana
+          - migration
+          - not
+          - supported
+  - kind: ListVariable
+    spec:
+      name: job
+      display:
+        name: Job
+        hidden: false
+      allow_all_value: false
+      allow_multiple: false
+      plugin:
+        kind: PrometheusLabelValuesVariable
+        spec:
+          label_name: job
+          matchers: []
+[...]
+```
