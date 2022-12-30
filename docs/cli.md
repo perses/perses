@@ -2,7 +2,7 @@ Perses CLI (percli)
 ==================
 
 On top of the application, we also provide a CLI named `percli`. This tool can be used to interact with the backend REST
-API to manage the resources such as dashboard, datasource, project etc.
+API to manage the resources such as dashboards, datasources, projects etc.
 
 The CLI is available in the docker image or in the archive we created during each release.
 
@@ -253,11 +253,11 @@ $ percli lint -f ./resource.json
 By default, the command doesn't require any remote server. We are providing a flag `--online` that will tell the CLI to
 use a remote Perses server for additional validation. For example, when it will have to validate a dashboard, it will
 use the endpoint `/api/validate/dashboards`. That can be useful if you want to be sure that your dashboard is compatible
-with the server (because it will use the remote CUE schemas instead of the local one)
+with the server (because it will match the plugins known by the server instead of the local ones)
 
 ### Migrate from Grafana dashboard to Perses format
 
-The command `migrate` is for the moment only use to translate a Grafana dashboard to the Perses format. This command
+The command `migrate` is for the moment only used to translate a Grafana dashboard to the Perses format. This command
 cannot be run offline. It requires an active connection to a remote Perses server that holds the translation logic.
 
 If the command runs successfully, it will return the dashboard in the Perses format.
