@@ -55,6 +55,11 @@ func (o *option) Complete(args []string) error {
 			DatasourcesPath: o.datasourcesSchemas,
 			VariablesPath:   o.variablesSchemas,
 		})
+		for _, loader := range o.sch.GetLoaders() {
+			if err := loader.Load(); err != nil {
+				return err
+			}
+		}
 	}
 	if o.online {
 		// Finally, get the api client we will need later.
