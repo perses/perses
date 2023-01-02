@@ -169,28 +169,29 @@ func NewHotReloaders(loaders []Loader) (async.SimpleTask, async.SimpleTask, erro
 		return nil, nil, err
 	}
 
-	return &watcher{
-			fsWatcher: fsWatcher,
-			loaders:   loaders,
-		}, &reloader{
-			loaders: loaders,
+	return &Watcher{
+			FSWatcher: fsWatcher,
+			Loaders:   loaders,
+		}, &Reloader{
+			Loaders: loaders,
 		},
 		nil
 }
 
-type watcher struct {
+type Watcher struct {
 	async.Task
-	fsWatcher *fsnotify.Watcher
-	loaders   []Loader
+	FSWatcher      *fsnotify.Watcher
+	Loaders        []Loader
+	LoaderCallback func()
 }
 
-func (w *watcher) String() string {
+func (w *Watcher) String() string {
 	return "schemas watcher"
 }
 
-func (w *watcher) Initialize() error {
-	for _, l := range w.loaders {
-		if err := w.fsWatcher.Add(l.GetSchemaPath()); err != nil {
+func (w *Watcher) Initialize() error {
+	for _, l := range w.Loaders {
+		if err := w.FSWatcher.Add(l.GetSchemaPath()); err != nil {
 			return err
 		}
 		logrus.Tracef("Starting to watch %s", l.GetSchemaPath())
@@ -198,10 +199,10 @@ func (w *watcher) Initialize() error {
 	return nil
 }
 
-func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error {
+func (w *Watcher) Execute(ctx context.Context, cancel context.CancelFunc) error {
 	for {
 		select {
-		case event, ok := <-w.fsWatcher.Events:
+		case event, ok := <-w.FSWatcher.Events:
 			if !ok {
 				cancel()
 				return fmt.Errorf("schemas watcher channel has been closed unexpectedly")
@@ -209,15 +210,18 @@ func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 			// NB room for improvement: the event fsnotify.Remove could be used to actually remove the CUE schema from the map
 			logrus.Tracef("%s event on %s", event.Op, event.Name)
 			if event.Has(fsnotify.Create) || event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
-				for _, l := range w.loaders {
+				for _, l := range w.Loaders {
 					if strings.HasPrefix(event.Name, filepath.FromSlash(l.GetSchemaPath())) {
 						if err := l.Load(); err != nil {
 							logrus.WithError(err).Errorf("unable to load the schemas in %s", l.GetSchemaPath())
 						}
 					}
 				}
+				if w.LoaderCallback != nil {
+					w.LoaderCallback()
+				}
 			}
-		case err, ok := <-w.fsWatcher.Errors:
+		case err, ok := <-w.FSWatcher.Errors:
 			if !ok {
 				cancel()
 				return fmt.Errorf("schemas watcher channel has been closed unexpectedly")
@@ -230,29 +234,33 @@ func (w *watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 	}
 }
 
-func (w *watcher) Finalize() error {
-	return w.fsWatcher.Close()
+func (w *Watcher) Finalize() error {
+	return w.FSWatcher.Close()
 }
 
-type reloader struct {
+type Reloader struct {
 	async.SimpleTask
-	loaders []Loader
+	Loaders        []Loader
+	LoaderCallback func()
 }
 
-func (r *reloader) String() string {
+func (r *Reloader) String() string {
 	return "schemas reloader"
 }
 
-func (r *reloader) Execute(ctx context.Context, _ context.CancelFunc) error {
+func (r *Reloader) Execute(ctx context.Context, _ context.CancelFunc) error {
 	select {
 	case <-ctx.Done():
 		logrus.Infof("canceled %s", r.String())
 		break
 	default:
-		for _, l := range r.loaders {
+		for _, l := range r.Loaders {
 			if err := l.Load(); err != nil {
 				logrus.WithError(err).Errorf("unable to load a schema")
 			}
+		}
+		if r.LoaderCallback != nil {
+			r.LoaderCallback()
 		}
 	}
 	return nil

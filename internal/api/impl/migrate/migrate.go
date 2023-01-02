@@ -14,116 +14,27 @@
 package migrate
 
 import (
-	_ "embed"
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
-	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/pkg/model/api"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/sirupsen/logrus"
 )
-
-//go:embed mapping.cuepart
-var migrationFileBytes []byte
-
-const (
-	grafanaDefID = "#grafanaDashboard"
-
-	variableDefaultValue = `
-		kind: "StaticListVariable"
-		spec: {
-			values: ["grafana", "migration", "not", "supported"]
-		}
-	`
-	variablePlaceholderText = "%(conditional_variables)"
-
-	panelDefaultValue = `
-		kind: "Markdown"
-		spec: {
-			text: "**Migration from Grafana not supported !**"
-		}
-	`
-	panelPlaceholderText = "%(conditional_panels)"
-
-	queryDefaultValue = `
-		kind: "PrometheusTimeSeriesQuery"
-		spec: {
-			datasource: {
-				kind: "PrometheusDatasource"
-				name: "MigrationFromGrafanaNotSupported"
-			}
-			query: "migration_from_grafana_not_supported"
-		}
-	`
-	queryPlaceholderText = "%(conditional_timeserie_queries)"
-)
-
-type migrateConf struct {
-	schemasPath     string
-	defaultValue    string
-	placeholderText string
-}
 
 // Endpoint is the struct that define all endpoint delivered by the path /migrate
 type Endpoint struct {
-	cuectx                *cue.Context
-	migrateConfs          []migrateConf
-	migrationSchemaString string
+	migrationService migrate.Migration
 }
 
 // New create an instance of the object Endpoint.
 // You should have at most one instance of this object as it is only used by the struct api in the method api.registerRoute
-func New(schemasConf config.Schemas) *Endpoint {
-	endpoint := &Endpoint{
-		cuectx: cuecontext.New(),
-		migrateConfs: []migrateConf{
-			{
-				schemasPath:     schemasConf.VariablesPath,
-				defaultValue:    variableDefaultValue,
-				placeholderText: variablePlaceholderText,
-			},
-			{
-				schemasPath:     schemasConf.PanelsPath,
-				defaultValue:    panelDefaultValue,
-				placeholderText: panelPlaceholderText,
-			},
-			{
-				schemasPath:     schemasConf.QueriesPath,
-				defaultValue:    queryDefaultValue,
-				placeholderText: queryPlaceholderText,
-			},
-		},
+func New(migrationService migrate.Migration) *Endpoint {
+	return &Endpoint{
+		migrationService: migrationService,
 	}
-	// TODO: preload to be activated when filewatch is implemented
-	// endpoint.buildMigrationSchemaString()
-
-	return endpoint
-}
-
-func (e *Endpoint) buildMigrationSchemaString() {
-	// start building the migration schema from the base .cuepart file
-	migrationSchemaString := string(migrationFileBytes)
-
-	// generate the blocks of conditionals from the mig.cuepart files of each plugin & replace the placeholders with them
-	for _, conf := range e.migrateConfs {
-		conditionals, err := getListOfConditions(conf.schemasPath, conf.defaultValue)
-		if err != nil {
-			logrus.WithError(err).Errorf("Unable to get list of conditions for %s", conf.schemasPath)
-		}
-		migrationSchemaString = strings.Replace(migrationSchemaString, conf.placeholderText, conditionals, -1)
-	}
-	logrus.Tracef("migrationSchemaString: %s", migrationSchemaString)
-
-	e.migrationSchemaString = migrationSchemaString
 }
 
 // RegisterRoutes is the method to use to register the routes prefixed by /api
@@ -139,84 +50,12 @@ func (e *Endpoint) Migrate(ctx echo.Context) error {
 		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
 	}
 	grafanaDashboard := replaceInputValue(body)
-	persesDashboard, err := e.migrate([]byte(grafanaDashboard))
+	persesDashboard, err := e.migrationService.Migrate([]byte(grafanaDashboard))
 	if err != nil {
 		return shared.HandleError(err)
 	}
 
 	return ctx.JSON(http.StatusOK, persesDashboard)
-}
-
-func (e *Endpoint) migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
-	// TODO to be replaced by filewatch-triggered refreshes, to avoid recomputing the schema when nothing changed
-	e.buildMigrationSchemaString()
-
-	// Build a CUE value that is just the received grafana dashboard wrapped in a definition. By doing this we isolate the
-	// fields from the Grafana dashboard together in a common namespace, so that they are not mixed with the ones from the
-	// migration schema. This make sure we have no wrong overlapping between Grafana & Perses objects, and also makes the
-	// remapping operations more explicit, with e.g `name: #grafanaDashboard.title` instead of `name: title`.
-	grafanaDashboardVal := e.cuectx.CompileString(fmt.Sprintf("%s: _", grafanaDefID))
-	grafanaDashboardVal = grafanaDashboardVal.FillPath(
-		cue.ParsePath(grafanaDefID),
-		e.cuectx.CompileBytes(grafanaDashboard),
-	)
-	if err := grafanaDashboardVal.Validate(cue.Final()); err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
-	}
-
-	// Compile the migration schema using the grafana def to resolve the paths
-	mappingVal := e.cuectx.CompileString(e.migrationSchemaString, cue.Scope(grafanaDashboardVal))
-	if mappingVal.Err() != nil {
-		return nil, fmt.Errorf("%w: %s", shared.InternalError, mappingVal.Err())
-	}
-	logrus.Tracef("final value: %#v", mappingVal)
-
-	// marshall to Json then unmarshall in v1.Dashboard struct to pass the final checks & build the final dashboard to return
-	persesDashboardJSON, err := json.Marshal(mappingVal)
-	if err != nil {
-		logrus.WithError(err).Error("Unable to marshall Cue Value to json")
-		return nil, fmt.Errorf("%w: %s", shared.InternalError, err)
-	}
-	var persesDashboard v1.Dashboard
-	err = json.Unmarshal(persesDashboardJSON, &persesDashboard)
-	if err != nil {
-		logrus.WithError(err).Error("Unable to unmarshall JSON bytes to Dashboard struct")
-		return nil, fmt.Errorf("%w: %s", shared.InternalError, err)
-	}
-
-	return &persesDashboard, nil
-}
-
-// getListOfConditions returns the list of conditions built from the mig .cuepart file of each plugin available at this path
-func getListOfConditions(schemasPath string, defaultValue string) (string, error) {
-	files, err := os.ReadDir(schemasPath)
-	if err != nil {
-		return "", err
-	}
-
-	var listOfConditions strings.Builder
-
-	// process each schema plugin to convert it into a CUE Value
-	for _, file := range files {
-		migFilePath := filepath.Join(schemasPath, file.Name(), "mig.cuepart")
-		contentStr, err := os.ReadFile(migFilePath)
-		if err != nil {
-			logrus.WithError(err).Debugf("No migration file found at %s, plugin %s will be skipped", migFilePath, file.Name())
-			continue
-		}
-
-		listOfConditions.WriteString(string(contentStr))
-		listOfConditions.WriteString("\n")
-	}
-
-	// append a default conditional for any Grafana plugin that has no corresponding Perses plugin
-	listOfConditions.WriteString(fmt.Sprintf(`
-	{
-		%s
-	}`, defaultValue))
-	listOfConditions.WriteString("\n")
-
-	return listOfConditions.String(), nil
 }
 
 func replaceInputValue(body *api.Migrate) string {

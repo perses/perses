@@ -129,6 +129,7 @@ func New(conf config.Schemas) Schemas {
 }
 
 type sch struct {
+	Schemas
 	context *cue.Context
 	panels  *cueDefs
 	dts     *cueDefs
