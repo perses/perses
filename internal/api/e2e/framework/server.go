@@ -75,12 +75,9 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
-	// Load every cue schemas
-	for _, loader := range serviceManager.GetSchemas().GetLoaders() {
-		if err := loader.Load(); err != nil {
-			t.Fatal(err)
-		}
+	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
+	if err != nil {
+		t.Fatal(err)
 	}
 	handler.Use(middleware.CheckProject(serviceManager.GetProject()))
 	persesAPI := core.NewPersesAPI(serviceManager, conf)

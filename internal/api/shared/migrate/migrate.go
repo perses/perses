@@ -70,9 +70,9 @@ type Migration interface {
 	GetLoaders() []schemas.Loader
 }
 
-func New(schemasConf config.Schemas) Migration {
+func New(schemasConf config.Schemas) (Migration, error) {
 	cueContext := cuecontext.New()
-	return &mig{
+	m := &mig{
 		cuectx: cueContext,
 		loaders: []loader{
 			&migCuePart{
@@ -95,6 +95,10 @@ func New(schemasConf config.Schemas) Migration {
 			},
 		},
 	}
+	if err := m.init(); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 type mig struct {
@@ -164,4 +168,14 @@ func (m *mig) Migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
 	}
 
 	return &persesDashboard, nil
+}
+
+func (m *mig) init() error {
+	for _, l := range m.loaders {
+		if err := l.Load(); err != nil {
+			return err
+		}
+	}
+	m.BuildMigrationSchemaString()
+	return nil
 }

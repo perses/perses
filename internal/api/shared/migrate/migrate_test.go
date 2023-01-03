@@ -51,14 +51,15 @@ func TestMigrate(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			migrateEndpoint := New(config.Schemas{
+			svc, err := New(config.Schemas{
 				// use the real schemas for these tests
 				VariablesPath: "../../../../schemas/variables",
 				PanelsPath:    "../../../../schemas/panels",
 				QueriesPath:   "../../../../schemas/queries",
 			})
+			assert.NoError(t, err)
 
-			persesDashboardStruct, err := migrateEndpoint.migrate(test.initialDashboard)
+			persesDashboardStruct, err := svc.Migrate(test.initialDashboard)
 			errString := ""
 			if err != nil {
 				errString = err.Error()

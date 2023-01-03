@@ -56,9 +56,15 @@ type service struct {
 	schemas          schemas.Schemas
 }
 
-func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManager {
-	schemasService := schemas.New(conf.Schemas)
-	migrateService := migrate.New(conf.Schemas)
+func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+	schemasService, err := schemas.New(conf.Schemas)
+	if err != nil {
+		return nil, err
+	}
+	migrateService, err := migrate.New(conf.Schemas)
+	if err != nil {
+		return nil, err
+	}
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
 	folderService := folderImpl.NewService(dao.GetFolder())
@@ -74,7 +80,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManage
 		migrate:          migrateService,
 		project:          projectService,
 		schemas:          schemasService,
-	}
+	}, nil
 }
 
 func (s *service) GetDashboard() dashboard.Service {

@@ -33,17 +33,18 @@ func NewHotReloaders(service Migration) (async.SimpleTask, async.SimpleTask, err
 		return nil, nil, err
 	}
 
+	callback := func() {
+		service.BuildMigrationSchemaString()
+	}
+	loaders := service.GetLoaders()
+
 	return &schemas.Watcher{
-			FSWatcher: fsWatcher,
-			Loaders:   service.GetLoaders(),
-			LoaderCallback: func() {
-				service.BuildMigrationSchemaString()
-			},
+			FSWatcher:      fsWatcher,
+			Loaders:        loaders,
+			LoaderCallback: callback,
 		}, &schemas.Reloader{
-			Loaders: service.GetLoaders(),
-			LoaderCallback: func() {
-				service.BuildMigrationSchemaString()
-			},
+			Loaders:        loaders,
+			LoaderCallback: callback,
 		},
 		nil
 }
@@ -68,16 +69,6 @@ func (c *migCuePart) GetSchemaPath() string {
 	return c.schemasPath
 }
 
-func (c *migCuePart) GetConditions() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	return c.listOfConditions
-}
-
-func (c *migCuePart) getPlaceholder() string {
-	return c.placeholderText
-}
-
 func (c *migCuePart) Load() error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -87,6 +78,16 @@ func (c *migCuePart) Load() error {
 	}
 	c.listOfConditions = conditions
 	return nil
+}
+
+func (c *migCuePart) getConditions() string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.listOfConditions
+}
+
+func (c *migCuePart) getPlaceholder() string {
+	return c.placeholderText
 }
 
 func (c *migCuePart) buildListOfConditions() (string, error) {

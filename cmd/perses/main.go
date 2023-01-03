@@ -56,7 +56,10 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
+	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to instantiate the service manager")
+	}
 	persesAPI := core.NewPersesAPI(serviceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
