@@ -15,13 +15,16 @@ import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
-import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { useState } from 'react';
 import { useDashboard, useDashboardActions, useEditMode } from '../../context';
-import { TemplateVariableList } from '../Variables';
+import { TemplateVariableList, VariableEditButton } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
+
+const ADD_PANEL_BUTTON_DESCRIPTION = 'Add panel';
+const ADD_PANEL_GROUP_BUTTON_DESCRIPTION = 'Add panel group';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -95,8 +98,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             sx={{
               display: 'flex',
               width: '100%',
-              alignItems: 'flex-start',
-              padding: (theme) => theme.spacing(0, 2, 2, 2),
+              alignItems: 'start',
+              padding: (theme) => theme.spacing(1, 2, 2, 2),
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
@@ -109,12 +112,21 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               />
             </ErrorBoundary>
             <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
-              <Button startIcon={<AddPanelGroupIcon />} onClick={openAddPanelGroup}>
-                Add Panel Group
-              </Button>
-              <Button startIcon={<AddPanelIcon />} onClick={openAddPanel}>
-                Add Panel
-              </Button>
+              <VariableEditButton />
+              <InfoTooltip description={ADD_PANEL_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
+                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={ADD_PANEL_BUTTON_DESCRIPTION}>
+                  Panel
+                </Button>
+              </InfoTooltip>
+              <InfoTooltip description={ADD_PANEL_GROUP_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
+                <Button
+                  startIcon={<AddPanelGroupIcon />}
+                  onClick={openAddPanelGroup}
+                  aria-label={ADD_PANEL_GROUP_BUTTON_DESCRIPTION}
+                >
+                  Panel group
+                </Button>
+              </InfoTooltip>
               <TimeRangeControls />
               <DownloadButton />
             </Stack>
