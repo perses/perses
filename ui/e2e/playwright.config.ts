@@ -21,6 +21,8 @@ import { devices } from '@playwright/test';
  */
 // require('dotenv').config();
 
+const IS_CI = process.env.CI;
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -38,20 +40,20 @@ const config: PlaywrightTestConfig = {
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!IS_CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: IS_CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: IS_CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? [['github']] : [['html'], ['list', { printSteps: true }]],
+  reporter: IS_CI ? [['github']] : [['html'], ['list', { printSteps: true }]],
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:3000',
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
@@ -98,22 +100,29 @@ const config: PlaywrightTestConfig = {
   // outputDir: 'test-results/',
 
   /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      command: 'npm run start',
-      port: 3000,
-      cwd: path.resolve(__dirname, '../'),
-      reuseExistingServer: true,
-      timeout: 5 * 60 * 1000,
-    },
-    {
-      command: './scripts/api_backend_dev.sh',
-      port: 8080,
-      cwd: path.resolve(__dirname, '../..'),
-      reuseExistingServer: true,
-      timeout: 5 * 60 * 1000,
-    },
-  ],
+  // Only run dev server in CI. During local development, you are more likely to
+  // want to keep the local servers running separately across test runs. Also,
+  // Playwright seems to struggle to clean up all of the processes from
+  // turborepo, which is more problematic when running on a local machine
+  // instead of an ephemeral container in CI.
+  webServer: IS_CI
+    ? [
+        {
+          command: 'npm run start',
+          port: 3000,
+          cwd: path.resolve(__dirname, '../'),
+          reuseExistingServer: true,
+          timeout: 5 * 60 * 1000,
+        },
+        {
+          command: './scripts/api_backend_dev.sh',
+          port: 8080,
+          cwd: path.resolve(__dirname, '../..'),
+          reuseExistingServer: true,
+          timeout: 5 * 60 * 1000,
+        },
+      ]
+    : [],
 };
 
 export default config;
