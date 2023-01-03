@@ -25,7 +25,7 @@ The tests depend on the local development servers (backend and UI) to test again
 
 ### In CI
 
-Tests are automatically run in CI using the workflow configured in `ci.yml`. In this case, Playwright automatically starts up and waits for the development servers.
+Tests are automatically run in CI using the workflow configured in `e2e.yml`. In this case, Playwright automatically starts up and waits for the development servers.
 
 ## Writing tests
 
@@ -34,7 +34,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 ### Test data
 
 - The `testing` project in `dev/data/project.json` and associated dashboards in `dev/data/dashboard.json` should be used for end-to-end tests.
-- The project does not currently have a data source that can be used to test consistent rendering in plugins. Therefore, you should not write tests for this level of detail because they will be inherently flaky.
+- The project does not currently have a data source that can be used to test consistent rendering in plugins (e.g. a line chart with time series data). Therefore, you should not write tests for this level of detail because they will be inherently flaky.
 
 ### Guidelines
 
