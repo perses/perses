@@ -19,7 +19,7 @@ import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perse
 import { DashboardResource } from '@perses-dev/core';
 import { useState } from 'react';
 import { useDashboard, useDashboardActions, useEditMode } from '../../context';
-import { TemplateVariableList, VariableEditButton } from '../Variables';
+import { TemplateVariableList, EditVariablesButton } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
 
@@ -112,7 +112,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               />
             </ErrorBoundary>
             <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
-              <VariableEditButton />
+              <EditVariablesButton />
               <InfoTooltip description={ADD_PANEL_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
                 <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={ADD_PANEL_BUTTON_DESCRIPTION}>
                   Panel

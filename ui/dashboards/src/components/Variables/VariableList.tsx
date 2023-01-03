@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { AppBar, Box, IconButton, SxProps, Theme, useScrollTrigger } from '@mui/material';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
+import { VariableDefinition } from '@perses-dev/core';
 import { useTemplateVariableDefinitions } from '../../context';
 import { TemplateVariable } from './Variable';
 
@@ -28,7 +29,7 @@ interface TemplateVariableListProps {
 
 export function TemplateVariableList(props: TemplateVariableListProps) {
   const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
-  const variableDefinitions = useTemplateVariableDefinitions();
+  const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
 
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;

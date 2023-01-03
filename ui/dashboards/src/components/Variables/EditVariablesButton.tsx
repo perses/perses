@@ -22,9 +22,9 @@ import { VariableEditor } from './VariableEditor';
 
 const EDIT_VARIABLES_BUTTON_DESCRIPTION = 'Edit variables';
 
-export function VariableEditButton() {
+export function EditVariablesButton() {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
-  const variableDefinitions = useTemplateVariableDefinitions();
+  const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
   const { setVariableDefinitions } = useTemplateVariableActions();
 
   const openVariableEditor = () => {
