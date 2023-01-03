@@ -13,6 +13,9 @@
 
 import { Locator, expect } from '@playwright/test';
 
+/**
+ * Panel group on a dashboard page.
+ */
 export class PanelGroup {
   readonly container: Locator;
 

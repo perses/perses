@@ -16,14 +16,14 @@ import { AppHomePage } from '../pages';
 
 test.describe('App', () => {
   test('can navigate to a dashboard', async ({ page }) => {
-    const persesApp = new AppHomePage(page);
+    const homePage = new AppHomePage(page);
 
-    await persesApp.goto();
+    await homePage.goto();
 
-    await persesApp.showDashboardList('perses');
+    await homePage.showDashboardList('perses');
 
     const navigationPromise = page.waitForNavigation();
-    await persesApp.clickDashboardItem('Demo');
+    await homePage.clickDashboardItem('Demo');
     await navigationPromise;
   });
 });

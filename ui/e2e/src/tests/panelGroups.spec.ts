@@ -19,16 +19,15 @@ test.use({
 
 test.describe('Dashboard: Panel Groups', () => {
   test('has initial panel config', async ({ dashboardPage }) => {
-    dashboardPage.getPanelGroup('Row 1');
+    const panelGroup = dashboardPage.getPanelGroup('Row 1');
 
     await expect(dashboardPage.panelGroups).toHaveCount(1);
 
     await expect(dashboardPage.panelGroupHeadings).toHaveText(['Row 1']);
-    await dashboardPage.getPanelGroup('Row 1').isExpanded();
+    await panelGroup.isExpanded();
   });
 
   test('can expand and collapse', async ({ dashboardPage }) => {
-    await dashboardPage.startEditing();
     const panelGroup = dashboardPage.getPanelGroup('Row 1');
 
     await panelGroup.isExpanded();
@@ -42,7 +41,7 @@ test.describe('Dashboard: Panel Groups', () => {
 
   test('can edit panel name', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
-    await dashboardPage.editPanelGroup('Row 1', 'Row One');
+    await dashboardPage.editPanelGroup('Row 1', { name: 'Row One' });
 
     await expect(dashboardPage.panelGroupHeadings).toHaveText(['Row One']);
   });

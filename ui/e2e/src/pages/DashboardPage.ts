@@ -15,8 +15,12 @@ import { Page, Locator } from '@playwright/test';
 import { PanelEditor } from './PanelEditor';
 import { PanelGroup } from './PanelGroup';
 
+type PanelGroupConfig = {
+  name: string;
+};
+
 /**
- * Perses App viewing a dashboard.
+ * Perses App dashboard page.
  */
 export class DashboardPage {
   readonly page: Page;
@@ -74,7 +78,7 @@ export class DashboardPage {
     await dialog.getByRole('button', { name: 'Add' }).click();
   }
 
-  async editPanelGroup(panelGrouName: string, newPanelGroupName: string) {
+  async editPanelGroup(panelGrouName: string, { name }: PanelGroupConfig) {
     const panelGroup = this.getPanelGroup(panelGrouName);
     await panelGroup.startEditing();
     const dialog = this.getDialog('edit panel group');
@@ -82,7 +86,7 @@ export class DashboardPage {
       exact: false,
     });
     await nameInput.clear();
-    await nameInput.type(newPanelGroupName);
+    await nameInput.type(name);
     await dialog.getByRole('button', { name: 'Apply' }).click();
   }
 

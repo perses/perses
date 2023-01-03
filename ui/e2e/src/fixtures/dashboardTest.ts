@@ -23,6 +23,9 @@ type DashboardTestFixtures = {
   dashboardPage: DashboardPage;
 };
 
+/**
+ * Fixture for testing specific end-to-end testing dashboards.
+ */
 export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures>({
   projectName: 'EndToEndTesting',
   dashboardName: '',

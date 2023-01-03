@@ -29,7 +29,7 @@ Tests are automatically run in CI using the workflow configured in `ci.yml`. In 
 
 ## Writing tests
 
-Check out [Playwright's extensive documentation](https://playwright.dev/docs/writing-tests) for general guidance on writing tests.
+Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests) for general guidance on writing tests.
 
 ### Test data
 
@@ -43,3 +43,10 @@ Check out [Playwright's extensive documentation](https://playwright.dev/docs/wri
 - Tests should not be flaky! Flaky tests are frustrating, waste time, and lead to decreased trust in the entire test suite. Ask for help if you are having trouble writing a non-flaky test for specific functionality.
 - Use [Page Object Models](https://playwright.dev/docs/pom) to reduce code duplication and improve test maintenance.
 - Use the [recommended locators](https://playwright.dev/docs/locators#quick-guide) (Playwright's term for element selectors), when possible. These patterns are very similar to React Testing Library, which is used for the project's Jest tests.
+
+## Troubleshooting
+
+### Tests failed in CI (Github Actions)
+
+- Go to the failing action in Github.
+- Follow the Playwright instructions for [viewing test logs](https://playwright.dev/docs/ci-intro#viewing-test-logs) and [viewing the html report](https://playwright.dev/docs/ci-intro#html-report).

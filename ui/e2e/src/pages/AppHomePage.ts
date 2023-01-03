@@ -27,6 +27,11 @@ export class AppHomePage {
     await this.page.goto('/');
   }
 
+  /**
+   * Navigates to the specified project dashboard using the home page UI.
+   * @param projectName - Name of the project.
+   * @param dashboardName - Name of the dashboard.
+   */
   async navigateToDashboard(projectName: string, dashboardName: string) {
     this.goto();
 
