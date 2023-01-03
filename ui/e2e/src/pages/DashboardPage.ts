@@ -15,6 +15,9 @@ import { Page, Locator } from '@playwright/test';
 import { PanelEditor } from './PanelEditor';
 import { PanelGroup } from './PanelGroup';
 
+/**
+ * Perses App viewing a dashboard.
+ */
 export class DashboardPage {
   readonly page: Page;
 

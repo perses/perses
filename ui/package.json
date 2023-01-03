@@ -12,7 +12,8 @@
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
     "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
-    "e2e": "turbo run e2e"
+    "e2e": "turbo run e2e",
+    "e2e:debug": "turbo run e2e -- --debug"
   },
   "workspaces": [
     "app",

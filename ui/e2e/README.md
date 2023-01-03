@@ -2,8 +2,6 @@
 
 This package contains end-to-end tests for Perses written using [https://playwright.dev/](Playwright).
 
-TODO: fill this in with some information about how to run, write, etc. tests and the associated patterns with page objects.
-
 ## Directory structure
 
 - `src`
@@ -16,16 +14,32 @@ TODO: fill this in with some information about how to run, write, etc. tests and
 
 ### Locally
 
-The tests depend on the local development servers (backend and UI) running to test against.
+The tests depend on the local development servers (backend and UI) to test against.
 
 - Start the backend server from the project root: `./scripts/api_backend_dev.sh`
 - Change to the `ui` directory.
 - Start the UI server: `npm start`
 - Run the end-to-end tests from the command line: `npm run e2e`
-- (Optional) Install [Playwright VS Code extension](https://playwright.dev/docs/getting-started-vscode) and run tests using it.
+- (Optional) Run the end-to-end tests in debug mode to walk through a test step by step to debug issues: `npm run e2e:debug`.
+- (Optional) Install [Playwright VS Code extension](https://playwright.dev/docs/getting-started-vscode). This extension has a lot of helpful tools for running tests, debugging, and creating selectors.
 
 ### In CI
 
 Tests are automatically run in CI using the workflow configured in `ci.yml`. In this case, Playwright automatically starts up and waits for the development servers.
 
 ## Writing tests
+
+Check out [Playwright's extensive documentation](https://playwright.dev/docs/writing-tests) for general guidance on writing tests.
+
+### Test data
+
+- The `EndToEndTesting` project in `dev/data/project.json` and associated dashboards in `dev/data/dashboard.json` should be used for end-to-end tests.
+- The project does not currently have a data source that can be used to test consistent rendering in plugins. Therefore, you should not write tests for this level of detail because they will be inherently flaky.
+
+### Guidelines
+
+- Tests live in `ui/e2e/src/tests` and follow the `testName.spec.ts` naming scheme.
+- Tests should be able to run in parallel. Do not write tests that depend on specific order.
+- Tests should not be flaky! Flaky tests are frustrating, waste time, and lead to decreased trust in the entire test suite. Ask for help if you are having trouble writing a non-flaky test for specific functionality.
+- Use [Page Object Models](https://playwright.dev/docs/pom) to reduce code duplication and improve test maintenance.
+- Use the [recommended locators](https://playwright.dev/docs/locators#quick-guide) (Playwright's term for element selectors), when possible. These patterns are very similar to React Testing Library, which is used for the project's Jest tests.

@@ -13,6 +13,9 @@
 
 import { Page } from '@playwright/test';
 
+/**
+ * The Perses App home page.
+ */
 export class AppHomePage {
   readonly page: Page;
 
