@@ -33,7 +33,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 
 ### Test data
 
-- The `EndToEndTesting` project in `dev/data/project.json` and associated dashboards in `dev/data/dashboard.json` should be used for end-to-end tests.
+- The `testing` project in `dev/data/project.json` and associated dashboards in `dev/data/dashboard.json` should be used for end-to-end tests.
 - The project does not currently have a data source that can be used to test consistent rendering in plugins. Therefore, you should not write tests for this level of detail because they will be inherently flaky.
 
 ### Guidelines

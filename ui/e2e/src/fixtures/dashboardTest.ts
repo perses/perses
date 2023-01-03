@@ -27,7 +27,7 @@ type DashboardTestFixtures = {
  * Fixture for testing specific end-to-end testing dashboards.
  */
 export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures>({
-  projectName: 'EndToEndTesting',
+  projectName: 'testing',
   dashboardName: '',
   dashboardPage: async ({ page, projectName, dashboardName }, use) => {
     const persesApp = new AppHomePage(page);
