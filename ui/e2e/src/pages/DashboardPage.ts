@@ -48,7 +48,7 @@ export class DashboardPage {
     // Needed to select "Add Panel" group button and NOT "Add Panel Group."
     // Exact match on "Add Panel" does not work in some situations, possibly
     // because of other content like icons inside the button.
-    this.addPanelButton = page.getByRole('button', { name: 'Add Panel' }).nth(1);
+    this.addPanelButton = page.getByRole('button', { name: 'Add panel' }).first();
 
     this.panelGroups = page.getByTestId('panel-group');
     this.panelGroupHeadings = this.panelGroups.getByTestId('panel-group-header').getByRole('heading', { level: 2 });
