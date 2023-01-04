@@ -36,7 +36,7 @@ export function EditVariablesButton() {
 
   return (
     <>
-      <InfoTooltip description={TOOLTIP_TEXT.editVariables} placement="bottom">
+      <InfoTooltip description={TOOLTIP_TEXT.editVariables}>
         <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={TOOLTIP_TEXT.editVariables}>
           Variables
         </Button>

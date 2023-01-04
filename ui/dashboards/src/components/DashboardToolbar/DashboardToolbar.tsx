@@ -111,12 +111,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             </ErrorBoundary>
             <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
               <EditVariablesButton />
-              <InfoTooltip description={TOOLTIP_TEXT.addPanel} placement="bottom">
+              <InfoTooltip description={TOOLTIP_TEXT.addPanel}>
                 <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={TOOLTIP_TEXT.addPanel}>
                   Panel
                 </Button>
               </InfoTooltip>
-              <InfoTooltip description={TOOLTIP_TEXT.addGroup} placement="bottom">
+              <InfoTooltip description={TOOLTIP_TEXT.addGroup}>
                 <Button
                   startIcon={<AddPanelGroupIcon />}
                   onClick={openAddPanelGroup}
