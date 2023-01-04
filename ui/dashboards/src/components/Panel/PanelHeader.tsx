@@ -17,7 +17,7 @@ import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import { ARIA_LABEL_COPY, TOOLTIP_COPY } from '../../utils';
+import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
@@ -41,26 +41,26 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
     // If there are edit handlers, always just show the edit buttons
     actions = (
       <>
-        <InfoTooltip description={TOOLTIP_COPY.editPanel}>
+        <InfoTooltip description={TOOLTIP_TEXT.editPanel}>
           <HeaderIconButton
-            aria-label={ARIA_LABEL_COPY.editPanel(title)}
+            aria-label={ARIA_LABEL_TEXT.editPanel(title)}
             size="small"
             onClick={editHandlers.onEditPanelClick}
           >
             <PencilIcon fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>
-        <InfoTooltip description={TOOLTIP_COPY.deletePanel}>
+        <InfoTooltip description={TOOLTIP_TEXT.deletePanel}>
           <HeaderIconButton
-            aria-label={ARIA_LABEL_COPY.deletePanel(title)}
+            aria-label={ARIA_LABEL_TEXT.deletePanel(title)}
             size="small"
             onClick={editHandlers.onDeletePanelClick}
           >
             <DeleteIcon fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>
-        <InfoTooltip description={TOOLTIP_COPY.movePanel}>
-          <HeaderIconButton aria-label={ARIA_LABEL_COPY.movePanel(title)} size="small">
+        <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
+          <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
             <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>

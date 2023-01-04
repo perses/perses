@@ -36,7 +36,7 @@ import { ErrorBoundary, InfoTooltip } from '@perses-dev/components';
 import Refresh from 'mdi-material-ui/Refresh';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 
-import { TOOLTIP_COPY } from '../../../utils';
+import { TOOLTIP_TEXT } from '../../../constants';
 import { useListVariablePluginValues, VARIABLE_TYPES } from '../variable-model';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
@@ -83,12 +83,12 @@ function VariableListPreview({ definition, onRefresh }: { definition: ListVariab
     <Box>
       <Stack direction={'row'} spacing={1} alignItems="center">
         <Typography variant="caption">Preview Values</Typography>
-        <InfoTooltip description={TOOLTIP_COPY.refreshVariableValues}>
+        <InfoTooltip description={TOOLTIP_TEXT.refreshVariableValues}>
           <IconButton onClick={onRefresh} size="small">
             <Refresh />
           </IconButton>
         </InfoTooltip>
-        <InfoTooltip description={TOOLTIP_COPY.copyVariableValues}>
+        <InfoTooltip description={TOOLTIP_TEXT.copyVariableValues}>
           <IconButton
             onClick={async () => {
               if (data?.length) {

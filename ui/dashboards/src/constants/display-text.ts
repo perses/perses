@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const TOOLTIP_COPY = {
+export const TOOLTIP_TEXT = {
   // Toolbar buttons
   addPanel: 'Add panel',
   addGroup: 'Add panel group',
@@ -33,7 +33,7 @@ export const TOOLTIP_COPY = {
   copyVariableValues: 'Copy values to clipboard',
 };
 
-export const ARIA_LABEL_COPY = {
+export const ARIA_LABEL_TEXT = {
   // Group buttons
   addPanelToGroup: (groupName: string) => `add panel to group ${groupName}`,
   deleteGroup: (groupName: string) => `delete group ${groupName}`,

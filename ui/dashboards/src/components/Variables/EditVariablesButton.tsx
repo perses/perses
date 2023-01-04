@@ -17,8 +17,8 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { VariableDefinition } from '@perses-dev/core';
 
+import { TOOLTIP_TEXT } from '../../constants';
 import { useTemplateVariableDefinitions, useTemplateVariableActions } from '../../context';
-import { TOOLTIP_COPY } from '../../utils';
 import { VariableEditor } from './VariableEditor';
 
 export function EditVariablesButton() {
@@ -36,8 +36,8 @@ export function EditVariablesButton() {
 
   return (
     <>
-      <InfoTooltip description={TOOLTIP_COPY.editVariables} placement="bottom">
-        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={TOOLTIP_COPY.editVariables}>
+      <InfoTooltip description={TOOLTIP_TEXT.editVariables} placement="bottom">
+        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={TOOLTIP_TEXT.editVariables}>
           Variables
         </Button>
       </InfoTooltip>

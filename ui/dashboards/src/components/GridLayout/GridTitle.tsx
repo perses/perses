@@ -20,8 +20,8 @@ import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { InfoTooltip } from '@perses-dev/components';
+import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { usePanelGroupActions, useEditMode, PanelGroupId, useDeletePanelGroupDialog } from '../../context';
-import { ARIA_LABEL_COPY, TOOLTIP_COPY } from '../../utils';
 
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;
@@ -68,36 +68,36 @@ export function GridTitle(props: GridTitleProps) {
           {text}
           {isEditMode && (
             <Stack direction="row" marginLeft="auto">
-              <InfoTooltip description={TOOLTIP_COPY.addPanelToGroup}>
-                <IconButton aria-label={ARIA_LABEL_COPY.addPanelToGroup(title)} onClick={openAddPanel}>
+              <InfoTooltip description={TOOLTIP_TEXT.addPanelToGroup}>
+                <IconButton aria-label={ARIA_LABEL_TEXT.addPanelToGroup(title)} onClick={openAddPanel}>
                   <AddPanelIcon />
                 </IconButton>
               </InfoTooltip>
-              <InfoTooltip description={TOOLTIP_COPY.editGroup}>
-                <IconButton aria-label={ARIA_LABEL_COPY.editGroup(title)} onClick={openEditPanelGroup}>
+              <InfoTooltip description={TOOLTIP_TEXT.editGroup}>
+                <IconButton aria-label={ARIA_LABEL_TEXT.editGroup(title)} onClick={openEditPanelGroup}>
                   <PencilIcon />
                 </IconButton>
               </InfoTooltip>
-              <InfoTooltip description={TOOLTIP_COPY.deleteGroup}>
+              <InfoTooltip description={TOOLTIP_TEXT.deleteGroup}>
                 <IconButton
-                  aria-label={ARIA_LABEL_COPY.deleteGroup(title)}
+                  aria-label={ARIA_LABEL_TEXT.deleteGroup(title)}
                   onClick={() => openDeletePanelGroupDialog(panelGroupId)}
                 >
                   <DeleteIcon />
                 </IconButton>
               </InfoTooltip>
-              <InfoTooltip description={TOOLTIP_COPY.moveGroupDown}>
+              <InfoTooltip description={TOOLTIP_TEXT.moveGroupDown}>
                 <IconButton
-                  aria-label={ARIA_LABEL_COPY.moveGroupDown(title)}
+                  aria-label={ARIA_LABEL_TEXT.moveGroupDown(title)}
                   disabled={moveDown === undefined}
                   onClick={moveDown}
                 >
                   <ArrowDownIcon />
                 </IconButton>
               </InfoTooltip>
-              <InfoTooltip description={TOOLTIP_COPY.moveGroupUp}>
+              <InfoTooltip description={TOOLTIP_TEXT.moveGroupUp}>
                 <IconButton
-                  aria-label={ARIA_LABEL_COPY.moveGroupUp(title)}
+                  aria-label={ARIA_LABEL_TEXT.moveGroupUp(title)}
                   disabled={moveUp === undefined}
                   onClick={moveUp}
                 >

@@ -18,8 +18,8 @@ import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ErrorBoundary, ErrorAlert, InfoTooltip } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { useState } from 'react';
+import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboard, useDashboardActions, useEditMode } from '../../context';
-import { TOOLTIP_COPY } from '../../utils';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
@@ -111,16 +111,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             </ErrorBoundary>
             <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
               <EditVariablesButton />
-              <InfoTooltip description={TOOLTIP_COPY.addPanel} placement="bottom">
-                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={TOOLTIP_COPY.addPanel}>
+              <InfoTooltip description={TOOLTIP_TEXT.addPanel} placement="bottom">
+                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={TOOLTIP_TEXT.addPanel}>
                   Panel
                 </Button>
               </InfoTooltip>
-              <InfoTooltip description={TOOLTIP_COPY.addGroup} placement="bottom">
+              <InfoTooltip description={TOOLTIP_TEXT.addGroup} placement="bottom">
                 <Button
                   startIcon={<AddPanelGroupIcon />}
                   onClick={openAddPanelGroup}
-                  aria-label={TOOLTIP_COPY.addGroup}
+                  aria-label={TOOLTIP_TEXT.addGroup}
                 >
                   Panel group
                 </Button>

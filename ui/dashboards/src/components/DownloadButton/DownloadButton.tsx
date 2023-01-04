@@ -14,8 +14,8 @@
 import { useRef } from 'react';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
 import { InfoTooltip } from '@perses-dev/components';
+import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboard } from '../../context';
-import { TOOLTIP_COPY } from '../../utils';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 
 // Button to download the dashboard as a JSON file.
@@ -40,8 +40,8 @@ export function DownloadButton() {
 
   return (
     <>
-      <InfoTooltip description={TOOLTIP_COPY.downloadDashboard} placement="bottom">
-        <ToolbarIconButton aria-label={TOOLTIP_COPY.downloadDashboard} onClick={onDownloadButtonClick}>
+      <InfoTooltip description={TOOLTIP_TEXT.downloadDashboard} placement="bottom">
+        <ToolbarIconButton aria-label={TOOLTIP_TEXT.downloadDashboard} onClick={onDownloadButtonClick}>
           <DownloadIcon />
         </ToolbarIconButton>
       </InfoTooltip>
