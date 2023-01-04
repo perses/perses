@@ -37,6 +37,7 @@ progress. The current pieces that are in place are:
     * To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
       All schemas are available in the [schemas](./schemas) folder.
 * A backend REST API provides R/W access to dashboard and datasource definitions.
+* A CLI that can be used to interact with the REST API. A short docs is available [here](./docs/cli.md)
 * While the UI is still in progress, we already have:
     * a beginning of navigation that will help to move from a dashboard to another.
     * a support of the following panel types:
