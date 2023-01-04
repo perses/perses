@@ -44,7 +44,11 @@ export class DashboardPage {
     this.editButton = page.getByRole('button', { name: 'Edit' });
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
     this.addPanelGroupButton = page.getByRole('button', { name: 'Add Panel Group' });
-    this.addPanelButton = page.getByRole('button', { name: 'Add Panel', exact: true });
+
+    // Regex needed to select "Add Panel" group button and NOT "Add Panel Group."
+    // Exact match on "Add Panel" does not work in some situations, possibly
+    // because of other content like icons inside the button.
+    this.addPanelButton = page.getByRole('button', { name: /Add Panel\s?(?!Group)$/ });
 
     this.panelGroups = page.getByTestId('panel-group');
     this.panelGroupHeadings = this.panelGroups.getByTestId('panel-group-header').getByRole('heading', { level: 2 });
