@@ -25,7 +25,7 @@ import {
   OptionsEditorControl,
 } from '@perses-dev/components';
 import { GaugeChartOptionsEditorProps } from './GaugeChartOptionsEditor';
-import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
+import { GaugeChartOptions, DEFAULT_UNIT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
 
 export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps) {
   const { onChange, value } = props;
@@ -49,6 +49,14 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
   // ensures decimal_places defaults to correct value
   const unit = merge({}, DEFAULT_UNIT, value.unit);
 
+  // max only needs to be set explicitly for units other than Percent and PercentDecimal
+  let maxPlaceholder = 'Enter value';
+  if (unit.kind === 'Percent') {
+    maxPlaceholder = DEFAULT_MAX_PERCENT.toString();
+  } else if (unit.kind === 'PercentDecimal') {
+    maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
+  }
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -62,8 +70,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
                 type="number"
                 value={value.max ?? ''}
                 onChange={(e) => {
-                  // ensure empty value resets to undef to allow chart to calculate max since
-                  // max only needs to be set explicitly for units other than Percent and PercentDecimal
+                  // ensure empty value resets to undef to allow chart to calculate max
                   const newValue = e.target.value ? Number(e.target.value) : undefined;
                   onChange(
                     produce(value, (draft: GaugeChartOptions) => {
@@ -71,7 +78,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
                     })
                   );
                 }}
-                placeholder="Default"
+                placeholder={maxPlaceholder}
               />
             }
           />
