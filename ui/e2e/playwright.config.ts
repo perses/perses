@@ -40,7 +40,7 @@ const config: PlaywrightTestConfig = {
   /* Opt out of parallel tests on CI. */
   workers: IS_CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: IS_CI ? [['github', 'html']] : [['html'], ['list', { printSteps: true }]],
+  reporter: IS_CI ? [['html']] : [['html'], ['list', { printSteps: true }]],
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
