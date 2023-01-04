@@ -20,12 +20,7 @@ import {
   Typography,
 } from '@mui/material';
 
-export enum TooltipPlacement {
-  Top = 'top',
-  Left = 'left',
-  Right = 'right',
-  Bottom = 'bottom',
-}
+export type TooltipPlacement = 'top' | 'left' | 'right' | 'bottom';
 
 interface InfoTooltipProps {
   description: string;
@@ -50,7 +45,7 @@ export const InfoTooltip = ({
     <StyledTooltip
       arrow
       id={id}
-      placement={placement ?? TooltipPlacement.Top}
+      placement={placement ?? 'top'}
       title={<TooltipContent title={title} description={description} />}
       enterDelay={enterDelay ?? 500}
       enterNextDelay={enterNextDelay ?? 500}

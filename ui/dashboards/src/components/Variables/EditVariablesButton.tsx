@@ -14,13 +14,12 @@
 import { useState } from 'react';
 import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
-import { Drawer, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { VariableDefinition } from '@perses-dev/core';
 
+import { TOOLTIP_TEXT } from '../../constants';
 import { useTemplateVariableDefinitions, useTemplateVariableActions } from '../../context';
 import { VariableEditor } from './VariableEditor';
-
-const EDIT_VARIABLES_BUTTON_DESCRIPTION = 'Edit variables';
 
 export function EditVariablesButton() {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
@@ -37,8 +36,8 @@ export function EditVariablesButton() {
 
   return (
     <>
-      <InfoTooltip description={EDIT_VARIABLES_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
-        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={EDIT_VARIABLES_BUTTON_DESCRIPTION}>
+      <InfoTooltip description={TOOLTIP_TEXT.editVariables} placement="bottom">
+        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={TOOLTIP_TEXT.editVariables}>
           Variables
         </Button>
       </InfoTooltip>
