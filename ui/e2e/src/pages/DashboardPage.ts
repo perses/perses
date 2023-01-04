@@ -78,9 +78,7 @@ export class DashboardPage {
   async addPanelGroup(panelGrouName: string) {
     await this.addPanelGroupButton.click();
     const dialog = this.getDialog('add panel group');
-    const nameInput = dialog.getByLabel('Name', {
-      exact: false,
-    });
+    const nameInput = dialog.getByLabel('Name');
     await nameInput.type(panelGrouName);
     await dialog.getByRole('button', { name: 'Add' }).click();
   }
@@ -89,9 +87,7 @@ export class DashboardPage {
     const panelGroup = this.getPanelGroup(panelGrouName);
     await panelGroup.startEditing();
     const dialog = this.getDialog('edit panel group');
-    const nameInput = dialog.getByLabel('Name', {
-      exact: false,
-    });
+    const nameInput = dialog.getByLabel('Name');
     await nameInput.clear();
     await nameInput.type(name);
     await dialog.getByRole('button', { name: 'Apply' }).click();
