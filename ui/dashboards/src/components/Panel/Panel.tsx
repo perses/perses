@@ -82,6 +82,7 @@ export function Panel(props: PanelProps) {
       onMouseLeave={handleMouseLeave}
       aria-labelledby={headerId}
       aria-describedby={headerId}
+      data-testid="panel"
       {...others}
     >
       <PanelHeader

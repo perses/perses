@@ -63,7 +63,7 @@ export function GridLayout(props: GridLayoutProps) {
           }
         />
       )}
-      <Collapse in={isOpen} unmountOnExit appear={false}>
+      <Collapse in={isOpen} unmountOnExit appear={false} data-testid="panel-group-content">
         <ResponsiveGridLayout
           className="layout"
           breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}

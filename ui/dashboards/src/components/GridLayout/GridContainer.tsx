@@ -35,6 +35,7 @@ export function GridContainer(props: GridContainerProps) {
         // (see https://github.com/react-grid-layout/react-grid-layout/issues/103)
         '& .react-grid-item.cssTransforms': { transitionProperty: isFirstRender ? 'none' : 'transform' },
       }}
+      data-testid="panel-group"
     >
       {props.children}
     </ReactGridLayoutContainer>
