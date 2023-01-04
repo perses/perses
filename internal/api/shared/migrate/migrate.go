@@ -64,6 +64,15 @@ const (
 	queryPlaceholderText = "%(conditional_timeserie_queries)"
 )
 
+func ReplaceInputValue(input map[string]string, grafanaDashboard string) string {
+	result := grafanaDashboard
+	for key, value := range input {
+		result = strings.Replace(result, fmt.Sprintf("$%s", key), value, -1)
+		result = strings.Replace(result, fmt.Sprintf("${%s}", key), value, -1)
+	}
+	return result
+}
+
 type Migration interface {
 	Migrate(grafanaDashboard []byte) (*v1.Dashboard, error)
 	BuildMigrationSchemaString()
