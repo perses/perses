@@ -18,9 +18,8 @@ import { Drawer, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { VariableDefinition } from '@perses-dev/core';
 
 import { useTemplateVariableDefinitions, useTemplateVariableActions } from '../../context';
+import { TOOLTIP_COPY } from '../../utils';
 import { VariableEditor } from './VariableEditor';
-
-const EDIT_VARIABLES_BUTTON_DESCRIPTION = 'Edit variables';
 
 export function EditVariablesButton() {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
@@ -37,8 +36,8 @@ export function EditVariablesButton() {
 
   return (
     <>
-      <InfoTooltip description={EDIT_VARIABLES_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
-        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={EDIT_VARIABLES_BUTTON_DESCRIPTION}>
+      <InfoTooltip description={TOOLTIP_COPY.editVariables} placement={TooltipPlacement.Bottom}>
+        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={TOOLTIP_COPY.editVariables}>
           Variables
         </Button>
       </InfoTooltip>

@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
+import { InfoTooltip, TooltipPlacement } from '@perses-dev/components';
 import { useDashboard } from '../../context';
+import { TOOLTIP_COPY } from '../../utils';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 
 // Button to download the dashboard as a JSON file.
@@ -38,9 +40,11 @@ export function DownloadButton() {
 
   return (
     <>
-      <ToolbarIconButton title="Download JSON" onClick={onDownloadButtonClick}>
-        <DownloadIcon />
-      </ToolbarIconButton>
+      <InfoTooltip description={TOOLTIP_COPY.downloadDashboard} placement={TooltipPlacement.Bottom}>
+        <ToolbarIconButton aria-label={TOOLTIP_COPY.downloadDashboard} onClick={onDownloadButtonClick}>
+          <DownloadIcon />
+        </ToolbarIconButton>
+      </InfoTooltip>
       {/* Hidden link to download the dashboard as a JSON file */}
       {/* eslint-disable jsx-a11y/anchor-has-content */}
       {/* eslint-disable jsx-a11y/anchor-is-valid  */}

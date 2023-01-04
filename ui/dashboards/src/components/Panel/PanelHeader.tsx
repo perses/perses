@@ -17,6 +17,7 @@ import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
+import { ARIA_LABEL_COPY, TOOLTIP_COPY } from '../../utils';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
@@ -40,18 +41,26 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
     // If there are edit handlers, always just show the edit buttons
     actions = (
       <>
-        <InfoTooltip description="Edit">
-          <HeaderIconButton aria-label={`edit panel ${title}`} size="small" onClick={editHandlers.onEditPanelClick}>
+        <InfoTooltip description={TOOLTIP_COPY.editPanel}>
+          <HeaderIconButton
+            aria-label={ARIA_LABEL_COPY.editPanel(title)}
+            size="small"
+            onClick={editHandlers.onEditPanelClick}
+          >
             <PencilIcon fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>
-        <InfoTooltip description="Delete">
-          <HeaderIconButton aria-label={`delete panel ${title}`} size="small" onClick={editHandlers.onDeletePanelClick}>
+        <InfoTooltip description={TOOLTIP_COPY.deletePanel}>
+          <HeaderIconButton
+            aria-label={ARIA_LABEL_COPY.deletePanel(title)}
+            size="small"
+            onClick={editHandlers.onDeletePanelClick}
+          >
             <DeleteIcon fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>
-        <InfoTooltip description="Drag and drop panel to reorganize">
-          <HeaderIconButton aria-label={`move panel ${title}`} size="small">
+        <InfoTooltip description={TOOLTIP_COPY.movePanel}>
+          <HeaderIconButton aria-label={ARIA_LABEL_COPY.movePanel(title)} size="small">
             <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>
@@ -61,7 +70,7 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
     // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
     actions = (
       <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
-        <HeaderIconButton aria-label="Panel Description" size="small">
+        <HeaderIconButton aria-label="panel description" size="small">
           <InformationOutlineIcon
             aria-describedby="info-tooltip"
             aria-hidden={false}

@@ -19,12 +19,10 @@ import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perse
 import { DashboardResource } from '@perses-dev/core';
 import { useState } from 'react';
 import { useDashboard, useDashboardActions, useEditMode } from '../../context';
+import { TOOLTIP_COPY } from '../../utils';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
-
-const ADD_PANEL_BUTTON_DESCRIPTION = 'Add panel';
-const ADD_PANEL_GROUP_BUTTON_DESCRIPTION = 'Add panel group';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -113,16 +111,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             </ErrorBoundary>
             <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
               <EditVariablesButton />
-              <InfoTooltip description={ADD_PANEL_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
-                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={ADD_PANEL_BUTTON_DESCRIPTION}>
+              <InfoTooltip description={TOOLTIP_COPY.addPanel} placement={TooltipPlacement.Bottom}>
+                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={TOOLTIP_COPY.addPanel}>
                   Panel
                 </Button>
               </InfoTooltip>
-              <InfoTooltip description={ADD_PANEL_GROUP_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
+              <InfoTooltip description={TOOLTIP_COPY.addGroup} placement={TooltipPlacement.Bottom}>
                 <Button
                   startIcon={<AddPanelGroupIcon />}
                   onClick={openAddPanelGroup}
-                  aria-label={ADD_PANEL_GROUP_BUTTON_DESCRIPTION}
+                  aria-label={TOOLTIP_COPY.addGroup}
                 >
                   Panel group
                 </Button>

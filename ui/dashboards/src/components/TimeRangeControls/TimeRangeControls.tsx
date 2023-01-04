@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import RefreshIcon from 'mdi-material-ui/Refresh';
-import { DateTimeRangePicker, TimeOption } from '@perses-dev/components';
+import { DateTimeRangePicker, InfoTooltip, TimeOption, TooltipPlacement } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isDurationString } from '@perses-dev/core';
 import { useDefaultTimeRange } from '../../context';
+import { TOOLTIP_COPY } from '../../utils';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 
 export const TIME_OPTIONS: TimeOption[] = [
@@ -59,9 +60,11 @@ export function TimeRangeControls({ heightPx }: TimeRangeControlsProps) {
   return (
     <>
       <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
-      <ToolbarIconButton aria-label="Refresh Dashboard" onClick={refresh} sx={{ height }}>
-        <RefreshIcon />
-      </ToolbarIconButton>
+      <InfoTooltip description={TOOLTIP_COPY.refreshDashboard} placement={TooltipPlacement.Bottom}>
+        <ToolbarIconButton aria-label={TOOLTIP_COPY.refreshDashboard} onClick={refresh} sx={{ height }}>
+          <RefreshIcon />
+        </ToolbarIconButton>
+      </InfoTooltip>
     </>
   );
 }
