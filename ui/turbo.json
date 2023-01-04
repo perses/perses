@@ -25,7 +25,8 @@
     },
     "e2e": {
       "dependsOn": [],
-      "outputs": []
+      "outputs": [],
+      "cache": false
     }
   }
 }
