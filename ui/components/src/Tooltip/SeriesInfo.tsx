@@ -131,7 +131,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
         >
-          <Typography variant="body2">{inlineSeriesLabels}</Typography>
+          {inlineSeriesLabels}
         </Box>
       </Box>
       <Box
