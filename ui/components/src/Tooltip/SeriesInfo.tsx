@@ -79,7 +79,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
           {splitLabels.map((name) => {
             // show labels on separate lines when many labels and only one focused series
             if (name) {
-              const [key, value] = name.split(':');
+              const [key, value] = name.split('=');
               const formattedKey = value !== undefined ? `${key}: ` : key;
               return (
                 <Box key={name} sx={{ display: 'flex', gap: '4px' }}>
