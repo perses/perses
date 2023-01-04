@@ -16,7 +16,6 @@ package migrate
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/shared"
@@ -49,20 +48,11 @@ func (e *Endpoint) Migrate(ctx echo.Context) error {
 	if err := ctx.Bind(body); err != nil {
 		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
 	}
-	grafanaDashboard := replaceInputValue(body)
+	grafanaDashboard := migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard))
 	persesDashboard, err := e.migrationService.Migrate([]byte(grafanaDashboard))
 	if err != nil {
 		return shared.HandleError(err)
 	}
 
 	return ctx.JSON(http.StatusOK, persesDashboard)
-}
-
-func replaceInputValue(body *api.Migrate) string {
-	grafanaDashboard := string(body.GrafanaDashboard)
-	for input, value := range body.Input {
-		grafanaDashboard = strings.Replace(grafanaDashboard, fmt.Sprintf("$%s", input), value, -1)
-		grafanaDashboard = strings.Replace(grafanaDashboard, fmt.Sprintf("${%s}", input), value, -1)
-	}
-	return grafanaDashboard
 }
