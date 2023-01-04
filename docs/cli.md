@@ -258,12 +258,23 @@ with the server (because it will match the plugins known by the server instead o
 ### Migrate from Grafana dashboard to Perses format
 
 The command `migrate` is for the moment only used to translate a Grafana dashboard to the Perses format. This command
-cannot be run offline. It requires an active connection to a remote Perses server that holds the translation logic.
+has two mode:
 
-If the command runs successfully, it will return the dashboard in the Perses format.
+1. An online mode that requires an active connection to a remote Perses server that holds the translation logic.
+2. An offline mode that requires three different folders:
+    * charts folders
+    * queries folders
+    * variables folders
+
+Each of the above folders should contain files, named `mig.cuepart` that holds the logic of the migration for each
+plugin. For more information about these files please read the documentation about [cue](./cue.md)
+
+In both mode, ff the command runs successfully, it will return the dashboard in the Perses format.
+
+For example:
 
 ```bash
-$ percli migrate -f ./grafana_dashboard.json
+$ percli migrate -f ./grafana_dashboard.json --online
 
 kind: Dashboard
 metadata:

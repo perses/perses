@@ -142,7 +142,7 @@ func NewCMD() *cobra.Command {
 		Short: "migrate a Grafana dashboard to the Perses format",
 		Example: `
 # Migrate a Grafana dashboard with input
-percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo
+percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
