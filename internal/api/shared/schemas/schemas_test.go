@@ -171,15 +171,15 @@ func TestValidatePanels(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			schema := New(config.Schemas{
+			schema, err := New(config.Schemas{
 				PanelsPath:  "testdata/panels",
 				QueriesPath: "testdata/queries",
 			})
-			for _, l := range schema.GetLoaders() {
-				assert.NoError(t, l.Load())
+			if err != nil {
+				t.Fatal(err)
 			}
 
-			err := schema.ValidatePanels(test.dashboard.Spec.Panels)
+			err = schema.ValidatePanels(test.dashboard.Spec.Panels)
 			errString := ""
 			if err != nil {
 				errString = err.Error()
@@ -287,14 +287,13 @@ func TestValidateVariables(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			schema := New(config.Schemas{
+			schema, err := New(config.Schemas{
 				VariablesPath: "testdata/variables",
 			})
-			for _, l := range schema.GetLoaders() {
-				assert.NoError(t, l.Load())
+			if err != nil {
+				t.Fatal(err)
 			}
-
-			err := schema.ValidateVariables(test.dashboard.Spec.Variables)
+			err = schema.ValidateVariables(test.dashboard.Spec.Variables)
 			errString := ""
 			if err != nil {
 				errString = err.Error()

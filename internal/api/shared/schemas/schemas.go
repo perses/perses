@@ -71,7 +71,7 @@ type Schemas interface {
 	GetLoaders() []Loader
 }
 
-func New(conf config.Schemas) Schemas {
+func New(conf config.Schemas) (Schemas, error) {
 	ctx := cuecontext.New()
 
 	// compile the base definitions
@@ -124,11 +124,14 @@ func New(conf config.Schemas) Schemas {
 		s.vars = vars
 	}
 	s.loaders = loaders
-
-	return s
+	if err := s.init(); err != nil {
+		return nil, err
+	}
+	return s, nil
 }
 
 type sch struct {
+	Schemas
 	context *cue.Context
 	panels  *cueDefs
 	dts     *cueDefs
@@ -246,6 +249,15 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 		//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
 		err = fmt.Errorf("invalid %s %s: %s", modelKind, modelName, err) // enrich the error message returned by cue lib
 		return err
+	}
+	return nil
+}
+
+func (s *sch) init() error {
+	for _, l := range s.loaders {
+		if err := l.Load(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
