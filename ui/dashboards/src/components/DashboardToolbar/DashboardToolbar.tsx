@@ -122,7 +122,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   onClick={openAddPanelGroup}
                   aria-label={TOOLTIP_TEXT.addGroup}
                 >
-                  Panel group
+                  Panel Group
                 </Button>
               </InfoTooltip>
               <TimeRangeControls />

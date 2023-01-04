@@ -61,7 +61,7 @@ export function PanelGroupDialog() {
           >
             <CloseIcon />
           </IconButton>
-          <DialogContent sx={{ width: '500px' }}>
+          <DialogContent dividers sx={{ width: '500px' }}>
             <PanelGroupEditorForm initialValues={panelGroupEditor.initialValues} onSubmit={handleSubmit} />
           </DialogContent>
           <DialogActions>
