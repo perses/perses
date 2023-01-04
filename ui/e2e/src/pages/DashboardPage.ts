@@ -26,6 +26,7 @@ export class DashboardPage {
   readonly page: Page;
 
   readonly editButton: Locator;
+  readonly cancelButton: Locator;
   readonly addPanelGroupButton: Locator;
   readonly addPanelButton: Locator;
 
@@ -41,6 +42,7 @@ export class DashboardPage {
     this.page = page;
 
     this.editButton = page.getByRole('button', { name: 'Edit' });
+    this.cancelButton = page.getByRole('button', { name: 'Cancel' });
     this.addPanelGroupButton = page.getByRole('button', { name: 'Add Panel Group' });
     this.addPanelButton = page.getByRole('button', { name: 'Add Panel', exact: true });
 
@@ -55,6 +57,7 @@ export class DashboardPage {
 
   async startEditing() {
     await this.editButton.click();
+    await this.cancelButton.isVisible();
   }
 
   getDialog(name: string) {
