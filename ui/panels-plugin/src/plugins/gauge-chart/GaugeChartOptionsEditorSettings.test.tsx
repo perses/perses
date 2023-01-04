@@ -84,4 +84,28 @@ describe('GaugeChartOptionsEditorSettings', () => {
       })
     );
   });
+
+  it('can modify max', async () => {
+    let maxValue: number | undefined = undefined;
+    const onChange = jest.fn((e) => {
+      maxValue = e.max;
+    });
+    renderGaugeChartOptionsEditorSettings(
+      {
+        unit: {
+          kind: 'Decimal',
+        },
+        max: 1,
+        calculation: 'LastNumber',
+        query: MOCK_QUERY,
+      },
+      onChange
+    );
+    const maxInput = await screen.findByLabelText(/Max/);
+    expect(maxInput).toBeInTheDocument();
+    userEvent.clear(maxInput);
+    userEvent.type(maxInput, '5');
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(maxValue).toBe(5);
+  });
 });

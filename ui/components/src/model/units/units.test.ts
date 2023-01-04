@@ -13,8 +13,14 @@
 
 import { formatValue, UnitOptions } from './units';
 
-describe('formatValue()', () => {
-  const tests = [
+interface UnitTestCase {
+  value: number;
+  unit: UnitOptions;
+  expected: string;
+}
+
+describe('formatValue', () => {
+  const tests: UnitTestCase[] = [
     {
       value: 100000,
       unit: { kind: 'Decimal' },
@@ -101,10 +107,8 @@ describe('formatValue()', () => {
       expected: '300.00 years',
     },
   ];
-
-  tests.forEach(({ value, unit, expected }) => {
-    it(`formats ${value} as ${JSON.stringify(unit)}`, () => {
-      expect(formatValue(value, unit as UnitOptions)).toEqual(expected);
-    });
+  it.each(tests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
+    const { value, unit, expected } = args;
+    expect(formatValue(value, unit)).toEqual(expected);
   });
 });

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { merge } from 'lodash-es';
+import { TextField } from '@mui/material';
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
@@ -21,9 +22,10 @@ import {
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
+  OptionsEditorControl,
 } from '@perses-dev/components';
 import { GaugeChartOptionsEditorProps } from './GaugeChartOptionsEditor';
-import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
+import { GaugeChartOptions, DEFAULT_UNIT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
 
 export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps) {
   const { onChange, value } = props;
@@ -47,12 +49,39 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
   // ensures decimal_places defaults to correct value
   const unit = merge({}, DEFAULT_UNIT, value.unit);
 
+  // max only needs to be set explicitly for units other than Percent and PercentDecimal
+  let maxPlaceholder = 'Enter value';
+  if (unit.kind === 'Percent') {
+    maxPlaceholder = DEFAULT_MAX_PERCENT.toString();
+  } else if (unit.kind === 'PercentDecimal') {
+    maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
+  }
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
           <UnitSelector value={unit} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+          <OptionsEditorControl
+            label="Max"
+            control={
+              <TextField
+                type="number"
+                value={value.max ?? ''}
+                onChange={(e) => {
+                  // ensure empty value resets to undef to allow chart to calculate max
+                  const newValue = e.target.value ? Number(e.target.value) : undefined;
+                  onChange(
+                    produce(value, (draft: GaugeChartOptions) => {
+                      draft.max = newValue;
+                    })
+                  );
+                }}
+                placeholder={maxPlaceholder}
+              />
+            }
+          />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>

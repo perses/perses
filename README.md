@@ -1,8 +1,9 @@
 Perses
 ======
-[![build](https://github.com/perses/perses/workflows/build_and_release/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Abuild)
+[![build](https://github.com/perses/perses/workflows/ci/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Aci)
 [![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago)
 [![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3React)
+[![Go Report Card](https://goreportcard.com/badge/github.com/perses/perses)](https://goreportcard.com/report/github.com/perses/perses)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/perses/perses)
 
 ## Overview
@@ -36,6 +37,7 @@ progress. The current pieces that are in place are:
     * To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
       All schemas are available in the [schemas](./schemas) folder.
 * A backend REST API provides R/W access to dashboard and datasource definitions.
+* A CLI that can be used to interact with the REST API. A short docs is available [here](./docs/cli.md)
 * While the UI is still in progress, we already have:
     * a beginning of navigation that will help to move from a dashboard to another.
     * a support of the following panel types:

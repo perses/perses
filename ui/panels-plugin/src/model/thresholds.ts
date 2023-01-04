@@ -52,10 +52,8 @@ export function convertThresholds(thresholds: ThresholdOptions, unit: UnitOption
     // https://echarts.apache.org/en/option.html#series-gauge.axisLine.lineStyle.color
     // color segments must be decimal between 0 and 1
     const segmentMax = 1;
-
     const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => {
-      if (unit.kind === 'PercentDecimal') return step.value;
-      return step.value / max; // max needed for Decimal and Percent conversion
+      return step.value / max;
     });
     valuesArr.push(segmentMax);
 
