@@ -13,7 +13,7 @@
 
 import { useRef } from 'react';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
-import { InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { InfoTooltip } from '@perses-dev/components';
 import { useDashboard } from '../../context';
 import { TOOLTIP_COPY } from '../../utils';
 import { ToolbarIconButton } from '../ToolbarIconButton';
@@ -40,7 +40,7 @@ export function DownloadButton() {
 
   return (
     <>
-      <InfoTooltip description={TOOLTIP_COPY.downloadDashboard} placement={TooltipPlacement.Bottom}>
+      <InfoTooltip description={TOOLTIP_COPY.downloadDashboard} placement="bottom">
         <ToolbarIconButton aria-label={TOOLTIP_COPY.downloadDashboard} onClick={onDownloadButtonClick}>
           <DownloadIcon />
         </ToolbarIconButton>
