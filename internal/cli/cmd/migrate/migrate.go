@@ -19,6 +19,8 @@ import (
 	"io"
 	"regexp"
 
+	apiConfig "github.com/perses/perses/internal/api/config"
+	"github.com/perses/perses/internal/api/shared/migrate"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
@@ -26,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -35,10 +38,15 @@ type option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.OutputOption
-	writer    io.Writer
-	rowInput  []string
-	input     map[string]string
-	apiClient api.ClientInterface
+	writer           io.Writer
+	rowInput         []string
+	input            map[string]string
+	chartsSchemas    string
+	queriesSchemas   string
+	variablesSchemas string
+	online           bool
+	mig              migrate.Migration
+	apiClient        api.ClientInterface
 }
 
 func (o *option) Complete(args []string) error {
@@ -49,11 +57,25 @@ func (o *option) Complete(args []string) error {
 		return outputErr
 	}
 	o.completeInput()
-	apiClient, err := config.Global.GetAPIClient()
-	if err != nil {
-		return err
+	if (len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0) || len(o.variablesSchemas) > 0 {
+		var err error
+		o.mig, err = migrate.New(apiConfig.Schemas{
+			PanelsPath:    o.chartsSchemas,
+			QueriesPath:   o.queriesSchemas,
+			VariablesPath: o.variablesSchemas,
+		})
+		if err != nil {
+			return err
+		}
 	}
-	o.apiClient = apiClient
+	if o.online {
+		// Finally, get the api client we will need later.
+		apiClient, err := config.Global.GetAPIClient()
+		if err != nil {
+			return err
+		}
+		o.apiClient = apiClient
+	}
 	return nil
 }
 
@@ -84,14 +106,29 @@ func (o *option) Execute() error {
 	if err := file.Unmarshal(o.File, &grafanaDashboard); err != nil {
 		return err
 	}
-	persesDashboard, err := o.apiClient.Migrate(&modelAPI.Migrate{
-		Input:            o.input,
-		GrafanaDashboard: grafanaDashboard,
-	})
+	var persesDashboard *modelV1.Dashboard
+	var err error
+	if o.online {
+		persesDashboard, err = o.onlineExecution(grafanaDashboard)
+	} else {
+		persesDashboard, err = o.offlineExecution(grafanaDashboard)
+	}
 	if err != nil {
 		return err
 	}
 	return output.Handle(o.writer, o.Output, persesDashboard)
+}
+
+func (o *option) onlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {
+	return o.apiClient.Migrate(&modelAPI.Migrate{
+		Input:            o.input,
+		GrafanaDashboard: grafanaDashboard,
+	})
+}
+
+func (o *option) offlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {
+	finalGrafanaDashboard := migrate.ReplaceInputValue(o.input, string(grafanaDashboard))
+	return o.mig.Migrate([]byte(finalGrafanaDashboard))
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -105,7 +142,7 @@ func NewCMD() *cobra.Command {
 		Short: "migrate a Grafana dashboard to the Perses format",
 		Example: `
 # Migrate a Grafana dashboard with input
-percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo
+percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
@@ -115,5 +152,15 @@ percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo
 	opt.AddOutputFlags(cmd, &o.OutputOption)
 	opt.MarkFileFlagAsMandatory(cmd)
 	cmd.Flags().StringArrayVar(&o.rowInput, "input", o.rowInput, "Grafana input values. Syntax supported is InputName=InputValue")
+	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for dasbhoard charts.")
+	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for chart queries.")
+	cmd.Flags().StringVar(&o.variablesSchemas, "schemas.variables", "", "Path to the CUE schemas for the dashboard variables")
+	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to use it to perform the migration")
+
+	// when online flag is used, the CLI will call the endpoint /migrate that will then use the schema from the server.
+	// So no need to use / load the schemas with the CLI.
+	cmd.MarkFlagsMutuallyExclusive("schemas.charts", "online")
+	cmd.MarkFlagsMutuallyExclusive("schemas.queries", "online")
+	cmd.MarkFlagsMutuallyExclusive("schemas.variables", "online")
 	return cmd
 }

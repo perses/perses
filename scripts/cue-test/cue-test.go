@@ -51,11 +51,9 @@ func validateSchemas(folder string, vf validateFunc) {
 func main() {
 	cfg := config.Schemas{}
 	_ = cfg.Verify()
-	sch := schemas.New(cfg)
-	for _, loader := range sch.GetLoaders() {
-		if err := loader.Load(); err != nil {
-			logrus.Fatal(err)
-		}
+	sch, err := schemas.New(cfg)
+	if err != nil {
+		logrus.Fatal(err)
 	}
 	validateSchemas(config.DefaultPanelsPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidatePanel(plugin, name)

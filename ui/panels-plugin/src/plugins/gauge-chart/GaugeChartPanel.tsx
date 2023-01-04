@@ -19,7 +19,7 @@ import { Box, Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
 import { useSuggestedStepMs } from '../../model/time';
-import { GaugeChartOptions, DEFAULT_UNIT } from './gauge-chart-model';
+import { GaugeChartOptions, DEFAULT_UNIT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
 const GAUGE_MIN_WIDTH = 90;
@@ -74,10 +74,10 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   // needed for end value of last threshold color segment
   let thresholdMax = max;
   if (thresholdMax === undefined) {
-    if (unit.kind === 'PercentDecimal') {
-      thresholdMax = 1;
+    if (unit.kind === 'Percent') {
+      thresholdMax = DEFAULT_MAX_PERCENT;
     } else {
-      thresholdMax = 100;
+      thresholdMax = DEFAULT_MAX_PERCENT_DECIMAL;
     }
   }
   const axisLineColors = convertThresholds(thresholds, unit, thresholdMax);

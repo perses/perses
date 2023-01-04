@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { convertThresholds } from '../thresholds';
+import { convertThresholds } from './thresholds';
 
 describe('convertThresholds', () => {
   it('should convert gauge thresholds to valid echarts option colors', () => {
@@ -70,5 +70,47 @@ describe('convertThresholds', () => {
       [1, 'rgba(234, 71, 71, 1)'],
     ];
     expect(convertThresholds(bytesInput, { kind: 'Bytes' }, 10000)).toEqual(bytesOutput);
+  });
+
+  it('should account for custom max', () => {
+    const percentOutput = [
+      [0.25, '#000'],
+      [0.4, '#FFA500'],
+      [1, '#FF0000'],
+    ];
+    const percentInput = {
+      default_color: '#000',
+      steps: [
+        {
+          value: 50,
+          color: '#FFA500',
+        },
+        {
+          value: 80,
+          color: '#FF0000',
+        },
+      ],
+    };
+    expect(convertThresholds(percentInput, { kind: 'Percent' }, 200)).toEqual(percentOutput);
+
+    const percentDecimalOutput = [
+      [0.05, '#000'],
+      [0.08, '#FFA500'],
+      [1, '#FF0000'],
+    ];
+    const percentDecimalInput = {
+      default_color: '#000',
+      steps: [
+        {
+          value: 0.5,
+          color: '#FFA500',
+        },
+        {
+          value: 0.8,
+          color: '#FF0000',
+        },
+      ],
+    };
+    expect(convertThresholds(percentDecimalInput, { kind: 'PercentDecimal' }, 10)).toEqual(percentDecimalOutput);
   });
 });
