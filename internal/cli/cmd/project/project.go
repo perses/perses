@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -82,7 +82,7 @@ func NewCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "project [NAME]",
 		Short: "Select the project used by default.",
-		Long: `Select a project as a default project to use for later. 
+		Long: `Select a project as a default project to use for later.
 The project to be used is stored in the configuration file located at ${USERHOME}/.perses/config.
 
 If no project is specified in the command line, it will instead display the current project used.`,

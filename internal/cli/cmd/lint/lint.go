@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -132,7 +132,7 @@ func NewCMD() *cobra.Command {
 		Use:   "lint -f [FILENAME]",
 		Short: "Static check of the resources",
 		Long: `
-The lint command will check statically that your resources are valid. 
+The lint command will check statically that your resources are valid.
 It doesn't necessary mean you won't face any issue when applying them.
 
 JSON and YAML formats are accepted.
