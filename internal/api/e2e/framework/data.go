@@ -195,7 +195,7 @@ func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	// Creating a full dashboard is quite long and to ensure the changes are still matching the dev environment,
 	// it's better to use the dashboard written in the dev/data/dashboard.json
-	persesRepositoryPath := getRepositoryPath(t)
+	persesRepositoryPath := GetRepositoryPath(t)
 	dashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "dashboard.json")
 	var list []*v1.Dashboard
 	data, err := os.ReadFile(dashboardJSONFilePath)

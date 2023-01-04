@@ -29,6 +29,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/schemas"
 )
 
@@ -38,6 +39,7 @@ type ServiceManager interface {
 	GetFolder() folder.Service
 	GetGlobalDatasource() globaldatasource.Service
 	GetHealth() health.Service
+	GetMigration() migrate.Migration
 	GetProject() project.Service
 	GetSchemas() schemas.Schemas
 }
@@ -49,12 +51,20 @@ type service struct {
 	folder           folder.Service
 	globalDatasource globaldatasource.Service
 	health           health.Service
+	migrate          migrate.Migration
 	project          project.Service
 	schemas          schemas.Schemas
 }
 
-func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManager {
-	schemasService := schemas.New(conf.Schemas)
+func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+	schemasService, err := schemas.New(conf.Schemas)
+	if err != nil {
+		return nil, err
+	}
+	migrateService, err := migrate.New(conf.Schemas)
+	if err != nil {
+		return nil, err
+	}
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
 	folderService := folderImpl.NewService(dao.GetFolder())
@@ -67,9 +77,10 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) ServiceManage
 		folder:           folderService,
 		globalDatasource: globalDatasourceService,
 		health:           healthService,
+		migrate:          migrateService,
 		project:          projectService,
 		schemas:          schemasService,
-	}
+	}, nil
 }
 
 func (s *service) GetDashboard() dashboard.Service {
@@ -90,6 +101,10 @@ func (s *service) GetGlobalDatasource() globaldatasource.Service {
 
 func (s *service) GetHealth() health.Service {
 	return s.health
+}
+
+func (s *service) GetMigration() migrate.Migration {
+	return s.migrate
 }
 
 func (s *service) GetProject() project.Service {

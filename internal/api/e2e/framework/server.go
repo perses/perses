@@ -32,7 +32,7 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 )
 
-func getRepositoryPath(t *testing.T) string {
+func GetRepositoryPath(t *testing.T) string {
 	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
 		t.Fatal(err)
@@ -57,7 +57,7 @@ func defaultFileConfig() *config.File {
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
-	projectPath := getRepositoryPath(t)
+	projectPath := GetRepositoryPath(t)
 	handler := echo.New()
 	conf := config.Config{
 		Database: config.Database{
@@ -75,12 +75,9 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
-	// Load every cue schemas
-	for _, loader := range serviceManager.GetSchemas().GetLoaders() {
-		if err := loader.Load(); err != nil {
-			t.Fatal(err)
-		}
+	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
+	if err != nil {
+		t.Fatal(err)
 	}
 	handler.Use(middleware.CheckProject(serviceManager.GetProject()))
 	persesAPI := core.NewPersesAPI(serviceManager, conf)

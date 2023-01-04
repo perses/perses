@@ -21,6 +21,7 @@ import (
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/ui"
 	"github.com/sirupsen/logrus"
@@ -55,7 +56,10 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
 	}
-	serviceManager := dependency.NewServiceManager(persistenceManager, conf)
+	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to instantiate the service manager")
+	}
 	persesAPI := core.NewPersesAPI(serviceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
@@ -64,12 +68,16 @@ func main() {
 	// - watch for changes on the schemas folders
 	// - register a cron task to reload all the schemas every <interval>
 	watcher, reloader, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
-
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the tasks for hot reload of schemas")
 	}
-	runner.WithTasks(watcher)
-	runner.WithCronTasks(conf.Schemas.Interval, reloader)
+	// enable hot reload of the migration schemas
+	migrateWatcher, migrateReloader, err := migrate.NewHotReloaders(serviceManager.GetMigration())
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to instantiate the tasks for hot reload of migration schema")
+	}
+	runner.WithTasks(watcher, migrateWatcher)
+	runner.WithCronTasks(conf.Schemas.Interval, reloader, migrateReloader)
 
 	// register the API
 	runner.HTTPServerBuilder().

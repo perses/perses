@@ -52,7 +52,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) e
 	}
 	apiEndpoints := []endpoint{
 		configendpoint.New(cfg),
-		migrateendpoint.New(cfg.Schemas),
+		migrateendpoint.New(serviceManager.GetMigration()),
 		validateendpoint.New(serviceManager.GetSchemas()),
 	}
 	return &api{

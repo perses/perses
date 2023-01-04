@@ -49,12 +49,16 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("no args are supported by the command 'lint'")
 	}
 	if (len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0) || len(o.datasourcesSchemas) > 0 || len(o.variablesSchemas) > 0 {
-		o.sch = schemas.New(apiConfig.Schemas{
+		var err error
+		o.sch, err = schemas.New(apiConfig.Schemas{
 			PanelsPath:      o.chartsSchemas,
 			QueriesPath:     o.queriesSchemas,
 			DatasourcesPath: o.datasourcesSchemas,
 			VariablesPath:   o.variablesSchemas,
 		})
+		if err != nil {
+			return err
+		}
 	}
 	if o.online {
 		// Finally, get the api client we will need later.
