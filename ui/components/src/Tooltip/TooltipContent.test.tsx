@@ -39,6 +39,7 @@ describe('TooltipContent', () => {
     renderComponent(tooltipContent);
     expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
+    expect(screen.getByText('13:53:00')).toBeInTheDocument();
   });
 
   it('render tooltip content with multiple series data', () => {

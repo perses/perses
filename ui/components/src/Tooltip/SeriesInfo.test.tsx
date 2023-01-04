@@ -32,7 +32,7 @@ describe('SeriesInfo', () => {
     renderComponent(seriesInfo);
     expect(screen.getByText('node_load1:')).toBeInTheDocument();
     expect(screen.getByText('28.0%')).toBeInTheDocument();
-    expect(screen.getByText('instance="demo.do.prometheus.io:')).toBeInTheDocument();
+    expect(screen.getByText('"demo.do.prometheus.io:9100"')).toBeInTheDocument();
   });
 
   it('render preformatted series name beside formattedY value', () => {
