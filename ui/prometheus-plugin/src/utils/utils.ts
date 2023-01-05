@@ -102,7 +102,7 @@ export function getUniqueKeyForPrometheusResult(
   metricLabels: {
     [key: string]: string;
   },
-  removeExprWrap?: boolean
+  { removeExprWrap }: { removeExprWrap?: boolean } = {}
 ) {
   const metricNameKey = '__name__';
   if (metricLabels) {
@@ -114,6 +114,7 @@ export function getUniqueKeyForPrometheusResult(
         },
         removeExprWrap
       );
+      console.log('removeExprWrap: ', removeExprWrap);
       if (removeExprWrap === true) {
         return `${stringifiedLabels}`;
       } else {

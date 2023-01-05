@@ -128,7 +128,7 @@ describe('getUniqueKeyForPrometheusResult', () => {
 
   it('should be formatted with "', () => {
     labels = { ['foo']: 'bar' };
-    const result = getUniqueKeyForPrometheusResult(labels, true);
+    const result = getUniqueKeyForPrometheusResult(labels, { removeExprWrap: true });
     expect(result).toEqual('{"foo":"bar"}');
   });
 
@@ -139,7 +139,7 @@ describe('getUniqueKeyForPrometheusResult', () => {
       instance: 'demo.do.prometheus.io:9100',
       job: 'node',
     };
-    const result = getUniqueKeyForPrometheusResult(labels, true);
+    const result = getUniqueKeyForPrometheusResult(labels, { removeExprWrap: true });
     expect(result).toEqual('{"env":"demo","instance":"demo.do.prometheus.io:9100","job":"node"}');
   });
 
@@ -150,7 +150,7 @@ describe('getUniqueKeyForPrometheusResult', () => {
       instance: 'demo.do.prometheus.io:9100',
       job: 'node',
     };
-    const result = getUniqueKeyForPrometheusResult(labels, false);
+    const result = getUniqueKeyForPrometheusResult(labels, { removeExprWrap: false });
     expect(result).toEqual('node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}');
   });
 });
