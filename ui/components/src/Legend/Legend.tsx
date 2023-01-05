@@ -24,7 +24,7 @@ interface LegendProps {
 }
 
 export function Legend({ width, height, options, data }: LegendProps) {
-  if (options.position === 'right') {
+  if (options.position === 'Right') {
     return (
       <Box
         sx={{
@@ -42,5 +42,16 @@ export function Legend({ width, height, options, data }: LegendProps) {
     );
   }
 
-  return <CompactLegend items={data} height={height} />;
+  return (
+    <Box
+      sx={{
+        width: width,
+        height: height,
+        position: 'absolute',
+        bottom: 0,
+      }}
+    >
+      <CompactLegend items={data} height={height} />;
+    </Box>
+  );
 }

@@ -12,21 +12,16 @@
 // limitations under the License.
 
 import { Autocomplete, Switch, SwitchProps, TextField } from '@mui/material';
-import { DEFAULT_LEGEND, LegendOptions } from '../model';
+import { ErrorAlert } from '../ErrorAlert';
+import {
+  DEFAULT_LEGEND,
+  getLegendPosition,
+  validateLegendSpec,
+  LEGEND_POSITIONS_CONFIG,
+  LegendOptions,
+  LegendPositionConfig,
+} from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
-
-type LegendPositionConfig = {
-  label: string;
-};
-
-const LEGEND_POSITIONS = ['bottom', 'right'] as const;
-
-type LegendPositions = typeof LEGEND_POSITIONS[number];
-
-const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendPositionConfig>> = {
-  bottom: { label: 'Bottom' },
-  right: { label: 'Right' },
-};
 
 type LegendPositionOption = LegendPositionConfig & { id: LegendOptions['position'] };
 
@@ -56,13 +51,18 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
-  const legendConfig = LEGEND_POSITIONS_CONFIG[value?.position ?? DEFAULT_LEGEND.position];
+  const currentPosition = getLegendPosition(value?.position);
+
+  const legendConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
+
+  const isValidLegend = validateLegendSpec(value);
 
   return (
     <>
+      {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
       <OptionsEditorControl
         label="Show"
-        control={<Switch checked={value !== undefined} onChange={handleLegendShowChange} />}
+        control={<Switch checked={isValidLegend} onChange={handleLegendShowChange} />}
       />
       <OptionsEditorControl
         label="Position"
@@ -70,13 +70,13 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
           <Autocomplete
             value={{
               ...legendConfig,
-              id: value?.position ?? DEFAULT_LEGEND.position,
+              id: currentPosition,
             }}
             options={POSITION_OPTIONS}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => <TextField {...params} />}
             onChange={handleLegendPositionChange}
-            disabled={value === undefined}
+            disabled={!isValidLegend}
             disableClearable
           ></Autocomplete>
         }

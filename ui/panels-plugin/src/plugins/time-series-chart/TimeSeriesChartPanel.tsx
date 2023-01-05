@@ -19,11 +19,12 @@ import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import {
   DEFAULT_LEGEND,
-  LineChart,
   EChartsDataFormat,
-  ZoomEventData,
+  validateLegendSpec,
   Legend,
+  LineChart,
   YAxisLabel,
+  ZoomEventData,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
@@ -47,7 +48,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
 
   // popuate default 'position' and other future properties
-  const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
+  const legend = validateLegendSpec(props.spec.legend) ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
 
   // TODO: eventually remove props.spec.unit, add support for y_axis_alt.unit
   let unit = DEFAULT_UNIT;
@@ -205,20 +206,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;
-  const legendHeight = legend && legend.position === 'right' ? contentDimensions.height : 35;
+  const legendWidth = legend && legend.position === 'Right' ? 200 : contentDimensions.width;
+  const legendHeight = legend && legend.position === 'Right' ? contentDimensions.height : 40;
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
     left: !yAxis.show ? 0 : gridLeft,
-    right: legend && legend.position === 'right' ? legendWidth : 20,
+    right: legend && legend.position === 'Right' ? legendWidth : 20,
+    bottom: legend && legend.position === 'Bottom' ? legendHeight : 0,
   };
-
-  const lineChartHeight =
-    legend && legend.position === 'bottom' && graphData.legendItems && graphData.legendItems.length > 0
-      ? contentDimensions.height - legendHeight
-      : contentDimensions.height;
 
   const handleDataZoom = (event: ZoomEventData) => {
     // TODO: add ECharts transition animation on zoom
@@ -229,7 +226,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     <>
       {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
       <LineChart
-        height={lineChartHeight}
+        height={contentDimensions.height}
         data={graphData}
         yAxis={yAxis}
         unit={unit}

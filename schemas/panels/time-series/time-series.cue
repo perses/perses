@@ -18,7 +18,7 @@ import (
 )
 
 #legend: {
-	position: "bottom" | "right"
+	position: "Bottom" | "Right"
 }
 
 #visual: {
