@@ -17,4 +17,3 @@ export * from './prometheus-client';
 export * from './prometheus-selectors';
 export * from './templating';
 export * from './time';
-export * from './utils';

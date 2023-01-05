@@ -20,7 +20,7 @@ import { CursorCoordinates, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH, useMousePosit
 import { TooltipContent } from './TooltipContent';
 import { assembleTransform } from './utils';
 
-interface TooltipProps {
+interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
   pinTooltip: boolean;
@@ -28,7 +28,13 @@ interface TooltipProps {
   unit?: UnitOptions;
 }
 
-const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, pinTooltip, unit }: TooltipProps) {
+export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
+  chartRef,
+  chartData,
+  wrapLabels,
+  pinTooltip,
+  unit,
+}: TimeSeriesTooltipProps) {
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
 
@@ -82,5 +88,3 @@ const Tooltip = React.memo(function Tooltip({ chartRef, chartData, wrapLabels, p
     </Portal>
   );
 });
-
-export { Tooltip };

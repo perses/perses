@@ -38,7 +38,7 @@ import { EChart, OnEventsType } from '../EChart';
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { Tooltip } from '../Tooltip/Tooltip';
+import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
@@ -196,7 +196,7 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
       onDoubleClick={handleOnDoubleClick}
     >
       {showTooltip === true && (
-        <Tooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit}></Tooltip>
+        <TimeSeriesTooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit} />
       )}
 
       <EChart
