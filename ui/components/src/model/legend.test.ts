@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { validateLegendSpec } from './legend';
+import { LegendOptions, validateLegendSpec } from './legend';
 
 describe('validateLegendSpec', () => {
   it('should check if a legend spec is valid', () => {
-    expect(validateLegendSpec({ position: 'bottom' })).toEqual(false);
+    const invalidLegend = { position: 'bottom' };
+    expect(validateLegendSpec(invalidLegend as LegendOptions)).toEqual(false);
     expect(validateLegendSpec({ position: 'Bottom' })).toEqual(true);
     expect(validateLegendSpec(undefined)).toEqual(true);
   });

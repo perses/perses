@@ -56,9 +56,7 @@ export function isValidLegendPosition(position: LegendPositions) {
   return (legendPositions as readonly string[]).includes(position);
 }
 
-// TODO: how to not use any, try unknown
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateLegendSpec(legend?: any) {
+export function validateLegendSpec(legend?: LegendOptions) {
   if (legend === undefined) {
     // undefined is valid since this is how legend is hidden by default
     return true;
