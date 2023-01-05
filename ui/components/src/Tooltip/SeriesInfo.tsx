@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, Stack, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { SeriesMarker } from './SeriesMarker';
+import { SeriesLabelsStack } from './SeriesLabelsStack';
 import { TOOLTIP_LABELS_MAX_WIDTH } from './tooltip-model';
 
 export interface SeriesInfoProps {
@@ -39,66 +40,12 @@ export function SeriesInfo(props: SeriesInfoProps) {
   if (totalSeries === 1 && splitLabels.length > 1) {
     const metricName = nameSplit[0] ? `${nameSplit[0]}:` : 'value:';
     return (
-      <Stack spacing={0.5}>
-        <Box
-          sx={(theme) => ({
-            height: '16px',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'left',
-            color: theme.palette.common.white,
-            fontSize: '11px',
-          })}
-        >
-          <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.25 }} />
-          <Box component="span">
-            {metricName}
-            <Box
-              component="span"
-              sx={(theme) => ({
-                color: theme.palette.common.white,
-                fontWeight: 700,
-                paddingLeft: '2px',
-              })}
-            >
-              {formattedY}
-            </Box>
-          </Box>
-        </Box>
-        <Divider
-          sx={(theme) => ({
-            borderColor: theme.palette.grey['500'],
-          })}
-        />
-        <Box
-          sx={(theme) => ({
-            color: theme.palette.common.white,
-          })}
-        >
-          {splitLabels.map((name) => {
-            // show labels on separate lines when many labels and only one focused series
-            if (name) {
-              const [key, value] = name.split('=');
-              const formattedKey = value !== undefined ? `${key}: ` : key;
-              return (
-                <Box key={name} sx={{ display: 'flex', gap: '4px' }}>
-                  <Typography sx={{ fontSize: '11px' }}>{formattedKey}</Typography>
-                  <Typography
-                    sx={(theme) => ({
-                      color: theme.palette.common.white,
-                      fontWeight: 700,
-                      fontSize: '11px',
-                    })}
-                  >
-                    {value}
-                  </Typography>
-                </Box>
-              );
-            }
-          })}
-        </Box>
-      </Stack>
+      <SeriesLabelsStack
+        formattedY={formattedY}
+        metricName={metricName}
+        metricLabels={splitLabels}
+        markerColor={markerColor}
+      />
     );
   }
 
