@@ -8,6 +8,7 @@ Currently, those packages consist of:
   Perses UI elements into their own applications
 - [`core`](./core): Core functionality that's exposed to plugins and also
   consumed by the app
+- [`e2e`](./e2e): End-to-end tests.
 - [`panels-plugin`](./panels-plugin): a plugin module with `Panel` plugins for
   the core visualizations supported by Perses.
 - [`plugin-system`](./plugin-system): All the type definitions and components that power our plugins, also includes the

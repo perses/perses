@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,13 +14,12 @@
 import { useState } from 'react';
 import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
-import { Drawer, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { VariableDefinition } from '@perses-dev/core';
 
+import { TOOLTIP_TEXT } from '../../constants';
 import { useTemplateVariableDefinitions, useTemplateVariableActions } from '../../context';
 import { VariableEditor } from './VariableEditor';
-
-const EDIT_VARIABLES_BUTTON_DESCRIPTION = 'Edit variables';
 
 export function EditVariablesButton() {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
@@ -37,8 +36,8 @@ export function EditVariablesButton() {
 
   return (
     <>
-      <InfoTooltip description={EDIT_VARIABLES_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
-        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={EDIT_VARIABLES_BUTTON_DESCRIPTION}>
+      <InfoTooltip description={TOOLTIP_TEXT.editVariables} placement="bottom">
+        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={TOOLTIP_TEXT.editVariables}>
           Variables
         </Button>
       </InfoTooltip>

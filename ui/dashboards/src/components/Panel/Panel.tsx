@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -82,6 +82,7 @@ export function Panel(props: PanelProps) {
       onMouseLeave={handleMouseLeave}
       aria-labelledby={headerId}
       aria-describedby={headerId}
+      data-testid="panel"
       {...others}
     >
       <PanelHeader

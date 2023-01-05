@@ -22,6 +22,11 @@
     "test": {
       "dependsOn": [],
       "outputs": []
+    },
+    "e2e": {
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false
     }
   }
 }

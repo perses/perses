@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,12 +20,7 @@ import {
   Typography,
 } from '@mui/material';
 
-export enum TooltipPlacement {
-  Top = 'top',
-  Left = 'left',
-  Right = 'right',
-  Bottom = 'bottom',
-}
+export type TooltipPlacement = 'top' | 'left' | 'right' | 'bottom';
 
 interface InfoTooltipProps {
   description: string;
@@ -50,7 +45,7 @@ export const InfoTooltip = ({
     <StyledTooltip
       arrow
       id={id}
-      placement={placement ?? TooltipPlacement.Top}
+      placement={placement ?? 'top'}
       title={<TooltipContent title={title} description={description} />}
       enterDelay={enterDelay ?? 500}
       enterNextDelay={enterNextDelay ?? 500}

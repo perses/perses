@@ -11,7 +11,7 @@ files=("../LICENSE" "../CHANGELOG.md")
 workspaces=$(jq -r '.workspaces[]' < package.json)
 publish_workspaces=$(for workspace in ${workspaces}; do 
   # package "app" is private so we shouldn't try to publish it.
-  if [[ "${workspace}" != "app" ]]; then
+  if [[ "${workspace}" != "app" ]] && [[ "${workspace}" != "e2e" ]]; then
     echo $workspace;
   fi 
 done)

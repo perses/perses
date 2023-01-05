@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,16 +15,14 @@ import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
-import { ErrorBoundary, ErrorAlert, InfoTooltip, TooltipPlacement } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, InfoTooltip } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { useState } from 'react';
+import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboard, useDashboardActions, useEditMode } from '../../context';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { DownloadButton } from '../DownloadButton';
-
-const ADD_PANEL_BUTTON_DESCRIPTION = 'Add panel';
-const ADD_PANEL_GROUP_BUTTON_DESCRIPTION = 'Add panel group';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -113,16 +111,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             </ErrorBoundary>
             <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
               <EditVariablesButton />
-              <InfoTooltip description={ADD_PANEL_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
-                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={ADD_PANEL_BUTTON_DESCRIPTION}>
+              <InfoTooltip description={TOOLTIP_TEXT.addPanel} placement="bottom">
+                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={TOOLTIP_TEXT.addPanel}>
                   Panel
                 </Button>
               </InfoTooltip>
-              <InfoTooltip description={ADD_PANEL_GROUP_BUTTON_DESCRIPTION} placement={TooltipPlacement.Bottom}>
+              <InfoTooltip description={TOOLTIP_TEXT.addGroup} placement="bottom">
                 <Button
                   startIcon={<AddPanelGroupIcon />}
                   onClick={openAddPanelGroup}
-                  aria-label={ADD_PANEL_GROUP_BUTTON_DESCRIPTION}
+                  aria-label={TOOLTIP_TEXT.addGroup}
                 >
                   Panel group
                 </Button>

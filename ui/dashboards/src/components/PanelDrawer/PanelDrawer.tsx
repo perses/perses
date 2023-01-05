@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -72,7 +72,7 @@ export const PanelDrawer = () => {
   }, []);
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }}>
+    <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }} data-testid="panel-editor">
       {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
       {panelEditor !== undefined && (
         <>

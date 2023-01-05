@@ -1,4 +1,4 @@
-// Copyright 2022 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -28,15 +28,15 @@ import {
   Chip,
   IconButton,
   ClickAwayListener,
-  Tooltip,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { PluginEditor } from '@perses-dev/plugin-system';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
-import { ErrorBoundary } from '@perses-dev/components';
+import { ErrorBoundary, InfoTooltip } from '@perses-dev/components';
 import Refresh from 'mdi-material-ui/Refresh';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 
+import { TOOLTIP_TEXT } from '../../../constants';
 import { useListVariablePluginValues, VARIABLE_TYPES } from '../variable-model';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
@@ -83,12 +83,12 @@ function VariableListPreview({ definition, onRefresh }: { definition: ListVariab
     <Box>
       <Stack direction={'row'} spacing={1} alignItems="center">
         <Typography variant="caption">Preview Values</Typography>
-        <Tooltip title="Refresh Values" placement="right">
+        <InfoTooltip description={TOOLTIP_TEXT.refreshVariableValues}>
           <IconButton onClick={onRefresh} size="small">
             <Refresh />
           </IconButton>
-        </Tooltip>
-        <Tooltip title="Copy Values to Clipboard" placement="right">
+        </InfoTooltip>
+        <InfoTooltip description={TOOLTIP_TEXT.copyVariableValues}>
           <IconButton
             onClick={async () => {
               if (data?.length) {
@@ -100,7 +100,7 @@ function VariableListPreview({ definition, onRefresh }: { definition: ListVariab
           >
             <Clipboard />
           </IconButton>
-        </Tooltip>
+        </InfoTooltip>
       </Stack>
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       {isFetching && 'Loading...'}
