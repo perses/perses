@@ -27,6 +27,11 @@
       "dependsOn": [],
       "outputs": [],
       "cache": false
+    },
+    "e2e:ci": {
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false
     }
   }
 }

@@ -33,7 +33,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run Playwright tests
         working-directory: ./ui
-        run: npm run e2e
+        run: npm run e2e:ci
         env:
           # Outputs information from webservers started in the background by
           # Playwright. Useful for understanding if something failing there
