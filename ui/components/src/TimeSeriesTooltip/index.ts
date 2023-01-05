@@ -12,10 +12,10 @@
 // limitations under the License.
 
 export * from './TimeSeriesTooltip';
-export * from './focused-series';
 export * from './SeriesInfo';
 export * from './SeriesLabelsStack';
 export * from './SeriesMarker';
-export * from './tooltip-model';
 export * from './TooltipContent';
+export * from './focused-series';
+export * from './tooltip-model';
 export * from './utils';
