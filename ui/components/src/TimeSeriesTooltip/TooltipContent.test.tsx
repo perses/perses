@@ -70,6 +70,7 @@ describe('TooltipContent', () => {
       wrapLabels: true,
     };
     renderComponent(tooltipContent);
+    expect(screen.getByText('84.64M')).toBeInTheDocument();
     expect(screen.getByText('33.77M')).toBeInTheDocument();
     expect(screen.getAllByText('env="demo", instance="demo.do.prometheus.io:9100", job="node"')).toHaveLength(2);
   });
