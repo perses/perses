@@ -51,18 +51,16 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
-  const currentPosition = getLegendPosition(value?.position);
-
-  const legendConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
-
   const isValidLegend = validateLegendSpec(value);
-
+  const currentPosition = getLegendPosition(value?.position);
+  const legendConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
   return (
     <>
+      {/* TODO: how to fix in light mode, styleOverrides needed in theme? */}
       {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
       <OptionsEditorControl
         label="Show"
-        control={<Switch checked={isValidLegend} onChange={handleLegendShowChange} />}
+        control={<Switch checked={value !== undefined} onChange={handleLegendShowChange} />}
       />
       <OptionsEditorControl
         label="Position"
@@ -76,7 +74,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => <TextField {...params} />}
             onChange={handleLegendPositionChange}
-            disabled={!isValidLegend}
+            disabled={value === undefined}
             disableClearable
           ></Autocomplete>
         }

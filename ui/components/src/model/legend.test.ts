@@ -17,5 +17,6 @@ describe('validateLegendSpec', () => {
   it('should check if a legend spec is valid', () => {
     expect(validateLegendSpec({ position: 'bottom' })).toEqual(false);
     expect(validateLegendSpec({ position: 'Bottom' })).toEqual(true);
+    expect(validateLegendSpec(undefined)).toEqual(true);
   });
 });
