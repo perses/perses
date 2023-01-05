@@ -27,8 +27,8 @@ export function SeriesLabelsStack(props: SeriesLabelsStackProps) {
     <Stack spacing={0.5}>
       <Box
         sx={(theme) => ({
-          height: '16px',
           display: 'flex',
+          height: '16px',
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'left',

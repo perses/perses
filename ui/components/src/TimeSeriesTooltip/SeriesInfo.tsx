@@ -70,12 +70,12 @@ export function SeriesInfo(props: SeriesInfoProps) {
         <Box
           component="span"
           sx={(theme) => ({
-            color: theme.palette.common.white,
             display: 'inline-block',
             width: 'calc(100% - 20px)',
-            minWidth: 150, // TODO: use clamp instead
+            minWidth: 150,
             maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
             overflow: 'hidden',
+            color: theme.palette.common.white,
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
@@ -86,10 +86,10 @@ export function SeriesInfo(props: SeriesInfoProps) {
       <Box
         sx={{
           display: 'table-cell',
-          fontWeight: '700',
           paddingLeft: 1.5,
           textAlign: 'right',
           verticalAlign: 'top',
+          fontWeight: '700',
         }}
       >
         {formattedY}
