@@ -28,6 +28,7 @@ import {
   Alert,
   styled,
 } from '@mui/material';
+import AddIcon from 'mdi-material-ui/Plus';
 import { VariableDefinition } from '@perses-dev/core';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -201,7 +202,7 @@ export function VariableEditor(props: {
                       <TableCell>Visibility</TableCell>
                       <TableCell>Name</TableCell>
                       <TableCell>Type</TableCell>
-                      <TableCell align="right">Action</TableCell>
+                      <TableCell align="right" />
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -243,8 +244,8 @@ export function VariableEditor(props: {
                 </Table>
               </TableContainer>
               <Box display="flex">
-                <Button onClick={addVariable} variant="contained">
-                  Add New
+                <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={addVariable}>
+                  Add Variable
                 </Button>
               </Box>
             </Stack>

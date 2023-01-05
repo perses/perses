@@ -40,7 +40,7 @@ export function DownloadButton() {
 
   return (
     <>
-      <InfoTooltip description={TOOLTIP_TEXT.downloadDashboard} placement="bottom">
+      <InfoTooltip description={TOOLTIP_TEXT.downloadDashboard}>
         <ToolbarIconButton aria-label={TOOLTIP_TEXT.downloadDashboard} onClick={onDownloadButtonClick}>
           <DownloadIcon />
         </ToolbarIconButton>

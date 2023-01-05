@@ -60,7 +60,7 @@ export function TimeRangeControls({ heightPx }: TimeRangeControlsProps) {
   return (
     <>
       <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
-      <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard} placement="bottom">
+      <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
         <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
           <RefreshIcon />
         </ToolbarIconButton>

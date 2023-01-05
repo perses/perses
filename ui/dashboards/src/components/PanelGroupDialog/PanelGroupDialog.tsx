@@ -61,14 +61,16 @@ export function PanelGroupDialog() {
           >
             <CloseIcon />
           </IconButton>
-          <DialogContent sx={{ width: '500px' }}>
+          <DialogContent dividers sx={{ width: '500px' }}>
             <PanelGroupEditorForm initialValues={panelGroupEditor.initialValues} onSubmit={handleSubmit} />
           </DialogContent>
           <DialogActions>
             <Button variant="contained" type="submit" form={panelGroupEditorFormId}>
               {panelGroupEditor.mode === 'Edit' ? 'Apply' : 'Add'}
             </Button>
-            <Button onClick={panelGroupEditor.close}>Cancel</Button>
+            <Button variant="outlined" onClick={panelGroupEditor.close}>
+              Cancel
+            </Button>
           </DialogActions>
         </>
       )}

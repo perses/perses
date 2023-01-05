@@ -27,7 +27,7 @@ export const TOOLTIP_TEXT = {
   // Panel buttons
   editPanel: 'Edit',
   deletePanel: 'Delete',
-  movePanel: 'Move panel',
+  movePanel: 'Move',
   // Variable editor buttons
   refreshVariableValues: 'Refresh values',
   copyVariableValues: 'Copy values to clipboard',
