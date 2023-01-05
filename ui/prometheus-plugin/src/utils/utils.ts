@@ -84,7 +84,7 @@ function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, rem
     .sort()
     .forEach((labelName) => {
       const labelValue = labels[labelName];
-      if (typeof labelValue === 'string') {
+      if (labelValue !== undefined) {
         if (removeExprWrap) {
           labelStrings.push(`"${labelName}":"${labelValue}"`);
         } else {
@@ -114,7 +114,6 @@ export function getUniqueKeyForPrometheusResult(
         },
         removeExprWrap
       );
-      console.log('removeExprWrap: ', removeExprWrap);
       if (removeExprWrap === true) {
         return `${stringifiedLabels}`;
       } else {
