@@ -24,6 +24,7 @@ export * from './LegendOptionsEditor';
 export * from './LineChart';
 export * from './OptionsEditorLayout';
 export * from './StatChart';
+export * from './TimeSeriesTooltip';
 export * from './UnitSelector';
 export * from './YAxisLabel';
 export * from './context/ChartsThemeProvider';
