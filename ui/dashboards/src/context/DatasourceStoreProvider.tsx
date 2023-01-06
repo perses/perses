@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
@@ -57,6 +57,9 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const { dashboardResource, datasourceApi, children } = props;
   const { project } = dashboardResource.metadata;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [activeDatasourceClient, setActiveDatasourceClient] = useState<any>();
+
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
   const findDatasource = useEvent(async (selector: DatasourceSelector) => {
@@ -94,11 +97,18 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
   const getDatasourceClient = useCallback(
     async function getClient<Client>(selector: DatasourceSelector): Promise<Client> {
+      if (activeDatasourceClient !== undefined) {
+        return activeDatasourceClient;
+      }
       const { kind } = selector;
       const [{ spec, proxyUrl }, plugin] = await Promise.all([findDatasource(selector), getPlugin('Datasource', kind)]);
-      return plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
+      const client = plugin.createClient(spec.plugin.spec, {
+        proxyUrl,
+      }) as Client;
+      setActiveDatasourceClient(client);
+      return client;
     },
-    [findDatasource, getPlugin]
+    [findDatasource, getPlugin, activeDatasourceClient]
   );
 
   const listDatasourceMetadata = useEvent(async (datasourcePluginKind: string): Promise<DatasourceMetadata[]> => {
@@ -143,11 +153,12 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
 
   const ctxValue: DatasourceStore = useMemo(
     () => ({
+      activeDatasourceClient,
       getDatasource,
       getDatasourceClient,
       listDatasourceMetadata,
     }),
-    [getDatasource, getDatasourceClient, listDatasourceMetadata]
+    [getDatasource, getDatasourceClient, listDatasourceMetadata, activeDatasourceClient]
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;

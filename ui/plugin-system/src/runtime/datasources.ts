@@ -16,6 +16,9 @@ import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
 export interface DatasourceStore {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  activeDatasourceClient?: any;
+
   // TODO: Do we even need this method?
   getDatasource(selector: DatasourceSelector): Promise<DatasourceSpec>;
 
