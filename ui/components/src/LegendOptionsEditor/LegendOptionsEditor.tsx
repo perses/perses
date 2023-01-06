@@ -56,7 +56,6 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
   const legendConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
   return (
     <>
-      {/* TODO: how to fix in light mode, styleOverrides needed in theme? */}
       {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
       <OptionsEditorControl
         label="Show"
