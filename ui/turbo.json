@@ -23,7 +23,7 @@
       "dependsOn": [],
       "outputs": []
     },
-    "e2e": {
+    "e2e:local": {
       "dependsOn": [],
       "outputs": [],
       "cache": false
