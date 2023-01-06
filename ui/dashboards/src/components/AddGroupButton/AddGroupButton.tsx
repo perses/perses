@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './AddGroupButton';
-export * from './AddPanelButton';
-export * from './Dashboard';
-export * from './DashboardToolbar';
-export * from './DeletePanelDialog';
-export * from './DeletePanelGroupDialog';
-export * from './DiscardChangesConfirmationDialog';
-export * from './DownloadButton';
-export * from './GridLayout';
-export * from './Panel';
-export * from './PanelDrawer';
-export * from './PanelGroupDialog';
-export * from './TimeRangeControls';
-export * from './ToolbarIconButton';
-export * from './Variables';
+import { Button } from '@mui/material';
+import AddGroupIcon from 'mdi-material-ui/PlusBoxOutline';
+import { InfoTooltip } from '@perses-dev/components';
+import { TOOLTIP_TEXT } from '../../constants';
+import { useDashboardActions } from '../../context';
+
+export const AddGroupButton = () => {
+  const { openAddPanelGroup } = useDashboardActions();
+
+  return (
+    <InfoTooltip description={TOOLTIP_TEXT.addGroup}>
+      <Button startIcon={<AddGroupIcon />} onClick={openAddPanelGroup} aria-label={TOOLTIP_TEXT.addGroup}>
+        Panel Group
+      </Button>
+    </InfoTooltip>
+  );
+};
