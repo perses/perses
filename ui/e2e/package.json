@@ -3,7 +3,8 @@
   "version": "0.21.1",
   "private": true,
   "scripts": {
-    "e2e": "playwright test --config=src/config/local.playwright.config.ts",
+    "e2e": "npm run e2e:local",
+    "e2e:local": "playwright test --config=src/config/local.playwright.config.ts",
     "e2e:headed": "npm run e2e -- --headed",
     "e2e:debug": "npm run e2e -- --debug",
     "e2e:report": "playwright show-report",

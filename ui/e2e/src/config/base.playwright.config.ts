@@ -31,6 +31,9 @@ const config: PlaywrightTestConfig = {
     timeout: 5000,
   },
 
+  /* Run tests in files in parallel */
+  fullyParallel: true,
+
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html'], ['list', { printSteps: true }]],
 
