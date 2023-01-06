@@ -34,6 +34,8 @@ export const EMPTY_GRAPH_DATA = {
   legendItems: [],
 };
 
+export const MIN_STEP_INTERVAL_MS = 10;
+
 /**
  * Given a list of running queries, calculates a common time scale for use on
  * the x axis (i.e. start/end dates and a step that is divisible into all of
@@ -72,7 +74,8 @@ export function getCommonTimeScale(queryResults: RunningQueriesState): TimeScale
   if (steps.length === 1) {
     stepMs = steps[0] as number;
   } else {
-    stepMs = gcd(...steps);
+    const calculatedStepMs = gcd(...steps);
+    stepMs = calculatedStepMs < MIN_STEP_INTERVAL_MS ? MIN_STEP_INTERVAL_MS : calculatedStepMs;
   }
 
   const startMs = timeRange.start.valueOf();
