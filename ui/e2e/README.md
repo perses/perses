@@ -38,6 +38,8 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 ### Test data
 
 - The `testing` project in `dev/data/project.json` and associated dashboards in `dev/data/dashboard.json` should be used for end-to-end tests.
+  - Give dashboards names that match the tests they are associated with for ease of debugging and maintenance.
+  - Create separate dashboards for tests that mutate the dashboard to ensure that tests can be run in parallel.
 - The project does not currently have a data source that can be used to test consistent rendering in plugins (e.g. a line chart with time series data). Therefore, you should not write tests for this level of detail because they will be inherently flaky.
 
 ### Guidelines
@@ -47,6 +49,8 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 - Tests should not be flaky! Flaky tests are frustrating, waste time, and lead to decreased trust in the entire test suite. Ask for help if you are having trouble writing a non-flaky test for specific functionality.
 - Use [Page Object Models](https://playwright.dev/docs/pom) to reduce code duplication and improve test maintenance.
 - Use the [recommended locators](https://playwright.dev/docs/locators#quick-guide) (Playwright's term for element selectors), when possible. These patterns are very similar to React Testing Library, which is used for the project's Jest tests.
+- Use unique names for panel groups and panels for ease of writing tests.
+- Recommend using using`toBeCloseTo` when asserting on inexact pixel values to allow a margin of error associated with padding/margins/etc. to avoid flaky tests. Note that the precision (second argument) is calculated as `Math.pow(10, -precision) / 2` (e.g. precision 1 will allow for a difference of 0.05).
 
 ## Troubleshooting
 

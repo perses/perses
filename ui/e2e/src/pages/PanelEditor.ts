@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator } from '@playwright/test';
+import { Locator, expect } from '@playwright/test';
 
 export class PanelEditor {
   readonly container: Locator;
@@ -20,6 +20,7 @@ export class PanelEditor {
   readonly descriptionInput: Locator;
 
   readonly addButton: Locator;
+  readonly applyButton: Locator;
 
   constructor(container: Locator) {
     this.container = container;
@@ -28,6 +29,15 @@ export class PanelEditor {
     this.descriptionInput = container.getByLabel('Description');
 
     this.addButton = container.getByRole('button', { name: 'Add', exact: true });
+    this.applyButton = container.getByRole('button', { name: 'Apply', exact: true });
+  }
+
+  async isVisible() {
+    // Wait for all animations to complete to avoid misclicking as the panel
+    // animates in.
+    await this.container.evaluate((element) =>
+      Promise.all(element.getAnimations().map((animation) => animation.finished))
+    );
   }
 
   async selectType(typeName: string) {
@@ -39,5 +49,22 @@ export class PanelEditor {
       .click();
     // Need to look up to the page because MUI uses portals for the dropdown.
     await this.container.page().getByRole('option', { name: typeName }).click();
+  }
+
+  async selectGroup(groupName: string) {
+    await this.container
+      .getByRole('button', {
+        name: 'Group',
+        exact: true,
+      })
+      .click();
+    // Need to look up to the page because MUI uses portals for the dropdown.
+    await this.container.page().getByRole('option', { name: groupName }).click();
+    await expect(
+      this.container.getByRole('button', {
+        name: 'Group',
+        exact: true,
+      })
+    ).toHaveText(groupName);
   }
 }

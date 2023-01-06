@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, expect } from '@playwright/test';
+import { Panel } from './Panel';
 
 /**
  * Panel group on a dashboard page.
@@ -21,6 +22,8 @@ export class PanelGroup {
 
   readonly header: Locator;
   readonly content: Locator;
+  readonly panels: Locator;
+  readonly panelHeadings: Locator;
 
   readonly editButton: Locator;
   readonly expandButton: Locator;
@@ -60,6 +63,9 @@ export class PanelGroup {
     this.addPanelButton = this.header.getByRole('button', {
       name: 'add panel to group',
     });
+
+    this.panels = this.container.getByTestId('panel');
+    this.panelHeadings = this.panels.locator('header').getByRole('heading');
   }
 
   isOpen() {
@@ -102,5 +108,35 @@ export class PanelGroup {
 
   async addPanel() {
     await this.addPanelButton.click();
+  }
+
+  /**
+   * Get information about the bounds of the panel group.
+   */
+  async getBounds() {
+    const groupBounds = await this.container.boundingBox();
+
+    // These values shouldn't be null in the cases we are using them, so thowing an error
+    // in the rare care they are null. This appropriately fails the test and acts as a
+    // type guard to simplify using the bounds in tests.
+    if (!groupBounds) {
+      throw new Error(`Unable to get bounds for panel group.`);
+    }
+
+    return groupBounds;
+  }
+
+  /**
+   * Gets the percentage of the height and width of a panel within the group.
+   * Useful for asserting resizing and responsive behavior.
+   */
+  async getPanelPercentOfBounds(panel: Panel) {
+    const groupBounds = await this.getBounds();
+    const panelBounds = await panel.getBounds();
+
+    return {
+      width: panelBounds.width / groupBounds.width,
+      height: panelBounds.height / groupBounds.height,
+    };
   }
 }
