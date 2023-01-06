@@ -3,11 +3,13 @@
   "version": "0.21.1",
   "private": true,
   "scripts": {
-    "e2e": "playwright test",
+    "e2e": "npm run e2e:local",
+    "e2e:local": "playwright test --config=src/config/local.playwright.config.ts",
     "e2e:headed": "npm run e2e -- --headed",
     "e2e:debug": "npm run e2e -- --debug",
     "e2e:report": "playwright show-report",
     "e2e:watch": "chokidar src/tests/**/**.ts -c 'playwright test {path}'",
+    "e2e:ci": "playwright test --config=src/config/ci.playwright.config.ts",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix"
   },

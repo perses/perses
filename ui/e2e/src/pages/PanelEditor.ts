@@ -24,7 +24,7 @@ export class PanelEditor {
   constructor(container: Locator) {
     this.container = container;
 
-    this.nameInput = container.getByLabel('Name');
+    this.nameInput = container.getByLabel('Name').first();
     this.descriptionInput = container.getByLabel('Description');
 
     this.addButton = container.getByRole('button', { name: 'Add', exact: true });

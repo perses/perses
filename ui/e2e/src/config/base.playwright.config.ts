@@ -11,17 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import path from 'path';
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { devices } from '@playwright/test';
 
-const IS_CI = process.env.CI;
-
 /**
+ * This is the base playwright configuration that contains common settings.
+ * Environment-specific testing configuration files extend from it.
  * See https://playwright.dev/docs/test-configuration.
  */
 const config: PlaywrightTestConfig = {
-  testDir: './src/tests',
+  testDir: '../tests',
   /* Maximum time one test can run for. */
   timeout: 60 * 1000,
   expect: {
@@ -31,16 +30,12 @@ const config: PlaywrightTestConfig = {
      */
     timeout: 5000,
   },
+
   /* Run tests in files in parallel */
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!IS_CI,
-  /* Retry on CI only */
-  retries: IS_CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: IS_CI ? 1 : undefined,
+
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: IS_CI ? [['html']] : [['html'], ['list', { printSteps: true }]],
+  reporter: [['html'], ['list', { printSteps: true }]],
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -61,34 +56,6 @@ const config: PlaywrightTestConfig = {
       },
     },
   ],
-
-  /* Folder for test artifacts such as screenshots, videos, traces, etc. */
-  // outputDir: 'test-results/',
-
-  /* Run your local dev server before starting the tests */
-  // Only run dev server in CI. During local development, you are more likely to
-  // want to keep the local servers running separately across test runs. Also,
-  // Playwright seems to struggle to clean up all of the processes from
-  // turborepo, which is more problematic when running on a local machine
-  // instead of an ephemeral container in CI.
-  webServer: IS_CI
-    ? [
-        {
-          command: 'npm run start',
-          port: 3000,
-          cwd: path.resolve(__dirname, '../'),
-          reuseExistingServer: true,
-          timeout: 5 * 60 * 1000,
-        },
-        {
-          command: './scripts/api_backend_dev.sh',
-          port: 8080,
-          cwd: path.resolve(__dirname, '../..'),
-          reuseExistingServer: true,
-          timeout: 5 * 60 * 1000,
-        },
-      ]
-    : [],
 };
 
 export default config;
