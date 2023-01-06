@@ -97,9 +97,9 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
   const getDatasourceClient = useCallback(
     async function getClient<Client>(selector: DatasourceSelector): Promise<Client> {
-      if (activeDatasourceClient && activeDatasourceClient.name) {
+      if (activeDatasourceClient && activeDatasourceClient.selector) {
         if (selector.name) {
-          if (selector.name === activeDatasourceClient.name) {
+          if (selector.name === activeDatasourceClient.selector.name) {
             return activeDatasourceClient.client as Client;
           }
         } else {
@@ -111,7 +111,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
       const client = plugin.createClient(spec.plugin.spec, {
         proxyUrl,
       }) as Client;
-      setActiveDatasourceClient({ name: selector.name, client });
+      setActiveDatasourceClient({ selector, client });
       return client;
     },
     [findDatasource, getPlugin, activeDatasourceClient]
