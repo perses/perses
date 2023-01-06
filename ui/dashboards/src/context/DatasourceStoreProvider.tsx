@@ -100,10 +100,10 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
       if (activeDatasourceClient && activeDatasourceClient.name) {
         if (selector.name) {
           if (selector.name === activeDatasourceClient.name) {
-            return activeDatasourceClient.client;
+            return activeDatasourceClient.client as Client;
           }
         } else {
-          return activeDatasourceClient.client;
+          return activeDatasourceClient.client as Client;
         }
       }
       const { kind } = selector;
