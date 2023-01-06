@@ -17,7 +17,7 @@ import { useTimeZone } from '../context/TimeZoneProvider';
 import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
 
-interface TooltipContentProps {
+export interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
   wrapLabels?: boolean;
 }

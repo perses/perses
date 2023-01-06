@@ -74,3 +74,53 @@ export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels
   const resolveLabelsRegex = /\{\{\s*(.+?)\s*\}\}/g;
   return inputFormat.replace(resolveLabelsRegex, (_, g) => (seriesLabels[g] ? seriesLabels[g] : g));
 }
+
+/*
+ * Stringifies object of labels into valid PromQL for querying metric by label
+ */
+function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, removeExprWrap?: boolean) {
+  const labelStrings: string[] = [];
+  Object.keys(labels)
+    .sort()
+    .forEach((labelName) => {
+      const labelValue = labels[labelName];
+      if (labelValue !== undefined) {
+        if (removeExprWrap) {
+          labelStrings.push(`"${labelName}":"${labelValue}"`);
+        } else {
+          labelStrings.push(`${labelName}="${labelValue}"`);
+        }
+      }
+    });
+  return `{${labelStrings.join(',')}}`;
+}
+
+/*
+ * Metric labels formattter which checks for __name__ and outputs valid PromQL for series name
+ */
+export function getUniqueKeyForPrometheusResult(
+  metricLabels: {
+    [key: string]: string;
+  },
+  { removeExprWrap }: { removeExprWrap?: boolean } = {}
+) {
+  const metricNameKey = '__name__';
+  if (metricLabels) {
+    if (Object.prototype.hasOwnProperty.call(metricLabels, metricNameKey)) {
+      const stringifiedLabels = stringifyPrometheusMetricLabels(
+        {
+          ...metricLabels,
+          [metricNameKey]: undefined,
+        },
+        removeExprWrap
+      );
+      if (removeExprWrap === true) {
+        return `${stringifiedLabels}`;
+      } else {
+        return `${metricLabels[metricNameKey]}${stringifiedLabels}`;
+      }
+    }
+    return stringifyPrometheusMetricLabels(metricLabels, removeExprWrap);
+  }
+  return '';
+}
