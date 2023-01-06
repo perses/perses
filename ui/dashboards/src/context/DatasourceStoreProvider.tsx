@@ -26,6 +26,7 @@ import {
   DatasourceStore,
   usePluginRegistry,
   DatasourceMetadata,
+  ActiveDatasourceClient,
 } from '@perses-dev/plugin-system';
 
 export interface DatasourceStoreProviderProps {
@@ -57,8 +58,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const { dashboardResource, datasourceApi, children } = props;
   const { project } = dashboardResource.metadata;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [activeDatasourceClient, setActiveDatasourceClient] = useState<any>();
+  const [activeDatasourceClient, setActiveDatasourceClient] = useState<ActiveDatasourceClient>();
 
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
@@ -97,8 +97,12 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
   const getDatasourceClient = useCallback(
     async function getClient<Client>(selector: DatasourceSelector): Promise<Client> {
-      if (activeDatasourceClient && activeDatasourceClient.client) {
-        if (activeDatasourceClient.name === selector.name) {
+      if (activeDatasourceClient && activeDatasourceClient.name) {
+        if (selector.name) {
+          if (selector.name === activeDatasourceClient.name) {
+            return activeDatasourceClient.client;
+          }
+        } else {
           return activeDatasourceClient.client;
         }
       }
