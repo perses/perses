@@ -168,9 +168,9 @@ const ROUNDED_STEP_INTERVALS = [
 /**
  * Round interval to clearer increments
  */
-export function roundStepInterval(interval: number) {
+export function roundStepInterval(stepMs: number) {
   for (const { maxMs, roundedStepMs } of ROUNDED_STEP_INTERVALS) {
-    if (interval < maxMs) {
+    if (stepMs < maxMs) {
       return roundedStepMs;
     }
   }
