@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.22.0 / 2023-01-09
+
+- [FEATURE] Add offline mode for the migrate command in the CLI (#901)
+- [FEATURE] Use codemirror for query and json editing (#853)
+- [FEATURE] Support snapshot UI releases (#844)
+- [ENHANCEMENT] Toolbar uses two rows for small screens (#909)
+- [ENHANCEMENT] Add prop for adjusting the height of the DownloadButton (#907)
+- [ENHANCEMENT] Add dividers to Edit Panel Group dialog (#904)
+- [ENHANCEMENT] Use InfoTooltip for all tooltips (#902)
+- [ENHANCEMENT] Move edit variables button and make variables wrap to next line (#900)
+- [ENHANCEMENT] GaugeChart panel ability to visually edit `max` (#891)
+- [ENHANCEMENT] Enable hot reload of the migration schemas (#899)
+- [ENHANCEMENT] Add a link to the release in the footer (#880)
+- [ENHANCEMENT] CLI can use variables schemas during the validation of dashboard (#881)
+- [BUGFIX] Round suggested stepMs to improve multi query performance (#912)
+- [BUGFIX] Reduce calculated min step interval in TimeSeriesPanel (#911)
+- [BUGFIX] Fix loading of the cue schemas in the command lint (#898)
+- [BUGFIX] GaugeChart do not ignore unit decimal_places and abbreviate (#892)
+- [BUGFIX] Toolbar inputs and icons are consistent (#877)
+- [BUGFIX] Fix Unmarshal variable display (#876)
+- [BUGFIX] default_value is accepted by the backend to be a string or an array (#873)
+- [BUGFIX] Fix variable collisions with promQL function (#870)
+- [BREAKINGCHANGE] change legend position values to PascalCase, fix resize glitch (#906)
+- [BREAKINGCHANGE] tooltip format and PrometheusTimeSeriesQuery series name overhaul (#895)
+- [BREAKINGCHANGE] Remove default value for TextVariable (#872)
+
 ## 0.21.1 / 2022-12-12
 
 - [BUGFIX] Fix extracted changelog file name (#868)

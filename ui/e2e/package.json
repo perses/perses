@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/e2e",
-  "version": "0.21.1",
+  "version": "0.22.0",
   "private": true,
   "scripts": {
     "e2e": "npm run e2e:local",
