@@ -25,7 +25,7 @@ test.describe('Dashboard: Panels', () => {
 
     await expect(dashboardPage.panels).toHaveCount(2);
     const newPanel = dashboardPage.getPanel('Markdown One');
-    await expect(newPanel).toBeVisible();
+    await expect(newPanel.container).toBeVisible();
 
     await expect(dashboardPage.panelHeadings).toContainText(['Markdown Example Zero', 'Markdown One']);
   });
@@ -38,8 +38,96 @@ test.describe('Dashboard: Panels', () => {
 
     await expect(dashboardPage.panels).toHaveCount(2);
     const newPanel = dashboardPage.getPanel('Markdown One');
-    await expect(newPanel).toBeVisible();
+    await expect(newPanel.container).toBeVisible();
 
     await expect(dashboardPage.panelHeadings).toContainText(['Markdown Example Zero', 'Markdown One']);
+  });
+
+  test('can be removed', async ({ dashboardPage }) => {
+    await dashboardPage.startEditing();
+    await dashboardPage.removePanel('Markdown Example Zero');
+    await expect(dashboardPage.panels).toHaveCount(0);
+  });
+
+  test('can be moved to a different panel group', async ({ dashboardPage }) => {
+    const panelGroupOne = dashboardPage.getPanelGroup('Row 1');
+    const panelGroupTwo = dashboardPage.getPanelGroup('Row 2');
+
+    await expect(panelGroupOne.panelHeadings).toContainText(['Markdown Example Zero']);
+    await expect(panelGroupTwo.panelHeadings).toContainText([]);
+
+    await dashboardPage.startEditing();
+    await dashboardPage.editMarkdownPanel('Markdown Example Zero', { groupName: 'Row 2' });
+
+    await expect(panelGroupOne.panelHeadings).toContainText([]);
+    await expect(panelGroupTwo.panelHeadings).toContainText(['Markdown Example Zero']);
+  });
+
+  test('can be renamed', async ({ dashboardPage }) => {
+    await dashboardPage.startEditing();
+
+    await dashboardPage.editMarkdownPanel('Markdown Example Zero', {
+      name: 'Markdown With a New Name',
+    });
+
+    await expect(dashboardPage.panelHeadings).toContainText(['Markdown With a New Name']);
+  });
+
+  test('can be resized', async ({ dashboardPage }) => {
+    await dashboardPage.startEditing();
+
+    const panel = dashboardPage.getPanel('Markdown Example Zero');
+
+    const originalSize = await panel.getBounds();
+
+    // Resize smaller
+    const smallMultiplier = 0.5;
+    await panel.resize({
+      width: originalSize.width * smallMultiplier,
+      height: originalSize.height * smallMultiplier,
+    });
+    const smallerSize = await panel.getBounds();
+    expect(smallerSize.width / originalSize.width).toBeCloseTo(smallMultiplier, 1);
+    expect(smallerSize.height / originalSize.height).toBeCloseTo(smallMultiplier, 1);
+
+    // Resize bigger
+    const largeMultiplier = 1.5;
+    await panel.resize({
+      width: originalSize.width * largeMultiplier,
+      height: originalSize.height * largeMultiplier,
+    });
+    const largerSize = await panel.getBounds();
+    expect(largerSize.width / originalSize.width).toBeCloseTo(largeMultiplier, 1);
+    expect(largerSize.height / originalSize.height).toBeCloseTo(largeMultiplier, 1);
+  });
+
+  // There was previously a bug related to going to a smaller screen and back to
+  // a larger screen. This test will help avoid a regression.
+  test('can resize responsively', async ({ dashboardPage, page }) => {
+    const panel = dashboardPage.getPanel('Markdown Example Zero');
+    const panelGroup = dashboardPage.getPanelGroup('Row 1');
+
+    const previousViewport = page.viewportSize();
+    expect(previousViewport).not.toBeNull();
+
+    // The test will fail with the previous expect, so this conditional is not
+    // introducing risk. Doing this to provide a type guard, so the the previous
+    // viewport can be used when not null.
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    if (previousViewport) {
+      await page.setViewportSize({
+        width: 600,
+        height: previousViewport.height,
+      });
+
+      // Panel is ~100% of panel group on a small screen.
+      const smallPanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
+      expect(smallPanelPercentSize.width).toBeCloseTo(1, 1);
+
+      // Panel is ~50% of panel group on a larger screen.
+      await page.setViewportSize(previousViewport);
+      const largePanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
+      expect(largePanelPercentSize.width).toBeCloseTo(0.5, 1);
+    }
   });
 });

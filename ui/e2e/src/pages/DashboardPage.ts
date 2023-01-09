@@ -14,9 +14,15 @@
 import { Page, Locator } from '@playwright/test';
 import { PanelEditor } from './PanelEditor';
 import { PanelGroup } from './PanelGroup';
+import { Panel } from './Panel';
 
 type PanelGroupConfig = {
   name: string;
+};
+
+type EditMarkdownPanelConfig = {
+  name?: string;
+  groupName?: string;
 };
 
 /**
@@ -105,12 +111,6 @@ export class DashboardPage {
     await panelGroup.addPanel();
   }
 
-  getPanel(panelName: string) {
-    return this.panels.filter({
-      has: this.page.getByRole('heading', { name: panelName }),
-    });
-  }
-
   async addPanel() {
     await this.addPanelButton.click();
   }
@@ -122,5 +122,39 @@ export class DashboardPage {
     await panelEditor.nameInput.type(panelName);
     await panelEditor.selectType('Markdown');
     await panelEditor.addButton.click();
+  }
+
+  getPanel(panelName: string) {
+    const container = this.panels.filter({
+      has: this.page.getByRole('heading', { name: panelName }),
+    });
+    return new Panel(container);
+  }
+
+  async editMarkdownPanel(panelName: string, { name, groupName }: EditMarkdownPanelConfig) {
+    const panel = this.getPanel(panelName);
+    await panel.startEditing();
+
+    const panelEditor = new PanelEditor(this.panelEditor);
+    await panelEditor.isVisible();
+
+    if (name) {
+      await panelEditor.nameInput.clear();
+      await panelEditor.nameInput.type(name);
+    }
+
+    if (groupName) {
+      await panelEditor.selectGroup(groupName);
+    }
+
+    await panelEditor.applyButton.click();
+  }
+
+  async removePanel(panelName: string) {
+    const panel = this.getPanel(panelName);
+
+    panel.delete();
+    const dialog = this.getDialog('delete panel');
+    await dialog.getByRole('button', { name: 'Delete' }).click();
   }
 }

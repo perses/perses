@@ -1580,6 +1580,18 @@
               }
             ]
           }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 2",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": []
+          }
         }
       ]
     }
