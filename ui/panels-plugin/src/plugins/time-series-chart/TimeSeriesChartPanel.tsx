@@ -47,7 +47,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
 
-  // popuate default 'position' and other future properties
+  // populate default 'position' and other future properties
   const legend =
     props.spec.legend && validateLegendSpec(props.spec.legend)
       ? merge({}, DEFAULT_LEGEND, props.spec.legend)
