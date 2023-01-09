@@ -12,12 +12,15 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
         }]
         legend: {
             if #panel.type == "timeseries" {
-                position: #panel.options.legend.placement
+            	  position: [
+            	  	if #panel.options.legend.placement == "bottom" { "Bottom" },
+            	  	if #panel.options.legend.placement == "right" { "Right" },
+            	  ][0]
             }
             if #panel.type == "graph" {
                 position: [ // switch
-                    if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "right" },
-                    { "bottom" }
+                    if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "Right" },
+                    { "Bottom" }
                 ][0]
             }
         }

@@ -29,10 +29,27 @@ describe('LegendOptionsEditor', () => {
     return screen.getByRole('checkbox', { name: 'Show' });
   };
 
+  const getLegendPositionSelector = () => {
+    return screen.getByRole('combobox', { name: 'Position' });
+  };
+
   it('can change legend visibility by clicking', () => {
     const onChange = jest.fn();
     renderLegendOptionsEditor(undefined, onChange);
+    expect(getLegendPositionSelector()).toBeDisabled();
     userEvent.click(getLegendShowSwitch());
-    expect(onChange).toHaveBeenCalledWith({ position: 'bottom' });
+    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom' });
+  });
+
+  it('should allow changing legend position', () => {
+    const onChange = jest.fn();
+    renderLegendOptionsEditor({ position: 'Bottom' }, onChange);
+    expect(getLegendPositionSelector()).toBeEnabled();
+    userEvent.click(getLegendPositionSelector());
+    const positionRightOption = screen.getByRole('option', {
+      name: 'Right',
+    });
+    userEvent.click(positionRightOption);
+    expect(onChange).toHaveBeenCalledWith({ position: 'Right' });
   });
 });

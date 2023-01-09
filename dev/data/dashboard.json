@@ -119,7 +119,7 @@
                 ],
                 "unit": { "kind": "Decimal" },
                 "legend": {
-                  "position": "right"
+                  "position": "Right"
                 }
               }
             }
@@ -183,7 +183,7 @@
                   }
                 ],
                 "legend": {
-                  "position": "bottom"
+                  "position": "Bottom"
                 },
                 "y_axis": {
                   "show": true,
@@ -219,7 +219,7 @@
                 ],
                 "unit": { "kind": "Decimal", "decimal_places": 2 },
                 "legend": {
-                  "position": "right"
+                  "position": "Right"
                 }
               }
             }
@@ -249,7 +249,7 @@
                   }
                 ],
                 "legend": {
-                  "position": "right"
+                  "position": "Right"
                 },
                 "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
                 "thresholds": {
@@ -301,7 +301,7 @@
                   }
                 },
                 "legend": {
-                  "position": "bottom"
+                  "position": "Bottom"
                 },
                 "thresholds": {
                   "steps": [{ "value": 0.2 }, { "value": 0.35 }]
@@ -920,7 +920,7 @@
                   }
                 ],
                 "legend": {
-                  "position": "bottom"
+                  "position": "Bottom"
                 },
                 "unit": {
                   "kind": "Bytes"
@@ -1009,7 +1009,7 @@
                 ],
                 "unit": { "kind": "PercentDecimal", "decimal_places": 0 },
                 "legend": {
-                  "position": "bottom"
+                  "position": "Bottom"
                 },
                 "thresholds": {
                   "steps": [{ "value": 0.01 }, { "value": 0.02 }]
@@ -1501,7 +1501,7 @@
               }
             }
           }
-        }    
+        }
       },
       "layouts": [
         {
@@ -1556,7 +1556,7 @@
               }
             }
           }
-        }    
+        }
       },
       "layouts": [
         {

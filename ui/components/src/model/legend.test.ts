@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph';
-export * from './legend';
-export * from './theme';
-export * from './units';
+import { LegendOptions, validateLegendSpec } from './legend';
+
+describe('validateLegendSpec', () => {
+  it('should check if a legend spec is valid', () => {
+    const invalidLegend = { position: 'bottom' };
+    expect(validateLegendSpec(invalidLegend as LegendOptions)).toEqual(false);
+    expect(validateLegendSpec({ position: 'Bottom' })).toEqual(true);
+    expect(validateLegendSpec(undefined)).toEqual(true);
+  });
+});

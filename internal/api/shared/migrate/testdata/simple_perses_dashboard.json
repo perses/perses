@@ -310,7 +310,7 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "bottom"
+                "position": "Bottom"
               },
               "queries": [{
                 "kind": "TimeSeriesQuery",
@@ -353,7 +353,7 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "bottom"
+                "position": "Bottom"
               },
               "queries": [{
                 "kind": "TimeSeriesQuery",
