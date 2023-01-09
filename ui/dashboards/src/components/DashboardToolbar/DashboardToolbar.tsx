@@ -11,18 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
-import AddPanelGroupIcon from 'mdi-material-ui/PlusBoxOutline';
-import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
-import { ErrorBoundary, ErrorAlert, InfoTooltip } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { useState } from 'react';
-import { TOOLTIP_TEXT } from '../../constants';
-import { useDashboard, useDashboardActions, useEditMode } from '../../context';
-import { TemplateVariableList, EditVariablesButton } from '../Variables';
-import { TimeRangeControls } from '../TimeRangeControls';
+import { useDashboard, useEditMode } from '../../context';
+import { AddPanelButton } from '../AddPanelButton';
+import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
+import { TimeRangeControls } from '../TimeRangeControls';
+import { TemplateVariableList, EditVariablesButton } from '../Variables';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -45,11 +44,14 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     onSave,
   } = props;
 
-  const { isEditMode, setEditMode } = useEditMode();
-  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const dashboard = useDashboard();
-  const { openAddPanelGroup, openAddPanel } = useDashboardActions();
-  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
+  const { isEditMode, setEditMode } = useEditMode();
+
+  const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
+  const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
+
+  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
+
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
   ) : (
@@ -109,25 +111,29 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 }}
               />
             </ErrorBoundary>
-            <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
-              <EditVariablesButton />
-              <InfoTooltip description={TOOLTIP_TEXT.addPanel}>
-                <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={TOOLTIP_TEXT.addPanel}>
-                  Panel
-                </Button>
-              </InfoTooltip>
-              <InfoTooltip description={TOOLTIP_TEXT.addGroup}>
-                <Button
-                  startIcon={<AddPanelGroupIcon />}
-                  onClick={openAddPanelGroup}
-                  aria-label={TOOLTIP_TEXT.addGroup}
-                >
-                  Panel Group
-                </Button>
-              </InfoTooltip>
-              <TimeRangeControls />
-              <DownloadButton />
-            </Stack>
+            {isBiggerThanMd ? (
+              // On bigger screens, make it one row
+              <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
+                <EditVariablesButton />
+                <AddPanelButton />
+                <AddGroupButton />
+                <TimeRangeControls />
+                <DownloadButton />
+              </Stack>
+            ) : (
+              // On smaller screens, make it two rows
+              <Stack spacing={1}>
+                <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
+                  <TimeRangeControls />
+                  <DownloadButton />
+                </Stack>
+                <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
+                  <EditVariablesButton />
+                  <AddPanelButton />
+                  <AddGroupButton />
+                </Stack>
+              </Stack>
+            )}
           </Box>
         </Stack>
       ) : (
@@ -137,7 +143,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack direction="row" spacing={1} marginLeft="auto">
               <TimeRangeControls />
               <DownloadButton />
-              {isLaptopSize && (
+              {isBiggerThanSm && (
                 <Button
                   variant="outlined"
                   color="secondary"
