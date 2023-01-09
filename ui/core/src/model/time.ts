@@ -102,108 +102,86 @@ export function isDurationString(maybeDuration: string): maybeDuration is Durati
   return DURATION_REGEX.test(maybeDuration);
 }
 
+const DEFAULT_STEP_MS = 15000;
+
+const ROUNDED_STEP_INTERVALS = [
+  // max: 0.015s
+  { maxMs: 15, roundedStepMs: 10, display: '0.01s' },
+  // max: 0.035s
+  { maxMs: 35, roundedStepMs: 20, display: '0.02s' },
+  // max: 0.075s
+  { maxMs: 75, roundedStepMs: 50, display: '0.05s' },
+  // max: 0.15s
+  { maxMs: 150, roundedStepMs: 100, display: '0.1s' },
+  // max: 0.35s
+  { maxMs: 350, roundedStepMs: 200, display: '0.2s' },
+  // max: 0.75s
+  { maxMs: 750, roundedStepMs: 500, display: '0.5s' },
+  // max: 1.5s
+  { maxMs: 1500, roundedStepMs: 1000, display: '1s' },
+  // max: 3.5s
+  { maxMs: 3500, roundedStepMs: 2000, display: '2s' },
+  // max: 7.5s
+  { maxMs: 7500, roundedStepMs: 5000, display: '5s' },
+  // max: 12.5s
+  { maxMs: 12500, roundedStepMs: 10000, display: '10s' },
+  // max: 17.5s
+  { maxMs: 17500, roundedStepMs: 15000, display: '15s' },
+  // max: 25s
+  { maxMs: 25000, roundedStepMs: 20000, display: '20s' },
+  // max: 45s
+  { maxMs: 45000, roundedStepMs: 30000, display: '30s' },
+  // max: 1.5m
+  { maxMs: 90000, roundedStepMs: 60000, display: '1m' },
+  // max: 3.5m
+  { maxMs: 210000, roundedStepMs: 120000, display: '2m' },
+  // max: 7.5m
+  { maxMs: 450000, roundedStepMs: 300000, display: '5m' },
+  // max: 12.5m
+  { maxMs: 750000, roundedStepMs: 600000, display: '10m' },
+  // max: 12.5m
+  { maxMs: 1050000, roundedStepMs: 900000, display: '15m' },
+  // max: 25m
+  { maxMs: 1500000, roundedStepMs: 1200000, display: '20m' },
+  // max: 45m
+  { maxMs: 2700000, roundedStepMs: 1800000, display: '30m' },
+  // max: 1.5h
+  { maxMs: 5400000, roundedStepMs: 3600000, display: '1h' },
+  // max: 2.5h
+  { maxMs: 9000000, roundedStepMs: 7200000, display: '2h' },
+  // max: 4.5h
+  { maxMs: 16200000, roundedStepMs: 10800000, display: '3h' },
+  // max: 9h
+  { maxMs: 32400000, roundedStepMs: 21600000, display: '6h' },
+  // max: 1d
+  { maxMs: 86400000, roundedStepMs: 43200000, display: '12h' },
+  // max: 1w
+  { maxMs: 604800000, roundedStepMs: 86400000, display: '1d' },
+  // max: 3w
+  { maxMs: 1814400000, roundedStepMs: 604800000, display: '1w' },
+  // max: 6w
+  { maxMs: 3628800000, roundedStepMs: 2592000000, display: '30d' },
+  // max: 2y
+  { maxMs: 63072000000, roundedStepMs: 31536000000, display: '1y' },
+];
+
 /**
  * Round interval to clearer increments
  */
-export function roundInterval(interval: number) {
-  switch (true) {
-    // 0.015s
-    case interval < 15:
-      return 10; // 0.01s
-    // 0.035s
-    case interval < 35:
-      return 20; // 0.02s
-    // 0.075s
-    case interval < 75:
-      return 50; // 0.05s
-    // 0.15s
-    case interval < 150:
-      return 100; // 0.1s
-    // 0.35s
-    case interval < 350:
-      return 200; // 0.2s
-    // 0.75s
-    case interval < 750:
-      return 500; // 0.5s
-    // 1.5s
-    case interval < 1500:
-      return 1000; // 1s
-    // 3.5s
-    case interval < 3500:
-      return 2000; // 2s
-    // 7.5s
-    case interval < 7500:
-      return 5000; // 5s
-    // 12.5s
-    case interval < 12500:
-      return 10000; // 10s
-    // 17.5s
-    case interval < 17500:
-      return 15000; // 15s
-    // 25s
-    case interval < 25000:
-      return 20000; // 20s
-    // 45s
-    case interval < 45000:
-      return 30000; // 30s
-    // 1.5m
-    case interval < 90000:
-      return 60000; // 1m
-    // 3.5m
-    case interval < 210000:
-      return 120000; // 2m
-    // 7.5m
-    case interval < 450000:
-      return 300000; // 5m
-    // 12.5m
-    case interval < 750000:
-      return 600000; // 10m
-    // 12.5m
-    case interval < 1050000:
-      return 900000; // 15m
-    // 25m
-    case interval < 1500000:
-      return 1200000; // 20m
-    // 45m
-    case interval < 2700000:
-      return 1800000; // 30m
-    // 1.5h
-    case interval < 5400000:
-      return 3600000; // 1h
-    // 2.5h
-    case interval < 9000000:
-      return 7200000; // 2h
-    // 4.5h
-    case interval < 16200000:
-      return 10800000; // 3h
-    // 9h
-    case interval < 32400000:
-      return 21600000; // 6h
-    // 1d
-    case interval < 86400000:
-      return 43200000; // 12h
-    // 1w
-    case interval < 604800000:
-      return 86400000; // 1d
-    // 3w
-    case interval < 1814400000:
-      return 604800000; // 1w
-    // 6w
-    case interval < 3628800000:
-      return 2592000000; // 30d
-    default:
-      return 31536000000; // 1y
+export function roundStepInterval(interval: number) {
+  for (const { maxMs, roundedStepMs } of ROUNDED_STEP_INTERVALS) {
+    if (interval < maxMs) {
+      return roundedStepMs;
+    }
   }
+  return DEFAULT_STEP_MS;
 }
 
 /**
  * Gets a suggested step/interval size for a time range based on the width of a visual component.
  */
 export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) {
-  // TODO: Should we try to suggest more "rounded" step values based around
-  // time increments that make sense (e.g. 15s, 30s, 1m, 5m, etc.)
   const queryRangeMs = timeRange.end.valueOf() - timeRange.start.valueOf();
   const stepMs = Math.floor(queryRangeMs / width);
-  const roundedStepMs = roundInterval(stepMs); // TODO: convert this function to ms instead of seconds as param
-  return roundedStepMs;
+  return roundStepInterval(stepMs);
 }
