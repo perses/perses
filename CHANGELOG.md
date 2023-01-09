@@ -14,6 +14,7 @@
 - [ENHANCEMENT] Enable hot reload of the migration schemas (#899)
 - [ENHANCEMENT] Add a link to the release in the footer (#880)
 - [ENHANCEMENT] CLI can use variables schemas during the validation of dashboard (#881)
+- [ENHANCEMENT] Hide horizontal scrollbar in Legend #874
 - [BUGFIX] Round suggested stepMs to improve multi query performance (#912)
 - [BUGFIX] Reduce calculated min step interval in TimeSeriesPanel (#911)
 - [BUGFIX] Fix loading of the cue schemas in the command lint (#898)
