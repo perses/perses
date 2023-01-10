@@ -25,10 +25,11 @@ To make it works correctly, commit or PR's title should follow the following nam
 
 where `catalog_entry` can be :
 
-- FEATURE
-- ENHANCEMENT
-- BUGFIX
-- BREAKINGCHANGE
+- `FEATURE`
+- `ENHANCEMENT`
+- `BUGFIX`
+- `BREAKINGCHANGE`
+- `IGNORE` - Changes that should not generate entries in the changelog. Primarily used for internal tooling changes that do not impact consumers.
 
 This catalog entry will indicate the purpose of your PR.
 
