@@ -43,7 +43,7 @@ export const DiscardChangesConfirmationDialog = () => {
             <Button variant="contained" onClick={dialog.onDiscardChanges}>
               Discard Changes
             </Button>
-            <Button variant="outlined" onClick={dialog.onCancel}>
+            <Button variant="outlined" color="secondary" onClick={dialog.onCancel}>
               Cancel
             </Button>
           </DialogActions>
