@@ -61,7 +61,7 @@ const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
         <Button variant="contained" type="submit">
           Delete
         </Button>
-        <Button variant="outlined" onClick={() => closeDeletePanelDialog()}>
+        <Button variant="outlined" color="secondary" onClick={() => closeDeletePanelDialog()}>
           Cancel
         </Button>
       </DialogActions>
