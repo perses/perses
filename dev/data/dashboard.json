@@ -1595,5 +1595,72 @@
         }
       ]
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "Variables",
+      "project": "testing",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2022-12-21T00:00:00Z",
+      "version": 0
+    },
+    "spec": {
+      "duration": "6h",
+      "variables": [],
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Markdown Example Zero",
+              "description": "This is a markdown panel"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Example"
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 2",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": []
+          }
+        }
+      ]
+    }
   }
 ]

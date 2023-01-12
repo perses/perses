@@ -37,7 +37,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
   return (
     // marginBottom={-1} counteracts the marginBottom={1} on every variable input.
     // The margin on the inputs is for spacing between inputs, but is not meant to add space to bottom of the container.
-    <Box marginBottom={-1}>
+    <Box marginBottom={-1} data-testid="variable-list">
       <AppBar
         color="inherit"
         position={isSticky ? 'fixed' : 'static'}
@@ -53,6 +53,7 @@ export function TemplateVariableList(props: TemplateVariableListProps) {
               maxWidth={VARIABLE_INPUT_MAX_WIDTH}
               marginBottom={1}
               marginRight={1}
+              data-testid="template-variable"
             >
               <TemplateVariable key={v.spec.name} name={v.spec.name} />
             </Box>

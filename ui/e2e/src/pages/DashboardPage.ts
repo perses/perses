@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { PanelEditor } from './PanelEditor';
+import { VariableEditor } from './VariableEditor';
 import { PanelGroup } from './PanelGroup';
 import { Panel } from './Panel';
 
@@ -33,8 +34,10 @@ export class DashboardPage {
 
   readonly editButton: Locator;
   readonly cancelButton: Locator;
+  readonly saveButton: Locator;
   readonly addPanelGroupButton: Locator;
   readonly addPanelButton: Locator;
+  readonly editVariablesButton: Locator;
 
   readonly panelGroups: Locator;
   readonly panelGroupHeadings: Locator;
@@ -42,14 +45,22 @@ export class DashboardPage {
   readonly panels: Locator;
   readonly panelHeadings: Locator;
 
+  readonly variableList: Locator;
+  readonly variableListItems: Locator;
+
   readonly panelEditor: Locator;
+  readonly variableEditor: Locator;
+
+  readonly alert: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.editButton = page.getByRole('button', { name: 'Edit' });
+    this.editButton = page.getByRole('button', { name: 'Edit' }).first();
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
+    this.saveButton = page.getByRole('button', { name: 'Save' });
     this.addPanelGroupButton = page.getByRole('button', { name: 'Add Panel Group' });
+    this.editVariablesButton = page.getByRole('button', { name: 'Edit variables' });
 
     // Needed to select "Add Panel" group button and NOT "Add Panel Group."
     // Exact match on "Add Panel" does not work in some situations, possibly
@@ -62,7 +73,13 @@ export class DashboardPage {
     this.panels = page.getByTestId('panel');
     this.panelHeadings = this.panels.locator('header').getByRole('heading');
 
+    this.variableList = page.getByTestId('variable-list');
+    this.variableListItems = this.variableList.getByTestId('template-variable');
+
     this.panelEditor = page.getByTestId('panel-editor');
+    this.variableEditor = page.getByTestId('variable-editor');
+
+    this.alert = page.getByRole('alert');
   }
 
   async startEditing() {
@@ -70,11 +87,21 @@ export class DashboardPage {
     await this.cancelButton.isVisible();
   }
 
+  async saveChanges() {
+    await this.saveButton.click();
+    await this.editButton.isVisible();
+    await expect(this.alert).toContainText('success');
+  }
+
   getDialog(name: string) {
     return this.page.getByRole('dialog', {
       name: name,
     });
   }
+
+  /**
+   * PANEL GROUP HELPERS
+   */
 
   getPanelGroup(panelGroupName: string) {
     const container = this.panelGroups.filter({ hasText: panelGroupName });
@@ -110,6 +137,10 @@ export class DashboardPage {
     const panelGroup = this.getPanelGroup(panelGroupName);
     await panelGroup.addPanel();
   }
+
+  /**
+   * PANEL HELPERS
+   */
 
   async addPanel() {
     await this.addPanelButton.click();
@@ -156,5 +187,19 @@ export class DashboardPage {
     panel.delete();
     const dialog = this.getDialog('delete panel');
     await dialog.getByRole('button', { name: 'Delete' }).click();
+  }
+
+  /**
+   * VARIABLE HELPERS
+   */
+
+  async startEditingVariables() {
+    await this.editVariablesButton.click();
+    const variableEditor = this.getVariableEditor();
+    await variableEditor.isVisible();
+  }
+
+  getVariableEditor() {
+    return new VariableEditor(this.variableEditor);
   }
 }
