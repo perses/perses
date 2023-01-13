@@ -11,16 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JSONEditor } from '@perses-dev/components';
-import {
-  OptionsEditorProps,
-  OptionsEditorTabs,
-  TimeSeriesQueryEditor,
-  TimeSeriesQueryEditorProps,
-} from '@perses-dev/plugin-system';
+import { OptionsEditorProps, TimeSeriesQueryEditor, TimeSeriesQueryEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { GaugeChartOptions } from './gauge-chart-model';
-import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
 export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
 
@@ -39,19 +32,5 @@ export function GaugeChartOptionsEditor(props: GaugeChartOptionsEditorProps) {
     );
   };
 
-  return (
-    <OptionsEditorTabs
-      tabs={{
-        query: {
-          content: <TimeSeriesQueryEditor value={query} onChange={handleQueryChange} />,
-        },
-        settings: {
-          content: <GaugeChartOptionsEditorSettings {...props} />,
-        },
-        json: {
-          content: <JSONEditor {...props} />,
-        },
-      }}
-    />
-  );
+  return <TimeSeriesQueryEditor value={query} onChange={handleQueryChange} />;
 }

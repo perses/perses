@@ -21,6 +21,12 @@ import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';
  */
 export const Markdown: PanelPlugin<MarkdownPanelOptions> = {
   PanelComponent: MarkdownPanel,
-  OptionsEditorComponent: MarkdownPanelOptionsEditor,
+  panelOptionsEditorComponents: [
+    {
+      id: 'markdown',
+      label: 'Markdown',
+      content: MarkdownPanelOptionsEditor,
+    },
+  ],
   createInitialOptions: createInitialMarkdownPanelOptions,
 };

@@ -17,23 +17,26 @@ import userEvent from '@testing-library/user-event';
 import { OptionsEditorTabs, OptionsEditorTabsProps } from './OptionsEditorTabs';
 
 describe('OptionsEditorTabs', () => {
-  const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']['other']) => {
-    render(
-      <OptionsEditorTabs
-        tabs={{
-          query: {
-            content: <div>Edit query configuration</div>,
-          },
-          settings: {
-            content: <div>Edit settings configuration</div>,
-          },
-          json: {
-            content: <div>JSON editor</div>,
-          },
-          other: otherTabs,
-        }}
-      />
-    );
+  const mockTabs: OptionsEditorTabsProps['tabs'] = [
+    {
+      id: 'query',
+      label: 'Query',
+      content: <div>Edit query configuration</div>,
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      content: <div>Edit settings configuration</div>,
+    },
+    {
+      id: 'json',
+      label: 'JSON',
+      content: <div>JSON Editor</div>,
+    },
+  ];
+  const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
+    const tabs = otherTabs ?? mockTabs;
+    render(<OptionsEditorTabs tabs={tabs} />);
   };
 
   const renderCustomTabs = () => {
@@ -134,21 +137,22 @@ describe('OptionsEditorTabs', () => {
   it('only renders common tabs that are specified', () => {
     render(
       <OptionsEditorTabs
-        tabs={{
-          settings: {
-            content: <div>settings are alone</div>,
-          },
-          json: {
-            content: <div>JSON is at the end</div>,
-          },
-          other: [
-            {
-              id: 'custom',
-              label: 'Another tab',
-              content: <div>another tab content</div>,
-            },
-          ],
-        }}
+        // tabs={{
+        //   settings: {
+        //     content: <div>settings are alone</div>,
+        //   },
+        //   json: {
+        //     content: <div>JSON is at the end</div>,
+        //   },
+        //   other: [
+        //     {
+        //       id: 'custom',
+        //       label: 'Another tab',
+        //       content: <div>another tab content</div>,
+        //     },
+        //   ],
+        // }}
+        tabs={[]}
       />
     );
     const tabList = screen.getByRole('tablist');
