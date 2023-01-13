@@ -15,59 +15,18 @@ import { Tab, TabProps, Tabs, TabsProps, Box } from '@mui/material';
 import { useState } from 'react';
 import { TabPanel } from './TabPanel';
 
-export interface BaseTabConfig {
+export type OptionsEditorTab = {
+  id: string;
+  label: TabProps['label'];
   /**
    * Content rendered when the tab is active.
    */
   content: React.ReactNode;
-}
-
-export interface OtherTabConfig extends BaseTabConfig {
-  id: string;
-  label: TabProps['label'];
-}
-
-type CommonTabId = 'query' | 'settings' | 'json';
-
-/**
- * Common tabs that are frequently used in the options editor across multiple
- * plugins. The label and display order of these tabs is not configurable to
- * avoid user experience inconsistencies across plugins.
- */
-export type CommonTabs = { [property in CommonTabId]?: BaseTabConfig };
-
-/**
- * Custom tabs specified for a given plugin. They are displayed after common
- * tabs.
- */
-export type OtherTabs = {
-  other?: OtherTabConfig[];
-};
-
-export type OptionsEditorTab = {
-  id: string;
-  label: TabProps['label'];
-  content: React.ReactNode;
 };
 
 export type OptionsEditorTabsProps = {
-  // tabs: CommonTabs & OtherTabs;
-  // query?: BaseTabConfig;
-  // settings?: BaseTabConfig;
   tabs: OptionsEditorTab[];
 };
-
-// Configuration of the order and labeling for tabs across plugins to enforce a
-// consistent UX.
-// const TAB_CONFIG = [
-//   { id: 'query', label: 'Query' },
-//   { id: 'settings', label: 'Settings' },
-
-//   // Custom tabs go between the visual common tabs and the raw JSON editor.
-//   'other',
-
-//   { id: 'json', label: 'JSON' },
-// ] as const;
 
 export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -75,31 +34,6 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
   const handleChange: TabsProps['onChange'] = (_, newValue) => {
     setActiveTab(newValue);
   };
-
-  // // Normalize the common tabs that are managed via constants in this file
-  // // and custom tabs that bring their own config into a consistent shape for
-  // // rendering.
-  // const normalizedTabs = TAB_CONFIG.reduce((combinedTabs, tabConfig) => {
-  //   // Custom tabs
-  //   if (tabConfig === 'other') {
-  //     const otherTabs = tabs?.other || [];
-  //     return [...combinedTabs, ...otherTabs];
-  //   }
-
-  //   // Common tabs
-  //   const commonTab = tabs[tabConfig.id];
-  //   if (commonTab) {
-  //     return [
-  //       ...combinedTabs,
-  //       {
-  //         ...tabConfig,
-  //         ...commonTab,
-  //       },
-  //     ];
-  //   }
-
-  //   return combinedTabs;
-  // }, [] as OtherTabConfig[]);
 
   return (
     <>
