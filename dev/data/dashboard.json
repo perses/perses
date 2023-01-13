@@ -44,34 +44,6 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "1500+ Series",
-              "description": "This is a line chart"
-            },
-            "plugin": {
-              "kind": "TimeSeriesChart",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "rate(caddy_http_request_duration_seconds_bucket[$interval])"
-                        }
-                      }
-                    }
-                  }
-                ],
-                "unit": { "kind": "Bytes" }
-              }
-            }
-          }
-        },
-        "seriesTestAlt": {
-          "kind": "Panel",
-          "spec": {
-            "display": {
               "name": "~130 Series",
               "description": "This is a line chart"
             },
@@ -91,7 +63,12 @@
                     }
                   }
                 ],
-                "unit": { "kind": "Bytes" }
+                "y_axis": {
+                  "unit": {
+                    "kind": "Bytes",
+                    "abbreviate": true
+                  }
+                }
               }
             }
           }
@@ -117,7 +94,9 @@
                     }
                   }
                 ],
-                "unit": { "kind": "Decimal" },
+                "y_axis": {
+                  "unit": { "kind": "Decimal" }
+                },
                 "legend": {
                   "position": "Right"
                 }
@@ -187,7 +166,10 @@
                 },
                 "y_axis": {
                   "show": true,
-                  "unit": { "kind": "Bytes" }
+                  "unit": {
+                    "kind": "Bytes",
+                    "abbreviate": true
+                  }
                 }
               }
             }
@@ -217,7 +199,9 @@
                     }
                   }
                 ],
-                "unit": { "kind": "Decimal", "decimal_places": 2 },
+                "y_axis": {
+                  "unit": { "kind": "Decimal", "decimal_places": 2 }
+                },
                 "legend": {
                   "position": "Right"
                 }
@@ -251,7 +235,9 @@
                 "legend": {
                   "position": "Right"
                 },
-                "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
+                "y_axis": {
+                  "unit": { "kind": "PercentDecimal", "decimal_places": 1 }
+                },
                 "thresholds": {
                   "steps": [
                     {
@@ -777,36 +763,6 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "1500+ Series",
-              "description": "This is a line chart"
-            },
-            "plugin": {
-              "kind": "TimeSeriesChart",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "rate(caddy_http_request_duration_seconds_bucket[$interval])"
-                        }
-                      }
-                    }
-                  }
-                ],
-                "unit": {
-                  "kind": "Bytes"
-                }
-              }
-            }
-          }
-        },
-        "seriesTestAlt": {
-          "kind": "Panel",
-          "spec": {
-            "display": {
               "name": "~130 Series",
               "description": "This is a line chart"
             },
@@ -826,9 +782,11 @@
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "Decimal",
-                  "decimal_places": 4
+                "y_axis": {
+                  "unit": {
+                    "kind": "Decimal",
+                    "decimal_places": 4
+                  }
                 }
               }
             }
@@ -856,9 +814,11 @@
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "PercentDecimal",
-                  "decimal_places": 0
+                "y_axis": {
+                  "unit": {
+                    "kind": "PercentDecimal",
+                    "decimal_places": 0
+                  }
                 }
               }
             }
@@ -922,14 +882,17 @@
                 "legend": {
                   "position": "Bottom"
                 },
-                "unit": {
-                  "kind": "Bytes"
+                "y_axis": {
+                  "unit": {
+                    "kind": "Bytes",
+                    "abbreviate": true
+                  }
                 }
               }
             }
           }
         },
-        "doubleQueries": {
+        "thresholdsEx": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -973,11 +936,11 @@
                 "thresholds": {
                   "steps": [
                     {
-                      "value": 0.4,
+                      "value": 1.5,
                       "name": "Alert: Warning condition example"
                     },
                     {
-                      "value": 0.75,
+                      "value": 3,
                       "name": "Alert: Critical condition example"
                     }
                   ]
@@ -1007,7 +970,9 @@
                     }
                   }
                 ],
-                "unit": { "kind": "PercentDecimal", "decimal_places": 0 },
+                "y_axis": {
+                  "unit": { "kind": "PercentDecimal", "decimal_places": 0 }
+                },
                 "legend": {
                   "position": "Bottom"
                 },
@@ -1327,7 +1292,7 @@
                 "width": 12,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/doubleQueries"
+                  "$ref": "#/spec/panels/thresholdsEx"
                 }
               },
               {
@@ -1398,7 +1363,7 @@
                 "width": 12,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/doubleQueries"
+                  "$ref": "#/spec/panels/thresholdsEx"
                 }
               }
             ]
