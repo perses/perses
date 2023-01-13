@@ -19,7 +19,7 @@ test.use({
 });
 
 test.describe('Dashboard: Variables', () => {
-  test('can add simple text variable', async ({ dashboardPage, page }) => {
+  test('can add simple text variable', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
     await dashboardPage.startEditingVariables();
 
