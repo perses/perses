@@ -54,10 +54,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       : undefined;
 
   // TODO: add support for y_axis_alt.unit
-  let unit = DEFAULT_UNIT;
-  if (props.spec.y_axis?.unit) {
-    unit = props.spec.y_axis.unit;
-  }
+  const unit = props.spec.y_axis?.unit ?? DEFAULT_UNIT;
 
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
