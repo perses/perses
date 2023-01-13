@@ -55,8 +55,6 @@ export class PanelEditor {
   async selectGroup(groupName: string) {
     await selectMenuItem(this.container, 'Group', groupName);
 
-    // Need to look up to the page because MUI uses portals for the dropdown.
-    await this.container.page().getByRole('option', { name: groupName }).click();
     await expect(
       this.container.getByRole('button', {
         name: 'Group',
