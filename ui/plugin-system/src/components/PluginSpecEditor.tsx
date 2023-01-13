@@ -39,8 +39,8 @@ export function PluginSpecEditor(props: PluginSpecEditorProps) {
     throw new Error(`Missing OptionsEditorComponent for ${pluginType} plugin with kind '${pluginKind}'`);
   }
 
-  if (`${pluginType}` === 'Panel') {
-    const { PanelQueryEditorComponent, panelOptionsEditorComponents } = plugin as unknown as PanelPlugin;
+  if (pluginType === 'Panel') {
+    const { PanelQueryEditorComponent, panelOptionsEditorComponents } = plugin as PanelPlugin;
     let tabs: OptionsEditorTabsProps['tabs'] = [];
     if (PanelQueryEditorComponent !== undefined) {
       tabs.push({ id: 'query', label: 'Query', content: <PanelQueryEditorComponent {...others} /> });
@@ -56,6 +56,7 @@ export function PluginSpecEditor(props: PluginSpecEditorProps) {
       );
     }
 
+    // always show json editor by default
     tabs.push({ id: 'json', label: 'JSON', content: <JSONEditor {...others} /> });
 
     return <OptionsEditorTabs tabs={tabs} />;
