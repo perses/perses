@@ -153,6 +153,7 @@ export class DashboardPage {
     await panelEditor.nameInput.type(panelName);
     await panelEditor.selectType('Markdown');
     await panelEditor.addButton.click();
+    await panelEditor.isClosed();
   }
 
   getPanel(panelName: string) {
@@ -179,6 +180,7 @@ export class DashboardPage {
     }
 
     await panelEditor.applyButton.click();
+    await panelEditor.isClosed();
   }
 
   async removePanel(panelName: string) {
