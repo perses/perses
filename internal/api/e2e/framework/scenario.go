@@ -172,6 +172,20 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 
+			expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusOK)
+
+			return []api.Entity{parent, entity}
+		})
+	})
+
+	t.Run("Creation with project path", func(t *testing.T) {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+			parent, entity := creator("myProject", "myResource")
+			CreateAndWaitUntilEntityExists(t, manager, parent)
+
 			expect.POST(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
 				Expect().
