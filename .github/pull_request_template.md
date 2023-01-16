@@ -1,7 +1,7 @@
 <!--
   See the contributing guide for detailed guidance about contributing.
   https://github.com/perses/perses/blob/main/CONTRIBUTING.md
- -->
+-->
 
 # Checklist
 

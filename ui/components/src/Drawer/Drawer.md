@@ -13,7 +13,7 @@ Drawer provides supplementary content that are anchored to the left or right edg
 ## Props
 
 | Name     |                                                   |
-| -------- | ------------------------------------------------- |
+|----------|---------------------------------------------------|
 | isOpen   | if true, the component is shown                   |
 | children | the content of the component                      |
 | onClose  | callback fired when component closes              |

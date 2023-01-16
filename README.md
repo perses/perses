@@ -1,8 +1,8 @@
-Perses
-======
+# Perses
+
 [![build](https://github.com/perses/perses/workflows/ci/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Aci)
 [![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago)
-[![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3React)
+[![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3AReact)
 [![Go Report Card](https://goreportcard.com/badge/github.com/perses/perses)](https://goreportcard.com/report/github.com/perses/perses)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/perses/perses)
 
@@ -33,20 +33,20 @@ While we already released a certain amount of versions, Perses is still in an ea
 progress. The current pieces that are in place are:
 
 * The Plugin architecture has finally reached a stable point.
-    * The plugins concerned the Variables, the Panels, The Queries and the Datasources definitions.
-    * To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
-      All schemas are available in the [schemas](./schemas) folder.
+  * The plugins concerned the Variables, the Panels, The Queries and the Datasources definitions.
+  * To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
+    All schemas are available in the [schemas](./schemas) folder.
 * A backend REST API provides R/W access to dashboard and datasource definitions.
 * A CLI that can be used to interact with the REST API. A short docs is available [here](./docs/cli.md)
 * While the UI is still in progress, we already have:
-    * a beginning of navigation that will help to move from a dashboard to another.
-    * a support of the following panel types:
-        * Time series charts.
-        * Gauge panels.
-        * Stat panels (single value with sparkline).
-        * Markdown panels (as an alternative to the Text panel)
-    * The editing of dashboard is well advanced. Most of the remaining work is in panel options, right now you have to
-      use the JSON editor for a lot of properties, but those will be form controls soon.
+  * a beginning of navigation that will help to move from a dashboard to another.
+  * a support of the following panel types:
+    * Time series charts.
+    * Gauge panels.
+    * Stat panels (single value with sparkline).
+    * Markdown panels (as an alternative to the Text panel)
+  * The editing of dashboard is well advanced. Most of the remaining work is in panel options, right now you have to
+    use the JSON editor for a lot of properties, but those will be form controls soon.
 * A migration script that will help to move from Grafana to Perses is on going.
 * The dashboard data model is still evolving along with the dashboard implementation and new requirements. Before
   reaching a stable state regarding the data model, we are waiting for feedback to know if we need to adjust and

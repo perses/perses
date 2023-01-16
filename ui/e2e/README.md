@@ -1,6 +1,6 @@
 # End-to-end tests
 
-This package contains end-to-end tests for Perses written using [https://playwright.dev/](Playwright).
+This package contains end-to-end tests for Perses written using [Playwright](https://playwright.dev/).
 
 ## Directory structure
 
@@ -54,7 +54,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 
 ## Troubleshooting
 
-### Tests failed in CI (Github Actions)
+### Tests failed in CI (GitHub Actions)
 
-- Go to the failing action in Github.
+- Go to the failing action in GitHub.
 - Follow the Playwright instructions for [viewing test logs](https://playwright.dev/docs/ci-intro#viewing-test-logs) and [viewing the html report](https://playwright.dev/docs/ci-intro#html-report).

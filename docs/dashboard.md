@@ -1,5 +1,4 @@
-Dashboard
-=========
+# Dashboard
 
 ## Data model
 
@@ -65,12 +64,12 @@ contains the following attribute:
 
 * `kind` is the type of the variable. It's an enum and each value is conditioning what you can put in the
   attribute `parameter`. Possible values are :
-    * `PromQLQuery`. In order to get the value for this variable, a PromQL query will be performed
-    * `LabelNamesQuery`. The list of value for this variable will be calculated using the Prometheus
-      endpoint `/api/v1/labels`
-    * `LabelValuesQuery`. The list of value for this variable will be calculated using the Prometheus
-      endpoint `/api/v1/label/<label_name>/values`
-    * `Constant`. The variable has a defined list of value.
+  * `PromQLQuery`. In order to get the value for this variable, a PromQL query will be performed
+  * `LabelNamesQuery`. The list of value for this variable will be calculated using the Prometheus
+    endpoint `/api/v1/labels`
+  * `LabelValuesQuery`. The list of value for this variable will be calculated using the Prometheus
+    endpoint `/api/v1/label/<label_name>/values`
+  * `Constant`. The variable has a defined list of value.
 * `displayed_name` is the name that would be displayed by the UI. It should be filled only if `hide` is set to `false`.
 * `hide` is a boolean that will be used by the UI to decide if the variable has to be displayed. By default,
   it's `false`
@@ -192,9 +191,9 @@ Here is the different attribute available:
 * `displayed_name` is the name of the panel that would be displayed by the UI.
 * `kind` is the type of chart displayed. It is an enum, and it conditions what contains the attribute `chart`. Possible
   values are :
-    * `TimeSeriesChart`. It is a simple graph
-    * `GaugeChart`. It is the way to display a single number with different threshold. It can be used to show with
-      different color if it's ok or not to have the current value displayed
+  * `TimeSeriesChart`. It is a simple graph
+  * `GaugeChart`. It is the way to display a single number with different threshold. It can be used to show with
+    different color if it's ok or not to have the current value displayed
 * `chart` contains the different parameters that describe a chart. It will depend on the `kind` value
 
 Example:
@@ -238,9 +237,9 @@ Here is the different attribute available:
 
 * `kind` is the type of layout. It is an enum, and it conditions what contains the attribute `parameter`. Possible value
   are:
-    * `Expand`: It's a layout that can be expanded. It can be used for example if you want to hide panel by default.
-    * `Grid`: It's the layout tha defines a grid. Useful when you want to give different size for your different panels
-      and to position them precisely.
+  * `Expand`: It's a layout that can be expanded. It can be used for example if you want to hide panel by default.
+  * `Grid`: It's the layout tha defines a grid. Useful when you want to give different size for your different panels
+    and to position them precisely.
 
 *`parameter` contains the different parameters of the layout. It will depend on the `kind` value
 
@@ -563,5 +562,3 @@ Note:
   definitions when requesting the backend to get the data.
 * After getting the values of the variables, the frontend need to get the data for the different panels displayed. For
   optimization purpose, the frontend shouldn't ask the data for the panels not displayed.
-
-

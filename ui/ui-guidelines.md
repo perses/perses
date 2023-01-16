@@ -111,7 +111,7 @@ are reflected in how the codebase is organized.
 These are things we look for in code review. Most of these are general guidelines
 to ensure you are writing modular UI code.
 
-- When writing CSS, _always_ use the variables from our Theme instead of writing
+- When writing CSS, *always* use the variables from our Theme instead of writing
   your own magic numbers/colors unless required
 - Avoid breaking things out into a reusable global component unless it needs to be
   used in 3 or more places.

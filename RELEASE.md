@@ -42,7 +42,18 @@ with `make upgrade-npm-deps`
 ### 1. Prepare your release
 
 You should start to create a branch that follows the pattern `release/v<X.Y>`. Release candidates and patch releases
-for any given major or minor release happen in the same release/v<major>.<minor> branch. Do not create release/<version>
+for any given major or minor release happen in the same release/v
+
+<major>
+
+.
+
+<minor>
+
+branch. Do not create release/
+
+<version>
+
 for patch or release candidate releases.
 
 - Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release
@@ -116,9 +127,9 @@ The creation of snapshots is automated by Github actions based on branch naming 
 - Github actions will build the UI and release a version named `0.0.0-snapshot-tag-name-SHA` at a tag
   named `snapshot-tag-name` where `tag-name` comes from your branch name and `SHA` is a short version of the git sha for
   the latest commit on the branch.
-    - We use `0.0.0` as the version prefix to keep snapshots at the bottom of the npm versions UI to avoid confusion for
-      consumers of the package. This also helps differentiate snapshots from the concept of prereleases, which we do not
-      currently provide, but may add in the future.
+  - We use `0.0.0` as the version prefix to keep snapshots at the bottom of the npm versions UI to avoid confusion for
+    consumers of the package. This also helps differentiate snapshots from the concept of prereleases, which we do not
+    currently provide, but may add in the future.
 - Github actions will release a new version with the latest sha each time you push to the snapshot branch.
 
 ### Using a snapshot branch
