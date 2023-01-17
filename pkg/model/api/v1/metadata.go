@@ -45,7 +45,7 @@ func (m *Metadata) Update(previous Metadata) {
 	// update the field UpdatedAt with the new time
 	m.UpdatedAt = time.Now().UTC()
 	// increase the version number
-	m.Version++
+	m.Version = previous.Version + 1
 }
 
 func (m *Metadata) GetName() string {
