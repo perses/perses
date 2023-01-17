@@ -39,7 +39,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 
 - The `testing` project in `dev/data/project.json` and associated dashboards in `dev/data/dashboard.json` should be used for end-to-end tests.
   - Give dashboards names that match the tests they are associated with for ease of debugging and maintenance.
-  - Create separate dashboards for tests that mutate the dashboard to ensure that tests can be run in parallel.
+  - Set `modifiesDashboard: true` in the test fixture configuration for tests that mutate dashboards to ensure these tests can be run in parallel. When this option is enabled, the fixture will automatically generate a duplicate dashboard for the test and clean it up when the test is finished running.
 - The project does not currently have a data source that can be used to test consistent rendering in plugins (e.g. a line chart with time series data). Therefore, you should not write tests for this level of detail because they will be inherently flaky.
 
 ### Guidelines

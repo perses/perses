@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { PanelEditor } from './PanelEditor';
+import { VariableEditor } from './VariableEditor';
 import { PanelGroup } from './PanelGroup';
 import { Panel } from './Panel';
 
@@ -31,10 +32,13 @@ type EditMarkdownPanelConfig = {
 export class DashboardPage {
   readonly page: Page;
 
+  readonly toolbar: Locator;
   readonly editButton: Locator;
   readonly cancelButton: Locator;
+  readonly saveButton: Locator;
   readonly addPanelGroupButton: Locator;
   readonly addPanelButton: Locator;
+  readonly editVariablesButton: Locator;
 
   readonly panelGroups: Locator;
   readonly panelGroupHeadings: Locator;
@@ -42,19 +46,28 @@ export class DashboardPage {
   readonly panels: Locator;
   readonly panelHeadings: Locator;
 
+  readonly variableList: Locator;
+  readonly variableListItems: Locator;
+
   readonly panelEditor: Locator;
+  readonly variableEditor: Locator;
+
+  readonly alert: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.editButton = page.getByRole('button', { name: 'Edit' });
-    this.cancelButton = page.getByRole('button', { name: 'Cancel' });
-    this.addPanelGroupButton = page.getByRole('button', { name: 'Add Panel Group' });
+    this.toolbar = page.getByTestId('dashboard-toolbar');
+    this.editButton = this.toolbar.getByRole('button', { name: 'Edit' });
+    this.cancelButton = this.toolbar.getByRole('button', { name: 'Cancel' });
+    this.saveButton = this.toolbar.getByRole('button', { name: 'Save' });
+    this.addPanelGroupButton = this.toolbar.getByRole('button', { name: 'Add Panel Group' });
+    this.editVariablesButton = this.toolbar.getByRole('button', { name: 'Edit variables' });
 
     // Needed to select "Add Panel" group button and NOT "Add Panel Group."
     // Exact match on "Add Panel" does not work in some situations, possibly
     // because of other content like icons inside the button.
-    this.addPanelButton = page.getByRole('button', { name: 'Add panel' }).first();
+    this.addPanelButton = this.toolbar.getByRole('button', { name: /Add panel$/ });
 
     this.panelGroups = page.getByTestId('panel-group');
     this.panelGroupHeadings = this.panelGroups.getByTestId('panel-group-header').getByRole('heading', { level: 2 });
@@ -62,7 +75,13 @@ export class DashboardPage {
     this.panels = page.getByTestId('panel');
     this.panelHeadings = this.panels.locator('header').getByRole('heading');
 
+    this.variableList = page.getByTestId('variable-list');
+    this.variableListItems = this.variableList.getByTestId('template-variable');
+
     this.panelEditor = page.getByTestId('panel-editor');
+    this.variableEditor = page.getByTestId('variable-editor');
+
+    this.alert = page.getByRole('alert');
   }
 
   async startEditing() {
@@ -70,11 +89,21 @@ export class DashboardPage {
     await this.cancelButton.isVisible();
   }
 
+  async saveChanges() {
+    await this.saveButton.click();
+    await this.editButton.isVisible();
+    await expect(this.alert).toContainText('success');
+  }
+
   getDialog(name: string) {
     return this.page.getByRole('dialog', {
       name: name,
     });
   }
+
+  /**
+   * PANEL GROUP HELPERS
+   */
 
   getPanelGroup(panelGroupName: string) {
     const container = this.panelGroups.filter({ hasText: panelGroupName });
@@ -111,6 +140,10 @@ export class DashboardPage {
     await panelGroup.addPanel();
   }
 
+  /**
+   * PANEL HELPERS
+   */
+
   async addPanel() {
     await this.addPanelButton.click();
   }
@@ -122,6 +155,7 @@ export class DashboardPage {
     await panelEditor.nameInput.type(panelName);
     await panelEditor.selectType('Markdown');
     await panelEditor.addButton.click();
+    await panelEditor.isClosed();
   }
 
   getPanel(panelName: string) {
@@ -148,6 +182,7 @@ export class DashboardPage {
     }
 
     await panelEditor.applyButton.click();
+    await panelEditor.isClosed();
   }
 
   async removePanel(panelName: string) {
@@ -156,5 +191,19 @@ export class DashboardPage {
     panel.delete();
     const dialog = this.getDialog('delete panel');
     await dialog.getByRole('button', { name: 'Delete' }).click();
+  }
+
+  /**
+   * VARIABLE HELPERS
+   */
+
+  async startEditingVariables() {
+    await this.editVariablesButton.click();
+    const variableEditor = this.getVariableEditor();
+    await variableEditor.isVisible();
+  }
+
+  getVariableEditor() {
+    return new VariableEditor(this.variableEditor);
   }
 }

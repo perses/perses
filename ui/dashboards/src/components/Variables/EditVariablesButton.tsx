@@ -41,7 +41,12 @@ export function EditVariablesButton() {
           Variables
         </Button>
       </InfoTooltip>
-      <Drawer isOpen={isVariableEditorOpen} onClose={closeVariableEditor} PaperProps={{ sx: { width: '50%' } }}>
+      <Drawer
+        isOpen={isVariableEditorOpen}
+        onClose={closeVariableEditor}
+        PaperProps={{ sx: { width: '50%' } }}
+        data-testid="variable-editor"
+      >
         <VariableEditor
           variableDefinitions={variableDefinitions}
           onCancel={closeVariableEditor}

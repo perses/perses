@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, expect } from '@playwright/test';
+import { selectMenuItem, waitForAnimations } from '../utils';
 
 export class PanelEditor {
   readonly container: Locator;
@@ -35,31 +36,25 @@ export class PanelEditor {
   async isVisible() {
     // Wait for all animations to complete to avoid misclicking as the panel
     // animates in.
-    await this.container.evaluate((element) =>
-      Promise.all(element.getAnimations().map((animation) => animation.finished))
-    );
+    await waitForAnimations(this.container);
+    await this.container.isVisible();
+  }
+
+  async isClosed() {
+    // Wait for all animations to complete to avoid misclicking as the panel
+    // animates out.
+    await waitForAnimations(this.container);
+    await expect(this.container).toHaveCount(0);
   }
 
   async selectType(typeName: string) {
-    await this.container
-      .getByRole('button', {
-        name: 'Type',
-        exact: true,
-      })
-      .click();
-    // Need to look up to the page because MUI uses portals for the dropdown.
-    await this.container.page().getByRole('option', { name: typeName }).click();
+    // Use a regex for this selector to avoid also selecting "Group type"
+    await selectMenuItem(this.container, /^Type/, typeName);
   }
 
   async selectGroup(groupName: string) {
-    await this.container
-      .getByRole('button', {
-        name: 'Group',
-        exact: true,
-      })
-      .click();
-    // Need to look up to the page because MUI uses portals for the dropdown.
-    await this.container.page().getByRole('option', { name: groupName }).click();
+    await selectMenuItem(this.container, 'Group', groupName);
+
     await expect(
       this.container.getByRole('button', {
         name: 'Group',
