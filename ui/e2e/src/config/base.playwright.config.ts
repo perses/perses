@@ -31,16 +31,8 @@ const config: PlaywrightTestConfig = {
     timeout: 5000,
   },
 
-  /**
-   * Do not run tests in files in parallel. This makes it possible to have tests
-   * within a given file mutate the same dashboard and reset after each test.
-   * If the tests ran in parallel, this would lead to inconsistencies.
-   *
-   * TODO: figure out how to use the create/delete endpoints, so we can use
-   * unique dashboards per test. These will allow us to parallelize these tests
-   * again.
-   */
-  fullyParallel: false,
+  /* Run tests in files in parallel */
+  fullyParallel: true,
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html'], ['list', { printSteps: true }]],

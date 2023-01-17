@@ -40,14 +40,50 @@ async function getDashboardJson(projectName: string, dashboardName: string) {
   return dashboardJson;
 }
 
-async function setDashboardJson(projectName: string, dashboardName: string, content: unknown) {
-  const queryUrl = `${BACKEND_BASE_URL}/api/v1/projects/${projectName}/dashboards/${dashboardName}`;
-  const result = await fetch(queryUrl, {
-    method: 'PUT',
+async function createDashboard(content: unknown) {
+  const queryUrl = `${BACKEND_BASE_URL}/api/v1/dashboards`;
+  return fetch(queryUrl, {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(content),
   });
+}
+
+async function duplicateDashboard(projectName: string, dashboardName: string, newDashboardName: string) {
+  const originalDashboardJson = await getDashboardJson(projectName, dashboardName);
+  const newDashboardJson = {
+    ...originalDashboardJson,
+    metadata: {
+      ...originalDashboardJson.metadata,
+      project: projectName,
+      name: newDashboardName,
+    },
+  };
+  const result = await createDashboard(newDashboardJson);
+  if (!result.ok) {
+    throw new Error(
+      `Unable to create test dashboard '${newDashboardName}'. Failed with status '${result.status}: ${result.statusText}'.`
+    );
+  }
+}
+
+async function deleteDashboard(projectName: string, dashboardName: string) {
+  const queryUrl = `${BACKEND_BASE_URL}/api/v1/projects/${projectName}/dashboards/${dashboardName}`;
+  const result = await fetch(queryUrl, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
   return result;
+}
+
+/**
+ * Generates a dashboard name to use when duplicating a dashboard for a given
+ * test.
+ */
+function generateDuplicateDashboardName(dashboardName: string, testTitle: string) {
+  // Replaces any characters that are not allowed in dashboard names with
+  // underscores.
+  return dashboardName + '__' + testTitle.replace(/[^a-zA-Z0-9_.:-]+/g, '_');
 }
 
 /**
@@ -57,14 +93,16 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
   projectName: 'testing',
   dashboardName: '',
   modifiesDashboard: false,
-  dashboardPage: async ({ page, projectName, dashboardName, modifiesDashboard }, use) => {
-    let originalDashboardJson;
+  dashboardPage: async ({ page, projectName, dashboardName, modifiesDashboard }, use, testInfo) => {
+    let testDashboardName: string = dashboardName;
+
     if (modifiesDashboard) {
-      originalDashboardJson = await getDashboardJson(projectName, dashboardName);
+      testDashboardName = generateDuplicateDashboardName(dashboardName, testInfo.title);
+      await duplicateDashboard(projectName, dashboardName, testDashboardName);
     }
 
     const persesApp = new AppHomePage(page);
-    await persesApp.navigateToDashboard(projectName, dashboardName);
+    await persesApp.navigateToDashboard(projectName, testDashboardName);
 
     const dashboardPage = new DashboardPage(page);
 
@@ -72,10 +110,10 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     await use(dashboardPage);
 
     if (modifiesDashboard) {
-      // Reset the dashboard, so any changes do not impact other tests.
-      const result = await setDashboardJson(projectName, dashboardName, originalDashboardJson);
-      if (result.status !== 200) {
-        console.error('Failed to reset the dashboard after a test. This may lead to unexpected test failures.');
+      // Clean up the duplicate dashboard created for the test.
+      const result = await deleteDashboard(projectName, testDashboardName);
+      if (!result.ok) {
+        console.error('Failed to clean up the dashboard after a test.');
       }
     }
   },
