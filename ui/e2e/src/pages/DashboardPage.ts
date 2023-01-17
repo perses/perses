@@ -32,6 +32,7 @@ type EditMarkdownPanelConfig = {
 export class DashboardPage {
   readonly page: Page;
 
+  readonly toolbar: Locator;
   readonly editButton: Locator;
   readonly cancelButton: Locator;
   readonly saveButton: Locator;
@@ -56,16 +57,17 @@ export class DashboardPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.editButton = page.getByRole('button', { name: 'Edit' }).first();
-    this.cancelButton = page.getByRole('button', { name: 'Cancel' });
-    this.saveButton = page.getByRole('button', { name: 'Save' });
-    this.addPanelGroupButton = page.getByRole('button', { name: 'Add Panel Group' });
-    this.editVariablesButton = page.getByRole('button', { name: 'Edit variables' });
+    this.toolbar = page.getByTestId('dashboard-toolbar');
+    this.editButton = this.toolbar.getByRole('button', { name: 'Edit' });
+    this.cancelButton = this.toolbar.getByRole('button', { name: 'Cancel' });
+    this.saveButton = this.toolbar.getByRole('button', { name: 'Save' });
+    this.addPanelGroupButton = this.toolbar.getByRole('button', { name: 'Add Panel Group' });
+    this.editVariablesButton = this.toolbar.getByRole('button', { name: 'Edit variables' });
 
     // Needed to select "Add Panel" group button and NOT "Add Panel Group."
     // Exact match on "Add Panel" does not work in some situations, possibly
     // because of other content like icons inside the button.
-    this.addPanelButton = page.getByRole('button', { name: 'Add panel' }).first();
+    this.addPanelButton = this.toolbar.getByRole('button', { name: /Add panel$/ });
 
     this.panelGroups = page.getByTestId('panel-group');
     this.panelGroupHeadings = this.panelGroups.getByTestId('panel-group-header').getByRole('heading', { level: 2 });
