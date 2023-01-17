@@ -19,15 +19,13 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
-import { TimeSeriesChartOptions } from './time-series-chart-model';
+import { TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
+import { TimeSeriesChartOptions, TimeSeriesChartOptionsEditorProps } from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
 
-export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
-
-export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
+export function TimeSeriesChartQueryEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
   const { queries } = value;
   const hasMoreThanOneQuery = queries.length > 1;

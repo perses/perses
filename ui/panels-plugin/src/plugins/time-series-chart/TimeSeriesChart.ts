@@ -13,7 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
-import { TimeSeriesChartOptionsEditor } from './TimeSeriesChartOptionsEditor';
+import { TimeSeriesChartQueryEditor } from './TimeSeriesChartQueryEditor';
 import { TimeSeriesChartOptionsEditorSettings } from './TimeSeriesChartOptionsEditorSettings';
 import { TimeSeriesChartPanel } from './TimeSeriesChartPanel';
 
@@ -22,7 +22,7 @@ import { TimeSeriesChartPanel } from './TimeSeriesChartPanel';
  */
 export const TimeSeriesChart: PanelPlugin<TimeSeriesChartOptions> = {
   PanelComponent: TimeSeriesChartPanel,
-  PanelQueryEditorComponent: TimeSeriesChartOptionsEditor,
+  PanelQueryEditorComponent: TimeSeriesChartQueryEditor,
   panelOptionsEditorComponents: [{ id: 'settings', label: 'Settings', content: TimeSeriesChartOptionsEditorSettings }],
   createInitialOptions: createInitialTimeSeriesChartOptions,
 };

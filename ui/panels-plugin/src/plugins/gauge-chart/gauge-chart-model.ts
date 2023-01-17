@@ -13,7 +13,7 @@
 
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
-import { CalculationType } from '@perses-dev/plugin-system';
+import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ThresholdOptions } from '../../model/thresholds';
 
 export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal', decimal_places: 1 };
@@ -21,6 +21,8 @@ export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal', decimal_place
 export const DEFAULT_MAX_PERCENT = 100;
 
 export const DEFAULT_MAX_PERCENT_DECIMAL = 1;
+
+export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
 
 /**
  * The Options object type supported by the GaugeChart panel plugin.

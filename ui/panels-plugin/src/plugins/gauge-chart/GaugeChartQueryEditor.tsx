@@ -11,16 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps, TimeSeriesQueryEditor, TimeSeriesQueryEditorProps } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryEditor, TimeSeriesQueryEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { StatChartOptions } from './stat-chart-model';
-
-export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
+import { GaugeChartOptionsEditorProps } from './gauge-chart-model';
 
 /**
- * Component for visually editing a Stat Chart's spec.
+ * Component for visually editing a Gauge Chart's spec.
  */
-export function StatChartOptionsEditor(props: StatChartOptionsEditorProps) {
+export function GaugeChartQueryEditor(props: GaugeChartOptionsEditorProps) {
   const { onChange, value } = props;
   const { query } = value;
 

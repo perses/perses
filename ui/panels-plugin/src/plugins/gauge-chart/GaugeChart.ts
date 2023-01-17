@@ -13,7 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialGaugeChartOptions, GaugeChartOptions } from './gauge-chart-model';
-import { GaugeChartOptionsEditor } from './GaugeChartOptionsEditor';
+import { GaugeChartQueryEditor } from './GaugeChartQueryEditor';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 import { GaugeChartPanel } from './GaugeChartPanel';
 
@@ -22,7 +22,7 @@ import { GaugeChartPanel } from './GaugeChartPanel';
  */
 export const GaugeChart: PanelPlugin<GaugeChartOptions> = {
   PanelComponent: GaugeChartPanel,
-  PanelQueryEditorComponent: GaugeChartOptionsEditor,
+  PanelQueryEditorComponent: GaugeChartQueryEditor,
   panelOptionsEditorComponents: [
     {
       id: 'setting',
