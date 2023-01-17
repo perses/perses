@@ -59,7 +59,7 @@ export class VariableEditor {
     await expect(this.container).toHaveCount(0);
   }
 
-  async addVariable() {
+  async startAddingVariable() {
     await this.addVariableButton.click();
   }
 

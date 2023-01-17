@@ -24,7 +24,7 @@ test.describe('Dashboard: Variables', () => {
     await dashboardPage.startEditingVariables();
 
     const variableEditor = dashboardPage.getVariableEditor();
-    await variableEditor.addVariable();
+    await variableEditor.startAddingVariable();
     await variableEditor.setName('text_var');
     await variableEditor.setDisplayLabel('Text Var');
     await variableEditor.selectType('Text');
@@ -47,7 +47,7 @@ test.describe('Dashboard: Variables', () => {
     await dashboardPage.startEditingVariables();
     const variableEditor = dashboardPage.getVariableEditor();
 
-    await variableEditor.addVariable();
+    await variableEditor.startAddingVariable();
     await variableEditor.setName('list_var');
     await variableEditor.setDisplayLabel('List Var');
     await variableEditor.selectType('list');
