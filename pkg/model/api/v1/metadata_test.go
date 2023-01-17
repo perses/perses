@@ -16,6 +16,7 @@ package v1
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -59,4 +60,26 @@ func TestKind_validate(t *testing.T) {
 			assert.NoError(t, (&test.kind).validate())
 		})
 	}
+}
+
+func TestProjectMetadata_UpdateVersion(t *testing.T) {
+	m := ProjectMetadata{
+		Metadata: Metadata{
+			Name:      "test",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Version:   0,
+		},
+		Project: "Perses",
+	}
+	// The idea here is to verify if we update multiple times a ProjectMetadata based on a previous version of the struct,
+	// we will have the correct version number.
+	for i := 0; i < 10; i++ {
+		old := m
+		// We reset the version of the current ProjectMetadata to simulate the fact the version should come from the previous struct
+		// and then being increased.
+		m.Version = 0
+		m.Update(old)
+	}
+	assert.Equal(t, m.Version, uint64(10))
 }
