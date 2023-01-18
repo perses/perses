@@ -16,8 +16,9 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
-import { createContext, useCallback, useContext, useState } from 'react';
-import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { DashboardResource, ProjectMetadata, RelativeTimeRange, UnknownSpec } from '@perses-dev/core';
+import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
@@ -63,8 +64,19 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 
 export function DashboardProvider(props: DashboardProviderProps) {
   const createDashboardStore = useCallback(initStore, [props]);
+  const [store, setStore] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
 
-  const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
+  // load plugin to retrieve initial spec if default panel kind is defined
+  const { defaultPluginKinds } = usePluginRegistry();
+  const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
+  const { data: plugin } = usePlugin('Panel', defaultPanelKind);
+
+  useEffect(() => {
+    if (plugin === undefined) return;
+    const spec = plugin.createInitialOptions();
+    // reinitialize store to set default panel spec
+    setStore(createDashboardStore(props, { kind: defaultPanelKind, spec }));
+  }, [plugin, defaultPanelKind, props, createDashboardStore]);
 
   return (
     <DashboardContext.Provider value={store as StoreApi<DashboardStoreState>}>
@@ -73,7 +85,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
   );
 }
 
-function initStore(props: DashboardProviderProps) {
+function initStore(props: DashboardProviderProps, defaultPanel?: { kind: string; spec: UnknownSpec }) {
   const {
     initialState: { dashboardResource, isEditMode },
   } = props;
@@ -91,7 +103,7 @@ function initStore(props: DashboardProviderProps) {
           ...createPanelSlice(panels)(...args),
           ...createPanelGroupEditorSlice(...args),
           ...createDeletePanelGroupSlice(...args),
-          ...createPanelEditorSlice()(...args),
+          ...createPanelEditorSlice(defaultPanel)(...args),
           ...createDeletePanelSlice()(...args),
           ...createDiscardChangesDialogSlice(...args),
           metadata,

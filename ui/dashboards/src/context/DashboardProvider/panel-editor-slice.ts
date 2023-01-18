@@ -82,13 +82,16 @@ export interface PanelEditorValues {
 /**
  * Curried function for creating the PanelEditorSlice.
  */
-export function createPanelEditorSlice(): StateCreator<
+export function createPanelEditorSlice(defaultPanel?: { kind: string; spec: UnknownSpec }): StateCreator<
   // Actions in here need to modify both Panels and Panel Groups state
   PanelEditorSlice & PanelSlice & PanelGroupSlice,
   Middleware,
   [],
   PanelEditorSlice
 > {
+  const defaultKind = defaultPanel?.kind ?? '';
+  const defaultSpec = defaultPanel?.spec ?? {};
+
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
     panelEditor: undefined,
@@ -190,8 +193,8 @@ export function createPanelEditorSlice(): StateCreator<
           name: '',
           description: '',
           groupId: panelGroupId,
-          kind: '',
-          spec: {},
+          kind: defaultKind,
+          spec: defaultSpec,
         },
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
