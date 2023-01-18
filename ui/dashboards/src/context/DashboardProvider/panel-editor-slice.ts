@@ -82,7 +82,7 @@ export interface PanelEditorValues {
 /**
  * Curried function for creating the PanelEditorSlice.
  */
-export function createPanelEditorSlice(defaultPanel?: { kind: string; spec: UnknownSpec }): StateCreator<
+export function createPanelEditorSlice(defaultPanel?: Pick<PanelEditorValues, 'kind' | 'spec'>): StateCreator<
   // Actions in here need to modify both Panels and Panel Groups state
   PanelEditorSlice & PanelSlice & PanelGroupSlice,
   Middleware,

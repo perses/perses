@@ -17,11 +17,11 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { DashboardResource, ProjectMetadata, RelativeTimeRange, UnknownSpec } from '@perses-dev/core';
+import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
-import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
+import { createPanelEditorSlice, PanelEditorSlice, PanelEditorValues } from './panel-editor-slice';
 import { createPanelSlice, PanelSlice } from './panel-slice';
 import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
 import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
@@ -85,7 +85,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
   );
 }
 
-function initStore(props: DashboardProviderProps, defaultPanel?: { kind: string; spec: UnknownSpec }) {
+function initStore(props: DashboardProviderProps, defaultPanel?: Pick<PanelEditorValues, 'kind' | 'spec'>) {
   const {
     initialState: { dashboardResource, isEditMode },
   } = props;
