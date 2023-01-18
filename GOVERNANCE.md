@@ -1,7 +1,7 @@
 # Project Governance
 
 This document provides an initial governance structure for the Perses project.
-We've deliberately kept this as simple as possible for now, but 
+We've deliberately kept this as simple as possible for now, but
 we expect the governance to evolve as the project grows.
 
 ## Team Members
@@ -10,11 +10,11 @@ A Team Member is any member of the private [perses-team](https://groups.google.c
 Google Group.
 
 Team member status may be given to those who have made ongoing contributions to
-the project for at least 3 months. Contributions can include 
+the project for at least 3 months. Contributions can include
 code improvements, notable work on documentation, organizing events,
 user support, and other contributions.
 
-New members may be proposed by any existing member by email to 
+New members may be proposed by any existing member by email to
 [perses-team](https://groups.google.com/g/perses-team).
 
 It is highly desirable to reach consensus about acceptance of a new member.
@@ -35,19 +35,19 @@ Upon death of a member, they leave the team automatically.
 
 The current team members are:
 
-| Team Member | GitHub ID | Affiliation |
-| --------------- | --------- | ----------- |
-| Augustin Husson | [nexucis](https://github.com/Nexucis) | Amadeus IT Group |
+| Team Member     | GitHub ID                                           | Affiliation      |
+|-----------------|-----------------------------------------------------|------------------|
+| Augustin Husson | [nexucis](https://github.com/Nexucis)               | Amadeus IT Group |
 | Antoine Thebaud | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus IT Group |
-| Eunice Wong | [eunicorn](https://github.com/eunicorn) | Chronosphere |
-| Luke Tillman | [luketillman](https://github.com/LukeTillman) | Chronosphere |
-| Steven Cobb | [sjcobb](https://github.com/sjcobb) | Chronosphere |
+| Eunice Wong     | [eunicorn](https://github.com/eunicorn)             | Chronosphere     |
+| Luke Tillman    | [luketillman](https://github.com/LukeTillman)       | Chronosphere     |
+| Steven Cobb     | [sjcobb](https://github.com/sjcobb)                 | Chronosphere     |
 
 ## Maintainers
 
 Perses maintainers have write access to projects under the Perses GitHub organization.
 They can merge their own patches or patches from others. The current maintainers
-can be found in [MAINTAINERS.md](./MAINTAINERS.md).  Maintainers collectively
+can be found in [MAINTAINERS.md](./MAINTAINERS.md). Maintainers collectively
 manage the project's resources and contributors.
 
 This privilege is granted with some expectation of responsibility: maintainers
@@ -64,18 +64,18 @@ the project succeed.
 
 To become a Maintainer you need to demonstrate the following:
 
-  * commitment to the project:
-    * participate in discussions, contributions, code and documentation reviews
-    * perform reviews for several non-trivial pull requests,
-    * contribute to several non-trivial pull requests and have them merged,
-  * ability to write quality code and/or documentation,
-  * ability to collaborate with the team,
-  * understanding of how the team works (policies, processes for testing and code review, etc),
-  * understanding of the project's code base and coding and documentation style.
+* commitment to the project:
+  * participate in discussions, contributions, code and documentation reviews
+  * perform reviews for several non-trivial pull requests,
+  * contribute to several non-trivial pull requests and have them merged,
+* ability to write quality code and/or documentation,
+* ability to collaborate with the team,
+* understanding of how the team works (policies, processes for testing and code review, etc),
+* understanding of the project's code base and coding and documentation style.
 
 A new maintainer must be proposed by an existing team member by sending an email to the
 private mailing list (perses-team@googlegroups.com). A 2/3 majority of team members
-must vote to approve a new maintainer. After the new maintainer is approved, they will 
+must vote to approve a new maintainer. After the new maintainer is approved, they will
 be added to the private team member mailing list.
 
 ## Voting

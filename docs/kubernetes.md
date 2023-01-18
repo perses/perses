@@ -1,5 +1,4 @@
-Perses on Kubernetes
-====================
+# Perses on Kubernetes
 
 This document aims to describe our vision about how Perses will work on kubernetes.
 

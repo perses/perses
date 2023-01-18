@@ -1,5 +1,4 @@
-Configuration
-=============
+# Configuration
 
 ## Flags available
 
@@ -54,10 +53,14 @@ uppercase. Every environment variable for this config are prefixed by `PERSES`
 
 For example, the environment variable for the password for etcd would be:
 
-    PERSES_DATABASE_ETCD_PASSWORD
+```
+PERSES_DATABASE_ETCD_PASSWORD
+```
 
 When you are dealing with the array, just include the index number in the variable. For example:
 
-    PERSES_DATABASE_ETCD_CONNECTIONS_0_HOST="etcd.node1"
-    PERSES_DATABASE_ETCD_CONNECTIONS_0_PORT= "7895"
-    PERSES_DATABASE_ETCD_CONNECTIONS_1="etcd.node2"
+```
+PERSES_DATABASE_ETCD_CONNECTIONS_0_HOST="etcd.node1"
+PERSES_DATABASE_ETCD_CONNECTIONS_0_PORT= "7895"
+PERSES_DATABASE_ETCD_CONNECTIONS_1="etcd.node2"
+```

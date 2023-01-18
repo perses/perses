@@ -1,5 +1,4 @@
-Perses CLI (percli)
-==================
+# Perses CLI (percli)
 
 On top of the application, we also provide a CLI named `percli`. This tool can be used to interact with the backend REST
 API to manage the resources such as dashboards, datasources, projects etc.
@@ -262,9 +261,9 @@ has two mode:
 
 1. An online mode that requires an active connection to a remote Perses server that holds the translation logic.
 2. An offline mode that requires three different folders:
-    * charts folders
-    * queries folders
-    * variables folders
+   * charts folders
+   * queries folders
+   * variables folders
 
 Each of the above folders should contain files, named `mig.cuepart` that holds the logic of the migration for each
 plugin. For more information about these files please read the documentation about [cue](./cue.md)

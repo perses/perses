@@ -15,6 +15,7 @@ GO                    ?= go
 CUE                   ?= cue
 GOCI                  ?= golangci-lint
 GOFMT                 ?= $(GO)fmt
+MDOX                  ?= mdox
 GOOS                  ?= $(shell $(GO) env GOOS)
 GOARCH                ?= $(shell $(GO) env GOARCH)
 GOHOSTOS              ?= $(shell $(GO) env GOHOSTOS)
@@ -50,6 +51,12 @@ checkformat:
 	@echo ">> running check for cue file format"
 	./scripts/cue.sh --checkformat
 
+.PHONY: checkdocs
+checkdocs:
+	@echo ">> check format markdown docs"
+	@make fmt-docs
+	@git diff --exit-code -- *.md
+
 .PHONY: checkunused
 checkunused:
 	@echo ">> running check for unused/missing packages in go.mod"
@@ -76,6 +83,11 @@ fmt:
 	@echo ">> format code"
 	$(GOFMT) -w -l $$(find . -name '*.go' -not -path "./ui/*" -print)
 	./scripts/cue.sh --fmt
+
+.PHONY: fmt-docs
+fmt-docs:
+	@echo ">> format markdown document"
+	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/prometheus-plugin/node_modules/*" -print)
 
 .PHONY: cue-eval
 cue-eval:

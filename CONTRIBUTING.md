@@ -29,7 +29,8 @@ where `catalog_entry` can be :
 - `ENHANCEMENT`
 - `BUGFIX`
 - `BREAKINGCHANGE`
-- `IGNORE` - Changes that should not generate entries in the changelog. Primarily used for internal tooling changes that do not impact consumers.
+- `IGNORE` - Changes that should not generate entries in the changelog. Primarily used for internal tooling changes that
+  do not impact consumers.
 
 This catalog entry will indicate the purpose of your PR.
 
@@ -41,6 +42,23 @@ In the usual workflow, all PRs are squashed. There is two exceptions to this rul
 2. In case your PR contains multiple kind of changes (aka, feature, bugfix ..etc.) and you took care about having
    different commit following the convention described above, then the PR will be merged and not squashed. Like that we
    are preserving the works you did and the effort you made when creating meaningful commit.
+
+## Documentation
+
+Documentation are written in Markdown. To ensure some quality on our documentation, we are
+running [mdox](https://github.com/bwplotka/mdox) that will ensure the doc is well formatted and all links are working.
+
+To format the docs, you will have to install the tool mentioned above. An easy way is to run the following command:
+
+```bash
+go install github.com/bwplotka/mdox@latest
+```
+
+Then to format the doc, run:
+
+```bash
+make fmt-docs
+```
 
 ## Development
 
@@ -63,9 +81,11 @@ Building and starting the backend API server requires the following tools:
 
 #### Quick version
 
-With the required dependencies installed, you can run `bash scripts/api_backend_dev.sh` to automatically set up the api server for local development. The API backend will be available on port 8080.
+With the required dependencies installed, you can run `bash scripts/api_backend_dev.sh` to automatically set up the api
+server for local development. The API backend will be available on port 8080.
 
-See "detailed version" for a summary of the steps automated by this script. Follow those instructions if you want more granular control over building and starting the API server.
+See "detailed version" for a summary of the steps automated by this script. Follow those instructions if you want more
+granular control over building and starting the API server.
 
 #### Detailed version
 
