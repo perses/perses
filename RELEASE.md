@@ -42,19 +42,8 @@ with `make upgrade-npm-deps`
 ### 1. Prepare your release
 
 You should start to create a branch that follows the pattern `release/v<X.Y>`. Release candidates and patch releases
-for any given major or minor release happen in the same release/v
-
-<major>
-
-.
-
-<minor>
-
-branch. Do not create release/
-
-<version>
-
-for patch or release candidate releases.
+for any given major or minor release happen in the same `release/v<major>.<minor>` branch. Do not
+create `release/<version>` for patch or release candidate releases.
 
 - Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release
   in general and on the addition to the changelog in particular.

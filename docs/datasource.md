@@ -49,22 +49,10 @@ GET /api/v1/projects/<project_name>/datasources
 
 URL query parameters:
 
-- kind =
-
-  <string>
-
-  : should be used to filter the list of datasources with a specific kind
-- default =
-
-  <boolean>
-
-  : should be used to filter the list of datasources to only have the default one. You should have
+- kind = `<string>` : should be used to filter the list of datasources with a specific kind
+- default = `<boolean>` : should be used to filter the list of datasources to only have the default one. You should have
   one default datasource per kind
-- name =
-
-  <string>
-
-  : should be used to filter the list of datasources based on the prefix name.
+- name = `<string>` : should be used to filter the list of datasources based on the prefix name.
 
 Example:
 
@@ -126,22 +114,10 @@ GET /api/v1/globaldatasources
 
 URL query parameters:
 
-- kind =
-
-  <string>
-
-  : should be used to filter the list of datasource with a specific kind
-- default =
-
-  <boolean>
-
-  : should be used to filter the list of datasource to only have the default one. You should have
+- kind = `<string>` : should be used to filter the list of datasource with a specific kind
+- default = `<boolean>` : should be used to filter the list of datasource to only have the default one. You should have
   one default datasource per kind
-- name =
-
-  <string>
-
-  : should be used to filter the list of datasource based on the prefix name.
+- name = `<string>` : should be used to filter the list of datasource based on the prefix name.
 
 Example:
 
