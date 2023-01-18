@@ -1,2 +1,4 @@
 # Build output
 dist
+
+*.md
