@@ -87,7 +87,7 @@ fmt:
 .PHONY: fmt-docs
 fmt-docs:
 	@echo ">> format markdown document"
-	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/prometheus-plugin/node_modules/*" -print)
+	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/prometheus-plugin/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: cue-eval
 cue-eval:
