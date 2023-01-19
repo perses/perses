@@ -22,6 +22,7 @@ export class PanelEditor {
 
   readonly addButton: Locator;
   readonly applyButton: Locator;
+  readonly cancelButton: Locator;
 
   constructor(container: Locator) {
     this.container = container;
@@ -31,6 +32,7 @@ export class PanelEditor {
 
     this.addButton = container.getByRole('button', { name: 'Add', exact: true });
     this.applyButton = container.getByRole('button', { name: 'Apply', exact: true });
+    this.cancelButton = container.getByRole('button', { name: 'Cancel', exact: true });
   }
 
   async isVisible() {
