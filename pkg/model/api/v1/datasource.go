@@ -14,7 +14,9 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -61,6 +63,42 @@ type GlobalDatasource struct {
 	Spec     DatasourceSpec `json:"spec" yaml:"spec"`
 }
 
+func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
+	var tmp GlobalDatasource
+	type plain GlobalDatasource
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *GlobalDatasource) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp GlobalDatasource
+	type plain GlobalDatasource
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *GlobalDatasource) validate() error {
+	if d.Kind != KindGlobalDatasource {
+		return fmt.Errorf("invalid kind: %q for a GlobalDatasource type", d.Kind)
+	}
+	if reflect.DeepEqual(d.Spec, DatasourceSpec{}) {
+		return fmt.Errorf("spec cannot be empty")
+	}
+	return nil
+}
+
 func (d *GlobalDatasource) GenerateID() string {
 	return GenerateGlobalDatasourceID(d.Metadata.Name)
 }
@@ -88,6 +126,42 @@ type Datasource struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     DatasourceSpec  `json:"spec" yaml:"spec"`
+}
+
+func (d *Datasource) UnmarshalJSON(data []byte) error {
+	var tmp Datasource
+	type plain Datasource
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *Datasource) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Datasource
+	type plain Datasource
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *Datasource) validate() error {
+	if d.Kind != KindDatasource {
+		return fmt.Errorf("invalid kind: %q for a Datasource type", d.Kind)
+	}
+	if reflect.DeepEqual(d.Spec, DatasourceSpec{}) {
+		return fmt.Errorf("spec cannot be empty")
+	}
+	return nil
 }
 
 func (d *Datasource) GenerateID() string {
