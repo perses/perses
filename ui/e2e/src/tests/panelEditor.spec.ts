@@ -12,32 +12,43 @@
 // limitations under the License.
 
 import { test, expect } from '../fixtures/dashboardTest';
-import { PanelEditor } from '../pages/PanelEditor';
 
 test.use({
   dashboardName: 'Panels',
 });
 
 test.describe('Dashboard: Panel Editor', () => {
-  test('should show discard changes confirmation dialog', async ({ dashboardPage }) => {
+  test('requires confirmation to discard changes', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
     await dashboardPage.addPanel();
     await dashboardPage.panelEditor.isVisible();
-    const panelEditor = new PanelEditor(dashboardPage.panelEditor);
+    const panelEditor = dashboardPage.getPanelEditor();
     await panelEditor.selectType('Markdown');
     await panelEditor.cancelButton.click();
 
-    await expect(dashboardPage.discardChangesConfirmationDialog).toBeVisible();
+    const discardChangesConfirmationDialog = dashboardPage.getDialog('Discard Changes');
+    await expect(discardChangesConfirmationDialog).toBeVisible();
 
     // clicking "Cancel" should do nothing and keep current changes
-    await dashboardPage.discardChangesConfirmationDialog.getByRole('button', { name: 'Cancel' }).click();
+    await discardChangesConfirmationDialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(dashboardPage.panelEditor).toBeVisible();
     await expect(dashboardPage.panelEditor.getByLabel(/^Type/)).toContainText('Markdown');
 
     // clicking "Discard Changes" should discard changes
     await panelEditor.cancelButton.click();
-    await dashboardPage.discardChangesConfirmationDialog.getByRole('button', { name: 'Discard Changes' }).click();
-    await expect(dashboardPage.panelEditor).toBeHidden();
-    await expect(dashboardPage.discardChangesConfirmationDialog).toBeHidden();
+    await discardChangesConfirmationDialog.getByRole('button', { name: 'Discard Changes' }).click();
+    await panelEditor.isClosed();
+    await expect(discardChangesConfirmationDialog).toBeHidden();
+  });
+
+  test('should not require confirmation to discard changes when there is no change', async ({ dashboardPage }) => {
+    await dashboardPage.startEditing();
+    await dashboardPage.addPanel();
+    const panelEditor = dashboardPage.getPanelEditor();
+    await panelEditor.isVisible();
+    await panelEditor.cancelButton.click();
+    const discardChangesConfirmationDialog = dashboardPage.getDialog('Discard Changes');
+    await expect(discardChangesConfirmationDialog).toBeHidden();
+    await panelEditor.isClosed();
   });
 });

@@ -20,7 +20,7 @@ export const DiscardChangesConfirmationDialog = () => {
   const isOpen = dialog !== undefined;
 
   return (
-    <Dialog open={isOpen} data-testid="discard-changes-confirmation-dialog">
+    <Dialog open={isOpen}>
       {dialog !== undefined && (
         <>
           <DialogTitle>Discard Changes</DialogTitle>

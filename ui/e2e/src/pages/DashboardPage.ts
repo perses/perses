@@ -51,7 +51,6 @@ export class DashboardPage {
 
   readonly panelEditor: Locator;
   readonly variableEditor: Locator;
-  readonly discardChangesConfirmationDialog: Locator;
 
   readonly alert: Locator;
 
@@ -81,7 +80,6 @@ export class DashboardPage {
 
     this.panelEditor = page.getByTestId('panel-editor');
     this.variableEditor = page.getByTestId('variable-editor');
-    this.discardChangesConfirmationDialog = page.getByTestId('discard-changes-confirmation-dialog');
 
     this.alert = page.getByRole('alert');
   }
@@ -101,6 +99,14 @@ export class DashboardPage {
     return this.page.getByRole('dialog', {
       name: name,
     });
+  }
+
+  /**
+   * PANEL EDITOR HELPERS
+   */
+
+  getPanelEditor() {
+    return new PanelEditor(this.panelEditor);
   }
 
   /**
