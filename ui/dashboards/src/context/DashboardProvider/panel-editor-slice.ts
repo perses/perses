@@ -31,6 +31,11 @@ import { PanelSlice } from './panel-slice';
  */
 export interface PanelEditorSlice {
   /**
+   * Initial values for add panel if default panel kind is defined
+   */
+  initialValues?: Pick<PanelEditorValues, 'kind' | 'spec'>;
+
+  /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
    */
   panelEditor?: PanelEditorState;
@@ -190,8 +195,8 @@ export function createPanelEditorSlice(): StateCreator<
           name: '',
           description: '',
           groupId: panelGroupId,
-          kind: '',
-          spec: {},
+          kind: get().initialValues?.kind ?? '',
+          spec: get().initialValues?.spec ?? {},
         },
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);

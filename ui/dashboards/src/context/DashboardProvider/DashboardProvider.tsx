@@ -16,8 +16,9 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
+import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
@@ -64,7 +65,19 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 export function DashboardProvider(props: DashboardProviderProps) {
   const createDashboardStore = useCallback(initStore, [props]);
 
+  // load plugin to retrieve initial spec if default panel kind is defined
+  const { defaultPluginKinds } = usePluginRegistry();
+  const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
+  const { data: plugin } = usePlugin('Panel', defaultPanelKind);
+
   const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
+
+  useEffect(() => {
+    if (plugin === undefined) return;
+    const spec = plugin.createInitialOptions();
+    // set default panel kind and spec for add panel editor
+    store.setState({ initialValues: { kind: defaultPanelKind, spec } });
+  }, [plugin, store, defaultPanelKind]);
 
   return (
     <DashboardContext.Provider value={store as StoreApi<DashboardStoreState>}>

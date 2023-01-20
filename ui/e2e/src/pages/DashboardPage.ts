@@ -102,6 +102,14 @@ export class DashboardPage {
   }
 
   /**
+   * PANEL EDITOR HELPERS
+   */
+
+  getPanelEditor() {
+    return new PanelEditor(this.panelEditor);
+  }
+
+  /**
    * PANEL GROUP HELPERS
    */
 
