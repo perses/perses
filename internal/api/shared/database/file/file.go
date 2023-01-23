@@ -56,22 +56,14 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 		// The file exists, so we should return a conflict error.
 		return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeConflict}
 	}
-	return d.Upsert(entity)
+	return d.upsert(key, entity)
 }
 func (d *DAO) Upsert(entity modelAPI.Entity) error {
 	key, generateKeyErr := generateKey(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if generateKeyErr != nil {
 		return generateKeyErr
 	}
-	filePath := d.buildPath(key)
-	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {
-		return err
-	}
-	data, err := d.marshal(entity)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filePath, data, 0600)
+	return d.upsert(key, entity)
 }
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
 	key, generateKeyErr := generateKey(kind, metadata)
@@ -186,6 +178,18 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 
 func (d *DAO) HealthCheck() bool {
 	return true
+}
+
+func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
+	filePath := d.buildPath(key)
+	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {
+		return err
+	}
+	data, err := d.marshal(entity)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filePath, data, 0600)
 }
 
 func (d *DAO) buildPath(key string) string {
