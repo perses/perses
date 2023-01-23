@@ -15,6 +15,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -93,6 +94,7 @@ func TestMarshalDashboard(t *testing.T) {
     "name": "SimpleDashboard",
     "created_at": "0001-01-01T00:00:00Z",
     "updated_at": "0001-01-01T00:00:00Z",
+    "version": 0,
     "project": "perses"
   },
   "spec": {
@@ -228,6 +230,7 @@ func TestMarshalDashboard(t *testing.T) {
     "name": "SimpleDashboard",
     "created_at": "0001-01-01T00:00:00Z",
     "updated_at": "0001-01-01T00:00:00Z",
+    "version": 0,
     "project": "perses"
   },
   "spec": {
@@ -488,4 +491,46 @@ func TestUnmarshallDashboard(t *testing.T) {
 	err := json.Unmarshal([]byte(jsonDashboard), result)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, result)
+}
+
+func TestUnmarshalDashboardError(t *testing.T) {
+	testSuite := []struct {
+		title string
+		jason string
+		err   error
+	}{
+		{
+			title: "spec cannot be empty",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  }
+}
+`,
+			err: fmt.Errorf("spec cannot be empty"),
+		},
+		{
+			title: "panel list cannot be empty",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {}
+}
+`,
+			err: fmt.Errorf("dashboard.spec.panels cannot be empty"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := Dashboard{}
+			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
+		})
+	}
 }

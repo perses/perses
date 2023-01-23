@@ -30,7 +30,7 @@ type Metadata struct {
 	Name      string    `json:"name" yaml:"name"`
 	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
-	Version   uint64    `json:"version,omitempty" yaml:"version,omitempty"`
+	Version   uint64    `json:"version" yaml:"version"`
 }
 
 func (m *Metadata) CreateNow() {
