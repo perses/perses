@@ -23,7 +23,6 @@ export const Markdown: PanelPlugin<MarkdownPanelOptions> = {
   PanelComponent: MarkdownPanel,
   panelOptionsEditorComponents: [
     {
-      id: 'markdown',
       label: 'Markdown',
       content: MarkdownPanelOptionsEditor,
     },

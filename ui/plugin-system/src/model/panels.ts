@@ -16,7 +16,7 @@ import React from 'react';
 import { OptionsEditorTab } from '../components';
 import { OptionsEditorProps, Plugin } from './plugin-base';
 
-export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'id' | 'label'> & {
+export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'label'> & {
   content: React.ComponentType<OptionsEditorProps<T>>;
 };
 /**

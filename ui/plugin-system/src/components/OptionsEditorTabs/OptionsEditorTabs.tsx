@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Tab, TabProps, Tabs, TabsProps, Box } from '@mui/material';
+import { Tab, Tabs, TabsProps, Box } from '@mui/material';
 import { useState } from 'react';
 import { TabPanel } from './TabPanel';
 
 export type OptionsEditorTab = {
-  id: string;
-  label: TabProps['label'];
+  label: string;
   /**
    * Content rendered when the tab is active.
    */
@@ -39,10 +38,10 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
     <>
       <Box sx={{ borderBottom: 1, borderColor: (theme) => theme.palette.divider }}>
         <Tabs value={activeTab} onChange={handleChange} aria-label="Panel configuration tabs">
-          {tabs.map(({ id, label }, i) => {
+          {tabs.map(({ label }, i) => {
             return (
               <Tab
-                key={id}
+                key={label}
                 label={label}
                 id={`options-editor-tab-${i}`}
                 aria-controls={`options-editor-tabpanel-${i}`}
@@ -51,9 +50,9 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
           })}
         </Tabs>
       </Box>
-      {tabs.map(({ id, content }, i) => {
+      {tabs.map(({ label, content }, i) => {
         return (
-          <TabPanel key={id} value={activeTab} index={i}>
+          <TabPanel key={label} value={activeTab} index={i}>
             {content}
           </TabPanel>
         );

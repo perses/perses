@@ -25,7 +25,6 @@ export const StatChart: PanelPlugin<StatChartOptions> = {
   PanelQueryEditorComponent: StatChartQueryEditor,
   panelOptionsEditorComponents: [
     {
-      id: 'setting',
       label: 'Settings',
       content: StatChartOptionsEditorSettings,
     },

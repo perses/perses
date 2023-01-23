@@ -25,7 +25,6 @@ export const GaugeChart: PanelPlugin<GaugeChartOptions> = {
   PanelQueryEditorComponent: GaugeChartQueryEditor,
   panelOptionsEditorComponents: [
     {
-      id: 'setting',
       label: 'Settings',
       content: GaugeChartOptionsEditorSettings,
     },
