@@ -19,17 +19,14 @@ import { OptionsEditorTabs, OptionsEditorTabsProps } from './OptionsEditorTabs';
 describe('OptionsEditorTabs', () => {
   const mockTabs: OptionsEditorTabsProps['tabs'] = [
     {
-      id: 'query',
       label: 'Query',
       content: <div>Edit query configuration</div>,
     },
     {
-      id: 'settings',
       label: 'Settings',
       content: <div>Edit settings configuration</div>,
     },
     {
-      id: 'json',
       label: 'JSON',
       content: <div>JSON editor</div>,
     },

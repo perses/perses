@@ -36,7 +36,6 @@ export const BertPanel2: PanelPlugin<{ option2: string }> = {
   PanelComponent: () => null,
   panelOptionsEditorComponents: [
     {
-      id: 'settings',
       label: 'Settings',
       content: function BertPanel2Editor({ value, onChange }) {
         return (
@@ -53,7 +52,6 @@ export const BertPanel2: PanelPlugin<{ option2: string }> = {
       },
     },
     {
-      id: 'custom tab',
       label: 'Custom Tab',
       content: function Editor() {
         return <div>custom content</div>;
