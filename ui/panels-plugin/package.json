@@ -33,7 +33,7 @@
     "@perses-dev/plugin-system": "0.21.1",
     "date-fns": "^2.28.0",
     "dompurify": "^2.4.0",
-    "echarts": "^5.3.3",
+    "echarts": "^5.4.1",
     "immer": "^9.0.15",
     "lodash-es": "^4.17.21",
     "marked": "^4.1.0",
