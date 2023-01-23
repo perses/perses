@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-docker_cmd=docker
-container=dev_etcd_1
-with_etcd=false
 local_folder_db=local_db
 
 function getKindID() {
@@ -29,12 +26,6 @@ function getKindID() {
   elif [ "${kind}" = "Dashboard" ]; then
     echo "dashboards"
   fi
-}
-
-function injectDataInETCD() {
-  id=$1
-  entity=$2
-  MSYS_NO_PATHCONV=1 ${docker_cmd} exec ${container} etcdctl put "/${id}" "${entity}"
 }
 
 function injectDataInLocalFileDB() {
@@ -60,11 +51,7 @@ function insertResourceData() {
     fi
     id=${id}$(_jq '.metadata.name')
     echo "injected document at with the key $id"
-    if [[ "${with_etcd}" = true ]]; then
-      injectDataInETCD "${id}" "${entity}"
-    else
-      injectDataInLocalFileDB "${id}" "${entity}"
-    fi
+    injectDataInLocalFileDB "${id}" "${entity}"
   done
 }
 
@@ -74,17 +61,5 @@ function injectAllData() {
   insertResourceData ./data/project.json
   insertResourceData ./data/globaldatasource.json
 }
-
-if [[ "$1" == "--with-etcd" ]]; then
-  with_etcd=true
-  if podman -v; then
-    echo "using podman instead of docker binary"
-    docker_cmd=podman
-  fi
-
-  if [ "$(${docker_cmd} ps -a | grep -c dev-etcd-1)" -gt 0 ]; then
-    container=dev-etcd-1
-  fi
-fi
 
 injectAllData

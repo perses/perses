@@ -52,8 +52,8 @@ func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Enti
 
 func defaultFileConfig() *config.File {
 	return &config.File{
-		Folder:        "./test",
-		FileExtension: config.JSONExtension,
+		Folder:    "./test",
+		Extension: config.JSONExtension,
 	}
 }
 

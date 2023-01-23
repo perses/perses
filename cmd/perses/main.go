@@ -44,11 +44,9 @@ All your monitoring dashboards in one place.               <\
 
 func main() {
 	configFile := flag.String("config", "", "Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.")
-	dbFolder := flag.String("db.folder", "", "Path to the folder to use as a database. In case the flag is not used, Perses requires a connection to etcd.")
-	dbExtension := flag.String("db.extension", "yaml", "The extension of the file to read and use when creating a file. Valid values: 'yaml' or 'json'.")
 	flag.Parse()
 	// load the config from file or/and from environment
-	conf, err := config.Resolve(*configFile, *dbFolder, *dbExtension)
+	conf, err := config.Resolve(*configFile)
 	if err != nil {
 		logrus.WithError(err).Fatalf("error reading configuration from file %q or from environment", *configFile)
 	}

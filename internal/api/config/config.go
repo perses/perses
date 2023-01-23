@@ -26,14 +26,8 @@ type Config struct {
 	Schemas Schemas `json:"schemas" yaml:"schemas"`
 }
 
-func Resolve(configFile string, dbFolder string, dbExtension string) (Config, error) {
+func Resolve(configFile string) (Config, error) {
 	c := Config{}
-	if len(dbFolder) > 0 {
-		c.Database.File = &File{
-			Folder:        dbFolder,
-			FileExtension: FileExtension(dbExtension),
-		}
-	}
 	return c, config.NewResolver[Config]().
 		SetConfigFile(configFile).
 		SetEnvPrefix("PERSES").

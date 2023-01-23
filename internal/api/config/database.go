@@ -15,8 +15,6 @@ package config
 
 import (
 	"fmt"
-
-	"github.com/perses/common/config"
 )
 
 type FileExtension string
@@ -27,31 +25,20 @@ const (
 )
 
 type File struct {
-	Folder        string        `json:"folder" yaml:"folder"`
-	FileExtension FileExtension `json:"file_extension" yaml:"file_extension"`
+	Folder    string        `json:"folder" yaml:"folder"`
+	Extension FileExtension `json:"extension" yaml:"extension"`
 }
 
 func (f *File) Verify() error {
-	if len(f.FileExtension) == 0 {
-		f.FileExtension = YAMLExtension
+	if len(f.Extension) == 0 {
+		f.Extension = YAMLExtension
 	}
-	if f.FileExtension != YAMLExtension && f.FileExtension != JSONExtension {
+	if f.Extension != YAMLExtension && f.Extension != JSONExtension {
 		return fmt.Errorf("wrong file extension defined when using the filesystem as a database. You can only define json or yaml")
 	}
 	return nil
 }
 
 type Database struct {
-	File *File              `json:"file,omitempty" yaml:"file,omitempty"`
-	Etcd *config.EtcdConfig `json:"etcd,omitempty" yaml:"etcd,omitempty"`
-}
-
-func (d *Database) Verify() error {
-	if d.File == nil && d.Etcd == nil {
-		return fmt.Errorf("you must specify if Perses has to use ETCD or filesystem as a database")
-	}
-	if d.File != nil && d.Etcd != nil {
-		return fmt.Errorf("you cannot tel to Perses to use ETCD and the filesystem at the same time")
-	}
-	return nil
+	File *File `json:"file" yaml:"file"`
 }

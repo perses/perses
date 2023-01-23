@@ -25,7 +25,7 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 	if conf.File != nil {
 		return &databaseFile.DAO{
 			Folder:    conf.File.Folder,
-			Extension: conf.File.FileExtension,
+			Extension: conf.File.Extension,
 		}, nil
 	}
 	return nil, fmt.Errorf("no dao defined")
