@@ -29,7 +29,8 @@ import (
 	"github.com/perses/perses/internal/api/core/middleware"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/pkg/model/api"
+	modelAPI "github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func GetRepositoryPath(t *testing.T) string {
@@ -40,9 +41,9 @@ func GetRepositoryPath(t *testing.T) string {
 	return strings.TrimSpace(string(projectPathByte))
 }
 
-func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...api.Entity) {
+func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Entity) {
 	for _, entity := range entities {
-		err := dao.Delete(entity.GetKind(), entity.GetMetadata())
+		err := dao.Delete(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -89,7 +90,7 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 	}), persistenceManager
 }
 
-func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []api.Entity) {
+func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	server, expect, persistenceManager := CreateServer(t)
 	defer server.Close()
 	entities := testFunc(expect, persistenceManager)
