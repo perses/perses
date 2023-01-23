@@ -20,10 +20,6 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
-func GenerateFolderID(project string, name string) string {
-	return generateProjectResourceID("folders", project, name)
-}
-
 type FolderSpec struct {
 	// Kind can only have two values: `Dashboard` or `Folder`
 	Kind Kind `json:"kind" yaml:"kind"`
@@ -77,10 +73,6 @@ type Folder struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     []FolderSpec    `json:"spec" yaml:"spec"`
-}
-
-func (f *Folder) GenerateID() string {
-	return GenerateDashboardID(f.Metadata.Project, f.Metadata.Name)
 }
 
 func (f *Folder) GetMetadata() modelAPI.Metadata {

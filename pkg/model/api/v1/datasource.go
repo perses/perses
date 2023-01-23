@@ -34,14 +34,6 @@ func FilterDatasource[T DatasourceInterface](kind string, defaultDTS *bool, list
 	return result
 }
 
-func GenerateGlobalDatasourceID(name string) string {
-	return fmt.Sprintf("/globaldatasources/%s", name)
-}
-
-func GenerateDatasourceID(project string, name string) string {
-	return generateProjectResourceID("datasources", project, name)
-}
-
 type DatasourceInterface interface {
 	GetMetadata() modelAPI.Metadata
 	GetDTSSpec() DatasourceSpec
@@ -97,10 +89,6 @@ func (d *GlobalDatasource) validate() error {
 		return fmt.Errorf("spec cannot be empty")
 	}
 	return nil
-}
-
-func (d *GlobalDatasource) GenerateID() string {
-	return GenerateGlobalDatasourceID(d.Metadata.Name)
 }
 
 func (d *GlobalDatasource) GetMetadata() modelAPI.Metadata {
@@ -162,10 +150,6 @@ func (d *Datasource) validate() error {
 		return fmt.Errorf("spec cannot be empty")
 	}
 	return nil
-}
-
-func (d *Datasource) GenerateID() string {
-	return GenerateDatasourceID(d.Metadata.Project, d.Metadata.Name)
 }
 
 func (d *Datasource) GetMetadata() modelAPI.Metadata {

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,34 +15,17 @@ package database
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/config"
+	databaseFile "github.com/perses/perses/internal/api/shared/database/file"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 )
 
-type DAO interface {
-	Create(key string, entity interface{}) error
-	Upsert(key string, entity interface{}) error
-	Get(key string, entity interface{}) error
-	Query(query etcd.Query, slice interface{}) error
-	Delete(key string) error
-	HealthCheck() bool
-}
-
-func New(conf config.Database) (DAO, error) {
-	if conf.Etcd != nil {
-		timeout := time.Duration(conf.Etcd.RequestTimeoutSeconds) * time.Second
-		etcdClient, err := etcd.NewETCDClient(*conf.Etcd)
-		if err != nil {
-			return nil, err
-		}
-		return etcd.NewDAO(etcdClient, timeout), nil
-	}
+func New(conf config.Database) (databaseModel.DAO, error) {
 	if conf.File != nil {
-		return &fileDAO{
-			folder:    conf.File.Folder,
-			extension: conf.File.FileExtension,
+		return &databaseFile.DAO{
+			Folder:    conf.File.Folder,
+			Extension: conf.File.FileExtension,
 		}, nil
 	}
 	return nil, fmt.Errorf("no dao defined")

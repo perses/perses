@@ -142,13 +142,13 @@ func (e *Endpoint) List(ctx echo.Context) error {
 package {{ $package }}
 
 import (
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/shared"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type Query struct {
-	etcd.Query
+	databaseModel.Query
 	// NamePrefix is a prefix of the {{ $kind }}.metadata.name that is used to filter the list of the {{ $kind }}.
 	// NamePrefix can be empty in case you want to return the full list of {{ $kind }} available.
 	NamePrefix string {{ tag "query:\"name\"" }}
@@ -173,7 +173,7 @@ type DAO interface {
 	Delete(name string) error
 	Get(name string) (*v1.{{ $kind }}, error)
 {{- end }}
-	List(q etcd.Query) ([]*v1.{{ $kind }}, error)
+	List(q databaseModel.Query) ([]*v1.{{ $kind }}, error)
 }
 
 type Service interface {
@@ -201,18 +201,17 @@ type Service interface {
 package {{ $package }}
 
 import (
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
-	"github.com/perses/perses/internal/api/shared/database"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type dao struct {
 	{{ $package }}.DAO
-	client database.DAO
+	client databaseModel.DAO
 }
 
-func NewDAO(persesDAO database.DAO) {{ $package }}.DAO {
+func NewDAO(persesDAO databaseModel.DAO) {{ $package }}.DAO {
 	return &dao{
 		client: persesDAO,
 	}
@@ -239,7 +238,7 @@ func (d *dao) Get({{- if $endpoint.IsProjectResource -}}project string,{{- end -
 	return entity, d.client.Get(key, entity)
 }
 
-func (d *dao) List(q etcd.Query) ([]*v1.{{ $kind }}, error) {
+func (d *dao) List(q databaseModel.Query) ([]*v1.{{ $kind }}, error) {
 	var result []*v1.{{ $kind }}
 	err := d.client.Query(q, &result)
 	return result, err

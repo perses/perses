@@ -24,10 +24,6 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-func GenerateDashboardID(project string, name string) string {
-	return generateProjectResourceID("dashboards", project, name)
-}
-
 type PanelSpec struct {
 	Display common.Display `json:"display" yaml:"display"`
 	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
@@ -101,10 +97,6 @@ type Dashboard struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     DashboardSpec   `json:"spec" yaml:"spec"`
-}
-
-func (d *Dashboard) GenerateID() string {
-	return GenerateDashboardID(d.Metadata.Project, d.Metadata.Name)
 }
 
 func (d *Dashboard) GetMetadata() modelAPI.Metadata {

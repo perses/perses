@@ -15,15 +15,15 @@ package health
 
 import (
 	"github.com/perses/perses/internal/api/interface/v1/health"
-	"github.com/perses/perses/internal/api/shared/database"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 )
 
 type dao struct {
 	health.DAO
-	client database.DAO
+	client databaseModel.DAO
 }
 
-func NewDAO(persesDAO database.DAO) health.DAO {
+func NewDAO(persesDAO databaseModel.DAO) health.DAO {
 	return &dao{
 		client: persesDAO,
 	}

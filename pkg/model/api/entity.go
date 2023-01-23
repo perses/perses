@@ -19,7 +19,6 @@ type Metadata interface {
 
 type Entity interface {
 	GetKind() string
-	GenerateID() string
 	GetMetadata() Metadata
 	GetSpec() interface{}
 }

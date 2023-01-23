@@ -27,7 +27,7 @@ import (
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/shared/database"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/pkg/model/api"
 )
@@ -40,9 +40,9 @@ func GetRepositoryPath(t *testing.T) string {
 	return strings.TrimSpace(string(projectPathByte))
 }
 
-func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
-	for _, key := range keys {
-		err := dao.Delete(key)
+func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...api.Entity) {
+	for _, entity := range entities {
+		err := dao.Delete(entity.GetKind(), entity.GetMetadata())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -93,8 +93,5 @@ func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.Persi
 	server, expect, persistenceManager := CreateServer(t)
 	defer server.Close()
 	entities := testFunc(expect, persistenceManager)
-	for _, entity := range entities {
-		entityID := entity.GenerateID()
-		ClearAllKeys(t, persistenceManager.GetPersesDAO(), entityID)
-	}
+	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
 }

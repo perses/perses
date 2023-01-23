@@ -38,6 +38,14 @@ var KindMap = map[Kind]bool{
 	KindProject:          true,
 }
 
+var PluralKindMap = map[Kind]string{
+	KindDashboard:        "dashboards",
+	KindDatasource:       "datasources",
+	KindFolder:           "folders",
+	KindGlobalDatasource: "globaldatasources",
+	KindProject:          "projects",
+}
+
 func (k *Kind) UnmarshalJSON(data []byte) error {
 	var tmp Kind
 	type plain Kind
