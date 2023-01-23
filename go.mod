@@ -9,7 +9,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/perses/common v0.16.0
+	github.com/perses/common v0.17.0
 	github.com/prometheus/common v0.39.0
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.14.0
@@ -68,9 +68,9 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	go.opentelemetry.io/otel v1.11.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.11.0 // indirect
-	go.opentelemetry.io/otel/trace v1.11.0 // indirect
+	go.opentelemetry.io/otel v1.11.2 // indirect
+	go.opentelemetry.io/otel/sdk v1.11.2 // indirect
+	go.opentelemetry.io/otel/trace v1.11.2 // indirect
 	golang.org/x/crypto v0.2.0 // indirect
 	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
