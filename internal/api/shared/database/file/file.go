@@ -154,7 +154,14 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		if unmarshalErr := d.unmarshal(data, obj); err != nil {
 			return unmarshalErr
 		}
-		sliceElem.Set(reflect.Append(sliceElem, value))
+		if typeParameter.Elem().Kind() != reflect.Ptr {
+			// In case the type of the slice element is not a pointer,
+			// we should return the value of the pointer created in the previous step.
+			sliceElem.Set(reflect.Append(sliceElem, value.Elem()))
+		} else {
+			sliceElem.Set(reflect.Append(sliceElem, value))
+		}
+
 	}
 	// at the end reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
 	result.Elem().Set(sliceElem)

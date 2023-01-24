@@ -88,8 +88,11 @@ func TestDAO_Query(t *testing.T) {
 	}
 	assert.NoError(t, d.Create(projectEntity))
 	var result []modelV1.Project
+	var result2 []*modelV1.Project
 	assert.NoError(t, d.Query(&project.Query{}, &result))
+	assert.NoError(t, d.Query(&project.Query{}, &result2))
 	assert.Equal(t, projectEntity.Metadata.Name, result[0].Metadata.Name)
+	assert.Equal(t, projectEntity.Metadata.Name, result2[0].Metadata.Name)
 	clear(t)
 }
 
