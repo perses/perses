@@ -17,38 +17,23 @@ import userEvent from '@testing-library/user-event';
 import { OptionsEditorTabs, OptionsEditorTabsProps } from './OptionsEditorTabs';
 
 describe('OptionsEditorTabs', () => {
-  const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']['other']) => {
-    render(
-      <OptionsEditorTabs
-        tabs={{
-          query: {
-            content: <div>Edit query configuration</div>,
-          },
-          settings: {
-            content: <div>Edit settings configuration</div>,
-          },
-          json: {
-            content: <div>JSON editor</div>,
-          },
-          other: otherTabs,
-        }}
-      />
-    );
-  };
-
-  const renderCustomTabs = () => {
-    renderTabs([
-      {
-        id: 'tableCols',
-        label: 'Table columns',
-        content: <div>custom table column</div>,
-      },
-      {
-        id: 'tableOpts',
-        label: 'Table options',
-        content: <div>custom table options</div>,
-      },
-    ]);
+  const mockTabs: OptionsEditorTabsProps['tabs'] = [
+    {
+      label: 'Query',
+      content: <div>Edit query configuration</div>,
+    },
+    {
+      label: 'Settings',
+      content: <div>Edit settings configuration</div>,
+    },
+    {
+      label: 'JSON',
+      content: <div>JSON editor</div>,
+    },
+  ];
+  const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
+    const tabs = otherTabs ?? mockTabs;
+    render(<OptionsEditorTabs tabs={tabs} />);
   };
 
   it('renders all specified tabs in a tab list', () => {
@@ -103,59 +88,14 @@ describe('OptionsEditorTabs', () => {
     expect(activeTabPanel).toHaveTextContent('settings configuration');
   });
 
-  it('renders custom tabs between visual tabs and json editor', () => {
-    renderCustomTabs();
+  it('renders tabs in correct order', () => {
+    renderTabs();
 
-    const tabList = screen.getByRole('tablist');
-    const tabs = getAllByRole(tabList, 'tab');
-    expect(tabs).toHaveLength(5);
-    expect(tabs[0]).toHaveTextContent('Query');
-    expect(tabs[1]).toHaveTextContent('Settings');
-    expect(tabs[2]).toHaveTextContent('Table column');
-    expect(tabs[3]).toHaveTextContent('Table options');
-    expect(tabs[4]).toHaveTextContent('JSON');
-  });
-
-  it('shows the correct content when selecting a custom tab', () => {
-    renderCustomTabs();
-
-    const tableColTab = screen.getByRole('tab', { name: 'Table columns' });
-    userEvent.click(tableColTab);
-
-    const activeTab = screen.getByRole('tab', {
-      selected: true,
-    });
-    expect(activeTab).toBe(tableColTab);
-
-    const activeTabPanel = screen.getByRole('tabpanel');
-    expect(activeTabPanel).toHaveTextContent('custom table column');
-  });
-
-  it('only renders common tabs that are specified', () => {
-    render(
-      <OptionsEditorTabs
-        tabs={{
-          settings: {
-            content: <div>settings are alone</div>,
-          },
-          json: {
-            content: <div>JSON is at the end</div>,
-          },
-          other: [
-            {
-              id: 'custom',
-              label: 'Another tab',
-              content: <div>another tab content</div>,
-            },
-          ],
-        }}
-      />
-    );
     const tabList = screen.getByRole('tablist');
     const tabs = getAllByRole(tabList, 'tab');
     expect(tabs).toHaveLength(3);
-    expect(tabs[0]).toHaveTextContent('Settings');
-    expect(tabs[1]).toHaveTextContent('Another tab');
+    expect(tabs[0]).toHaveTextContent('Query');
+    expect(tabs[1]).toHaveTextContent('Settings');
     expect(tabs[2]).toHaveTextContent('JSON');
   });
 });

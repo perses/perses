@@ -24,8 +24,13 @@ import {
   OptionsEditorColumn,
   OptionsEditorControl,
 } from '@perses-dev/components';
-import { GaugeChartOptionsEditorProps } from './GaugeChartOptionsEditor';
-import { GaugeChartOptions, DEFAULT_UNIT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
+import {
+  GaugeChartOptions,
+  DEFAULT_UNIT,
+  DEFAULT_MAX_PERCENT,
+  DEFAULT_MAX_PERCENT_DECIMAL,
+  GaugeChartOptionsEditorProps,
+} from './gauge-chart-model';
 
 export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps) {
   const { onChange, value } = props;

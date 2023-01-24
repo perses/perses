@@ -20,8 +20,12 @@ import {
   OptionsEditorGrid,
   OptionsEditorColumn,
 } from '@perses-dev/components';
-import { TimeSeriesChartOptionsEditorProps } from './TimeSeriesChartOptionsEditor';
-import { TimeSeriesChartOptions, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
+  TimeSeriesChartOptionsEditorProps,
+} from './time-series-chart-model';
 import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
 import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEditor';
 

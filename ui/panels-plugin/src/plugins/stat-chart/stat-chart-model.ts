@@ -13,13 +13,15 @@
 
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
-import { CalculationType } from '@perses-dev/plugin-system';
+import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ThresholdOptions } from '../../model/thresholds';
 
 export interface SparklineOptions {
   color?: string;
   width?: number;
 }
+
+export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
 export interface StatChartOptions {
   name: string;

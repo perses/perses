@@ -14,22 +14,18 @@
 import { useState } from 'react';
 import { produce } from 'immer';
 import { Button, IconButton, Stack, Typography } from '@mui/material';
-import { JSONEditor } from '@perses-dev/components';
 import AddIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { OptionsEditorProps, TimeSeriesQueryEditor, usePlugin, OptionsEditorTabs } from '@perses-dev/plugin-system';
-import { TimeSeriesChartOptions } from './time-series-chart-model';
-import { TimeSeriesChartOptionsEditorSettings } from './TimeSeriesChartOptionsEditorSettings';
+import { TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
+import { TimeSeriesChartOptions, TimeSeriesChartOptionsEditorProps } from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
 
-export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
-
-export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditorProps) {
+export function TimeSeriesChartQueryEditor(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
   const { queries } = value;
   const hasMoreThanOneQuery = queries.length > 1;
@@ -90,52 +86,33 @@ export function TimeSeriesChartOptionsEditor(props: TimeSeriesChartOptionsEditor
   };
 
   return (
-    <OptionsEditorTabs
-      tabs={{
-        query: {
-          content: (
-            <Stack spacing={1}>
-              <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
-                Add Query
-              </Button>
-              {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
-                <Stack key={i} spacing={1}>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    borderBottom={1}
-                    borderColor={(theme) => theme.palette.divider}
-                  >
-                    <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
-                      {queriesCollapsed[i] ? <ChevronRight /> : <ChevronDown />}
-                    </IconButton>
-                    <Typography variant="overline" component="h4">
-                      Query {i + 1}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
-                      sx={{ marginLeft: 'auto', visibility: `${hasMoreThanOneQuery ? 'visible' : 'hidden'}` }}
-                      onClick={() => handleQueryDelete(i)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Stack>
-                  {!queriesCollapsed[i] && (
-                    <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
-                  )}
-                </Stack>
-              ))}
-            </Stack>
-          ),
-        },
-        settings: {
-          content: <TimeSeriesChartOptionsEditorSettings {...props} />,
-        },
-        json: {
-          content: <JSONEditor {...props} />,
-        },
-      }}
-    />
+    <Stack spacing={1}>
+      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
+        Add Query
+      </Button>
+      {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
+        <Stack key={i} spacing={1}>
+          <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
+            <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
+              {queriesCollapsed[i] ? <ChevronRight /> : <ChevronDown />}
+            </IconButton>
+            <Typography variant="overline" component="h4">
+              Query {i + 1}
+            </Typography>
+            <IconButton
+              size="small"
+              // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
+              sx={{ marginLeft: 'auto', visibility: `${hasMoreThanOneQuery ? 'visible' : 'hidden'}` }}
+              onClick={() => handleQueryDelete(i)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Stack>
+          {!queriesCollapsed[i] && (
+            <TimeSeriesQueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />
+          )}
+        </Stack>
+      ))}
+    </Stack>
   );
 }

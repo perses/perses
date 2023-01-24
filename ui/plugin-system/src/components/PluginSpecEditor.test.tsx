@@ -21,10 +21,28 @@ describe('PluginSpecEditor', () => {
     renderWithContext(<PluginSpecEditor {...props} />);
   };
 
-  it('shows the options editor component for a plugin', async () => {
-    renderComponent({ pluginType: 'Panel', pluginKind: 'BertPanel1', value: {}, onChange: jest.fn() });
-    const editor = await screen.findByLabelText('BertPanel1 editor');
-    expect(editor).toBeInTheDocument();
+  describe('Panel plugin', () => {
+    it('should show query and json editors', async () => {
+      renderComponent({ pluginType: 'Panel', pluginKind: 'BertPanel1', value: {}, onChange: jest.fn() });
+      const queryTab = await screen.findByLabelText('Query');
+      expect(queryTab).toBeInTheDocument();
+      const editor = await screen.findByLabelText('BertPanel1 editor');
+      expect(editor).toBeInTheDocument();
+      const jsonEditor = await screen.findByLabelText('JSON');
+      expect(jsonEditor).toBeInTheDocument();
+    });
+
+    it('should display other options editor components', async () => {
+      renderComponent({ pluginType: 'Panel', pluginKind: 'BertPanel2', value: {}, onChange: jest.fn() });
+      const settingsTab = await screen.findByLabelText('Settings');
+      expect(settingsTab).toBeInTheDocument();
+      const editor = await screen.findByLabelText('BertPanel2 editor');
+      expect(editor).toBeInTheDocument();
+      const customTab = await screen.findByLabelText('Custom Tab');
+      expect(customTab).toBeInTheDocument();
+      const jsonEditor = await screen.findByLabelText('JSON');
+      expect(jsonEditor).toBeInTheDocument();
+    });
   });
 
   it('propagates value changes', async () => {

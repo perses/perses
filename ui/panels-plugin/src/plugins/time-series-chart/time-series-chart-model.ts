@@ -13,6 +13,7 @@
 
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ThresholdOptions } from '../../model/thresholds';
 
 /**
@@ -26,6 +27,8 @@ export interface TimeSeriesChartOptions {
   thresholds?: ThresholdOptions;
   visual?: VisualOptions;
 }
+
+export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
 export interface YAxisOptions {
   show?: boolean;
