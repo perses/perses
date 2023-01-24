@@ -29,7 +29,7 @@ Tests are run during local development using the configuration in `local.playwri
 
 ### In CI
 
-Tests are automatically run in CI using the workflow configured in `e2e.yml` with the configuration in `ci.playwright.config.ts`. In this case, Playwright automatically starts up and waits for the development servers.
+Tests are automatically run in CI using the workflow configured in `e2e.yml` with the configuration in `ci.playwright.config.ts`. In this case, Playwright automatically starts up and waits for the development servers. 
 
 ## Writing tests
 

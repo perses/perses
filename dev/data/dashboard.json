@@ -1694,5 +1694,179 @@
         }
       ]
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "MarkdownPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-24T03:17:08.454524Z",
+      "version": 2,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "Code": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Code",
+              "description": "Markdown code formatting"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "`Inline code` with backticks\n\n```\n# code block\nprint '3 backticks or'\nprint 'indent 4 spaces'\n```"
+              }
+            }
+          }
+        },
+        "Links": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Links",
+              "description": "Markdown links"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "\n[Link](http://a.com)\n\n[Link][1]\n\n[1]: http://b.org"
+              }
+            }
+          }
+        },
+        "Lists": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Lists",
+              "description": "Markdown lists"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "* List\n* List\n* List\n\n- List\n- List\n- List\n\n1. One\n2. Two\n3. Three\n\n1) One\n2) Two\n3) Three"
+              }
+            }
+          }
+        },
+        "Tables": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Tables",
+              "description": "Markdown table"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "| Name | Data |\n| -- | -- |\n| Row 1 | Hi |\n| Row 2 | Hi |"
+              }
+            }
+          }
+        },
+        "Text": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Text",
+              "description": "Markdown text formatting"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "Unformatted\n\n*Italic*\n\n_Italic_\n\n**Bold**\n\n__Bold__\n\n> Blockquote\n\n---\n\n***"
+              }
+            }
+          }
+        },
+        "Headings": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Headings",
+              "description": "Markdown headings"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "# First header\n\nFirst header\n=========\n\n## Second header\n\nSecond header\n---------\n\n### Third header\n\n#### Fourth header"
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Headings"
+                }
+              },
+              {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Text"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 4,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Code"
+                }
+              },
+              {
+                "x": 20,
+                "y": 0,
+                "width": 4,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Tables"
+                }
+              },
+              {
+                "x": 16,
+                "y": 0,
+                "width": 4,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Lists"
+                }
+              },
+              {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Links"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 ]
