@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package database
+package databaseFile
 
 import (
 	"encoding/json"
@@ -22,79 +22,65 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-	"time"
 
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/config"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	modelAPI "github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"gopkg.in/yaml.v2"
 )
 
-type DAO interface {
-	Create(key string, entity interface{}) error
-	Upsert(key string, entity interface{}) error
-	Get(key string, entity interface{}) error
-	Query(query etcd.Query, slice interface{}) error
-	Delete(key string) error
-	HealthCheck() bool
-}
-
-func New(conf config.Database) (DAO, error) {
-	if conf.Etcd != nil {
-		timeout := time.Duration(conf.Etcd.RequestTimeoutSeconds) * time.Second
-		etcdClient, err := etcd.NewETCDClient(*conf.Etcd)
-		if err != nil {
-			return nil, err
-		}
-		return etcd.NewDAO(etcdClient, timeout), nil
+func generateKey(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
+	switch m := metadata.(type) {
+	case *modelV1.ProjectMetadata:
+		return fmt.Sprintf("/%s/%s/%s", modelV1.PluralKindMap[kind], m.Project, m.Name), nil
+	case *modelV1.Metadata:
+		return fmt.Sprintf("/%s/%s", modelV1.PluralKindMap[kind], m.Name), nil
 	}
-	if conf.File != nil {
-		return &fileDAO{
-			folder:    conf.File.Folder,
-			extension: conf.File.FileExtension,
-		}, nil
+	return "", fmt.Errorf("metadata %T not managed", metadata)
+}
+
+type DAO struct {
+	databaseModel.DAO
+	Folder    string
+	Extension config.FileExtension
+}
+
+func (d *DAO) Create(entity modelAPI.Entity) error {
+	key, generateKeyErr := generateKey(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	if generateKeyErr != nil {
+		return generateKeyErr
 	}
-	return nil, fmt.Errorf("no dao defined")
-}
-
-type fileDAO struct {
-	DAO
-	folder    string
-	extension config.FileExtension
-}
-
-func (d *fileDAO) Create(key string, entity interface{}) error {
 	filePath := d.buildPath(key)
 	if _, err := os.Stat(filePath); err == nil {
 		// The file exists, so we should return a conflict error.
-		// Let's use the etcd error so the caller doesn't have to handle multiple different kind of error
-		// It's an easy hack let's say, but a bit crappy. We should probably at some point defined a higher error to wrap the one coming from the package etcd.
-		return &etcd.Error{Key: key, Code: etcd.ErrorCodeKeyConflict}
+		return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeConflict}
 	}
-	return d.Upsert(key, entity)
+	return d.upsert(key, entity)
 }
-func (d *fileDAO) Upsert(key string, entity interface{}) error {
-	filePath := d.buildPath(key)
-	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {
-		return err
+func (d *DAO) Upsert(entity modelAPI.Entity) error {
+	key, generateKeyErr := generateKey(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	if generateKeyErr != nil {
+		return generateKeyErr
 	}
-	data, err := d.marshal(entity)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filePath, data, 0600)
+	return d.upsert(key, entity)
 }
-func (d *fileDAO) Get(key string, entity interface{}) error {
+func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
+	key, generateKeyErr := generateKey(kind, metadata)
+	if generateKeyErr != nil {
+		return generateKeyErr
+	}
 	filePath := d.buildPath(key)
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return &etcd.Error{Key: key, Code: etcd.ErrorCodeKeyNotFound}
+			return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
 		}
 		return err
 	}
 	return d.unmarshal(data, entity)
 }
-func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
+func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	typeParameter := reflect.TypeOf(slice)
 	result := reflect.ValueOf(slice)
 	// to avoid any miss usage when using this method, slice should be a pointer to a slice.
@@ -114,7 +100,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	if typeParameter.Kind() != reflect.Slice {
 		return fmt.Errorf("slice in parameter is not actually a slice but a %q", typeParameter.Kind())
 	}
-	q, err := query.Build()
+	q, err := buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
@@ -123,7 +109,7 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	// Or it's the partial name, and it should only be used to filter the list of the document.
 	// For example: `/projects/per`.
 	// `/projects` is the folder we are looking for, `per` is the partial name.
-	folder := path.Join(d.folder, q)
+	folder := path.Join(d.Folder, q)
 	prefix := ""
 	// An easy way to achieve is to:
 	// 1. try if the path exist with the given query.
@@ -147,7 +133,6 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 	}
 	if len(files) <= 0 {
 		// in case the result is empty, let's initialize the slice just to avoid returning a nil slice
-		// TODO we should look inside the nested folder, that could make sense when we want to list all dashboards across project
 		sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
 	}
 	for _, file := range files {
@@ -169,47 +154,70 @@ func (d *fileDAO) Query(query etcd.Query, slice interface{}) error {
 		if unmarshalErr := d.unmarshal(data, obj); err != nil {
 			return unmarshalErr
 		}
-		sliceElem.Set(reflect.Append(sliceElem, value))
+		if typeParameter.Elem().Kind() != reflect.Ptr {
+			// In case the type of the slice element is not a pointer,
+			// we should return the value of the pointer created in the previous step.
+			sliceElem.Set(reflect.Append(sliceElem, value.Elem()))
+		} else {
+			sliceElem.Set(reflect.Append(sliceElem, value))
+		}
+
 	}
 	// at the end reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
 	result.Elem().Set(sliceElem)
 	return nil
 }
-func (d *fileDAO) Delete(key string) error {
+func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
+	key, generateKeyErr := generateKey(kind, metadata)
+	if generateKeyErr != nil {
+		return generateKeyErr
+	}
 	filePath := d.buildPath(key)
 	err := os.Remove(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return &etcd.Error{Key: key, Code: etcd.ErrorCodeKeyNotFound}
+			return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
 		}
 		return err
 	}
 	return nil
 }
 
-func (d *fileDAO) HealthCheck() bool {
+func (d *DAO) HealthCheck() bool {
 	return true
 }
 
-func (d *fileDAO) buildPath(key string) string {
-	return path.Join(d.folder, fmt.Sprintf("%s.%s", key, d.extension))
+func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
+	filePath := d.buildPath(key)
+	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {
+		return err
+	}
+	data, err := d.marshal(entity)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filePath, data, 0600)
 }
 
-func (d *fileDAO) unmarshal(data []byte, entity interface{}) error {
-	if d.extension == config.JSONExtension {
+func (d *DAO) buildPath(key string) string {
+	return path.Join(d.Folder, fmt.Sprintf("%s.%s", key, d.Extension))
+}
+
+func (d *DAO) unmarshal(data []byte, entity interface{}) error {
+	if d.Extension == config.JSONExtension {
 		return json.Unmarshal(data, entity)
 	}
 	return yaml.Unmarshal(data, entity)
 }
 
-func (d *fileDAO) marshal(entity interface{}) ([]byte, error) {
-	if d.extension == config.JSONExtension {
+func (d *DAO) marshal(entity interface{}) ([]byte, error) {
+	if d.Extension == config.JSONExtension {
 		return json.Marshal(entity)
 	}
 	return yaml.Marshal(entity)
 }
 
-func (d *fileDAO) visit(rootPath string, prefix string) ([]string, error) {
+func (d *DAO) visit(rootPath string, prefix string) ([]string, error) {
 	var result []string
 	err := filepath.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -219,7 +227,7 @@ func (d *fileDAO) visit(rootPath string, prefix string) ([]string, error) {
 			return nil
 		}
 		fileName := info.Name()
-		if filepath.Ext(fileName) != fmt.Sprintf(".%s", d.extension) {
+		if filepath.Ext(fileName) != fmt.Sprintf(".%s", d.Extension) {
 			// skip every file that doesn't have the correct extension
 			return nil
 		}

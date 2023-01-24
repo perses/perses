@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/shared/database"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 )
 
 type PersistenceManager interface {
@@ -36,7 +37,7 @@ type PersistenceManager interface {
 	GetFolder() folder.DAO
 	GetGlobalDatasource() globaldatasource.DAO
 	GetHealth() health.DAO
-	GetPersesDAO() database.DAO
+	GetPersesDAO() databaseModel.DAO
 	GetProject() project.DAO
 }
 
@@ -47,7 +48,7 @@ type persistence struct {
 	folder           folder.DAO
 	globalDatasource globaldatasource.DAO
 	health           health.DAO
-	perses           database.DAO
+	perses           databaseModel.DAO
 	project          project.DAO
 }
 
@@ -93,7 +94,7 @@ func (p *persistence) GetHealth() health.DAO {
 	return p.health
 }
 
-func (p *persistence) GetPersesDAO() database.DAO {
+func (p *persistence) GetPersesDAO() databaseModel.DAO {
 	return p.perses
 }
 

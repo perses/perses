@@ -14,45 +14,42 @@
 package dashboard
 
 import (
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
-	"github.com/perses/perses/internal/api/shared/database"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type dao struct {
 	dashboard.DAO
-	client database.DAO
+	client databaseModel.DAO
+	kind   v1.Kind
 }
 
-func NewDAO(persesDAO database.DAO) dashboard.DAO {
+func NewDAO(persesDAO databaseModel.DAO) dashboard.DAO {
 	return &dao{
 		client: persesDAO,
+		kind:   v1.KindDashboard,
 	}
 }
 
 func (d *dao) Create(entity *v1.Dashboard) error {
-	key := entity.GenerateID()
-	return d.client.Create(key, entity)
+	return d.client.Create(entity)
 }
 
 func (d *dao) Update(entity *v1.Dashboard) error {
-	key := entity.GenerateID()
-	return d.client.Upsert(key, entity)
+	return d.client.Upsert(entity)
 }
 
 func (d *dao) Delete(project string, name string) error {
-	key := v1.GenerateDashboardID(project, name)
-	return d.client.Delete(key)
+	return d.client.Delete(d.kind, v1.NewProjectMetadata(project, name))
 }
 
 func (d *dao) Get(project string, name string) (*v1.Dashboard, error) {
-	key := v1.GenerateDashboardID(project, name)
 	entity := &v1.Dashboard{}
-	return entity, d.client.Get(key, entity)
+	return entity, d.client.Get(d.kind, v1.NewProjectMetadata(project, name), entity)
 }
 
-func (d *dao) List(q etcd.Query) ([]*v1.Dashboard, error) {
+func (d *dao) List(q databaseModel.Query) ([]*v1.Dashboard, error) {
 	var result []*v1.Dashboard
 	err := d.client.Query(q, &result)
 	return result, err

@@ -14,16 +14,13 @@
 package v1
 
 import (
-	"fmt"
 	"time"
 )
 
-func generateProjectResourceID(pluralKind string, project string, name string) string {
-	if len(project) == 0 {
-		// it's used when we query a list of object. It can happen that the project is empty.
-		return fmt.Sprintf("/%s", pluralKind)
+func NewMetadata(name string) *Metadata {
+	return &Metadata{
+		Name: name,
 	}
-	return fmt.Sprintf("/%s/%s/%s", pluralKind, project, name)
 }
 
 type Metadata struct {
@@ -50,6 +47,15 @@ func (m *Metadata) Update(previous Metadata) {
 
 func (m *Metadata) GetName() string {
 	return m.Name
+}
+
+func NewProjectMetadata(project string, name string) *ProjectMetadata {
+	return &ProjectMetadata{
+		Metadata: Metadata{
+			Name: name,
+		},
+		Project: project,
+	}
 }
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.

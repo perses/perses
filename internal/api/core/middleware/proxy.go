@@ -23,9 +23,9 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/sirupsen/logrus"
@@ -79,7 +79,7 @@ func getGlobalDatasourceAndPath(dao globaldatasource.DAO, requestPath string) (v
 	// getting the datasource object
 	dts, err := dao.Get(datasourceName)
 	if err != nil {
-		if etcd.IsKeyNotFound(err) {
+		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", datasourceName)
 			return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
@@ -105,7 +105,7 @@ func getLocalDatasourceAndPath(dao datasource.DAO, requestPath string) (v1.Datas
 	// getting the datasource object
 	dts, err := dao.Get(projectName, datasourceName)
 	if err != nil {
-		if etcd.IsKeyNotFound(err) {
+		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", datasourceName, projectName)
 			return v1.DatasourceSpec{}, "", echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", datasourceName))
 		}
