@@ -28,13 +28,13 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "0.21.1",
-    "@perses-dev/core": "0.21.1",
-    "@perses-dev/plugin-system": "0.21.1",
-    "date-fns": "^2.28.0",
-    "dompurify": "^2.4.0",
+    "@perses-dev/components": "0.22.0",
+    "@perses-dev/core": "0.22.0",
+    "@perses-dev/plugin-system": "0.22.0",
+    "date-fns": "^2.29.3",
+    "dompurify": "^2.4.3",
     "echarts": "^5.4.1",
-    "immer": "^9.0.15",
+    "immer": "^9.0.18",
     "lodash-es": "^4.17.21",
     "marked": "^4.2.12",
     "mathjs": "^10.6.4"
@@ -49,7 +49,7 @@
     "plugin.json"
   ],
   "devDependencies": {
-    "@types/dompurify": "^2.3.4",
-    "@types/marked": "^4.0.7"
+    "@types/dompurify": "^2.4.0",
+    "@types/marked": "^4.0.8"
   }
 }
