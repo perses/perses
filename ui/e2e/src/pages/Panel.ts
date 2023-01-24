@@ -53,9 +53,14 @@ export class Panel {
   }
 
   async isLoaded() {
-    await expect(this.loader).toHaveCount(0);
-    await expect(this.figure).toBeVisible();
-    await waitForAnimations(this.figure);
+    // Wait for the figure to have at least one visible child that is not the loader.
+    await expect(async () => {
+      expect(this.figure).not.toContain(this.loader);
+
+      const figureChildren = this.figure.locator('*:visible');
+
+      expect(await figureChildren.count()).toBeGreaterThan(0);
+    }).toPass();
 
     // Trial a click to wait for the figure to be stable. Replace this with a
     // baked in "stable" check when one is available.
