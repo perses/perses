@@ -88,6 +88,14 @@ export class DashboardPage {
     this.alert = page.getByRole('alert');
   }
 
+  async isDarkMode() {
+    await expect(this.themeToggle).toBeChecked();
+  }
+
+  async isLightMode() {
+    await expect(this.themeToggle).not.toBeChecked();
+  }
+
   async toggleTheme() {
     await this.themeToggle.click();
   }

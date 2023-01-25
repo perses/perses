@@ -29,6 +29,8 @@ test.describe('Dashboard: Markdown Panel', () => {
 
   ['Headings', 'Text', 'Links', 'Code', 'Lists', 'Tables'].forEach((panelName) => {
     test(`displays ${panelName} as expected`, async ({ page, dashboardPage }) => {
+      await dashboardPage.isLightMode();
+
       const markdownPanel = dashboardPage.getPanel(panelName);
       await markdownPanel.isLoaded();
 
@@ -38,6 +40,7 @@ test.describe('Dashboard: Markdown Panel', () => {
       });
 
       await dashboardPage.toggleTheme();
+      await dashboardPage.isDarkMode();
 
       await markdownPanel.isLoaded();
       await happoPlaywright.screenshot(page, markdownPanel.container, {
