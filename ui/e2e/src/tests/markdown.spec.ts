@@ -27,14 +27,14 @@ test.describe('Dashboard: Markdown Panel', () => {
     await happoPlaywright.finish();
   });
 
-  ['Headings', 'Text', 'Links', 'Code', 'Lists', 'Tables'].forEach((name) => {
-    test(`displays ${name} as expected`, async ({ page, dashboardPage }) => {
-      const markdownPanel = dashboardPage.getPanel(name);
+  ['Headings', 'Text', 'Links', 'Code', 'Lists', 'Tables'].forEach((panelName) => {
+    test(`displays ${panelName} as expected`, async ({ page, dashboardPage }) => {
+      const markdownPanel = dashboardPage.getPanel(panelName);
       await markdownPanel.isLoaded();
 
       await happoPlaywright.screenshot(page, markdownPanel.container, {
         component: 'Markdown Panel',
-        variant: `${name} [light]`,
+        variant: `${panelName} [light]`,
       });
 
       await dashboardPage.toggleTheme();
@@ -42,7 +42,7 @@ test.describe('Dashboard: Markdown Panel', () => {
       await markdownPanel.isLoaded();
       await happoPlaywright.screenshot(page, markdownPanel.container, {
         component: 'Markdown Panel',
-        variant: `${name} [dark]`,
+        variant: `${panelName} [dark]`,
       });
     });
   });
