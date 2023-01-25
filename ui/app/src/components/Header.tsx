@@ -173,7 +173,11 @@ export default function Header(): JSX.Element {
             </IconButton>
           </Tooltip>
           <Tooltip title="Theme">
-            <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} />
+            <Switch
+              checked={isDarkModeEnabled}
+              onChange={handleDarkModeChange}
+              inputProps={{ 'aria-label': 'Theme' }}
+            />
           </Tooltip>
         </Stack>
       </Toolbar>

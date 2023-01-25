@@ -32,6 +32,8 @@ type EditMarkdownPanelConfig = {
 export class DashboardPage {
   readonly page: Page;
 
+  readonly themeToggle: Locator;
+
   readonly toolbar: Locator;
   readonly editButton: Locator;
   readonly cancelButton: Locator;
@@ -56,6 +58,8 @@ export class DashboardPage {
 
   constructor(page: Page) {
     this.page = page;
+
+    this.themeToggle = page.getByRole('checkbox', { name: 'Theme' });
 
     this.toolbar = page.getByTestId('dashboard-toolbar');
     this.editButton = this.toolbar.getByRole('button', { name: 'Edit' });
@@ -82,6 +86,18 @@ export class DashboardPage {
     this.variableEditor = page.getByTestId('variable-editor');
 
     this.alert = page.getByRole('alert');
+  }
+
+  async isDarkMode() {
+    await expect(this.themeToggle).toBeChecked();
+  }
+
+  async isLightMode() {
+    await expect(this.themeToggle).not.toBeChecked();
+  }
+
+  async toggleTheme() {
+    await this.themeToggle.click();
   }
 
   async startEditing() {

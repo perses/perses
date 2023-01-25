@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator } from '@playwright/test';
+import { Locator, expect } from '@playwright/test';
 
 type resizePanelOptions = {
   width: number;
@@ -29,6 +29,9 @@ export class Panel {
 
   readonly resizeHandle: Locator;
 
+  readonly figure: Locator;
+  readonly loader: Locator;
+
   constructor(container: Locator) {
     this.container = container;
 
@@ -43,6 +46,27 @@ export class Panel {
     // The classname selector here is not ideal, but it's all that is available
     // because this lives deeper in another library.
     this.resizeHandle = this.container.locator('..').locator('.react-resizable-handle');
+
+    this.figure = this.container.getByRole('figure');
+    this.loader = this.container.getByLabel('Loading');
+  }
+
+  async isLoaded() {
+    // Wait for the figure to have at least one visible child that is not the loader.
+    await expect(async () => {
+      expect(this.figure).not.toContain(this.loader);
+
+      const figureChildren = this.figure.locator('*:visible');
+
+      expect(await figureChildren.count()).toBeGreaterThan(0);
+    }).toPass();
+
+    // Trial a click to wait for the figure to be stable. Replace this with a
+    // baked in "stable" check when one is available.
+    // https://github.com/microsoft/playwright/issues/15195#issuecomment-1176370571
+    await this.figure.click({
+      trial: true,
+    });
   }
 
   async startEditing() {
