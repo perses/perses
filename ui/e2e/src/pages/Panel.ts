@@ -23,6 +23,7 @@ type resizePanelOptions = {
  */
 export class Panel {
   readonly container: Locator;
+  readonly parent: Locator;
 
   readonly editButton: Locator;
   readonly deleteButton: Locator;
@@ -34,6 +35,10 @@ export class Panel {
 
   constructor(container: Locator) {
     this.container = container;
+
+    // Useful for visual testing because the parent contains the height and
+    // width setting.
+    this.parent = this.container.locator('..');
 
     this.deleteButton = this.container.getByRole('button', {
       name: 'delete panel',
@@ -48,17 +53,18 @@ export class Panel {
     this.resizeHandle = this.container.locator('..').locator('.react-resizable-handle');
 
     this.figure = this.container.getByRole('figure');
-    this.loader = this.container.getByLabel('Loading');
+    this.loader = this.container.locator('[aria-label*=Loading]');
   }
 
   async isLoaded() {
     // Wait for the figure to have at least one visible child that is not the loader.
     await expect(async () => {
-      expect(this.figure).not.toContain(this.loader);
+      await expect(this.loader).toHaveCount(0);
 
       const figureChildren = this.figure.locator('*:visible');
-
       expect(await figureChildren.count()).toBeGreaterThan(0);
+
+      await expect(this.loader).toHaveCount(0);
     }).toPass();
 
     // Trial a click to wait for the figure to be stable. Replace this with a
