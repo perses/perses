@@ -32,9 +32,10 @@ test.describe('Dashboard: Markdown Panel', () => {
       await dashboardPage.isLightMode();
 
       const markdownPanel = dashboardPage.getPanel(panelName);
+      await markdownPanel.container.scrollIntoViewIfNeeded();
       await markdownPanel.isLoaded();
 
-      await happoPlaywright.screenshot(page, markdownPanel.container, {
+      await happoPlaywright.screenshot(page, markdownPanel.parent, {
         component: 'Markdown Panel',
         variant: `${panelName} [light]`,
       });
@@ -42,8 +43,9 @@ test.describe('Dashboard: Markdown Panel', () => {
       await dashboardPage.toggleTheme();
       await dashboardPage.isDarkMode();
 
+      await markdownPanel.container.scrollIntoViewIfNeeded();
       await markdownPanel.isLoaded();
-      await happoPlaywright.screenshot(page, markdownPanel.container, {
+      await happoPlaywright.screenshot(page, markdownPanel.parent, {
         component: 'Markdown Panel',
         variant: `${panelName} [dark]`,
       });
