@@ -12,4 +12,6 @@
 // limitations under the License.
 
 export * from './animationUtils';
+export * from './canvasUtils';
 export * from './formUtils';
+export * from './mockTimeSeries';

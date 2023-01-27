@@ -26,6 +26,20 @@ type EditMarkdownPanelConfig = {
   groupName?: string;
 };
 
+type MockQueryRangeQueryConfig = {
+  query: string;
+  response: {
+    status?: 200;
+    body: string;
+  };
+};
+
+type MockQueryRangeConfig = {
+  queries: MockQueryRangeQueryConfig[];
+};
+
+type ThemeName = 'light' | 'dark';
+
 /**
  * Perses App dashboard page.
  */
@@ -88,18 +102,6 @@ export class DashboardPage {
     this.alert = page.getByRole('alert');
   }
 
-  async isDarkMode() {
-    await expect(this.themeToggle).toBeChecked();
-  }
-
-  async isLightMode() {
-    await expect(this.themeToggle).not.toBeChecked();
-  }
-
-  async toggleTheme() {
-    await this.themeToggle.click();
-  }
-
   async startEditing() {
     await this.editButton.click();
     await this.cancelButton.isVisible();
@@ -115,6 +117,36 @@ export class DashboardPage {
     return this.page.getByRole('dialog', {
       name: name,
     });
+  }
+
+  /**
+   * THEME HELPERS
+   */
+  async isDarkMode() {
+    await expect(this.themeToggle).toBeChecked();
+  }
+
+  async isLightMode() {
+    await expect(this.themeToggle).not.toBeChecked();
+  }
+
+  async toggleTheme() {
+    await this.themeToggle.click();
+  }
+
+  /**
+   * Runs the specified callback function for each theme on the page. Useful
+   * for taking screenshots. Ensure that the callback includes any setup needed
+   * before taking a screenshot because the dashboard reloads on changing the
+   * theme.
+   */
+  async forEachTheme(callback: (themeName: ThemeName) => Promise<void>) {
+    await this.isLightMode();
+    await callback('light');
+
+    await this.toggleTheme();
+    await this.isDarkMode();
+    await callback('dark');
   }
 
   /**
@@ -229,5 +261,36 @@ export class DashboardPage {
 
   getVariableEditor() {
     return new VariableEditor(this.variableEditor);
+  }
+
+  /**
+   * MOCKING NETWORK REQUESTS
+   */
+
+  /**
+   * Mock responses from '/api/v1/query_range' by the query parameter in the
+   * request. Useful for stabilizing charts when taking screenshots.
+   */
+  async mockQueryRangeRequests({ queries }: MockQueryRangeConfig) {
+    // Mock data response, so we can make assertions on consistent response data.
+    await this.page.route('**/api/v1/query_range', (route) => {
+      const request = route.request();
+      const requestPostData = request.postDataJSON();
+
+      const requestQuery = typeof requestPostData === 'object' ? requestPostData['query'] : undefined;
+      const mockQuery = queries.find((mockQueryConfig) => mockQueryConfig.query === requestQuery);
+
+      if (mockQuery) {
+        // Found a config for mocking this query. Return the mock response.
+        route.fulfill(mockQuery.response);
+      } else {
+        // No config found. Let the request continue normally.
+        route.continue();
+      }
+    });
+  }
+
+  async cleanupMockRequests() {
+    await this.page.unroute('**/api/v1/query_range');
   }
 }

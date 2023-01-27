@@ -31,6 +31,7 @@ export class Panel {
   readonly resizeHandle: Locator;
 
   readonly figure: Locator;
+  readonly canvas: Locator;
   readonly loader: Locator;
 
   constructor(container: Locator) {
@@ -53,6 +54,7 @@ export class Panel {
     this.resizeHandle = this.container.locator('..').locator('.react-resizable-handle');
 
     this.figure = this.container.getByRole('figure');
+    this.canvas = this.container.locator('canvas');
     this.loader = this.container.locator('[aria-label*=Loading]');
   }
 

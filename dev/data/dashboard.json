@@ -1868,5 +1868,223 @@
         }
       ]
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "TimeSeriesChartPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-25T17:43:56.745494Z",
+      "version": 3,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "SingleLine": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Line",
+              "description": "Time series chart with a single line"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 9,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/SingleLine"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "GaugeChartPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-26T17:29:46.991965Z",
+      "version": 5,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "SingleGauge": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Gauge",
+              "description": "Gauge chart with a single gauge"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "Mean",
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "100 - ((node_memory_MemAvailable_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"} * 100) / node_memory_MemTotal_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"})"
+                      }
+                    }
+                  }
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0.8
+                    },
+                    {
+                      "value": 0.9
+                    }
+                  ]
+                },
+                "unit": {
+                  "kind": "Percent"
+                }
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 9,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/SingleGauge"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "StatChartPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-27T00:35:26.333638Z",
+      "version": 8,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "SimpleStat": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Simple Stat",
+              "description": "Stat chart with a single value"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "calculation": "Mean",
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "prometheus_http_requests_total{instance=\"demo.do.prometheus.io:9090\",code!=\"200\"}"
+                      }
+                    }
+                  }
+                },
+                "sparkline": {},
+                "unit": {
+                  "abbreviate": false,
+                  "kind": "Decimal"
+                }
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 9,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/SimpleStat"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 ]
