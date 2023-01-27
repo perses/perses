@@ -9,7 +9,7 @@
     "e2e:debug": "npm run e2e:local -- --debug",
     "e2e:report": "playwright show-report",
     "e2e:watch": "chokidar src/tests/**/**.ts -c 'playwright test {path}'",
-    "e2e:ci": "npx happo-e2e -- playwright test --config=src/config/ci.playwright.config.ts",
+    "e2e:ci": "HAPPO_DOWNLOAD_ALL=true npx happo-e2e -- playwright test --config=src/config/ci.playwright.config.ts",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix"
   },
