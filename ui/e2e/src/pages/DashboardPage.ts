@@ -38,6 +38,8 @@ type MockQueryRangeConfig = {
   queries: MockQueryRangeQueryConfig[];
 };
 
+type ThemeName = 'light' | 'dark';
+
 /**
  * Perses App dashboard page.
  */
@@ -100,18 +102,6 @@ export class DashboardPage {
     this.alert = page.getByRole('alert');
   }
 
-  async isDarkMode() {
-    await expect(this.themeToggle).toBeChecked();
-  }
-
-  async isLightMode() {
-    await expect(this.themeToggle).not.toBeChecked();
-  }
-
-  async toggleTheme() {
-    await this.themeToggle.click();
-  }
-
   async startEditing() {
     await this.editButton.click();
     await this.cancelButton.isVisible();
@@ -127,6 +117,36 @@ export class DashboardPage {
     return this.page.getByRole('dialog', {
       name: name,
     });
+  }
+
+  /**
+   * THEME HELPERS
+   */
+  async isDarkMode() {
+    await expect(this.themeToggle).toBeChecked();
+  }
+
+  async isLightMode() {
+    await expect(this.themeToggle).not.toBeChecked();
+  }
+
+  async toggleTheme() {
+    await this.themeToggle.click();
+  }
+
+  /**
+   * Runs the specified callback function for each theme on the page. Useful
+   * for taking screenshots. Ensure that the callback includes any setup needed
+   * before taking a screenshot because the dashboard reloads on changing the
+   * theme.
+   */
+  async forEachTheme(callback: (themeName: ThemeName) => Promise<void>) {
+    await this.isLightMode();
+    await callback('light');
+
+    await this.toggleTheme();
+    await this.isDarkMode();
+    await callback('dark');
   }
 
   /**

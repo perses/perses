@@ -58,23 +58,14 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
       ],
     });
 
-    await dashboardPage.isLightMode();
+    await dashboardPage.forEachTheme(async (themeName) => {
+      const panel = dashboardPage.getPanel('Single Line');
+      await panel.isLoaded();
 
-    const panel = dashboardPage.getPanel('Single Line');
-    await panel.isLoaded();
-
-    await happoPlaywright.screenshot(page, panel.parent, {
-      component: 'Time Series Chart Panel',
-      variant: 'Single Line [light]',
-    });
-
-    await dashboardPage.toggleTheme();
-    await dashboardPage.isDarkMode();
-
-    await panel.isLoaded();
-    await happoPlaywright.screenshot(page, panel.parent, {
-      component: 'Time Series Chart Panel',
-      variant: 'Single Line [dark]',
+      await happoPlaywright.screenshot(page, panel.parent, {
+        component: 'Time Series Chart Panel',
+        variant: `Single Line [${themeName}]`,
+      });
     });
   });
 });

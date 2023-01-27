@@ -29,25 +29,15 @@ test.describe('Dashboard: Markdown Panel', () => {
 
   ['Headings', 'Text', 'Links', 'Code', 'Lists', 'Tables'].forEach((panelName) => {
     test(`displays ${panelName} as expected`, async ({ page, dashboardPage }) => {
-      await dashboardPage.isLightMode();
+      await dashboardPage.forEachTheme(async (themeName) => {
+        const markdownPanel = dashboardPage.getPanel(panelName);
+        await markdownPanel.container.scrollIntoViewIfNeeded();
+        await markdownPanel.isLoaded();
 
-      const markdownPanel = dashboardPage.getPanel(panelName);
-      await markdownPanel.container.scrollIntoViewIfNeeded();
-      await markdownPanel.isLoaded();
-
-      await happoPlaywright.screenshot(page, markdownPanel.parent, {
-        component: 'Markdown Panel',
-        variant: `${panelName} [light]`,
-      });
-
-      await dashboardPage.toggleTheme();
-      await dashboardPage.isDarkMode();
-
-      await markdownPanel.container.scrollIntoViewIfNeeded();
-      await markdownPanel.isLoaded();
-      await happoPlaywright.screenshot(page, markdownPanel.parent, {
-        component: 'Markdown Panel',
-        variant: `${panelName} [dark]`,
+        await happoPlaywright.screenshot(page, markdownPanel.parent, {
+          component: 'Markdown Panel',
+          variant: `${panelName} [${themeName}]`,
+        });
       });
     });
   });

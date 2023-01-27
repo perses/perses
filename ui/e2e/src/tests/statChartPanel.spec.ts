@@ -58,23 +58,14 @@ test.describe('Dashboard: Stat Chart Panel', () => {
       ],
     });
 
-    await dashboardPage.isLightMode();
+    await dashboardPage.forEachTheme(async (themeName) => {
+      const panel = dashboardPage.getPanel('Simple Stat');
+      await panel.isLoaded();
 
-    const panel = dashboardPage.getPanel('Simple Stat');
-    await panel.isLoaded();
-
-    await happoPlaywright.screenshot(page, panel.parent, {
-      component: 'Stat Chart Panel',
-      variant: 'Single Stat [light]',
-    });
-
-    await dashboardPage.toggleTheme();
-    await dashboardPage.isDarkMode();
-
-    await panel.isLoaded();
-    await happoPlaywright.screenshot(page, panel.parent, {
-      component: 'Stat Chart Panel',
-      variant: 'Simple Stat [dark]',
+      await happoPlaywright.screenshot(page, panel.parent, {
+        component: 'Stat Chart Panel',
+        variant: `Single Stat [${themeName}]`,
+      });
     });
   });
 });

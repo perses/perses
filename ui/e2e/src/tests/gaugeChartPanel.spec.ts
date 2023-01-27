@@ -59,28 +59,16 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       ],
     });
 
-    await dashboardPage.isLightMode();
+    await dashboardPage.forEachTheme(async (themeName) => {
+      const panel = dashboardPage.getPanel('Single Gauge');
+      await panel.isLoaded();
+      // Wait for gauge animation to finish before taking a screenshot.
+      await waitForStableCanvas(panel.canvas);
 
-    const panel = dashboardPage.getPanel('Single Gauge');
-    await panel.isLoaded();
-    // Wait for gauge animation to finish before taking a screenshot.
-    await waitForStableCanvas(panel.canvas);
-
-    await happoPlaywright.screenshot(page, panel.parent, {
-      component: 'Gauge Chart Panel',
-      variant: 'Single Gauge [light]',
-    });
-
-    await dashboardPage.toggleTheme();
-    await dashboardPage.isDarkMode();
-
-    await panel.isLoaded();
-    // Wait for gauge animation to finish before taking a screenshot.
-    await waitForStableCanvas(panel.canvas);
-
-    await happoPlaywright.screenshot(page, panel.parent, {
-      component: 'Gauge Chart Panel',
-      variant: 'Single Gauge [dark]',
+      await happoPlaywright.screenshot(page, panel.parent, {
+        component: 'Gauge Chart Panel',
+        variant: `Single Gauge [${themeName}]`,
+      });
     });
   });
 });
