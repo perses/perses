@@ -22,6 +22,7 @@ export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 
 function createMarkdownPanelStyles(theme: Theme) {
   return {
+    padding: theme.spacing(1.5),
     // Make the content scrollable
     height: '100%',
     overflowY: 'auto',

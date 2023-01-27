@@ -100,10 +100,10 @@ export function Panel(props: PanelProps) {
           overflow: 'hidden',
           flexGrow: 1,
           margin: 0,
-          padding: (theme) => theme.spacing(panelPadding),
+          padding: 0,
           // Override MUI default style for last-child
           ':last-child': {
-            padding: (theme) => theme.spacing(panelPadding),
+            padding: 0,
           },
         }}
         ref={setContentElement}

@@ -110,11 +110,13 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     chartWidth = GAUGE_MIN_WIDTH;
   }
 
+  const hasMultipleCharts = gaugeData.length > 1;
+
   return (
     <Stack
       direction="row"
-      spacing={2}
-      justifyContent="left"
+      spacing={hasMultipleCharts ? 2 : 0}
+      justifyContent={hasMultipleCharts ? 'left' : 'center'}
       alignItems="center"
       sx={{
         // so scrollbar only shows when necessary

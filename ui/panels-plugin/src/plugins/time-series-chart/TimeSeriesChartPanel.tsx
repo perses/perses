@@ -16,7 +16,7 @@ import { merge } from 'lodash-es';
 import { useDeepMemo } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
-import { Box, Skeleton } from '@mui/material';
+import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   DEFAULT_LEGEND,
   EChartsDataFormat,
@@ -46,6 +46,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     spec: { queries, thresholds, y_axis },
     contentDimensions,
   } = props;
+  const theme = useTheme();
+
+  const contentPadding = parseInt(theme.spacing(1.5), 10);
+  const adjustedContentDimensions: typeof contentDimensions = contentDimensions
+    ? {
+        width: contentDimensions.width - contentPadding * 2,
+        height: contentDimensions.height - contentPadding * 2,
+      }
+    : undefined;
 
   // populate default 'position' and other future properties
   const legend =
@@ -69,7 +78,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
-  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
+  const suggestedStepMs = useSuggestedStepMs(adjustedContentDimensions?.width);
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
   const fetching = queryResults.some((result) => result.isFetching);
   const loading = queryResults.some((result) => result.isLoading);
@@ -177,7 +186,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
   }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading]);
 
-  if (contentDimensions === undefined) {
+  if (adjustedContentDimensions === undefined) {
     return null;
   }
 
@@ -185,13 +194,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={contentDimensions.width}
-        height={contentDimensions.height}
+        width={adjustedContentDimensions.width}
+        height={adjustedContentDimensions.height}
       >
         <Skeleton
           variant="text"
-          width={contentDimensions.width - 20}
-          height={contentDimensions.height / 2}
+          width={adjustedContentDimensions.width - 20}
+          height={adjustedContentDimensions.height / 2}
           aria-label="Loading..."
         />
       </Box>
@@ -209,8 +218,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  const legendWidth = legend && legend.position === 'Right' ? 200 : contentDimensions.width;
-  const legendHeight = legend && legend.position === 'Right' ? contentDimensions.height : 40;
+  const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
+  const legendHeight = legend && legend.position === 'Right' ? adjustedContentDimensions.height : 40;
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
@@ -226,10 +235,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   return (
-    <>
-      {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
+    <Box sx={{ padding: (theme) => theme.spacing(1.5), position: 'relative' }}>
+      {y_axis && y_axis.show && y_axis.label && (
+        <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
+      )}
       <LineChart
-        height={contentDimensions.height}
+        height={adjustedContentDimensions.height}
         data={graphData}
         yAxis={yAxis}
         unit={unit}
@@ -239,6 +250,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       {legend && graphData.legendItems && (
         <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
       )}
-    </>
+    </Box>
   );
 }

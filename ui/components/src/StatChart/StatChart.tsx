@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useMemo } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Stack } from '@mui/material';
 import { merge } from 'lodash-es';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
@@ -34,7 +34,6 @@ use([
   CanvasRenderer,
 ]);
 
-const PANEL_PADDING = 32;
 const MIN_VALUE_SIZE = 12;
 const MAX_VALUE_SIZE = 36;
 
@@ -114,30 +113,30 @@ export function StatChart(props: StatChartProps) {
   const valueSize = isLargePanel === true ? MAX_VALUE_SIZE : Math.min(width, height) / charactersAdjust;
 
   return (
-    <Box>
+    <Stack sx={{ height: '100%', width: '100%' }} spacing={0}>
       <Typography
         variant="h3"
         sx={(theme) => ({
           color: theme.palette.text.primary,
           fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
+          padding: (theme) => theme.spacing(1.5, 1.5, 0, 1.5),
         })}
       >
         {formattedValue}
       </Typography>
       {sparkline !== undefined && (
-        <EChart
-          sx={{
-            width: width + PANEL_PADDING, // allows sparkline to extend to edge of panel
-            height: height,
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-          }}
-          option={option}
-          theme={chartsTheme.echartsTheme}
-          renderer="svg"
-        />
+        <Box sx={{ flex: 1 }}>
+          <EChart
+            sx={{
+              width: '100%',
+              height: '100%',
+            }}
+            option={option}
+            theme={chartsTheme.echartsTheme}
+            renderer="svg"
+          />
+        </Box>
       )}
-    </Box>
+    </Stack>
   );
 }
