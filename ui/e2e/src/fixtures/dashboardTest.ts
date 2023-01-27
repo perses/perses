@@ -80,10 +80,12 @@ async function deleteDashboard(projectName: string, dashboardName: string) {
  * Generates a dashboard name to use when duplicating a dashboard for a given
  * test.
  */
-function generateDuplicateDashboardName(dashboardName: string, testTitle: string) {
+function generateDuplicateDashboardName(dashboardName: string, testTitle: string, retry: number) {
   // Replaces any characters that are not allowed in dashboard names with
   // underscores.
-  return dashboardName + '__' + testTitle.replace(/[^a-zA-Z0-9_.:-]+/g, '_');
+  const normalizedTitle = testTitle.replace(/[^a-zA-Z0-9_.:-]+/g, '_');
+
+  return [dashboardName, normalizedTitle, retry].join('__');
 }
 
 /**
@@ -97,7 +99,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     let testDashboardName: string = dashboardName;
 
     if (modifiesDashboard) {
-      testDashboardName = generateDuplicateDashboardName(dashboardName, testInfo.title);
+      testDashboardName = generateDuplicateDashboardName(dashboardName, testInfo.title, testInfo.retry);
       await duplicateDashboard(projectName, dashboardName, testDashboardName);
     }
 
