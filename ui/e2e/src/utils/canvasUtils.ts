@@ -47,7 +47,7 @@ type WaitForStableCanvasOptions = {
  */
 export async function waitForStableCanvas(
   canvasEl: Locator,
-  { interval = 300, timeout = 5000 }: WaitForStableCanvasOptions = {}
+  { interval = 250, timeout = 5000 }: WaitForStableCanvasOptions = {}
 ) {
   const maxChecks = Math.floor(timeout / interval);
 
