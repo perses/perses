@@ -55,7 +55,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 - The `testing` project in `dev/data/project.json` and associated dashboards in `dev/data/dashboard.json` should be used for end-to-end tests.
   - Give dashboards names that match the tests they are associated with for ease of debugging and maintenance.
   - Set `modifiesDashboard: true` in the test fixture configuration for tests that mutate dashboards to ensure these tests can be run in parallel. When this option is enabled, the fixture will automatically generate a duplicate dashboard for the test and clean it up when the test is finished running.
-- The project does not currently have a data source that can be used to test consistent rendering in plugins (e.g. a line chart with time series data). Therefore, you should not write tests for this level of detail because they will be inherently flaky.
+- The project does not currently have a data source that can be used to test consistent rendering in plugins (e.g. a line chart with time series data). You can work around this by mocking network requests. See `mockQueryRangeRequests` in `DashboardPage` for an example.
 
 ### Guidelines
 
@@ -73,10 +73,10 @@ This project uses a free open source account from [Happo](https://happo.io/) for
 
 - Use visual tests for use cases where a different type of test will not provide adequate coverage (e.g. canvas-based visualizations, styling).
 - Only create visual tests that can reliably be reproduced. Flaky tests are often worse than no tests at all because they lead to toil and reduce trust in the overall test set. Some examples of things that can lead to unreliable tests are:
-  - Inconsistent data sources. Consider using consistent mock data to avoid this.
-  - Time zones. Consider mocking the time zone to avoid inconsistencies depending on what machine the tests are run on.
-  - Current time. Consider mocking `Date.now` or other relevant timing functions to avoid differences when the test is run.
-  - Dynamic content. Wait for everything to load before taking a snapshot.
+  - Inconsistent data sources. Consider using consistent mock data to avoid this. See `mockQueryRangeRequests` in `DashboardPage` for an example. Make sure to reset any mocked routes using `unroute` when the test is finished.
+  - Time zones. Playwright is [configured](https://playwright.dev/docs/emulation#locale--timezone) to run tests in `America/Los_Angeles` to avoid this issue. Be careful when overriding this value.
+  - Current time. Consider mocking `Date.now` or other relevant timing functions to avoid differences when the test is run. Tests using the `dashboardTest` fixture can do this by setting `mockNow` to a specific time in milliseconds.
+  - Dynamic content. Wait for everything to load before taking a snapshot. This may involve a mix of things like: waiting for network requests to complete, waiting for css-based animations to complete (try using the `waitForAnimations` util), and waiting for canvas changes to complete (try using the `waitForStableCanvas` util).
   - If individual elements are known to cause inconsistencies, consider adding the `data-happo-hide` attribute. This will render the element invisible in the screenshot.
 - In most cases, visual tests should be generated for both light and dark themes.
 

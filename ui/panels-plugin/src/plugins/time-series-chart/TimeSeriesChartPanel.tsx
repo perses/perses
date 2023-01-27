@@ -188,7 +188,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         width={contentDimensions.width}
         height={contentDimensions.height}
       >
-        <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
+        <Skeleton
+          variant="text"
+          width={contentDimensions.width - 20}
+          height={contentDimensions.height / 2}
+          aria-label="Loading..."
+        />
       </Box>
     );
   }

@@ -14,10 +14,11 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "devDependencies": {
+    "@perses-dev/prometheus-plugin": "0.21.1",
     "@playwright/test": "^1.29.1",
     "chokidar-cli": "^3.0.0",
     "eslint-plugin-playwright": "^0.11.2",
-    "happo-e2e": "^2.1.0",
+    "happo-e2e": "^2.1.1",
     "happo-playwright": "^2.0.1",
     "happo-plugin-typescript": "^1.0.0",
     "happo.io": "^8.3.1"

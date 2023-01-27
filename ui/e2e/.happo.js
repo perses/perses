@@ -25,6 +25,9 @@ module.exports = {
 
   targets: {
     'chrome-desktop': new RemoteBrowserTarget('chrome', {
+      // Keep this in sync with the viewport setting in `base.playwright.config.ts` 
+      // for consistency for canvas elements, which are converted into images when 
+      // run in playwright and sent to happo.
       viewport: '1200x800',
     }),
   },

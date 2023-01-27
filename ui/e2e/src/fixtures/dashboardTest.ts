@@ -20,6 +20,9 @@ type DashboardTestOptions = {
 };
 
 type DashboardTestFixtures = {
+  /**
+   * Name of the dashboard to load for the tests.
+   */
   dashboardName: string;
 
   /**
@@ -28,6 +31,13 @@ type DashboardTestFixtures = {
    * tests because it will unnecessarily slow them down.
    */
   modifiesDashboard: boolean;
+
+  /**
+   * Time in unix milliseconds to be returned when `Date.now` is called on the
+   * page. Useful for stabilizing tests that depend on the current time.
+   */
+  mockNow: number;
+
   dashboardPage: DashboardPage;
 };
 
@@ -86,6 +96,26 @@ function generateDuplicateDashboardName(dashboardName: string, testTitle: string
   return dashboardName + '__' + testTitle.replace(/[^a-zA-Z0-9_.:-]+/g, '_');
 }
 
+function getMockDateScript(mockNow: number) {
+  // From https://github.com/microsoft/playwright/issues/6347#issuecomment-1085850728
+  return `{
+    // Extend Date constructor to default to fakeNow
+    Date = class extends Date {
+      constructor(...args) {
+        if (args.length === 0) {
+          super(${mockNow});
+        } else {
+          super(...args);
+        }
+      }
+    }
+    // Override Date.now() to start from fakeNow
+    const __DateNowOffset = ${mockNow} - Date.now();
+    const __DateNow = Date.now;
+    Date.now = () => __DateNow() + __DateNowOffset;
+  }`;
+}
+
 /**
  * Fixture for testing specific end-to-end testing dashboards.
  */
@@ -93,12 +123,18 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
   projectName: 'testing',
   dashboardName: '',
   modifiesDashboard: false,
-  dashboardPage: async ({ page, projectName, dashboardName, modifiesDashboard }, use, testInfo) => {
+  mockNow: 0,
+  dashboardPage: async ({ page, projectName, dashboardName, modifiesDashboard, mockNow }, use, testInfo) => {
     let testDashboardName: string = dashboardName;
 
     if (modifiesDashboard) {
       testDashboardName = generateDuplicateDashboardName(dashboardName, testInfo.title);
       await duplicateDashboard(projectName, dashboardName, testDashboardName);
+    }
+
+    if (mockNow) {
+      // Injects date mock into the page.
+      await page.addInitScript(getMockDateScript(mockNow));
     }
 
     const persesApp = new AppHomePage(page);
@@ -108,6 +144,8 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
 
     // Use the fixture value in the test.
     await use(dashboardPage);
+
+    await dashboardPage.cleanupMockRequests();
 
     if (modifiesDashboard) {
       // Clean up the duplicate dashboard created for the test.

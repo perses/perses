@@ -26,6 +26,18 @@ type EditMarkdownPanelConfig = {
   groupName?: string;
 };
 
+type MockQueryRangeQueryConfig = {
+  query: string;
+  response: {
+    status?: 200;
+    body: string;
+  };
+};
+
+type MockQueryRangeConfig = {
+  queries: MockQueryRangeQueryConfig[];
+};
+
 /**
  * Perses App dashboard page.
  */
@@ -229,5 +241,36 @@ export class DashboardPage {
 
   getVariableEditor() {
     return new VariableEditor(this.variableEditor);
+  }
+
+  /**
+   * MOCKING NETWORK REQUESTS
+   */
+
+  /**
+   * Mock responses from '/api/v1/query_range' by the query parameter in the
+   * request. Useful for stabilizing charts when taking screenshots.
+   */
+  async mockQueryRangeRequests({ queries }: MockQueryRangeConfig) {
+    // Mock data response, so we can make assertions on consistent response data.
+    await this.page.route('**/api/v1/query_range', (route) => {
+      const request = route.request();
+      const requestPostData = request.postDataJSON();
+
+      const requestQuery = typeof requestPostData === 'object' ? requestPostData['query'] : undefined;
+      const mockQuery = queries.find((mockQueryConfig) => mockQueryConfig.query === requestQuery);
+
+      if (mockQuery) {
+        // Found a config for mocking this query. Return the mock response.
+        route.fulfill(mockQuery.response);
+      } else {
+        // No config found. Let the request continue normally.
+        route.continue();
+      }
+    });
+  }
+
+  async cleanupMockRequests() {
+    await this.page.unroute('**/api/v1/query_range');
   }
 }
