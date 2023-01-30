@@ -52,6 +52,16 @@ describe('formatValue', () => {
       expected: '0.1235',
     },
     {
+      value: -0.123456789,
+      unit: { kind: 'Decimal', decimal_places: 3, abbreviate: true },
+      expected: '-0.123',
+    },
+    {
+      value: 0,
+      unit: { kind: 'Decimal', decimal_places: 2, abbreviate: true },
+      expected: '0',
+    },
+    {
       value: 10,
       unit: { kind: 'Percent' },
       expected: '10.00%',
