@@ -36,7 +36,7 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
 export function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
   const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
 
-  if (unitOptions.abbreviate === true) {
+  if (unitOptions.abbreviate === true && value >= 1000) {
     return abbreviateLargeNumber(value, decimals);
   }
 
