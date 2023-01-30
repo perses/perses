@@ -24,23 +24,22 @@ import {
   Typography,
 } from '@mui/material';
 
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useCallback, useState } from 'react';
 import { DashboardResource } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import FolderPound from 'mdi-material-ui/FolderPound';
-import TrashCan from 'mdi-material-ui/TrashCan';
+import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardList } from '../model/dashboard-client';
-import { useAddProjectMutation, useDeleteProjectMutation, ProjectModel } from '../model/project-client';
-import { useSnackbar } from '../context/SnackbarProvider';
+import { ProjectModel } from '../model/project-client';
 import DashboardList from '../components/DashboardList';
 import DeleteProjectDialog from '../components/DeleteProjectDialog/DeleteProjectDialog';
 import AddProjectDialog from '../components/AddProjectDialog/AddProjectDialog';
 
 function RenderDashboardList() {
   const [openDeleteProjectDialog, setOpenDeleteProjectDialog] = useState<boolean>(false);
-  const [projectToDelete, setProjectToDelete] = useState<string | undefined>(undefined);
+  const [projectToDelete, setProjectToDelete] = useState<string>();
 
   const openDeleteProjectConfirmDialog = ($event: MouseEvent, name: string) => {
     $event.stopPropagation(); // Preventing the accordion to toggle when we click on the button
@@ -50,21 +49,6 @@ function RenderDashboardList() {
 
   const closeDeleteProjectConfirmDialog = () => {
     setOpenDeleteProjectDialog(false);
-  };
-
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const deleteProjectMutation = useDeleteProjectMutation();
-  const triggerProjectDeletion = function () {
-    if (projectToDelete) {
-      deleteProjectMutation.mutate(projectToDelete, {
-        onSuccess: (name: string) => {
-          successSnackbar(`project ${name} was successfully deleted`);
-        },
-        onError: (err) => {
-          exceptionSnackbar(err);
-        },
-      });
-    }
   };
 
   const { data, isLoading } = useDashboardList();
@@ -98,7 +82,7 @@ function RenderDashboardList() {
               <Typography variant="h3">{projectName}</Typography>
             </Stack>
             <IconButton onClick={(event: MouseEvent) => openDeleteProjectConfirmDialog(event, projectName)}>
-              <TrashCan />
+              <DeleteOutline />
             </IconButton>
           </Stack>
         </AccordionSummary>
@@ -113,39 +97,29 @@ function RenderDashboardList() {
     <>
       <Box>{accordions}</Box>
       <DeleteProjectDialog
-        name={projectToDelete}
+        name={projectToDelete || ''}
         open={openDeleteProjectDialog}
         onClose={closeDeleteProjectConfirmDialog}
-        onSubmit={triggerProjectDeletion}
       />
     </>
   );
 }
 
 function ViewDashboardList() {
-  const [isAddProjectDialogOpen, setIsAddProjectDialogOpen] = useState(false);
+  // Navigate to the project page if the project has been successfully added
+  const navigate = useNavigate();
+  const handleAddProjectDialogSubmit = useCallback(
+    (entity: ProjectModel) => navigate(`/projects/${entity.metadata.name}`),
+    [navigate]
+  );
 
+  // Open/Close management for the "Create Project" dialog
+  const [isAddProjectDialogOpen, setIsAddProjectDialogOpen] = useState(false);
   const handleAddProjectDialogOpen = () => {
     setIsAddProjectDialogOpen(true);
   };
-
   const handleAddProjectDialogClose = () => {
     setIsAddProjectDialogOpen(false);
-  };
-
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const navigate = useNavigate();
-  const addProjectMutation = useAddProjectMutation();
-  const handleAddProjectDialogSubmit = function (name: string) {
-    addProjectMutation.mutate(name, {
-      onSuccess: (entity: ProjectModel) => {
-        successSnackbar(`project ${entity.metadata.name} was successfully created`);
-        navigate(`/projects/${entity.metadata.name}`);
-      },
-      onError: (err) => {
-        exceptionSnackbar(err);
-      },
-    });
   };
 
   return (
@@ -166,7 +140,7 @@ function ViewDashboardList() {
       <AddProjectDialog
         open={isAddProjectDialogOpen}
         onClose={handleAddProjectDialogClose}
-        onSubmit={handleAddProjectDialogSubmit}
+        onSuccess={handleAddProjectDialogSubmit}
       />
     </Container>
   );

@@ -16,11 +16,9 @@ import { Box, Container, Paper, Stack, Typography, Button } from '@mui/material'
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import FolderPound from 'mdi-material-ui/FolderPound';
 import ViewDashboard from 'mdi-material-ui/ViewDashboard';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDashboardList } from '../model/dashboard-client';
 import DashboardList from '../components/DashboardList';
-import { useSnackbar } from '../context/SnackbarProvider';
-import { useDeleteProjectMutation } from '../model/project-client';
 import DeleteProjectDialog from '../components/DeleteProjectDialog/DeleteProjectDialog';
 
 interface RenderDashboardInProjectProperties {
@@ -53,32 +51,21 @@ function ViewProject() {
     throw new Error('Unable to get the project name');
   }
 
+  // Navigate to the home page if the project has been successfully deleted
   const navigate = useNavigate();
+  const handleDeleteProjectDialogSuccess = useCallback(() => navigate(`/`), [navigate]);
 
+  // Open/Close management for the "Delete Project" dialog
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
-  const handleDeleteProjectDialogOpen = () => {
-    setIsDeleteProjectDialogOpen(true);
-  };
+  const handleDeleteProjectDialogOpen = useCallback(
+    () => setIsDeleteProjectDialogOpen(true),
+    [setIsDeleteProjectDialogOpen]
+  );
+  const handleDeleteProjectDialogClose = useCallback(
+    () => setIsDeleteProjectDialogOpen(false),
+    [setIsDeleteProjectDialogOpen]
+  );
 
-  const handleDeleteProjectDialogClose = () => {
-    setIsDeleteProjectDialogOpen(false);
-  };
-
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const deleteProjectMutation = useDeleteProjectMutation();
-  const handleDeleteProjectDialogSubmit = function () {
-    deleteProjectMutation.mutate(projectName, {
-      onSuccess: (name: string) => {
-        successSnackbar(`project ${name} was successfully deleted`);
-      },
-      onError: (err) => {
-        exceptionSnackbar(err);
-      },
-      onSettled: () => {
-        navigate(`/`);
-      },
-    });
-  };
   return (
     <>
       <Container maxWidth="md">
@@ -97,7 +84,7 @@ function ViewProject() {
         name={projectName}
         open={isDeleteProjectDialogOpen}
         onClose={handleDeleteProjectDialogClose}
-        onSubmit={handleDeleteProjectDialogSubmit}
+        onSuccess={handleDeleteProjectDialogSuccess}
       />
     </>
   );

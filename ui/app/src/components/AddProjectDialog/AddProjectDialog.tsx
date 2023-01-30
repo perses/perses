@@ -11,14 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent, Dispatch, DispatchWithoutAction, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, IconButton } from '@mui/material';
+import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, IconButton, Theme } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
+import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
+import { useSnackbar } from '../../context/SnackbarProvider';
+
+/**
+ * Render the CSS of the dialog's close button, according to the given material theme.
+ * @param theme material theme
+ */
+const dialogCloseIconButtonStyle = function (theme: Theme) {
+  return { position: 'absolute', top: theme.spacing(0.5), right: theme.spacing(0.5) };
+};
 
 export interface AddProjectDialogProps {
   open: boolean;
   onClose: DispatchWithoutAction;
-  onSubmit: Dispatch<string>;
+  onSuccess?: Dispatch<ProjectModel>;
 }
 
 /**
@@ -29,74 +39,85 @@ export interface AddProjectDialogProps {
  * @constructor
  */
 const AddProjectDialog = (props: AddProjectDialogProps) => {
-  const { open, onClose, onSubmit } = props;
+  const { open, onClose, onSuccess } = props;
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-    if (!e.target.value) {
-      setError('Required');
-    } else if (!/^[a-zA-Z0-9_.:-]+$/.exec(e.target.value)) {
-      setError('Allowed special characters are _ . : -');
-    } else {
-      setError('');
-    }
-  };
+  // Called every time the user type in the form
+  const handleNameFormChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setName(e.target.value);
+      if (!e.target.value) {
+        setError('Required');
+      } else if (!/^[a-zA-Z0-9_.:-]+$/.exec(e.target.value)) {
+        setError('Allowed special characters are _ . : -');
+      } else {
+        setError('');
+      }
+      // TODO: Verify the non-existence of the project, using a debounce (300ms?) to not call it too many
+    },
+    [setName, setError]
+  );
 
   // Reinitialize form for next time the dialog is opened
-  const resetForm = () => {
+  const handleNameFormReset = useCallback(() => {
     setName('');
     setError('');
-  };
-  const handleSubmit = () => {
-    onClose();
-    onSubmit(name);
+  }, [setName, setError]);
 
-    resetForm();
-  };
-  const handleClose = () => {
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const mutation = useAddProjectMutation();
+  const handleSubmit = useCallback(() => {
+    mutation.mutate(name, {
+      onSuccess: (entity: ProjectModel) => {
+        successSnackbar(`project ${entity.metadata.name} was successfully created`);
+        onClose();
+        if (onSuccess) {
+          onSuccess(entity);
+        }
+      },
+      onError: (err) => {
+        exceptionSnackbar(err);
+      },
+      onSettled: () => {
+        handleNameFormReset();
+      },
+    });
+  }, [mutation, name, successSnackbar, exceptionSnackbar, onSuccess, onClose, handleNameFormReset]);
+
+  const handleClose = useCallback(() => {
     onClose();
-    resetForm();
-  };
+    handleNameFormReset();
+  }, [onClose, handleNameFormReset]);
+
   return (
     <Dialog open={open} onClose={handleClose}>
-      <form>
-        <DialogTitle>Add Project</DialogTitle>
-        <IconButton
-          aria-label="Close"
-          onClick={handleClose}
-          sx={(theme) => ({
-            position: 'absolute',
-            top: theme.spacing(0.5),
-            right: theme.spacing(0.5),
-          })}
-        >
-          <CloseIcon />
-        </IconButton>
-        <DialogContent dividers sx={{ width: '500px' }}>
-          <TextField
-            required
-            margin="dense"
-            id="name"
-            label="Name"
-            type="text"
-            fullWidth
-            onChange={handleChange}
-            value={name}
-            error={!!error}
-            helperText={error}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" type="submit" disabled={!!error} onClick={handleSubmit}>
-            Add
-          </Button>
-          <Button variant="contained" color="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-        </DialogActions>
-      </form>
+      <DialogTitle>Add Project</DialogTitle>
+      <IconButton aria-label="Close" onClick={handleClose} sx={dialogCloseIconButtonStyle}>
+        <CloseIcon />
+      </IconButton>
+      <DialogContent dividers sx={{ width: '500px' }}>
+        <TextField
+          required
+          margin="dense"
+          id="name"
+          label="Name"
+          type="text"
+          fullWidth
+          onChange={handleNameFormChange}
+          value={name}
+          error={!!error}
+          helperText={error}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button variant="contained" type="submit" disabled={!!error} onClick={handleSubmit}>
+          Add
+        </Button>
+        <Button variant="outlined" color="secondary" onClick={handleClose}>
+          Cancel
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

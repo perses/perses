@@ -11,15 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithoutAction } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
+import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Theme } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
+import { useSnackbar } from '../../context/SnackbarProvider';
+import { useDeleteProjectMutation } from '../../model/project-client';
+
+/**
+ * Render the CSS of the dialog's close button, according to the given material theme.
+ * @param theme material theme
+ */
+const dialogCloseIconButtonStyle = function (theme: Theme) {
+  return { position: 'absolute', top: theme.spacing(0.5), right: theme.spacing(0.5) };
+};
 
 export interface DeleteProjectDialogProps {
-  name: string | undefined;
+  name: string;
   open: boolean;
   onClose: DispatchWithoutAction;
-  onSubmit: DispatchWithoutAction;
+  onSuccess?: Dispatch<string>;
 }
 
 /**
@@ -27,32 +37,34 @@ export interface DeleteProjectDialogProps {
  *
  * @param props.name The name of the project to delete.
  * @param props.open Define if the dialog should be opened or not.
- * @param props.closeDialog Provides the function to close itself.
- * @param props.onConfirm Action to perform when user confirmed.
+ * @param props.onClose Callback executed when dialog is closed.
+ * @param props.onSuccess Callback executed when deletion has been performed with success.
  * @constructor
  */
 const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
-  const { name, open, onClose, onSubmit } = props;
+  const { name, open, onClose, onSuccess } = props;
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const mutation = useDeleteProjectMutation();
 
-  const handleSubmit = () => {
-    onClose();
-    onSubmit();
-  };
-  const handleClose = () => {
-    onClose();
-  };
+  const handleSubmit = useCallback(() => {
+    return mutation.mutate(name, {
+      onSuccess: (name: string) => {
+        successSnackbar(`project ${name} was successfully deleted`);
+        onClose();
+        if (onSuccess) {
+          onSuccess(name);
+        }
+      },
+      onError: (err) => {
+        exceptionSnackbar(err);
+      },
+    });
+  }, [mutation, name, onClose, onSuccess, successSnackbar, exceptionSnackbar]);
+
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={onClose}>
       <DialogTitle>Delete Project</DialogTitle>
-      <IconButton
-        aria-label="Close"
-        onClick={handleClose}
-        sx={(theme) => ({
-          position: 'absolute',
-          top: theme.spacing(0.5),
-          right: theme.spacing(0.5),
-        })}
-      >
+      <IconButton aria-label="Close" onClick={onClose} sx={dialogCloseIconButtonStyle}>
         <CloseIcon />
       </IconButton>
       <DialogContent dividers sx={{ width: '500px' }}>
@@ -63,7 +75,7 @@ const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
         <Button variant="contained" type="submit" onClick={handleSubmit}>
           Delete
         </Button>
-        <Button variant="contained" color="secondary" onClick={handleClose}>
+        <Button variant="outlined" color="secondary" onClick={onClose}>
           Cancel
         </Button>
       </DialogActions>
