@@ -33,6 +33,11 @@ describe('generateChartsTheme', () => {
   it('should return perses specific charts theme from converted MUI theme', () => {
     expect(chartsTheme).toMatchInlineSnapshot(`
       Object {
+        "container": Object {
+          "padding": Object {
+            "default": 12,
+          },
+        },
         "echartsTheme": Object {
           "bar": Object {
             "barMaxWidth": 150,
