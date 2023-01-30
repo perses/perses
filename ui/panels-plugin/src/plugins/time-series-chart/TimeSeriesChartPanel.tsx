@@ -16,7 +16,7 @@ import { merge } from 'lodash-es';
 import { useDeepMemo } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
-import { Box, Skeleton, useTheme } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import {
   DEFAULT_LEGEND,
   EChartsDataFormat,
@@ -25,6 +25,7 @@ import {
   LineChart,
   YAxisLabel,
   ZoomEventData,
+  useChartsTheme,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
@@ -46,12 +47,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     spec: { queries, thresholds, y_axis },
     contentDimensions,
   } = props;
-  const theme = useTheme();
+  const chartsTheme = useChartsTheme();
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made the the time series panel (e.g.
   // when making improvements to the legend to more closely match designs).
-  const contentPadding = parseInt(theme.spacing(1.5), 10);
+  const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
     ? {
         width: contentDimensions.width - contentPadding * 2,
@@ -238,7 +239,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   return (
-    <Box sx={{ padding: (theme) => theme.spacing(1.5), position: 'relative' }}>
+    <Box sx={{ padding: `${contentPadding}px`, position: 'relative' }}>
       {y_axis && y_axis.show && y_axis.label && (
         <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
       )}

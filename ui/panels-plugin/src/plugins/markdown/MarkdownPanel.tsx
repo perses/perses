@@ -16,13 +16,14 @@ import * as DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { Box, Theme } from '@mui/material';
 import { PanelProps } from '@perses-dev/plugin-system';
+import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 
-function createMarkdownPanelStyles(theme: Theme) {
+function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme) {
   return {
-    padding: theme.spacing(1.5),
+    padding: `${chartsTheme.container.padding.default}px`,
     // Make the content scrollable
     height: '100%',
     overflowY: 'auto',
@@ -78,9 +79,15 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
     spec: { text },
   } = props;
+  const chartsTheme = useChartsTheme();
 
   const html = useMemo(() => markdownToHTML(text), [text]);
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 
-  return <Box sx={createMarkdownPanelStyles} dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
+  return (
+    <Box
+      sx={(theme) => createMarkdownPanelStyles(theme, chartsTheme)}
+      dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+    />
+  );
 }

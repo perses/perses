@@ -112,6 +112,8 @@ export function StatChart(props: StatChartProps) {
   const charactersAdjust = formattedValue.length;
   const valueSize = isLargePanel === true ? MAX_VALUE_SIZE : Math.min(width, height) / charactersAdjust;
 
+  const containerPadding = `${chartsTheme.container.padding.default}px`;
+
   return (
     <Stack sx={{ height: '100%', width: '100%' }} spacing={0}>
       <Typography
@@ -119,7 +121,7 @@ export function StatChart(props: StatChartProps) {
         sx={(theme) => ({
           color: theme.palette.text.primary,
           fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
-          padding: (theme) => theme.spacing(1.5, 1.5, 0, 1.5),
+          padding: [containerPadding, containerPadding, 0, containerPadding],
         })}
       >
         {formattedValue}
