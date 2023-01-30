@@ -26,6 +26,9 @@ import CloseIcon from 'mdi-material-ui/Close';
 import { combineSx } from '../utils';
 
 export interface DialogHeaderProps extends DialogTitleProps {
+  /**
+   * Callback fired when close button is clicked. If undefined, close button will not appear in header.
+   */
   onClose?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
@@ -40,6 +43,9 @@ export interface DialogButtonProps {
 }
 
 export interface DialogContentProps extends MuiDialogContentProps {
+  /**
+   * @default 500
+   */
   width?: number;
 }
 
