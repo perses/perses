@@ -27,7 +27,7 @@ function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme)
     // Make the content scrollable
     height: '100%',
     overflowY: 'auto',
-    // Ignore top margin on the first element (TODO: Remove when we can set padding for each panel type)
+    // Ignore top margin on the first element.
     '& :first-child': {
       marginTop: 0,
     },
