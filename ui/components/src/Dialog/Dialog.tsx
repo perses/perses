@@ -14,13 +14,16 @@
 import React from 'react';
 import {
   Button,
+  ButtonProps,
   Dialog as MuiDialog,
   DialogActions,
   DialogContent,
   DialogContentProps as MuiDialogContentProps,
+  DialogProps,
   DialogTitle,
   DialogTitleProps,
   IconButton,
+  Theme,
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { combineSx } from '../utils';
@@ -32,7 +35,7 @@ export interface DialogHeaderProps extends DialogTitleProps {
   onClose?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-export interface DialogButtonProps {
+export interface DialogButtonProps extends Omit<ButtonProps, 'variant' | 'color'> {
   children: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
   /**
@@ -54,15 +57,7 @@ const Header = ({ children, onClose, ...props }: DialogHeaderProps) => {
     <>
       <DialogTitle {...props}>{children}</DialogTitle>
       {onClose && (
-        <IconButton
-          aria-label="Close"
-          onClick={onClose}
-          sx={(theme) => ({
-            position: 'absolute',
-            top: theme.spacing(0.5),
-            right: theme.spacing(0.5),
-          })}
-        >
+        <IconButton aria-label="Close" onClick={onClose} sx={dialogCloseIconButtonStyle}>
           <CloseIcon />
         </IconButton>
       )}
@@ -76,23 +71,30 @@ const Content = ({ children, width = 500, sx, ...props }: DialogContentProps) =>
   </DialogContent>
 );
 
-const PrimaryButton = ({ children, form, onClick }: DialogButtonProps) => (
-  <Button variant="contained" type="submit" form={form} onClick={onClick}>
+const PrimaryButton = ({ children, form, onClick, ...props }: DialogButtonProps) => (
+  <Button variant="contained" type="submit" form={form} onClick={onClick} {...props}>
     {children}
   </Button>
 );
 
-const SecondaryButton = ({ children, onClick }: DialogButtonProps) => (
-  <Button variant="outlined" color="secondary" onClick={onClick}>
+const SecondaryButton = ({ children, onClick, ...props }: DialogButtonProps) => (
+  <Button variant="outlined" color="secondary" onClick={onClick} {...props}>
     {children}
   </Button>
 );
 
-export const Dialog = {
-  Dialog: MuiDialog,
-  Header,
-  Content,
-  PrimaryButton,
-  SecondaryButton,
-  Actions: DialogActions,
+/**
+ * Render the CSS of the dialog's close button, according to the given material theme.
+ * @param theme material theme
+ */
+const dialogCloseIconButtonStyle = (theme: Theme) => {
+  return { position: 'absolute', top: theme.spacing(0.5), right: theme.spacing(0.5) };
 };
+
+export const Dialog = ({ children, ...props }: DialogProps) => <MuiDialog {...props}>{children}</MuiDialog>;
+
+Dialog.Header = Header;
+Dialog.Content = Content;
+Dialog.PrimaryButton = PrimaryButton;
+Dialog.SecondaryButton = SecondaryButton;
+Dialog.Actions = DialogActions;

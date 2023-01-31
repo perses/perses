@@ -19,10 +19,10 @@ export const DeletePanelDialog = () => {
   const { deletePanelDialog, closeDeletePanelDialog } = useDeletePanelDialog();
 
   return (
-    <Dialog.Dialog open={deletePanelDialog !== undefined}>
+    <Dialog open={deletePanelDialog !== undefined}>
       <Dialog.Header onClose={() => closeDeletePanelDialog()}>Delete Panel</Dialog.Header>
       {deletePanelDialog && <DeletePanelForm deletePanelDialog={deletePanelDialog} />}
-    </Dialog.Dialog>
+    </Dialog>
   );
 };
 
