@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useMemo } from 'react';
-import { Box, Typography, Stack } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { merge } from 'lodash-es';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
@@ -115,13 +115,13 @@ export function StatChart(props: StatChartProps) {
   const containerPadding = `${chartsTheme.container.padding.default}px`;
 
   return (
-    <Stack sx={{ height: '100%', width: '100%' }} spacing={0}>
+    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <Typography
         variant="h3"
         sx={(theme) => ({
           color: theme.palette.text.primary,
           fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
-          padding: [containerPadding, containerPadding, 0, containerPadding],
+          padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
         })}
       >
         {formattedValue}
@@ -139,6 +139,6 @@ export function StatChart(props: StatChartProps) {
           />
         </Box>
       )}
-    </Stack>
+    </Box>
   );
 }
