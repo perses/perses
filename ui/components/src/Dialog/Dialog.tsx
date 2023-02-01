@@ -35,15 +35,7 @@ export interface DialogHeaderProps extends DialogTitleProps {
   onClose?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-export interface DialogButtonProps extends Omit<ButtonProps, 'variant' | 'color'> {
-  children: React.ReactNode;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
-  /**
-   * This specifies the form the button belongs to.
-   * The value of this prop must be equal to the id attribute of a form element.
-   */
-  form?: string;
-}
+export type DialogButtonProps = Omit<ButtonProps, 'variant' | 'color' | 'type'>;
 
 export interface DialogContentProps extends MuiDialogContentProps {
   /**
@@ -71,14 +63,14 @@ const Content = ({ children, width = 500, sx, ...props }: DialogContentProps) =>
   </DialogContent>
 );
 
-const PrimaryButton = ({ children, form, onClick, ...props }: DialogButtonProps) => (
-  <Button variant="contained" type="submit" form={form} onClick={onClick} {...props}>
+const PrimaryButton = ({ children, ...props }: DialogButtonProps) => (
+  <Button variant="contained" type="submit" {...props}>
     {children}
   </Button>
 );
 
-const SecondaryButton = ({ children, onClick, ...props }: DialogButtonProps) => (
-  <Button variant="outlined" color="secondary" onClick={onClick} {...props}>
+const SecondaryButton = ({ children, ...props }: DialogButtonProps) => (
+  <Button variant="outlined" color="secondary" {...props}>
     {children}
   </Button>
 );
