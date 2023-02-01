@@ -50,7 +50,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const chartsTheme = useChartsTheme();
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
-  // the next time significant changes are made the the time series panel (e.g.
+  // the next time significant changes are made to the time series panel (e.g.
   // when making improvements to the legend to more closely match designs).
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
