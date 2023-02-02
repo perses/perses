@@ -59,9 +59,14 @@ export function createDuplicatePanelSlice(): StateCreator<
           throw new Error(`Cannot find Panel with key '${panelKey}'`);
         }
 
+        // Find the layout for the item being duped
         const matchingLayout = group.itemLayouts.find((itemLayout) => {
           return itemLayout.i === panelGroupLayoutId;
         });
+
+        if (matchingLayout === undefined) {
+          throw new Error(`Cannot find layout for Panel with key '${panelKey}'`);
+        }
 
         const dupePanelKey = getValidPanelKey(panelKey, panels);
 
@@ -71,8 +76,8 @@ export function createDuplicatePanelSlice(): StateCreator<
           i: generateId().toString(),
           x: 0,
           y: getYForNewRow(group),
-          w: matchingLayout?.w || 12,
-          h: matchingLayout?.h || 6,
+          w: matchingLayout.w,
+          h: matchingLayout.h,
         };
         group.itemLayouts.push(layout);
         group.itemPanelKeys[layout.i] = dupePanelKey;
