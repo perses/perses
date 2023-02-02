@@ -1604,8 +1604,8 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 12,
-                "height": 6,
+                "width": 6,
+                "height": 4,
                 "content": {
                   "$ref": "#/spec/panels/markdownEx"
                 }

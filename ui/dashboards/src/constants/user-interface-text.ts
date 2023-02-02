@@ -26,6 +26,7 @@ export const TOOLTIP_TEXT = {
   moveGroupUp: 'Move group up',
   // Panel buttons
   editPanel: 'Edit',
+  duplicatePanel: 'Duplicate',
   deletePanel: 'Delete',
   movePanel: 'Move',
   // Variable editor buttons
@@ -42,6 +43,7 @@ export const ARIA_LABEL_TEXT = {
   moveGroupUp: (groupName: string) => `move group ${groupName} up`,
   // Panel buttons
   editPanel: (panelName: string) => `edit panel ${panelName}`,
+  duplicatePanel: (panelName: string) => `duplicate panel ${panelName}`,
   deletePanel: (panelName: string) => `delete panel ${panelName}`,
   movePanel: (panelName: string) => `move panel ${panelName}`,
 };

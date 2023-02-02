@@ -25,13 +25,14 @@ export function GridItemContent(props: GridItemContentProps) {
   const { panelGroupItemId } = props;
   const panelDefinition = usePanel(panelGroupItemId);
   const { isEditMode } = useEditMode();
-  const { openEditPanel, openDeletePanelDialog } = usePanelActions(panelGroupItemId);
+  const { openEditPanel, openDeletePanelDialog, duplicatePanel } = usePanelActions(panelGroupItemId);
 
   // Provide actions to the panel when in edit mode
   let editHandlers: PanelProps['editHandlers'] = undefined;
   if (isEditMode) {
     editHandlers = {
       onEditPanelClick: openEditPanel,
+      onDuplicatePanelClick: duplicatePanel,
       onDeletePanelClick: openDeletePanelDialog,
     };
   }

@@ -17,6 +17,7 @@ import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
+import ContentCopy from 'mdi-material-ui/ContentCopy';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
@@ -27,6 +28,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   description?: string;
   editHandlers?: {
     onEditPanelClick: () => void;
+    onDuplicatePanelClick: () => void;
     onDeletePanelClick: () => void;
   };
   isHovered: boolean;
@@ -48,6 +50,22 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
             onClick={editHandlers.onEditPanelClick}
           >
             <PencilIcon fontSize="inherit" />
+          </HeaderIconButton>
+        </InfoTooltip>
+        <InfoTooltip description={TOOLTIP_TEXT.duplicatePanel}>
+          <HeaderIconButton
+            aria-label={ARIA_LABEL_TEXT.duplicatePanel(title)}
+            size="small"
+            onClick={editHandlers.onDuplicatePanelClick}
+          >
+            <ContentCopy
+              fontSize="inherit"
+              sx={{
+                // Shrink this icon a little bit to look more consistent
+                // with the other icons in the header.
+                transform: 'scale(0.9)',
+              }}
+            />
           </HeaderIconButton>
         </InfoTooltip>
         <InfoTooltip description={TOOLTIP_TEXT.deletePanel}>
