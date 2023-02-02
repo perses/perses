@@ -20,4 +20,9 @@ export const testChartsTheme: PersesChartsTheme = {
     width: 1,
     color: '#000000',
   },
+  container: {
+    padding: {
+      default: 12,
+    },
+  },
 };
