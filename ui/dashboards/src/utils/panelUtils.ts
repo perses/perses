@@ -69,7 +69,7 @@ function getPanelKeyParts(panelKey: string): PanelKeyParts {
   };
 }
 
-// Find all the unique panel keys
+// Find all the unique panel keys and the largest number used for each.
 // ex: cpu, cpu-1, cpu-2 count as the same panel key since these panels have the same name
 function getUniquePanelKeys(panels: Record<string, PanelDefinition>): Record<string, number> {
   const uniquePanelKeys: Record<string, number> = {};

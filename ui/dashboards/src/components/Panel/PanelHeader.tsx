@@ -63,7 +63,7 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
               sx={{
                 // Shrink this icon a little bit to look more consistent
                 // with the other icons in the header.
-                transform: 'scale(0.9)',
+                transform: 'scale(0.925)',
               }}
             />
           </HeaderIconButton>
