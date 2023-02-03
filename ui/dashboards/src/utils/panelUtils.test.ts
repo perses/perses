@@ -19,6 +19,16 @@ describe('getValidPanelKey', () => {
     expect(getValidPanelKey('my panel name', {})).toBe('mypanelname');
   });
 
+  test('does not include a counter if the key is not in use', () => {
+    const mockPanelDefs = {
+      alreadyInUse: {
+        kind: 'Panel',
+        spec: {},
+      } as PanelDefinition,
+    };
+    expect(getValidPanelKey('newPanelName', mockPanelDefs)).toBe('newPanelName');
+  });
+
   test('includes a counter if the key is already in use', () => {
     const mockPanelDefs = {
       alreadyInUse: {
