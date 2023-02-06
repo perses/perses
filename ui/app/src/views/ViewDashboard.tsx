@@ -31,7 +31,7 @@ function ViewDashboard() {
   const { projectName, dashboardName } = useParams();
 
   if (projectName === undefined || dashboardName === undefined) {
-    throw new Error('Unable to get the Dashboard or Project name');
+    throw new Error('Unable to get the dashboard or project name');
   }
 
   const datasourceApi = useDatasourceApi();
@@ -40,7 +40,7 @@ function ViewDashboard() {
   const dashboardUpdatePromise = (data: DashboardResource) => {
     return updateDashboard(data)
       .then((updatedDashboard) => {
-        successSnackbar(`dashboard ${updatedDashboard.metadata.name} is successfully updated`);
+        successSnackbar(`dashboard ${updatedDashboard.metadata.name} was successfully updated`);
         return updatedDashboard;
       })
       .catch((err) => {

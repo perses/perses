@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useParams } from 'react-router-dom';
-import { Box, Container, Paper, Stack, Typography } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Container, Paper, Stack, Typography, Button } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import FolderPound from 'mdi-material-ui/FolderPound';
 import ViewDashboard from 'mdi-material-ui/ViewDashboard';
+import { useCallback, useState } from 'react';
 import { useDashboardList } from '../model/dashboard-client';
 import DashboardList from '../components/DashboardList';
+import DeleteProjectDialog from '../components/DeleteProjectDialog/DeleteProjectDialog';
 
 interface RenderDashboardInProjectProperties {
   projectName: string;
@@ -46,16 +48,45 @@ function DashboardPageInProject(props: RenderDashboardInProjectProperties) {
 function ViewProject() {
   const { projectName } = useParams();
   if (projectName === undefined) {
-    throw new Error('Unable to get the Project name');
+    throw new Error('Unable to get the project name');
   }
+
+  // Navigate to the home page if the project has been successfully deleted
+  const navigate = useNavigate();
+  const handleDeleteProjectDialogSuccess = useCallback(() => navigate(`/`), [navigate]);
+
+  // Open/Close management for the "Delete Project" dialog
+  const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
+  const handleDeleteProjectDialogOpen = useCallback(
+    () => setIsDeleteProjectDialogOpen(true),
+    [setIsDeleteProjectDialogOpen]
+  );
+  const handleDeleteProjectDialogClose = useCallback(
+    () => setIsDeleteProjectDialogOpen(false),
+    [setIsDeleteProjectDialogOpen]
+  );
+
   return (
-    <Container maxWidth="md">
-      <Stack direction="row" alignItems="center" gap={1} mb={2}>
-        <FolderPound fontSize={'large'} />
-        <Typography variant="h1">{projectName}</Typography>
-      </Stack>
-      <DashboardPageInProject projectName={projectName} />
-    </Container>
+    <>
+      <Container maxWidth="md">
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" alignItems="center" gap={1} mb={2}>
+            <FolderPound fontSize={'large'} />
+            <Typography variant="h1">{projectName}</Typography>
+          </Stack>
+          <Button variant="outlined" color="error" size="small" onClick={handleDeleteProjectDialogOpen}>
+            Delete
+          </Button>
+        </Stack>
+        <DashboardPageInProject projectName={projectName} />
+      </Container>
+      <DeleteProjectDialog
+        name={projectName}
+        open={isDeleteProjectDialogOpen}
+        onClose={handleDeleteProjectDialogClose}
+        onSuccess={handleDeleteProjectDialogSuccess}
+      />
+    </>
   );
 }
 
