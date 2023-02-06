@@ -26,8 +26,10 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
         }
         #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
         if #unitPath != null if #mapping.unit[#unitPath] != _|_ {
-            unit: {
-                kind: #mapping.unit[#unitPath]
+            y_axis: {
+                unit: {
+                  kind: #mapping.unit[#unitPath]
+                }
             }
         }
         if #panel.fieldConfig.defaults.thresholds != _|_ {
