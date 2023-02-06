@@ -53,7 +53,7 @@ const removeWhiteSpaces = (str: string) => {
 
 /**
  * Breaks the specified panel key into the name and the optional `-number` used
- * for deduping panels with the name name.
+ * for deduping panels with the same name.
  */
 function getPanelKeyParts(panelKey: string): PanelKeyParts {
   const parts = panelKey.match(/(.+)-([0-9]+)/);
