@@ -33,7 +33,7 @@ export function getYForNewRow(group: PanelGroupDefinition) {
  */
 export function getValidPanelKey(panelKey: string, panels: Record<string, PanelDefinition>): string {
   const uniquePanelKeys = getUniquePanelKeys(panels);
-  let normalizedPanelKey = getPanelKeyParts(removeWhiteSpacesAndSpecialCharacters(panelKey)).name;
+  let normalizedPanelKey = getPanelKeyParts(removeWhiteSpaces(panelKey)).name;
 
   const matchingKey = uniquePanelKeys[normalizedPanelKey];
   if (typeof matchingKey === 'number') {
@@ -47,7 +47,7 @@ type PanelKeyParts = {
   number?: number;
 };
 
-const removeWhiteSpacesAndSpecialCharacters = (str: string) => {
+const removeWhiteSpaces = (str: string) => {
   return str.replace(/\s+/g, '');
 };
 
