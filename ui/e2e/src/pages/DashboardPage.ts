@@ -21,11 +21,6 @@ type PanelGroupConfig = {
   name: string;
 };
 
-type EditMarkdownPanelConfig = {
-  name?: string;
-  groupName?: string;
-};
-
 type MockQueryRangeQueryConfig = {
   query: string;
   response: {
@@ -39,6 +34,8 @@ type MockQueryRangeConfig = {
 };
 
 type ThemeName = 'light' | 'dark';
+
+type PanelNameOrPanel = string | Panel;
 
 /**
  * Perses App dashboard page.
@@ -214,35 +211,67 @@ export class DashboardPage {
     await panelEditor.isClosed();
   }
 
-  getPanel(panelName: string) {
+  /**
+   * If the passed value is already a panel, return it. Otherwise, look the panel
+   * up by name. Useful for internal helper functions that can support taking
+   * a name or a panel.
+   */
+  private getPanelByNameOrSelf(panelNameOrPanel: PanelNameOrPanel) {
+    // If the passed value is already a panel, return it. Useful for internal
+    // helper functions that want to support taking a name or a panel.
+    if (typeof panelNameOrPanel !== 'string') {
+      return panelNameOrPanel;
+    }
+
+    return this.getPanel(panelNameOrPanel);
+  }
+
+  /**
+   * Get a panel by name.
+   */
+  getPanel(panelName: string): Panel {
     const container = this.panels.filter({
       has: this.page.getByRole('heading', { name: panelName }),
     });
     return new Panel(container);
   }
 
-  async editMarkdownPanel(panelName: string, { name, groupName }: EditMarkdownPanelConfig) {
-    const panel = this.getPanel(panelName);
+  /**
+   * Look up a panel by its index on the page. Useful for tests when the name
+   * of the panel will change and cannot be relied on as a consistent locator.
+   */
+  getPanelByIndex(i: number) {
+    return new Panel(this.panels.nth(i));
+  }
+
+  /**
+   * Helper for simplifying panel editing.
+   * - Starts the editing process for the specified panel by opening the panel
+   *   editor.
+   * - Provides the panel editor to a callback function that handles the
+   *   steps to edit the panel.
+   * - When the callback is fiished, applies the changes and waits for the panel
+   *   editor to close.
+   * @param panel - Panel to edit.
+   * @param callback - Async function that is called after the panel editor is
+   * opened and before the changes in the panel editor are applied.
+   */
+  async editPanel(panelNameOrPanel: PanelNameOrPanel, callback: (panelEditor: PanelEditor) => Promise<void>) {
+    const panel = this.getPanelByNameOrSelf(panelNameOrPanel);
+
     await panel.startEditing();
 
     const panelEditor = new PanelEditor(this.panelEditor);
     await panelEditor.isVisible();
 
-    if (name) {
-      await panelEditor.nameInput.clear();
-      await panelEditor.nameInput.type(name);
-    }
-
-    if (groupName) {
-      await panelEditor.selectGroup(groupName);
-    }
+    await callback(panelEditor);
 
     await panelEditor.applyButton.click();
     await panelEditor.isClosed();
   }
 
-  async removePanel(panelName: string) {
-    const panel = this.getPanel(panelName);
+  async removePanel(panelNameOrPanel: PanelNameOrPanel) {
+    const panel = this.getPanelByNameOrSelf(panelNameOrPanel);
 
     panel.delete();
     const dialog = this.getDialog('delete panel');

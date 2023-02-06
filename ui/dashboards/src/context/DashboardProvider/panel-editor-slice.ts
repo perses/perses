@@ -13,7 +13,7 @@
 
 import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
-import { removeWhiteSpacesAndSpecialCharacters } from '../../utils/functions';
+import { getYForNewRow, getValidPanelKey } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
 import {
   PanelGroupSlice,
@@ -200,12 +200,8 @@ export function createPanelEditorSlice(): StateCreator<
         },
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
-          const uniquePanelKeys = getUniquePanelKeys(get().panels);
-          let panelKey = removeWhiteSpacesAndSpecialCharacters(next.name);
-          // append count if panel key already exists
-          if (uniquePanelKeys[panelKey]) {
-            panelKey += `-${uniquePanelKeys[panelKey]}`;
-          }
+          const panelKey = getValidPanelKey(next.name, get().panels);
+
           set((state) => {
             // Add a panel
             state.panels[panelKey] = panelDef;
@@ -261,32 +257,4 @@ function createPanelDefinitionFromEditorValues(editorValues: PanelEditorValues):
       },
     },
   };
-}
-
-// Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
-function getYForNewRow(group: PanelGroupDefinition) {
-  let newRowY = 0;
-  for (const layout of group.itemLayouts) {
-    const itemMaxY = layout.y + layout.h;
-    if (itemMaxY > newRowY) {
-      newRowY = itemMaxY;
-    }
-  }
-  return newRowY;
-}
-
-// Find all the unique panel keys
-// ex: cpu, cpu-1, cpu-2 count as the same panel key since these panels have the same name
-function getUniquePanelKeys(panels: Record<string, PanelDefinition>): Record<string, number> {
-  const uniquePanelKeys: Record<string, number> = {};
-  Object.keys(panels).forEach((panelKey) => {
-    const key = panelKey.replace(/-([0-9]+)/, '');
-    const count = uniquePanelKeys[key];
-    if (count) {
-      uniquePanelKeys[key] = count + 1;
-    } else {
-      uniquePanelKeys[key] = 1;
-    }
-  });
-  return uniquePanelKeys;
 }

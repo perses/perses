@@ -26,6 +26,7 @@ import { createPanelSlice, PanelSlice } from './panel-slice';
 import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
 import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 import { createDiscardChangesDialogSlice, DiscardChangesConfirmationDialogSlice } from './discard-changes-dialog-slice';
+import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -34,7 +35,8 @@ export interface DashboardStoreState
     DeletePanelGroupSlice,
     PanelEditorSlice,
     DeletePanelSlice,
-    DiscardChangesConfirmationDialogSlice {
+    DiscardChangesConfirmationDialogSlice,
+    DuplicatePanelSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
@@ -108,6 +110,7 @@ function initStore(props: DashboardProviderProps) {
           ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
           ...createDiscardChangesDialogSlice(...args),
+          ...createDuplicatePanelSlice()(...args),
           metadata,
           display,
           defaultTimeRange: { pastDuration: duration },

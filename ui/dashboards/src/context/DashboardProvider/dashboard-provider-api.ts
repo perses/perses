@@ -184,18 +184,21 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
   return panel;
 }
 
-const selectPanelActions = ({ openEditPanel, openDeletePanelDialog }: DashboardStoreState) => ({
+const selectPanelActions = ({ openEditPanel, openDeletePanelDialog, duplicatePanel }: DashboardStoreState) => ({
   openEditPanel,
   openDeletePanelDialog,
+  duplicatePanel,
 });
+
 /**
  * Returns actions that can be performed on the given Panel.
  */
 export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
-  const { openEditPanel, openDeletePanelDialog } = useDashboardStore(selectPanelActions);
+  const { openEditPanel, openDeletePanelDialog, duplicatePanel } = useDashboardStore(selectPanelActions);
   return {
     openEditPanel: () => openEditPanel(panelGroupItemId),
     openDeletePanelDialog: () => openDeletePanelDialog(panelGroupItemId),
+    duplicatePanel: () => duplicatePanel(panelGroupItemId),
   };
 }
 
