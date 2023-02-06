@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, Metadata } from '@perses-dev/core';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { fetchJson, fetch, Metadata } from '@perses-dev/core';
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
+import { HTTPHeader, HTTPMethodPOST, HTTPMethodDELETE } from './http';
 
 const resource = 'projects';
 
@@ -36,4 +37,61 @@ export function useProjectQuery(options?: ProjectListOptions) {
     },
     options
   );
+}
+
+/**
+ * Used to create a project in the API
+ *
+ * Will automatically invalidate the project list and force get query to be executed again.
+ *
+ * @example:
+ * const addProjectMutation = useAddProjectMutation()
+ * // ...
+ * addProjectMutation.mutate("MyProjectName")
+ */
+export function useAddProjectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<ProjectModel, Error, string>({
+    mutationKey: [resource],
+    mutationFn: (name: string) => {
+      const url = buildURL({ resource });
+      return fetchJson<ProjectModel>(url, {
+        method: HTTPMethodPOST,
+        headers: HTTPHeader,
+        body: JSON.stringify({ kind: 'Project', metadata: { name } }),
+      });
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries([resource]);
+    },
+  });
+}
+
+/**
+ * Used to remove a project from the API
+ *
+ * Will automatically invalidate the project list and force get query to be executed again.
+ *
+ * @example:
+ * const deleteProjectMutation = useDeleteProjectMutation()
+ * // ...
+ * deleteProjectMutation.mutate("MyProjectName")
+ */
+export function useDeleteProjectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<string, Error, string>({
+    mutationKey: [resource],
+    mutationFn: (name: string) => {
+      const url = buildURL({ resource, name });
+      return fetch(url, {
+        method: HTTPMethodDELETE,
+        headers: HTTPHeader,
+      }).then(() => {
+        return name;
+      });
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries([resource]);
+    },
+  });
 }

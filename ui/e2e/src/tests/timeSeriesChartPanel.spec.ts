@@ -13,7 +13,7 @@
 
 import happoPlaywright from 'happo-playwright';
 import { test } from '../fixtures/dashboardTest';
-import { mockTimeSeriesResponseWithStableValue } from '../utils';
+import { mockTimeSeriesResponseWithStableValue, waitForStableCanvas } from '../utils';
 
 test.use({
   dashboardName: 'TimeSeriesChartPanel',
@@ -61,6 +61,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await dashboardPage.forEachTheme(async (themeName) => {
       const panel = dashboardPage.getPanel('Single Line');
       await panel.isLoaded();
+      await waitForStableCanvas(panel.canvas);
 
       await happoPlaywright.screenshot(page, panel.parent, {
         component: 'Time Series Chart Panel',

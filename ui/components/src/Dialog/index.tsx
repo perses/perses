@@ -11,10 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const HTTPMethodPOST = 'POST';
-export const HTTPMethodPUT = 'PUT';
-export const HTTPMethodDELETE = 'DELETE';
-export const HTTPHeader: Record<string, string> = {
-  'Content-Type': 'application/json',
-  Accept: 'application/json',
-};
+export * from './Dialog';

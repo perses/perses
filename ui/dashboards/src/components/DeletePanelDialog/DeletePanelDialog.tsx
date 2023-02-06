@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { FormEvent } from 'react';
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Dialog } from '@perses-dev/components';
 import { useDeletePanelDialog, DeletePanelDialogState } from '../../context';
 
 export const DeletePanelDialog = () => {
@@ -21,18 +20,7 @@ export const DeletePanelDialog = () => {
 
   return (
     <Dialog open={deletePanelDialog !== undefined}>
-      <DialogTitle>Delete Panel</DialogTitle>
-      <IconButton
-        aria-label="Close"
-        onClick={() => closeDeletePanelDialog()}
-        sx={(theme) => ({
-          position: 'absolute',
-          top: theme.spacing(0.5),
-          right: theme.spacing(0.5),
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
+      <Dialog.Header onClose={() => closeDeletePanelDialog()}>Delete Panel</Dialog.Header>
       {deletePanelDialog && <DeletePanelForm deletePanelDialog={deletePanelDialog} />}
     </Dialog>
   );
@@ -53,18 +41,14 @@ const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
   };
   return (
     <form onSubmit={handleDelete}>
-      <DialogContent dividers sx={{ width: '500px' }}>
+      <Dialog.Content>
         Are you sure you want to delete {deletePanelDialog.panelName} from {deletePanelDialog.panelGroupName}? This
         action cannot be undone.
-      </DialogContent>
-      <DialogActions>
-        <Button variant="contained" type="submit">
-          Delete
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={() => closeDeletePanelDialog()}>
-          Cancel
-        </Button>
-      </DialogActions>
+      </Dialog.Content>
+      <Dialog.Actions>
+        <Dialog.PrimaryButton>Delete</Dialog.PrimaryButton>
+        <Dialog.SecondaryButton onClick={() => closeDeletePanelDialog()}>Cancel</Dialog.SecondaryButton>
+      </Dialog.Actions>
     </form>
   );
 };

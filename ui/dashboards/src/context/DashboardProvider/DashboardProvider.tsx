@@ -16,8 +16,8 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { DashboardResource, Display, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -42,6 +42,7 @@ export interface DashboardStoreState
   defaultTimeRange: RelativeTimeRange;
   setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
+  display?: Display;
 }
 
 export interface DashboardStoreProps {
@@ -51,7 +52,7 @@ export interface DashboardStoreProps {
 
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
@@ -94,7 +95,7 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { layouts, panels, duration },
+    spec: { display, layouts, panels, duration },
     metadata,
   } = dashboardResource;
   const store = createStore<DashboardStoreState>()(
@@ -111,12 +112,14 @@ function initStore(props: DashboardProviderProps) {
           ...createDiscardChangesDialogSlice(...args),
           ...createDuplicatePanelSlice()(...args),
           metadata,
+          display,
           defaultTimeRange: { pastDuration: duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { panels, layouts } }) => {
+          setDashboard: ({ metadata, spec: { display, panels, layouts } }) => {
             set((state) => {
               state.metadata = metadata;
+              state.display = display;
               const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panels = panels;
               state.panelGroups = panelGroups;
