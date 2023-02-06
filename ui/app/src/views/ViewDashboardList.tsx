@@ -20,6 +20,7 @@ import {
   CircularProgress,
   Container,
   IconButton,
+  Link,
   Stack,
   Typography,
 } from '@mui/material';
@@ -73,13 +74,16 @@ function RenderDashboardList() {
 
   const accordions: JSX.Element[] = [];
   dashboardListAsMap.forEach((list, projectName: string) => {
+    const projectLink = `/projects/${projectName}`;
     accordions.push(
       <Accordion TransitionProps={{ unmountOnExit: true }} key={projectName}>
         <AccordionSummary expandIcon={<ChevronDown />}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
             <Stack direction="row" alignItems="center" gap={1}>
               <FolderPound />
-              <Typography variant="h3">{projectName}</Typography>
+              <Link href={projectLink} variant="h3" underline="hover">
+                {projectName}
+              </Link>
             </Stack>
             <IconButton onClick={(event: MouseEvent) => openDeleteProjectConfirmDialog(event, projectName)}>
               <DeleteOutline />
