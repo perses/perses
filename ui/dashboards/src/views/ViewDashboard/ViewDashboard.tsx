@@ -28,8 +28,10 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
   dashboardTitleComponent?: JSX.Element;
   onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
+  onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
+  isEditing?: boolean;
 }
 
 /**
@@ -41,8 +43,10 @@ export function ViewDashboard(props: ViewDashboardProps) {
     datasourceApi,
     dashboardTitleComponent,
     onSave,
+    onDiscard,
     initialVariableIsSticky,
     isReadonly,
+    isEditing,
     sx,
     ...others
   } = props;
@@ -52,7 +56,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardResource }}>
+      <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
         <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
@@ -73,6 +77,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                   dashboardResource={dashboardResource}
                   dashboardTitleComponent={dashboardTitleComponent}
                   onSave={onSave}
+                  onDiscard={onDiscard}
                   initialVariableIsSticky={initialVariableIsSticky}
                   isReadonly={isReadonly}
                 />

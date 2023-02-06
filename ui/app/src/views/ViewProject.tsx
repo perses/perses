@@ -20,26 +20,49 @@ import { useCallback, useState } from 'react';
 import { useDashboardList } from '../model/dashboard-client';
 import DashboardList from '../components/DashboardList';
 import DeleteProjectDialog from '../components/DeleteProjectDialog/DeleteProjectDialog';
+import { useSnackbar } from '../context/SnackbarProvider';
+import { CreateDashboardDialog } from '../components/CreateDashboardDialog/CreateDashboardDialog';
 
 interface RenderDashboardInProjectProperties {
   projectName: string;
 }
 
 function DashboardPageInProject(props: RenderDashboardInProjectProperties) {
+  const { infoSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+
+  const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
+
   const { data } = useDashboardList(props.projectName);
   if (data === undefined) {
     return null;
   }
+
+  const handleDashboardCreation = function (name: string) {
+    navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
+    infoSnackbar(`In order to create a new dashboard. You need to add at least one panel!`);
+  };
+
   return (
     <Paper>
       <Box p={1}>
-        <Stack direction="row" alignItems="center" gap={1} my={2}>
-          <ViewDashboard />
-          <Typography variant="h3">Dashboards</Typography>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" alignItems="center" gap={1} my={2}>
+            <ViewDashboard />
+            <Typography variant="h3">Dashboards</Typography>
+          </Stack>
+          <Button variant="contained" size="small" onClick={() => setOpenCreateDashboardDialogState(true)}>
+            Add Dashboard
+          </Button>
         </Stack>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <DashboardList dashboardList={data} />
         </ErrorBoundary>
+        <CreateDashboardDialog
+          open={openCreateDashboardDialogState}
+          onClose={() => setOpenCreateDashboardDialogState(false)}
+          onSuccess={(name: string) => handleDashboardCreation(name)}
+        />
       </Box>
     </Paper>
   );
@@ -68,7 +91,7 @@ function ViewProject() {
 
   return (
     <>
-      <Container maxWidth="md">
+      <Container maxWidth="md" sx={{ marginY: 2 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1} mb={2}>
             <FolderPound fontSize={'large'} />
