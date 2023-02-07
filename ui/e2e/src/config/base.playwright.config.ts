@@ -53,11 +53,6 @@ const config: PlaywrightTestConfig = {
      */
     serviceWorkers: 'block',
 
-    // Keep this in sync with the setting in `.happo.js` for consistency for
-    // canvas elements, which are converted into images when run in playwright
-    // and sent to happo.
-    viewport: { width: 1200, height: 800 },
-
     // Use a consistent time zone, so we do not have to worry about flakiness
     // depending on the server.
     timezoneId: 'America/Los_Angeles',
@@ -69,6 +64,10 @@ const config: PlaywrightTestConfig = {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        // Keep this in sync with the setting in `.happo.js` for consistency for
+        // canvas elements, which are converted into images when run in playwright
+        // and sent to happo.
+        viewport: { width: 1200, height: 800 },
       },
     },
   ],
