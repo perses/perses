@@ -81,12 +81,11 @@ export function insertPanelInLayout(
 
   const referenceBounds = getPanelBounds(referenceLayout);
 
+  // Organize layouts based on vertical relation to the item being inserted
+  // after.
   const aboveInsertRow: PanelGroupItemLayout[] = [];
   const insertRow: PanelGroupItemLayout[] = [];
   const belowInsertRow: PanelGroupItemLayout[] = [];
-
-  // Organize layouts based on vertical relation to the item being inserted
-  // after.
   itemLayouts.forEach((itemLayout) => {
     const itemBounds = getPanelBounds(itemLayout);
 
