@@ -12,8 +12,12 @@
 // limitations under the License.
 
 import { Locator, expect } from '@playwright/test';
-import { waitForAnimations } from '../utils';
+import { waitForAnimations, getPanelByName } from '../utils';
 import { Panel } from './Panel';
+
+type GetPanelByNameOpts = {
+  nth?: number;
+};
 
 /**
  * Panel group on a dashboard page.
@@ -124,10 +128,14 @@ export class PanelGroup {
   /**
    * Get a panel by name.
    */
-  getPanel(panelName: string): Panel {
-    const container = this.panels.filter({
+  getPanel(panelName: string, { nth }: GetPanelByNameOpts = {}): Panel {
+    let container = this.panels.filter({
       has: this.container.page().getByRole('heading', { name: panelName }),
     });
+    if (nth !== undefined) {
+      container = container.nth(nth);
+    }
+
     return new Panel(container);
   }
 

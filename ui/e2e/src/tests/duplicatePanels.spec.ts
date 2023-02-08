@@ -105,9 +105,16 @@ test.describe('Dashboard: Panels can be duplicated', () => {
 
       const originalPanel = panelGroup.getPanel('panel being duplicated');
       await expect(originalPanel.container).toBeVisible();
+      const orignalPanelCount = await panelGroup.panels.count();
 
       // Duplicate the original panel
       await originalPanel.duplicateButton.click();
+
+      // Wait for new panel to be added and loaded.
+      await expect(panelGroup.panels).toHaveCount(orignalPanelCount + 1);
+      const newPanel = panelGroup.getPanel('panel being duplicated', { nth: 1 });
+      await newPanel.container.scrollIntoViewIfNeeded();
+      await newPanel.isLoaded();
 
       // Take a screenshot of each duplicate case because it's easier to look
       // at than to try to write a bunch of complex assertions about placement.
