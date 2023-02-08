@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './user-interface-text';
+export * from './grid-layout-config';

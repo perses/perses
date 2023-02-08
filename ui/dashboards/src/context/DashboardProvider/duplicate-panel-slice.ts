@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { getYForNewRow, getValidPanelKey } from '../../utils/panelUtils';
+import { getValidPanelKey, insertPanelInLayout, PartialPanelGroupItemLayout } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
-import { PanelGroupSlice, PanelGroupItemId, PanelGroupItemLayout } from './panel-group-slice';
+import { PanelGroupSlice, PanelGroupItemId } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -72,15 +72,15 @@ export function createDuplicatePanelSlice(): StateCreator<
 
         state.panels[dupePanelKey] = panelToDupe;
 
-        const layout: PanelGroupItemLayout = {
+        const duplicateLayout: PartialPanelGroupItemLayout = {
           i: generateId().toString(),
-          x: 0,
-          y: getYForNewRow(group),
           w: matchingLayout.w,
           h: matchingLayout.h,
         };
-        group.itemLayouts.push(layout);
-        group.itemPanelKeys[layout.i] = dupePanelKey;
+
+        group.itemLayouts = insertPanelInLayout(duplicateLayout, matchingLayout, group.itemLayouts);
+
+        group.itemPanelKeys[duplicateLayout.i] = dupePanelKey;
       });
     },
   });

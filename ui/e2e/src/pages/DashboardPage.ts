@@ -43,6 +43,8 @@ type PanelNameOrPanel = string | Panel;
 export class DashboardPage {
   readonly page: Page;
 
+  readonly root: Locator;
+
   readonly themeToggle: Locator;
 
   readonly toolbar: Locator;
@@ -69,6 +71,8 @@ export class DashboardPage {
 
   constructor(page: Page) {
     this.page = page;
+
+    this.root = page.locator('#root');
 
     this.themeToggle = page.getByRole('checkbox', { name: 'Theme' });
 

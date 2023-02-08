@@ -11,16 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard-provider-api';
-export * from './DashboardProvider';
-export type {
-  PanelGroupId,
-  PanelGroupDefinition,
-  PanelGroupItemId,
-  PanelGroupItemLayoutId as PanelGroupLayoutId,
-  PanelGroupItemLayout,
-} from './panel-group-slice';
-export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-editor-slice';
-export type { DeletePanelDialogState } from './delete-panel-slice';
-export type { DiscardChangesConfirmationDialogState } from './discard-changes-dialog-slice';
-export type { PanelEditorValues } from './panel-editor-slice';
+export const GRID_LAYOUT_COLS = { sm: 24, xxs: 2 } as const;
+
+export const GRID_LAYOUT_SMALL_BREAKPOINT = 'sm' as const;

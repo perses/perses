@@ -12,7 +12,116 @@
 // limitations under the License.
 
 import { PanelDefinition } from '@perses-dev/core';
-import { getValidPanelKey } from './panelUtils';
+import { PanelGroupItemLayout } from '../context';
+import { getValidPanelKey, insertPanelInLayout, PartialPanelGroupItemLayout } from './panelUtils';
+
+describe('insertPanelInLayout', () => {
+  describe('inserts the panel to the right when space is available', () => {
+    test('with a single panel in that row', () => {
+      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const referenceLayout: PanelGroupItemLayout = {
+        i: 'one',
+        x: 0,
+        y: 0,
+        w: 6,
+        h: 6,
+      };
+      const layouts: PanelGroupItemLayout[] = [referenceLayout];
+      expect(insertPanelInLayout(newLayout, referenceLayout, layouts)).toEqual([
+        referenceLayout,
+        {
+          x: 6,
+          y: 0,
+          ...newLayout,
+        },
+      ]);
+    });
+
+    test('with multiple panels in that row with space between them', () => {
+      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const referenceLayout: PanelGroupItemLayout = {
+        i: 'one',
+        x: 0,
+        y: 0,
+        w: 3,
+        h: 4,
+      };
+      const otherPanelInRow: PanelGroupItemLayout = {
+        i: 'two',
+        x: 20,
+        y: 0,
+        w: 4,
+        h: 4,
+      };
+      const layouts: PanelGroupItemLayout[] = [referenceLayout, otherPanelInRow];
+      const result = insertPanelInLayout(newLayout, referenceLayout, layouts);
+
+      expect(result).toEqual([
+        referenceLayout,
+        {
+          x: 3,
+          y: 0,
+          ...newLayout,
+        },
+        otherPanelInRow,
+      ]);
+    });
+  });
+
+  describe('inserts the panel below when space is not available to the right', () => {
+    test('with a single panel in the initial layout', () => {
+      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const referenceLayout: PanelGroupItemLayout = {
+        i: 'one',
+        x: 1,
+        y: 0,
+        w: 18,
+        h: 4,
+      };
+      const layouts: PanelGroupItemLayout[] = [referenceLayout];
+      expect(insertPanelInLayout(newLayout, referenceLayout, layouts)).toEqual([
+        referenceLayout,
+        {
+          x: 1,
+          y: 4,
+          ...newLayout,
+        },
+      ]);
+    });
+
+    test('with a single panel in the same row and additional panels below', () => {
+      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const referenceLayout: PanelGroupItemLayout = {
+        i: 'one',
+        x: 0,
+        y: 0,
+        w: 18,
+        h: 4,
+      };
+      const nextRowItem: PanelGroupItemLayout = {
+        i: 'two',
+        x: 0,
+        y: 4,
+        w: 6,
+        h: 6,
+      };
+      const layouts: PanelGroupItemLayout[] = [referenceLayout, nextRowItem];
+
+      expect(insertPanelInLayout(newLayout, referenceLayout, layouts)).toEqual([
+        referenceLayout,
+        {
+          x: 0,
+          y: 4,
+          ...newLayout,
+        },
+        {
+          ...nextRowItem,
+          y: nextRowItem.y + newLayout.h,
+        },
+      ]);
+    });
+  });
+});
 
 describe('getValidPanelKey', () => {
   test('removes whitespace', () => {

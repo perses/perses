@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, expect } from '@playwright/test';
+import { waitForAnimations } from '../utils';
 import { Panel } from './Panel';
 
 /**
@@ -84,10 +85,16 @@ export class PanelGroup {
 
   async expand() {
     await this.expandButton.click();
+    // Wait for all animations to complete to avoid misclicking as the panel
+    // group animates open.
+    await waitForAnimations(this.container);
   }
 
   async collapse() {
     await this.collapseButton.click();
+    // Wait for all animations to complete to avoid misclicking as the panel
+    // group animates closed.
+    await waitForAnimations(this.container);
   }
 
   async startEditing() {
@@ -106,8 +113,30 @@ export class PanelGroup {
     await this.deleteButton.click();
   }
 
+  /**
+   * PANEL HELPERS
+   */
+
   async addPanel() {
     await this.addPanelButton.click();
+  }
+
+  /**
+   * Get a panel by name.
+   */
+  getPanel(panelName: string): Panel {
+    const container = this.panels.filter({
+      has: this.container.page().getByRole('heading', { name: panelName }),
+    });
+    return new Panel(container);
+  }
+
+  /**
+   * Look up a panel by its index on the page. Useful for tests when the name
+   * of the panel will change and cannot be relied on as a consistent locator.
+   */
+  getPanelByIndex(i: number) {
+    return new Panel(this.panels.nth(i));
   }
 
   /**
