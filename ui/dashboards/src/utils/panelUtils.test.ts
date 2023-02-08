@@ -54,9 +54,8 @@ describe('insertPanelInLayout', () => {
         h: 4,
       };
       const layouts: PanelGroupItemLayout[] = [referenceLayout, otherPanelInRow];
-      const result = insertPanelInLayout(newLayout, referenceLayout, layouts);
 
-      expect(result).toEqual([
+      expect(insertPanelInLayout(newLayout, referenceLayout, layouts)).toEqual([
         referenceLayout,
         {
           x: 3,
