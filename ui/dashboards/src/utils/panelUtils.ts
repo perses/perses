@@ -55,7 +55,7 @@ function getPanelBounds({ x, y, w, h }: PanelGroupItemLayout): PanelGroupItemBou
   };
 }
 
-export type PartialPanelGroupItemLayout = Omit<PanelGroupItemLayout, 'x' | 'y'>;
+export type UnpositionedPanelGroupItemLayout = Omit<PanelGroupItemLayout, 'x' | 'y'>;
 
 /**
  * Inserts a new panel into the layout with placement determined by a specified
@@ -73,7 +73,7 @@ export type PartialPanelGroupItemLayout = Omit<PanelGroupItemLayout, 'x' | 'y'>;
  * @returns - Item layouts modified to insert the new panel.
  */
 export function insertPanelInLayout(
-  newLayout: PartialPanelGroupItemLayout,
+  newLayout: UnpositionedPanelGroupItemLayout,
   referenceLayout: PanelGroupItemLayout,
   itemLayouts: PanelGroupItemLayout[]
 ): PanelGroupItemLayout[] {

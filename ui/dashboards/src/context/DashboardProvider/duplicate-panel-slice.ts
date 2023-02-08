@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { getValidPanelKey, insertPanelInLayout, PartialPanelGroupItemLayout } from '../../utils/panelUtils';
+import { getValidPanelKey, insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
 import { PanelGroupSlice, PanelGroupItemId } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -72,7 +72,7 @@ export function createDuplicatePanelSlice(): StateCreator<
 
         state.panels[dupePanelKey] = panelToDupe;
 
-        const duplicateLayout: PartialPanelGroupItemLayout = {
+        const duplicateLayout: UnpositionedPanelGroupItemLayout = {
           i: generateId().toString(),
           w: matchingLayout.w,
           h: matchingLayout.h,

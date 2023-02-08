@@ -13,12 +13,12 @@
 
 import { PanelDefinition } from '@perses-dev/core';
 import { PanelGroupItemLayout } from '../context';
-import { getValidPanelKey, insertPanelInLayout, PartialPanelGroupItemLayout } from './panelUtils';
+import { getValidPanelKey, insertPanelInLayout, UnpositionedPanelGroupItemLayout } from './panelUtils';
 
 describe('insertPanelInLayout', () => {
   describe('inserts the panel to the right when space is available', () => {
     test('with a single panel in that row', () => {
-      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const newLayout: UnpositionedPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
       const referenceLayout: PanelGroupItemLayout = {
         i: 'one',
         x: 0,
@@ -38,7 +38,7 @@ describe('insertPanelInLayout', () => {
     });
 
     test('with multiple panels in that row with space between them', () => {
-      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const newLayout: UnpositionedPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
       const referenceLayout: PanelGroupItemLayout = {
         i: 'one',
         x: 0,
@@ -69,7 +69,7 @@ describe('insertPanelInLayout', () => {
 
   describe('inserts the panel below when space is not available to the right', () => {
     test('with a single panel in the initial layout', () => {
-      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const newLayout: UnpositionedPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
       const referenceLayout: PanelGroupItemLayout = {
         i: 'one',
         x: 1,
@@ -89,7 +89,7 @@ describe('insertPanelInLayout', () => {
     });
 
     test('with a single panel in the same row and additional panels below', () => {
-      const newLayout: PartialPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+      const newLayout: UnpositionedPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
       const referenceLayout: PanelGroupItemLayout = {
         i: 'one',
         x: 0,
