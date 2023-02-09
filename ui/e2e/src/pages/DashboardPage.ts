@@ -77,9 +77,6 @@ export class DashboardPage {
   readonly panelGroups: Locator;
   readonly panelGroupHeadings: Locator;
 
-  // readonly panels: Locator;
-  // readonly panelHeadings: Locator;
-
   readonly variableList: Locator;
   readonly variableListItems: Locator;
 
@@ -109,9 +106,6 @@ export class DashboardPage {
 
     this.panelGroups = page.getByTestId('panel-group');
     this.panelGroupHeadings = this.panelGroups.getByTestId('panel-group-header').getByRole('heading', { level: 2 });
-
-    // this.panels = page.getByTestId('panel');
-    // this.panelHeadings = this.panels.locator('header').getByRole('heading');
 
     this.variableList = page.getByTestId('variable-list');
     this.variableListItems = this.variableList.getByTestId('template-variable');
