@@ -45,8 +45,8 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     await duplicateOne.duplicateButton.click();
     const duplicateTwo = dashboardPage.getPanel({ group: panelGroup, nth: 2 });
 
-    await expect(panelGroup.panels).toHaveCount(3);
-    await expect(panelGroup.panelHeadings).toContainText([
+    await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(3);
+    await expect(dashboardPage.getPanelHeadings(panelGroup)).toContainText([
       'panel being duplicated',
       'panel being duplicated',
       'panel being duplicated',
@@ -79,7 +79,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     }
 
     // Ensure that editing the duplicates does not modify the original panel.
-    await expect(dashboardPage.panelHeadings).toContainText([
+    await expect(dashboardPage.getPanelHeadings(panelGroup)).toContainText([
       'panel being duplicated',
       'Duplicate panel 1',
       'Duplicate panel 2',
@@ -105,13 +105,13 @@ test.describe('Dashboard: Panels can be duplicated', () => {
 
       const originalPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated' });
       await expect(originalPanel.container).toBeVisible();
-      const orignalPanelCount = await panelGroup.panels.count();
+      const orignalPanelCount = await dashboardPage.getPanels(panelGroup).count();
 
       // Duplicate the original panel
       await originalPanel.duplicateButton.click();
 
       // Wait for new panel to be added and loaded.
-      await expect(panelGroup.panels).toHaveCount(orignalPanelCount + 1);
+      await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(orignalPanelCount + 1);
       const newPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated', nth: 1 });
       await newPanel.container.scrollIntoViewIfNeeded();
       await newPanel.isLoaded();

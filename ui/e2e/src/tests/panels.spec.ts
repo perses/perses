@@ -23,11 +23,11 @@ test.describe('Dashboard: Panels', () => {
     await dashboardPage.addPanelToGroup('Row 1');
     await dashboardPage.addMarkdownPanel('Markdown One');
 
-    await expect(dashboardPage.panels).toHaveCount(2);
+    await expect(dashboardPage.getPanels()).toHaveCount(2);
     const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
-    await expect(dashboardPage.panelHeadings).toContainText(['Markdown Example Zero', 'Markdown One']);
+    await expect(dashboardPage.getPanelHeadings()).toContainText(['Markdown Example Zero', 'Markdown One']);
   });
 
   test('can be added to the dashboard', async ({ dashboardPage }) => {
@@ -40,33 +40,33 @@ test.describe('Dashboard: Panels', () => {
 
     await dashboardPage.addMarkdownPanel('Markdown One');
 
-    await expect(dashboardPage.panels).toHaveCount(2);
+    await expect(dashboardPage.getPanels()).toHaveCount(2);
     const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
-    await expect(dashboardPage.panelHeadings).toContainText(['Markdown Example Zero', 'Markdown One']);
+    await expect(dashboardPage.getPanelHeadings()).toContainText(['Markdown Example Zero', 'Markdown One']);
   });
 
   test('can be removed', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
     await dashboardPage.removePanel('Markdown Example Zero');
-    await expect(dashboardPage.panels).toHaveCount(0);
+    await expect(dashboardPage.getPanels()).toHaveCount(0);
   });
 
   test('can be moved to a different panel group', async ({ dashboardPage }) => {
     const panelGroupOne = dashboardPage.getPanelGroup('Row 1');
     const panelGroupTwo = dashboardPage.getPanelGroup('Row 2');
 
-    await expect(panelGroupOne.panelHeadings).toContainText(['Markdown Example Zero']);
-    await expect(panelGroupTwo.panelHeadings).toContainText([]);
+    await expect(dashboardPage.getPanelHeadings(panelGroupOne)).toContainText(['Markdown Example Zero']);
+    await expect(dashboardPage.getPanelHeadings(panelGroupTwo)).toContainText([]);
 
     await dashboardPage.startEditing();
     await dashboardPage.editPanel('Markdown Example Zero', async (panelEditor) => {
       await panelEditor.selectGroup('Row 2');
     });
 
-    await expect(panelGroupOne.panelHeadings).toContainText([]);
-    await expect(panelGroupTwo.panelHeadings).toContainText(['Markdown Example Zero']);
+    await expect(dashboardPage.getPanelHeadings(panelGroupOne)).toContainText([]);
+    await expect(dashboardPage.getPanelHeadings(panelGroupTwo)).toContainText(['Markdown Example Zero']);
   });
 
   test('can be renamed', async ({ dashboardPage }) => {
@@ -77,7 +77,7 @@ test.describe('Dashboard: Panels', () => {
       await panelEditor.nameInput.type('Markdown With a New Name');
     });
 
-    await expect(dashboardPage.panelHeadings).toContainText(['Markdown With a New Name']);
+    await expect(dashboardPage.getPanelHeadings()).toContainText(['Markdown With a New Name']);
   });
 
   test('can be resized', async ({ dashboardPage }) => {

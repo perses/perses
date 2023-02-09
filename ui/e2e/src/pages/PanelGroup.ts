@@ -15,10 +15,6 @@ import { Locator, expect } from '@playwright/test';
 import { waitForAnimations } from '../utils';
 import { Panel } from './Panel';
 
-type GetPanelByNameOpts = {
-  nth?: number;
-};
-
 /**
  * Panel group on a dashboard page.
  */
@@ -27,8 +23,6 @@ export class PanelGroup {
 
   readonly header: Locator;
   readonly content: Locator;
-  readonly panels: Locator;
-  readonly panelHeadings: Locator;
 
   readonly editButton: Locator;
   readonly expandButton: Locator;
@@ -68,9 +62,6 @@ export class PanelGroup {
     this.addPanelButton = this.header.getByRole('button', {
       name: 'add panel to group',
     });
-
-    this.panels = this.container.getByTestId('panel');
-    this.panelHeadings = this.panels.locator('header').getByRole('heading');
   }
 
   isOpen() {
