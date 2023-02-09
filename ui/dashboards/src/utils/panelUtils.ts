@@ -135,7 +135,7 @@ export function insertPanelInLayout(
     }
   }
 
-  // Inserted the new item below the original and shift the items below the
+  // Insert the new item below the original and shift the items below the
   // row where the reference is located.
   return [
     ...aboveInsertRow,
