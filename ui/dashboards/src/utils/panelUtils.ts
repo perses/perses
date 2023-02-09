@@ -119,9 +119,7 @@ export function insertPanelInLayout(
         ...belowInsertRow,
       ];
     }
-  }
-
-  if (insertAfterIndex >= 0) {
+  } else if (insertAfterIndex >= 0) {
     const nextItem = insertRow[insertAfterIndex + 1];
 
     if (nextItem && getPanelBounds(nextItem).x1 - referenceBounds.x2 >= newLayout.w) {
