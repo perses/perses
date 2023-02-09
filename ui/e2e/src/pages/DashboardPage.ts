@@ -37,6 +37,25 @@ type ThemeName = 'light' | 'dark';
 
 type PanelNameOrPanel = string | Panel;
 
+type GetPanelOpts = {
+  /**
+   * Name of the panel.
+   */
+  name?: string;
+
+  /**
+   * The parent to look inside for panels. If not specified, defaults to the
+   * page. Useful for filtering panels down to a specific group.
+   */
+  group?: PanelGroup;
+
+  /**
+   * The index of the panel. Useful for locating panels with names that change
+   * or when multiple panels have the same name.
+   */
+  nth?: number;
+};
+
 /**
  * Perses App dashboard page.
  */
@@ -227,17 +246,38 @@ export class DashboardPage {
       return panelNameOrPanel;
     }
 
-    return this.getPanel(panelNameOrPanel);
+    return this.getPanelByName(panelNameOrPanel);
+  }
+
+  getPanels(group?: PanelGroup) {
+    const parent = group ? group.container : this.page;
+
+    return parent.getByTestId('panel');
+  }
+
+  /**
+   * Get a panel based on specified options.
+   */
+  getPanel({ group, name, nth }: GetPanelOpts = {}): Panel {
+    const panels = this.getPanels(group);
+    const panel = panels.filter({
+      has: name ? this.page.getByRole('heading', { name }) : undefined,
+    });
+    if (nth !== undefined) {
+      return new Panel(panel.nth(nth));
+    }
+
+    return new Panel(panel);
   }
 
   /**
    * Get a panel by name.
    */
-  getPanel(panelName: string): Panel {
-    const container = this.panels.filter({
-      has: this.page.getByRole('heading', { name: panelName }),
+  getPanelByName(panelName: Required<GetPanelOpts['name']>, opts: Omit<GetPanelOpts, 'name'> = {}): Panel {
+    return this.getPanel({
+      name: panelName,
+      ...opts,
     });
-    return new Panel(container);
   }
 
   /**

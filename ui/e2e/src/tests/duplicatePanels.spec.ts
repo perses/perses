@@ -32,18 +32,18 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     await dashboardPage.startEditing();
     const panelGroup = dashboardPage.getPanelGroup('single panel with space to right');
     await panelGroup.expand();
-    const originalPanel = panelGroup.getPanelByIndex(0);
+    const originalPanel = dashboardPage.getPanel({ group: panelGroup, nth: 0 });
 
     // Duplicate the original panel
     await originalPanel.duplicateButton.click();
     // Panels are referenced by index in this test because they will be renamed
     // later, so their names are not durable locators.
-    const duplicateOne = panelGroup.getPanelByIndex(1);
+    const duplicateOne = dashboardPage.getPanel({ group: panelGroup, nth: 1 });
 
     // Duplicate the duplicate. Intentionally testing multiple duplicates to
     // catch some edge cases.
     await duplicateOne.duplicateButton.click();
-    const duplicateTwo = panelGroup.getPanelByIndex(2);
+    const duplicateTwo = dashboardPage.getPanel({ group: panelGroup, nth: 2 });
 
     await expect(panelGroup.panels).toHaveCount(3);
     await expect(panelGroup.panelHeadings).toContainText([
@@ -103,7 +103,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
       await panelGroup.expand();
       await panelGroup.container.scrollIntoViewIfNeeded();
 
-      const originalPanel = panelGroup.getPanel('panel being duplicated');
+      const originalPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated' });
       await expect(originalPanel.container).toBeVisible();
       const orignalPanelCount = await panelGroup.panels.count();
 
@@ -112,7 +112,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
 
       // Wait for new panel to be added and loaded.
       await expect(panelGroup.panels).toHaveCount(orignalPanelCount + 1);
-      const newPanel = panelGroup.getPanel('panel being duplicated', { nth: 1 });
+      const newPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated', nth: 1 });
       await newPanel.container.scrollIntoViewIfNeeded();
       await newPanel.isLoaded();
 

@@ -59,7 +59,7 @@ test.describe('Dashboard: Stat Chart Panel', () => {
     });
 
     await dashboardPage.forEachTheme(async (themeName) => {
-      const panel = dashboardPage.getPanel('Simple Stat');
+      const panel = dashboardPage.getPanelByName('Simple Stat');
       await panel.isLoaded();
       await waitForStableCanvas(panel.canvas);
 

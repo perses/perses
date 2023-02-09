@@ -24,7 +24,7 @@ test.describe('Dashboard: Panels', () => {
     await dashboardPage.addMarkdownPanel('Markdown One');
 
     await expect(dashboardPage.panels).toHaveCount(2);
-    const newPanel = dashboardPage.getPanel('Markdown One');
+    const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
     await expect(dashboardPage.panelHeadings).toContainText(['Markdown Example Zero', 'Markdown One']);
@@ -41,7 +41,7 @@ test.describe('Dashboard: Panels', () => {
     await dashboardPage.addMarkdownPanel('Markdown One');
 
     await expect(dashboardPage.panels).toHaveCount(2);
-    const newPanel = dashboardPage.getPanel('Markdown One');
+    const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
     await expect(dashboardPage.panelHeadings).toContainText(['Markdown Example Zero', 'Markdown One']);
@@ -83,7 +83,7 @@ test.describe('Dashboard: Panels', () => {
   test('can be resized', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
 
-    const panel = dashboardPage.getPanel('Markdown Example Zero');
+    const panel = dashboardPage.getPanelByName('Markdown Example Zero');
 
     const originalSize = await panel.getBounds();
 
@@ -111,7 +111,7 @@ test.describe('Dashboard: Panels', () => {
   // There was previously a bug related to going to a smaller screen and back to
   // a larger screen. This test will help avoid a regression.
   test('can resize responsively', async ({ dashboardPage, page }) => {
-    const panel = dashboardPage.getPanel('Markdown Example Zero');
+    const panel = dashboardPage.getPanelByName('Markdown Example Zero');
     const panelGroup = dashboardPage.getPanelGroup('Row 1');
 
     // Save original panel size.
@@ -140,61 +140,5 @@ test.describe('Dashboard: Panels', () => {
       expect(largePanelPercentSize).toEqual(originalPanelPercentSize);
       expect(largePanelPercentSize.width).toBeCloseTo(0.25, 1);
     }
-  });
-
-  test('can be duplicated', async ({ dashboardPage }) => {
-    await dashboardPage.startEditing();
-    const originalPanel = dashboardPage.getPanelByIndex(0);
-
-    // Duplicate the original panel
-    await originalPanel.duplicateButton.click();
-    // Panels are referenced by index in this test because they will be renamed
-    // later, so their names are not durable locators.
-    const duplicateOne = dashboardPage.getPanelByIndex(1);
-
-    // Duplicate the duplicate. Intentionally testing multiple duplicates to
-    // catch some edge cases.
-    await duplicateOne.duplicateButton.click();
-    const duplicateTwo = dashboardPage.getPanelByIndex(2);
-
-    await expect(dashboardPage.panels).toHaveCount(3);
-    await expect(dashboardPage.panelHeadings).toContainText([
-      'Markdown Example Zero',
-      'Markdown Example Zero',
-      'Markdown Example Zero',
-    ]);
-
-    const duplicatePanels = [duplicateOne, duplicateTwo];
-
-    for (const duplicatePanel of duplicatePanels) {
-      await expect(duplicatePanel.container).toBeVisible();
-
-      // Duplicate panel should have the same dimensions.
-      const originalBounds = await originalPanel.getBounds();
-      const duplicateBounds = await duplicatePanel.getBounds();
-      expect(originalBounds.height).toEqual(duplicateBounds.height);
-      expect(originalBounds.width).toEqual(duplicateBounds.width);
-
-      // Duplicate panel should have the same content.
-      const originalContent = await originalPanel.figure.innerHTML();
-      const duplicateContent = await duplicatePanel.figure.innerHTML();
-      expect(originalContent).toEqual(duplicateContent);
-    }
-
-    // Modify duplicate panels to ensure they are now being treated as distinct
-    // from the panels they were duplicated from.
-    for (const [i, duplicatePanel] of duplicatePanels.entries()) {
-      await dashboardPage.editPanel(duplicatePanel, async (panelEditor) => {
-        await panelEditor.nameInput.clear();
-        await panelEditor.nameInput.type(`Duplicate panel ${i + 1}`);
-      });
-    }
-
-    // Ensure that editing the duplicates does not modify the original panel.
-    await expect(dashboardPage.panelHeadings).toContainText([
-      'Markdown Example Zero',
-      'Duplicate panel 1',
-      'Duplicate panel 2',
-    ]);
   });
 });

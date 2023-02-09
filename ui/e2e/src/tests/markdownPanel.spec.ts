@@ -30,7 +30,7 @@ test.describe('Dashboard: Markdown Panel', () => {
   ['Headings', 'Text', 'Links', 'Code', 'Lists', 'Tables'].forEach((panelName) => {
     test(`displays ${panelName} as expected`, async ({ page, dashboardPage }) => {
       await dashboardPage.forEachTheme(async (themeName) => {
-        const markdownPanel = dashboardPage.getPanel(panelName);
+        const markdownPanel = dashboardPage.getPanelByName(panelName);
         await markdownPanel.container.scrollIntoViewIfNeeded();
         await markdownPanel.isLoaded();
 

@@ -60,7 +60,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
     });
 
     await dashboardPage.forEachTheme(async (themeName) => {
-      const panel = dashboardPage.getPanel('Single Gauge');
+      const panel = dashboardPage.getPanelByName('Single Gauge');
       await panel.isLoaded();
       // Wait for gauge animation to finish before taking a screenshot.
       await waitForStableCanvas(panel.canvas);

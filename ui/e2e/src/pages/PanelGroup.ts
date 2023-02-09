@@ -117,34 +117,8 @@ export class PanelGroup {
     await this.deleteButton.click();
   }
 
-  /**
-   * PANEL HELPERS
-   */
-
   async addPanel() {
     await this.addPanelButton.click();
-  }
-
-  /**
-   * Get a panel by name.
-   */
-  getPanel(panelName: string, { nth }: GetPanelByNameOpts = {}): Panel {
-    let container = this.panels.filter({
-      has: this.container.page().getByRole('heading', { name: panelName }),
-    });
-    if (nth !== undefined) {
-      container = container.nth(nth);
-    }
-
-    return new Panel(container);
-  }
-
-  /**
-   * Look up a panel by its index on the page. Useful for tests when the name
-   * of the panel will change and cannot be relied on as a consistent locator.
-   */
-  getPanelByIndex(i: number) {
-    return new Panel(this.panels.nth(i));
   }
 
   /**
