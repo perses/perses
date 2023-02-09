@@ -11,5 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './user-interface-text';
 export * from './grid-layout-config';
+export * from './user-interface-text';
