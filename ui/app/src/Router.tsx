@@ -17,6 +17,7 @@ import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
 import ViewDashboardList from './views/ViewDashboardList';
 import ViewMigrate from './views/ViewMigrate';
+import ViewValidate from './views/ViewValidate';
 
 // Other routes are lazy-loaded for code-splitting
 const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
@@ -28,12 +29,13 @@ function Router() {
       {/* TODO: What sort of loading fallback to we want? */}
       <Suspense>
         <Routes>
+          <Route path="/" element={<ViewDashboardList />} />
           <Route path="/migrate" element={<ViewMigrate />} />
+          <Route path="/validate" element={<ViewValidate />} />
           <Route path="/projects" element={<ViewDashboardList />} />
           <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
           <Route path="/projects/:projectName/dashboards/:dashboardName/:action" element={<ViewDashboard />} />
           <Route path="/projects/:projectName" element={<ViewProject />} />
-          <Route path="/" element={<ViewDashboardList />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>
