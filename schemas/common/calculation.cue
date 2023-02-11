@@ -13,4 +13,4 @@
 
 package common
 
-#calculation: "First" | "Last" | "LastNumber" | "Mean" | "Sum"
+#calculation: "First" | "Last" | "LastNumber" | "Mean" | "Sum" @cuetsy(kind="type")

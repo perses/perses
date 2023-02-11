@@ -20,7 +20,7 @@ import (
 	apiConfig "github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/internal/api/shared/validate"
-	"github.com/perses/perses/internal/cli/cmd"
+	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"
@@ -102,6 +102,8 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 					return err
 				}
 			} else if err := validate.Dashboard(entity, o.sch); err != nil {
+				fmt.Println("Error - unexpected...")
+				fmt.Println(entity)
 				return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
 			}
 

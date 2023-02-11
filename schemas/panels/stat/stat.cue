@@ -17,7 +17,7 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
-kind: "StatChart"
+kind: "StatChart" @cuetsy(kind="type")
 spec: close({
 	query:       #ts_query
 	calculation: common.#calculation

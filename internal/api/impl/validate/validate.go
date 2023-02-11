@@ -42,11 +42,17 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {
 	entity := &v1.Dashboard{}
 	if err := ctx.Bind(entity); err != nil {
+		fmt.Println("1st Error")
+		fmt.Println(entity)
 		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
 	}
 	if err := validate.Dashboard(entity, e.sch); err != nil {
+		fmt.Println("2nd Error")
+		fmt.Println(entity)
+		// return fmt.Errorf("%w: %s", shared.BadRequestError, err)
 		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
+	fmt.Println("3rd - NoContent")
 	return ctx.NoContent(http.StatusOK)
 }
 

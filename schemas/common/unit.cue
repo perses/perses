@@ -13,26 +13,26 @@
 
 package common
 
-#unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit
+#unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit @cuetsy(kind="type")
 
 #timeUnit: {
 	kind:            "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
 	decimal_places?: number
-}
+} @cuetsy(kind="interface")
 
 #percentUnit: {
 	kind:            "Percent" | "PercentDecimal"
 	decimal_places?: number
-}
+} @cuetsy(kind="interface")
 
 #decimalUnit: {
 	kind:            "Decimal"
 	decimal_places?: number
 	abbreviate?:     bool
-}
+} @cuetsy(kind="interface")
 
 #bytesUnit: {
 	kind:            "Bytes"
 	decimal_places?: number
 	abbreviate?:     bool
-}
+} @cuetsy(kind="interface")
