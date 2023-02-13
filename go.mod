@@ -6,6 +6,8 @@ require (
 	cuelang.org/go v0.4.2
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.12.0
+	github.com/go-sql-driver/mysql v1.7.0
+	github.com/huandu/go-sqlbuilder v1.19.0
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/olekukonko/tablewriter v0.0.5
@@ -36,6 +38,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/klauspost/compress v1.15.2 // indirect

@@ -159,7 +159,7 @@ generate-changelog:
 .PHONY: clean
 clean:
 	rm -rf ./bin
-	rm EXTRACTED_CHANGELOG.md
+	rm -rf EXTRACTED_CHANGELOG.md
 	./scripts/ui_release.sh --clean
 	cd ./ui && npm run clean
 

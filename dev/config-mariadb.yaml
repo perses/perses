@@ -1,0 +1,17 @@
+database:
+  sql:
+    user: "user"
+    password: "password"
+    db_name: "perses"
+    net: "tcp"
+    addr: "localhost:3306"
+    allow_native_passwords: true
+
+schemas:
+  panels_path: "schemas/panels"
+  queries_path: "schemas/queries"
+  datasources_path: "schemas/datasources"
+  variables_path: "schemas/variables"
+  interval: "5m"
+
+readonly: false

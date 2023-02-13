@@ -54,6 +54,15 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
 	}
+	persesDAO := persistenceManager.GetPersesDAO()
+	if dbInitError := persesDAO.Init(); dbInitError != nil {
+		logrus.WithError(dbInitError).Fatal("unable to initialize the database")
+	}
+	defer func() {
+		if daoCloseErr := persesDAO.Close(); daoCloseErr != nil {
+			logrus.WithError(daoCloseErr).Error("unable to close the connection to the database")
+		}
+	}()
 	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the service manager")

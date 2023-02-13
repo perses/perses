@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  mariadb:
+    image: mariadb
+    ports:
+      - '3306:3306'
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: perses
+      MARIADB_USER: user
+      MARIADB_PASSWORD: password
