@@ -15,6 +15,7 @@ import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
 import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useEditMode, usePanelGroup, usePanelGroupActions, PanelGroupId } from '../../context';
+import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 import { GridContainer } from './GridContainer';
@@ -24,8 +25,6 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
 }
-
-const SMALL_LAYOUT_BREAKPOINT = 'sm' as const;
 
 /**
  * Layout component that arranges children in a Grid based on the definition.
@@ -44,7 +43,7 @@ export function GridLayout(props: GridLayoutProps) {
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
     // when going to a smaller breakpoint and then back to a larger breakpoint.
     // https://github.com/react-grid-layout/react-grid-layout/issues/1663
-    const smallLayout = allLayouts[SMALL_LAYOUT_BREAKPOINT];
+    const smallLayout = allLayouts[GRID_LAYOUT_SMALL_BREAKPOINT];
     if (smallLayout) {
       updatePanelGroupLayouts(smallLayout);
     }
@@ -67,14 +66,14 @@ export function GridLayout(props: GridLayoutProps) {
         <ResponsiveGridLayout
           className="layout"
           breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}
-          cols={{ sm: 24, xxs: 2 }}
+          cols={GRID_LAYOUT_COLS}
           rowHeight={30}
           draggableHandle={'.drag-handle'}
           resizeHandles={['se']}
           isDraggable={isEditMode}
           isResizable={isEditMode}
           containerPadding={[0, 10]}
-          layouts={{ [SMALL_LAYOUT_BREAKPOINT]: groupDefinition.itemLayouts }}
+          layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: groupDefinition.itemLayouts }}
           onLayoutChange={handleLayoutChange}
         >
           {groupDefinition.itemLayouts.map(({ i }) => (

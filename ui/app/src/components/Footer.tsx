@@ -35,7 +35,7 @@ export default function Footer(): JSX.Element {
             <Github sx={{ verticalAlign: 'bottom' }} />
           </a>
         </li>
-        <li>
+        <li data-happo-hide>
           {isLoading ? (
             <CircularProgress size="1rem" />
           ) : data !== undefined && data.version !== '' ? (

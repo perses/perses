@@ -2086,5 +2086,511 @@
         }
       ]
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "DuplicatePanels",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-02-07T00:28:57.658905Z",
+      "version": 14,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-10": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 8"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 8"
+              }
+            }
+          }
+        },
+        "markdownEx-11": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-12": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-13": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-14": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 1"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 1"
+              }
+            }
+          }
+        },
+        "markdownEx-15": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-16": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 1"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 1"
+              }
+            }
+          }
+        },
+        "markdownEx-2": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 1"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 1"
+              }
+            }
+          }
+        },
+        "markdownEx-3": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 2"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 2"
+              }
+            }
+          }
+        },
+        "markdownEx-4": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 3"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 3"
+              }
+            }
+          }
+        },
+        "markdownEx-5": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 4"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 4"
+              }
+            }
+          }
+        },
+        "markdownEx-6": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 5"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 5"
+              }
+            }
+          }
+        },
+        "markdownEx-7": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 6"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 6"
+              }
+            }
+          }
+        },
+        "markdownEx-8": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 7"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 7"
+              }
+            }
+          }
+        },
+        "markdownEx-9": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel with space to right",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 4,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel with space to left",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 18,
+                "y": 0,
+                "width": 6,
+                "height": 4,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-11"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel with space on both sides",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 8,
+                "y": 0,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-12"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel without space on same line",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 4,
+                "y": 0,
+                "width": 14,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-9"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "multiple panels with space next to original",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-13"
+                }
+              },
+              {
+                "x": 15,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-14"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "multiple panels with space not next to original",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-15"
+                }
+              },
+              {
+                "x": 7,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-16"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "multiple panels w/o space & more panels below",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 18,
+                "y": 0,
+                "width": 6,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-4"
+                }
+              },
+              {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-1"
+                }
+              },
+              {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-2"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-3"
+                }
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "width": 3,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-8"
+                }
+              },
+              {
+                "x": 21,
+                "y": 5,
+                "width": 3,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-10"
+                }
+              },
+              {
+                "x": 0,
+                "y": 6,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-5"
+                }
+              },
+              {
+                "x": 7,
+                "y": 6,
+                "width": 4,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-6"
+                }
+              },
+              {
+                "x": 11,
+                "y": 6,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-7"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 ]

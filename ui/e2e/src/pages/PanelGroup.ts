@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, expect } from '@playwright/test';
+import { waitForAnimations } from '../utils';
 import { Panel } from './Panel';
 
 /**
@@ -22,8 +23,6 @@ export class PanelGroup {
 
   readonly header: Locator;
   readonly content: Locator;
-  readonly panels: Locator;
-  readonly panelHeadings: Locator;
 
   readonly editButton: Locator;
   readonly expandButton: Locator;
@@ -63,9 +62,6 @@ export class PanelGroup {
     this.addPanelButton = this.header.getByRole('button', {
       name: 'add panel to group',
     });
-
-    this.panels = this.container.getByTestId('panel');
-    this.panelHeadings = this.panels.locator('header').getByRole('heading');
   }
 
   isOpen() {
@@ -84,10 +80,16 @@ export class PanelGroup {
 
   async expand() {
     await this.expandButton.click();
+    // Wait for all animations to complete to avoid misclicking as the panel
+    // group animates open.
+    await waitForAnimations(this.container);
   }
 
   async collapse() {
     await this.collapseButton.click();
+    // Wait for all animations to complete to avoid misclicking as the panel
+    // group animates closed.
+    await waitForAnimations(this.container);
   }
 
   async startEditing() {

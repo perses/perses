@@ -52,6 +52,7 @@ export class AppHomePage {
   async clickDashboardItem(dashboardName: string) {
     const dashboardButton = this.page.getByRole('button', {
       name: dashboardName,
+      exact: true,
     });
     await dashboardButton.click();
   }

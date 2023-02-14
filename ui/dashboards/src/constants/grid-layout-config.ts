@@ -11,5 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './grid-layout-config';
-export * from './user-interface-text';
+export const GRID_LAYOUT_COLS = { sm: 24, xxs: 2 } as const;
+
+export const GRID_LAYOUT_SMALL_BREAKPOINT = 'sm' as const;

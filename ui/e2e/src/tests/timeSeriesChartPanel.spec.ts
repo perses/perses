@@ -59,7 +59,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     });
 
     await dashboardPage.forEachTheme(async (themeName) => {
-      const panel = dashboardPage.getPanel('Single Line');
+      const panel = dashboardPage.getPanelByName('Single Line');
       await panel.isLoaded();
       await waitForStableCanvas(panel.canvas);
 
