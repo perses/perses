@@ -13,8 +13,7 @@
 
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ThresholdOptions } from '../../model/thresholds';
+import { OptionsEditorProps, ThresholdOptions } from '@perses-dev/plugin-system';
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.

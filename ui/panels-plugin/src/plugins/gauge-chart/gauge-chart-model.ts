@@ -13,8 +13,7 @@
 
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
-import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ThresholdOptions } from '../../model/thresholds';
+import { CalculationType, OptionsEditorProps, ThresholdOptions } from '@perses-dev/plugin-system';
 
 export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal', decimal_places: 1 };
 

@@ -14,9 +14,8 @@
 import { AbsoluteTimeRange } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
 import { EChartsTimeSeries } from '@perses-dev/components';
-import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
+import { StepOptions, TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
-import { StepOptions } from '../../../model/thresholds';
 import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS } from '../time-series-chart-model';
 import { getRandomColor } from './palette-gen';
 

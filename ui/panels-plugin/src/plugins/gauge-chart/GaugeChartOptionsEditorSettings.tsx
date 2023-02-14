@@ -13,7 +13,12 @@
 
 import { merge } from 'lodash-es';
 import { TextField } from '@mui/material';
-import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
+import {
+  CalculationSelector,
+  CalculationSelectorProps,
+  ThresholdOptions,
+  ThresholdsEditor,
+} from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import {
@@ -62,6 +67,14 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
   }
 
+  const handleThresholdsChange = (thresholds: ThresholdOptions) => {
+    onChange(
+      produce(value, (draft: GaugeChartOptions) => {
+        draft.thresholds = thresholds;
+      })
+    );
+  };
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -88,6 +101,9 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
             }
           />
         </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <ThresholdsEditor thresholds={value.thresholds} onChange={handleThresholdsChange} />
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );
