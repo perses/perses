@@ -164,31 +164,6 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
 }
 
-func (d *DAO) exists(kind modelV1.Kind, metadata modelAPI.Metadata) (bool, error) {
-	_, query, queryErr := d.get(kind, metadata)
-	if queryErr != nil {
-		return false, queryErr
-	}
-	defer query.Close()
-	return query.Next(), nil
-}
-
-func (d *DAO) get(kind modelV1.Kind, metadata modelAPI.Metadata) (string, *sql.Rows, error) {
-	id, tableName, idErr := d.getIDAndTableName(kind, metadata)
-	if idErr != nil {
-		return "", nil, idErr
-	}
-
-	queryBuilder := sqlbuilder.NewSelectBuilder().
-		Select(colDoc).
-		From(tableName)
-	queryBuilder.Where(queryBuilder.Equal(colID, id))
-	sqlQuery, args := queryBuilder.Build()
-
-	rows, err := d.DB.Query(sqlQuery, args...)
-	return id, rows, err
-}
-
 func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	typeParameter := reflect.TypeOf(slice)
 	result := reflect.ValueOf(slice)
@@ -259,6 +234,14 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 		return idErr
 	}
 
+	isExist, err := d.exists(kind, metadata)
+	if err != nil {
+		return err
+	}
+	if !isExist {
+		return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
+	}
+
 	deleteBuilder := sqlbuilder.NewDeleteBuilder().DeleteFrom(tableName)
 	deleteBuilder.Where(deleteBuilder.Equal(colID, id))
 	sqlQuery, args := deleteBuilder.Build()
@@ -293,4 +276,29 @@ func (d *DAO) getIDAndTableName(kind modelV1.Kind, metadata modelAPI.Metadata) (
 // generateCompleteTableName concat the tableName and the DBName. This should be used everytime a FROM condition is used.
 func (d *DAO) generateCompleteTableName(tableName string) string {
 	return fmt.Sprintf("%s.%s", d.SchemaName, tableName)
+}
+
+func (d *DAO) exists(kind modelV1.Kind, metadata modelAPI.Metadata) (bool, error) {
+	_, query, queryErr := d.get(kind, metadata)
+	if queryErr != nil {
+		return false, queryErr
+	}
+	defer query.Close()
+	return query.Next(), nil
+}
+
+func (d *DAO) get(kind modelV1.Kind, metadata modelAPI.Metadata) (string, *sql.Rows, error) {
+	id, tableName, idErr := d.getIDAndTableName(kind, metadata)
+	if idErr != nil {
+		return "", nil, idErr
+	}
+
+	queryBuilder := sqlbuilder.NewSelectBuilder().
+		Select(colDoc).
+		From(tableName)
+	queryBuilder.Where(queryBuilder.Equal(colID, id))
+	sqlQuery, args := queryBuilder.Build()
+
+	rows, err := d.DB.Query(sqlQuery, args...)
+	return id, rows, err
 }
