@@ -67,6 +67,7 @@ export class DashboardPage {
   readonly themeToggle: Locator;
 
   readonly toolbar: Locator;
+  readonly timePicker: Locator;
   readonly editButton: Locator;
   readonly cancelButton: Locator;
   readonly saveButton: Locator;
@@ -93,6 +94,7 @@ export class DashboardPage {
     this.themeToggle = page.getByRole('checkbox', { name: 'Theme' });
 
     this.toolbar = page.getByTestId('dashboard-toolbar');
+    this.timePicker = page.getByRole('button', { name: 'Select time range' });
     this.editButton = this.toolbar.getByRole('button', { name: 'Edit' });
     this.cancelButton = this.toolbar.getByRole('button', { name: 'Cancel' });
     this.saveButton = this.toolbar.getByRole('button', { name: 'Save' });
