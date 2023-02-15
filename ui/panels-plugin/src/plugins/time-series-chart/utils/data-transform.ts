@@ -17,7 +17,13 @@ import { EChartsTimeSeries } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
 import { StepOptions } from '../../../model/thresholds';
-import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS } from '../time-series-chart-model';
+import {
+  DEFAULT_AREA_OPACITY,
+  DEFAULT_LINE_WIDTH,
+  DEFAULT_POINT_RADIUS,
+  VisualOptions,
+} from '../time-series-chart-model';
+
 import { getRandomColor } from './palette-gen';
 
 export interface TimeScale {
@@ -149,6 +155,9 @@ export function getLineSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
+    },
+    areaStyle: {
+      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     emphasis: {
       lineStyle: {
