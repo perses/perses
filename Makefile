@@ -108,6 +108,10 @@ test: generate
 integration-test: generate
 	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
+.PHONY: mysql-integration-test
+mysql-integration-test: generate
+	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
+
 .PHONY: coverage-html
 coverage-html: integration-test
 	@echo ">> Print test coverage"

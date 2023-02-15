@@ -130,7 +130,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 		return queryErr
 	}
 
-	sqlQuery = fmt.Sprintf("%s ON DUPLICATE KEY UPDATE %s = %s", sqlQuery, colID, id)
+	sqlQuery = fmt.Sprintf("%s ON DUPLICATE KEY UPDATE %s = '%s'", sqlQuery, colID, id)
 
 	upsertQuery, upsertErr := d.DB.Query(sqlQuery, args...)
 	if upsertErr != nil {
