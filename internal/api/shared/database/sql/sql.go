@@ -112,9 +112,17 @@ func (d *DAO) Close() error {
 }
 
 func (d *DAO) Create(entity modelAPI.Entity) error {
-	_, sqlQuery, args, queryErr := d.generateInsertQuery(entity)
+	id, sqlQuery, args, queryErr := d.generateInsertQuery(entity)
 	if queryErr != nil {
 		return queryErr
+	}
+
+	isExist, err := d.exists(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	if err != nil {
+		return err
+	}
+	if isExist {
+		return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeConflict}
 	}
 
 	createQuery, createErr := d.DB.Query(sqlQuery, args...)
@@ -141,18 +149,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 }
 
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
-	id, tableName, idErr := d.getIDAndTableName(kind, metadata)
-	if idErr != nil {
-		return idErr
-	}
-
-	queryBuilder := sqlbuilder.NewSelectBuilder().
-		Select(colDoc).
-		From(tableName)
-	queryBuilder.Where(queryBuilder.Equal(colID, id))
-	sqlQuery, args := queryBuilder.Build()
-
-	query, queryErr := d.DB.Query(sqlQuery, args...)
+	id, query, queryErr := d.get(kind, metadata)
 	if queryErr != nil {
 		return queryErr
 	}
@@ -165,6 +162,31 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 		return json.Unmarshal([]byte(rowJSONDoc), entity)
 	}
 	return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
+}
+
+func (d *DAO) exists(kind modelV1.Kind, metadata modelAPI.Metadata) (bool, error) {
+	_, query, queryErr := d.get(kind, metadata)
+	if queryErr != nil {
+		return false, queryErr
+	}
+	defer query.Close()
+	return query.Next(), nil
+}
+
+func (d *DAO) get(kind modelV1.Kind, metadata modelAPI.Metadata) (string, *sql.Rows, error) {
+	id, tableName, idErr := d.getIDAndTableName(kind, metadata)
+	if idErr != nil {
+		return "", nil, idErr
+	}
+
+	queryBuilder := sqlbuilder.NewSelectBuilder().
+		Select(colDoc).
+		From(tableName)
+	queryBuilder.Where(queryBuilder.Equal(colID, id))
+	sqlQuery, args := queryBuilder.Build()
+
+	rows, err := d.DB.Query(sqlQuery, args...)
+	return id, rows, err
 }
 
 func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
