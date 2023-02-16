@@ -157,7 +157,7 @@ export function getLineSeries(
       width: lineWidth,
     },
     areaStyle: {
-      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
+      opacity: visual.area_shading ? DEFAULT_AREA_OPACITY : 0,
     },
     emphasis: {
       lineStyle: {

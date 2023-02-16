@@ -31,7 +31,7 @@ export const OptionsEditorControl = ({ label, control }: OptionsEditorControlPro
     <FormControl>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <FormLabel htmlFor={controlId}>{label}</FormLabel>
-        <Box sx={{ width: '150px', textAlign: 'right' }}> {React.cloneElement(control, controlProps)}</Box>
+        <Box sx={{ width: '160px', textAlign: 'right' }}> {React.cloneElement(control, controlProps)}</Box>
       </Stack>
     </FormControl>
   );

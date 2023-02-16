@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { VisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
+import userEvent from '@testing-library/user-event';
+import { DEFAULT_VISUAL, VisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
@@ -22,6 +23,10 @@ describe('VisualOptionsEditor', () => {
 
   const getLineWidthSlider = () => {
     return screen.getByTestId(VISUAL_CONFIG.line_width.testId);
+  };
+
+  const getAreaShadingSwitch = () => {
+    return screen.getByRole('checkbox', { name: VISUAL_CONFIG.area_shading.label });
   };
 
   it('can update the line width visual option', () => {
@@ -51,5 +56,14 @@ describe('VisualOptionsEditor', () => {
     // to move slider and update visual options
     fireEvent.mouseDown(sliderInput, { clientX: 220, clientY: 100 });
     expect(onChange).toHaveBeenCalledWith({ line_width: 1.25, point_radius: 2 });
+  });
+
+  it('can change area shading by clicking', () => {
+    const onChange = jest.fn();
+    renderVisualOptionsEditor(DEFAULT_VISUAL, onChange);
+
+    userEvent.click(getAreaShadingSwitch());
+
+    expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_VISUAL, area_shading: !DEFAULT_VISUAL.area_shading });
   });
 });

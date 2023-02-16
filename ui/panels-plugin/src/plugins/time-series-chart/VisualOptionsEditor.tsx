@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider } from '@mui/material';
+import { Slider, Switch } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
 import {
-  DEFAULT_AREA_OPACITY,
+  DEFAULT_AREA_SHADING,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
   VISUAL_CONFIG,
@@ -84,17 +84,16 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         }
       />
       <OptionsEditorControl
-        label={VISUAL_CONFIG.area_opacity.label}
+        label={VISUAL_CONFIG.area_shading.label}
         control={
-          <Slider
-            data-testid={VISUAL_CONFIG.area_opacity.testId}
-            value={value.area_opacity ?? DEFAULT_AREA_OPACITY}
-            valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.area_opacity.step}
-            marks
-            min={VISUAL_CONFIG.area_opacity.min}
-            max={VISUAL_CONFIG.area_opacity.max}
-            onChange={handleAreaOpacityChange}
+          <Switch
+            checked={value.area_shading ?? DEFAULT_AREA_SHADING}
+            onChange={(e) => {
+              onChange({
+                ...value,
+                area_shading: e.target.checked,
+              });
+            }}
           />
         }
       />
