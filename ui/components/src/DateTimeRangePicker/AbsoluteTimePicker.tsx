@@ -24,13 +24,14 @@ const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 interface AbsoluteTimeFormProps {
   initialTimeRange: AbsoluteTimeRange;
   onChange: (timeRange: AbsoluteTimeRange) => void;
+  onCancel: () => void;
 }
 
 type AbsoluteTimeRangeInputValue = {
   [Property in keyof AbsoluteTimeRange]: string;
 };
 
-export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeFormProps) => {
+export const AbsoluteTimePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps) => {
   const { formatWithUserTimeZone } = useTimeZone();
 
   // Time range values as dates that can be used as a time range.
@@ -199,11 +200,14 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
             type="tel"
           />
         </Stack>
-        <Box sx={{ padding: (theme) => theme.spacing(0, 1) }}>
-          <Button variant="contained" onClick={() => onApply()}>
+        <Stack direction="row" sx={{ padding: (theme) => theme.spacing(0, 1) }} gap={1}>
+          <Button variant="contained" onClick={() => onApply()} fullWidth>
             Apply
           </Button>
-        </Box>
+          <Button variant="outlined" onClick={() => onCancel()} fullWidth>
+            Cancel
+          </Button>
+        </Stack>
       </Stack>
     </LocalizationProvider>
   );

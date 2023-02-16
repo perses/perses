@@ -22,6 +22,11 @@ test.use({
 });
 
 test.describe('Time Picker', () => {
+  test('defaults to 6 hours', async ({ page, dashboardPage }) => {
+    await expect(dashboardPage.timePicker).toContainText('6 hours');
+    expect(page.url()).toContain('start=6h');
+  });
+
   test.describe('can select a custom time range', () => {
     test('using interactive calendar and clock', async ({ page, dashboardPage, timezoneId }) => {
       await dashboardPage.timePicker.click();
@@ -133,6 +138,35 @@ test.describe('Time Picker', () => {
 
       expect(page.url()).toContain(`start=${expectedStartMs}`);
       expect(page.url()).toContain(`end=${expectedEndMs}`);
+    });
+
+    test('and cancel to keep the previous time range', async ({ dashboardPage, page }) => {
+      await dashboardPage.timePicker.click();
+
+      await page.getByRole('option', { name: 'Custom time range' }).click();
+
+      const startTimeInput = page.getByLabel('Start Time');
+      await startTimeInput.clear();
+      await startTimeInput.type('2023-01-15 13:05:00');
+
+      const endTimeInput = page.getByLabel('End Time');
+      await endTimeInput.clear();
+      await endTimeInput.type('2023-02-01 10:00:00');
+
+      await page.getByRole('button', { name: 'Cancel' }).click();
+
+      // Time picker dropdown shows custom time range option
+      await expect(page.getByRole('option', { name: 'Custom time range' })).toBeVisible();
+
+      // Dismiss dropdown. This happens automatically when these steps are done
+      // manually, but is required in playwright. Guessing it is something
+      // subtle with the click targets and/or speed of actions.
+      await page.keyboard.press('Escape');
+
+      // Time picker shows the original time range.
+      await expect(dashboardPage.timePicker).toContainText('6 hours');
+      expect(page.url()).toContain('start=6h');
+      expect(page.url()).not.toContain('end=');
     });
   });
 });
