@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { Box, Stack, TextField, Typography } from '@mui/material';
+import { Box, Stack, TextField, Typography, Button } from '@mui/material';
 import { LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { AbsoluteTimeRange } from '@perses-dev/core';
@@ -24,34 +24,77 @@ const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
 interface AbsoluteTimeFormProps {
   initialTimeRange: AbsoluteTimeRange;
   onChange: (timeRange: AbsoluteTimeRange) => void;
+  onCancel: () => void;
 }
 
-export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeFormProps) => {
-  const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
-  const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
+type AbsoluteTimeRangeInputValue = {
+  [Property in keyof AbsoluteTimeRange]: string;
+};
+
+export const AbsoluteTimePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps) => {
   const { formatWithUserTimeZone } = useTimeZone();
 
-  // validate start and end time, propagate changes
-  const updateDateRange = (input: string, isStartDate: boolean) => {
-    const newDate = new Date(input);
-    if (isStartDate === true) {
-      const isValidDateRange = validateDateRange(newDate, timeRange.end);
-      if (isValidDateRange === true) {
-        setTimeRange((current) => {
-          const updatedRange = { start: newDate, end: current.end };
-          onChange(updatedRange);
-          return updatedRange;
-        });
-      }
-    } else {
-      const isValidDateRange = validateDateRange(timeRange.start, newDate);
-      if (isValidDateRange === true) {
-        setTimeRange((current) => {
-          const updatedRange = { start: current.start, end: newDate };
-          onChange(updatedRange);
-          return updatedRange;
-        });
-      }
+  // Time range values as dates that can be used as a time range.
+  const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
+
+  // Time range values as strings used to populate the text inputs. May not
+  // be valid as dates when the user is typing.
+  const [timeRangeInputs, setTimeRangeInputs] = useState<AbsoluteTimeRangeInputValue>({
+    start: formatWithUserTimeZone(initialTimeRange.start, DATE_TIME_FORMAT),
+    end: formatWithUserTimeZone(initialTimeRange.end, DATE_TIME_FORMAT),
+  });
+
+  const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
+
+  const changeTimeRange = (newTime: string | Date, segment: keyof AbsoluteTimeRange) => {
+    const isInputChange = typeof newTime === 'string';
+    const newInputTime = isInputChange ? newTime : formatWithUserTimeZone(newTime, DATE_TIME_FORMAT);
+
+    setTimeRangeInputs((prevTimeRangeInputs) => {
+      return {
+        ...prevTimeRangeInputs,
+        [segment]: newInputTime,
+      };
+    });
+
+    // When the change is a string from an input, do not try to convert it to
+    // a date because there are likely to be interim stages of editing where it
+    // is not valid as a date. When the change is a Date from the calendar/clock
+    // interface, we can be sure it is a date.
+    if (!isInputChange) {
+      setTimeRange((prevTimeRange) => {
+        return {
+          ...prevTimeRange,
+          [segment]: newTime,
+        };
+      });
+    }
+  };
+
+  const onChangeStartTime = (newStartTime: string | Date) => {
+    changeTimeRange(newStartTime, 'start');
+  };
+
+  const onChangeEndTime = (newEndTime: string | Date) => {
+    changeTimeRange(newEndTime, 'end');
+  };
+
+  const updateDateRange = () => {
+    const newDates = {
+      start: new Date(timeRangeInputs.start),
+      end: new Date(timeRangeInputs.end),
+    };
+    const isValidDateRange = validateDateRange(newDates.start, newDates.end);
+    if (isValidDateRange) {
+      setTimeRange(newDates);
+      return newDates;
+    }
+  };
+
+  const onApply = () => {
+    const newDates = updateDateRange();
+    if (newDates) {
+      onChange(newDates);
     }
   };
 
@@ -88,9 +131,7 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               value={initialTimeRange.start}
               onChange={(newValue) => {
                 if (newValue === null) return;
-                setTimeRange((current) => {
-                  return { start: newValue, end: current.end };
-                });
+                onChangeStartTime(newValue);
               }}
               onAccept={() => {
                 setShowStartCalendar(false);
@@ -124,13 +165,12 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
               minDateTime={timeRange.start}
               onChange={(newValue) => {
                 if (newValue === null) return;
-                setTimeRange((current) => {
-                  return { start: current.start, end: newValue };
-                });
+                onChangeEndTime(newValue);
               }}
-              onAccept={() => {
+              onAccept={(newValue) => {
+                if (newValue === null) return;
                 setShowStartCalendar(true);
-                onChange(timeRange);
+                onChangeEndTime(newValue);
               }}
               renderInput={(params) => <TextField {...params} />}
             />
@@ -140,23 +180,33 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange }: AbsoluteTimeF
           <TextField
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               // TODO: add helperText, fix validation after we decide on form state solution
-              updateDateRange(event.target.value, true);
+              onChangeStartTime(event.target.value);
             }}
-            value={formatWithUserTimeZone(timeRange.start, DATE_TIME_FORMAT)}
+            onBlur={() => updateDateRange()}
+            value={timeRangeInputs.start}
             label="Start Time"
-            placeholder="mm/dd/yyyy hh:mm"
+            placeholder={DATE_TIME_FORMAT}
             // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
             type="tel"
           />
           <TextField
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              updateDateRange(event.target.value, false);
+              onChangeEndTime(event.target.value);
             }}
-            value={formatWithUserTimeZone(timeRange.end, DATE_TIME_FORMAT)}
+            onBlur={() => updateDateRange()}
+            value={timeRangeInputs.end}
             label="End Time"
-            placeholder="mm/dd/yyyy hh:mm"
+            placeholder={DATE_TIME_FORMAT}
             type="tel"
           />
+        </Stack>
+        <Stack direction="row" sx={{ padding: (theme) => theme.spacing(0, 1) }} gap={1}>
+          <Button variant="contained" onClick={() => onApply()} fullWidth>
+            Apply
+          </Button>
+          <Button variant="outlined" onClick={() => onCancel()} fullWidth>
+            Cancel
+          </Button>
         </Stack>
       </Stack>
     </LocalizationProvider>
