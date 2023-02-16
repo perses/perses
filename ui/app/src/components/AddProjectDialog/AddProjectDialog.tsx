@@ -12,18 +12,10 @@
 // limitations under the License.
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, IconButton, Theme } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Button, TextField } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
 import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
 import { useSnackbar } from '../../context/SnackbarProvider';
-
-/**
- * Render the CSS of the dialog's close button, according to the given material theme.
- * @param theme material theme
- */
-const dialogCloseIconButtonStyle = function (theme: Theme) {
-  return { position: 'absolute', top: theme.spacing(0.5), right: theme.spacing(0.5) };
-};
 
 export interface AddProjectDialogProps {
   open: boolean;
@@ -38,7 +30,7 @@ export interface AddProjectDialogProps {
  * @param props.onConfirm Action to perform when user confirmed.
  * @constructor
  */
-const AddProjectDialog = (props: AddProjectDialogProps) => {
+export const AddProjectDialog = (props: AddProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -92,11 +84,8 @@ const AddProjectDialog = (props: AddProjectDialogProps) => {
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Add Project</DialogTitle>
-      <IconButton aria-label="Close" onClick={handleClose} sx={dialogCloseIconButtonStyle}>
-        <CloseIcon />
-      </IconButton>
-      <DialogContent dividers sx={{ width: '500px' }}>
+      <Dialog.Header>Add Project</Dialog.Header>
+      <Dialog.Content>
         <TextField
           required
           margin="dense"
@@ -109,17 +98,15 @@ const AddProjectDialog = (props: AddProjectDialogProps) => {
           error={!!error}
           helperText={error}
         />
-      </DialogContent>
-      <DialogActions>
+      </Dialog.Content>
+      <Dialog.Actions>
         <Button variant="contained" type="submit" disabled={!!error} onClick={handleSubmit}>
           Add
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClose}>
           Cancel
         </Button>
-      </DialogActions>
+      </Dialog.Actions>
     </Dialog>
   );
 };
-
-export default AddProjectDialog;
