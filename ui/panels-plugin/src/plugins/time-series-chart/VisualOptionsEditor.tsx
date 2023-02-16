@@ -43,14 +43,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     });
   };
 
-  const handleAreaOpacityChange = (_: Event, sliderValue: number | number[]) => {
-    const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
-    onChange({
-      ...value,
-      area_opacity: newValue,
-    });
-  };
-
   return (
     <OptionsEditorGroup title="Visual">
       <OptionsEditorControl
