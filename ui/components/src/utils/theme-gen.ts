@@ -17,13 +17,6 @@ import { EChartsTheme, PersesChartsTheme } from '../model';
 
 const DEFAULT_TEXT_COLOR = '#222';
 
-const ThresholdColors = {
-  GREEN: 'rgba(47, 191, 114, 1)', // green.500
-  YELLOW: 'rgba(255, 193, 7, 1)',
-  ORANGE: 'rgba(255, 159, 28, 0.9)', // orange.500
-  RED: 'rgba(234, 71, 71, 1)', // red.500
-};
-
 // avoid component override type errors since only palette and typography are used
 type MuiTheme = Omit<Theme, 'components'>;
 
@@ -189,8 +182,8 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       },
     },
     thresholds: {
-      defaultColor: ThresholdColors.GREEN,
-      palette: [ThresholdColors.YELLOW, ThresholdColors.ORANGE, ThresholdColors.RED],
+      defaultColor: muiTheme.palette.success.main,
+      palette: [muiTheme.palette.info.main, muiTheme.palette.warning.main, muiTheme.palette.error.main],
     },
   };
 }

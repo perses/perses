@@ -26,7 +26,7 @@ export const testChartsTheme: PersesChartsTheme = {
     },
   },
   thresholds: {
-    defaultColor: 'rgba(47, 191, 114, 1)', // green
-    palette: ['rgba(255, 193, 7, 1)', 'rgba(255, 159, 28, 0.9)', 'rgba(234, 71, 71, 1)'],
+    defaultColor: '#59CC8D',
+    palette: ['#438FEB', '#FFB249', '#EE6C6C'],
   },
 };

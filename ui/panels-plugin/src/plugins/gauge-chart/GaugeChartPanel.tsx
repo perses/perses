@@ -83,7 +83,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     }
   }
   const axisLineColors = convertThresholds(thresholds, unit, thresholdMax, thresholdsColors);
-  console.log('axisLineColors', axisLineColors);
+
   const axisLine: GaugeSeriesOption['axisLine'] = {
     show: true,
     lineStyle: {

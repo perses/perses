@@ -14,13 +14,7 @@
 import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo } from '@perses-dev/core';
-import {
-  PanelProps,
-  useTimeSeriesQueries,
-  useTimeRange,
-  StepOptions,
-  ThresholdColors,
-} from '@perses-dev/plugin-system';
+import { PanelProps, useTimeSeriesQueries, useTimeRange, StepOptions } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import {
@@ -178,7 +172,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
-      const defaultThresholdColor = thresholdsColors.defaultColor ?? ThresholdColors.RED;
+      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
       thresholds.steps.forEach((step: StepOptions, index: number) => {
         const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
         const thresholdLineColor = step.color ?? stepPaletteColor;
