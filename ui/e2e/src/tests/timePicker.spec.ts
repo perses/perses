@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { test, expect } from '../fixtures/dashboardTest';
+import { parseDateIntoTimeZone } from '../utils';
 
 test.use({
   dashboardName: 'Panels',
@@ -22,7 +23,7 @@ test.use({
 
 test.describe('Time Picker', () => {
   test.describe('can select a custom time range', () => {
-    test('using interactive calendar and clock', async ({ page, dashboardPage }) => {
+    test('using interactive calendar and clock', async ({ page, dashboardPage, timezoneId }) => {
       await dashboardPage.timePicker.click();
 
       await page.getByRole('option', { name: 'Custom time range' }).click();
@@ -75,7 +76,9 @@ test.describe('Time Picker', () => {
 
       await page.getByRole('button', { name: 'Apply' }).click();
 
-      const expectedTimeRange = '2023-02-04 03:15:15 - 2023-02-09 19:55:15';
+      const expectedStart = '2023-02-04 03:15:15';
+      const expectedEnd = '2023-02-09 19:55:15';
+      const expectedTimeRange = `${expectedStart} - ${expectedEnd}`;
 
       // Time picker dropdown shows the new time range
       await expect(page.getByRole('option', { name: expectedTimeRange })).toBeVisible();
@@ -87,9 +90,15 @@ test.describe('Time Picker', () => {
 
       // Time picker shows the new time range.
       await expect(dashboardPage.timePicker).toContainText(expectedTimeRange);
+
+      const expectedStartMs = parseDateIntoTimeZone(expectedStart, timezoneId).valueOf();
+      const expectedEndMs = parseDateIntoTimeZone(expectedEnd, timezoneId).valueOf();
+
+      expect(page.url()).toContain(`start=${expectedStartMs}`);
+      expect(page.url()).toContain(`end=${expectedEndMs}`);
     });
 
-    test('using text input', async ({ page, dashboardPage }) => {
+    test('using text input', async ({ page, dashboardPage, timezoneId }) => {
       await dashboardPage.timePicker.click();
 
       await page.getByRole('option', { name: 'Custom time range' }).click();
@@ -104,7 +113,9 @@ test.describe('Time Picker', () => {
 
       await page.getByRole('button', { name: 'Apply' }).click();
 
-      const expectedTimeRange = '2023-01-15 13:05:00 - 2023-02-01 10:00:00';
+      const expectedStart = '2023-01-15 13:05:00';
+      const expectedEnd = '2023-02-01 10:00:00';
+      const expectedTimeRange = `${expectedStart} - ${expectedEnd}`;
 
       // Time picker dropdown shows the new time range
       await expect(page.getByRole('option', { name: expectedTimeRange })).toBeVisible();
@@ -116,6 +127,12 @@ test.describe('Time Picker', () => {
 
       // Time picker shows the new time range.
       await expect(dashboardPage.timePicker).toContainText(expectedTimeRange);
+
+      const expectedStartMs = parseDateIntoTimeZone(expectedStart, timezoneId).valueOf();
+      const expectedEndMs = parseDateIntoTimeZone(expectedEnd, timezoneId).valueOf();
+
+      expect(page.url()).toContain(`start=${expectedStartMs}`);
+      expect(page.url()).toContain(`end=${expectedEndMs}`);
     });
   });
 });
