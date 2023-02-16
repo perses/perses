@@ -18,6 +18,7 @@ export type {
   PanelGroupDefinition,
   PanelGroupItemId,
   PanelGroupItemLayoutId as PanelGroupLayoutId,
+  PanelGroupItemLayout,
 } from './panel-group-slice';
 export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-editor-slice';
 export type { DeletePanelDialogState } from './delete-panel-slice';

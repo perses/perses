@@ -25,16 +25,16 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/pkg/model/api"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
+	modelAPI "github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 
-func MainTestScenario(t *testing.T, path string, creator func(name string) api.Entity) {
+func MainTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
 
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 
 			expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
@@ -42,13 +42,13 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) api.E
 				Expect().
 				Status(http.StatusOK)
 
-			return []api.Entity{entity}
+			return []modelAPI.Entity{entity}
 		})
 	})
 
 	// Conflict test : Call again the same endpoint, it should now return a conflict error
 	t.Run(fmt.Sprintf("Conflict test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 			CreateAndWaitUntilEntityExists(t, manager, entity)
 			expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
@@ -56,13 +56,13 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) api.E
 				Expect().
 				Status(http.StatusConflict)
 
-			return []api.Entity{entity}
+			return []modelAPI.Entity{entity}
 		})
 	})
 
 	// Retrieval tests : Check all different GET methods
 	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 			CreateAndWaitUntilEntityExists(t, manager, entity)
 			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
@@ -80,13 +80,13 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) api.E
 				Status(http.StatusOK).
 				JSON().Equal(entity)
 
-			return []api.Entity{entity}
+			return []modelAPI.Entity{entity}
 		})
 	})
 
 	// "404 - Not found" tests
 	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("not-existing")
 
 			expect.GET(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
@@ -100,13 +100,13 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) api.E
 				Expect().
 				Status(http.StatusNotFound)
 
-			return []api.Entity{}
+			return []modelAPI.Entity{}
 		})
 	})
 
 	// Update test
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 			CreateAndWaitUntilEntityExists(t, manager, entity)
 
@@ -124,7 +124,7 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) api.E
 				t.Fatal(err)
 			}
 
-			result, err := v1.GetStruct(v1.Kind(entity.GetKind()))
+			result, err := modelV1.GetStruct(modelV1.Kind(entity.GetKind()))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -138,13 +138,13 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) api.E
 			// check the document exists in the db
 			_, err = getFunc()
 			assert.NoError(t, err)
-			return []api.Entity{entity}
+			return []modelAPI.Entity{entity}
 		})
 	})
 
 	// Deletion test
 	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 			CreateAndWaitUntilEntityExists(t, manager, entity)
 
@@ -160,15 +160,29 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) api.E
 				Expect().
 				Status(http.StatusNotFound)
 
-			return []api.Entity{}
+			return []modelAPI.Entity{}
 		})
 	})
 }
 
-func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (api.Entity, api.Entity)) {
+func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			parent, entity := creator("myProject", "myResource")
+			CreateAndWaitUntilEntityExists(t, manager, parent)
+
+			expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusOK)
+
+			return []modelAPI.Entity{parent, entity}
+		})
+	})
+
+	t.Run("Creation with project path", func(t *testing.T) {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 
@@ -177,13 +191,13 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				Expect().
 				Status(http.StatusOK)
 
-			return []api.Entity{parent, entity}
+			return []modelAPI.Entity{parent, entity}
 		})
 	})
 
 	// Conflict test : Call again the same endpoint, it should now return a conflict error
 	t.Run(fmt.Sprintf("Conflict test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 			CreateAndWaitUntilEntityExists(t, manager, entity)
@@ -193,13 +207,13 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				Expect().
 				Status(http.StatusConflict)
 
-			return []api.Entity{parent, entity}
+			return []modelAPI.Entity{parent, entity}
 		})
 	})
 
 	// Retrieval tests : Check all different GET methods specifying the parent
 	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 			CreateAndWaitUntilEntityExists(t, manager, entity)
@@ -225,13 +239,13 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				Status(http.StatusOK).
 				JSON().Equal(entity)
 
-			return []api.Entity{parent, entity}
+			return []modelAPI.Entity{parent, entity}
 		})
 	})
 
 	// Global Retrieval tests : Check GET methods without specifying the parent
 	t.Run(fmt.Sprintf("Global Retrieval tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent1, entity1 := creator("myProject1", "myResource1")
 			parent2, entity2 := creator("myProject2", "myResource2")
 			CreateAndWaitUntilEntityExists(t, manager, parent1)
@@ -247,13 +261,13 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				Status(http.StatusOK).
 				JSON().Array().Contains(entity1, entity2)
 
-			return []api.Entity{parent1, parent2, entity1, entity2}
+			return []modelAPI.Entity{parent1, parent2, entity1, entity2}
 		})
 	})
 
 	// "404 - Not found" tests
 	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myParentResource", "not-exisiting")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 
@@ -269,13 +283,13 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				Expect().
 				Status(http.StatusNotFound)
 
-			return []api.Entity{parent}
+			return []modelAPI.Entity{parent}
 		})
 	})
 
 	// Update test
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 			CreateAndWaitUntilEntityExists(t, manager, entity)
@@ -293,7 +307,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				t.Fatal(err)
 			}
 
-			result, err := v1.GetStruct(v1.Kind(entity.GetKind()))
+			result, err := modelV1.GetStruct(modelV1.Kind(entity.GetKind()))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -307,13 +321,13 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 			// check the document exists in the db
 			_, err = getFunc()
 			assert.NoError(t, err)
-			return []api.Entity{parent, entity}
+			return []modelAPI.Entity{parent, entity}
 		})
 	})
 
 	// Deletion test
 	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myParentResource", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 			CreateAndWaitUntilEntityExists(t, manager, entity)
@@ -326,7 +340,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				Expect().
 				Status(http.StatusNotFound)
 
-			return []api.Entity{parent}
+			return []modelAPI.Entity{parent}
 		})
 	})
 

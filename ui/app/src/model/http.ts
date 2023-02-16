@@ -13,6 +13,7 @@
 
 export const HTTPMethodPOST = 'POST';
 export const HTTPMethodPUT = 'PUT';
+export const HTTPMethodDELETE = 'DELETE';
 export const HTTPHeader: Record<string, string> = {
   'Content-Type': 'application/json',
   Accept: 'application/json',

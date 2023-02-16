@@ -30,10 +30,8 @@ func withClient(t *testing.T, testFunc func(ClientInterface, dependency.Persiste
 	defer server.Close()
 	persesClient := createClient(t, server)
 	entities := testFunc(persesClient, persistenceManager)
-	for _, entity := range entities {
-		entityID := entity.GenerateID()
-		e2eframework.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entityID)
-	}
+	e2eframework.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+
 }
 
 func createClient(t *testing.T, server *httptest.Server) ClientInterface {

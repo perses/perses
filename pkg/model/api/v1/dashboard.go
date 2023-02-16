@@ -16,16 +16,13 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/prometheus/common/model"
 )
-
-func GenerateDashboardID(project string, name string) string {
-	return generateProjectResourceID("dashboards", project, name)
-}
 
 type PanelSpec struct {
 	Display common.Display `json:"display" yaml:"display"`
@@ -45,7 +42,7 @@ type DashboardSpec struct {
 	// dashboard
 	Duration  model.Duration       `json:"duration" yaml:"duration"`
 	Variables []dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Panels    map[string]*Panel    `json:"panels" yaml:"panels"` // kept as raw json as the validation is done with cuelang
+	Panels    map[string]*Panel    `json:"panels" yaml:"panels"`
 	Layouts   []dashboard.Layout   `json:"layouts" yaml:"layouts"`
 }
 
@@ -102,10 +99,6 @@ type Dashboard struct {
 	Spec     DashboardSpec   `json:"spec" yaml:"spec"`
 }
 
-func (d *Dashboard) GenerateID() string {
-	return GenerateDashboardID(d.Metadata.Project, d.Metadata.Name)
-}
-
 func (d *Dashboard) GetMetadata() modelAPI.Metadata {
 	return &d.Metadata
 }
@@ -147,6 +140,9 @@ func (d *Dashboard) UnmarshalYAML(unmarshal func(interface{}) error) error {
 func (d *Dashboard) validate() error {
 	if d.Kind != KindDashboard {
 		return fmt.Errorf("invalid kind: %q for a Dashboard type", d.Kind)
+	}
+	if reflect.DeepEqual(d.Spec, DashboardSpec{}) {
+		return fmt.Errorf("spec cannot be empty")
 	}
 	return d.verifyAndSetJSONReferences()
 }

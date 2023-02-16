@@ -23,8 +23,7 @@ import {
   OptionsEditorColumn,
   OptionsEditorControl,
 } from '@perses-dev/components';
-import { StatChartOptionsEditorProps } from './StatChartOptionsEditor';
-import { StatChartOptions } from './stat-chart-model';
+import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
 
 export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProps) {
   const { onChange, value } = props;

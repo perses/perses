@@ -1,7 +1,7 @@
 database:
   file:
     folder: "/perses"
-    file_extension: "json"
+    extension: "json"
 
 schemas:
   panels_path: "/etc/perses/schemas/panels"

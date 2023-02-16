@@ -45,6 +45,17 @@ const config: PlaywrightTestConfig = {
     baseURL: 'http://localhost:3000',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /**
+     * Disabled per playwright documentation, so we can reliably mock network
+     * requests.
+     * https://playwright.dev/docs/network#missing-network-events-and-service-workers
+     */
+    serviceWorkers: 'block',
+
+    // Use a consistent time zone, so we do not have to worry about flakiness
+    // depending on the server.
+    timezoneId: 'America/Los_Angeles',
   },
 
   /* Configure projects for major browsers */
@@ -53,6 +64,10 @@ const config: PlaywrightTestConfig = {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        // Keep this in sync with the setting in `.happo.js` for consistency for
+        // canvas elements, which are converted into images when run in playwright
+        // and sent to happo.
+        viewport: { width: 1200, height: 800 },
       },
     },
   ],

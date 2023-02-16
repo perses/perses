@@ -11,6 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const removeWhiteSpacesAndSpecialCharacters = (str: string) => {
-  return str.replace(/\s+/g, '');
-};
+export const CreateAction = 'create';

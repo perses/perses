@@ -13,39 +13,96 @@
 
 import { DashboardResource } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
-import { Divider, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { Box, Divider, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { useState } from 'react';
+import { dashboardDisplayName } from '@perses-dev/core/dist/utils/text';
+import { DeleteDashboardDialog } from './DeleteDashboardDialog/DeleteDashboardDialog';
+import { RenameDashboardDialog } from './RenameDashboardDialog/RenameDashboardDialog';
 
 export interface DashboardListProperties {
   dashboardList: DashboardResource[];
 }
 
 function DashboardList(props: DashboardListProperties) {
+  const { dashboardList } = props;
+
   const navigate = useNavigate();
+
+  const [targetedDashboard, setTargetedDashboard] = useState<DashboardResource>();
+  const [isRenameDashboardDialogStateOpened, setRenameDashboardDialogStateOpened] = useState<boolean>(false);
+  const [isDeleteDashboardDialogStateOpened, setDeleteDashboardDialogStateOpened] = useState<boolean>(false);
+
+  const onRenameButtonClick = (dashboard: DashboardResource) => {
+    setTargetedDashboard(dashboard);
+    setRenameDashboardDialogStateOpened(true);
+  };
+
+  const onDeleteButtonClick = (dashboard: DashboardResource) => {
+    setTargetedDashboard(dashboard);
+    setDeleteDashboardDialogStateOpened(true);
+  };
+
   return (
-    <List>
-      {props.dashboardList.map((dashboard, i) => {
-        return (
-          <>
-            {i !== 0 && <Divider key={`divider-${i}`} />}
-            <ListItem
-              disablePadding
-              sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }}
-              key={`list-item-${i}`}
-            >
-              <ListItemButton
-                onClick={() =>
-                  navigate(`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`)
+    <Box>
+      <List>
+        {dashboardList.map((dashboard, i) => {
+          return (
+            <>
+              {i !== 0 && <Divider key={`divider-${i}`} />}
+              <ListItem
+                disablePadding
+                sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }}
+                key={`list-item-${i}`}
+                secondaryAction={
+                  <ListItem>
+                    <IconButton
+                      edge="start"
+                      aria-label="rename"
+                      onClick={() => onRenameButtonClick(dashboard)}
+                      disabled={isRenameDashboardDialogStateOpened || isDeleteDashboardDialogStateOpened}
+                    >
+                      <PencilIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => onDeleteButtonClick(dashboard)}
+                      disabled={isRenameDashboardDialogStateOpened || isDeleteDashboardDialogStateOpened}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItem>
                 }
               >
-                <ListItemText
-                  primary={dashboard.spec.display ? dashboard.spec.display.name : dashboard.metadata.name}
-                />
-              </ListItemButton>
-            </ListItem>
-          </>
-        );
-      })}
-    </List>
+                <ListItemButton
+                  onClick={() =>
+                    navigate(`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`)
+                  }
+                >
+                  <ListItemText primary={dashboardDisplayName(dashboard)} />
+                </ListItemButton>
+              </ListItem>
+            </>
+          );
+        })}
+      </List>
+      {targetedDashboard && (
+        <Box>
+          <RenameDashboardDialog
+            open={isRenameDashboardDialogStateOpened}
+            onClose={() => setRenameDashboardDialogStateOpened(false)}
+            dashboard={targetedDashboard}
+          />
+          <DeleteDashboardDialog
+            open={isDeleteDashboardDialogStateOpened}
+            onClose={() => setDeleteDashboardDialogStateOpened(false)}
+            dashboard={targetedDashboard}
+          />
+        </Box>
+      )}
+    </Box>
   );
 }
 

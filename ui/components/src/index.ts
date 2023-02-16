@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './DateTimeRangePicker';
+export * from './Dialog';
 export * from './Drawer';
 export * from './EChart';
 export * from './ErrorAlert';

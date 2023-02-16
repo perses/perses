@@ -1,0 +1,7 @@
+version: 1
+timeout: '1m'
+
+validators:
+  # randomly it returns the error: status code 403: Forbidden
+  - regex: 'groups\.google\.com'
+    type: 'ignore'

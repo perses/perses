@@ -1,5 +1,4 @@
-Datasource Specification
-========================
+# Datasource Specification
 
 This documentation is describing how a datasource can be defined and can be used in a dashboard. It is the conclusion of
 the discussion #404.
@@ -50,10 +49,10 @@ GET /api/v1/projects/<project_name>/datasources
 
 URL query parameters:
 
-- kind = <string> : should be used to filter the list of datasources with a specific kind
-- default = <boolean> : should be used to filter the list of datasources to only have the default one. You should have
+- kind = `<string>` : should be used to filter the list of datasources with a specific kind
+- default = `<boolean>` : should be used to filter the list of datasources to only have the default one. You should have
   one default datasource per kind
-- name = <string> : should be used to filter the list of datasources based on the prefix name.
+- name = `<string>` : should be used to filter the list of datasources based on the prefix name.
 
 Example:
 
@@ -115,10 +114,10 @@ GET /api/v1/globaldatasources
 
 URL query parameters:
 
-- kind = <string> : should be used to filter the list of datasource with a specific kind
-- default = <boolean> : should be used to filter the list of datasource to only have the default one. You should have
+- kind = `<string>` : should be used to filter the list of datasource with a specific kind
+- default = `<boolean>` : should be used to filter the list of datasource to only have the default one. You should have
   one default datasource per kind
-- name = <string> : should be used to filter the list of datasource based on the prefix name.
+- name = `<string>` : should be used to filter the list of datasource based on the prefix name.
 
 Example:
 
@@ -375,8 +374,9 @@ another field in the selector like `level` which will indicate at what level the
 > scenario:
 > 1. You created a dashboard where you are selecting a Global Datasource called "Foo".
 > 2. After that, someone is creating a new datasource called "Foo" in the same project as the previous dashboard.
-     > As a result, the scope of the datasource selected change without modifying the dashboard. It can be a good or a
-     bad thing. Somehow I have a feeling it's more a bad thing that a good one.
+>
+>    > As a result, the scope of the datasource selected change without modifying the dashboard. It can be a good or a
+>    > bad thing. Somehow I have a feeling it's more a bad thing that a good one.
 
 ### How to use the Perses' proxy
 
@@ -388,6 +388,7 @@ server to contact the datasource. For that the FE will have to determinate which
 Perses server based on what kind of datasource is used.
 
 * datasource is at project scope.
+
   ```
     var datasource; 
     if datasource.kind == 'Datasource'; then 
@@ -395,6 +396,7 @@ Perses server based on what kind of datasource is used.
   ```
 
 * datasource is at global scope.
+
   ```
     var datasource; 
     if datasource.kind == 'GlobalDatasource'; then 

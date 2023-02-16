@@ -74,10 +74,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     }
   };
 
+  const testId = 'dashboard-toolbar';
+
   return (
     <>
       {isEditMode ? (
-        <Stack spacing={1}>
+        <Stack spacing={1} data-testid={testId}>
           <Box p={2} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
             {dashboardTitle}
             <Stack direction="row" spacing={1} marginLeft="auto">
@@ -137,7 +139,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
         </Stack>
       ) : (
-        <Stack spacing={1} padding={2}>
+        <Stack spacing={1} padding={2} data-testid={testId}>
           <Box sx={{ display: 'flex', width: '100%' }}>
             {dashboardTitle}
             <Stack direction="row" spacing={1} marginLeft="auto">

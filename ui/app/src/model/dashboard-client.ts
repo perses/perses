@@ -11,27 +11,100 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { DashboardResource, fetchJson } from '@perses-dev/core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { DashboardResource, fetch, fetchJson } from '@perses-dev/core';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodPOST, HTTPMethodPUT } from './http';
+import { HTTPHeader, HTTPMethodDELETE, HTTPMethodPOST, HTTPMethodPUT } from './http';
 
 const resource = 'dashboards';
 
-export function useCreateDashboard(
+/**
+ * Used to create a dashboard in the API.
+ * Will automatically invalidate dashboards and force the get query to be executed again.
+ */
+export function useCreateDashboardMutation(
   onSuccess?: (data: DashboardResource, variables: DashboardResource) => Promise<unknown> | unknown
 ) {
+  const queryClient = useQueryClient();
+
   return useMutation<DashboardResource, Error, DashboardResource>({
     mutationKey: [resource],
     mutationFn: (dashboard) => {
-      const url = buildURL({ resource: resource, project: dashboard.metadata.project });
-      return fetchJson<DashboardResource>(url, {
-        method: HTTPMethodPOST,
-        headers: HTTPHeader,
-        body: JSON.stringify(dashboard),
-      });
+      return createDashboard(dashboard);
     },
     onSuccess: onSuccess,
+    onSettled: () => {
+      return queryClient.invalidateQueries([resource]);
+    },
+  });
+}
+
+/**
+ * Used to get a dashboard in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useDashboard(project: string, name: string) {
+  return useQuery<DashboardResource, Error>([resource, project, name], () => {
+    const url = buildURL({ resource: resource, name: name, project: project });
+    return fetchJson<DashboardResource>(url);
+  });
+}
+
+/**
+ * Used to get dashboards in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useDashboardList(project?: string) {
+  return useQuery<DashboardResource[], Error>([resource, project], () => {
+    const url = buildURL({ resource: resource, project: project });
+    return fetchJson<DashboardResource[]>(url);
+  });
+}
+
+/**
+ * Used to update a dashboard in the API.
+ * Will automatically invalidate dashboards and force the get query to be executed again.
+ */
+export function useUpdateDashboardMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<DashboardResource, Error, DashboardResource>({
+    mutationKey: [resource],
+    mutationFn: (dashboard) => {
+      return updateDashboard(dashboard);
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries([resource]);
+    },
+  });
+}
+
+/**
+ * Used to delete a dashboard in the API.
+ * Will automatically invalidate dashboards and force the get query to be executed again.
+ */
+export function useDeleteDashboardMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<DashboardResource, Error, DashboardResource>({
+    mutationKey: [resource],
+    mutationFn: (entity: DashboardResource) => {
+      return deleteDashboard(entity).then(() => {
+        return entity;
+      });
+    },
+    onSuccess: (dashboard) => {
+      queryClient.removeQueries([resource, dashboard.metadata.project, dashboard.metadata.name]);
+      return queryClient.invalidateQueries([resource]);
+    },
+  });
+}
+
+export function createDashboard(entity: DashboardResource) {
+  const url = buildURL({ resource: resource, project: entity.metadata.project });
+  return fetchJson<DashboardResource>(url, {
+    method: HTTPMethodPOST,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
   });
 }
 
@@ -44,16 +117,10 @@ export function updateDashboard(entity: DashboardResource) {
   });
 }
 
-export function useDashboard(project: string, name: string) {
-  return useQuery<DashboardResource, Error>([resource, project, name], () => {
-    const url = buildURL({ resource: resource, name: name, project: project });
-    return fetchJson<DashboardResource>(url);
-  });
-}
-
-export function useDashboardList(project?: string) {
-  return useQuery<DashboardResource[], Error>([resource, project], () => {
-    const url = buildURL({ resource: resource, project: project });
-    return fetchJson<DashboardResource[]>(url);
+export function deleteDashboard(entity: DashboardResource) {
+  const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetch(url, {
+    method: HTTPMethodDELETE,
+    headers: HTTPHeader,
   });
 }

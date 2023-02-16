@@ -36,23 +36,23 @@
     "use-resize-observer": "^9.0.0"
   },
   "devDependencies": {
-    "@svgr/webpack": "^6.3.0",
+    "@svgr/webpack": "^6.5.1",
     "@types/circular-dependency-plugin": "^5.0.5",
     "@types/loadable__component": "^5.13.4",
-    "@types/webpack-bundle-analyzer": "^4.4.1",
+    "@types/webpack-bundle-analyzer": "^4.6.0",
     "circular-dependency-plugin": "^5.2.2",
     "css-loader": "^6.7.1",
     "dotenv-defaults": "^5.0.2",
     "eslint-webpack-plugin": "^3.2.0",
-    "fork-ts-checker-webpack-plugin": "^7.2.13",
+    "fork-ts-checker-webpack-plugin": "^7.3.0",
     "html-webpack-plugin": "^5.5.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.9.1",
-    "webpack": "^5.73.0",
-    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack": "^5.75.0",
+    "webpack-bundle-analyzer": "^4.7.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3",
+    "webpack-dev-server": "^4.11.1",
     "webpack-merge": "^5.8.0"
   }
 }

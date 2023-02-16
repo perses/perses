@@ -25,6 +25,7 @@ import {
   LineChart,
   YAxisLabel,
   ZoomEventData,
+  useChartsTheme,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
@@ -46,6 +47,20 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     spec: { queries, thresholds, y_axis },
     contentDimensions,
   } = props;
+  const chartsTheme = useChartsTheme();
+
+  // TODO: consider refactoring how the layout/spacing/alignment are calculated
+  // the next time significant changes are made to the time series panel (e.g.
+  // when making improvements to the legend to more closely match designs).
+  // This may also want to include moving some of this logic down to the shared,
+  // embeddable components.
+  const contentPadding = chartsTheme.container.padding.default;
+  const adjustedContentDimensions: typeof contentDimensions = contentDimensions
+    ? {
+        width: contentDimensions.width - contentPadding * 2,
+        height: contentDimensions.height - contentPadding * 2,
+      }
+    : undefined;
 
   // populate default 'position' and other future properties
   const legend =
@@ -53,13 +68,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       ? merge({}, DEFAULT_LEGEND, props.spec.legend)
       : undefined;
 
-  // TODO: eventually remove props.spec.unit, add support for y_axis_alt.unit
-  let unit = DEFAULT_UNIT;
-  if (props.spec.y_axis?.unit) {
-    unit = props.spec.y_axis.unit;
-  } else if (props.spec.unit) {
-    unit = props.spec.unit;
-  }
+  // TODO: add support for y_axis_alt.unit
+  const unit = props.spec.y_axis?.unit ?? DEFAULT_UNIT;
 
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
@@ -74,7 +84,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
-  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
+  const suggestedStepMs = useSuggestedStepMs(adjustedContentDimensions?.width);
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
   const fetching = queryResults.some((result) => result.isFetching);
   const loading = queryResults.some((result) => result.isLoading);
@@ -182,7 +192,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
   }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading]);
 
-  if (contentDimensions === undefined) {
+  if (adjustedContentDimensions === undefined) {
     return null;
   }
 
@@ -190,10 +200,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={contentDimensions.width}
-        height={contentDimensions.height}
+        width={adjustedContentDimensions.width}
+        height={adjustedContentDimensions.height}
       >
-        <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
+        <Skeleton
+          variant="text"
+          width={adjustedContentDimensions.width - 20}
+          height={adjustedContentDimensions.height / 2}
+          aria-label="Loading..."
+        />
       </Box>
     );
   }
@@ -209,8 +224,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  const legendWidth = legend && legend.position === 'Right' ? 200 : contentDimensions.width;
-  const legendHeight = legend && legend.position === 'Right' ? contentDimensions.height : 40;
+  const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
+  const legendHeight = legend && legend.position === 'Right' ? adjustedContentDimensions.height : 40;
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
@@ -226,10 +241,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   return (
-    <>
-      {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
+    <Box sx={{ padding: `${contentPadding}px`, position: 'relative' }}>
+      {y_axis && y_axis.show && y_axis.label && (
+        <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
+      )}
       <LineChart
-        height={contentDimensions.height}
+        height={adjustedContentDimensions.height}
         data={graphData}
         yAxis={yAxis}
         unit={unit}
@@ -239,6 +256,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       {legend && graphData.legendItems && (
         <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
       )}
-    </>
+    </Box>
   );
 }

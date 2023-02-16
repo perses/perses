@@ -16,8 +16,9 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import shallow from 'zustand/shallow';
-import { createContext, useCallback, useContext, useState } from 'react';
-import { DashboardResource, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { DashboardResource, Display, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
+import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
@@ -25,6 +26,7 @@ import { createPanelSlice, PanelSlice } from './panel-slice';
 import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
 import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 import { createDiscardChangesDialogSlice, DiscardChangesConfirmationDialogSlice } from './discard-changes-dialog-slice';
+import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -33,12 +35,14 @@ export interface DashboardStoreState
     DeletePanelGroupSlice,
     PanelEditorSlice,
     DeletePanelSlice,
-    DiscardChangesConfirmationDialogSlice {
+    DiscardChangesConfirmationDialogSlice,
+    DuplicatePanelSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
   setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
+  display?: Display;
 }
 
 export interface DashboardStoreProps {
@@ -48,7 +52,7 @@ export interface DashboardStoreProps {
 
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
@@ -64,7 +68,19 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 export function DashboardProvider(props: DashboardProviderProps) {
   const createDashboardStore = useCallback(initStore, [props]);
 
+  // load plugin to retrieve initial spec if default panel kind is defined
+  const { defaultPluginKinds } = usePluginRegistry();
+  const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
+  const { data: plugin } = usePlugin('Panel', defaultPanelKind);
+
   const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
+
+  useEffect(() => {
+    if (plugin === undefined) return;
+    const spec = plugin.createInitialOptions();
+    // set default panel kind and spec for add panel editor
+    store.setState({ initialValues: { kind: defaultPanelKind, spec } });
+  }, [plugin, store, defaultPanelKind]);
 
   return (
     <DashboardContext.Provider value={store as StoreApi<DashboardStoreState>}>
@@ -79,7 +95,7 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { layouts, panels, duration },
+    spec: { display, layouts, panels, duration },
     metadata,
   } = dashboardResource;
   const store = createStore<DashboardStoreState>()(
@@ -94,13 +110,16 @@ function initStore(props: DashboardProviderProps) {
           ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
           ...createDiscardChangesDialogSlice(...args),
+          ...createDuplicatePanelSlice()(...args),
           metadata,
+          display,
           defaultTimeRange: { pastDuration: duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { panels, layouts } }) => {
+          setDashboard: ({ metadata, spec: { display, panels, layouts } }) => {
             set((state) => {
               state.metadata = metadata;
+              state.display = display;
               const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panels = panels;
               state.panelGroups = panelGroups;

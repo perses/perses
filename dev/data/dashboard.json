@@ -40,13 +40,10 @@
         }
       ],
       "panels": {
-        "seriesTest": {
+        "defaultTimeSeriesChart": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "1500+ Series",
-              "description": "This is a line chart"
-            },
+            "display": { "name": "Default Time Series Panel" },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -57,18 +54,17 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "rate(caddy_http_request_duration_seconds_bucket[$interval])"
+                          "query": "up"
                         }
                       }
                     }
                   }
-                ],
-                "unit": { "kind": "Bytes" }
+                ]
               }
             }
           }
         },
-        "seriesTestAlt": {
+        "seriesTest": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -91,7 +87,12 @@
                     }
                   }
                 ],
-                "unit": { "kind": "Bytes" }
+                "y_axis": {
+                  "unit": {
+                    "kind": "Bytes",
+                    "abbreviate": true
+                  }
+                }
               }
             }
           }
@@ -117,7 +118,9 @@
                     }
                   }
                 ],
-                "unit": { "kind": "Decimal" },
+                "y_axis": {
+                  "unit": { "kind": "Decimal" }
+                },
                 "legend": {
                   "position": "Right"
                 }
@@ -187,7 +190,10 @@
                 },
                 "y_axis": {
                   "show": true,
-                  "unit": { "kind": "Bytes" }
+                  "unit": {
+                    "kind": "Bytes",
+                    "abbreviate": true
+                  }
                 }
               }
             }
@@ -217,7 +223,9 @@
                     }
                   }
                 ],
-                "unit": { "kind": "Decimal", "decimal_places": 2 },
+                "y_axis": {
+                  "unit": { "kind": "Decimal", "decimal_places": 2 }
+                },
                 "legend": {
                   "position": "Right"
                 }
@@ -251,7 +259,9 @@
                 "legend": {
                   "position": "Right"
                 },
-                "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
+                "y_axis": {
+                  "unit": { "kind": "PercentDecimal", "decimal_places": 1 }
+                },
                 "thresholds": {
                   "steps": [
                     {
@@ -691,9 +701,16 @@
               {
                 "x": 0,
                 "y": 6,
-                "width": 24,
+                "width": 12,
                 "height": 8,
                 "content": { "$ref": "#/spec/panels/cpuLine" }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 8,
+                "content": { "$ref": "#/spec/panels/defaultTimeSeriesChart" }
               }
             ]
           }
@@ -758,28 +775,10 @@
         }
       ],
       "panels": {
-        "markdownEx": {
+        "defaultTimeSeriesChart": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "Dashboard Team Overview",
-              "description": "This is a markdown panel"
-            },
-            "plugin": {
-              "kind": "Markdown",
-              "spec": {
-                "text": "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\nHere is `some inline code`.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n* two bullet\n* points\n\nDo you want to [visit the google](https://www.google.com)?\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>When inlining HTML, will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n"
-              }
-            }
-          }
-        },
-        "seriesTest": {
-          "kind": "Panel",
-          "spec": {
-            "display": {
-              "name": "1500+ Series",
-              "description": "This is a line chart"
-            },
+            "display": { "name": "Default Time Series Panel" },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -790,20 +789,32 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "rate(caddy_http_request_duration_seconds_bucket[$interval])"
+                          "query": "up"
                         }
                       }
                     }
                   }
-                ],
-                "unit": {
-                  "kind": "Bytes"
-                }
+                ]
               }
             }
           }
         },
-        "seriesTestAlt": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Dashboard Team Overview",
+              "description": "This is a markdown panel"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "# First header\n\nFirst header\n=========\n\n## Second header\n\nSecond header\n---------\n\n### Third header\n\n#### Fourth header\n\n*Italic*\n\n_Italic_\n\n**Bold**\n\n__Bold__\n\n[Link](http://a.com)\n\n[Link][1]\n\n[1]: http://b.org\n\n> Blockquote\n\n* List\n* List\n* List\n\n- List\n- List\n- List\n\n1. One\n2. Two\n3. Three\n\n1) One\n2) Two\n3) Three\n\n---\n\n***\n\n`Inline code` with backticks\n\n```\n# code block\nprint '3 backticks or'\nprint 'indent 4 spaces'\n```\n\n| Name | Data |\n| -- | -- |\n| Row 1 | Hi |\n| Row 2 | Hi |\n\n## Attempts at XSS\n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h3>When inlining HTML, will this header be here?</h3><a href='www.google.com'>Will this regular link be here?</a><br/><a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n"
+              }
+            }
+          }
+        },
+        "seriesTest": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -826,9 +837,11 @@
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "Decimal",
-                  "decimal_places": 4
+                "y_axis": {
+                  "unit": {
+                    "kind": "Decimal",
+                    "decimal_places": 4
+                  }
                 }
               }
             }
@@ -856,9 +869,11 @@
                     }
                   }
                 ],
-                "unit": {
-                  "kind": "PercentDecimal",
-                  "decimal_places": 0
+                "y_axis": {
+                  "unit": {
+                    "kind": "PercentDecimal",
+                    "decimal_places": 0
+                  }
                 }
               }
             }
@@ -867,9 +882,7 @@
         "legendEx": {
           "kind": "Panel",
           "spec": {
-            "display": {
-              "name": "Legend Example"
-            },
+            "display": { "name": "Legend Example" },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -880,7 +893,8 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"} - node_memory_MemFree_bytes{job=\"node\",instance=\"$instance\"} - node_memory_Buffers_bytes{job=\"node\",instance=\"$instance\"} - node_memory_Cached_bytes{job=\"node\",instance=\"$instance\"}"
+                          "series_name_format": "Node memory total",
+                          "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
@@ -891,7 +905,8 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_Buffers_bytes{job=\"node\",instance=\"$instance\"}"
+                          "series_name_format": "Memory (buffers) - {{instance}}",
+                          "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
@@ -902,7 +917,8 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_Cached_bytes{job=\"node\",instance=\"$instance\"}"
+                          "series_name_format": "Cached Bytes",
+                          "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
@@ -913,7 +929,8 @@
                       "plugin": {
                         "kind": "PrometheusTimeSeriesQuery",
                         "spec": {
-                          "query": "node_memory_MemFree_bytes{job=\"node\",instance=\"$instance\"}"
+                          "series_name_format": "MemFree Bytes",
+                          "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
                         }
                       }
                     }
@@ -922,14 +939,18 @@
                 "legend": {
                   "position": "Bottom"
                 },
-                "unit": {
-                  "kind": "Bytes"
+                "y_axis": {
+                  "show": true,
+                  "unit": {
+                    "kind": "Bytes",
+                    "abbreviate": true
+                  }
                 }
               }
             }
           }
         },
-        "doubleQueries": {
+        "thresholdsEx": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -973,11 +994,11 @@
                 "thresholds": {
                   "steps": [
                     {
-                      "value": 0.4,
+                      "value": 1.5,
                       "name": "Alert: Warning condition example"
                     },
                     {
-                      "value": 0.75,
+                      "value": 3,
                       "name": "Alert: Critical condition example"
                     }
                   ]
@@ -1007,7 +1028,9 @@
                     }
                   }
                 ],
-                "unit": { "kind": "PercentDecimal", "decimal_places": 0 },
+                "y_axis": {
+                  "unit": { "kind": "PercentDecimal", "decimal_places": 0 }
+                },
                 "legend": {
                   "position": "Bottom"
                 },
@@ -1327,7 +1350,7 @@
                 "width": 12,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/doubleQueries"
+                  "$ref": "#/spec/panels/thresholdsEx"
                 }
               },
               {
@@ -1355,19 +1378,28 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 12,
+                "width": 8,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/legendEx"
+                  "$ref": "#/spec/panels/cpu"
                 }
               },
               {
-                "x": 12,
+                "x": 8,
                 "y": 0,
-                "width": 12,
+                "width": 8,
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/basicEx"
+                }
+              },
+              {
+                "x": 16,
+                "y": 0,
+                "width": 8,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/defaultTimeSeriesChart"
                 }
               }
             ]
@@ -1389,7 +1421,7 @@
                 "width": 12,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/cpu"
+                  "$ref": "#/spec/panels/legendEx"
                 }
               },
               {
@@ -1398,7 +1430,7 @@
                 "width": 12,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/doubleQueries"
+                  "$ref": "#/spec/panels/thresholdsEx"
                 }
               }
             ]
@@ -1572,10 +1604,987 @@
               {
                 "x": 0,
                 "y": 0,
+                "width": 6,
+                "height": 4,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 2",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "Variables",
+      "project": "testing",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2022-12-21T00:00:00Z",
+      "version": 0
+    },
+    "spec": {
+      "duration": "6h",
+      "variables": [],
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Markdown Example Zero",
+              "description": "This is a markdown panel"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Example"
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
                 "width": 12,
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/markdownEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 2",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "MarkdownPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-26T20:03:02.724739Z",
+      "version": 3,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "Code": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Code",
+              "description": "Markdown code formatting"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "`Inline code` with backticks\n\n```\n# code block\nprint '3 backticks or'\nprint 'indent 4 spaces'\n```"
+              }
+            }
+          }
+        },
+        "Headings": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Headings",
+              "description": "Markdown headings"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "# First header\n\nFirst header\n=========\n\n## Second header\n\nSecond header\n---------\n\n### Third header\n\n#### Fourth header"
+              }
+            }
+          }
+        },
+        "Links": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Links",
+              "description": "Markdown links"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "\n[Link](http://a.com)\n\n[Link][1]\n\n[1]: http://b.org"
+              }
+            }
+          }
+        },
+        "Lists": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Lists",
+              "description": "Markdown lists"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "* List\n* List\n* List\n\n- List\n- List\n- List\n\n1. One\n2. Two\n3. Three\n\n1) One\n2) Two\n3) Three"
+              }
+            }
+          }
+        },
+        "Tables": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Tables",
+              "description": "Markdown table"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "| Name | Data |\n| -- | -- |\n| Row 1 | Hi |\n| Row 2 | Hi |"
+              }
+            }
+          }
+        },
+        "Text": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Text",
+              "description": "Markdown text formatting"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "Unformatted\n\n*Italic*\n\n_Italic_\n\n**Bold**\n\n__Bold__\n\n> Blockquote\n\n---\n\n***"
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 8,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Headings"
+                }
+              },
+              {
+                "x": 8,
+                "y": 0,
+                "width": 8,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Text"
+                }
+              },
+              {
+                "x": 0,
+                "y": 10,
+                "width": 8,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Code"
+                }
+              },
+              {
+                "x": 16,
+                "y": 10,
+                "width": 8,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Tables"
+                }
+              },
+              {
+                "x": 8,
+                "y": 10,
+                "width": 8,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Lists"
+                }
+              },
+              {
+                "x": 16,
+                "y": 0,
+                "width": 8,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/Links"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "TimeSeriesChartPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-25T17:43:56.745494Z",
+      "version": 3,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "SingleLine": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Line",
+              "description": "Time series chart with a single line"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 9,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/SingleLine"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "GaugeChartPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-26T17:29:46.991965Z",
+      "version": 5,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "SingleGauge": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Gauge",
+              "description": "Gauge chart with a single gauge"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "Mean",
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "100 - ((node_memory_MemAvailable_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"} * 100) / node_memory_MemTotal_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"})"
+                      }
+                    }
+                  }
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0.8
+                    },
+                    {
+                      "value": 0.9
+                    }
+                  ]
+                },
+                "unit": {
+                  "kind": "Percent"
+                }
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 9,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/SingleGauge"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "StatChartPanel",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-01-27T00:35:26.333638Z",
+      "version": 8,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "SimpleStat": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Simple Stat",
+              "description": "Stat chart with a single value"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "calculation": "Mean",
+                "query": {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "query": "prometheus_http_requests_total{instance=\"demo.do.prometheus.io:9090\",code!=\"200\"}"
+                      }
+                    }
+                  }
+                },
+                "sparkline": {},
+                "unit": {
+                  "abbreviate": false,
+                  "kind": "Decimal"
+                }
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 9,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/SimpleStat"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "DuplicatePanels",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-02-07T00:28:57.658905Z",
+      "version": 14,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "6h",
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-10": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 8"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 8"
+              }
+            }
+          }
+        },
+        "markdownEx-11": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-12": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-13": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-14": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 1"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 1"
+              }
+            }
+          }
+        },
+        "markdownEx-15": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        },
+        "markdownEx-16": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 1"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 1"
+              }
+            }
+          }
+        },
+        "markdownEx-2": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 1"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 1"
+              }
+            }
+          }
+        },
+        "markdownEx-3": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 2"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 2"
+              }
+            }
+          }
+        },
+        "markdownEx-4": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 3"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 3"
+              }
+            }
+          }
+        },
+        "markdownEx-5": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 4"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 4"
+              }
+            }
+          }
+        },
+        "markdownEx-6": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 5"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 5"
+              }
+            }
+          }
+        },
+        "markdownEx-7": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 6"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 6"
+              }
+            }
+          }
+        },
+        "markdownEx-8": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "other panel 7"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## another panel 7"
+              }
+            }
+          }
+        },
+        "markdownEx-9": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "panel being duplicated",
+              "description": "This panel will be duplicated"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Duplicate me"
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel with space to right",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 4,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel with space to left",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 18,
+                "y": 0,
+                "width": 6,
+                "height": 4,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-11"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel with space on both sides",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 8,
+                "y": 0,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-12"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "single panel without space on same line",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 4,
+                "y": 0,
+                "width": 14,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-9"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "multiple panels with space next to original",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-13"
+                }
+              },
+              {
+                "x": 15,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-14"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "multiple panels with space not next to original",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-15"
+                }
+              },
+              {
+                "x": 7,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-16"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "multiple panels w/o space & more panels below",
+              "collapse": {
+                "open": false
+              }
+            },
+            "items": [
+              {
+                "x": 18,
+                "y": 0,
+                "width": 6,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-4"
+                }
+              },
+              {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-1"
+                }
+              },
+              {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-2"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-3"
+                }
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "width": 3,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-8"
+                }
+              },
+              {
+                "x": 21,
+                "y": 5,
+                "width": 3,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-10"
+                }
+              },
+              {
+                "x": 0,
+                "y": 6,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-5"
+                }
+              },
+              {
+                "x": 7,
+                "y": 6,
+                "width": 4,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-6"
+                }
+              },
+              {
+                "x": 11,
+                "y": 6,
+                "width": 7,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx-7"
                 }
               }
             ]

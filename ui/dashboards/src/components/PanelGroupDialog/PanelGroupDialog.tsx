@@ -68,7 +68,7 @@ export function PanelGroupDialog() {
             <Button variant="contained" type="submit" form={panelGroupEditorFormId}>
               {panelGroupEditor.mode === 'Edit' ? 'Apply' : 'Add'}
             </Button>
-            <Button variant="outlined" onClick={panelGroupEditor.close}>
+            <Button variant="outlined" color="secondary" onClick={panelGroupEditor.close}>
               Cancel
             </Button>
           </DialogActions>

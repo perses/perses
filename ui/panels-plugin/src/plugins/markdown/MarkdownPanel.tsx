@@ -16,18 +16,24 @@ import * as DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { Box, Theme } from '@mui/material';
 import { PanelProps } from '@perses-dev/plugin-system';
+import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 
-function createMarkdownPanelStyles(theme: Theme) {
+function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme) {
   return {
+    padding: `${chartsTheme.container.padding.default}px`,
     // Make the content scrollable
     height: '100%',
     overflowY: 'auto',
-    // Ignore first margin
+    // Ignore top margin on the first element.
     '& :first-child': {
       marginTop: 0,
+    },
+    // Styles for headers
+    '& h1': {
+      fontSize: '2em',
     },
     // Styles for <code>
     '& code': { fontSize: '0.85em' },
@@ -58,12 +64,13 @@ function createMarkdownPanelStyles(theme: Theme) {
   };
 }
 
-// Convert markdown text to HTML, with support for original markdown and Github Flavored Markdown
-function convertTextToHTML(text: string): string {
+// Convert markdown to HTML
+// Supports original markdown and GitHub Flavored markdown
+function markdownToHTML(text: string): string {
   return marked.parse(text, { gfm: true });
 }
 
-// Sanitize HTML (i.e. prevent XSS attacks by removing the vectors for these attacks)
+// Prevent XSS attacks by removing the vectors for attacks
 function sanitizeHTML(html: string): string {
   return DOMPurify.sanitize(html);
 }
@@ -72,9 +79,15 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
     spec: { text },
   } = props;
+  const chartsTheme = useChartsTheme();
 
-  const html = useMemo(() => convertTextToHTML(text), [text]);
+  const html = useMemo(() => markdownToHTML(text), [text]);
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 
-  return <Box sx={createMarkdownPanelStyles} dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
+  return (
+    <Box
+      sx={(theme) => createMarkdownPanelStyles(theme, chartsTheme)}
+      dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+    />
+  );
 }

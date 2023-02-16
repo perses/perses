@@ -30,12 +30,13 @@ export interface DashboardAppProps {
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
   onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
+  onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource, dashboardTitleComponent, onSave, initialVariableIsSticky, isReadonly } = props;
+  const { dashboardResource, dashboardTitleComponent, onSave, onDiscard, initialVariableIsSticky, isReadonly } = props;
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
@@ -50,6 +51,9 @@ export const DashboardApp = (props: DashboardAppProps) => {
     }
     setEditMode(false);
     closeDiscardChangesConfirmationDialog();
+    if (onDiscard) {
+      onDiscard(dashboard);
+    }
   };
 
   const onEditButtonClick = () => {

@@ -20,6 +20,17 @@ export interface PersesChartsTheme {
     width: number;
     color: string;
   };
+  /**
+   * Theming for the container that wraps a chart.
+   */
+  container: {
+    /**
+     * Padding in pixels.
+     */
+    padding: {
+      default: number;
+    };
+  };
 }
 
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207

@@ -18,7 +18,7 @@ import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelOptionsEditorProps = OptionsEditorProps<MarkdownPanelOptions>;
 
-const MARKDOWN_GUIDE_URL = 'https://www.markdownguide.org/cheat-sheet';
+const MARKDOWN_GUIDE_URL = 'https://commonmark.org/help/';
 const TEXT_INPUT_NUM_ROWS = 20;
 
 export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProps) {

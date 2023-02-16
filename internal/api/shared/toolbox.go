@@ -18,7 +18,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/common/etcd"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
 
@@ -39,7 +39,7 @@ type ToolboxService interface {
 	Update(entity api.Entity, parameters Parameters) (interface{}, error)
 	Delete(parameters Parameters) error
 	Get(parameters Parameters) (interface{}, error)
-	List(q etcd.Query, parameters Parameters) (interface{}, error)
+	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -49,7 +49,7 @@ type Toolbox interface {
 	Update(ctx echo.Context, entity api.Entity) error
 	Delete(ctx echo.Context) error
 	Get(ctx echo.Context) error
-	List(ctx echo.Context, q etcd.Query) error
+	List(ctx echo.Context, q databaseModel.Query) error
 }
 
 func NewToolBox(service ToolboxService) Toolbox {
@@ -103,7 +103,7 @@ func (t *toolbox) Get(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, entity)
 }
 
-func (t *toolbox) List(ctx echo.Context, q etcd.Query) error {
+func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
 		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
 	}

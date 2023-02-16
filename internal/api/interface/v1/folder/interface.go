@@ -14,13 +14,13 @@
 package folder
 
 import (
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/shared"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type Query struct {
-	etcd.Query
+	databaseModel.Query
 	// NamePrefix is a prefix of the Folders.metadata.name that is used to filter the list of the Folders.
 	// NamePrefix can be empty in case you want to return the full list of Folders available.
 	NamePrefix string `query:"name"`
@@ -29,16 +29,12 @@ type Query struct {
 	Project string `param:"project" query:"project"`
 }
 
-func (q *Query) Build() (string, error) {
-	return v1.GenerateFolderID(q.Project, q.NamePrefix), nil
-}
-
 type DAO interface {
 	Create(entity *v1.Folder) error
 	Update(entity *v1.Folder) error
 	Delete(project string, name string) error
 	Get(project string, name string) (*v1.Folder, error)
-	List(q etcd.Query) ([]*v1.Folder, error)
+	List(q databaseModel.Query) ([]*v1.Folder, error)
 }
 
 type Service interface {

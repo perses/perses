@@ -14,45 +14,42 @@
 package datasource
 
 import (
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
-	"github.com/perses/perses/internal/api/shared/database"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type dao struct {
 	datasource.DAO
-	client database.DAO
+	client databaseModel.DAO
+	kind   v1.Kind
 }
 
-func NewDAO(persesDAO database.DAO) datasource.DAO {
+func NewDAO(persesDAO databaseModel.DAO) datasource.DAO {
 	return &dao{
 		client: persesDAO,
+		kind:   v1.KindDatasource,
 	}
 }
 
 func (d *dao) Create(entity *v1.Datasource) error {
-	key := entity.GenerateID()
-	return d.client.Create(key, entity)
+	return d.client.Create(entity)
 }
 
 func (d *dao) Update(entity *v1.Datasource) error {
-	key := entity.GenerateID()
-	return d.client.Upsert(key, entity)
+	return d.client.Upsert(entity)
 }
 
 func (d *dao) Delete(project string, name string) error {
-	key := v1.GenerateDatasourceID(project, name)
-	return d.client.Delete(key)
+	return d.client.Delete(d.kind, v1.NewProjectMetadata(project, name))
 }
 
 func (d *dao) Get(project string, name string) (*v1.Datasource, error) {
-	key := v1.GenerateDatasourceID(project, name)
 	entity := &v1.Datasource{}
-	return entity, d.client.Get(key, entity)
+	return entity, d.client.Get(d.kind, v1.NewProjectMetadata(project, name), entity)
 }
 
-func (d *dao) List(q etcd.Query) ([]*v1.Datasource, error) {
+func (d *dao) List(q databaseModel.Query) ([]*v1.Datasource, error) {
 	var result []*v1.Datasource
 	err := d.client.Query(q, &result)
 	return result, err

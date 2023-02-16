@@ -20,7 +20,7 @@ export interface Plugin<Spec> {
   /**
    * React component for editing the plugin's options in the UI.
    */
-  OptionsEditorComponent: React.ComponentType<OptionsEditorProps<Spec>>;
+  OptionsEditorComponent?: React.ComponentType<OptionsEditorProps<Spec>>;
 
   /**
    * Callback for creating the initial options for the plugin.
