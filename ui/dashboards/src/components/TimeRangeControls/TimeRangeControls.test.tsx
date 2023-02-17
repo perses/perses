@@ -50,7 +50,7 @@ describe('TimeRangeControls', () => {
   it('should default to dashboard duration and update selected time option when clicked', async () => {
     renderTimeRangeControls(false);
     expect(screen.getByText('Last 30 minutes')).toBeInTheDocument();
-    const dateButton = screen.getByRole('button', { name: /last/i });
+    const dateButton = screen.getByRole('button', { name: /time range/i });
     userEvent.click(dateButton);
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);
@@ -59,7 +59,7 @@ describe('TimeRangeControls', () => {
 
   it('should update URL params with correct time range values', () => {
     renderTimeRangeControls(true);
-    const dateButton = screen.getByRole('button', { name: /last/i });
+    const dateButton = screen.getByRole('button', { name: /time range/i });
     userEvent.click(dateButton);
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);

@@ -43,6 +43,9 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
       value={formattedValue}
       onChange={onSelectChange}
       IconComponent={Calendar}
+      inputProps={{
+        'aria-label': `Select time range. Currently set to ${formattedValue}`,
+      }}
       sx={{
         '.MuiSelect-icon': {
           marginTop: '1px',
