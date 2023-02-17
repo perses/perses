@@ -83,7 +83,7 @@ export const VISUAL_CONFIG = {
     testId: 'slider-area-opacity',
     min: 0,
     max: 1,
-    step: 0.1,
+    step: 0.05,
   },
 };
 
