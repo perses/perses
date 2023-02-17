@@ -20,6 +20,7 @@ package common
 }
 
 #thresholds: {
+	mode?: string
 	default_color?: string
 	steps?: [...#stepOption]
 }

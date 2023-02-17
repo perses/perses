@@ -71,9 +71,9 @@ describe('convertThresholds', () => {
       ],
     };
     const bytesOutput = [
-      [0.8, 'rgba(47, 191, 114, 1)'],
-      [0.9, 'rgba(255, 159, 28, 0.9)'],
-      [1, 'rgba(234, 71, 71, 1)'],
+      [0.8, thresholdsColors.defaultColor],
+      [0.9, thresholdsColors.palette[0]],
+      [1, thresholdsColors.palette[1]],
     ];
     expect(convertThresholds(bytesInput, { kind: 'Bytes' }, 10000, thresholdsColors)).toEqual(bytesOutput);
   });

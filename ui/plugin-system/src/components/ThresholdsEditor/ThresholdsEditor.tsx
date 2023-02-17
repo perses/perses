@@ -1,12 +1,25 @@
+// Copyright 2023 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import React, { RefObject, useEffect, useRef, useState } from 'react';
 import produce from 'immer';
-import { IconButton, styled, TextField, Typography } from '@mui/material';
+import { IconButton, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
-import CircleIcon from 'mdi-material-ui/Circle';
 import { Stack } from '@mui/system';
-import { ColorPicker, OptionsEditorGroup, useChartsTheme } from '@perses-dev/components';
+import { InfoTooltip, OptionsEditorGroup, useChartsTheme } from '@perses-dev/components';
 import { ThresholdOptions } from '../../model/thresholds';
+import { ThresholdColorPicker } from './ThresholdColorPicker';
 
 interface ThresholdsEditorProps {
   thresholds?: ThresholdOptions;
@@ -33,7 +46,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
     focusRef.current = false;
   }, [steps?.length]);
 
-  const handleThresholdChange: (e: React.ChangeEvent<HTMLInputElement>, i: number) => void = (e, i) => {
+  const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>, i: number) => {
     setSteps(
       produce(steps, (draft) => {
         const step = draft?.[i];
@@ -69,7 +82,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
     }
   };
 
-  // sort thresholds in descending order every time an input blurs
+  // sort thresholds in ascending order every time an input blurs
   const handleThresholdBlur = () => {
     if (steps !== undefined) {
       const sortedSteps = [...steps];
@@ -107,11 +120,21 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
           const steps = draft.steps;
           if (steps?.length) {
             const lastStep = steps[steps.length - 1];
-            const color = palette[steps.length] ?? getRandomColor(); // we will assign color from the palette first, then randomly generate color
+            const color = palette[steps.length] ?? getRandomColor(); // we will assign color from the palette first, then generate random color
             steps.push({ color, value: (lastStep?.value ?? 0) + 10 });
           } else if (steps) {
             steps.push({ value: 10 });
           }
+        })
+      );
+    }
+  };
+
+  const handleModeChange = (event: React.MouseEvent, value: string): void => {
+    if (thresholds !== undefined) {
+      onChange(
+        produce(thresholds, (draft) => {
+          draft.mode = value === 'percentage' ? 'percentage' : undefined;
         })
       );
     }
@@ -126,6 +149,19 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
         </IconButton>
       }
     >
+      <ToggleButtonGroup
+        exclusive
+        value={thresholds?.mode ?? 'absolute'}
+        onChange={handleModeChange}
+        sx={{ height: '36px', marginLeft: 'auto' }}
+      >
+        <ToggleButton aria-label="absolute" value="absolute">
+          <InfoTooltip description="Absolute">#</InfoTooltip>
+        </ToggleButton>
+        <ToggleButton aria-label="percentage" value="percentage">
+          <InfoTooltip description="Percentage means thresholds relative to min & max">%</InfoTooltip>
+        </ToggleButton>
+      </ToggleButtonGroup>
       {steps &&
         steps
           .map((step, i) => (
@@ -154,7 +190,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
   );
 }
 
-interface ThresholdInputProps {
+export interface ThresholdInputProps {
   index: number;
   color: string;
   value: number;
@@ -186,56 +222,6 @@ function ThresholdInput({
     </Stack>
   );
 }
-
-function ThresholdColorPicker({ color, onColorChange }: Pick<ThresholdInputProps, 'color' | 'onColorChange'>) {
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
-  const isOpen = Boolean(anchorEl);
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const {
-    thresholds: { defaultColor, palette },
-  } = useChartsTheme();
-
-  return (
-    <>
-      <ColorIconButton
-        size="small"
-        aria-label="change threshold color"
-        iconColor={color}
-        isSelected={isOpen}
-        onClick={handleClick}
-      >
-        <CircleIcon />
-      </ColorIconButton>
-      <ColorPicker
-        initialColor={color}
-        onColorChange={onColorChange}
-        palette={[defaultColor, ...palette]}
-        open={isOpen}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      />
-    </>
-  );
-}
-
-const ColorIconButton = styled(IconButton)<{ iconColor?: string; isSelected?: boolean }>(
-  ({ iconColor, isSelected }) => ({
-    color: iconColor,
-    backgroundColor: isSelected && iconColor ? `${iconColor}3F` : 'undefined', // 3F represents 25% opacity
-  })
-);
 
 // https://www.paulirish.com/2009/random-hex-color-code-snippets/
 const getRandomColor = () => {

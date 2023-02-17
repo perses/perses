@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GaugeChartOptions } from './gauge-chart-model';
@@ -30,7 +31,11 @@ const MOCK_QUERY = {
 
 describe('GaugeChartOptionsEditorSettings', () => {
   const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = jest.fn()) => {
-    render(<GaugeChartOptionsEditorSettings value={value} onChange={onChange} />);
+    render(
+      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+        <GaugeChartOptionsEditorSettings value={value} onChange={onChange} />
+      </ChartsThemeProvider>
+    );
   };
 
   it('can modify unit', () => {
