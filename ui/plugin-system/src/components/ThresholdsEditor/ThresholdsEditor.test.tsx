@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import produce from 'immer';
 import { ThresholdOptions } from '../../model';
