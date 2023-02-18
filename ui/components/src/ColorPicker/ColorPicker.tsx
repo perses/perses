@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Popover, PopoverProps, Stack, TextField } from '@mui/material';
+import { IconButton, Stack, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import CircleIcon from 'mdi-material-ui/Circle';
 
-interface ColorPickerProps extends PopoverProps {
+interface ColorPickerProps {
   initialColor?: string;
   onColorChange?: (color: string) => void;
   /**
@@ -25,7 +25,7 @@ interface ColorPickerProps extends PopoverProps {
   palette?: string[];
 }
 
-export const ColorPicker = ({ initialColor, onColorChange, palette, ...props }: ColorPickerProps) => {
+export const ColorPicker = ({ initialColor, onColorChange, palette }: ColorPickerProps) => {
   const [color, setColor] = useState(initialColor);
   const [value, setValue] = useState(color);
 
@@ -41,30 +41,34 @@ export const ColorPicker = ({ initialColor, onColorChange, palette, ...props }: 
     // only set color if input value is a valid hex color
     if (isValidHex(e.target.value)) {
       setColor(e.target.value);
+      onColorChange && onColorChange(e.target.value);
     }
   };
 
   return (
-    <Popover {...props} PaperProps={{ sx: { padding: (theme) => theme.spacing(2) } }}>
-      <Stack spacing={1}>
-        <HexColorPicker color={color} onChange={handleColorChange} />
-        <Stack direction="row" flexWrap="wrap" justifyContent="space-evenly" width={'200px'}>
-          {palette &&
-            palette.map((color, i) => (
-              <IconButton
-                key={i}
-                size="small"
-                aria-label="change threshold color"
-                sx={{ color }}
-                onClick={() => handleColorChange(color)}
-              >
-                <CircleIcon />
-              </IconButton>
-            ))}
-        </Stack>
-        <TextField fullWidth value={value} onChange={handleInputChange} />
+    <Stack spacing={1}>
+      <HexColorPicker color={color} onChange={handleColorChange} />
+      <Stack direction="row" flexWrap="wrap" justifyContent="space-evenly" width={'200px'}>
+        {palette &&
+          palette.map((color, i) => (
+            <IconButton
+              key={i}
+              size="small"
+              aria-label={`change color to ${color}`}
+              sx={{ color }}
+              onClick={() => handleColorChange(color)}
+            >
+              <CircleIcon />
+            </IconButton>
+          ))}
       </Stack>
-    </Popover>
+      <TextField
+        inputProps={{ 'aria-label': 'enter hex color' }}
+        fullWidth
+        value={value}
+        onChange={handleInputChange}
+      />
+    </Stack>
   );
 };
 

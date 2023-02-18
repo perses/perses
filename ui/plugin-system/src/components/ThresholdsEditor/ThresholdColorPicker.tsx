@@ -12,12 +12,16 @@
 // limitations under the License.
 
 import React from 'react';
-import { styled, IconButton } from '@mui/material';
+import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
 import { useChartsTheme, ColorPicker } from '@perses-dev/components';
 import { ThresholdInputProps } from './ThresholdsEditor';
 
-export function ThresholdColorPicker({ color, onColorChange }: Pick<ThresholdInputProps, 'color' | 'onColorChange'>) {
+export function ThresholdColorPicker({
+  color,
+  onColorChange,
+  label,
+}: Pick<ThresholdInputProps, 'color' | 'onColorChange' | 'label'>) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
@@ -33,20 +37,19 @@ export function ThresholdColorPicker({ color, onColorChange }: Pick<ThresholdInp
     <>
       <ColorIconButton
         size="small"
-        aria-label="change threshold color"
+        aria-label={`change threshold ${label} color`}
         isSelected={isOpen}
         iconColor={color}
         onClick={handleClick}
       >
         <CircleIcon />
       </ColorIconButton>
-      <ColorPicker
-        initialColor={color}
-        onColorChange={onColorChange}
-        palette={[defaultColor, ...palette]}
+      <Popover
+        data-testid="threshold color picker"
         open={isOpen}
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
+        PaperProps={{ sx: { padding: (theme) => theme.spacing(2) } }}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'left',
@@ -55,7 +58,9 @@ export function ThresholdColorPicker({ color, onColorChange }: Pick<ThresholdInp
           vertical: 'top',
           horizontal: 'right',
         }}
-      />
+      >
+        <ColorPicker initialColor={color} onColorChange={onColorChange} palette={[defaultColor, ...palette]} />
+      </Popover>
     </>
   );
 }

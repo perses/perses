@@ -13,7 +13,7 @@
 
 import React, { RefObject, useEffect, useRef, useState } from 'react';
 import produce from 'immer';
-import { IconButton, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { FormLabel, IconButton, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
@@ -168,7 +168,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
             <ThresholdInput
               inputRef={i === steps.length - 1 ? recentlyAddedInputRef : undefined}
               key={i}
-              index={i}
+              label={`T${i + 1}`}
               color={step.color ?? palette[i] ?? defaultThresholdColor}
               value={step.value}
               onColorChange={(color) => handleThresholdColorChange(color, i)}
@@ -183,7 +183,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
           ))
           .reverse()}
       <Stack flex={1} direction="row" alignItems="center" spacing={1}>
-        <ThresholdColorPicker color={defaultThresholdColor} onColorChange={handleDefaultColorChange} />
+        <ThresholdColorPicker label="default" color={defaultThresholdColor} onColorChange={handleDefaultColorChange} />
         <Typography>Default</Typography>
       </Stack>
     </OptionsEditorGroup>
@@ -191,7 +191,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
 }
 
 export interface ThresholdInputProps {
-  index: number;
+  label: string;
   color: string;
   value: number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -203,7 +203,7 @@ export interface ThresholdInputProps {
 
 function ThresholdInput({
   inputRef,
-  index,
+  label,
   color,
   value,
   onChange,
@@ -213,10 +213,10 @@ function ThresholdInput({
 }: ThresholdInputProps) {
   return (
     <Stack flex={1} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-      <ThresholdColorPicker color={color} onColorChange={onColorChange} />
-      <Typography>{`T${index + 1}`}</Typography>
-      <TextField inputRef={inputRef} type="number" value={value} onChange={onChange} onBlur={onBlur} />
-      <IconButton size="small" onClick={onDelete}>
+      <ThresholdColorPicker label={label} color={color} onColorChange={onColorChange} />
+      <FormLabel htmlFor={label}>{label}</FormLabel>
+      <TextField id={label} inputRef={inputRef} type="number" value={value} onChange={onChange} onBlur={onBlur} />
+      <IconButton aria-label={`delete threshold ${label}`} size="small" onClick={onDelete}>
         <DeleteIcon />
       </IconButton>
     </Stack>
