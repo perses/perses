@@ -125,17 +125,17 @@ func (d *DAO) Close() error {
 }
 
 func (d *DAO) Create(entity modelAPI.Entity) error {
-	id, sqlQuery, args, queryErr := d.generateInsertQuery(entity)
-	if queryErr != nil {
-		return queryErr
-	}
-
-	isExist, err := d.exists(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	id, isExist, err := d.exists(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if err != nil {
 		return err
 	}
 	if isExist {
 		return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeConflict}
+	}
+
+	sqlQuery, args, queryErr := d.generateInsertQuery(entity)
+	if queryErr != nil {
+		return queryErr
 	}
 
 	createQuery, createErr := d.DB.Query(sqlQuery, args...)
@@ -146,18 +146,25 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 }
 
 func (d *DAO) Upsert(entity modelAPI.Entity) error {
-	id, sqlQuery, args, queryErr := d.generateInsertQuery(entity)
-	if queryErr != nil {
-		return queryErr
+	_, isExist, err := d.exists(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	if err != nil {
+		return err
 	}
-
-	sqlQuery = fmt.Sprintf("%s ON DUPLICATE KEY UPDATE %s = '%s'", sqlQuery, colID, id)
-
+	var sqlQuery string
+	var args []interface{}
+	var queryGeneratorErr error
+	if !isExist {
+		sqlQuery, args, queryGeneratorErr = d.generateInsertQuery(entity)
+	} else {
+		sqlQuery, args, queryGeneratorErr = d.generateUpdateQuery(entity)
+	}
+	if queryGeneratorErr != nil {
+		return queryGeneratorErr
+	}
 	upsertQuery, upsertErr := d.DB.Query(sqlQuery, args...)
 	if upsertErr != nil {
 		return upsertErr
 	}
-
 	return upsertQuery.Close()
 }
 
@@ -242,17 +249,17 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 }
 
 func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
-	id, tableName, idErr := d.getIDAndTableName(kind, metadata)
-	if idErr != nil {
-		return idErr
-	}
-
-	isExist, err := d.exists(kind, metadata)
+	id, isExist, err := d.exists(kind, metadata)
 	if err != nil {
 		return err
 	}
 	if !isExist {
 		return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
+	}
+
+	id, tableName, idErr := d.getIDAndTableName(kind, metadata)
+	if idErr != nil {
+		return idErr
 	}
 
 	deleteBuilder := sqlbuilder.NewDeleteBuilder().DeleteFrom(tableName)
@@ -291,13 +298,13 @@ func (d *DAO) generateCompleteTableName(tableName string) string {
 	return fmt.Sprintf("%s.%s", d.SchemaName, tableName)
 }
 
-func (d *DAO) exists(kind modelV1.Kind, metadata modelAPI.Metadata) (bool, error) {
-	_, query, queryErr := d.get(kind, metadata)
+func (d *DAO) exists(kind modelV1.Kind, metadata modelAPI.Metadata) (string, bool, error) {
+	id, query, queryErr := d.get(kind, metadata)
 	if queryErr != nil {
-		return false, queryErr
+		return "", false, queryErr
 	}
 	defer query.Close()
-	return query.Next(), nil
+	return id, query.Next(), nil
 }
 
 func (d *DAO) get(kind modelV1.Kind, metadata modelAPI.Metadata) (string, *sql.Rows, error) {

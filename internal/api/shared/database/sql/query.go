@@ -44,14 +44,14 @@ func generateResourceInsertQuery(tableName string, id string, rowJSONDoc []byte,
 		Build()
 }
 
-func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, string, []interface{}, error) {
+func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []interface{}, error) {
 	id, tableName, idErr := d.getIDAndTableName(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if idErr != nil {
-		return "", "", nil, idErr
+		return "", nil, idErr
 	}
 	rowJSONDoc, unmarshalErr := json.Marshal(entity)
 	if unmarshalErr != nil {
-		return "", "", nil, unmarshalErr
+		return "", nil, unmarshalErr
 	}
 	var sql string
 	var args []interface{}
@@ -61,7 +61,23 @@ func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, string, []int
 	case *modelV1.Metadata:
 		sql, args = generateResourceInsertQuery(tableName, id, rowJSONDoc, m)
 	}
-	return id, sql, args, nil
+	return sql, args, nil
+}
+
+func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}, error) {
+	id, tableName, idErr := d.getIDAndTableName(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	if idErr != nil {
+		return "", nil, idErr
+	}
+	rowJSONDoc, unmarshalErr := json.Marshal(entity)
+	if unmarshalErr != nil {
+		return "", nil, unmarshalErr
+	}
+	builder := sqlbuilder.NewUpdateBuilder().Update(tableName)
+	builder.Where(builder.Equal(colID, id))
+	builder.Set(builder.Assign(colDoc, rowJSONDoc))
+	sql, args := builder.Build()
+	return sql, args, nil
 }
 
 func generateProjectResourceSelectQuery(tableName string, project string, name string) (string, []interface{}) {
