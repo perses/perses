@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, IconButton } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Button, TextField } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
 
 export interface CreateDashboardDialogProps {
   open: boolean;
@@ -66,19 +66,8 @@ export const CreateDashboardDialog = (props: CreateDashboardDialogProps) => {
 
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
-      <DialogTitle id="confirm-dialog">Create Dashboard</DialogTitle>
-      <IconButton
-        aria-label="Close"
-        onClick={handleClose}
-        sx={(theme) => ({
-          position: 'absolute',
-          top: theme.spacing(0.5),
-          right: theme.spacing(0.5),
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
-      <DialogContent dividers sx={{ width: '500px' }}>
+      <Dialog.Header>Create Dashboard</Dialog.Header>
+      <Dialog.Content>
         <TextField
           required
           margin="dense"
@@ -91,15 +80,15 @@ export const CreateDashboardDialog = (props: CreateDashboardDialogProps) => {
           error={!!error}
           helperText={error}
         />
-      </DialogContent>
-      <DialogActions>
+      </Dialog.Content>
+      <Dialog.Actions>
         <Button variant="contained" disabled={!!error} onClick={handleSubmit}>
           Add
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClose}>
           Cancel
         </Button>
-      </DialogActions>
+      </Dialog.Actions>
     </Dialog>
   );
 };
