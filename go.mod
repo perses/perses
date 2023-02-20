@@ -10,7 +10,7 @@ require (
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.17.0
-	github.com/prometheus/common v0.39.0
+	github.com/prometheus/common v0.40.0
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.14.0
 	github.com/sirupsen/logrus v1.9.0
