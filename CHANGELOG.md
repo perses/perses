@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.23.1 / 2023-02-20
+
+- [ENHANCEMENT] upgrade zustand to latest (#972)
+
 ## 0.23.0 / 2023-02-17
 
 - [FEATURE] Add ability to duplicate panels (#949)
