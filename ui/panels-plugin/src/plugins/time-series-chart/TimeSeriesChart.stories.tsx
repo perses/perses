@@ -32,11 +32,7 @@ export default {
   args: {},
 } as Meta;
 
-export const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
-  // {
-  //   resource: prometheusResource as PluginModuleResource,
-  //   importPlugin: () => import('@perses-dev/prometheus-plugin'),
-  // },
+const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
     resource: panelsResource as PluginModuleResource,
     importPlugin: () => import('@perses-dev/panels-plugin'),
