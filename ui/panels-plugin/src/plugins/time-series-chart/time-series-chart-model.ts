@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { OptionsEditorProps, ThresholdOptions } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.

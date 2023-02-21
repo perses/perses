@@ -13,8 +13,8 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo } from '@perses-dev/core';
-import { PanelProps, useTimeSeriesQueries, useTimeRange, StepOptions } from '@perses-dev/plugin-system';
+import { useDeepMemo, StepOptions } from '@perses-dev/core';
+import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import {

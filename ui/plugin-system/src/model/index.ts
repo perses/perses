@@ -17,6 +17,5 @@ export * from './panels';
 export * from './plugins';
 export * from './plugin-base';
 export * from './plugin-loading';
-export * from './thresholds';
 export * from './time-series-queries';
 export * from './variables';

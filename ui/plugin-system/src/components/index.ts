@@ -19,4 +19,3 @@ export * from './PluginKindSelect';
 export * from './PluginRegistry';
 export * from './PluginSpecEditor';
 export * from './TimeSeriesQueryEditor';
-export * from './ThresholdsEditor';

@@ -17,8 +17,10 @@ import { FormLabel, IconButton, TextField, ToggleButton, ToggleButtonGroup, Typo
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
-import { InfoTooltip, OptionsEditorGroup, useChartsTheme } from '@perses-dev/components';
-import { ThresholdOptions } from '../../model/thresholds';
+import { ThresholdOptions } from '@perses-dev/core';
+import { InfoTooltip } from '../InfoTooltip';
+import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { OptionsEditorGroup } from '../OptionsEditorLayout';
 import { ThresholdColorPicker } from './ThresholdColorPicker';
 
 interface ThresholdsEditorProps {
@@ -134,7 +136,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
     if (thresholds !== undefined) {
       onChange(
         produce(thresholds, (draft) => {
-          draft.mode = value === 'percentage' ? 'percentage' : undefined;
+          draft.mode = value === 'Percent' ? 'Percent' : undefined;
         })
       );
     }
@@ -155,10 +157,10 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
         onChange={handleModeChange}
         sx={{ height: '36px', marginLeft: 'auto' }}
       >
-        <ToggleButton aria-label="absolute" value="absolute">
+        <ToggleButton aria-label="absolute" value="Absolute">
           <InfoTooltip description="Absolute">#</InfoTooltip>
         </ToggleButton>
-        <ToggleButton aria-label="percentage" value="percentage">
+        <ToggleButton aria-label="percent" value="Percent">
           <InfoTooltip description="Percentage means thresholds relative to min & max">%</InfoTooltip>
         </ToggleButton>
       </ToggleButtonGroup>

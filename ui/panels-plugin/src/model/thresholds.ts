@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { UnitOptions, ThresholdColorPalette } from '@perses-dev/components';
-import { StepOptions, ThresholdOptions } from '@perses-dev/plugin-system';
+import { StepOptions, ThresholdOptions } from '@perses-dev/core';
 import { zip } from 'lodash-es';
 
 export type GaugeColorStop = [number, string];
@@ -35,7 +35,7 @@ export function convertThresholds(
     // color segments must be decimal between 0 and 1
     const segmentMax = 1;
     const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => {
-      if (thresholds.mode === 'percentage') {
+      if (thresholds.mode === 'Percent') {
         return step.value / 100;
       }
       return step.value / max;

@@ -18,7 +18,7 @@ export interface StepOptions {
 }
 
 export interface ThresholdOptions {
-  mode?: 'percentage' | 'absolute';
+  mode?: 'Percent' | 'Absolute';
   default_color?: string;
   max?: number; // is this same as the max in GaugeChartOptions? can we remove?
   steps?: StepOptions[];

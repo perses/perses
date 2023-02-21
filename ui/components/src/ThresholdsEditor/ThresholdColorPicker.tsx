@@ -14,7 +14,8 @@
 import React from 'react';
 import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
-import { useChartsTheme, ColorPicker } from '@perses-dev/components';
+import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { ColorPicker } from '../ColorPicker';
 import { ThresholdInputProps } from './ThresholdsEditor';
 
 export function ThresholdColorPicker({

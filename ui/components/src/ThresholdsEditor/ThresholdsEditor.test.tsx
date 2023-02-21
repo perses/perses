@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
+import { ThresholdOptions } from '@perses-dev/core';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import produce from 'immer';
-import { ThresholdOptions } from '../../model';
+import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
+import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
 
 describe('ThresholdsEditor', () => {
@@ -140,11 +141,11 @@ describe('ThresholdsEditor', () => {
 
   it('should update threshold mode', () => {
     renderThresholdEditor(thresholds, onChange);
-    const percentageButton = screen.getByLabelText('percentage');
+    const percentageButton = screen.getByLabelText('percent');
     userEvent.click(percentageButton);
     expect(onChange).toHaveBeenCalledWith(
       produce(thresholds, (draft) => {
-        draft.mode = 'percentage';
+        draft.mode = 'Percent';
       })
     );
 

@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
-import { CalculationType, OptionsEditorProps, ThresholdOptions } from '@perses-dev/plugin-system';
+import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export interface SparklineOptions {
   color?: string;
