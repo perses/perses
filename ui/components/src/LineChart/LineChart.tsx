@@ -56,7 +56,10 @@ use([
   CanvasRenderer,
 ]);
 
-interface LineChartProps {
+export interface LineChartProps {
+  /**
+   * Height of the chart
+   */
   height: number;
   data: EChartsDataFormat;
   yAxis?: YAXisComponentOption;

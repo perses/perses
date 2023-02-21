@@ -19,6 +19,10 @@
       "dependsOn": ["^build"],
       "cache": false
     },
+    "storybook": {
+      "dependsOn": [],
+      "outputs": []
+    },
     "test": {
       "dependsOn": [],
       "outputs": []

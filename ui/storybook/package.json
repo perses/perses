@@ -1,0 +1,27 @@
+{
+  "name": "@perses-dev/docs",
+  "version": "0.22.0",
+  "private": true,
+  "scripts": {
+    "storybook": "start-storybook --config-dir src/config --port 6006",
+    "build-storybook": "build-storybook --config-dir src/config",
+    "serve-static": "npx http-server ./storybook-static",
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.12",
+    "@storybook/addon-actions": "^6.5.16",
+    "@storybook/addon-essentials": "^6.5.16",
+    "@storybook/addon-interactions": "^6.5.16",
+    "@storybook/addon-links": "^6.5.16",
+    "@storybook/builder-webpack5": "^6.5.16",
+    "@storybook/manager-webpack5": "^6.5.16",
+    "@storybook/react": "^6.5.16",
+    "@storybook/testing-library": "^0.0.13",
+    "babel-loader": "^8.3.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "storybook-dark-mode": "^2.1.0"
+  }
+}

@@ -1,0 +1,25 @@
+import LinkTo from '@storybook/addon-links/react';
+
+<Meta title="Introduction" />
+
+# Welcome to Perses
+
+This Storybook is currently a work-in-progress! Stay tuned for more information soon.
+
+## Packages
+
+The Perses project includes several packages that provide the building blocks that power the Perses app. These building
+blocks can also be used to build other applications.
+
+- <LinkTo kind="Components/About">@perses-dev/components</LinkTo> - Common components available to the app, plugins, or users
+  who want to embed common Perses UI elements into their own applications.
+- <LinkTo kind="Core/About">@perses-dev/core</LinkTo> - Core functionality that's exposed to plugins and also consumed by
+  the app.
+- <LinkTo kind="Dashboards/About">@perses-dev/dashboards</LinkTo> - Components for dashboards.
+- <LinkTo kind="Panels Plugin/About">@perses-dev/panels-plugin</LinkTo> - A plugin module with `Panel` plugins for the core
+  visualizations supported by Perses.
+- <LinkTo kind="Plugin System/About">@perses-dev/plugin-system</LinkTo> - All the type definitions and components that power
+  our plugins, also includes the definitions for the runtime available to plugins (e.g. the current time range state, the
+  current template variable state).
+- <LinkTo kind="Prometheus Plugin/About">@perses-dev/prometheus-plugin</LinkTo> - A plugin module with multiple plugin types
+  (e.g. Variable, ChartQuery, etc.) for supporting Prometheus in Perses.

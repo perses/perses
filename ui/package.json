@@ -9,12 +9,14 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "start": "turbo run start",
+    "start-with-storybook": "turbo run start storybook",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
     "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
     "e2e": "turbo run e2e:local",
     "e2e:debug": "turbo run e2e -- --debug",
-    "e2e:ci": "turbo run e2e:ci"
+    "e2e:ci": "turbo run e2e:ci",
+    "storybook": "turbo run storybook"
   },
   "workspaces": [
     "app",
@@ -24,7 +26,8 @@
     "e2e",
     "panels-plugin",
     "plugin-system",
-    "prometheus-plugin"
+    "prometheus-plugin",
+    "storybook"
   ],
   "devDependencies": {
     "@swc/cli": "^0.1.57",
