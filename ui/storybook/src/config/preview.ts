@@ -16,7 +16,15 @@ import { WithThemes, WithBackground } from './decorators';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
-  backgrounds: { disable: true },
+  backgrounds: {
+    // Disabling backgrounds, so we can use custom logic of our own for
+    // backgrounds with our themes. It needs to be disabled because it comes
+    // bundled with the storybook essentials addon.
+    disable: true,
+    grid: {
+      disable: true,
+    },
+  },
   controls: {
     matchers: {
       color: /(background|color)$/i,

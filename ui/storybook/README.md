@@ -1,8 +1,10 @@
 # Storybook
 
-This package contains documentation for the Perses UI using [Storybook](https://storybook.js.org/).
+This package is used to generate documentation for Perses UI components using [Storybook](https://storybook.js.org/).
 
 ## Getting started
+
+- Run storybook in development mode: `npm run storybook`
 
 ## Creating stories
 
@@ -37,6 +39,39 @@ import { LineChart } from '@perses-dev/components';
 import { LineChart } from '.';
 ```
 
+## Notable addons
+
+Below are some notable addons this project currently uses.
+
+- [Accessibility](https://storybook.js.org/addons/@storybook/addon-a11y/) - Helpful for making components a11y.
+- [Actions](https://storybook.js.org/addons/@storybook/addon-actions) - Used to display data received by event handlers.
+- [Controls](https://storybook.js.org/addons/@storybook/addon-controls/) - Interact with component inputs dynamically in the Storybook UI.
+- [Dark Mode](https://storybook.js.org/addons/storybook-dark-mode/) - Adds a toolbar toggle that switches between light and dark mode.
+- [Docs](https://storybook.js.org/addons/@storybook/addon-docs/) - Document component usage and properties in Markdown.
+- [Links](https://storybook.js.org/addons/@storybook/addon-links/) - Use to create links that navigate between stories.
+- [Measure](https://storybook.js.org/addons/@storybook/addon-measure/) - Helpful for inspecting layouts by visualizing the box model.
+- [Outline](https://storybook.js.org/addons/@storybook/addon-outline/) - Outline all elements with CSS to help with layout placement and alignment.
+- [Storysource](https://storybook.js.org/addons/@storybook/addon-storysource/) - Used to show stories source in the addon panel
+- [Viewport](https://storybook.js.org/addons/@storybook/addon-viewport/) - Allows stories to be displayed in different sizes and layouts.
+
+We primarily use first party addons maintained by Storybook to avoid pain with upgrades and interoperability with the relatively complex Storybook ecosystem.
+
+## Configuring Storybook
+
+Storybook configuration lives in `src/config` and includes the following:
+
+- `main.ts` - [Core configuration](https://storybook.js.org/docs/react/configure/overview#configure-your-storybook-project).
+- `preview.ts` - [Rendering configuration](https://storybook.js.org/docs/react/configure/overview#configure-story-rendering)
+- `decorators` - Directory for global [decorators](https://storybook.js.org/docs/react/writing-stories/decorators) that wrap all stories.
+  - `WithBackground` - Decorator that allows toggling between different background colors from the projects theme. It relies on significant prior art from the [backgrounds addon](https://storybook.js.org/addons/@storybook/addon-backgrounds/), which we cannot easily use here because it requires the background colors to be hardcoded (instead of dynamic based on being in dark/light mode).
+  - `WithThemes` - Decorator that wraps all stories with theming for MUI and echarts.
+- `DocsContainer` - Custom container for the docs addon to make it work with the dark mode addon.
+
 ## Known issues
 
-- The grid and background color toolbar items do not play nicely together because of some customizations we're doing to get the backgrounds to use our theme. This is likely fixable, but not urgent, so has not been addressed y et.
+Below are some known issues about the configuration of storybook for this project that developers should be aware of when making changes.
+
+- Stories reference TypeScript source code (instead of compiled code) from packages to be able to autogenerate documentation from component prop types.
+  - The webpack configuration for storybook includes aliases for internal packages to ensure consistent reference of source code throughout TypeScript. Without this, issues can occur with mixing and matching `src` and `dist` versions of package context/providers.
+- Storybook compiles code using Webpack and packages compile code using SWC. This is not currently causing any issues, but could lead to inconsistencies in the future.
+- The grid and background color toolbar items do not play nicely together because of some customizations we're doing to get the backgrounds to use our theme. For now, disabling the grid feature until we have time to dig into this more. Other storybook addons (e.g. measure, outline) and browser extensions provide similar behavior, so this is not a priority to fix.

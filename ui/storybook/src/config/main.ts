@@ -14,42 +14,65 @@
 import path from 'path';
 import { Configuration } from 'webpack';
 
+// UI project root.
 const uiRoot = path.resolve(__dirname, '../../..');
-console.log(uiRoot);
 
-const pkgConfig = [
+/**
+ * Information about packages that is used to configure storybook.
+ */
+type PkgConfig = {
+  /**
+   * Name of the package. Used to configure a webpack alias.
+   */
+  pkg: string;
+
+  /**
+   * Absolute path to the source directory for the package. Used to look for
+   * stories and to configure a webpack alias.
+   */
+  directory: string;
+
+  /**
+   * Title for items from that package. Will be used as the name for the folder
+   * containing stories from this package in the storybook UI.
+   */
+  title: string;
+};
+
+const pkgConfig: PkgConfig[] = [
   {
     pkg: '@perses-dev/components',
     directory: path.resolve(uiRoot, 'components/src'),
-    titlePrefix: 'Components',
+    title: 'Components',
   },
   {
     pkg: '@perses-dev/core',
     directory: path.resolve(uiRoot, 'core/src'),
-    titlePrefix: 'Core',
+    title: 'Core',
   },
   {
     pkg: '@perses-dev/dashboards',
     directory: path.resolve(uiRoot, 'dashboards/src'),
-    titlePrefix: 'Dashboards',
+    title: 'Dashboards',
   },
   {
     pkg: '@perses-dev/panels-plugin',
     directory: path.resolve(uiRoot, 'panels-plugin/src'),
-    titlePrefix: 'Panels Plugin',
+    title: 'Panels Plugin',
   },
   {
     pkg: '@perses-dev/plugin-system',
     directory: path.resolve(uiRoot, 'plugin-system/src'),
-    titlePrefix: 'Plugin System',
+    title: 'Plugin System',
   },
   {
     pkg: '@perses-dev/prometheus-plugin',
     directory: path.resolve(uiRoot, 'prometheus-plugin/src'),
-    titlePrefix: 'Prometheus Plugin',
+    title: 'Prometheus Plugin',
   },
 ];
 
+// File selector for stories.
 const BASE_STORY_SELECTOR = '*.stories.@(js|jsx|ts|tsx|mdx)';
 
 module.exports = {
@@ -61,15 +84,17 @@ module.exports = {
     '@storybook/addon-links',
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
+    '@storybook/addon-a11y',
+    '@storybook/addon-storysource',
     'storybook-dark-mode',
   ],
   stories: [
     // Package-specific stories that live alongside their components or in
     // the `stories` directory.
-    ...pkgConfig.map(({ directory, titlePrefix }) => {
+    ...pkgConfig.map(({ directory, title }) => {
       return {
         directory,
-        titlePrefix,
+        titlePrefix: title,
         files: `**/${BASE_STORY_SELECTOR}`,
       };
     }),

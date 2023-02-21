@@ -22,7 +22,7 @@ module.exports = {
     'plugin:prettier/recommended',
 
     // Only impacts stories following *.stories.* naming by default.
-    'plugin:storybook/recommended'
+    'plugin:storybook/recommended',
   ],
 
   plugins: ['import'],

@@ -17,10 +17,8 @@ import { DecoratorFn } from '@storybook/react';
 import { useDarkMode } from 'storybook-dark-mode';
 import { getTheme, ChartsThemeProvider, generateChartsTheme } from '../../../../components/src';
 
-export const WithThemes: DecoratorFn = (Story, context) => {
+export const WithThemes: DecoratorFn = (Story) => {
   const isDarkModeEnabled = useDarkMode();
-
-  console.log(context.globals.backgrounds);
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);
   const chartsTheme = useMemo(() => {
