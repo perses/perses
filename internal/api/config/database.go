@@ -91,7 +91,24 @@ type SQL struct {
 	RejectReadOnly bool `json:"reject_read_only" yaml:"reject_read_only"`
 }
 
+func (s *SQL) Verify() error {
+	if len(s.DBName) == 0 {
+		return fmt.Errorf("db_name must be specified")
+	}
+	return nil
+}
+
 type Database struct {
 	File *File `json:"file,omitempty" yaml:"file,omitempty"`
 	SQL  *SQL  `json:"sql,omitempty" yaml:"sql,omitempty"`
+}
+
+func (d *Database) Verify() error {
+	if d.File == nil && d.SQL == nil {
+		return fmt.Errorf("you must specify if Perses has to use SQL or filesystem as a database")
+	}
+	if d.File != nil && d.SQL != nil {
+		return fmt.Errorf("you cannot tel to Perses to use SQL and the filesystem at the same time")
+	}
+	return nil
 }
