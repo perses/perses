@@ -24,7 +24,7 @@
     "build": "concurrently \"npm:build:*\"",
     "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
     "build:esm": "swc ./src -d dist --config-file ../.swcrc",
-    "build:types": "tsc --emitDeclarationOnly --declaration --preserveWatchOutput",
+    "build:types": "tsc --project tsconfig.build.json",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "TZ=UTC jest",
     "test:watch": "TZ=UTC jest --watch",
