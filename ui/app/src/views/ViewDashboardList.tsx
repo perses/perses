@@ -35,8 +35,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDashboardList } from '../model/dashboard-client';
 import { ProjectModel } from '../model/project-client';
 import DashboardList from '../components/DashboardList';
-import DeleteProjectDialog from '../components/DeleteProjectDialog/DeleteProjectDialog';
-import AddProjectDialog from '../components/AddProjectDialog/AddProjectDialog';
+import { DeleteProjectDialog } from '../components/DeleteProjectDialog/DeleteProjectDialog';
+import { AddProjectDialog } from '../components/AddProjectDialog/AddProjectDialog';
 
 function RenderDashboardList() {
   const [openDeleteProjectDialog, setOpenDeleteProjectDialog] = useState<boolean>(false);

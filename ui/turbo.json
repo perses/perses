@@ -27,6 +27,12 @@
       "dependsOn": [],
       "outputs": []
     },
+    "type-check": {
+      // Make sure all packages are built once before type-checking to ensure
+      // we have the right files for cross-package dependencies.
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "e2e:local": {
       "dependsOn": [],
       "outputs": [],

@@ -51,7 +51,7 @@ export function Legend({ width, height, options, data }: LegendProps) {
         bottom: 0,
       }}
     >
-      <CompactLegend items={data} height={height} />;
+      <CompactLegend items={data} height={height} />
     </Box>
   );
 }
