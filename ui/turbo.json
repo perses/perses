@@ -19,7 +19,13 @@
       "dependsOn": ["^build"],
       "cache": false
     },
-    "storybook": {
+    // Splitting out storybook jobs with a prefix because they behave differently
+    // than our packages and this makes it easier to separate.
+    "storybook:start": {
+      "dependsOn": [],
+      "outputs": []
+    },
+    "storybook:build": {
       "dependsOn": [],
       "outputs": []
     },

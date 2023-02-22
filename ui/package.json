@@ -10,14 +10,15 @@
     "lint:fix": "turbo run lint -- --fix",
     "type-check": "turbo run type-check",
     "start": "turbo run start",
-    "start-with-storybook": "turbo run start storybook",
+    "start-with-storybook": "turbo run start storybook:start",
+    "storybook": "turbo run storybook:start",
+    "storybook:build": "turbo run storybook:build",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
     "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
     "e2e": "turbo run e2e:local",
     "e2e:debug": "turbo run e2e -- --debug",
-    "e2e:ci": "turbo run e2e:ci",
-    "storybook": "turbo run storybook"
+    "e2e:ci": "turbo run e2e:ci"
   },
   "workspaces": [
     "app",
