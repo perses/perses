@@ -26,7 +26,9 @@ interface ColorPickerProps {
 }
 
 export const ColorPicker = ({ initialColor, onColorChange, palette }: ColorPickerProps) => {
+  // color is the valid hex color that we'll use for onColorChange
   const [color, setColor] = useState(initialColor);
+  // value is the visible value for the controlled text input
   const [value, setValue] = useState(color);
 
   const handleColorChange = (color: string) => {
@@ -35,9 +37,10 @@ export const ColorPicker = ({ initialColor, onColorChange, palette }: ColorPicke
     onColorChange && onColorChange(color);
   };
 
+  // we should update this if https://github.com/omgovich/react-colorful/issues/157 is resolved
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.replace(/([^0-9A-F]+)/gi, '').substring(0, 8);
-    setValue(`#${inputValue}`);
+    setValue(`#${inputValue}`); // always prefix input value with # to indicate hex format
     // only set color if input value is a valid hex color
     if (isValidHex(e.target.value)) {
       setColor(e.target.value);

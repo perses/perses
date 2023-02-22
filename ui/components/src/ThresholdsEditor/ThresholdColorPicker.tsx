@@ -26,8 +26,12 @@ export function ThresholdColorPicker({
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const openColorPicker = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const closeColorPicker = () => {
+    setAnchorEl(null);
   };
 
   const {
@@ -41,7 +45,7 @@ export function ThresholdColorPicker({
         aria-label={`change threshold ${label} color`}
         isSelected={isOpen}
         iconColor={color}
-        onClick={handleClick}
+        onClick={openColorPicker}
       >
         <CircleIcon />
       </ColorIconButton>
@@ -49,7 +53,7 @@ export function ThresholdColorPicker({
         data-testid="threshold color picker"
         open={isOpen}
         anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
+        onClose={closeColorPicker}
         PaperProps={{ sx: { padding: (theme) => theme.spacing(2) } }}
         anchorOrigin={{
           vertical: 'top',

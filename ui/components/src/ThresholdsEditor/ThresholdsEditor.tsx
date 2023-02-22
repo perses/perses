@@ -28,6 +28,8 @@ interface ThresholdsEditorProps {
   onChange: (thresholds: ThresholdOptions) => void;
 }
 
+const DEFAULT_STEP = 10;
+
 export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps) {
   const {
     thresholds: { defaultColor, palette },
@@ -48,7 +50,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
     focusRef.current = false;
   }, [steps?.length]);
 
-  const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>, i: number) => {
+  const handleThresholdValueChange = (e: React.ChangeEvent<HTMLInputElement>, i: number) => {
     setSteps(
       produce(steps, (draft) => {
         const step = draft?.[i];
@@ -114,7 +116,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
     focusRef.current = true;
     if (thresholds === undefined) {
       onChange({
-        steps: [{ value: 10 }],
+        steps: [{ value: DEFAULT_STEP }],
       });
     } else {
       onChange(
@@ -123,9 +125,9 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
           if (steps?.length) {
             const lastStep = steps[steps.length - 1];
             const color = palette[steps.length] ?? getRandomColor(); // we will assign color from the palette first, then generate random color
-            steps.push({ color, value: (lastStep?.value ?? 0) + 10 });
+            steps.push({ color, value: (lastStep?.value ?? 0) + DEFAULT_STEP }); // set new threshold value to last step value + 10
           } else if (steps) {
-            steps.push({ value: 10 });
+            steps.push({ value: DEFAULT_STEP });
           }
         })
       );
@@ -175,7 +177,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
               value={step.value}
               onColorChange={(color) => handleThresholdColorChange(color, i)}
               onChange={(e) => {
-                handleThresholdChange(e, i);
+                handleThresholdValueChange(e, i);
               }}
               onDelete={() => {
                 deleteThreshold(i);
