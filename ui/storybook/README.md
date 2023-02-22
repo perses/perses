@@ -34,7 +34,7 @@ These may include importing a few small components like the `LinkTo` component f
 
 #### TLDR;
 
-Stories should import package code by referencing the package, not by making a relative reference.
+Stories should import package code by referencing the package, not by making a relative reference. Under the hood, this will reference source code (not compiled code), so we can benefit from some Storybook features like autogenerating documentation from types.
 
 Import like this in a story:
 
@@ -54,9 +54,12 @@ import { LineChart } from '.';
 
 #### Long version
 
-Stories should import from source code (NOT compiled code) because this enables us to automatically generate documentation tables for component props from types. Stories should import from the top level export for that package to help ensure the component was properly exported for consumption from the package when published.
+Stories should import from source code (NOT compiled code) because this enables us to automatically generate documentation tables for component props from types. Stories should import from the top level export for that package to help ensure the component was properly exported for consumption from the package when published. The same versions of code need to be used across the storybook to avoid issues when using `context` and singletons.
 
-To simplify following these rules, the storybook's webpack configuration includes aliases for references to internal packages that redirect them to the source code. (e.g. `@perses-dev/components` will alias to `ui/components/src` instead of pointing to `ui/components/dist`). This makes it easy to import from the associated package in stories. It also ensures that components referenced indirectly in stories (usually a child of the component used directly in the story) point to source code to avoid accidentally mixing and matching source and compiled code, which will cause issues when using `context`.
+The project enforces the above contraints using the following tooling:
+
+- **aliases to source for all @perses-dev packages in storybook's webpack config** - E.g. `@perses-dev/components` will alias to `ui/components/src` instead of pointing to `ui/components/dist`). This makes it easy to import from packages in stories in a consistent way while pointing at the top level `src` export. It also ensures that components referenced indirectly in stories (usually a child of the component used directly in the story) point to source code to avoid accidentally mixing and matching source and compiled code, which can cause issues when using `context` and singletons.
+- **alias to source for the specific @perses-dev package in package-specific tsconfig** - E.g. a story in the `@perses-dev/components` package can import from `@perses-dev/components` and have TypeScript look in `ui/components/src` for types. Without this, you would get type errors because TypeScript will expect the package to have installed itself.
 
 ## Notable addons
 
