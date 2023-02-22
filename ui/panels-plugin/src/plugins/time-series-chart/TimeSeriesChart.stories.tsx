@@ -22,7 +22,7 @@ import { Meta, Story } from '@storybook/react';
 import { QueryParamProvider } from 'use-query-params';
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { TimeSeriesChart } from '../../../src';
+import { TimeSeriesChart } from '@perses-dev/panels-plugin';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const panelsResource = require('../../../plugin.json');
@@ -35,7 +35,7 @@ export default {
 const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
     resource: panelsResource as PluginModuleResource,
-    importPlugin: () => import('../../../src'),
+    importPlugin: () => import('@perses-dev/panels-plugin'),
   },
 ]);
 
