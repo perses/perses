@@ -16,5 +16,6 @@
   "module": {
     "type": "es6"
   },
-  "sourceMaps": true
+  "sourceMaps": true,
+  "exclude": ["\\.(test)\\."]
 }
