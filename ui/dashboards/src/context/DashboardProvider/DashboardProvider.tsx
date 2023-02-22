@@ -15,7 +15,7 @@ import { createStore, useStore } from 'zustand';
 import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import shallow from 'zustand/shallow';
+import { shallow } from 'zustand/shallow';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { DashboardResource, Display, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
