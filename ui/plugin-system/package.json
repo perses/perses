@@ -21,6 +21,7 @@
     "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
     "build:esm": "swc ./src -d dist --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
+    "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",

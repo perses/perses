@@ -23,6 +23,10 @@
       "dependsOn": [],
       "outputs": []
     },
+    "type-check": {
+      "dependsOn": [],
+      "outputs": []
+    },
     "e2e:local": {
       "dependsOn": [],
       "outputs": [],
