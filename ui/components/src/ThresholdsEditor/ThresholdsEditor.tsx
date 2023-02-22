@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { RefObject, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import produce from 'immer';
-import { FormLabel, IconButton, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
 import { ThresholdOptions } from '@perses-dev/core';
@@ -22,6 +21,7 @@ import { InfoTooltip } from '../InfoTooltip';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { OptionsEditorGroup } from '../OptionsEditorLayout';
 import { ThresholdColorPicker } from './ThresholdColorPicker';
+import { ThresholdInput } from './ThresholdInput';
 
 interface ThresholdsEditorProps {
   thresholds?: ThresholdOptions;
@@ -155,7 +155,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
     >
       <ToggleButtonGroup
         exclusive
-        value={thresholds?.mode ?? 'absolute'}
+        value={thresholds?.mode ?? 'Absolute'}
         onChange={handleModeChange}
         sx={{ height: '36px', marginLeft: 'auto' }}
       >
@@ -191,39 +191,6 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
         <Typography>Default</Typography>
       </Stack>
     </OptionsEditorGroup>
-  );
-}
-
-export interface ThresholdInputProps {
-  label: string;
-  color: string;
-  value: number;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onColorChange: (color: string) => void;
-  onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
-  onDelete: () => void;
-  inputRef?: RefObject<HTMLInputElement | null>;
-}
-
-function ThresholdInput({
-  inputRef,
-  label,
-  color,
-  value,
-  onChange,
-  onColorChange,
-  onBlur,
-  onDelete,
-}: ThresholdInputProps) {
-  return (
-    <Stack flex={1} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-      <ThresholdColorPicker label={label} color={color} onColorChange={onColorChange} />
-      <FormLabel htmlFor={label}>{label}</FormLabel>
-      <TextField id={label} inputRef={inputRef} type="number" value={value} onChange={onChange} onBlur={onBlur} />
-      <IconButton aria-label={`delete threshold ${label}`} size="small" onClick={onDelete}>
-        <DeleteIcon />
-      </IconButton>
-    </Stack>
   );
 }
 

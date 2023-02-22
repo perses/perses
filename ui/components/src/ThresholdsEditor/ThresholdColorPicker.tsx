@@ -16,7 +16,7 @@ import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { ColorPicker } from '../ColorPicker';
-import { ThresholdInputProps } from './ThresholdsEditor';
+import { ThresholdInputProps } from './ThresholdInput';
 
 export function ThresholdColorPicker({
   color,
