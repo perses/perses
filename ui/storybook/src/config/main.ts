@@ -73,7 +73,7 @@ const pkgConfig: PkgConfig[] = [
 ];
 
 // File selector for stories.
-const BASE_STORY_SELECTOR = '*.stories.@(js|jsx|ts|tsx|mdx)';
+const BASE_STORY_SELECTOR = '*.stories.@(ts|tsx|mdx)';
 
 module.exports = {
   core: {

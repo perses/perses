@@ -15,7 +15,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { useMemo } from 'react';
 import { DecoratorFn } from '@storybook/react';
 import { useDarkMode } from 'storybook-dark-mode';
-import { getTheme, ChartsThemeProvider, generateChartsTheme } from '../../../../components/src';
+import { getTheme, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/components';
 
 export const WithThemes: DecoratorFn = (Story) => {
   const isDarkModeEnabled = useDarkMode();

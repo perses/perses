@@ -48,10 +48,10 @@ export const globalTypes = {
   backgrounds: {
     name: 'Background',
     description: 'Background color',
-    defaultValue: 'default',
+    defaultValue: 'paper',
     toolbar: {
       icon: 'photo',
-      items: ['default', 'paper', 'overlay', 'navigation', 'tooltip'],
+      items: ['paper', 'default', 'overlay', 'navigation', 'tooltip'],
       // Change title based on selected value
       dynamicTitle: true,
     },

@@ -11,6 +11,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@perses-dev/components": "0.22.0",
     "@storybook/addon-actions": "^6.5.16",
     "@storybook/addon-essentials": "^6.5.16",
     "@storybook/addon-interactions": "^6.5.16",
