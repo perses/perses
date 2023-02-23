@@ -55,7 +55,7 @@ function ProjectMenu(): JSX.Element {
     return <CircularProgress size="1rem" />;
   }
 
-  if (data === undefined) {
+  if (data === undefined || data === null) {
     return <></>;
   }
 

@@ -30,7 +30,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func generateKey(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
+func generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
 	switch m := metadata.(type) {
 	case *modelV1.ProjectMetadata:
 		return fmt.Sprintf("/%s/%s/%s", modelV1.PluralKindMap[kind], m.Project, m.Name), nil
@@ -46,10 +46,18 @@ type DAO struct {
 	Extension config.FileExtension
 }
 
+func (d *DAO) Init() error {
+	return nil
+}
+
+func (d *DAO) Close() error {
+	return nil
+}
+
 func (d *DAO) Create(entity modelAPI.Entity) error {
-	key, generateKeyErr := generateKey(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
-	if generateKeyErr != nil {
-		return generateKeyErr
+	key, generateIDErr := generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	if generateIDErr != nil {
+		return generateIDErr
 	}
 	filePath := d.buildPath(key)
 	if _, err := os.Stat(filePath); err == nil {
@@ -59,16 +67,16 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 	return d.upsert(key, entity)
 }
 func (d *DAO) Upsert(entity modelAPI.Entity) error {
-	key, generateKeyErr := generateKey(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
-	if generateKeyErr != nil {
-		return generateKeyErr
+	key, generateIDErr := generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	if generateIDErr != nil {
+		return generateIDErr
 	}
 	return d.upsert(key, entity)
 }
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
-	key, generateKeyErr := generateKey(kind, metadata)
-	if generateKeyErr != nil {
-		return generateKeyErr
+	key, generateIDErr := generateID(kind, metadata)
+	if generateIDErr != nil {
+		return generateIDErr
 	}
 	filePath := d.buildPath(key)
 	data, err := os.ReadFile(filePath)
@@ -151,7 +159,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		}
 		// then get back the actual struct behind the value.
 		obj := value.Interface()
-		if unmarshalErr := d.unmarshal(data, obj); err != nil {
+		if unmarshalErr := d.unmarshal(data, obj); unmarshalErr != nil {
 			return unmarshalErr
 		}
 		if typeParameter.Elem().Kind() != reflect.Ptr {
@@ -168,9 +176,9 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	return nil
 }
 func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
-	key, generateKeyErr := generateKey(kind, metadata)
-	if generateKeyErr != nil {
-		return generateKeyErr
+	key, generateIDErr := generateID(kind, metadata)
+	if generateIDErr != nil {
+		return generateIDErr
 	}
 	filePath := d.buildPath(key)
 	err := os.Remove(filePath)
