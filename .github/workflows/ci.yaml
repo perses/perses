@@ -51,6 +51,7 @@ jobs:
           path: |
             ui/**/dist
             !ui/node_modules
+            !ui/storybook
 
   build-storybook:
     name: "build-storybook"
@@ -69,8 +70,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: storybook
-          path: |
-            ui/storybook/storybook-static
+          path: ui/storybook/storybook-static
   
   libs-release:
     name: "libs-release"
