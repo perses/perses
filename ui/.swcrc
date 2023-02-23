@@ -17,5 +17,5 @@
     "type": "es6"
   },
   "sourceMaps": true,
-  "exclude": ["\\.(test)\\."]
+  "exclude": ["\\.(stories|test)\\."]
 }

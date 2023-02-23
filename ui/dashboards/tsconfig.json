@@ -3,6 +3,9 @@
   "include": ["src"],
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "paths": {
+      "@perses-dev/dashboards": ["./src"]
+    }
   }
 }

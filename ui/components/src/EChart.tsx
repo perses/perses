@@ -50,7 +50,7 @@ const mouseEvents = [
   'contextmenu',
 ] as const;
 
-export type MouseEventName = typeof mouseEvents[number];
+export type MouseEventName = (typeof mouseEvents)[number];
 
 // batch event types
 export interface DataZoomPayloadBatchItem {
@@ -84,7 +84,7 @@ type OnBatchEventFunction = (params: BatchEventsParameters) => void;
 
 const batchEvents = ['datazoom', 'downplay', 'highlight'] as const;
 
-export type BatchEventName = typeof batchEvents[number];
+export type BatchEventName = (typeof batchEvents)[number];
 
 type ChartEventName = 'finished';
 

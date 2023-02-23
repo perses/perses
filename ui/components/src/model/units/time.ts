@@ -15,7 +15,7 @@ import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 
 const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'] as const;
-type TimeUnitKind = typeof timeUnitKinds[number];
+type TimeUnitKind = (typeof timeUnitKinds)[number];
 export type TimeUnitOptions = {
   kind: TimeUnitKind;
   decimal_places?: number;

@@ -9,7 +9,8 @@
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
-    "analyze": "webpack --config webpack.analyze.ts"
+    "analyze": "webpack --config webpack.analyze.ts",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
