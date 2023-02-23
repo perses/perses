@@ -56,7 +56,6 @@ type loader interface {
 }
 
 type migCuePart struct {
-	loader
 	context          *cue.Context
 	listOfConditions string
 	schemasPath      string
