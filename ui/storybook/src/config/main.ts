@@ -102,7 +102,7 @@ module.exports = {
     `../stories/**/${BASE_STORY_SELECTOR}`,
   ],
   typescript: {
-    reactDocgen: 'react-docgen',
+    reactDocgen: 'react-docgen-typescript',
     reactDocgenTypescriptOptions: {
       compilerOptions: {
         // TODO: play around with these settings
