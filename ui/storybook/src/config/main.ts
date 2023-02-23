@@ -97,6 +97,7 @@ const config: StorybookConfig = {
         files: `**/${BASE_STORY_SELECTOR}`,
       };
     }),
+    // Higher level stories that live alongside the storybook setup.
     '../stories/**/*.@(mdx|stories.@(ts|tsx))',
   ],
   typescript: {
@@ -104,8 +105,6 @@ const config: StorybookConfig = {
     reactDocgenTypescriptOptions: {
       compilerOptions: {
         // TODO: play around with these settings
-        allowSyntheticDefaultImports: false,
-        esModuleInterop: false,
       },
     },
   },
