@@ -17,24 +17,21 @@ import { HexColorPicker } from 'react-colorful';
 import CircleIcon from 'mdi-material-ui/Circle';
 
 interface ColorPickerProps {
-  initialColor?: string;
-  onColorChange?: (color: string) => void;
+  color: string;
+  onChange?: (color: string) => void;
   /**
    * Preset color palette
    */
   palette?: string[];
 }
 
-export const ColorPicker = ({ initialColor, onColorChange, palette }: ColorPickerProps) => {
-  // color is the valid hex color that we'll use for onColorChange
-  const [color, setColor] = useState(initialColor);
+export const ColorPicker = ({ color, onChange, palette }: ColorPickerProps) => {
   // value is the visible value for the controlled text input
   const [value, setValue] = useState(color);
 
   const handleColorChange = (color: string) => {
-    setColor(color);
     setValue(color);
-    onColorChange && onColorChange(color);
+    onChange && onChange(color);
   };
 
   // we should update this if https://github.com/omgovich/react-colorful/issues/157 is resolved
@@ -43,8 +40,7 @@ export const ColorPicker = ({ initialColor, onColorChange, palette }: ColorPicke
     setValue(`#${inputValue}`); // always prefix input value with # to indicate hex format
     // only set color if input value is a valid hex color
     if (isValidHex(e.target.value)) {
-      setColor(e.target.value);
-      onColorChange && onColorChange(e.target.value);
+      onChange && onChange(e.target.value);
     }
   };
 

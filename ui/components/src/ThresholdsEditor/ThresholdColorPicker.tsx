@@ -64,7 +64,7 @@ export function ThresholdColorPicker({
           horizontal: 'right',
         }}
       >
-        <ColorPicker initialColor={color} onColorChange={onColorChange} palette={[defaultColor, ...palette]} />
+        <ColorPicker color={color} onChange={onColorChange} palette={[defaultColor, ...palette]} />
       </Popover>
     </>
   );
