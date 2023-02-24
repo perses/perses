@@ -160,6 +160,7 @@ export function getLineSeries(
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     emphasis: {
+      disabled: visual.area_opacity !== undefined, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1,
       },
