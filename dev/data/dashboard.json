@@ -1911,6 +1911,42 @@
               }
             }
           }
+        },
+        "LineVisualOptions": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Line Visual Options",
+              "description": "Time series chart with custom visual options and unformatted legend"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "visual": {
+                  "area_opacity": 0.4,
+                  "point_radius": 6,
+                  "line_width": 3
+                }
+              }
+            }
+          }
         }
       },
       "layouts": [
@@ -1931,6 +1967,15 @@
                 "height": 7,
                 "content": {
                   "$ref": "#/spec/panels/SingleLine"
+                }
+              },
+              {
+                "x": 9,
+                "y": 0,
+                "width": 9,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/LineVisualOptions"
                 }
               }
             ]
