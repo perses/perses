@@ -143,6 +143,7 @@ export function getLineSeries(
   data: EChartsTimeSeries['data'],
   visual: VisualOptions
 ): EChartsTimeSeries {
+  console.log('visual: ', visual);
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
   return {
@@ -160,7 +161,7 @@ export function getLineSeries(
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     emphasis: {
-      disabled: visual.area_opacity !== undefined, // prevents flicker when moving cursor between shaded regions
+      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1,
       },
