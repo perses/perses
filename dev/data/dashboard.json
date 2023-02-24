@@ -1917,7 +1917,7 @@
           "spec": {
             "display": {
               "name": "Line Visual Options",
-              "description": "Time series chart with custom visual options and unformatted legend"
+              "description": "Time series chart with custom visual options"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -1940,7 +1940,7 @@
                   }
                 ],
                 "visual": {
-                  "area_opacity": 0.4,
+                  "area_opacity": 0.5,
                   "point_radius": 6,
                   "line_width": 3
                 }
