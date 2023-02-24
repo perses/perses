@@ -143,7 +143,6 @@ export function getLineSeries(
   data: EChartsTimeSeries['data'],
   visual: VisualOptions
 ): EChartsTimeSeries {
-  console.log('visual: ', visual);
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
   return {
