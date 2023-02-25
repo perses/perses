@@ -13,7 +13,7 @@
 
 import { Box, Typography } from '@mui/material';
 
-interface YAxisLabelProps {
+export interface YAxisLabelProps {
   name: string;
   height: number;
 }
