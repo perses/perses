@@ -31,6 +31,13 @@ interface DateTimeRangePickerProps {
   height?: string;
 }
 
+/**
+ * Date & time selection component to customize what data renders on dashboard.
+ * This include relative shortcuts and the ability to pick absolute start and end times.
+ * MUI has plans to build a component similar to this in the future
+ * (see [mui/mui-x/issues/4547](https://github.com/mui/mui-x/issues/4547)),
+ * but for now this gives us full control and builds on top of MUI's StaticDateTimePicker.
+ */
 export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
   const { value, onChange, timeOptions, height } = props;
 

@@ -9,6 +9,9 @@ export default meta;
 
 type Story = StoryObj<typeof DateTimeRangePicker>;
 
+/**
+ * You can use this to select a date range!
+ */
 export const Primary: Story = {
   args: {
     value: {
