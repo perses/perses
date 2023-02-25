@@ -12,5 +12,3 @@
 // limitations under the License.
 
 export * from './DateTimeRangePicker';
-export * from './TimeRangeSelector';
-export * from './AbsoluteTimePicker';
