@@ -35,7 +35,9 @@ const DialogWithButton = (args: Story['args']) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>open dialog</Button>
+      <Button onClick={() => setOpen(true)} variant="outlined">
+        open dialog
+      </Button>
       <Dialog {...args} open={open} onClose={handleClose}>
         <Dialog.Header>Dialog header</Dialog.Header>
         <Dialog.Content>Dialog content</Dialog.Content>
