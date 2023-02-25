@@ -10,5 +10,9 @@ export default meta;
 type Story = StoryObj<typeof LegendOptionsEditor>;
 
 export const Primary: Story = {
-  args: {},
+  args: {
+    value: {
+      position: 'Bottom',
+    },
+  },
 };
