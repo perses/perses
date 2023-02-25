@@ -32,6 +32,9 @@ interface InfoTooltipProps {
   enterNextDelay?: number; // default is 500ms
 }
 
+/**
+ * Info tooltip displays informative text when users hover over, focus on, or tap an element.
+ */
 export const InfoTooltip = ({
   id,
   title,
