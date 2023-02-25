@@ -12,15 +12,14 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { DashboardToolbar, DashboardProvider, TemplateVariableProvider } from '@perses-dev/dashboards';
+import { DownloadButton, DashboardProvider, TemplateVariableProvider } from '@perses-dev/dashboards';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
 import { QueryParamProvider } from 'use-query-params';
-import { TimeRangeProvider } from '@perses-dev/plugin-system';
 
-const meta: Meta<typeof DashboardToolbar> = {
-  component: DashboardToolbar,
+const meta: Meta<typeof DownloadButton> = {
+  component: DownloadButton,
   render: (args) => {
     const queryClient = new QueryClient({});
 
@@ -33,38 +32,30 @@ const meta: Meta<typeof DashboardToolbar> = {
               importPluginModule: () => Promise.resolve(),
             }}
           >
-            <TimeRangeProvider
-              initialTimeRange={{
-                pastDuration: '6h',
-                end: new Date(),
-              }}
-              enabledURLParams={false}
-            >
-              <TemplateVariableProvider>
-                <DashboardProvider
-                  initialState={{
-                    dashboardResource: {
-                      kind: 'Dashboard',
-                      metadata: {
-                        name: 'AddGroupButton',
-                        project: 'storybook',
-                        created_at: '2021-11-09T00:00:00Z',
-                        updated_at: '2021-11-09T00:00:00Z',
-                        version: 0,
-                      },
-                      spec: {
-                        duration: '6h',
-                        variables: [],
-                        layouts: [],
-                        panels: {},
-                      },
+            <TemplateVariableProvider>
+              <DashboardProvider
+                initialState={{
+                  dashboardResource: {
+                    kind: 'Dashboard',
+                    metadata: {
+                      name: 'AddGroupButton',
+                      project: 'storybook',
+                      created_at: '2021-11-09T00:00:00Z',
+                      updated_at: '2021-11-09T00:00:00Z',
+                      version: 0,
                     },
-                  }}
-                >
-                  <DashboardToolbar {...args} />
-                </DashboardProvider>
-              </TemplateVariableProvider>
-            </TimeRangeProvider>
+                    spec: {
+                      duration: '6h',
+                      variables: [],
+                      layouts: [],
+                      panels: {},
+                    },
+                  },
+                }}
+              >
+                <DownloadButton {...args} />
+              </DashboardProvider>
+            </TemplateVariableProvider>
           </PluginRegistry>
         </QueryClientProvider>
       </QueryParamProvider>
@@ -74,11 +65,8 @@ const meta: Meta<typeof DashboardToolbar> = {
 
 export default meta;
 
-type Story = StoryObj<typeof DashboardToolbar>;
+type Story = StoryObj<typeof DownloadButton>;
 
 export const Primary: Story = {
-  args: {
-    dashboardName: 'My Dashboard',
-    isReadonly: false,
-  },
+  args: {},
 };
