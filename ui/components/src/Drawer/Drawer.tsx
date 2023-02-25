@@ -22,6 +22,9 @@ export interface DrawerProps extends MuiDrawerProps {
 
 const DRAWER_DEFAULT_WIDTH = 900;
 
+/**
+ * Drawer provides supplementary content that are anchored to the left or right edge of the screen.
+ */
 export const Drawer = ({ anchor = 'right', isOpen, onClose, PaperProps, children, ...rest }: DrawerProps) => {
   return (
     <MuiDrawer

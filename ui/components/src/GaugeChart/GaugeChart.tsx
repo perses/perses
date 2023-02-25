@@ -47,6 +47,8 @@ export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine, max } = props;
   const chartsTheme = useChartsTheme();
 
+  console.log(JSON.stringify(axisLine));
+
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
   const option: EChartsCoreOption = useDeepMemo(() => {
     if (data.value === undefined || data.value === null) return chartsTheme.noDataOption;
