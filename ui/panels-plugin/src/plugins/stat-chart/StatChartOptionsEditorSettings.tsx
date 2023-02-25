@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import { Switch, SwitchProps } from '@mui/material';
+import { CalculationSelector, CalculationSelectorProps, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import {
   UnitSelector,
   UnitSelectorProps,
@@ -22,6 +21,8 @@ import {
   OptionsEditorGrid,
   OptionsEditorColumn,
   OptionsEditorControl,
+  ThresholdsEditorProp,
+  ThresholdsEditor,
 } from '@perses-dev/components';
 import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
 
@@ -55,6 +56,14 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
+  const handleThresholdsChange: ThresholdsEditorProp['onChange'] = (thresholds) => {
+    onChange(
+      produce(value, (draft: StatChartOptions) => {
+        draft.thresholds = thresholds;
+      })
+    );
+  };
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -66,6 +75,9 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <UnitSelector value={value.unit} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
         </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <ThresholdsEditor disablePercentMode thresholds={value.thresholds} onChange={handleThresholdsChange} />
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );

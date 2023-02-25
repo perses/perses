@@ -36,6 +36,7 @@ import {
   getYValues,
   getXValues,
   EMPTY_GRAPH_DATA,
+  convertPercentThreshold,
 } from './utils/data-transform';
 import { getRandomColor } from './utils/palette-gen';
 
@@ -178,11 +179,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const thresholdLineColor = step.color ?? stepPaletteColor;
         const stepOption: StepOptions = {
           color: thresholdLineColor,
-          value: step.value,
+          value:
+            thresholds.mode === 'Percent'
+              ? convertPercentThreshold(step.value, graphData.timeSeries, yAxis.max, yAxis.min)
+              : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
         // TODO: switch back to markLine once alternate tooltip created
-        const thresholdData = Array(xAxisData.length).fill(step.value);
+        const thresholdData = Array(xAxisData.length).fill(stepOption.value);
         const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
         graphData.timeSeries.push(thresholdLineSeries);
       });
@@ -191,7 +195,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, yAxis.max, yAxis.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;

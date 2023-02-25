@@ -23,14 +23,16 @@ import { OptionsEditorGroup } from '../OptionsEditorLayout';
 import { ThresholdColorPicker } from './ThresholdColorPicker';
 import { ThresholdInput } from './ThresholdInput';
 
-interface ThresholdsEditorProps {
-  thresholds?: ThresholdOptions;
+export interface ThresholdsEditorProps {
   onChange: (thresholds: ThresholdOptions) => void;
+  thresholds?: ThresholdOptions;
+  hideDefault?: boolean;
+  disablePercentMode?: boolean;
 }
 
 const DEFAULT_STEP = 10;
 
-export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps) {
+export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePercentMode }: ThresholdsEditorProps) {
   const {
     thresholds: { defaultColor, palette },
   } = useChartsTheme();
@@ -135,12 +137,15 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
   };
 
   const handleModeChange = (event: React.MouseEvent, value: string): void => {
+    const mode = value === 'Percent' ? 'Percent' : undefined;
     if (thresholds !== undefined) {
       onChange(
         produce(thresholds, (draft) => {
-          draft.mode = value === 'Percent' ? 'Percent' : undefined;
+          draft.mode = mode;
         })
       );
+    } else {
+      onChange({ mode });
     }
   };
 
@@ -155,6 +160,7 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
     >
       <ToggleButtonGroup
         exclusive
+        disabled={disablePercentMode}
         value={thresholds?.mode ?? 'Absolute'}
         onChange={handleModeChange}
         sx={{ height: '36px', marginLeft: 'auto' }}
@@ -186,10 +192,16 @@ export function ThresholdsEditor({ thresholds, onChange }: ThresholdsEditorProps
             />
           ))
           .reverse()}
-      <Stack flex={1} direction="row" alignItems="center" spacing={1}>
-        <ThresholdColorPicker label="default" color={defaultThresholdColor} onColorChange={handleDefaultColorChange} />
-        <Typography>Default</Typography>
-      </Stack>
+      {!hideDefault && (
+        <Stack flex={1} direction="row" alignItems="center" spacing={1}>
+          <ThresholdColorPicker
+            label="default"
+            color={defaultThresholdColor}
+            onColorChange={handleDefaultColorChange}
+          />
+          <Typography>Default</Typography>
+        </Stack>
+      )}
     </OptionsEditorGroup>
   );
 }

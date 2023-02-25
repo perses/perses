@@ -19,6 +19,8 @@ import {
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
+  ThresholdsEditor,
+  ThresholdsEditorProp,
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
@@ -57,6 +59,14 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     );
   };
 
+  const handleThresholdsChange: ThresholdsEditorProp['onChange'] = (thresholds) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.thresholds = thresholds;
+      })
+    );
+  };
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -64,6 +74,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
           <LegendOptionsEditor value={value.legend} onChange={handleLegendChange} />
         </OptionsEditorGroup>
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
+        <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={handleThresholdsChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <YAxisOptionsEditor value={value.y_axis ?? DEFAULT_Y_AXIS} onChange={handleYAxisChange} />

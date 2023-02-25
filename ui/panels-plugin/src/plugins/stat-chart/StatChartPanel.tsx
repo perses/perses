@@ -17,6 +17,7 @@ import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { TimeSeriesData, useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
+import { ThresholdOptions } from '@perses-dev/core';
 import { useSuggestedStepMs } from '../../model/time';
 import { SparklineOptions, StatChartOptions } from './stat-chart-model';
 
@@ -24,7 +25,7 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    spec: { query, calculation, unit, sparkline },
+    spec: { query, calculation, unit, sparkline, thresholds },
     contentDimensions,
   } = props;
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
@@ -54,7 +55,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       height={contentDimensions.height}
       data={chartData}
       unit={unit}
-      sparkline={convertSparkline(chartsTheme, sparkline)}
+      sparkline={convertSparkline(chartsTheme, sparkline, thresholds, chartData.calculatedValue)}
     />
   );
 }
@@ -77,18 +78,31 @@ const useChartData = (data: TimeSeriesData | undefined, calculation: Calculation
 
 export function convertSparkline(
   chartsTheme: PersesChartsTheme,
-  sparkline?: SparklineOptions
+  sparkline?: SparklineOptions,
+  thresholds?: ThresholdOptions,
+  value?: number
 ): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
+
+  // TO DO: add option for color scheme?
+  let color = sparkline.color ?? chartsTheme.thresholds.defaultColor ?? chartsTheme.sparkline.color;
+
+  if (thresholds?.steps && value) {
+    thresholds.steps.forEach((step, index) => {
+      if (value > step.value) {
+        color = step.color ?? chartsTheme.thresholds.palette[index];
+      }
+    });
+  }
 
   return {
     lineStyle: {
       width: sparkline.width ?? chartsTheme.sparkline.width,
-      color: sparkline.color ?? chartsTheme.sparkline.color,
+      color,
       opacity: 1,
     },
     areaStyle: {
-      color: sparkline.color ?? chartsTheme.sparkline.color,
+      color,
       opacity: 0.4,
     },
   };

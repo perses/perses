@@ -18,6 +18,7 @@ import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
 import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS } from '../time-series-chart-model';
 import { getRandomColor } from './palette-gen';
+import { EChartsTimeSeries } from '@perses-dev/components';
 
 export interface TimeScale {
   startMs: number;
@@ -185,4 +186,28 @@ export function getThresholdSeries(
       },
     },
   };
+}
+
+/**
+ * Converts percent threshold into absolute step value
+ * If max is undefined, use the max value from time series data as default
+ */
+export function convertPercentThreshold(percent: number, data: EChartsTimeSeries[], max?: number, min?: number) {
+  const percentDecimal = percent / 100;
+  const adjustedMax = max ?? findMax(data);
+  const adjustedMin = min ?? 0;
+  const total = adjustedMax - adjustedMin;
+  return percentDecimal * total + adjustedMin;
+}
+
+function findMax(timeSeries: EChartsTimeSeries[]) {
+  let max = 0;
+  timeSeries.forEach((series) => {
+    series.data.forEach((value: number) => {
+      if (value > max) {
+        max = value;
+      }
+    });
+  });
+  return max;
 }
