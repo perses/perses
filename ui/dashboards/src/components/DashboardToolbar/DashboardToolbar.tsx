@@ -34,6 +34,7 @@ export interface DashboardToolbarProps {
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
+  console.log(props);
   const {
     dashboardName,
     dashboardTitleComponent,
