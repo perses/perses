@@ -10,5 +10,9 @@ export default meta;
 type Story = StoryObj<typeof UnitSelector>;
 
 export const Primary: Story = {
-  args: {},
+  args: {
+    value: {
+      kind: 'Decimal',
+    },
+  },
 };

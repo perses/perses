@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { TimeSeriesTooltip } from './TimeSeriesTooltip';
 
 const meta: Meta<typeof TimeSeriesTooltip> = {
-  component: TimeSeriesTooltip,
+  component: TimeSeriesTooltip.type,
 };
 
 export default meta;

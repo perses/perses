@@ -28,7 +28,7 @@ interface TimeSeriesTooltipProps {
   unit?: UnitOptions;
 }
 
-export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
+export function TimeSeriesTooltipOriginal({
   chartRef,
   chartData,
   wrapLabels,
@@ -87,4 +87,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
       </Box>
     </Portal>
   );
-});
+}
+
+export const TimeSeriesTooltip = React.memo(TimeSeriesTooltipOriginal);
