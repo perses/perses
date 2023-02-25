@@ -16,7 +16,7 @@ import { LegendOptions, LegendItem } from '../model';
 import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 
-interface LegendProps {
+export interface LegendProps {
   width: number;
   height: number;
   data: LegendItem[];
@@ -24,6 +24,9 @@ interface LegendProps {
 }
 
 export function Legend({ width, height, options, data }: LegendProps) {
+  console.log(JSON.stringify(options));
+  console.log(JSON.stringify(data));
+
   if (options.position === 'Right') {
     return (
       <Box
