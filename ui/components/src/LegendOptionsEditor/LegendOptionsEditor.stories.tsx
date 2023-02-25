@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { LegendOptionsEditor } from './LegendOptionsEditor';
+import { LegendOptionsEditor } from '@perses-dev/components';
 
 const meta: Meta<typeof LegendOptionsEditor> = {
   component: LegendOptionsEditor,

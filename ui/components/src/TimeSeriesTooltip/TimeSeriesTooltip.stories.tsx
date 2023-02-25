@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { TimeSeriesTooltip } from './TimeSeriesTooltip';
+import { TimeSeriesTooltip } from '@perses-dev/components';
 
 const meta: Meta<typeof TimeSeriesTooltip> = {
   component: TimeSeriesTooltip.type,

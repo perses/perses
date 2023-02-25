@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { UnitSelector } from './UnitSelector';
+import { UnitSelector } from '@perses-dev/components';
 
 const meta: Meta<typeof UnitSelector> = {
   component: UnitSelector,

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { StatChart, StatChartProps } from './StatChart';
+import { StatChart, StatChartProps } from '@perses-dev/components';
 
 const meta: Meta<typeof StatChart> = {
   component: StatChart,

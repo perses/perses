@@ -15,7 +15,7 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import { isEqual, debounce } from 'lodash-es';
-import { EChartsTheme } from './model';
+import { EChartsTheme } from '../model';
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
 export interface MouseEventsParameters<T> {
@@ -108,7 +108,7 @@ export interface EChartsProps<T> {
   onChartInitialized?: (instance: ECharts) => void;
 }
 
-export const EChart = React.memo(function EChart<T>({
+export const EChartOriginal = function EChart<T>({
   option,
   theme,
   renderer,
@@ -183,7 +183,9 @@ export const EChart = React.memo(function EChart<T>({
   }, [sx]);
 
   return <Box ref={containerRef} sx={sx}></Box>;
-});
+};
+
+export const EChart = React.memo(EChartOriginal);
 
 // Validate event config and bind custom events
 function bindEvents<T>(instance: ECharts, events?: OnEventsType<T>) {
