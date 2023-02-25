@@ -43,7 +43,7 @@ export interface StatChartData {
   name?: string;
 }
 
-interface StatChartProps {
+export interface StatChartProps {
   width: number;
   height: number;
   data: StatChartData;

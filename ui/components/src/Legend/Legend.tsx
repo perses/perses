@@ -24,9 +24,6 @@ export interface LegendProps {
 }
 
 export function Legend({ width, height, options, data }: LegendProps) {
-  console.log(JSON.stringify(options));
-  console.log(JSON.stringify(data));
-
   if (options.position === 'Right') {
     return (
       <Box
