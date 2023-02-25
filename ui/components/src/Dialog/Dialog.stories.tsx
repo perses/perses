@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { Button } from '@mui/material';
 import { action } from '@storybook/addon-actions';
-import { Dialog } from './Dialog';
+import { Dialog } from '@perses-dev/components';
 
 const meta: Meta<typeof Dialog> = {
   component: Dialog,

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { DateTimeRangePicker } from './DateTimeRangePicker';
+import { DateTimeRangePicker } from '@perses-dev/components';
 
 const meta: Meta<typeof DateTimeRangePicker> = {
   component: DateTimeRangePicker,

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { GaugeChart } from './GaugeChart';
+import { GaugeChart } from '@perses-dev/components';
 
 const meta: Meta<typeof GaugeChart> = {
   component: GaugeChart,

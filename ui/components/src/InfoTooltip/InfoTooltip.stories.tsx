@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@mui/material';
-import { InfoTooltip } from './InfoTooltip';
+import { InfoTooltip } from '@perses-dev/components';
 
 const meta: Meta<typeof InfoTooltip> = {
   component: InfoTooltip,

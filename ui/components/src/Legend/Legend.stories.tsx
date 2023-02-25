@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { Legend, LegendProps } from './Legend';
+import { Legend, LegendProps } from '@perses-dev/components';
 
 const meta: Meta<typeof Legend> = {
   component: Legend,
