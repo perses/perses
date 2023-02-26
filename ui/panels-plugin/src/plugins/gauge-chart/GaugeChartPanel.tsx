@@ -47,7 +47,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     for (const timeSeries of data.series) {
       const calculate = CalculationsMap[calculation];
       const series = {
-        value: calculate(Array.from(timeSeries.values)),
+        value: calculate(timeSeries.values),
         label: timeSeries.formattedName ?? '',
       };
       seriesData.push(series);
