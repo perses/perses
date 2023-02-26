@@ -30,7 +30,6 @@ interface TemplateVariableListProps {
 export function TemplateVariableList(props: TemplateVariableListProps) {
   const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
-
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
 

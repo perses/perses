@@ -33,10 +33,14 @@ const panelsResource = require('../../../../panels-plugin/plugin.json');
 const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
     resource: prometheusResource as PluginModuleResource,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     importPlugin: () => import('@perses-dev/prometheus-plugin'),
   },
   {
     resource: panelsResource as PluginModuleResource,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     importPlugin: () => import('@perses-dev/panels-plugin'),
   },
 ]);
