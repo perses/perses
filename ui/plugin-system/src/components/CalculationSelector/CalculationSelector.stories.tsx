@@ -12,27 +12,18 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { OptionsEditorTabs } from '@perses-dev/plugin-system';
+import { CalculationSelector } from '@perses-dev/plugin-system';
 
-const meta: Meta<typeof OptionsEditorTabs> = {
-  component: OptionsEditorTabs,
+const meta: Meta<typeof CalculationSelector> = {
+  component: CalculationSelector,
 };
 
 export default meta;
 
-type Story = StoryObj<typeof OptionsEditorTabs>;
+type Story = StoryObj<typeof CalculationSelector>;
 
 export const Primary: Story = {
   args: {
-    tabs: [
-      {
-        label: 'tab one',
-        content: 'tab one',
-      },
-      {
-        label: 'tab two',
-        content: 'tab two',
-      },
-    ],
+    value: 'First',
   },
 };
