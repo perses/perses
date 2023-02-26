@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { findLast, meanBy, sumBy } from 'lodash-es';
-import { TimeSeriesValueTuple } from './time-series-queries';
+import { TimeSeriesValueTuple } from '@perses-dev/core';
 
 export const CalculationsMap = {
   First: first,

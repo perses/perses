@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Definition, UnknownSpec } from './definitions';
+import { UnixTimeMs } from './time';
 
 export interface TimeSeriesQueryDefinition<PluginSpec = UnknownSpec>
   extends Definition<TimeSeriesQuerySpec<PluginSpec>> {
@@ -21,3 +22,5 @@ export interface TimeSeriesQueryDefinition<PluginSpec = UnknownSpec>
 export interface TimeSeriesQuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
 }
+
+export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
