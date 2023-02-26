@@ -75,5 +75,9 @@ function sum(values: TimeSeriesValueTuple[]): number | undefined {
 }
 
 function getValue(valueTuple: TimeSeriesValueTuple) {
-  return valueTuple[1];
+  const value = valueTuple[1];
+  if (value !== null) {
+    return value;
+  }
+  return NaN;
 }
