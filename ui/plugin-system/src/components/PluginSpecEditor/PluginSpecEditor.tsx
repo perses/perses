@@ -13,9 +13,9 @@
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/core';
-import { OptionsEditorProps, PanelPlugin, PluginType } from '../model';
-import { usePlugin } from '../runtime';
-import { OptionsEditorTabsProps, OptionsEditorTabs } from './OptionsEditorTabs';
+import { OptionsEditorProps, PanelPlugin, PluginType } from '../../model';
+import { usePlugin } from '../../runtime';
+import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: PluginType;
