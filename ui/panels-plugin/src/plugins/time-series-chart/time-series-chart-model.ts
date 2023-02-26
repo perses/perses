@@ -43,6 +43,7 @@ export type VisualOptions = {
   point_radius?: number;
   line_width?: number;
   area_opacity?: number;
+  connect_nulls?: boolean;
 };
 
 export const DEFAULT_UNIT: UnitOptions = {
@@ -57,10 +58,13 @@ export const DEFAULT_POINT_RADIUS = 4;
 
 export const DEFAULT_AREA_OPACITY = 0;
 
+export const DEFAULT_CONNECT_NULLS = false;
+
 export const DEFAULT_VISUAL: VisualOptions = {
   line_width: DEFAULT_LINE_WIDTH,
   point_radius: DEFAULT_POINT_RADIUS,
   area_opacity: DEFAULT_AREA_OPACITY,
+  connect_nulls: DEFAULT_CONNECT_NULLS,
 };
 
 export const VISUAL_CONFIG = {
@@ -84,6 +88,9 @@ export const VISUAL_CONFIG = {
     min: 0,
     max: 1,
     step: 0.05,
+  },
+  connect_nulls: {
+    label: 'Connect Nulls',
   },
 };
 
