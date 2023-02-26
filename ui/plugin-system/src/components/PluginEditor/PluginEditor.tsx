@@ -25,7 +25,6 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  * `usePluginEditor` hook that powers this component.
  */
 export function PluginEditor(props: PluginEditorProps) {
-  console.log(JSON.stringify(props));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { value, pluginType, pluginKindLabel, onChange: _, ...others } = props;
   const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);

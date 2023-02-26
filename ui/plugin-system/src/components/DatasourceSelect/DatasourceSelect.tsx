@@ -14,7 +14,7 @@
 import { Select, SelectProps, MenuItem } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { useMemo } from 'react';
-import { useListDatasources } from '../runtime';
+import { useListDatasources } from '../../runtime';
 
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
 // this component

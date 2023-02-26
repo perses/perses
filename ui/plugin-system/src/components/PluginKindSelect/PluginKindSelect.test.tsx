@@ -13,7 +13,7 @@
 
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { renderWithContext } from '../test';
+import { renderWithContext } from '../../test';
 import { PluginKindSelect, PluginKindSelectProps } from './PluginKindSelect';
 
 describe('PluginKindSelect', () => {
