@@ -23,4 +23,4 @@ export interface TimeSeriesQuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
 }
 
-export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
+export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
