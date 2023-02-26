@@ -14,7 +14,7 @@
 import { Box, BoxProps } from '@mui/material';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { produce } from 'immer';
-import { PluginEditor, PluginEditorProps } from './PluginEditor';
+import { PluginEditor, PluginEditorProps } from '../PluginEditor';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
@@ -29,6 +29,7 @@ export interface TimeSeriesQueryEditorProps extends Omit<BoxProps, OmittedMuiPro
  * Displays an editor for TimeSeriesQueryDefinition objects.
  */
 export function TimeSeriesQueryEditor(props: TimeSeriesQueryEditorProps) {
+  console.log(JSON.stringify(props));
   const { value, onChange, ...others } = props;
   const {
     spec: { plugin },
