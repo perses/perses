@@ -13,12 +13,13 @@
 
 import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
 import { AbsoluteTimeRange, isRelativeTimeRange, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
-import { useSetTimeRangeParams } from './query-params';
+// import { useSetTimeRangeParams } from './query-params';
 
 export interface TimeRangeProviderProps {
-  initialTimeRange: TimeRangeValue;
-  enabledURLParams?: boolean;
+  // initialTimeRange: TimeRangeValue;
+  timeRange: TimeRangeValue;
   children?: React.ReactNode;
+  onChange: (value: TimeRangeValue) => void;
 }
 
 export interface TimeRange {
@@ -43,17 +44,15 @@ export function useTimeRangeContext() {
  * Get and set the current resolved time range at runtime.
  */
 export function useTimeRange(): TimeRange {
-  const { timeRange, absoluteTimeRange, setTimeRange, refresh, refreshKey } = useTimeRangeContext();
-  return { timeRange, absoluteTimeRange, setTimeRange, refresh, refreshKey };
+  const { timeRange, absoluteTimeRange, refresh, refreshKey, setTimeRange } = useTimeRangeContext();
+  return { timeRange, absoluteTimeRange, refresh, refreshKey, setTimeRange };
 }
 
 /**
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { initialTimeRange, enabledURLParams, children } = props;
-
-  const { timeRange, setTimeRange } = useSetTimeRangeParams(initialTimeRange, enabledURLParams);
+  const { timeRange, children, onChange } = props;
 
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -63,14 +62,17 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
 
   const ctx = useMemo(() => {
     const absoluteTimeRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+    const setTimeRange = (value: TimeRangeValue) => {
+      onChange(value);
+    };
     return {
       timeRange,
-      setTimeRange,
       absoluteTimeRange,
       refresh,
+      setTimeRange,
       refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${refreshKey}`,
     };
-  }, [timeRange, setTimeRange, refresh, refreshKey]);
+  }, [timeRange, refresh, refreshKey, onChange]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }

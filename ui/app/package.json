@@ -22,6 +22,7 @@
     "@perses-dev/panels-plugin": "0.23.1",
     "@perses-dev/plugin-system": "0.23.1",
     "@perses-dev/prometheus-plugin": "0.23.1",
+    "@perses-dev/use-query-params": "0.23.1",
     "@tanstack/react-query": "^4.7.1",
     "immer": "^9.0.15",
     "lodash-es": "^4.17.21",

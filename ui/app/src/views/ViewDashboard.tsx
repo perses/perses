@@ -11,161 +11,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Box } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardResource } from '@perses-dev/core';
-import { dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
-import { useCallback, useRef } from 'react';
-import { bundledPluginLoader } from '../model/bundled-plugins';
-import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
-import { useDatasourceApi } from '../model/datasource-api';
+import { ViewDashboard as DashboardView, ViewDashboardProps } from '@perses-dev/dashboards';
+import { useSetTimeRangeParams, useInitialTimeRange } from '@perses-dev/use-query-params';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
-import { useIsReadonly } from '../model/config-client';
-import { useSnackbar } from '../context/SnackbarProvider';
-import { CreateAction } from '../model/action';
-
-/**
- * Generated a resource name valid for the API.
- * By removing accents from alpha characters and replace specials character by underscores.
- * @param name
- */
-function generateMetadataName(name: string): string {
-  return name
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-zA-Z0-9_.:-]/g, '_');
-}
 
 /**
  * The View for viewing a Dashboard.
  */
-function ViewDashboard() {
-  const { projectName, dashboardName, action } = useParams();
-  const actionRef = useRef(action?.toLowerCase());
-
-  if (projectName === undefined || dashboardName === undefined) {
-    throw new Error('Unable to get the dashboard or project name');
-  }
-
-  const navigate = useNavigate();
-  const { successSnackbar, exceptionSnackbar, warningSnackbar } = useSnackbar();
-  const datasourceApi = useDatasourceApi();
-  const { isLoading } = useDashboard(projectName, dashboardName);
-  let { data } = useDashboard(projectName, dashboardName);
-  const isReadonly = useIsReadonly();
-
-  const createDashboardMutation = useCreateDashboardMutation();
-  const updateDashboardMutation = useUpdateDashboardMutation();
-
-  let isEditing = false;
-
-  if (actionRef.current === CreateAction) {
-    if (data !== undefined) {
-      // Dashboard already exists in the API, the user is redirected to the existing dashboard
-      actionRef.current = undefined;
-      warningSnackbar(`Dashboard ${dashboardDisplayName(data)} already exists`);
-      navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
-    } else {
-      data = {
-        kind: 'Dashboard',
-        metadata: {
-          name: generateMetadataName(dashboardName),
-          project: projectName,
-          version: 0,
-        },
-        spec: {
-          display: {
-            name: dashboardName,
-          },
-          duration: '5m',
-          variables: [],
-          layouts: [],
-          panels: {},
-        },
-      } as unknown as DashboardResource;
-      isEditing = true;
-    }
-  }
-
-  const handleDashboardSave = useCallback(
-    (data: DashboardResource) => {
-      if (actionRef.current === CreateAction) {
-        return createDashboardMutation.mutateAsync(data, {
-          onSuccess: (createdDashboard: DashboardResource) => {
-            actionRef.current = undefined;
-            successSnackbar(`Dashboard ${dashboardDisplayName(createdDashboard)} has been successfully created`);
-            navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
-            return createdDashboard;
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            throw err;
-          },
-        });
-      }
-
-      return updateDashboardMutation.mutateAsync(data, {
-        onSuccess: (updatedDashboard: DashboardResource) => {
-          successSnackbar(`Dashboard ${dashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`);
-          return updatedDashboard;
-        },
-        onError: (err) => {
-          exceptionSnackbar(err);
-          throw err;
-        },
-      });
-    },
-    [actionRef, createDashboardMutation, exceptionSnackbar, navigate, successSnackbar, updateDashboardMutation]
-  );
-
-  const handleDashboardDiscard = useCallback(() => {
-    if (actionRef.current === CreateAction) {
-      navigate(`/projects/${projectName}`);
-    }
-  }, [actionRef, navigate, projectName]);
-
-  if (isLoading) return null;
-
-  if (!data || data.spec === undefined || isReadonly === undefined) return null;
+export function ViewDashboard({
+  dashboardResource,
+  datasourceApi,
+  onSave,
+  onDiscard,
+  isReadonly,
+  isEditing,
+}: Omit<ViewDashboardProps, 'onChangeTime'>) {
+  const dashboardDuration = dashboardResource.spec.duration ?? '1h';
+  const initialTimeRange = useInitialTimeRange(dashboardDuration);
+  const { setTimeRange, timeRange } = useSetTimeRangeParams(initialTimeRange);
 
   return (
-    <Box
-      component="main"
-      sx={{
-        flexGrow: 1,
-        overflow: 'hidden',
-      }}
-    >
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={bundledPluginLoader}
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-          }}
-        >
-          <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <DashboardView
-              dashboardResource={data}
-              datasourceApi={datasourceApi}
-              dashboardTitleComponent={
-                <DashboardBreadcrumbs
-                  dashboardName={data.spec.display ? data.spec.display.name : data.metadata.name}
-                  dashboardProject={data.metadata.project}
-                />
-              }
-              onSave={handleDashboardSave}
-              onDiscard={handleDashboardDiscard}
-              initialVariableIsSticky={true}
-              isReadonly={isReadonly}
-              isEditing={isEditing}
-            />
-          </ErrorBoundary>
-        </PluginRegistry>
-      </ErrorBoundary>
-    </Box>
+    <DashboardView
+      dashboardResource={dashboardResource}
+      datasourceApi={datasourceApi}
+      dashboardTitleComponent={
+        <DashboardBreadcrumbs
+          dashboardName={
+            dashboardResource.spec.display ? dashboardResource.spec.display.name : dashboardResource.metadata.name
+          }
+          dashboardProject={dashboardResource.metadata.project}
+        />
+      }
+      onSave={onSave}
+      onDiscard={onDiscard}
+      initialVariableIsSticky={true}
+      isReadonly={isReadonly}
+      isEditing={isEditing}
+      onChangeTime={setTimeRange}
+      timeRange={timeRange}
+    />
   );
 }
 

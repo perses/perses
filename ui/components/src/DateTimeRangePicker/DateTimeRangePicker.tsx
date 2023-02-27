@@ -24,7 +24,7 @@ import {
 import { AbsoluteTimePicker } from './AbsoluteTimePicker';
 import { TimeRangeSelector, TimeOption } from './TimeRangeSelector';
 
-interface DateTimeRangePickerProps {
+export interface DateTimeRangePickerProps {
   value: TimeRangeValue;
   onChange: (value: TimeRangeValue) => void;
   timeOptions: TimeOption[];

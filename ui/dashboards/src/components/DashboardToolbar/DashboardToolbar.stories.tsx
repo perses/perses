@@ -18,6 +18,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
 import { QueryParamProvider } from 'use-query-params';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
+import { action } from '@storybook/addon-actions';
 
 const meta: Meta<typeof DashboardToolbar> = {
   component: DashboardToolbar,
@@ -34,11 +35,11 @@ const meta: Meta<typeof DashboardToolbar> = {
             }}
           >
             <TimeRangeProvider
-              initialTimeRange={{
+              timeRange={{
                 pastDuration: '6h',
                 end: new Date(),
               }}
-              enabledURLParams={false}
+              onChange={action('onChange TimeRangeProvider')}
             >
               <TemplateVariableProvider>
                 <DashboardProvider

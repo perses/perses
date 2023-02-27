@@ -17,6 +17,7 @@ import { PluginRegistry, TimeRangeProvider } from '@perses-dev/plugin-system';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
 import { QueryParamProvider } from 'use-query-params';
+import { action } from '@storybook/addon-actions';
 
 const meta: Meta<typeof TimeRangeControls> = {
   component: TimeRangeControls,
@@ -33,11 +34,11 @@ const meta: Meta<typeof TimeRangeControls> = {
             }}
           >
             <TimeRangeProvider
-              initialTimeRange={{
+              timeRange={{
                 pastDuration: '6h',
                 end: new Date(),
               }}
-              enabledURLParams={false}
+              onChange={action('onChange TimeRangeProvider')}
             >
               <DashboardProvider
                 initialState={{

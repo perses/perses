@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, TimeRangeValue } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import { TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
 import {
@@ -29,9 +29,11 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'> {
   dashboardTitleComponent?: JSX.Element;
   onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
   onDiscard?: (entity: DashboardResource) => void;
+  onChangeTime: (value: TimeRangeValue) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
   isEditing?: boolean;
+  timeRange?: TimeRangeValue;
 }
 
 /**
@@ -48,6 +50,8 @@ export function ViewDashboard(props: ViewDashboardProps) {
     isReadonly,
     isEditing,
     sx,
+    onChangeTime,
+    timeRange,
     ...others
   } = props;
   const { spec } = dashboardResource;
@@ -57,7 +61,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
-        <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
+        <TimeRangeProvider timeRange={timeRange || initialTimeRange} onChange={onChangeTime}>
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
               sx={combineSx(

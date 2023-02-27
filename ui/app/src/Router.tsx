@@ -19,7 +19,7 @@ import ViewDashboardList from './views/ViewDashboardList';
 import ViewMigrate from './views/ViewMigrate';
 
 // Other routes are lazy-loaded for code-splitting
-const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
+const ViewDashboardContainer = lazy(() => import('./views/ViewDashboardContainer'));
 const ViewProject = lazy(() => import('./views/ViewProject'));
 
 function Router() {
@@ -30,8 +30,8 @@ function Router() {
         <Routes>
           <Route path="/migrate" element={<ViewMigrate />} />
           <Route path="/projects" element={<ViewDashboardList />} />
-          <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
-          <Route path="/projects/:projectName/dashboards/:dashboardName/:action" element={<ViewDashboard />} />
+          <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboardContainer />} />
+          <Route path="/projects/:projectName/dashboards/:dashboardName/:action" element={<ViewDashboardContainer />} />
           <Route path="/projects/:projectName" element={<ViewProject />} />
           <Route path="/" element={<ViewDashboardList />} />
         </Routes>

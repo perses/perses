@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  // Includes JSON just for test compilation/test files
+  "include": ["src", "src/**/*.json"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "@perses-dev/use-query-params": ["./src"]
+    }
+  }
+}

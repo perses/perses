@@ -33,11 +33,10 @@ const meta: Meta<typeof TemplateVariableList> = {
             }}
           >
             <TimeRangeProvider
-              initialTimeRange={{
+              timeRange={{
                 pastDuration: '6h',
                 end: new Date(),
               }}
-              enabledURLParams={false}
             >
               <DatasourceStoreProvider
                 dashboardResource={{

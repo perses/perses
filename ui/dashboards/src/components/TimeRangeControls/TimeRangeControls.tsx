@@ -34,7 +34,7 @@ export const TIME_OPTIONS: TimeOption[] = [
 
 const DEFAULT_HEIGHT = '34px';
 
-interface TimeRangeControlsProps {
+export interface TimeRangeControlsProps {
   // The controls look best at heights >= 28 pixels
   heightPx?: number;
 

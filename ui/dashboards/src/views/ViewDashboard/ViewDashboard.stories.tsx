@@ -21,7 +21,6 @@ import {
   PluginLoader,
   PluginModuleResource,
   dynamicImportPluginLoader,
-  TimeRangeProvider,
 } from '@perses-dev/plugin-system';
 
 // NOTE: the aliases we use for components break these top level imports, so we
@@ -56,64 +55,56 @@ const meta: Meta<typeof ViewDashboard> = {
       <QueryParamProvider adapter={WindowHistoryAdapter}>
         <QueryClientProvider client={queryClient}>
           <PluginRegistry pluginLoader={bundledPluginLoader}>
-            <TimeRangeProvider
-              initialTimeRange={{
-                pastDuration: '6h',
-                end: new Date(),
-              }}
-              enabledURLParams={false}
-            >
-              <TemplateVariableProvider
-                initialVariableDefinitions={[
-                  {
-                    kind: 'TextVariable',
-                    spec: { name: 'NewVariable', display: { name: 'MyVariable' }, value: 'one' },
-                  },
-                  {
-                    kind: 'ListVariable',
-                    spec: {
-                      name: 'MyList',
-                      display: { name: 'MyList' },
-                      allow_multiple: false,
-                      allow_all_value: false,
-                      plugin: {
-                        kind: 'StaticListVariable',
-                        spec: {
-                          values: [
-                            { value: 'one', label: 'one' },
-                            { value: 'two', label: 'two' },
-                            { value: 'three', label: 'three' },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                ]}
-              >
-                <DashboardProvider
-                  initialState={{
-                    dashboardResource: {
-                      kind: 'Dashboard',
-                      metadata: {
-                        name: 'AddGroupButton',
-                        project: 'storybook',
-                        created_at: '2021-11-09T00:00:00Z',
-                        updated_at: '2021-11-09T00:00:00Z',
-                        version: 0,
-                      },
+            <TemplateVariableProvider
+              initialVariableDefinitions={[
+                {
+                  kind: 'TextVariable',
+                  spec: { name: 'NewVariable', display: { name: 'MyVariable' }, value: 'one' },
+                },
+                {
+                  kind: 'ListVariable',
+                  spec: {
+                    name: 'MyList',
+                    display: { name: 'MyList' },
+                    allow_multiple: false,
+                    allow_all_value: false,
+                    plugin: {
+                      kind: 'StaticListVariable',
                       spec: {
-                        duration: '6h',
-                        variables: [],
-                        layouts: [],
-                        panels: {},
+                        values: [
+                          { value: 'one', label: 'one' },
+                          { value: 'two', label: 'two' },
+                          { value: 'three', label: 'three' },
+                        ],
                       },
                     },
-                  }}
-                >
-                  <ViewDashboard {...args} />
-                </DashboardProvider>
-              </TemplateVariableProvider>
-            </TimeRangeProvider>
+                  },
+                },
+              ]}
+            >
+              <DashboardProvider
+                initialState={{
+                  dashboardResource: {
+                    kind: 'Dashboard',
+                    metadata: {
+                      name: 'AddGroupButton',
+                      project: 'storybook',
+                      created_at: '2021-11-09T00:00:00Z',
+                      updated_at: '2021-11-09T00:00:00Z',
+                      version: 0,
+                    },
+                    spec: {
+                      duration: '6h',
+                      variables: [],
+                      layouts: [],
+                      panels: {},
+                    },
+                  },
+                }}
+              >
+                <ViewDashboard {...args} />
+              </DashboardProvider>
+            </TemplateVariableProvider>
           </PluginRegistry>
         </QueryClientProvider>
       </QueryParamProvider>
@@ -127,6 +118,9 @@ type Story = StoryObj<typeof ViewDashboard>;
 
 export const Primary: Story = {
   args: {
+    timeRange: {
+      pastDuration: '1h',
+    },
     dashboardResource: {
       kind: 'Dashboard',
       metadata: {
