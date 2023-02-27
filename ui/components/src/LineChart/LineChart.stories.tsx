@@ -11,14 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-
-import { StoryFn, Meta } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import { LineChart } from '@perses-dev/components';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-  title: 'LineChart',
+const meta: Meta<typeof LineChart> = {
   component: LineChart,
   args: {
     height: 200,
@@ -54,11 +50,10 @@ export default {
       bottom: 0,
     },
   },
-} as Meta<typeof LineChart>;
-
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: StoryFn<typeof LineChart> = (args) => {
-  return <LineChart {...args} />;
 };
 
-export const Primary = Template.bind({});
+export default meta;
+
+type Story = StoryObj<typeof LineChart>;
+
+export const Primary: Story = {};

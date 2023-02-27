@@ -11,14 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { OptionsEditorTabs } from '@perses-dev/plugin-system';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
+const meta: Meta<typeof OptionsEditorTabs> = {
   component: OptionsEditorTabs,
+};
+
+export default meta;
+
+type Story = StoryObj<typeof OptionsEditorTabs>;
+
+export const Primary: Story = {
   args: {
     tabs: [
       {
@@ -31,9 +35,4 @@ export default {
       },
     ],
   },
-} as Meta<typeof OptionsEditorTabs>;
-
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: StoryFn<typeof OptionsEditorTabs> = (args) => <OptionsEditorTabs {...args} />;
-
-export const Primary = Template.bind({});
+};
