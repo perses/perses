@@ -1916,7 +1916,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Line Visual Options",
+              "name": "Custom Visual Options",
               "description": "Time series chart with custom visual options"
             },
             "plugin": {

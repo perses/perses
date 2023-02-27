@@ -63,22 +63,22 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     });
 
     await dashboardPage.forEachTheme(async (themeName) => {
-      const panelFirst = dashboardPage.getPanelByName('Single Line');
-      await panelFirst.isLoaded();
-      await waitForStableCanvas(panelFirst.canvas);
+      const firstPanel = dashboardPage.getPanelByName('Single Line');
+      await firstPanel.isLoaded();
+      await waitForStableCanvas(firstPanel.canvas);
 
-      await happoPlaywright.screenshot(page, panelFirst.parent, {
+      await happoPlaywright.screenshot(page, firstPanel.parent, {
         component: 'Time Series Chart Panel',
         variant: `Single Line [${themeName}]`,
       });
 
-      const panelSecond = dashboardPage.getPanelByName('Line Visual Options');
-      await panelSecond.isLoaded();
-      await waitForStableCanvas(panelSecond.canvas);
+      const secondPanel = dashboardPage.getPanelByName('Custom Visual Options');
+      await secondPanel.isLoaded();
+      await waitForStableCanvas(secondPanel.canvas);
 
-      await happoPlaywright.screenshot(page, panelSecond.parent, {
+      await happoPlaywright.screenshot(page, secondPanel.parent, {
         component: 'Time Series Chart Panel',
-        variant: `Line Visual Options [${themeName}]`,
+        variant: `Custom Visual Options [${themeName}]`,
       });
     });
   });
