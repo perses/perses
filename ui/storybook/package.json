@@ -11,7 +11,7 @@
     "lint:fix": "npm run lint -- --fix",
     "type-check": "tsc --noEmit",
     "happo": "happo",
-    "happo-ci-github-actions": "happo-ci-github-actions"
+    "happo-ci-github-actions": "HAPPO_COMMAND=../node_modules/happo.io/build/cli.js npx happo-ci-github-actions"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
