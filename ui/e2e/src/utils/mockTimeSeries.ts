@@ -62,7 +62,7 @@ export function mockTimeSeriesResponseWithStableValue({
   };
 }
 
-// Testing future TimeSeriesQuery plugins that can return null values
+// Testing TimeSeriesQuery plugins that can return null values
 export function mockTimeSeriesResponseWithNullValues(): RangeQuery {
   return {
     status: 'success',
@@ -70,11 +70,7 @@ export function mockTimeSeriesResponseWithNullValues(): RangeQuery {
       resultType: 'matrix',
       result: [
         {
-          metric: {
-            __name__: 'up',
-            instance: 'demo.do.prometheus.io:3000',
-            job: 'grafana',
-          },
+          metric: {},
           values: [
             [1677511940, '1'],
             [1677511941, '1'],
