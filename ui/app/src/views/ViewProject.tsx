@@ -19,7 +19,7 @@ import ViewDashboard from 'mdi-material-ui/ViewDashboard';
 import { useCallback, useState } from 'react';
 import { useDashboardList } from '../model/dashboard-client';
 import DashboardList from '../components/DashboardList';
-import DeleteProjectDialog from '../components/DeleteProjectDialog/DeleteProjectDialog';
+import { DeleteProjectDialog } from '../components/DeleteProjectDialog/DeleteProjectDialog';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { CreateDashboardDialog } from '../components/CreateDashboardDialog/CreateDashboardDialog';
 

@@ -19,8 +19,28 @@
       "dependsOn": ["^build"],
       "cache": false
     },
+    // Splitting out storybook jobs with a prefix because they behave differently
+    // than our packages and this makes it easier to separate.
+    "storybook:start": {
+      "dependsOn": [],
+      "outputs": []
+    },
+    "storybook:build": {
+      "dependsOn": [],
+      "outputs": []
+    },
+    "storybook:serve": {
+      "dependsOn": ["storybook:build"],
+      "outputs": []
+    },
     "test": {
       "dependsOn": [],
+      "outputs": []
+    },
+    "type-check": {
+      // Make sure all packages are built once before type-checking to ensure
+      // we have the right files for cross-package dependencies.
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "e2e:local": {

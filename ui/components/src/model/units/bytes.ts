@@ -15,7 +15,7 @@ import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 
 const bytesUnitKinds = ['Bytes'] as const;
-type BytesUnitKind = typeof bytesUnitKinds[number];
+type BytesUnitKind = (typeof bytesUnitKinds)[number];
 export type BytesUnitOptions = {
   kind: BytesUnitKind;
   decimal_places?: number;

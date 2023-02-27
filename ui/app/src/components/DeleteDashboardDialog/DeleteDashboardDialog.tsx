@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Button } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
@@ -57,30 +57,19 @@ export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Delete Dashboard</DialogTitle>
-      <IconButton
-        aria-label="Close"
-        onClick={() => onClose()}
-        sx={(theme) => ({
-          position: 'absolute',
-          top: theme.spacing(0.5),
-          right: theme.spacing(0.5),
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
-      <DialogContent dividers sx={{ width: '500px' }}>
+      <Dialog.Header>Delete Dashboard</Dialog.Header>
+      <Dialog.Content>
         Are you sure you want to delete the dashboard {dashboardExtendedDisplayName(dashboard)}? This action cannot be
         undone.
-      </DialogContent>
-      <DialogActions>
+      </Dialog.Content>
+      <Dialog.Actions>
         <Button variant="contained" type="submit" onClick={handleSubmit}>
           Delete
         </Button>
         <Button variant="outlined" color="secondary" onClick={onClose}>
           Cancel
         </Button>
-      </DialogActions>
+      </Dialog.Actions>
     </Dialog>
   );
 };
