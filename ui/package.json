@@ -14,6 +14,7 @@
     "storybook": "turbo run storybook:start",
     "storybook:build": "turbo run storybook:build",
     "storybook:serve": "turbo run storybook:serve",
+    "storybook:happo": "npm run happo-ci-github-actions -w storybook",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
     "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
