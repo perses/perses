@@ -128,7 +128,7 @@ describe('TimeSeriesChartPanel', () => {
   it('should toggle selected state when a legend item is clicked', async () => {
     renderPanel();
 
-    const seriesArr = Array.from(MOCK_TIME_SERIES_DATA.series);
+    const seriesArr = MOCK_TIME_SERIES_DATA.series;
     const firstLegend = getLegendByName(seriesArr[0]?.name);
     const secondLegend = getLegendByName(seriesArr[1]?.name);
 
@@ -143,7 +143,7 @@ describe('TimeSeriesChartPanel', () => {
 
   it('should modify selected state when a legend item is clicked with shift key', async () => {
     renderPanel();
-    const seriesArr = Array.from(MOCK_TIME_SERIES_DATA.series);
+    const seriesArr = MOCK_TIME_SERIES_DATA.series;
     const firstLegend = getLegendByName(seriesArr[0]?.name);
     const secondLegend = getLegendByName(seriesArr[1]?.name);
 
@@ -178,7 +178,7 @@ describe('TimeSeriesChartPanel', () => {
 
   it('should modify selected state when a legend item is clicked with meta key', async () => {
     renderPanel();
-    const seriesArr = Array.from(MOCK_TIME_SERIES_DATA.series);
+    const seriesArr = MOCK_TIME_SERIES_DATA.series;
 
     // Falling back to a bogus string if not set to appease typescript.
     const firstName = seriesArr[0]?.name;

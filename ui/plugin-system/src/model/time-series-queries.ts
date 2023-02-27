@@ -48,12 +48,12 @@ export interface TimeSeriesQueryContext {
 export interface TimeSeriesData {
   timeRange?: AbsoluteTimeRange;
   stepMs?: number;
-  series: Iterable<TimeSeries>;
+  series: TimeSeries[];
 }
 
 export interface TimeSeries {
   name: string;
-  values: Iterable<TimeSeriesValueTuple>;
+  values: TimeSeriesValueTuple[];
   formattedName?: string;
 }
 
