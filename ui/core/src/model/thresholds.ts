@@ -11,16 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
-
-#stepOption: {
-	value:  number
-	color?: string
-	name?:  string
+export interface StepOptions {
+  value: number;
+  color?: string;
+  name?: string;
 }
 
-#thresholds: {
-	mode?:          "Percent" | "Absolute"
-	default_color?: string
-	steps?: [...#stepOption]
+export interface ThresholdOptions {
+  mode?: 'Percent' | 'Absolute';
+  default_color?: string;
+  max?: number; // is this same as the max in GaugeChartOptions? can we remove?
+  steps?: StepOptions[];
 }

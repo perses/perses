@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './ColorPicker';
 export * from './DateTimeRangePicker';
 export * from './Dialog';
 export * from './Drawer';
@@ -25,6 +26,7 @@ export * from './LegendOptionsEditor';
 export * from './LineChart';
 export * from './OptionsEditorLayout';
 export * from './StatChart';
+export * from './ThresholdsEditor';
 export * from './TimeSeriesTooltip';
 export * from './UnitSelector';
 export * from './YAxisLabel';

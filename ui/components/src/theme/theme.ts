@@ -70,6 +70,11 @@ const components: ThemeOptions['components'] = {
       paper: getModalBackgroundStyle,
     },
   },
+  MuiPopover: {
+    styleOverrides: {
+      paper: getModalBackgroundStyle,
+    },
+  },
   MuiAlert: {
     styleOverrides: {
       standardError: ({ theme }) => ({

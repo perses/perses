@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange } from '@perses-dev/core';
+import { AbsoluteTimeRange, StepOptions } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
 import { EChartsTimeSeries } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
-import { StepOptions } from '../../../model/thresholds';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_LINE_WIDTH,
