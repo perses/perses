@@ -22,7 +22,7 @@ This package is used to generate documentation for Perses UI components using [S
 Stories **SHOULD** live in the first entry in the list below that matches their purpose:
 
 - Stories that are tightly coupled with a component should be colocated with the component code in the associated package (e.g. the stories for the `LineChart` component live at `ui/components/src/LineChart/LineChart.stories.tsx` as a sibling of `LineChart.tsx`).
-- Package-specific stories should live in the `src/stories` directory for that package.
+- Package-specific stories (e.g. top-level "About" story describing the package, stories showing how to use multiple components in the package together) should live in the `src/stories` directory for that package.
 - Stories that provide project-wide documentation or involve components from multiple packages should live in the storybook package (`ui/storybook/stories`).
 
 ### What kind of story format should I use?
