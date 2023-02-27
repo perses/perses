@@ -183,7 +183,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
     },
     thresholds: {
       defaultColor: muiTheme.palette.success.main,
-      palette: [muiTheme.palette.info.main, muiTheme.palette.warning.main, muiTheme.palette.error.main],
+      palette: ['#FFCC00', muiTheme.palette.warning.main, muiTheme.palette.error.main],
     },
   };
 }
