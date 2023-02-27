@@ -15,7 +15,7 @@ import { MouseEventHandler } from 'react';
 
 export const legendPositions = ['Bottom', 'Right'] as const;
 
-export type LegendPositions = typeof legendPositions[number];
+export type LegendPositions = (typeof legendPositions)[number];
 
 export interface LegendOptions {
   position: LegendPositions;

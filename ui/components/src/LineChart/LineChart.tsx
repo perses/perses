@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEvent, useMemo, useRef, useState } from 'react';
+import React, { MouseEvent, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -56,7 +56,10 @@ use([
   CanvasRenderer,
 ]);
 
-interface LineChartProps {
+export interface LineChartProps {
+  /**
+   * Height of the chart
+   */
   height: number;
   data: EChartsDataFormat;
   yAxis?: YAXisComponentOption;

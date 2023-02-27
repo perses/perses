@@ -16,5 +16,5 @@
   "module": {
     "type": "commonjs"
   },
-  "exclude": ["\\.(test)\\."]
+  "exclude": ["\\.(stories|test)\\."]
 }
