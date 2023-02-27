@@ -60,11 +60,6 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
               ),
             },
           },
-        ],
-      });
-
-      await dashboardPage.mockQueryRangeRequests({
-        queries: [
           {
             query: 'fake_graphite_query_with_nulls',
             response: {
