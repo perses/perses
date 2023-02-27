@@ -9,7 +9,9 @@
     "storybook:serve": "npx http-server ./storybook-static",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "happo": "happo",
+    "happo-ci-github-actions": "happo-ci-github-actions"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
@@ -30,6 +32,8 @@
     "@storybook/testing-library": "^0.0.14-next.1",
     "babel-loader": "^8.3.0",
     "babel-plugin-react-require": "^3.1.3",
+    "happo-plugin-storybook": "^3.1.0",
+    "happo.io": "^8.3.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "storybook": "^7.0.0-beta.53",

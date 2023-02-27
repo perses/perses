@@ -13,6 +13,7 @@
 
 import { DocsContainer } from './DocsContainer';
 import { WithThemes, WithBackground } from './decorators';
+import './addons/happo/register';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
