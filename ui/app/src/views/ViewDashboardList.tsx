@@ -57,7 +57,7 @@ function RenderDashboardList() {
     return <CircularProgress />;
   }
 
-  if (data === undefined) return null;
+  if (data === undefined || data === null) return null;
 
   const dashboardListAsMap = new Map<string, DashboardResource[]>();
   if (Array.isArray(data)) {

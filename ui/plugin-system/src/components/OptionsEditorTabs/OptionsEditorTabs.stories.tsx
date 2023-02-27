@@ -26,12 +26,12 @@ export const Primary: Story = {
   args: {
     tabs: [
       {
-        label: 'tab one',
-        content: 'tab one',
+        label: 'Tab One',
+        content: 'Tab One',
       },
       {
-        label: 'tab two',
-        content: 'tab two',
+        label: 'Tab Two',
+        content: 'Tab Two',
       },
     ],
   },

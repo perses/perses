@@ -6,11 +6,11 @@ This package is used to generate documentation for Perses UI components using [S
 
 ## Getting started
 
-### Running storybook
+### Running Storybook
 
-- Run storybook in development mode: `npm run storybook`
+- Run Storybook in development mode: `npm run storybook`
 
-### Building storybook
+### Building Storybook
 
 - Build only: `npm run storybook:build`
 - Build & serve static assets from build: `npm run storybook:serve`
@@ -22,8 +22,8 @@ This package is used to generate documentation for Perses UI components using [S
 Stories **SHOULD** live in the first entry in the list below that matches their purpose:
 
 - Stories that are tightly coupled with a component should be colocated with the component code in the associated package (e.g. the stories for the `LineChart` component live at `ui/components/src/LineChart/LineChart.stories.tsx` as a sibling of `LineChart.tsx`).
-- Package-specific stories should live in the `src/stories` directory for that package.
-- Stories that provide project-wide documentation or involve components from multiple packages should live in the storybook package (`ui/storybook/stories`).
+- Package-specific stories (e.g. top-level "About" story describing the package, stories showing how to use multiple components in the package together) should live in the `src/stories` directory for that package.
+- Stories that provide project-wide documentation or involve components from multiple packages should live in the Storybook package (`ui/storybook/stories`).
 
 ### What kind of story format should I use?
 
@@ -63,11 +63,11 @@ import { LineChart } from '.';
 
 #### Long version
 
-Stories should import from source code (NOT compiled code) because this enables us to automatically generate documentation tables for component props from types. Stories should import from the top level export for that package to help ensure the component was properly exported for consumption from the package when published. The same versions of code need to be used across the storybook to avoid issues when using `context` and singletons.
+Stories should import from source code (NOT compiled code) because this enables us to automatically generate documentation tables for component props from types. Stories should import from the top level export for that package to help ensure the component was properly exported for consumption from the package when published. The same versions of code need to be used across the Storybook to avoid issues when using `context` and singletons.
 
 The project enforces the above contraints using the following tooling:
 
-- **aliases to source for all @perses-dev packages in storybook's webpack config** - E.g. `@perses-dev/components` will alias to `ui/components/src` instead of pointing to `ui/components/dist`). This makes it easy to import from packages in stories in a consistent way while pointing at the top level `src` export. It also ensures that components referenced indirectly in stories (usually a child of the component used directly in the story) point to source code to avoid accidentally mixing and matching source and compiled code, which can cause issues when using `context` and singletons.
+- **aliases to source for all @perses-dev packages in Storybook's webpack config** - E.g. `@perses-dev/components` will alias to `ui/components/src` instead of pointing to `ui/components/dist`). This makes it easy to import from packages in stories in a consistent way while pointing at the top level `src` export. It also ensures that components referenced indirectly in stories (usually a child of the component used directly in the story) point to source code to avoid accidentally mixing and matching source and compiled code, which can cause issues when using `context` and singletons.
 - **alias to source for the specific @perses-dev package in package-specific tsconfig** - E.g. a story in the `@perses-dev/components` package can import from `@perses-dev/components` and have TypeScript look in `ui/components/src` for types. Without this, you would get type errors because TypeScript will expect the package to have installed itself.
 
 ## Notable addons
@@ -102,17 +102,17 @@ Storybook is currently configured to build with [Webpack 5](https://storybook.js
 
 ## Known issues
 
-Below are some known issues related to storybook that developers should be aware of.
+Below are some known issues related to Storybook that developers should be aware of.
 
 ### Related to our setup/usage
 
 These issues are related to our specific use of Storybook.
 
 - Stories reference TypeScript source code (instead of compiled code) from packages to be able to autogenerate documentation from component prop types.
-  - The webpack configuration for storybook includes aliases for internal packages to ensure consistent reference of source code throughout TypeScript. Without this, issues can occur with mixing and matching `src` and `dist` versions of package context/providers.
+  - The webpack configuration for Storybook includes aliases for internal packages to ensure consistent reference of source code throughout TypeScript. Without this, issues can occur with mixing and matching `src` and `dist` versions of package context/providers.
 - Storybook compiles code using Webpack and packages compile code using SWC. This is not currently causing any issues, but could lead to inconsistencies in the future.
   - There is a Storybook plugin for building using SWC, but it is not a core Storybook plugin, and it broke several Storybook features when we attempted to use it.
-- The grid and background color toolbar items do not play nicely together because of some customizations we're doing to get the backgrounds to use our theme. For now, disabling the grid feature until we have time to dig into this more. Other storybook addons (e.g. measure, outline) and browser extensions provide similar behavior, so this is not a priority to fix.
+- The grid and background color toolbar items do not play nicely together because of some customizations we're doing to get the backgrounds to use our theme. For now, disabling the grid feature until we have time to dig into this more. Other Storybook addons (e.g. measure, outline) and browser extensions provide similar behavior, so this is not a priority to fix.
 
 ### In Storybook
 
