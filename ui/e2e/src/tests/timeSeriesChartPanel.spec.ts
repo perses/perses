@@ -29,6 +29,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await happoPlaywright.finish();
   });
 
+  // TODO: need test for nulls and connect_nulls option
   test(`displays single line as expected`, async ({ page, dashboardPage, mockNow }) => {
     // Mock data response, so we can make assertions on consistent response data.
     await dashboardPage.mockQueryRangeRequests({
