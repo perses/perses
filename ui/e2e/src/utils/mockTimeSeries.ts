@@ -13,7 +13,7 @@
 
 import { PrometheusDatasource } from '@perses-dev/prometheus-plugin';
 
-type PrometheusClient = ReturnType<(typeof PrometheusDatasource)['createClient']>;
+type PrometheusClient = ReturnType<typeof PrometheusDatasource['createClient']>;
 type RangeQuery = Awaited<ReturnType<PrometheusClient['rangeQuery']>>;
 
 type MockStableValueResultConfig = {
@@ -63,7 +63,22 @@ export function mockTimeSeriesResponseWithStableValue({
 }
 
 // Testing TimeSeriesQuery plugins that can return null values
-export function mockTimeSeriesResponseWithNullValues(): RangeQuery {
+
+type MockNullValueConfig = {
+  startTimeMs: number;
+  endTimeMs: number;
+  count?: number;
+};
+
+export function mockTimeSeriesResponseWithNullValues({
+  startTimeMs,
+  endTimeMs,
+  count = 1000,
+}: MockNullValueConfig): RangeQuery {
+  const startTimeS = Math.floor(startTimeMs / 1000);
+  const endTimeS = Math.floor(endTimeMs / 1000);
+  const stepSize = Math.floor((endTimeS - startTimeS) / count);
+
   return {
     status: 'success',
     data: {
@@ -71,69 +86,15 @@ export function mockTimeSeriesResponseWithNullValues(): RangeQuery {
       result: [
         {
           metric: {},
-          values: [
-            [1677511940, '1'],
-            [1677511941, '1'],
-            [1677511942, '1'],
-            [1677511943, '1'],
-            [1677511944, '1'],
-            [1677511945, '1'],
-            [1677511946, '1'],
-            [1677511947, '1'],
-            [1677511948, '1'],
-            [1677511949, null],
-            [1677511950, null],
-            [1677511951, null],
-            [1677511952, null],
-            [1677511953, null],
-            [1677511954, '1'],
-            [1677511955, '1'],
-            [1677511956, '1'],
-            [1677511957, '1'],
-            [1677511958, '1'],
-            [1677511959, '1'],
-            [1677511960, '1'],
-            [1677511961, '1'],
-            [1677511962, '1'],
-            [1677511963, '1'],
-            [1677511964, '1'],
-            [1677511965, '1'],
-            [1677511966, '1'],
-            [1677511967, '1'],
-            [1677511968, '1'],
-            [1677511969, '1'],
-            [1677511970, '1'],
-            [1677511971, '1'],
-            [1677511972, '1'],
-            [1677511973, '1'],
-            [1677511974, '1'],
-            [1677511975, '1'],
-            [1677511976, '1'],
-            [1677511977, '1'],
-            [1677511978, '1'],
-            [1677511979, '1'],
-            [1677511980, '1'],
-            [1677511981, '1'],
-            [1677511982, '1'],
-            [1677511983, '1'],
-            [1677511984, '1'],
-            [1677511985, '1'],
-            [1677511986, '1'],
-            [1677511987, '1'],
-            [1677511988, '1'],
-            [1677511989, '1'],
-            [1677511990, '1'],
-            [1677511991, '1'],
-            [1677511992, '1'],
-            [1677511993, '1'],
-            [1677511994, '1'],
-            [1677511995, '1'],
-            [1677511996, '1'],
-            [1677511997, '1'],
-            [1677511998, '1'],
-            [1677511999, '1'],
-            [1677512000, '1'],
-          ],
+          values: [...Array(count)].map((_, i) => {
+            const timestamp = i < count - 1 ? startTimeS + i * stepSize : endTimeS;
+            let value: string | null = '100';
+            // to test visual.connect_nulls option
+            if (i > 50 && i < 100) {
+              value = null;
+            }
+            return [timestamp, value];
+          }),
         },
       ],
     },

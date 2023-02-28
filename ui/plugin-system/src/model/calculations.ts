@@ -80,5 +80,6 @@ function getValue(valueTuple: TimeSeriesValueTuple) {
   if (value !== null) {
     return value;
   }
+  // TODO: refactor utils so null can be returned and LastNotNull supported
   return NaN;
 }

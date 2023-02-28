@@ -64,7 +64,12 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
             query: 'fake_graphite_query_with_nulls',
             response: {
               status: 200,
-              body: JSON.stringify(mockTimeSeriesResponseWithNullValues()),
+              body: JSON.stringify(
+                mockTimeSeriesResponseWithNullValues({
+                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+                  endTimeMs: mockNow,
+                })
+              ),
             },
           },
         ],
