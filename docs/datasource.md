@@ -264,7 +264,7 @@ A simple Prometheus datasource would be
   "spec": {
     "default": true,
     "plugin": {
-      "kind": "Prometheus",
+      "kind": "PrometheusDatasource",
       "spec": {
         "direct_url": "https://prometheus.demo.do.prometheus.io"
       }
@@ -285,10 +285,10 @@ A more complex one:
   "spec": {
     "default": true,
     "plugin": {
-      "kind": "Prometheus",
+      "kind": "PrometheusDatasource",
       "spec": {
         "proxy": {
-          "kind": "HTTP",
+          "kind": "HTTPProxy",
           "spec": {
             "url": "https://prometheus.demo.do.prometheus.io",
             "allowed_endpoints": [
