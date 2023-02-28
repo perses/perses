@@ -29,7 +29,7 @@ Tests are run during local development using the configuration in `local.playwri
 
 ### Locally with screenshots (maintainers only)
 
-_This option is limited to maintainers because it requires access to secrets in the Happo account._
+*This option is limited to maintainers because it requires access to secrets in the Happo account.*
 
 Occasionally, you may want to generate screenshots locally to debug an issue with visual tests.
 
