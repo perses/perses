@@ -21,7 +21,7 @@ import {
   OptionsEditorGrid,
   OptionsEditorColumn,
   OptionsEditorControl,
-  ThresholdsEditorProp,
+  ThresholdsEditorProps,
   ThresholdsEditor,
 } from '@perses-dev/components';
 import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
@@ -56,7 +56,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
-  const handleThresholdsChange: ThresholdsEditorProp['onChange'] = (thresholds) => {
+  const handleThresholdsChange: ThresholdsEditorProps['onChange'] = (thresholds) => {
     onChange(
       produce(value, (draft: StatChartOptions) => {
         draft.thresholds = thresholds;

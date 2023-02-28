@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatChart, StatChartData, useChartsTheme, PersesChartsTheme } from '@perses-dev/components';
+import { StatChart, StatChartData, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
-import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { TimeSeriesData, useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
-import { ThresholdOptions } from '@perses-dev/core';
 import { useSuggestedStepMs } from '../../model/time';
-import { SparklineOptions, StatChartOptions } from './stat-chart-model';
+import { StatChartOptions } from './stat-chart-model';
+import { convertSparkline } from './utils/data-transform';
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
@@ -75,35 +74,3 @@ const useChartData = (data: TimeSeriesData | undefined, calculation: Calculation
     return { calculatedValue, seriesData };
   }, [data, calculation]);
 };
-
-export function convertSparkline(
-  chartsTheme: PersesChartsTheme,
-  sparkline?: SparklineOptions,
-  thresholds?: ThresholdOptions,
-  value?: number
-): LineSeriesOption | undefined {
-  if (sparkline === undefined) return;
-
-  // TO DO: add option for color scheme?
-  let color = sparkline.color ?? chartsTheme.thresholds.defaultColor ?? chartsTheme.sparkline.color;
-
-  if (thresholds?.steps && value) {
-    thresholds.steps.forEach((step, index) => {
-      if (value > step.value) {
-        color = step.color ?? chartsTheme.thresholds.palette[index];
-      }
-    });
-  }
-
-  return {
-    lineStyle: {
-      width: sparkline.width ?? chartsTheme.sparkline.width,
-      color,
-      opacity: 1,
-    },
-    areaStyle: {
-      color,
-      opacity: 0.4,
-    },
-  };
-}

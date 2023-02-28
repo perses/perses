@@ -13,7 +13,7 @@
 
 import { AbsoluteTimeRange, StepOptions } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
-import { EChartsTimeSeries } from '@perses-dev/components';
+import { EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
 import {
@@ -211,8 +211,8 @@ export function convertPercentThreshold(percent: number, data: EChartsTimeSeries
 function findMax(timeSeries: EChartsTimeSeries[]) {
   let max = 0;
   timeSeries.forEach((series) => {
-    series.data.forEach((value: number) => {
-      if (value > max) {
+    series.data.forEach((value: EChartsValues) => {
+      if (typeof value === 'number' && value > max) {
         max = value;
       }
     });
