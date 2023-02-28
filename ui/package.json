@@ -8,7 +8,12 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
+    "type-check": "turbo run type-check",
     "start": "turbo run start",
+    "start-with-storybook": "turbo run start storybook:start",
+    "storybook": "turbo run storybook:start",
+    "storybook:build": "turbo run storybook:build",
+    "storybook:serve": "turbo run storybook:serve",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
     "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
@@ -24,7 +29,8 @@
     "e2e",
     "panels-plugin",
     "plugin-system",
-    "prometheus-plugin"
+    "prometheus-plugin",
+    "storybook"
   ],
   "devDependencies": {
     "@swc/cli": "^0.1.57",
@@ -50,6 +56,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-storybook": "^0.6.11",
     "jest": "^27.5.1",
     "node-fetch": "^2.6.7",
     "prettier": "^2.7.1",

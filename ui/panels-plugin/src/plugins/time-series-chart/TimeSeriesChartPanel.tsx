@@ -90,7 +90,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
   const fetching = queryResults.some((result) => result.isFetching);
   const loading = queryResults.some((result) => result.isLoading);
-  const hasData = queryResults.some((result) => result.data && Array.from(result.data.series).length > 0);
+  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   const { setTimeRange } = useTimeRange();
 

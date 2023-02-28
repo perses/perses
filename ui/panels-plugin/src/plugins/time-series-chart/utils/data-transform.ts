@@ -16,9 +16,13 @@ import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
 import { EChartsTimeSeries } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
-import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS } from '../time-series-chart-model';
+import {
+  DEFAULT_AREA_OPACITY,
+  DEFAULT_LINE_WIDTH,
+  DEFAULT_POINT_RADIUS,
+  VisualOptions,
+} from '../time-series-chart-model';
 import { getRandomColor } from './palette-gen';
-import { EChartsTimeSeries } from '@perses-dev/components';
 
 export interface TimeScale {
   startMs: number;
@@ -150,7 +154,11 @@ export function getLineSeries(
     lineStyle: {
       width: lineWidth,
     },
+    areaStyle: {
+      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
+    },
     emphasis: {
+      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1,
       },

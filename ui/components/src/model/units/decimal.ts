@@ -16,7 +16,7 @@ import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 
 const decimalUnitKinds = ['Decimal'] as const;
-type DecimalUnitKind = typeof decimalUnitKinds[number];
+type DecimalUnitKind = (typeof decimalUnitKinds)[number];
 export type DecimalUnitOptions = {
   kind: DecimalUnitKind;
   decimal_places?: number;

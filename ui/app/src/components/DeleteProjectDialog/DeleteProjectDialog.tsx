@@ -12,18 +12,10 @@
 // limitations under the License.
 
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Theme } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Button } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
 import { useSnackbar } from '../../context/SnackbarProvider';
 import { useDeleteProjectMutation } from '../../model/project-client';
-
-/**
- * Render the CSS of the dialog's close button, according to the given material theme.
- * @param theme material theme
- */
-const dialogCloseIconButtonStyle = function (theme: Theme) {
-  return { position: 'absolute', top: theme.spacing(0.5), right: theme.spacing(0.5) };
-};
 
 export interface DeleteProjectDialogProps {
   name: string;
@@ -41,7 +33,7 @@ export interface DeleteProjectDialogProps {
  * @param props.onSuccess Callback executed when deletion has been performed with success.
  * @constructor
  */
-const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
+export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
   const { name, open, onClose, onSuccess } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const mutation = useDeleteProjectMutation();
@@ -63,24 +55,19 @@ const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Delete Project</DialogTitle>
-      <IconButton aria-label="Close" onClick={onClose} sx={dialogCloseIconButtonStyle}>
-        <CloseIcon />
-      </IconButton>
-      <DialogContent dividers sx={{ width: '500px' }}>
+      <Dialog.Header>Delete Project</Dialog.Header>
+      <Dialog.Content>
         Are you sure you want to delete the project <strong>{name}</strong>? This will delete all the dashboards within
         the project.
-      </DialogContent>
-      <DialogActions>
+      </Dialog.Content>
+      <Dialog.Actions>
         <Button variant="contained" type="submit" onClick={handleSubmit}>
           Delete
         </Button>
         <Button variant="outlined" color="secondary" onClick={onClose}>
           Cancel
         </Button>
-      </DialogActions>
+      </Dialog.Actions>
     </Dialog>
   );
 };
-
-export default DeleteProjectDialog;

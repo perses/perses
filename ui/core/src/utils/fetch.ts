@@ -37,7 +37,7 @@ export async function fetchJson<T>(...args: Parameters<typeof global.fetch>) {
  * Error thrown when fetch returns a non-200 response.
  */
 export class FetchError extends Error {
-  constructor(readonly response: Response) {
+  constructor(response: Readonly<Response>) {
     super(`${response.status} ${response.statusText}`);
     Object.setPrototypeOf(this, FetchError.prototype);
   }

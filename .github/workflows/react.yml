@@ -26,6 +26,18 @@ jobs:
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run lint
+  type_check:
+    name: "type check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_npm: true
+      - name: install deps
+        run: cd ./ui && npm ci
+      - run: cd ./ui && npm run type-check
   test:
     name: "unit test"
     runs-on: ubuntu-latest

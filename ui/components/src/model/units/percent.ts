@@ -15,7 +15,7 @@ import { UnitGroupConfig, UnitConfig } from './types';
 import { DEFAULT_DECIMAL_PLACES } from './constants';
 
 const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
-type PercentUnitKind = typeof percentUnitKinds[number];
+type PercentUnitKind = (typeof percentUnitKinds)[number];
 export type PercentUnitOptions = {
   kind: PercentUnitKind;
   decimal_places?: number;

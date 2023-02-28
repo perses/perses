@@ -29,7 +29,11 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await happoPlaywright.finish();
   });
 
-  test(`displays single line as expected`, async ({ page, dashboardPage, mockNow }) => {
+  test(`displays default single line and custom visual options as expected`, async ({
+    page,
+    dashboardPage,
+    mockNow,
+  }) => {
     // Mock data response, so we can make assertions on consistent response data.
     await dashboardPage.mockQueryRangeRequests({
       queries: [
@@ -59,13 +63,22 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     });
 
     await dashboardPage.forEachTheme(async (themeName) => {
-      const panel = dashboardPage.getPanelByName('Single Line');
-      await panel.isLoaded();
-      await waitForStableCanvas(panel.canvas);
+      const firstPanel = dashboardPage.getPanelByName('Single Line');
+      await firstPanel.isLoaded();
+      await waitForStableCanvas(firstPanel.canvas);
 
-      await happoPlaywright.screenshot(page, panel.parent, {
+      await happoPlaywright.screenshot(page, firstPanel.parent, {
         component: 'Time Series Chart Panel',
         variant: `Single Line [${themeName}]`,
+      });
+
+      const secondPanel = dashboardPage.getPanelByName('Custom Visual Options');
+      await secondPanel.isLoaded();
+      await waitForStableCanvas(secondPanel.canvas);
+
+      await happoPlaywright.screenshot(page, secondPanel.parent, {
+        component: 'Time Series Chart Panel',
+        variant: `Custom Visual Options [${themeName}]`,
       });
     });
   });

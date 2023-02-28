@@ -23,7 +23,7 @@ export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
 
 export interface GraphSeries {
   name: string;
-  values: Iterable<GraphSeriesValueTuple>;
+  values: GraphSeriesValueTuple[];
 }
 
 export type EChartsValues = number | null | '-';

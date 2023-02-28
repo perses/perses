@@ -17,6 +17,7 @@ package e2eframework
 
 import (
 	"net/http/httptest"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -32,6 +33,8 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
+
+var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
 
 func GetRepositoryPath(t *testing.T) string {
 	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
@@ -61,9 +64,6 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 	projectPath := GetRepositoryPath(t)
 	handler := echo.New()
 	conf := config.Config{
-		Database: config.Database{
-			File: defaultFileConfig(),
-		},
 		Schemas: config.Schemas{
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
 			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
@@ -72,9 +72,28 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 			Interval:        0,
 		},
 	}
+	if useSQL == "true" {
+		conf.Database = config.Database{
+			SQL: &config.SQL{
+				User:                 "user",
+				Password:             "password",
+				Net:                  "tcp",
+				Addr:                 "localhost:3306",
+				DBName:               "perses",
+				AllowNativePasswords: true,
+			},
+		}
+	} else {
+		conf.Database = config.Database{
+			File: defaultFileConfig(),
+		}
+	}
 	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if dbInitError := persistenceManager.GetPersesDAO().Init(); dbInitError != nil {
+		t.Fatal(dbInitError)
 	}
 	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
 	if err != nil {
@@ -92,6 +111,7 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 
 func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	server, expect, persistenceManager := CreateServer(t)
+	defer persistenceManager.GetPersesDAO().Close()
 	defer server.Close()
 	entities := testFunc(expect, persistenceManager)
 	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)

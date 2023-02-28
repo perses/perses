@@ -199,7 +199,7 @@ describe('generateChartsTheme', () => {
         "thresholds": Object {
           "defaultColor": "#2e7d32",
           "palette": Array [
-            "#0288d1",
+            "#FFCC00",
             "#ed6c02",
             "#d32f2f",
           ],

@@ -51,7 +51,27 @@ jobs:
           path: |
             ui/**/dist
             !ui/node_modules
+            !ui/storybook
 
+  build-storybook:
+    name: "build-storybook"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_environment
+        with:
+          enable_npm: true
+      - name: Install UI deps
+        run: cd ./ui && npm install
+      - name: Build the storybook
+        run: cd ./ui && npm run storybook:build
+      - name: store storybook build
+        uses: actions/upload-artifact@v3
+        with:
+          name: storybook
+          path: ui/storybook/storybook-static
+  
   libs-release:
     name: "libs-release"
     needs: "build-frontend"

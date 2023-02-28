@@ -28,7 +28,7 @@ export type OptionsEditorGroupProps = {
  */
 export const OptionsEditorGroup = ({ title, children, icon }: OptionsEditorGroupProps) => {
   return (
-    <>
+    <Box>
       <Box display="flex" borderBottom={1} borderColor="grey.300" marginBottom={(theme) => theme.spacing(1)}>
         <Typography variant="overline" component="h4">
           {title}
@@ -36,6 +36,6 @@ export const OptionsEditorGroup = ({ title, children, icon }: OptionsEditorGroup
         {icon && <Box sx={{ marginLeft: 'auto' }}>{icon}</Box>}
       </Box>
       <Stack spacing={1}>{children}</Stack>
-    </>
+    </Box>
   );
 };

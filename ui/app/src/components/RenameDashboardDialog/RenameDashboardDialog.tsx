@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, IconButton } from '@mui/material';
+import { Button, TextField } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import CloseIcon from 'mdi-material-ui/Close';
 import { dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
 import { useSnackbar } from '../../context/SnackbarProvider';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
@@ -90,19 +90,8 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
 
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
-      <DialogTitle id="confirm-dialog">Rename Dashboard</DialogTitle>
-      <IconButton
-        aria-label="Close"
-        onClick={handleClose}
-        sx={(theme) => ({
-          position: 'absolute',
-          top: theme.spacing(0.5),
-          right: theme.spacing(0.5),
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
-      <DialogContent dividers sx={{ width: '500px' }}>
+      <Dialog.Header>Rename Dashboard</Dialog.Header>
+      <Dialog.Content>
         <TextField
           required
           margin="dense"
@@ -116,15 +105,15 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
           error={!!error}
           helperText={error}
         />
-      </DialogContent>
-      <DialogActions>
+      </Dialog.Content>
+      <Dialog.Actions>
         <Button variant="contained" disabled={!!error} onClick={handleSubmit}>
           Rename
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClose}>
           Cancel
         </Button>
-      </DialogActions>
+      </Dialog.Actions>
     </Dialog>
   );
 };
