@@ -102,7 +102,7 @@ Storybook is currently configured to build with [Webpack 5](https://storybook.js
 
 ## Visual tests
 
-This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. Visual tests generated for storybook use `happo-plugin-storybook`. See the `e2e` package for information about visual tests generated using that tooling.
+This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. Visual tests generated for storybook use `happo-plugin-storybook` ([relevant documentation](https://docs.happo.io/docs/storybook)) and are listed under the `perses-storybook` project in Happo. See the `e2e` package for information about visual tests generated using that tooling.
 
 - Use visual tests for use cases where a different type of test will not provide adequate coverage (e.g. canvas-based visualizations, styling).
 - Only create visual tests that can reliably be reproduced. Flaky tests are often worse than no tests at all because they lead to toil and reduce trust in the overall test set. Some examples of things that can lead to unreliable tests are:
@@ -111,7 +111,12 @@ This project uses a free open source account from [Happo](https://happo.io/) for
   - Current time.
   - Dynamic content. Wait for everything to load before taking a snapshot.
   - If individual elements are known to cause inconsistencies, consider adding the `data-happo-hide` attribute. This will render the element invisible in the screenshot.
-- In most cases, visual tests should be generated for both light and dark themes.
+
+### Configuration
+
+By default, visual tests will be taken for every story in storybook. You can disable stories by setting `parameters.happo` to `false` (see [relevant docs](https://docs.happo.io/docs/storybook#disabling-a-story)).
+
+By default, visual tests will be taking for both light mode and dark mode. You can modify this by setting `parameters.happo.themes` to an array of the themes you want (e.g. `['light']` to just use light mode). This is a customization we configured on top of happo's built in behavior, so this is not mentioned in their documentation.
 
 ### Happo issues
 
