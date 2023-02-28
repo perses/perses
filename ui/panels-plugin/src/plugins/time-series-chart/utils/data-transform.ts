@@ -18,6 +18,7 @@ import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
 import {
   DEFAULT_AREA_OPACITY,
+  DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
   VisualOptions,
@@ -148,9 +149,11 @@ export function getLineSeries(
     type: 'line',
     name: formattedName,
     data: data,
+    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
+    showSymbol: visual.show_points === 'Always' ? true : false,
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,

@@ -22,9 +22,11 @@ import (
 }
 
 #visual: {
-	line_width?:   number & >=0.25 & <=3
-	point_radius?: number & >=0 & <=6
-	area_opacity?: number & >=0 & <=1
+	line_width?:    number & >=0.25 & <=3
+	area_opacity?:  number & >=0 & <=1
+	show_points?:   "Auto" | "Always"
+	point_radius?:  number & >=0 & <=6
+	connect_nulls?: bool
 }
 
 #y_axis: {

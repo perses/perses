@@ -13,7 +13,11 @@
 
 import happoPlaywright from 'happo-playwright';
 import { test } from '../fixtures/dashboardTest';
-import { mockTimeSeriesResponseWithStableValue, waitForStableCanvas } from '../utils';
+import {
+  mockTimeSeriesResponseWithStableValue,
+  mockTimeSeriesResponseWithNullValues,
+  waitForStableCanvas,
+} from '../utils';
 
 test.use({
   dashboardName: 'TimeSeriesChartPanel',
@@ -29,56 +33,58 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await happoPlaywright.finish();
   });
 
-  test(`displays default single line and custom visual options as expected`, async ({
-    page,
-    dashboardPage,
-    mockNow,
-  }) => {
-    // Mock data response, so we can make assertions on consistent response data.
-    await dashboardPage.mockQueryRangeRequests({
-      queries: [
-        {
-          query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-          response: {
-            status: 200,
-            body: JSON.stringify(
-              mockTimeSeriesResponseWithStableValue({
-                metrics: [
-                  {
-                    metric: {
-                      __name__: 'up',
-                      instance: 'demo.do.prometheus.io:3000',
-                      job: 'grafana',
+  ['Single Line', 'Custom Visual Options', 'Connected Nulls'].forEach((panelName) => {
+    test(`displays ${panelName} as expected`, async ({ page, dashboardPage, mockNow }) => {
+      // Mock data response, so we can make assertions on consistent response data.
+      await dashboardPage.mockQueryRangeRequests({
+        queries: [
+          {
+            query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+            response: {
+              status: 200,
+              body: JSON.stringify(
+                mockTimeSeriesResponseWithStableValue({
+                  metrics: [
+                    {
+                      metric: {
+                        __name__: 'up',
+                        instance: 'demo.do.prometheus.io:3000',
+                        job: 'grafana',
+                      },
+                      value: '1',
                     },
-                    value: '1',
-                  },
-                ],
-                startTimeMs: mockNow - 6 * 60 * 60 * 1000,
-                endTimeMs: mockNow,
-              })
-            ),
+                  ],
+                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+                  endTimeMs: mockNow,
+                })
+              ),
+            },
           },
-        },
-      ],
-    });
-
-    await dashboardPage.forEachTheme(async (themeName) => {
-      const firstPanel = dashboardPage.getPanelByName('Single Line');
-      await firstPanel.isLoaded();
-      await waitForStableCanvas(firstPanel.canvas);
-
-      await happoPlaywright.screenshot(page, firstPanel.parent, {
-        component: 'Time Series Chart Panel',
-        variant: `Single Line [${themeName}]`,
+          {
+            query: 'fake_graphite_query_with_nulls',
+            response: {
+              status: 200,
+              body: JSON.stringify(
+                mockTimeSeriesResponseWithNullValues({
+                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+                  endTimeMs: mockNow,
+                })
+              ),
+            },
+          },
+        ],
       });
 
-      const secondPanel = dashboardPage.getPanelByName('Custom Visual Options');
-      await secondPanel.isLoaded();
-      await waitForStableCanvas(secondPanel.canvas);
+      await dashboardPage.forEachTheme(async (themeName) => {
+        const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
+        await timeSeriesPanel.container.scrollIntoViewIfNeeded();
+        await timeSeriesPanel.isLoaded();
+        await waitForStableCanvas(timeSeriesPanel.canvas);
 
-      await happoPlaywright.screenshot(page, secondPanel.parent, {
-        component: 'Time Series Chart Panel',
-        variant: `Custom Visual Options [${themeName}]`,
+        await happoPlaywright.screenshot(page, timeSeriesPanel.parent, {
+          component: 'Time Series Chart Panel',
+          variant: `${panelName} [${themeName}]`,
+        });
       });
     });
   });

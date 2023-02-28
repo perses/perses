@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import { merge } from 'lodash-es';
 import { use, EChartsCoreOption } from 'echarts/core';
-import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -24,15 +23,7 @@ import { formatValue, UnitOptions } from '../model/units';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
 
-use([
-  EChartsGaugeChart,
-  EChartsLineChart,
-  GridComponent,
-  DatasetComponent,
-  TitleComponent,
-  TooltipComponent,
-  CanvasRenderer,
-]);
+use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 const MIN_VALUE_SIZE = 12;
 const MAX_VALUE_SIZE = 36;
@@ -40,7 +31,6 @@ const MAX_VALUE_SIZE = 36;
 export interface StatChartData {
   calculatedValue?: number;
   seriesData?: GraphSeries;
-  name?: string;
 }
 
 interface StatChartProps {
@@ -61,11 +51,10 @@ export function StatChart(props: StatChartProps) {
     if (data.seriesData === undefined) return chartsTheme.noDataOption;
 
     const series = data.seriesData;
-
-    const statSeries: Array<GaugeSeriesOption | LineSeriesOption> = [];
+    const statSeries: LineSeriesOption[] = [];
 
     if (sparkline !== undefined) {
-      const lineSeries: LineSeriesOption = {
+      const lineSeries = {
         type: 'line',
         data: [...series.values],
         zlevel: 1,
