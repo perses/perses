@@ -107,7 +107,7 @@ This project uses a free open source account from [Happo](https://happo.io/) for
 - Use visual tests for use cases where a different type of test will not provide adequate coverage (e.g. canvas-based visualizations, styling).
 - Only create visual tests that can reliably be reproduced. Flaky tests are often worse than no tests at all because they lead to toil and reduce trust in the overall test set. Some examples of things that can lead to unreliable tests are:
   - Inconsistent data sources. Consider using consistent mock data to avoid this. See `mockQueryRangeRequests` in `DashboardPage` for an example. Make sure to reset any mocked routes using `unroute` when the test is finished.
-  - Time zones.
+  - Time zones. Tests are automatically decorated with `TimeZoneProvider` set to `UTC` when running in Happo to provide consistent time zone usage for visual testing.
   - Current time.
   - Dynamic content. Wait for everything to load before taking a snapshot.
   - If individual elements are known to cause inconsistencies, consider adding the `data-happo-hide` attribute. This will render the element invisible in the screenshot.

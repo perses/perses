@@ -14,11 +14,11 @@
 import React from 'react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { useMemo } from 'react';
-import { DecoratorFn } from '@storybook/react';
+import { Decorator } from '@storybook/react';
 import { useDarkMode } from 'storybook-dark-mode';
 import { getTheme, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/components';
 
-export const WithThemes: DecoratorFn = (Story) => {
+export const WithThemes: Decorator = (Story) => {
   const isDarkModeEnabled = useDarkMode();
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);
