@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Autocomplete, Slider, Switch, TextField } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
+  STACK_CONFIG,
+  STACK_OPTIONS,
   VISUAL_CONFIG,
   VisualOptions,
 } from './time-series-chart-model';
@@ -51,6 +53,9 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
       area_opacity: newValue,
     });
   };
+
+  const currentStack = value.stack ?? 'None';
+  const stackConfig = STACK_CONFIG[currentStack];
 
   return (
     <OptionsEditorGroup title="Visual">
@@ -102,23 +107,23 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
       <OptionsEditorControl
         label={VISUAL_CONFIG.stack.label}
         control={
-          <ToggleButtonGroup
-            color="primary"
-            exclusive
-            value={value.stack}
+          <Autocomplete
+            value={{
+              ...stackConfig,
+              id: currentStack,
+            }}
+            options={STACK_OPTIONS}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => <TextField {...params} />}
             onChange={(__, newValue) => {
               onChange({
                 ...value,
-                stack: newValue,
+                stack: newValue.id,
               });
             }}
-          >
-            <ToggleButton value="None">None</ToggleButton>
-            <ToggleButton value="Normal">Normal</ToggleButton>
-            <ToggleButton value="Percent" disabled>
-              %
-            </ToggleButton>
-          </ToggleButtonGroup>
+            disabled={value === undefined}
+            disableClearable
+          ></Autocomplete>
         }
       />
       <OptionsEditorControl

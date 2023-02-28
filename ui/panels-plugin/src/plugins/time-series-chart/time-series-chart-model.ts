@@ -37,12 +37,14 @@ export interface YAxisOptions {
   max?: number;
 }
 
+export type StackOptions = 'None' | 'Normal' | 'Percent';
+
 export type VisualOptions = {
   line_width?: number;
   area_opacity?: number;
   show_points?: 'Auto' | 'Always';
   point_radius?: number;
-  stack?: 'None' | 'Normal' | 'Percent';
+  stack?: StackOptions;
   connect_nulls?: boolean;
 };
 
@@ -112,6 +114,19 @@ export const Y_AXIS_CONFIG = {
   min: { label: 'Min' },
   max: { label: 'Max' },
 };
+
+export const STACK_CONFIG = {
+  None: { label: 'None' },
+  Normal: { label: 'Normal' },
+  // Percent: { label: '%' }, // TODO: add Percent mode support for stacked area charts
+};
+
+export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {
+  return {
+    id: id as StackOptions,
+    ...config,
+  };
+});
 
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
