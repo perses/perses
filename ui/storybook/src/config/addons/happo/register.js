@@ -12,10 +12,17 @@
 // limitations under the License.
 
 // This code is largely a copy of the following file from happo with some
-// adjustments to work for our specific use case (v7 version of storybook).
+// adjustments to work for our specific use case (v7 version of storybook) and
+// to more easily support taking pictures of light and dark mode.
+// We may need to keep an eye on the original source to keep things working.
+// Please comment specific areas of customization to make it easier to handle
+// future changes.
 // https://github.com/happo/happo-plugin-storybook/blob/master/src/register.js
 
 import { addons } from '@storybook/addons';
+
+// CUSTOMIZATION: part of adding ability to build a story for each theme.
+import { DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
 
 const time = window.happoTime || {
   originalDateNow: Date.now,
@@ -25,9 +32,26 @@ const time = window.happoTime || {
 const ASYNC_TIMEOUT = 100;
 const WAIT_FOR_TIMEOUT = 2000;
 
+// CUSTOMIZATION: part of adding ability to build a story for each theme.
+const DEFAULT_THEMES = ['light', 'dark'];
+
 let examples;
 let currentIndex = 0;
 let defaultDelay;
+
+// CUSTOMIZATION: part of adding ability to build a story for each theme.
+async function setTheme(channel, theme) {
+  return new Promise((resolve) => {
+    const isDarkMode = theme === 'dark';
+
+    // Listen for dark mode to change and resolve.
+    channel.once(DARK_MODE_EVENT_NAME, () => {
+      resolve();
+    });
+    // Change the theme.
+    channel.emit(DARK_MODE_EVENT_NAME, isDarkMode);
+  });
+}
 
 async function waitForSomeContent(elem, start = time.originalDateNow()) {
   const html = elem.innerHTML.trim();
@@ -54,7 +78,7 @@ async function getExamples() {
   if (storyStore.cacheAllCSFFiles) {
     await storyStore.cacheAllCSFFiles();
   }
-  return Object.values(storyStore.extract())
+  const result = Object.values(storyStore.extract())
     .map(({ id, kind, story, parameters }) => {
       if (parameters.happo === false) {
         return;
@@ -65,6 +89,10 @@ async function getExamples() {
       let beforeScreenshot;
       let afterScreenshot;
       let targets;
+
+      // CUSTOMIZATION: part of adding ability to build a story for each theme.
+      let themes = DEFAULT_THEMES;
+
       if (typeof parameters.happo === 'object' && parameters.happo !== null) {
         delay = parameters.happo.delay || defaultDelay;
         waitForContent = parameters.happo.waitForContent;
@@ -72,6 +100,9 @@ async function getExamples() {
         beforeScreenshot = parameters.happo.beforeScreenshot;
         afterScreenshot = parameters.happo.afterScreenshot;
         targets = parameters.happo.targets;
+
+        // CUSTOMIZATION: part of adding ability to build a story for each theme.
+        themes = parameters.happo.themes || DEFAULT_THEMES;
       }
       return {
         component: kind,
@@ -83,9 +114,30 @@ async function getExamples() {
         beforeScreenshot,
         afterScreenshot,
         targets,
+
+        // CUSTOMIZATION: part of adding ability to build a story for each theme.
+        themes,
       };
     })
+    // CUSTOMIZATION: part of adding ability to build a story for each theme.
+    .reduce((result, { themes, ...otherExample }) => {
+      if (!themes) {
+        result.push(otherExample);
+      } else {
+        themes.forEach((theme) => {
+          result.push({
+            ...otherExample,
+            variant: `${otherExample.variant} [${theme}]`,
+            theme,
+          });
+        });
+      }
+
+      return result;
+    }, [])
     .filter(Boolean);
+
+  return result;
 }
 
 function filterExamples(all) {
@@ -122,13 +174,16 @@ window.happo.nextExample = async () => {
   if (currentIndex >= examples.length) {
     return;
   }
-  const { component, variant, storyId, delay, waitForContent, waitFor, beforeScreenshot } = examples[currentIndex];
+  const { component, variant, storyId, delay, waitForContent, waitFor, beforeScreenshot, theme } =
+    examples[currentIndex];
 
   try {
     const docsRootElement = document.getElementById('docs-root');
     if (docsRootElement) {
       docsRootElement.setAttribute('data-happo-ignore', 'true');
     }
+    // CUSTOMIZATION: adjusted the id to look for because this changed in
+    // storybook v7.
     const rootElement = document.getElementById('storybook-root');
     rootElement.setAttribute('data-happo-ignore', 'true');
 
@@ -146,8 +201,14 @@ window.happo.nextExample = async () => {
       story: variant,
       storyId,
     });
+
     await new Promise((resolve) => time.originalSetTimeout(resolve, 0));
+
     await waitForSomeContent(rootElement);
+
+    // CUSTOMIZATION: part of adding ability to build a story for each theme.
+    await setTheme(channel, theme);
+
     if (/sb-show-errordisplay/.test(document.body.className)) {
       // It's possible that the error is from unmounting the previous story. We
       // can try re-rendering in this case.

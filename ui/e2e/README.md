@@ -29,7 +29,7 @@ Tests are run during local development using the configuration in `local.playwri
 
 ### Locally with screenshots (maintainers only)
 
-*This option is limited to maintainers because it requires access to secrets in the Happo account.*
+_This option is limited to maintainers because it requires access to secrets in the Happo account._
 
 Occasionally, you may want to generate screenshots locally to debug an issue with visual tests.
 
@@ -69,7 +69,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 
 ### Visual tests
 
-This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. The tests are generated through the Playwright end-to-end test set using `happo-playwright`.
+This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. Visual tests generated through the Playwright end-to-end test set use `happo-playwright`. See the `storybook` package for information about visual tests generated using that tooling.
 
 - Use visual tests for use cases where a different type of test will not provide adequate coverage (e.g. canvas-based visualizations, styling).
 - Only create visual tests that can reliably be reproduced. Flaky tests are often worse than no tests at all because they lead to toil and reduce trust in the overall test set. Some examples of things that can lead to unreliable tests are:

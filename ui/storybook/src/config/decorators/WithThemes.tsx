@@ -20,6 +20,7 @@ import { getTheme, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/
 
 export const WithThemes: DecoratorFn = (Story) => {
   const isDarkModeEnabled = useDarkMode();
+  console.log(`isDarkModeEnabled: ${isDarkModeEnabled}`);
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);
   const chartsTheme = useMemo(() => {
