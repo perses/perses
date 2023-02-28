@@ -95,7 +95,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
             );
           }}
         >
-          Reset to Default
+          Reset All Settings
         </Button>
       </OptionsEditorColumn>
     </OptionsEditorGrid>
