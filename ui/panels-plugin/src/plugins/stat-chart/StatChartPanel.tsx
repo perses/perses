@@ -67,9 +67,9 @@ const useChartData = (data: TimeSeriesData | undefined, calculation: Calculation
     };
     if (data === undefined) return loadingData;
 
-    const seriesData = Array.from(data.series)[0];
+    const seriesData = data.series[0];
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = seriesData !== undefined ? calculate(Array.from(seriesData.values)) : undefined;
+    const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
 
     return { calculatedValue, seriesData };
   }, [data, calculation]);

@@ -25,4 +25,8 @@ export const testChartsTheme: PersesChartsTheme = {
       default: 12,
     },
   },
+  thresholds: {
+    defaultColor: '#59CC8D',
+    palette: ['#438FEB', '#FFB249', '#EE6C6C'],
+  },
 };

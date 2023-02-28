@@ -12,9 +12,8 @@
 // limitations under the License.
 
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ThresholdOptions } from '../../model/thresholds';
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.
@@ -39,10 +38,11 @@ export interface YAxisOptions {
 }
 
 export type VisualOptions = {
-  // type: 'line' | 'bar' | 'scatter'; // TODO: new option to change series type
-  point_radius?: number;
   line_width?: number;
   area_opacity?: number;
+  show_points?: 'Auto' | 'Always';
+  point_radius?: number;
+  connect_nulls?: boolean;
 };
 
 export const DEFAULT_UNIT: UnitOptions = {
@@ -53,14 +53,17 @@ export const DEFAULT_UNIT: UnitOptions = {
 
 export const DEFAULT_LINE_WIDTH = 1.5;
 
+export const DEFAULT_AREA_OPACITY = 0;
+
 export const DEFAULT_POINT_RADIUS = 4;
 
-export const DEFAULT_AREA_OPACITY = 0;
+export const DEFAULT_CONNECT_NULLS = false;
 
 export const DEFAULT_VISUAL: VisualOptions = {
   line_width: DEFAULT_LINE_WIDTH,
-  point_radius: DEFAULT_POINT_RADIUS,
   area_opacity: DEFAULT_AREA_OPACITY,
+  point_radius: DEFAULT_POINT_RADIUS,
+  connect_nulls: DEFAULT_CONNECT_NULLS,
 };
 
 export const VISUAL_CONFIG = {
@@ -84,6 +87,9 @@ export const VISUAL_CONFIG = {
     min: 0,
     max: 1,
     step: 0.05,
+  },
+  connect_nulls: {
+    label: 'Connect Nulls',
   },
 };
 

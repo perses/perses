@@ -24,6 +24,8 @@ import {
   OptionsEditorColumn,
   OptionsEditorControl,
 } from '@perses-dev/components';
+import { ThresholdsEditor } from '@perses-dev/components';
+import { ThresholdOptions } from '@perses-dev/core';
 import {
   GaugeChartOptions,
   DEFAULT_UNIT,
@@ -62,6 +64,14 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
   }
 
+  const handleThresholdsChange = (thresholds: ThresholdOptions) => {
+    onChange(
+      produce(value, (draft: GaugeChartOptions) => {
+        draft.thresholds = thresholds;
+      })
+    );
+  };
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -88,6 +98,9 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
             }
           />
         </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <ThresholdsEditor thresholds={value.thresholds} onChange={handleThresholdsChange} />
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );

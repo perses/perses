@@ -11,16 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
-
-#stepOption: {
-	value:  number
-	color?: string
-	name?:  string
-}
-
-#thresholds: {
-	mode?:          "Percent" | "Absolute"
-	default_color?: string
-	steps?: [...#stepOption]
-}
+export * from './ColorPicker';

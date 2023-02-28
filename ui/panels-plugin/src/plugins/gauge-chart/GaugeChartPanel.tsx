@@ -14,7 +14,7 @@
 import type { GaugeSeriesOption } from 'echarts';
 import { merge } from 'lodash-es';
 import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
-import { GaugeChart, GaugeSeries } from '@perses-dev/components';
+import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
@@ -30,6 +30,8 @@ export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
   const { query, calculation, max } = pluginSpec;
+
+  const { thresholds: thresholdsColors } = useChartsTheme();
 
   // ensures all default unit properties set if undef
   const unit = merge({}, DEFAULT_UNIT, pluginSpec.unit);
@@ -47,7 +49,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     for (const timeSeries of data.series) {
       const calculate = CalculationsMap[calculation];
       const series = {
-        value: calculate(Array.from(timeSeries.values)),
+        value: calculate(timeSeries.values),
         label: timeSeries.formattedName ?? '',
       };
       seriesData.push(series);
@@ -80,7 +82,8 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
       thresholdMax = DEFAULT_MAX_PERCENT_DECIMAL;
     }
   }
-  const axisLineColors = convertThresholds(thresholds, unit, thresholdMax);
+  const axisLineColors = convertThresholds(thresholds, unit, thresholdMax, thresholdsColors);
+
   const axisLine: GaugeSeriesOption['axisLine'] = {
     show: true,
     lineStyle: {

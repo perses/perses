@@ -61,3 +61,43 @@ export function mockTimeSeriesResponseWithStableValue({
     },
   };
 }
+
+// Testing TimeSeriesQuery plugins that can return null values
+
+type MockNullValueConfig = {
+  startTimeMs: number;
+  endTimeMs: number;
+  count?: number;
+};
+
+export function mockTimeSeriesResponseWithNullValues({
+  startTimeMs,
+  endTimeMs,
+  count = 1000,
+}: MockNullValueConfig): RangeQuery {
+  const startTimeS = Math.floor(startTimeMs / 1000);
+  const endTimeS = Math.floor(endTimeMs / 1000);
+  const stepSize = Math.floor((endTimeS - startTimeS) / count);
+
+  return {
+    status: 'success',
+    data: {
+      resultType: 'matrix',
+      result: [
+        {
+          metric: {},
+          values: [...Array(count)].map((_, i) => {
+            const timestamp = i < count - 1 ? startTimeS + i * stepSize : endTimeS;
+            let value: string | null = '100';
+            // to test visual.connect_nulls option
+            if (i > 50 && i < 100) {
+              value = null;
+            }
+            // TODO: fix types when graphite datasource added
+            return [timestamp, value as string];
+          }),
+        },
+      ],
+    },
+  };
+}

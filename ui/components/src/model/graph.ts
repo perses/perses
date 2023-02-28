@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { LegendItem } from './legend';
 
@@ -19,11 +20,9 @@ export const OPTIMIZED_MODE_SERIES_LIMIT = 1000;
 
 export type UnixTimeMs = number;
 
-export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
-
 export interface GraphSeries {
   name: string;
-  values: Iterable<GraphSeriesValueTuple>;
+  values: TimeSeriesValueTuple[];
 }
 
 export type EChartsValues = number | null | '-';

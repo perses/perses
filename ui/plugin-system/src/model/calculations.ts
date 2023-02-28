@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { findLast, meanBy, sumBy } from 'lodash-es';
-import { TimeSeriesValueTuple } from './time-series-queries';
+import { TimeSeriesValueTuple } from '@perses-dev/core';
 
+// TODO: move this file and calculations.test.ts to @perses-dev/core
 export const CalculationsMap = {
   First: first,
   Last: last,
@@ -75,5 +76,10 @@ function sum(values: TimeSeriesValueTuple[]): number | undefined {
 }
 
 function getValue(valueTuple: TimeSeriesValueTuple) {
-  return valueTuple[1];
+  const value = valueTuple[1];
+  if (value !== null) {
+    return value;
+  }
+  // TODO: refactor utils so null can be returned and LastNotNull supported
+  return NaN;
 }

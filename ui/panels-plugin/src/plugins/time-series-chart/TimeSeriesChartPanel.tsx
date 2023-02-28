@@ -13,7 +13,7 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo } from '@perses-dev/core';
+import { useDeepMemo, StepOptions } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
@@ -28,7 +28,6 @@ import {
   useChartsTheme,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
-import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
 import {
   getLineSeries,
@@ -62,6 +61,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       }
     : undefined;
 
+  const { thresholds: thresholdsColors } = useChartsTheme();
+
   // populate default 'position' and other future properties
   const legend =
     props.spec.legend && validateLegendSpec(props.spec.legend)
@@ -88,7 +89,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
   const fetching = queryResults.some((result) => result.isFetching);
   const loading = queryResults.some((result) => result.isLoading);
-  const hasData = queryResults.some((result) => result.data && Array.from(result.data.series).length > 0);
+  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   const { setTimeRange } = useTimeRange();
 
@@ -171,9 +172,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
-      const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.RED;
+      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
       thresholds.steps.forEach((step: StepOptions, index: number) => {
-        const stepPaletteColor = ThresholdColorsPalette[index] ?? defaultThresholdColor;
+        const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
         const thresholdLineColor = step.color ?? stepPaletteColor;
         const stepOption: StepOptions = {
           color: thresholdLineColor,
