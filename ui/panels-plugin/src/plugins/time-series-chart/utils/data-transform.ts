@@ -153,6 +153,7 @@ export function getLineSeries(
     color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
+    showSymbol: visual.show_points === 'Always' ? 'true' : false,
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
