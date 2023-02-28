@@ -72,7 +72,7 @@ export const globalTypes = {
     // When running in Happo, we always use UTC for consistency in screenshots
     // regardless of the server they run on. When being used by humans, use local
     // to start because that will make more sense for viewing documentation.
-    defaultValue: isHappoRun ? 'UTC' : 'local',
+    defaultValue: isHappoRun() ? 'UTC' : 'local',
     toolbar: {
       icon: 'time',
       items: ['local', 'UTC', ...timeZoneNames],
