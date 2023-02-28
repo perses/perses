@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson } from '@perses-dev/core';
+import { fetchJson, RequestHeaders } from '@perses-dev/core';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -25,6 +25,7 @@ import {
 
 interface PrometheusClientOptions {
   datasourceUrl: string;
+  headers?: RequestHeaders;
 }
 
 export interface PrometheusClient {
@@ -37,6 +38,7 @@ export interface PrometheusClient {
 
 export interface QueryOptions {
   datasourceUrl: string;
+  headers?: RequestHeaders;
 }
 
 /**
@@ -81,13 +83,14 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, par
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
-  const { datasourceUrl } = queryOptions;
+  const { datasourceUrl, headers } = queryOptions;
 
   const url = `${datasourceUrl}${apiURI}`;
   const init = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
+      ...headers,
     },
     body: createSearchParams(params),
   };
