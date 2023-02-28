@@ -1977,6 +1977,7 @@
                   }
                 ],
                 "visual": {
+                  "show_points": "Always",
                   "connected_nulls": true
                 }
               }

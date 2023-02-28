@@ -13,7 +13,7 @@
 
 import { PrometheusDatasource } from '@perses-dev/prometheus-plugin';
 
-type PrometheusClient = ReturnType<typeof PrometheusDatasource['createClient']>;
+type PrometheusClient = ReturnType<(typeof PrometheusDatasource)['createClient']>;
 type RangeQuery = Awaited<ReturnType<PrometheusClient['rangeQuery']>>;
 
 type MockStableValueResultConfig = {
@@ -93,7 +93,8 @@ export function mockTimeSeriesResponseWithNullValues({
             if (i > 50 && i < 100) {
               value = null;
             }
-            return [timestamp, value];
+            // TODO: fix types when graphite datasource added
+            return [timestamp, value as string];
           }),
         },
       ],
