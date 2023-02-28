@@ -74,12 +74,12 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
           <LegendOptionsEditor value={value.legend} onChange={handleLegendChange} />
         </OptionsEditorGroup>
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
-        <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={handleThresholdsChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <YAxisOptionsEditor value={value.y_axis ?? DEFAULT_Y_AXIS} onChange={handleYAxisChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
+        <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={handleThresholdsChange} />
         <Button
           variant="outlined"
           color="secondary"
@@ -90,6 +90,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
                 draft.y_axis = undefined;
                 draft.legend = undefined;
                 draft.visual = undefined;
+                draft.thresholds = undefined;
               })
             );
           }}
