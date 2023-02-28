@@ -1943,7 +1943,7 @@
                   "area_opacity": 0.5,
                   "point_radius": 6,
                   "line_width": 3,
-                  "connected_nulls": false
+                  "connect_nulls": false
                 }
               }
             }
@@ -1978,7 +1978,7 @@
                 ],
                 "visual": {
                   "show_points": "Always",
-                  "connected_nulls": true
+                  "connect_nulls": true
                 }
               }
             }
