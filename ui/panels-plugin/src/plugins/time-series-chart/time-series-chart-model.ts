@@ -37,8 +37,6 @@ export interface YAxisOptions {
   max?: number;
 }
 
-export type StackOptions = 'None' | 'Normal' | 'Percent';
-
 export type VisualOptions = {
   line_width?: number;
   area_opacity?: number;
@@ -115,10 +113,13 @@ export const Y_AXIS_CONFIG = {
   max: { label: 'Max' },
 };
 
+// TODO: add Percent mode support for stacked area charts
+export type StackOptions = 'None' | 'Normal';
+
 export const STACK_CONFIG = {
   None: { label: 'None' },
   Normal: { label: 'Normal' },
-  // Percent: { label: '%' }, // TODO: add Percent mode support for stacked area charts
+  // Percent: { label: '%' },
 };
 
 export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {

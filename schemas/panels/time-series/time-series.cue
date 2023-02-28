@@ -26,7 +26,7 @@ import (
 	area_opacity?:  number & >=0 & <=1
 	show_points?:   "Auto" | "Always"
 	point_radius?:  number & >=0 & <=6
-	stack?: "None" | "Normal" | "Percent"
+	stack?:         "None" | "Normal" // TODO: add "Percent" option support
 	connect_nulls?: bool
 }
 

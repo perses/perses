@@ -19,6 +19,7 @@ import {
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
   STACK_CONFIG,
+  StackOptions,
   STACK_OPTIONS,
   VISUAL_CONFIG,
   VisualOptions,
@@ -54,7 +55,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     });
   };
 
-  const currentStack = value.stack ?? 'None';
+  const currentStack: StackOptions = value.stack ?? 'None';
   const stackConfig = STACK_CONFIG[currentStack];
 
   return (
