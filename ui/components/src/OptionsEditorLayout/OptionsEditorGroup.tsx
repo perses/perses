@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box, Typography, Stack } from '@mui/material';
+import React from 'react';
 
 export type OptionsEditorGroupProps = {
   /**
@@ -19,23 +20,21 @@ export type OptionsEditorGroupProps = {
    */
   title: string;
   children: React.ReactNode;
+  icon?: React.ReactNode;
 };
 
 /**
  * Group similar content within panel options.
  */
-export const OptionsEditorGroup = ({ title, children }: OptionsEditorGroupProps) => {
+export const OptionsEditorGroup = ({ title, children, icon }: OptionsEditorGroupProps) => {
   return (
     <Box>
-      <Typography
-        variant="overline"
-        component="h4"
-        borderBottom={1}
-        borderColor="grey.300"
-        marginBottom={(theme) => theme.spacing(1)}
-      >
-        {title}
-      </Typography>
+      <Box display="flex" borderBottom={1} borderColor="grey.300" marginBottom={(theme) => theme.spacing(1)}>
+        <Typography variant="overline" component="h4">
+          {title}
+        </Typography>
+        {icon && <Box sx={{ marginLeft: 'auto' }}>{icon}</Box>}
+      </Box>
       <Stack spacing={1}>{children}</Stack>
     </Box>
   );

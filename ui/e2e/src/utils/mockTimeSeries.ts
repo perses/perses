@@ -13,7 +13,7 @@
 
 import { PrometheusDatasource } from '@perses-dev/prometheus-plugin';
 
-type PrometheusClient = ReturnType<typeof PrometheusDatasource['createClient']>;
+type PrometheusClient = ReturnType<(typeof PrometheusDatasource)['createClient']>;
 type RangeQuery = Awaited<ReturnType<PrometheusClient['rangeQuery']>>;
 
 type MockStableValueResultConfig = {

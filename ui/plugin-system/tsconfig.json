@@ -4,6 +4,9 @@
   "include": ["src", "src/**/*.json"],
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "paths": {
+      "@perses-dev/plugin-system": ["./src"]
+    }
   }
 }

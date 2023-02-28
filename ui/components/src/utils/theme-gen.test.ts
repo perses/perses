@@ -196,6 +196,14 @@ describe('generateChartsTheme', () => {
           "color": "#1976d2",
           "width": 2,
         },
+        "thresholds": Object {
+          "defaultColor": "#2e7d32",
+          "palette": Array [
+            "#FFCC00",
+            "#ed6c02",
+            "#d32f2f",
+          ],
+        },
       }
     `);
   });

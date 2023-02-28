@@ -181,6 +181,9 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         default: parseInt(muiTheme.spacing(1.5), 10),
       },
     },
-    // TODO: add thresholdColors to theme
+    thresholds: {
+      defaultColor: muiTheme.palette.success.main,
+      palette: ['#FFCC00', muiTheme.palette.warning.main, muiTheme.palette.error.main],
+    },
   };
 }

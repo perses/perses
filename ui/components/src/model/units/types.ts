@@ -15,7 +15,7 @@
 // units.
 
 export const UNIT_GROUPS = ['Time', 'Percent', 'Decimal', 'Bytes'] as const;
-export type UnitGroup = typeof UNIT_GROUPS[number];
+export type UnitGroup = (typeof UNIT_GROUPS)[number];
 
 /**
  * Configuration for rendering units that are part of a group.
