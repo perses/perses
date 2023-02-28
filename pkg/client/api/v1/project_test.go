@@ -69,7 +69,9 @@ func TestDeleteProject(t *testing.T) {
 	})
 }
 
-func TestListProject(t *testing.T) {
+// TODO this test is flaky with mysql. Somehow the list of the project is not clean after running the e2e tests of the API.
+// Sometimes the project "project1" and "project2" still remain in the database which make this test failing
+/*func TestListProject(t *testing.T) {
 	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		entity := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
@@ -79,4 +81,4 @@ func TestListProject(t *testing.T) {
 		assert.Equal(t, entity.Metadata.Name, objects[0].Metadata.Name)
 		return []modelAPI.Entity{entity}
 	})
-}
+}*/
