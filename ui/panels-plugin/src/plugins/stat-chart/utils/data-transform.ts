@@ -24,7 +24,7 @@ export function convertSparkline(
 ): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
 
-  // TO DO: add option for color scheme? Should default color derive from threshold.defaultDo or sparkline.color?
+  // TO DO: add option for color scheme? Should default color derive from threshold.defaultColor or sparkline.color?
   const defaultColor = chartsTheme.thresholds.defaultColor ?? chartsTheme.sparkline.color;
   let color: string = sparkline.color ?? defaultColor;
 

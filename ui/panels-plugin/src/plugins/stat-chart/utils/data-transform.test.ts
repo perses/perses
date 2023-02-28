@@ -39,29 +39,22 @@ describe('convertSparkline', () => {
     ],
   };
 
-  it('should render sparkline color if default threshold color is undefined', () => {
-    const options = convertSparkline(testChartsTheme, sparkline, thresholds, 5) as LineSeriesOption;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(options.lineStyle!.color).toEqual(sparkline.color);
-  });
-
-  it('should render charts theme default threshold color if defined', () => {
+  it('should render charts theme default threshold color if sparkline.color is undefined', () => {
     testChartsTheme.thresholds.defaultColor = 'green';
     const options = convertSparkline(testChartsTheme, {}, thresholds, 5) as LineSeriesOption;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(options.lineStyle!.color).toEqual('green');
+    expect(options.lineStyle?.color).toEqual('green');
+    expect(options.areaStyle?.color).toEqual('green');
   });
 
-  it('should render charts theme default threshold color if defined', () => {
-    testChartsTheme.thresholds.defaultColor = 'green';
+  it('should render sparkline.color if threshold is not met ', () => {
     const options = convertSparkline(testChartsTheme, sparkline, thresholds, 5) as LineSeriesOption;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(options.lineStyle!.color).toEqual('green');
+    expect(options.lineStyle?.color).toEqual(sparkline.color);
+    expect(options.areaStyle?.color).toEqual(sparkline.color);
   });
 
   it('should render orange if value meets the threshold', () => {
     const options = convertSparkline(testChartsTheme, sparkline, thresholds, 25) as LineSeriesOption;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(options.lineStyle!.color).toEqual('orange');
+    expect(options.lineStyle?.color).toEqual('orange');
+    expect(options.areaStyle?.color).toEqual('orange');
   });
 });
