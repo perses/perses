@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider, Switch } from '@mui/material';
+import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
@@ -97,6 +97,28 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             max={VISUAL_CONFIG.area_opacity.max}
             onChange={handleAreaOpacityChange}
           />
+        }
+      />
+      <OptionsEditorControl
+        label={VISUAL_CONFIG.stack.label}
+        control={
+          <ToggleButtonGroup
+            color="primary"
+            exclusive
+            value={value.stack}
+            onChange={(__, newValue) => {
+              onChange({
+                ...value,
+                stack: newValue,
+              });
+            }}
+          >
+            <ToggleButton value="None">None</ToggleButton>
+            <ToggleButton value="Normal">Normal</ToggleButton>
+            <ToggleButton value="Percent" disabled>
+              %
+            </ToggleButton>
+          </ToggleButtonGroup>
         }
       />
       <OptionsEditorControl

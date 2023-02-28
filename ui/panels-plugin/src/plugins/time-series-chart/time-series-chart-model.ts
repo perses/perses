@@ -42,6 +42,7 @@ export type VisualOptions = {
   area_opacity?: number;
   show_points?: 'Auto' | 'Always';
   point_radius?: number;
+  stack?: 'None' | 'Normal' | 'Percent';
   connect_nulls?: boolean;
 };
 
@@ -87,6 +88,9 @@ export const VISUAL_CONFIG = {
     min: 0,
     max: 1,
     step: 0.05,
+  },
+  stack: {
+    label: 'Stack Series',
   },
   connect_nulls: {
     label: 'Connect Nulls',
