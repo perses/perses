@@ -5,7 +5,7 @@ go 1.18
 require (
 	cuelang.org/go v0.4.2
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gavv/httpexpect/v2 v2.12.0
+	github.com/gavv/httpexpect/v2 v2.13.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/huandu/go-sqlbuilder v1.20.0
 	github.com/json-iterator/go v1.1.12
@@ -32,6 +32,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
