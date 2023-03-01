@@ -234,8 +234,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   }
 
   const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
-  let legendHeight = legend && legend.position === 'Right' ? adjustedContentDimensions.height : LEGEND_HEIGHT_SM;
-  if (adjustedContentDimensions.height > PANEL_HEIGHT_LG_BREAKPOINT) {
+
+  // TODO: account for number of time series returned when adjusting legend spacing
+  let legendHeight = LEGEND_HEIGHT_SM;
+  if (legend && legend.position === 'Right') {
+    legendHeight = adjustedContentDimensions.height;
+  } else if (adjustedContentDimensions.height > PANEL_HEIGHT_LG_BREAKPOINT) {
     legendHeight = LEGEND_HEIGHT_LG;
   }
 

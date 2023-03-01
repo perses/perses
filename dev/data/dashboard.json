@@ -1946,6 +1946,40 @@
             }
           }
         },
+        "LegendRight": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Position Right",
+              "description": "Time series chart with a legend positioned to the right"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "Right"
+                },
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
         "LegendTallFormatted": {
           "kind": "Panel",
           "spec": {
@@ -2101,6 +2135,13 @@
               },
               {
                 "x": 8,
+                "y": 7,
+                "width": 8,
+                "height": 7,
+                "content": { "$ref": "#/spec/panels/LegendRight" }
+              },
+              {
+                "x": 16,
                 "y": 7,
                 "width": 8,
                 "height": 10,
