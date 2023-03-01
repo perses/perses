@@ -69,7 +69,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 
 ### Visual tests
 
-This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. The tests are generated through the Playwright end-to-end test set using `happo-playwright`.
+This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. Visual tests generated through the Playwright end-to-end test set use `happo-playwright` and are listed under the `perses-ui` project in Happo. See the `storybook` package for information about visual tests generated using that tooling.
 
 - Use visual tests for use cases where a different type of test will not provide adequate coverage (e.g. canvas-based visualizations, styling).
 - Only create visual tests that can reliably be reproduced. Flaky tests are often worse than no tests at all because they lead to toil and reduce trust in the overall test set. Some examples of things that can lead to unreliable tests are:

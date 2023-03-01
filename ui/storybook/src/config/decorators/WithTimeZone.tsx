@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, UnknownSpec } from './definitions';
-import { UnixTimeMs } from './time';
+import { Decorator } from '@storybook/react';
+import { TimeZoneProvider } from '@perses-dev/components';
 
-export interface TimeSeriesQueryDefinition<PluginSpec = UnknownSpec>
-  extends Definition<TimeSeriesQuerySpec<PluginSpec>> {
-  kind: 'TimeSeriesQuery';
-}
+export const WithTimeZone: Decorator = (Story, context) => {
+  const globalTimeZone = context.globals.timeZone;
+  const timeZone = typeof globalTimeZone === 'string' ? globalTimeZone : undefined;
 
-export interface TimeSeriesQuerySpec<PluginSpec> {
-  plugin: Definition<PluginSpec>;
-}
-
-export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
+  return (
+    <TimeZoneProvider timeZone={timeZone}>
+      <Story />
+    </TimeZoneProvider>
+  );
+};

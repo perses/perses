@@ -1912,7 +1912,7 @@
             }
           }
         },
-        "LineVisualOptions": {
+        "CustomVisualOptions": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -1942,7 +1942,43 @@
                 "visual": {
                   "area_opacity": 0.5,
                   "point_radius": 6,
-                  "line_width": 3
+                  "line_width": 3,
+                  "connect_nulls": false
+                }
+              }
+            }
+          }
+        },
+        "ConnectedNulls": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Connected Nulls",
+              "description": "Time series chart with connected null values"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "fake_graphite_query_with_nulls"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "visual": {
+                  "show_points": "Always",
+                  "connect_nulls": true
                 }
               }
             }
@@ -1963,19 +1999,28 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 9,
+                "width": 8,
                 "height": 7,
                 "content": {
                   "$ref": "#/spec/panels/SingleLine"
                 }
               },
               {
-                "x": 9,
+                "x": 8,
                 "y": 0,
-                "width": 9,
+                "width": 8,
                 "height": 7,
                 "content": {
-                  "$ref": "#/spec/panels/LineVisualOptions"
+                  "$ref": "#/spec/panels/CustomVisualOptions"
+                }
+              },
+              {
+                "x": 16,
+                "y": 0,
+                "width": 8,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/ConnectedNulls"
                 }
               }
             ]

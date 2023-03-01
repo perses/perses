@@ -15,6 +15,7 @@ export * from './dashboard';
 export * from './datasource';
 export * from './definitions';
 export * from './display';
+export * from './http';
 export * from './layout';
 export * from './panels';
 export * from './resource';
