@@ -33,7 +33,7 @@ describe('StatChartOptionsEditorSettings', () => {
   const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = jest.fn()) => {
     render(
       <ChartsThemeProvider chartsTheme={testChartsTheme}>
-        <StatChartOptionsEditorSettings value={value} onChange={onChange} />{' '}
+        <StatChartOptionsEditorSettings value={value} onChange={onChange} />
       </ChartsThemeProvider>
     );
   };
