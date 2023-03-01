@@ -11,6 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './WithBackground';
-export * from './WithThemes';
-export * from './WithTimeZone';
+import { Decorator } from '@storybook/react';
+import { TimeZoneProvider } from '@perses-dev/components';
+
+export const WithTimeZone: Decorator = (Story, context) => {
+  const globalTimeZone = context.globals.timeZone;
+  const timeZone = typeof globalTimeZone === 'string' ? globalTimeZone : undefined;
+
+  return (
+    <TimeZoneProvider timeZone={timeZone}>
+      <Story />
+    </TimeZoneProvider>
+  );
+};

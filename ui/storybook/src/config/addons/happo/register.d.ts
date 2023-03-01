@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './WithBackground';
-export * from './WithThemes';
-export * from './WithTimeZone';
+// This file contains barebones types needed to make TS code play nicely with
+// register.js, which is being kept in JS in the hopes that it can eventually
+// be used directly from Happo in the future after some improvements.
+
+export function isHappoRun(): boolean;

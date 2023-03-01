@@ -14,7 +14,7 @@
 import React from 'react';
 import { useTheme } from '@mui/material';
 import { useMemo } from 'react';
-import { DecoratorFn } from '@storybook/react';
+import { Decorator } from '@storybook/react';
 import { useEffect } from 'react';
 
 // Much of the code for this decorator is cribbed from the backgrounds addon. We cannot
@@ -48,7 +48,7 @@ export const addBackgroundStyle = (selector: string, css: string, storyId: strin
   }
 };
 
-export const WithBackground: DecoratorFn = (Story, context) => {
+export const WithBackground: Decorator = (Story, context) => {
   const theme = useTheme();
 
   const maybeGlobalBg = context.globals.bgColor;

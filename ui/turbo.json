@@ -27,11 +27,13 @@
     },
     "storybook:build": {
       "dependsOn": [],
-      "outputs": []
+      "outputs": ["storybook-static/**"],
+      "cache": false
     },
     "storybook:serve": {
       "dependsOn": ["storybook:build"],
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "test": {
       "dependsOn": [],
