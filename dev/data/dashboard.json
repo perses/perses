@@ -1912,6 +1912,73 @@
             }
           }
         },
+        "LegendBottom": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Position Bottom",
+              "description": "Time series chart with a single line"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "Bottom"
+                },
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "LegendTallFormatted": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Tall Formatted",
+              "description": "Time series chart with large legend and formatted series names"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": { "position": "Bottom" },
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
+                          "series_name_format": "formatted series example - {{job}} job - {{instance}}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
         "CustomVisualOptions": {
           "kind": "Panel",
           "spec": {
@@ -2022,6 +2089,22 @@
                 "content": {
                   "$ref": "#/spec/panels/ConnectedNulls"
                 }
+              },
+              {
+                "x": 0,
+                "y": 7,
+                "width": 8,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/LegendBottom"
+                }
+              },
+              {
+                "x": 8,
+                "y": 7,
+                "width": 8,
+                "height": 10,
+                "content": { "$ref": "#/spec/panels/LegendTallFormatted" }
               }
             ]
           }
