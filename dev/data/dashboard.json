@@ -1917,7 +1917,7 @@
           "spec": {
             "display": {
               "name": "Legend Position Bottom",
-              "description": "Time series chart with a single line"
+              "description": "Time series chart with a default legend"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -1969,7 +1969,7 @@
                             "name": "PrometheusDemo"
                           },
                           "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
-                          "series_name_format": "formatted series example - {{job}} job - {{instance}}"
+                          "series_name_format": "formatted series name example - {{job}} job - instance {{instance}}"
                         }
                       }
                     }
