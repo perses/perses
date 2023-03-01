@@ -38,6 +38,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     'Custom Visual Options',
     'Connected Nulls',
     'Legend Position Bottom',
+    'Legend Position Right',
     'Legend Tall Formatted',
   ].forEach((panelName) => {
     test(`displays ${panelName} as expected`, async ({ page, dashboardPage, mockNow }) => {
