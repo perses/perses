@@ -64,4 +64,34 @@ export class PanelEditor {
       })
     ).toHaveText(groupName);
   }
+
+  async selectTab(tabName: string) {
+    await this.container.getByRole('tab', { name: tabName }).click();
+  }
+
+  /**
+   * THRESHOLDS EDITOR HELPERS
+   */
+  async addThreshold() {
+    await this.container.getByRole('button', { name: 'add threshold' }).click();
+  }
+
+  async deleteThreshold(label: string) {
+    await this.container.getByRole('button', { name: `delete threshold ${label}` }).click();
+  }
+
+  async editThreshold(label: string, value: string) {
+    const input = this.container.getByLabel(label);
+    await input.clear();
+    await input.type(value);
+  }
+
+  async openThresholdColorPicker(label: string) {
+    const openColorPickerButton = this.container.getByRole('button', { name: `change threshold ${label} color` });
+    await openColorPickerButton.click();
+  }
+
+  async toggleThresholdModes(mode: 'Absolute' | 'Percent') {
+    await this.container.getByRole('button', { name: mode === 'Percent' ? 'percent' : 'absolute' }).click();
+  }
 }

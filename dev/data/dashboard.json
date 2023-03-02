@@ -19,11 +19,7 @@
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
-                "values": [
-                  "demo.do.prometheus.io:9100",
-                  "demo.do.prometheus.io:3000",
-                  "demo.promlabs.com:9100"
-                ]
+                "values": ["demo.do.prometheus.io:9100", "demo.do.prometheus.io:3000", "demo.promlabs.com:9100"]
               }
             }
           }
@@ -2066,10 +2062,7 @@
                 "thresholds": {
                   "steps": [
                     {
-                      "value": 0.8
-                    },
-                    {
-                      "value": 0.9
+                      "value": 20
                     }
                   ]
                 },
