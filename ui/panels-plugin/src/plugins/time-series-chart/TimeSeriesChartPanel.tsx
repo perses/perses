@@ -28,7 +28,15 @@ import {
   useChartsTheme,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
-import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
+  PANEL_HEIGHT_LG_BREAKPOINT,
+  LEGEND_HEIGHT_SM,
+  LEGEND_HEIGHT_LG,
+} from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -230,7 +238,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   }
 
   const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
-  const legendHeight = legend && legend.position === 'Right' ? adjustedContentDimensions.height : 40;
+
+  // TODO: account for number of time series returned when adjusting legend spacing
+  let legendHeight = LEGEND_HEIGHT_SM;
+  if (legend && legend.position === 'Right') {
+    legendHeight = adjustedContentDimensions.height;
+  } else if (adjustedContentDimensions.height > PANEL_HEIGHT_LG_BREAKPOINT) {
+    legendHeight = LEGEND_HEIGHT_LG;
+  }
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;

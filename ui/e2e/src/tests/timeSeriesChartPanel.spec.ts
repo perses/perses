@@ -33,7 +33,14 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await happoPlaywright.finish();
   });
 
-  ['Single Line', 'Custom Visual Options', 'Connected Nulls'].forEach((panelName) => {
+  [
+    'Single Line',
+    'Custom Visual Options',
+    'Connected Nulls',
+    'Legend Position Bottom',
+    'Legend Position Right',
+    'Legend Tall Formatted',
+  ].forEach((panelName) => {
     test(`displays ${panelName} as expected`, async ({ page, dashboardPage, mockNow }) => {
       // Mock data response, so we can make assertions on consistent response data.
       await dashboardPage.mockQueryRangeRequests({
