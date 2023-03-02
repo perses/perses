@@ -118,7 +118,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
           await colorPicker.isVisible();
           const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
           await colorInput.clear();
-          await colorInput.type('8457c2');
+          await colorInput.type('8457c2', { delay: 100 });
           await page.keyboard.press('Escape');
         });
         const panel = dashboardPage.getPanelByName('Single Gauge');
@@ -144,7 +144,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
           await colorPicker.isVisible();
           const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
           await colorInput.clear();
-          await colorInput.type('e3abab');
+          await colorInput.type('e3abab', { delay: 100 });
           await page.keyboard.press('Escape');
         });
         const panel = dashboardPage.getPanelByName('Single Gauge');
@@ -161,7 +161,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
   });
 });
 
-export async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: number) {
+async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: number) {
   // Mock data response, so we can make assertions on consistent response data.
   await page.mockQueryRangeRequests({
     queries: [
