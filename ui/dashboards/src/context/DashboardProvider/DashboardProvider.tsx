@@ -95,22 +95,34 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, layouts, panels, duration },
+    spec: { display, duration },
     metadata,
   } = dashboardResource;
+
+  let {
+    spec: { layouts, panels },
+  } = dashboardResource;
+
+  // Set fallbacks
+  layouts = layouts ?? [];
+  panels = panels ?? {};
+
   const store = createStore<DashboardStoreState>()(
     immer(
       devtools((...args) => {
         const [set] = args;
         return {
+          /* Groups */
           ...createPanelGroupSlice(layouts)(...args),
-          ...createPanelSlice(panels)(...args),
           ...createPanelGroupEditorSlice(...args),
           ...createDeletePanelGroupSlice(...args),
+          /* Panels */
+          ...createPanelSlice(panels)(...args),
           ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
-          ...createDiscardChangesDialogSlice(...args),
           ...createDuplicatePanelSlice()(...args),
+          /* General */
+          ...createDiscardChangesDialogSlice(...args),
           metadata,
           display,
           defaultTimeRange: { pastDuration: duration },
