@@ -14,7 +14,7 @@
 import happoPlaywright from 'happo-playwright';
 import { test } from '../fixtures/dashboardTest';
 import { DashboardPage } from '../pages';
-import { mockTimeSeriesResponseWithStableValue, waitForAnimations, waitForStableCanvas } from '../utils';
+import { mockTimeSeriesResponseWithStableValue, waitForStableCanvas } from '../utils';
 
 test.use({
   dashboardName: 'StatChartPanel',
