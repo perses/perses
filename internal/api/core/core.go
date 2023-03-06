@@ -63,6 +63,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		APIRegistration(persesAPI).
 		APIRegistration(persesFrontend).
 		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource())).
+		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
 	return runner, persistenceManager, nil
 }
