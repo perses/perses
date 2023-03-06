@@ -128,12 +128,12 @@ function initStore(props: DashboardProviderProps) {
           defaultTimeRange: { pastDuration: duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { display, panels, layouts } }) => {
+          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [] } }) => {
             set((state) => {
               state.metadata = metadata;
               state.display = display;
-              const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panels = panels;
+              const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
             });
