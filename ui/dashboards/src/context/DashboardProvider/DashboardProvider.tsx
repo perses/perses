@@ -103,7 +103,7 @@ function initStore(props: DashboardProviderProps) {
     spec: { layouts, panels },
   } = dashboardResource;
 
-  // Set fallbacks
+  // Set fallbacks in case the frontend is used with a non-Perses backend
   layouts = layouts ?? [];
   panels = panels ?? {};
 
