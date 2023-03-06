@@ -5,7 +5,7 @@ go 1.18
 require (
 	cuelang.org/go v0.4.2
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gavv/httpexpect/v2 v2.13.0
+	github.com/gavv/httpexpect/v2 v2.14.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/huandu/go-sqlbuilder v1.20.0
 	github.com/json-iterator/go v1.1.12
