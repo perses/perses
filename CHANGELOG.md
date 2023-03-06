@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.24.0 / 2023-03-06
+
+- [FEATURE] Ability to edit thresholds for Time Series and Stat Charts (#992)
+- [FEATURE] Ability to edit thresholds in panel options for gauge chart (#968)
+- [FEATURE] New `area_opacity` option in time series panel (#962)
+- [FEATURE] Support mysql for the main DB (#961)
+- [ENHANCEMENT] Legend height increased for tall panels (#998)
+- [ENHANCEMENT] Pass headers in Prometheus datasource createClient (#996)
+- [ENHANCEMENT] Fix styling of TimeRangeControls (#974)
+- [ENHANCEMENT] Migrate custom dialogs to generic dialog component (#965)
+- [BUGFIX] Do not include tests in compiled output (#976)
+- [BUGFIX] Remove semicolon below legend (#975)
+- [BREAKINGCHANGE] TimeSeriesValueTuple null supported, `connect_nulls` option added (#990)
+- [BREAKINGCHANGE] TimeSeries and TimeSeriesValueTuple Iterable type change (#985)
+
 ## 0.23.1 / 2023-02-20
 
 - [ENHANCEMENT] upgrade zustand to latest (#972)
