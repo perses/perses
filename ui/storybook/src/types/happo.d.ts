@@ -11,8 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This file contains barebones types needed to make TS code play nicely with
-// register.js, which is being kept in JS in the hopes that it can eventually
-// be used directly from Happo in the future after some improvements.
+/// <reference types="@storybook/addons" />
 
-export function isHappoRun(): boolean;
+// Minimum implementation to get happo working with TS.
+// https://github.com/happo/happo-plugin-storybook
+
+declare module 'happo-plugin-storybook/register' {
+  export function isHappoRun(): boolean;
+  export function setThemeSwitcher(themeSwitcherFn: (theme: string, channel: Channel) => Promise<void>);
+}
