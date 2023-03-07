@@ -23,18 +23,17 @@ import {
   MenuItem,
   Stack,
   Switch,
-  Theme,
   Toolbar,
   Tooltip,
   Typography,
 } from '@mui/material';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
-import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { MouseEvent, useState } from 'react';
 import { useProjectQuery } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useDarkMode } from '../context/DarkMode';
+import { PersesLogo } from './PersesLogo';
 
 const ITEM_HEIGHT = 48;
 
@@ -60,7 +59,7 @@ function ProjectMenu(): JSX.Element {
   }
 
   return (
-    <>
+    <Box sx={{ padding: (theme) => theme.spacing(0.5, 0, 0, 1) }}>
       <Button
         aria-label="List of the available projects"
         aria-controls="menu-project-list-appbar"
@@ -112,14 +111,9 @@ function ProjectMenu(): JSX.Element {
           );
         })}
       </Menu>
-    </>
+    </Box>
   );
 }
-
-const style: SxProps<Theme> = {
-  display: 'flex',
-  flexDirection: 'row',
-};
 
 export default function Header(): JSX.Element {
   const navigate = useNavigate();
@@ -140,21 +134,20 @@ export default function Header(): JSX.Element {
           backgroundColor: (theme) => theme.palette.designSystem.blue[700],
         }}
       >
-        <Box sx={style} flexGrow={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexGrow: 1,
+            alignItems: 'center',
+          }}
+        >
           <Button
             onClick={() => {
               navigate('/');
             }}
           >
-            <Typography
-              variant="h1"
-              sx={(theme) => ({
-                marginRight: '1rem',
-                color: theme.palette.common.white,
-              })}
-            >
-              Perses
-            </Typography>
+            <PersesLogo />
           </Button>
           <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
           <ProjectMenu />
