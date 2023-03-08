@@ -19,6 +19,7 @@ export * from './http';
 export * from './layout';
 export * from './notice';
 export * from './panels';
+export * from './query';
 export * from './resource';
 export * from './thresholds';
 export * from './time';

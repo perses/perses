@@ -20,14 +20,13 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { TimeSeriesQueryEditor, usePlugin } from '@perses-dev/plugin-system';
-import { TimeSeriesChartOptions, TimeSeriesChartOptionsEditorProps } from './time-series-chart-model';
+import { TimeSeriesChartOptions, TimeSeriesChartQueryEditorProps } from './time-series-chart-model';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 const DEFAULT_QUERY_PLUGIN_KIND = 'PrometheusTimeSeriesQuery';
 
-export function TimeSeriesChartQueryEditor(props: TimeSeriesChartOptionsEditorProps) {
-  const { onChange, value } = props;
-  const { queries } = value;
+export function TimeSeriesChartQueryEditor(props: TimeSeriesChartQueryEditorProps) {
+  const { onChange, value, queries } = props;
   const hasMoreThanOneQuery = queries.length > 1;
 
   const { data: defaultQueryPlugin } = usePlugin(DEFAULT_QUERY_PLUGIN_TYPE, DEFAULT_QUERY_PLUGIN_KIND, {
@@ -43,7 +42,11 @@ export function TimeSeriesChartQueryEditor(props: TimeSeriesChartOptionsEditorPr
   const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.queries[index] = queryDef;
+        if (draft.queries) {
+          draft.queries[index] = queryDef;
+        } else {
+          draft.queries = [queryDef];
+        }
       })
     );
   };
@@ -52,12 +55,17 @@ export function TimeSeriesChartQueryEditor(props: TimeSeriesChartOptionsEditorPr
     if (!defaultQueryPlugin) return;
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.queries.push({
+        const queryDef: TimeSeriesQueryDefinition = {
           kind: DEFAULT_QUERY_PLUGIN_TYPE,
           spec: {
             plugin: { kind: DEFAULT_QUERY_PLUGIN_KIND, spec: defaultQueryPlugin.createInitialOptions() },
           },
-        });
+        };
+        if (draft.queries) {
+          draft.queries.push(queryDef);
+        } else {
+          draft.queries = [...queries, queryDef];
+        }
       })
     );
     setQueriesCollapsed((queriesCollapsed) => {

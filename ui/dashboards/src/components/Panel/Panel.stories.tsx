@@ -18,6 +18,7 @@ import { Panel } from '@perses-dev/dashboards';
 import { PanelDefinition } from '@perses-dev/core';
 import {
   WithPluginRegistry,
+  WithDataQueries,
   WithTimeRange,
   WithQueryClient,
   WithQueryParams,
@@ -31,28 +32,28 @@ const panelDefinition: PanelDefinition = {
     display: { name: 'Single Query', description: 'This is a panel rendering a time series chart' },
     plugin: {
       kind: 'TimeSeriesChart',
-      spec: {
-        queries: [
-          {
-            kind: 'TimeSeriesQuery',
+      spec: {},
+    },
+    queries: [
+      {
+        kind: 'TimeSeriesQuery',
+        spec: {
+          plugin: {
+            kind: 'PrometheusTimeSeriesQuery',
             spec: {
-              plugin: {
-                kind: 'PrometheusTimeSeriesQuery',
-                spec: {
-                  query: 'up',
-                },
-              },
+              query: 'up',
             },
           },
-        ],
+        },
       },
-    },
+    ],
   },
 };
 
 const meta: Meta<typeof Panel> = {
   component: Panel,
   decorators: [
+    WithDataQueries,
     WithTemplateVariables,
     WithTimeRange,
     WithDatasourceStore,
@@ -67,6 +68,18 @@ const meta: Meta<typeof Panel> = {
     // with the page.
     actions: { argTypesRegex: '' },
     happo: false,
+    WithDataQueries: {
+      props: {
+        definitions: [
+          {
+            kind: 'PrometheusTimeSeriesQuery',
+            spec: {
+              query: 'up',
+            },
+          },
+        ],
+      },
+    },
   },
   args: {
     definition: panelDefinition,

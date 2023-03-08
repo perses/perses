@@ -23,7 +23,15 @@ describe('PluginSpecEditor', () => {
 
   describe('Panel plugin', () => {
     it('should show query and json editors', async () => {
-      renderComponent({ pluginType: 'Panel', pluginKind: 'BertPanel1', value: {}, onChange: jest.fn() });
+      renderComponent({
+        pluginType: 'Panel',
+        pluginKind: 'BertPanel1',
+        queries: [
+          { kind: 'TimeSeriesQuery', spec: { plugin: { kind: 'PrometheusTimeSeriesQuery', spec: { query: 'up' } } } },
+        ],
+        value: {},
+        onChange: jest.fn(),
+      });
       const queryTab = await screen.findByLabelText('Query');
       expect(queryTab).toBeInTheDocument();
       const editor = await screen.findByLabelText('BertPanel1 editor');

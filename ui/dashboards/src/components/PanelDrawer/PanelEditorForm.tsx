@@ -24,8 +24,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginKindSelect, PluginSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
+import { OptionsEditorProps, PluginKindSelect, PluginSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { PanelPreview } from './PanelPreview';
@@ -45,6 +46,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const [groupId, setGroupId] = useState(initialValues.groupId);
   const [kind, setKind] = useState(initialValues.kind);
   const [spec, setSpec] = useState(initialValues.spec);
+  const [queries, setQueries] = useState(initialValues.queries);
 
   // Use common plugin editor logic even though we've split the inputs up in this form
   const pluginEditor = usePluginEditor({
@@ -65,10 +67,19 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     setGroupId(value);
   };
 
+  // TO DO: once we remove query editor from panel plugin, we can remove this method
+  const handlePluginSpecChange: OptionsEditorProps<UnknownSpec>['onChange'] = (spec) => {
+    // time series chart query editor returns spec.queries while gauge and stat charts return spec.query
+    if (spec?.queries || spec?.query) {
+      setQueries((spec?.queries ?? [spec?.query]) as QueryDefinition[]);
+    }
+    pluginEditor.onSpecChange(spec);
+  };
+
   useEffect(() => {
-    const values: PanelEditorValues = { name, description, groupId, kind, spec };
+    const values: PanelEditorValues = { name, description, groupId, kind, spec, queries };
     onChange(values);
-  }, [name, description, groupId, kind, spec, onChange]);
+  }, [name, description, groupId, kind, spec, queries, onChange]);
 
   return (
     // Grid maxHeight allows user to scroll inside Drawer to see all content
@@ -128,12 +139,25 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             Preview
           </Typography>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <PanelPreview kind={kind} name={name} description={description} spec={spec} groupId={groupId} />
+            <PanelPreview
+              kind={kind}
+              name={name}
+              description={description}
+              spec={spec}
+              groupId={groupId}
+              queries={queries}
+            />
           </ErrorBoundary>
         </Grid>
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <PluginSpecEditor pluginType="Panel" pluginKind={kind} value={spec} onChange={pluginEditor.onSpecChange} />
+            <PluginSpecEditor
+              pluginType="Panel"
+              pluginKind={kind}
+              queries={queries}
+              value={spec}
+              onChange={handlePluginSpecChange}
+            />
           </ErrorBoundary>
         </Grid>
       </Grid>

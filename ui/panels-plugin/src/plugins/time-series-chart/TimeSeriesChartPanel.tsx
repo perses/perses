@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
-import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
+import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
@@ -27,7 +27,6 @@ import {
   ZoomEventData,
   useChartsTheme,
 } from '@perses-dev/components';
-import { useSuggestedStepMs } from '../../model/time';
 import {
   TimeSeriesChartOptions,
   DEFAULT_UNIT,
@@ -50,12 +49,16 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { queries, thresholds, y_axis },
+    spec: { thresholds, y_axis },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
   const echartsPalette = chartsTheme.echartsTheme.color ?? [muiTheme.palette.primary];
+
+  const { isFetching, isLoading, queryResults } = useDataQueries();
+
+  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -90,12 +93,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
-  const suggestedStepMs = useSuggestedStepMs(adjustedContentDimensions?.width);
-  const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
-  const fetching = queryResults.some((result) => result.isFetching);
-  const loading = queryResults.some((result) => result.isLoading);
-  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
-
   const { setTimeRange } = useTimeRange();
 
   const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesName: string) => {
@@ -129,7 +126,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const { graphData } = useDeepMemo(() => {
     // If loading or fetching, we display a loading indicator.
     // We skip the expensive loops below until we are done loading or fetching.
-    if (loading || fetching) {
+    if (isLoading || isFetching) {
       return {
         graphData: EMPTY_GRAPH_DATA,
       };
@@ -221,13 +218,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, y_axis?.max, y_axis?.min]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
   }
 
-  if (loading === true || fetching == true) {
+  if (isLoading || isFetching) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}

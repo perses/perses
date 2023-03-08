@@ -22,7 +22,9 @@ export const DEFAULT_MAX_PERCENT = 100;
 export const DEFAULT_MAX_PERCENT_DECIMAL = 1;
 
 export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
-
+export interface GaugeChartQueryEditorProps extends GaugeChartOptionsEditorProps {
+  queries: TimeSeriesQueryDefinition[];
+}
 /**
  * The Options object type supported by the GaugeChart panel plugin.
  */
