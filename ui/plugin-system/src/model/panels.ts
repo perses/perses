@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from '@perses-dev/core';
 import React from 'react';
+import { UnknownSpec } from '@perses-dev/core';
 import { OptionsEditorTab } from '../components';
-import { OptionsEditorProps, Plugin } from './plugin-base';
+import { OptionsEditorProps, Plugin, QueryEditorProps } from './plugin-base';
 
 export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'label'> & {
   content: React.ComponentType<OptionsEditorProps<T>>;
@@ -27,7 +27,7 @@ export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   /**
    * React component for the content of "Query" tab
    */
-  PanelQueryEditorComponent?: React.ComponentType<OptionsEditorProps<Spec>>;
+  PanelQueryEditorComponent?: React.ComponentType<QueryEditorProps<Spec>>;
   /**
    * React components for custom tabs
    */

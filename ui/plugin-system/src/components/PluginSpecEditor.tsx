@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
-import { UnknownSpec } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { OptionsEditorProps, PanelPlugin, PluginType } from '../model';
 import { usePlugin } from '../runtime';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from './OptionsEditorTabs';
@@ -20,10 +20,12 @@ import { OptionsEditorTabsProps, OptionsEditorTabs } from './OptionsEditorTabs';
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: PluginType;
   pluginKind: string;
+  // TO DO: consider removing query editor out of plugin spec so we don't need to pass queries to plugin spec editor
+  queries?: QueryDefinition[];
 }
 
 export function PluginSpecEditor(props: PluginSpecEditorProps) {
-  const { pluginType, pluginKind, ...others } = props;
+  const { pluginType, pluginKind, queries, ...others } = props;
   const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
 
   if (error) {
@@ -42,10 +44,9 @@ export function PluginSpecEditor(props: PluginSpecEditorProps) {
   if (pluginType === 'Panel') {
     const { PanelQueryEditorComponent, panelOptionsEditorComponents } = plugin as PanelPlugin;
     let tabs: OptionsEditorTabsProps['tabs'] = [];
-    if (PanelQueryEditorComponent !== undefined) {
-      tabs.push({ label: 'Query', content: <PanelQueryEditorComponent {...others} /> });
+    if (PanelQueryEditorComponent !== undefined && queries !== undefined) {
+      tabs.push({ label: 'Query', content: <PanelQueryEditorComponent {...others} queries={queries} /> });
     }
-
     if (panelOptionsEditorComponents !== undefined) {
       tabs = tabs.concat(
         panelOptionsEditorComponents.map(({ label, content: OptionsEditorComponent }) => ({

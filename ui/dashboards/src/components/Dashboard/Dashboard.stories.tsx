@@ -15,7 +15,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Dashboard, TemplateVariableList } from '@perses-dev/dashboards';
 import { action } from '@storybook/addon-actions';
 import { Button, Stack } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, QueryDefinition } from '@perses-dev/core';
 import {
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
@@ -23,6 +23,7 @@ import {
 import { mockQueryRangeRequests, waitForStableCanvas } from '@perses-dev/storybook';
 import {
   WithDashboard,
+  WithDataQueries,
   WithDatasourceStore,
   WithPluginRegistry,
   WithQueryClient,
@@ -34,6 +35,7 @@ import {
 const meta: Meta<typeof Dashboard> = {
   component: Dashboard,
   decorators: [
+    WithDataQueries,
     WithDashboard,
     WithTemplateVariables,
     WithTimeRange,
@@ -81,21 +83,21 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
               legend: {
                 position: 'Right',
               },
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'up{instance=~"$instance"}',
-                      },
-                    },
-                  },
-                },
-              ],
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query: 'up{instance=~"$instance"}',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
     },
@@ -149,7 +151,20 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
 };
 
 function formatProviderParameters(dashboardState: DashboardResource) {
+  const panel = dashboardState.spec.panels['TimeSeries'];
+  const definitions = panel?.spec.queries?.map((query: QueryDefinition) => {
+    return {
+      kind: query.spec.plugin.kind,
+      spec: query.spec.plugin.spec,
+    };
+  });
+
   return {
+    WithDataQueries: {
+      props: {
+        definitions,
+      },
+    },
     withDashboard: {
       props: {
         initialState: {

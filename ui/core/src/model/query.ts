@@ -11,9 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasources';
-export * from './plugin-registry';
-export * from './template-variables';
-export * from './TimeRangeProvider';
-export * from './time-series-queries';
-export * from './DataQueriesProvider';
+import { Definition, UnknownSpec } from './definitions';
+
+interface QuerySpec<PluginSpec> {
+  plugin: Definition<PluginSpec>;
+}
+/**
+ * A generic query definition interface that can be extended to support more than just TimeSeriesQuery
+ */
+export interface QueryDefinition<Kind = QueryType, PluginSpec = UnknownSpec> {
+  kind: Kind;
+  spec: QuerySpec<PluginSpec>;
+}
+
+export type QueryType = 'TimeSeriesQuery';

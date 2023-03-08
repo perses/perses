@@ -11,16 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { TimeSeriesQueryEditor, TimeSeriesQueryEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { StatChartOptionsEditorProps } from './stat-chart-model';
+import { StatChartQueryEditorProps } from './stat-chart-model';
 
 /**
  * Component for visually editing a Stat Chart's spec.
  */
-export function StatChartQueryEditor(props: StatChartOptionsEditorProps) {
-  const { onChange, value } = props;
-  const { query } = value;
+export function StatChartQueryEditor(props: StatChartQueryEditorProps) {
+  const { onChange, value, queries } = props;
+  const query: TimeSeriesQueryDefinition<UnknownSpec> = queries[0] ?? {
+    kind: 'TimeSeriesQuery',
+    spec: {
+      plugin: {
+        kind: 'PrometheusTimeSeriesQuery',
+        spec: {
+          query: '',
+        },
+      },
+    },
+  };
 
   const handleQueryChange: TimeSeriesQueryEditorProps['onChange'] = (next) => {
     onChange(

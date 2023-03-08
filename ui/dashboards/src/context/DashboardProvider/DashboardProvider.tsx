@@ -73,6 +73,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
   // load plugin to retrieve initial spec if default panel kind is defined
   const { defaultPluginKinds } = usePluginRegistry();
   const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
+  const defaultTimeSeriesQueryKind = defaultPluginKinds?.['TimeSeriesQuery'] ?? '';
   const { data: plugin } = usePlugin('Panel', defaultPanelKind);
 
   const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
@@ -80,9 +81,27 @@ export function DashboardProvider(props: DashboardProviderProps) {
   useEffect(() => {
     if (plugin === undefined) return;
     const spec = plugin.createInitialOptions();
-    // set default panel kind and spec for add panel editor
-    store.setState({ initialValues: { kind: defaultPanelKind, spec } });
-  }, [plugin, store, defaultPanelKind]);
+    // set default panel kind, spec, and queries for add panel editor
+    store.setState({
+      initialValues: {
+        kind: defaultPanelKind,
+        spec,
+        queries: [
+          {
+            kind: 'TimeSeriesQuery',
+            spec: {
+              plugin: {
+                kind: defaultTimeSeriesQueryKind,
+                spec: {
+                  query: '',
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+  }, [plugin, store, defaultPanelKind, defaultTimeSeriesQueryKind]);
 
   return (
     <DashboardContext.Provider value={store as StoreApi<DashboardStoreState>}>
