@@ -12,13 +12,18 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { QueryDefinition } from '@perses-dev/core';
+import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '../../context';
 import { Panel, PanelProps } from '../Panel';
 
-export function PanelPreview({ name, description, kind, spec }: PanelEditorValues) {
+const PANEL_PREVIEW_HEIGHT = 300;
+
+export function PanelPreview({ name, description, kind, spec, queries }: PanelEditorValues) {
   const definition: PanelProps['definition'] = {
     kind: 'Panel',
     spec: {
+      queries,
       display: {
         name,
         description: description === '' ? undefined : description,
@@ -34,9 +39,30 @@ export function PanelPreview({ name, description, kind, spec }: PanelEditorValue
     return null;
   }
 
+  // ex: markdown panel does not have a query
+  if (!queries) {
+    return (
+      <Box height={PANEL_PREVIEW_HEIGHT}>
+        <Panel definition={definition} />
+      </Box>
+    );
+  }
+
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
+  const definitions = queries.length
+    ? queries.map((query: QueryDefinition) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      })
+    : [];
+
   return (
-    <Box height={300}>
-      <Panel definition={definition} />
+    <Box height={PANEL_PREVIEW_HEIGHT}>
+      <DataQueriesProvider definitions={definitions}>
+        <Panel definition={definition} />
+      </DataQueriesProvider>
     </Box>
   );
 }

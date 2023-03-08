@@ -28,6 +28,9 @@ export interface TimeSeriesChartOptions {
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
+export interface TimeSeriesChartQueryEditorProps extends TimeSeriesChartOptionsEditorProps {
+  queries: TimeSeriesQueryDefinition[];
+}
 
 export interface YAxisOptions {
   show?: boolean;

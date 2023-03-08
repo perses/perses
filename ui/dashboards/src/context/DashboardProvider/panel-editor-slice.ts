@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
+import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { getYForNewRow, getValidPanelKey } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
@@ -33,7 +33,7 @@ export interface PanelEditorSlice {
   /**
    * Initial values for add panel if default panel kind is defined
    */
-  initialValues?: Pick<PanelEditorValues, 'kind' | 'spec'>;
+  initialValues?: Pick<PanelEditorValues, 'kind' | 'spec' | 'queries'>;
 
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
@@ -82,6 +82,7 @@ export interface PanelEditorValues {
   groupId: PanelGroupId;
   kind: string;
   spec: UnknownSpec;
+  queries?: QueryDefinition[];
 }
 
 /**
@@ -122,6 +123,7 @@ export function createPanelEditorSlice(): StateCreator<
           groupId: panelGroupItemId.panelGroupId,
           kind: panelToEdit.spec.plugin.kind,
           spec: panelToEdit.spec.plugin.spec,
+          queries: panelToEdit.spec.queries,
         },
         applyChanges: (next) => {
           const panelDefinititon = createPanelDefinitionFromEditorValues(next);
@@ -197,6 +199,7 @@ export function createPanelEditorSlice(): StateCreator<
           groupId: panelGroupId,
           kind: get().initialValues?.kind ?? '',
           spec: get().initialValues?.spec ?? {},
+          queries: get().initialValues?.queries ?? [],
         },
         applyChanges: (next) => {
           const panelDef = createPanelDefinitionFromEditorValues(next);
@@ -255,6 +258,7 @@ function createPanelDefinitionFromEditorValues(editorValues: PanelEditorValues):
         kind: editorValues.kind,
         spec: editorValues.spec,
       },
+      queries: editorValues.queries,
     },
   };
 }

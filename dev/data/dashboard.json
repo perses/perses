@@ -42,22 +42,21 @@
             "display": { "name": "Default Time Series Panel" },
             "plugin": {
               "kind": "TimeSeriesChart",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "up"
-                        }
-                      }
+                      "query": "up"
                     }
                   }
-                ]
+                }
               }
-            }
+            ]
           }
         },
         "seriesTest": {
@@ -70,19 +69,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "rate(caddy_http_response_duration_seconds_sum[$interval])"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "unit": {
                     "kind": "Bytes",
@@ -90,7 +76,20 @@
                   }
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "rate(caddy_http_response_duration_seconds_sum[$interval])"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "basicEx": {
@@ -121,7 +120,21 @@
                   "position": "Right"
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Node memory - {{device}} {{instance}}",
+                      "query": "1 - node_filesystem_free_bytes{job='$job',instance=~'$instance',fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "legendEx": {
@@ -131,56 +144,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Node memory total",
-                          "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Memory (buffers) - {{instance}}",
-                          "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Cached Bytes",
-                          "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "MemFree Bytes",
-                          "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "legend": {
                   "position": "Bottom"
                 },
@@ -192,7 +155,57 @@
                   }
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Node memory total",
+                      "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Memory (buffers) - {{instance}}",
+                      "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Cached Bytes",
+                      "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "MemFree Bytes",
+                      "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "testNodeQuery": {
@@ -205,20 +218,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}",
-                          "series_name_format": "Test {{job}} {{instance}}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "unit": { "kind": "Decimal", "decimal_places": 2 }
                 },
@@ -226,7 +225,21 @@
                   "position": "Right"
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}",
+                      "series_name_format": "Test {{job}} {{instance}}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "testQueryAlt": {
@@ -239,19 +252,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "node_load1{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "legend": {
                   "position": "Right"
                 },
@@ -271,7 +271,20 @@
                   ]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_load1{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "cpuLine": {
@@ -284,20 +297,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
-                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "show": false,
                   "label": "CPU Label",
@@ -313,7 +312,21 @@
                   "steps": [{ "value": 0.2 }, { "value": 0.35 }]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "cpuGauge": {
@@ -326,25 +339,27 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
-                        "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": { "kind": "PercentDecimal" },
                 "thresholds": {
                   "steps": [{ "value": 0.2 }, { "value": 0.35 }]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statSm": {
@@ -354,17 +369,6 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_time_seconds{job='$job',instance=~'$instance'} - node_boot_time_seconds{job='$job',instance=~'$instance'}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "Mean",
                 "unit": {
                   "kind": "Decimal",
@@ -372,7 +376,20 @@
                   "abbreviate": true
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_time_seconds{job='$job',instance=~'$instance'} - node_boot_time_seconds{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "gaugeRAM": {
@@ -385,22 +402,24 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "100 - ((node_memory_MemAvailable_bytes{job='$job',instance=~'$instance'} * 100) / node_memory_MemTotal_bytes{job='$job',instance=~'$instance'})"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": { "kind": "Percent" },
                 "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "100 - ((node_memory_MemAvailable_bytes{job='$job',instance=~'$instance'} * 100) / node_memory_MemTotal_bytes{job='$job',instance=~'$instance'})"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statRAM": {
@@ -413,21 +432,23 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "100 - ((node_memory_MemAvailable_bytes{job='$job',instance=~'$instance'} * 100) / node_memory_MemTotal_bytes{job='$job',instance=~'$instance'})"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": { "kind": "Percent" }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "100 - ((node_memory_MemAvailable_bytes{job='$job',instance=~'$instance'} * 100) / node_memory_MemTotal_bytes{job='$job',instance=~'$instance'})"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statTotalRAM": {
@@ -440,21 +461,23 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": { "kind": "Bytes", "decimal_places": 1 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statMd": {
@@ -464,17 +487,6 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "avg(node_load15{job='node',instance=~'$instance'}) /  count(count(node_cpu_seconds_total{job='node',instance=~'$instance'}) by (cpu)) * 100"
-                      }
-                    }
-                  }
-                },
                 "calculation": "Sum",
                 "unit": {
                   "kind": "Decimal",
@@ -483,7 +495,20 @@
                 },
                 "sparkline": { "color": "#e65013", "width": 1.5 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "avg(node_load15{job='node',instance=~'$instance'}) /  count(count(node_cpu_seconds_total{job='node',instance=~'$instance'}) by (cpu)) * 100"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statLg": {
@@ -496,21 +521,23 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "(((count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job='$job',instance=~'$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))"
-                      }
-                    }
-                  }
-                },
                 "calculation": "Mean",
                 "unit": { "kind": "Percent" }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(((count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job='$job',instance=~'$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "gaugeEx": {
@@ -523,22 +550,24 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "(((count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job='$job',instance=~'$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": { "kind": "Percent" },
                 "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(((count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job='$job',instance=~'$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='$job',instance=~'$instance'}) by (cpu))"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "gaugeAltEx": {
@@ -551,17 +580,6 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_load15{instance=~'$instance',job='$job'}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
                 "thresholds": {
@@ -577,7 +595,20 @@
                   ]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_load15{instance=~'$instance',job='$job'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "gaugeFormatTest": {
@@ -587,17 +618,6 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_time_seconds{job='$job',instance=~'$instance'} - node_boot_time_seconds{job='$job',instance=~'$instance'}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": { "kind": "Bytes" },
                 "max": 95000000,
@@ -605,7 +625,20 @@
                   "steps": [{ "value": 71000000 }, { "value": 82000000 }]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_time_seconds{job='$job',instance=~'$instance'} - node_boot_time_seconds{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         }
       },
@@ -777,22 +810,21 @@
             "display": { "name": "Default Time Series Panel" },
             "plugin": {
               "kind": "TimeSeriesChart",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "up"
-                        }
-                      }
+                      "query": "up"
                     }
                   }
-                ]
+                }
               }
-            }
+            ]
           }
         },
         "markdownEx": {
@@ -820,19 +852,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "rate(caddy_http_response_duration_seconds_sum[$interval])"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "unit": {
                     "kind": "Decimal",
@@ -840,7 +859,20 @@
                   }
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "rate(caddy_http_response_duration_seconds_sum[$interval])"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "basicEx": {
@@ -852,19 +884,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "1 - node_filesystem_free_bytes{job=\"node\",instance=\"$instance\",fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job=\"node\",instance=\"$instance\"}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "unit": {
                     "kind": "PercentDecimal",
@@ -872,7 +891,20 @@
                   }
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "1 - node_filesystem_free_bytes{job=\"node\",instance=\"$instance\",fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job=\"node\",instance=\"$instance\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "legendEx": {
@@ -882,56 +914,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Node memory total",
-                          "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Memory (buffers) - {{instance}}",
-                          "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Cached Bytes",
-                          "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "MemFree Bytes",
-                          "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "legend": {
                   "position": "Bottom"
                 },
@@ -943,7 +925,57 @@
                   }
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Node memory total",
+                      "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Memory (buffers) - {{instance}}",
+                      "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Cached Bytes",
+                      "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "MemFree Bytes",
+                      "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "thresholdsEx": {
@@ -956,30 +988,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "node_load15{instance=\"$instance\",job=\"node\"}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "query": "node_load1{instance=\"$instance\",job=\"node\"}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "show": true,
                   "unit": {
@@ -1000,7 +1008,31 @@
                   ]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_load15{instance=\"$instance\",job=\"node\"}"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_load1{instance=\"$instance\",job=\"node\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "cpu": {
@@ -1010,20 +1042,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Custom {{job}} - {{device}} {{instance}}",
-                          "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "unit": { "kind": "PercentDecimal", "decimal_places": 0 }
                 },
@@ -1034,7 +1052,21 @@
                   "steps": [{ "value": 0.01 }, { "value": 0.02 }]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "series_name_format": "Custom {{job}} - {{device}} {{instance}}",
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statSm": {
@@ -1046,17 +1078,6 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_time_seconds{job=\"node\",instance=\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=\"$instance\"}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "Mean",
                 "unit": {
                   "kind": "Decimal",
@@ -1064,7 +1085,20 @@
                   "abbreviate": true
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_time_seconds{job=\"node\",instance=\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=\"$instance\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statRAM": {
@@ -1077,23 +1111,25 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "100 - ((node_memory_MemAvailable_bytes{job=\"node\",instance=\"$instance\"} * 100) / node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"})"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": {
                   "kind": "Percent"
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "100 - ((node_memory_MemAvailable_bytes{job=\"node\",instance=\"$instance\"} * 100) / node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"})"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statTotalRAM": {
@@ -1106,24 +1142,26 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": {
                   "kind": "Bytes",
                   "decimal_places": 1
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_memory_MemTotal_bytes{job=\"node\",instance=\"$instance\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statMd": {
@@ -1135,17 +1173,6 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "avg(node_load15{job=\"node\",instance=\"$instance\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu)) * 100"
-                      }
-                    }
-                  }
-                },
                 "calculation": "Sum",
                 "unit": {
                   "kind": "Decimal",
@@ -1157,7 +1184,20 @@
                   "width": 1.5
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "avg(node_load15{job=\"node\",instance=\"$instance\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu)) * 100"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "statLg": {
@@ -1170,24 +1210,26 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))"
-                      }
-                    }
-                  }
-                },
                 "sparkline": {},
                 "calculation": "Mean",
                 "unit": {
                   "kind": "Percent"
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "gaugeEx": {
@@ -1200,17 +1242,6 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": {
                   "kind": "Percent"
@@ -1226,7 +1257,20 @@
                   ]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(((count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode=\"idle\",job=\"node\",instance=\"$instance\"}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job=\"node\",instance=\"$instance\"}) by (cpu))"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "gaugeAltEx": {
@@ -1239,17 +1283,6 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_load15{instance=\"$instance\",job=\"node\"}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": {
                   "kind": "PercentDecimal",
@@ -1268,7 +1301,20 @@
                   ]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_load15{instance=\"$instance\",job=\"node\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "gaugeFormatTest": {
@@ -1280,17 +1326,6 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "node_time_seconds{job=\"node\",instance=\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=\"$instance\"}"
-                      }
-                    }
-                  }
-                },
                 "calculation": "LastNumber",
                 "unit": {
                   "kind": "Decimal"
@@ -1307,7 +1342,20 @@
                   ]
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_time_seconds{job=\"node\",instance=\"$instance\"} - node_boot_time_seconds{job=\"node\",instance=\"$instance\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         }
       },
@@ -1886,26 +1934,25 @@
             },
             "plugin": {
               "kind": "TimeSeriesChart",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
-                        }
-                      }
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusDemo"
+                      },
+                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
                     }
                   }
-                ]
+                }
               }
-            }
+            ]
           }
         },
         "LegendBottom": {
@@ -1920,26 +1967,26 @@
               "spec": {
                 "legend": {
                   "position": "Bottom"
-                },
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
-                        }
-                      }
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusDemo"
+                      },
+                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
                     }
                   }
-                ]
+                }
               }
-            }
+            ]
           }
         },
         "LegendRight": {
@@ -1954,26 +2001,26 @@
               "spec": {
                 "legend": {
                   "position": "Right"
-                },
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
-                        }
-                      }
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusDemo"
+                      },
+                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
                     }
                   }
-                ]
+                }
               }
-            }
+            ]
           }
         },
         "LegendTallFormatted": {
@@ -1986,27 +2033,27 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "legend": { "position": "Bottom" },
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
+                "legend": { "position": "Bottom" }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
-                          "series_name_format": "formatted series name example - {{job}} job - instance {{instance}}"
-                        }
-                      }
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusDemo"
+                      },
+                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
+                      "series_name_format": "formatted series name example - {{job}} job - instance {{instance}}"
                     }
                   }
-                ]
+                }
               }
-            }
+            ]
           }
         },
         "CustomVisualOptions": {
@@ -2019,23 +2066,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "visual": {
                   "area_opacity": 0.5,
                   "point_radius": 6,
@@ -2043,7 +2073,24 @@
                   "connect_nulls": false
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusDemo"
+                      },
+                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "ConnectedNulls": {
@@ -2056,29 +2103,29 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "fake_graphite_query_with_nulls"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "visual": {
                   "show_points": "Always",
                   "connect_nulls": true
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusDemo"
+                      },
+                      "query": "fake_graphite_query_with_nulls"
+                    }
+                  }
+                }
+              }
+            ]
           }
         }
       },
@@ -2172,17 +2219,6 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "Mean",
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "100 - ((node_memory_MemAvailable_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"} * 100) / node_memory_MemTotal_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"})"
-                      }
-                    }
-                  }
-                },
                 "thresholds": {
                   "steps": [
                     {
@@ -2194,7 +2230,20 @@
                   "kind": "Percent"
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "100 - ((node_memory_MemAvailable_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"} * 100) / node_memory_MemTotal_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"})"
+                    }
+                  }
+                }
+              }
+            ]
           }
         }
       },
@@ -2247,24 +2296,26 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "Mean",
-                "query": {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "query": "prometheus_http_requests_total{instance=\"demo.do.prometheus.io:9090\",code!=\"200\"}"
-                      }
-                    }
-                  }
-                },
                 "sparkline": {},
                 "unit": {
                   "abbreviate": false,
                   "kind": "Decimal"
                 }
               }
-            }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "prometheus_http_requests_total{instance=\"demo.do.prometheus.io:9090\",code!=\"200\"}"
+                    }
+                  }
+                }
+              }
+            ]
           }
         }
       },
