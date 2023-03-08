@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { test } from '@playwright/test';
-import { AppHomePage } from '../pages';
+import { test, expect } from '@playwright/test';
+import { AppHomePage, AppProjectPage, DashboardPage } from '../pages';
 
 test.describe('App', () => {
   test('can navigate to a dashboard', async ({ page }) => {
@@ -25,5 +25,39 @@ test.describe('App', () => {
     const navigationPromise = page.waitForNavigation();
     await homePage.clickDashboardItem('Demo');
     await navigationPromise;
+  });
+
+  test('can create a new dashboard', async ({ page }) => {
+    const homePage = new AppHomePage(page);
+    await homePage.goto();
+
+    // Go to testing project
+    await homePage.showDashboardList('testing');
+    const projectLink = await page.getByRole('link', { name: 'testing' });
+    const navigationPromise = page.waitForNavigation();
+    await projectLink.click();
+    await navigationPromise;
+
+    // Create a new dashboard
+    const projectPage = new AppProjectPage(page);
+    await projectPage.createDashboard('my new dashboard');
+
+    // Should see empty state
+    await expect(page.getByRole('main')).toContainText("Let's get started");
+
+    // Use empty state to add a new panel
+    const dashboardPage = new DashboardPage(page);
+    await page
+      .getByRole('button', {
+        name: /Add panel$/,
+        exact: true,
+      })
+      .last()
+      .click();
+
+    await dashboardPage.addMarkdownPanel('My first panel');
+
+    // Should no longer see empty state
+    await expect(page.getByRole('main')).not.toContainText("Let's get started");
   });
 });

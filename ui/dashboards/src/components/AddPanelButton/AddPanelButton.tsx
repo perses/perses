@@ -11,19 +11,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button } from '@mui/material';
+import { Button, ButtonProps } from '@mui/material';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { InfoTooltip } from '@perses-dev/components';
 import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboardActions } from '../../context';
 
-export const AddPanelButton = () => {
+export interface AddPanelButtonProps extends Pick<ButtonProps, 'fullWidth'> {
+  /**
+   * The variant to use to display the button. The `primary` variant is used
+   * in toolbars. The `secondary` variant is used in the empty state messaging.
+   */
+  variant?: 'primary' | 'secondary';
+
+  /**
+   * The type of text used to communicate the purpose of the button. The `short`
+   * label is brief and takes up less space. The `long` label is more detailed,
+   * but takes up more space.
+   */
+  labelType?: 'short' | 'long';
+}
+
+export const AddPanelButton = ({ variant = 'primary', labelType = 'short', fullWidth }: AddPanelButtonProps) => {
   const { openAddPanel } = useDashboardActions();
 
   return (
     <InfoTooltip description={TOOLTIP_TEXT.addPanel}>
-      <Button startIcon={<AddPanelIcon />} onClick={openAddPanel} aria-label={TOOLTIP_TEXT.addPanel}>
-        Panel
+      <Button
+        startIcon={<AddPanelIcon />}
+        onClick={openAddPanel}
+        aria-label={TOOLTIP_TEXT.addPanel}
+        variant={variant === 'primary' ? 'text' : 'outlined'}
+        color={variant === 'primary' ? 'primary' : 'secondary'}
+        fullWidth={fullWidth}
+        sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+      >
+        {labelType === 'long' && 'Add'} Panel
       </Button>
     </InfoTooltip>
   );

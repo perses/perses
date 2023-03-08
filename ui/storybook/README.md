@@ -2,7 +2,7 @@
 
 This package is used to generate documentation for Perses UI components using [Storybook](https://storybook.js.org/).
 
-> This project currently uses the [v7 beta](https://storybook.js.org/docs/7.0/react/get-started/introduction) of Storybook. Be sure to reference the associated [v7 beta documentation](https://storybook.js.org/docs/7.0/react/get-started/introduction).
+> This project currently uses the [v7 beta](https://storybook.js.org/docs/7.0/react/writing-stories/introduction) of Storybook. Be sure to reference the associated [v7 beta documentation](https://storybook.js.org/docs/7.0/react/writing-stories/introduction).
 
 ## Getting started
 
