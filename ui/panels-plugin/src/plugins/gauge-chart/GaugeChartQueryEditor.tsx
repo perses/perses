@@ -11,16 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { TimeSeriesQueryEditor, TimeSeriesQueryEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { GaugeChartOptionsEditorProps } from './gauge-chart-model';
+import { GaugeChartQueryEditorProps } from './gauge-chart-model';
 
 /**
  * Component for visually editing a Gauge Chart's spec.
  */
-export function GaugeChartQueryEditor(props: GaugeChartOptionsEditorProps) {
-  const { onChange, value } = props;
-  const { query } = value;
+export function GaugeChartQueryEditor(props: GaugeChartQueryEditorProps) {
+  const { onChange, value, queries } = props;
+  const query: TimeSeriesQueryDefinition<UnknownSpec> = queries[0] ?? {
+    kind: 'TimeSeriesQuery',
+    spec: {
+      plugin: {
+        kind: 'PrometheusTimeSeriesQuery',
+        spec: {
+          query: '',
+        },
+      },
+    },
+  };
 
   const handleQueryChange: TimeSeriesQueryEditorProps['onChange'] = (next) => {
     onChange(

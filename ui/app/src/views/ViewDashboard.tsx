@@ -149,6 +149,7 @@ function ViewDashboard() {
           pluginLoader={bundledPluginLoader}
           defaultPluginKinds={{
             Panel: 'TimeSeriesChart',
+            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
           }}
         >
           <ErrorBoundary FallbackComponent={ErrorAlert}>

@@ -13,7 +13,7 @@
 
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
-import { useTimeSeriesQueries } from '@perses-dev/plugin-system';
+import { useTimeSeriesQueries, UseDataQueriesResult } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -35,7 +35,7 @@ export const EMPTY_GRAPH_DATA = {
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScaleForQueries(queries: RunningQueriesState): TimeScale | undefined {
+export function getCommonTimeScaleForQueries(queries: UseDataQueriesResult['queryResults']): TimeScale | undefined {
   const seriesData = queries.map((query) => (query.isLoading ? undefined : query.data));
   return getCommonTimeScale(seriesData);
 }

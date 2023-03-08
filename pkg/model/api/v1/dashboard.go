@@ -27,11 +27,21 @@ import (
 type PanelSpec struct {
 	Display common.Display `json:"display" yaml:"display"`
 	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
+	Queries []Query  `json:"queries" yaml:"queries"`
 }
 
 type Panel struct {
 	Kind string    `json:"kind" yaml:"kind"`
 	Spec PanelSpec `json:"spec" yaml:"spec"`
+}
+
+type Query struct {
+	Kind string    `json:"kind" yaml:"kind"`
+	Spec QuerySpec `json:"spec" yaml:"spec"`
+}
+
+type QuerySpec struct {
+	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
 }
 
 type DashboardSpec struct {

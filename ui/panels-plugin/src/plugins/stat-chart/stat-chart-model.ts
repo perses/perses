@@ -21,6 +21,9 @@ export interface SparklineOptions {
 }
 
 export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
+export interface StatChartQueryEditorProps extends StatChartOptionsEditorProps {
+  queries: TimeSeriesQueryDefinition[];
+}
 
 export interface StatChartOptions {
   name: string;
