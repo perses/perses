@@ -45,7 +45,7 @@ use([
 ]);
 
 const meta: Meta<typeof EChart> = {
-  component: EChart.type,
+  component: EChart,
   argTypes: {
     onEvents: {
       // It doesn't make sense for this to have an editable control because
