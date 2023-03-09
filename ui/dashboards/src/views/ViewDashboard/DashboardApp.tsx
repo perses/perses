@@ -23,12 +23,14 @@ import {
   DiscardChangesConfirmationDialog,
   DashboardToolbar,
   DeletePanelDialog,
+  DashboardProps,
 } from '../../components';
 import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
-export interface DashboardAppProps {
+export interface DashboardAppProps extends Pick<DashboardProps, 'emptyDashboard'> {
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
+
   onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
@@ -36,7 +38,15 @@ export interface DashboardAppProps {
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
-  const { dashboardResource, dashboardTitleComponent, onSave, onDiscard, initialVariableIsSticky, isReadonly } = props;
+  const {
+    dashboardResource,
+    dashboardTitleComponent,
+    emptyDashboard,
+    onSave,
+    onDiscard,
+    initialVariableIsSticky,
+    isReadonly,
+  } = props;
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
@@ -96,9 +106,9 @@ export const DashboardApp = (props: DashboardAppProps) => {
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
       />
-      <Box sx={{ padding: (theme) => theme.spacing(2) }}>
+      <Box sx={{ padding: (theme) => theme.spacing(2), height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <Dashboard />
+          <Dashboard emptyDashboard={emptyDashboard} />
         </ErrorBoundary>
         <PanelDrawer />
         <PanelGroupDialog />

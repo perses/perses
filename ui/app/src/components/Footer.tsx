@@ -28,7 +28,11 @@ export default function Footer(): JSX.Element {
   const { data, isLoading } = useHealth({ onError: exceptionSnackbar });
   return (
     <Box component="footer" sx={style}>
-      <ul>
+      <ul
+        style={{
+          paddingLeft: 0,
+        }}
+      >
         <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
         <li>
           <a href="https://github.com/perses/perses" target="_blank" rel="noreferrer">
