@@ -53,8 +53,8 @@ const meta: Meta<typeof LineChart> = {
   },
   parameters: {
     happo: {
-      waitForAsync: () => {
-        return waitForStableCanvas('canvas');
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
       },
     },
   },

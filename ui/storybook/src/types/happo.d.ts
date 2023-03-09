@@ -11,4 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const SB_ROOT_ELEMENT_SELECTOR = '#root,#storybook-root';
+/// <reference types="@storybook/addons" />
+
+// Minimum implementation to get happo working with TS.
+// https://github.com/happo/happo-plugin-storybook
+
+declare module 'happo-plugin-storybook/register' {
+  export function isHappoRun(): boolean;
+  export function setThemeSwitcher(themeSwitcherFn: (theme: string, channel: Channel) => Promise<void>);
+}

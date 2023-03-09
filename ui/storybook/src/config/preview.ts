@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { isHappoRun, setThemeSwitcher } from 'happo-plugin-storybook/register';
 import { DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
-import { isHappoRun, setThemeSwitcher } from './addons/happo/register';
 import { DocsContainer } from './DocsContainer';
 import { WithThemes, WithBackground, WithTimeZone } from './decorators';
 

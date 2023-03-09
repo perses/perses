@@ -19,8 +19,8 @@ const meta: Meta<typeof GaugeChart> = {
   component: GaugeChart,
   parameters: {
     happo: {
-      waitForAsync: () => {
-        return waitForStableCanvas('canvas');
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
       },
     },
   },

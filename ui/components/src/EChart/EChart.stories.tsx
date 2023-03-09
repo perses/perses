@@ -70,8 +70,8 @@ const meta: Meta<typeof EChart> = {
   },
   parameters: {
     happo: {
-      waitForAsync: () => {
-        return waitForStableCanvas('canvas');
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
       },
     },
   },

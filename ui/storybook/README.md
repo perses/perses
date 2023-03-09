@@ -120,9 +120,7 @@ By default, visual tests will be taking for both light mode and dark mode. You c
 
 #### Waiting for stable canvas
 
-Happo does its best to wait for the page to stabilize before taking a screenshot, but it does not do anything special for canvas. We cannot use happo's built-in `waitFor` to work around this because it is synchronous and constantly looping to check the status will deny the underlying code the ability to actually modify the canvas.
-
-To work around this, we've added an async `waitForAsync` helper that you can use in concert with an internal `waitForStableCanvas` utility in the storybook package to attempt to wait for a stable canvas element before taking a screenshot.
+Happo does its best to wait for the page to stabilize before taking a screenshot, but it does not do anything special for canvas. To work around this, you can use the `parameters.happo.beforeScreenshot` in concert with an internal `waitForStableCanvas` utility in the storybook package to attempt to wait for a stable canvas element before taking a screenshot.
 
 ```ts
 import { waitForStableCanvas } from '@perses-dev/storybook';
@@ -131,8 +129,8 @@ const meta: Meta<typeof LineChart> = {
   component: LineChart,
   parameters: {
     happo: {
-      waitForAsync: () => {
-        return waitForStableCanvas('canvas');
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
       },
     },
   },
@@ -145,7 +143,6 @@ We have some customization over the default `happo-storybook` configuration rela
 
 - We explicitly build storybook before running happo and have `usePrebuiltPackage` set to `true`. This is needed because the name of the executable for storybook changed in v7 and happo hasn't updated to account for it yet.
 - We need to set explicitly set the `HAPPO_COMMAND` env var when calling `happo-ci-github-actions` to run in CI. Their default script looks in the wrong location because it doesn't fully account for the complexity of a monorepo setup like ours.
-- We use a modified version of [`register.js`](https://github.com/happo/happo-plugin-storybook/blob/master/src/register.js) file provided by `happo-plugin-storybook`. This enables us to add custom `waitForAsync` functionality.
 
 #### Debugging
 
