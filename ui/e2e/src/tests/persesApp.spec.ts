@@ -57,7 +57,7 @@ test.describe('App', () => {
     const dashboardPage = new DashboardPage(page);
 
     await dashboardPage.forEachTheme(async (themeName) => {
-      await happoPlaywright.screenshot(page, page.getByRole('main'), {
+      await happoPlaywright.screenshot(page, dashboardPage.root, {
         component: 'Empty State',
         variant: themeName,
       });
