@@ -157,7 +157,7 @@ function ViewDashboard() {
                 />
               }
               emptyDashboard={
-                <EmptyDashboard additionalText="In order to create a new dashboard. You need to add at least one panel!" />
+                <EmptyDashboard additionalText="In order to create a new dashboard, you need to add at least one panel!" />
               }
               onSave={handleDashboardSave}
               onDiscard={handleDashboardDiscard}
