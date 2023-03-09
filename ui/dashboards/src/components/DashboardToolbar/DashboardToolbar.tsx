@@ -22,6 +22,7 @@ import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
+import { EditJsonButton } from '../EditJsonButton';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -121,6 +122,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 <AddGroupButton />
                 <TimeRangeControls />
                 <DownloadButton />
+                <EditJsonButton />
               </Stack>
             ) : (
               // On smaller screens, make it two rows
@@ -128,6 +130,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
                   <TimeRangeControls />
                   <DownloadButton />
+                  <EditJsonButton />
                 </Stack>
                 <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
                   <EditVariablesButton />
