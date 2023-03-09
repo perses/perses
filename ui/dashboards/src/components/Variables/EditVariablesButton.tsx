@@ -23,14 +23,12 @@ import { VariableEditor } from './VariableEditor';
 
 export interface EditVariablesButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   /**
-   * The variant to use to display the button. The `text` variant is used
-   * in toolbars. The `outlined` variant is used in the empty state messaging.
+   * The variant to use to display the button.
    */
   variant?: 'text' | 'outlined';
 
   /**
-   * The color to use to display the button. The `primary` color is used in
-   * toolbars. The `secondary` variant is used in the empty state messaging.
+   * The color to use to display the button.
    */
   color?: 'primary' | 'secondary';
 
