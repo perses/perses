@@ -20,7 +20,7 @@ const meta: Meta<typeof InfoTooltip> = {
   argTypes: {
     placement: {
       options: ['top', 'left', 'right', 'bottom'],
-      control: 'radio',
+      control: 'select',
     },
     children: {
       control: false,
