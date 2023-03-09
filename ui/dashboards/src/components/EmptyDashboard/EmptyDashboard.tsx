@@ -53,6 +53,10 @@ const DEFAULT_ACTIONS = (
   </>
 );
 
+// Constants from specifics in designs to make the default messaging look good.
+const EMPTY_CONTAINER_WIDTH = '450px';
+const PRIMARY_CONTENT_WIDTH = '289px';
+
 /**
  * Communicate that a dashboard is empty and prompt the user to get started.
  */
@@ -68,8 +72,8 @@ export const EmptyDashboard = ({
   const showActions = !!actions || typeof actions === 'undefined';
 
   return (
-    <Box sx={{ width: '450px', textAlign: 'center', margin: '0 auto' }}>
-      <Box sx={{ width: '289px', margin: '0 auto' }}>
+    <Box sx={{ width: EMPTY_CONTAINER_WIDTH, textAlign: 'center', margin: '0 auto' }}>
+      <Box sx={{ width: PRIMARY_CONTENT_WIDTH, margin: '0 auto' }}>
         <Typography variant="h2" gutterBottom>
           {title}
         </Typography>
