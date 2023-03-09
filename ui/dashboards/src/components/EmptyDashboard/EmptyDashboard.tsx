@@ -17,15 +17,12 @@ import { EditVariablesButton } from '../Variables';
 
 export interface EmptyDashboardProps {
   /**
-   * The title for the empty state. This should be relatively short text.
-   * If not specified, the default title will be used.
+   * The title, which should be relatively short text.
    */
   title?: string;
 
   /**
-   * Descriptive text for the empty state. This can be longer text that gives the
-   * user additional information.
-   * If not specified, the default description will be used.
+   * Descriptive text, which can be a bit longer.
    */
   description?: string;
 
@@ -54,7 +51,7 @@ const DEFAULT_ACTIONS = (
 );
 
 // Constants from specifics in designs to make the default messaging look good.
-const EMPTY_CONTAINER_WIDTH = '450px';
+const CONTAINER_WIDTH = '450px';
 const PRIMARY_CONTENT_WIDTH = '289px';
 
 /**
@@ -72,7 +69,7 @@ export const EmptyDashboard = ({
   const showActions = !!actions || typeof actions === 'undefined';
 
   return (
-    <Box sx={{ width: EMPTY_CONTAINER_WIDTH, textAlign: 'center', margin: '0 auto' }}>
+    <Box sx={{ width: CONTAINER_WIDTH, textAlign: 'center', margin: '0 auto' }}>
       <Box sx={{ width: PRIMARY_CONTENT_WIDTH, margin: '0 auto' }}>
         <Typography variant="h2" gutterBottom>
           {title}
