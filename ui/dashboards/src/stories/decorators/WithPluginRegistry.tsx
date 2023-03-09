@@ -29,10 +29,18 @@ const panelsResource = require('../../../../panels-plugin/plugin.json');
 const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
     resource: prometheusResource as PluginModuleResource,
+    // This throws an error in CI (but not locally for some reason), likely because
+    // this package isn't a dependency for dashboards. We probably do not want to
+    // make it one solely for type-checking in storybook.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     importPlugin: () => import('@perses-dev/prometheus-plugin'),
   },
   {
     resource: panelsResource as PluginModuleResource,
+    // Same comment as above.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     importPlugin: () => import('@perses-dev/panels-plugin'),
   },
 ]);
