@@ -28,6 +28,7 @@ import {
   LegendComponent,
 } from 'echarts/components';
 import { action } from '@storybook/addon-actions';
+import { waitForStableCanvas } from '@perses-dev/storybook';
 
 use([
   EChartsLineChart,
@@ -65,6 +66,13 @@ const meta: Meta<typeof EChart> = {
       click: action('click'),
       mouseover: action('mouseover'),
       mouseout: action('mouseout'),
+    },
+  },
+  parameters: {
+    happo: {
+      waitForAsync: () => {
+        return waitForStableCanvas('canvas');
+      },
     },
   },
 };

@@ -13,9 +13,17 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { GaugeChart } from '@perses-dev/components';
+import { waitForStableCanvas } from '@perses-dev/storybook';
 
 const meta: Meta<typeof GaugeChart> = {
   component: GaugeChart,
+  parameters: {
+    happo: {
+      waitForAsync: () => {
+        return waitForStableCanvas('canvas');
+      },
+    },
+  },
 };
 
 export default meta;

@@ -13,6 +13,7 @@
 
 import { StoryObj, Meta } from '@storybook/react';
 import { LineChart } from '@perses-dev/components';
+import { waitForStableCanvas } from '@perses-dev/storybook';
 
 const meta: Meta<typeof LineChart> = {
   component: LineChart,
@@ -48,6 +49,13 @@ const meta: Meta<typeof LineChart> = {
       left: 20,
       right: 20,
       bottom: 0,
+    },
+  },
+  parameters: {
+    happo: {
+      waitForAsync: () => {
+        return waitForStableCanvas('canvas');
+      },
     },
   },
 };
