@@ -19,20 +19,29 @@ import { useDashboardActions } from '../../context';
 
 export interface AddPanelButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   /**
-   * The variant to use to display the button. The `primary` variant is used
-   * in toolbars. The `secondary` variant is used in the empty state messaging.
+   * The variant to use to display the button. The `text` variant is used
+   * in toolbars. The `outlined` variant is used in the empty state messaging.
    */
-  variant?: 'primary' | 'secondary';
+  variant?: 'text' | 'outlined';
 
   /**
-   * The type of text used to communicate the purpose of the button. The `short`
-   * label is brief and takes up less space. The `long` label is more detailed,
-   * but takes up more space.
+   * The color to use to display the button. The `primary` color is used in
+   * toolbars. The `secondary` variant is used in the empty state messaging.
    */
-  labelType?: 'short' | 'long';
+  color?: 'primary' | 'secondary';
+
+  /**
+   * The label used inside the button.
+   */
+  label?: string;
 }
 
-export const AddPanelButton = ({ variant = 'primary', labelType = 'short', fullWidth }: AddPanelButtonProps) => {
+export const AddPanelButton = ({
+  variant = 'text',
+  color = 'primary',
+  label = 'Panel',
+  fullWidth,
+}: AddPanelButtonProps) => {
   const { openAddPanel } = useDashboardActions();
 
   return (
@@ -41,12 +50,12 @@ export const AddPanelButton = ({ variant = 'primary', labelType = 'short', fullW
         startIcon={<AddPanelIcon />}
         onClick={openAddPanel}
         aria-label={TOOLTIP_TEXT.addPanel}
-        variant={variant === 'primary' ? 'text' : 'outlined'}
-        color={variant === 'primary' ? 'primary' : 'secondary'}
+        variant={variant}
+        color={color}
         fullWidth={fullWidth}
         sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
       >
-        {labelType === 'long' && 'Add'} Panel
+        {label}
       </Button>
     </InfoTooltip>
   );

@@ -48,8 +48,8 @@ const DEFAULT_TITLE = "Let's get started";
 const DEFAULT_DESCRIPTION = 'We currently support time series charts, gauge charts, stat charts and more!';
 const DEFAULT_ACTIONS = (
   <>
-    <AddPanelButton variant="secondary" labelType="long" fullWidth={true} />
-    <EditVariablesButton variant="secondary" labelType="long" fullWidth={true} />
+    <AddPanelButton variant="outlined" color="secondary" label="Add Panel" fullWidth={true} />
+    <EditVariablesButton variant="outlined" color="secondary" label="Add Variables" fullWidth={true} />
   </>
 );
 

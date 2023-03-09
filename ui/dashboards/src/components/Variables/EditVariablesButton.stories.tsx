@@ -31,23 +31,24 @@ export default meta;
 type Story = StoryObj<typeof EditVariablesButton>;
 
 /**
- * When used in toolbars, the component is rendered with the `primary` `variant`
- * and a `short` `labelType`.
+ * When used in toolbars, the component is rendered with the `text` `variant`,
+ * `primary` `color`, and the default `label`.
  */
-export const Primary: Story = {
+export const Toolbar: Story = {
   args: {
-    variant: 'primary',
-    labelType: 'short',
+    variant: 'text',
+    color: 'primary',
   },
 };
 
 /**
  * When used in other situations (e.g. the empty state), the component is rendered
- * with the `secondary` `variant` and a `long` `labelType`.
+ * with the `outlined` `variant`, the `secondary` `color`,  and a custom `label`.
  */
-export const Secondary: Story = {
+export const Other: Story = {
   args: {
-    variant: 'secondary',
-    labelType: 'long',
+    variant: 'outlined',
+    color: 'secondary',
+    label: 'Add Panel',
   },
 };

@@ -23,20 +23,29 @@ import { VariableEditor } from './VariableEditor';
 
 export interface EditVariablesButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   /**
-   * The variant to use to display the button. The `primary` variant is used
-   * in toolbars. The `secondary` variant is used in the empty state messaging.
+   * The variant to use to display the button. The `text` variant is used
+   * in toolbars. The `outlined` variant is used in the empty state messaging.
    */
-  variant?: 'primary' | 'secondary';
+  variant?: 'text' | 'outlined';
 
   /**
-   * The type of text used to communicate the purpose of the button. The `short`
-   * label is brief and takes up less space. The `long` label is more detailed,
-   * but takes up more space.
+   * The color to use to display the button. The `primary` color is used in
+   * toolbars. The `secondary` variant is used in the empty state messaging.
    */
-  labelType?: 'short' | 'long';
+  color?: 'primary' | 'secondary';
+
+  /**
+   * The label used inside the button.
+   */
+  label?: string;
 }
 
-export function EditVariablesButton({ variant = 'primary', labelType = 'short', fullWidth }: EditVariablesButtonProps) {
+export function EditVariablesButton({
+  variant = 'text',
+  label = 'Variables',
+  color = 'primary',
+  fullWidth,
+}: EditVariablesButtonProps) {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
   const { setVariableDefinitions } = useTemplateVariableActions();
@@ -56,12 +65,12 @@ export function EditVariablesButton({ variant = 'primary', labelType = 'short', 
           startIcon={<PencilIcon />}
           onClick={openVariableEditor}
           aria-label={TOOLTIP_TEXT.editVariables}
-          variant={variant === 'primary' ? 'text' : 'outlined'}
-          color={variant === 'primary' ? 'primary' : 'secondary'}
+          variant={variant}
+          color={color}
           fullWidth={fullWidth}
           sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
         >
-          {labelType === 'long' && 'Add'} Variables
+          {label}
         </Button>
       </InfoTooltip>
       <Drawer
