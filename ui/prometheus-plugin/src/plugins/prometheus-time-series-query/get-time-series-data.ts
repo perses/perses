@@ -87,6 +87,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
         name,
         values: values.map(parseValueTuple),
         formattedName,
+        labels: metric,
       };
     }),
   };
