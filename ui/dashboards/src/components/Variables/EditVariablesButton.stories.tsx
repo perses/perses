@@ -49,6 +49,6 @@ export const Other: Story = {
   args: {
     variant: 'outlined',
     color: 'secondary',
-    label: 'Add Panel',
+    label: 'Add Variables',
   },
 };
