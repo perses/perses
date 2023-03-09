@@ -132,7 +132,11 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
       await panelEditor.addThreshold();
       await panelEditor.editThreshold('T1', '50');
       await panelEditor.toggleThresholdModes('Percent');
-      await panelEditor.container.getByLabel('Max').fill('5');
+      await panelEditor.container
+        .getByRole('spinbutton', {
+          name: 'Max',
+        })
+        .fill('5');
       await panelEditor.openThresholdColorPicker('T2');
       const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
       await colorPicker.isVisible();
