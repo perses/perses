@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
-import { UserFriendlyError } from '@perses-dev/core';
 import { Alert } from '@mui/material';
 
 export interface ErrorAlertProps {
@@ -24,29 +22,5 @@ export interface ErrorAlertProps {
  */
 export function ErrorAlert(props: ErrorAlertProps) {
   const { error } = props;
-
-  const { errors: errorMessages } = useMemo(
-    () => getUserFriendlyErrors(error, 'Failed to load response data.'),
-    [error]
-  );
-
-  return <Alert severity="error">{errorMessages}</Alert>;
-}
-
-interface UserFriendlyErrors {
-  errors: string[];
-}
-
-/**
- * Given a server error, determines the user-friendly message(s) to show.
- */
-export function getUserFriendlyErrors(error: unknown, defaultMessage: string): UserFriendlyErrors {
-  // UserFriendlyError messages can be shown as-is
-  if (error instanceof UserFriendlyError) {
-    const errorEvent = error as UserFriendlyError;
-    return { errors: [errorEvent.message] };
-  }
-
-  // Otherwise, use the fallback/default message
-  return { errors: [defaultMessage] };
+  return <Alert severity="error">{error.message}</Alert>;
 }
