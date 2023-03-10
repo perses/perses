@@ -33,6 +33,7 @@ function App() {
         sx={{
           paddingBottom: (theme) => theme.spacing(1),
           flex: 1,
+          display: 'flex',
         }}
       >
         <Router />

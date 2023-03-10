@@ -11,19 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './AddGroupButton';
-export * from './AddPanelButton';
-export * from './Dashboard';
-export * from './DashboardToolbar';
-export * from './DeletePanelDialog';
-export * from './DeletePanelGroupDialog';
-export * from './DiscardChangesConfirmationDialog';
-export * from './DownloadButton';
-export * from './EmptyDashboard';
-export * from './GridLayout';
-export * from './Panel';
-export * from './PanelDrawer';
-export * from './PanelGroupDialog';
-export * from './TimeRangeControls';
-export * from './ToolbarIconButton';
-export * from './Variables';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StoryFn } from '@storybook/react';
+
+export const WithQueryClient = (Story: StoryFn) => {
+  const queryClient = new QueryClient({});
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Story />
+    </QueryClientProvider>
+  );
+};

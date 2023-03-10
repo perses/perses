@@ -20,7 +20,6 @@ import { useCallback, useState } from 'react';
 import { useDashboardList } from '../model/dashboard-client';
 import DashboardList from '../components/DashboardList';
 import { DeleteProjectDialog } from '../components/DeleteProjectDialog/DeleteProjectDialog';
-import { useSnackbar } from '../context/SnackbarProvider';
 import { CreateDashboardDialog } from '../components/CreateDashboardDialog/CreateDashboardDialog';
 
 interface RenderDashboardInProjectProperties {
@@ -28,7 +27,6 @@ interface RenderDashboardInProjectProperties {
 }
 
 function DashboardPageInProject(props: RenderDashboardInProjectProperties) {
-  const { infoSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
@@ -40,7 +38,6 @@ function DashboardPageInProject(props: RenderDashboardInProjectProperties) {
 
   const handleDashboardCreation = function (name: string) {
     navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
-    infoSnackbar(`In order to create a new dashboard. You need to add at least one panel!`);
   };
 
   return (

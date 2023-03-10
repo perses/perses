@@ -114,6 +114,10 @@ const config: StorybookConfig = {
     const defaultAlias = config.resolve.alias;
     config.resolve.alias = {
       ...defaultAlias,
+
+      // Needed to support referencing the utils in other packages.
+      '@perses-dev/storybook': path.resolve(uiRoot, 'storybook/src'),
+
       // We alias internal cross-package imports to the src (instead of dist)
       // to ensure we are using the same versions of the code throughout the
       // storybook. Without this, we'd be using a mix and match of src/dist for
