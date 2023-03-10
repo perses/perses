@@ -17,6 +17,13 @@
 export async function fetch(...args: Parameters<typeof global.fetch>) {
   const response = await global.fetch(...args);
   if (response.ok === false) {
+    const json = await response.json();
+    if (json.error) {
+      throw new UserFriendlyError(json.error);
+    }
+    if (json.message) {
+      throw new UserFriendlyError(json.message);
+    }
     throw new FetchError(response);
   }
   return response;
@@ -40,5 +47,15 @@ export class FetchError extends Error {
   constructor(response: Readonly<Response>) {
     super(`${response.status} ${response.statusText}`);
     Object.setPrototypeOf(this, FetchError.prototype);
+  }
+}
+
+/**
+ * General error type for an error that has a message that is OK to show to the end user.
+ */
+export class UserFriendlyError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, UserFriendlyError.prototype);
   }
 }
