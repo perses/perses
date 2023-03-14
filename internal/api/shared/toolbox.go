@@ -69,7 +69,7 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	}
 	newEntity, err := t.service.Create(entity)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, newEntity)
 }
@@ -81,7 +81,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	parameters := extractParameters(ctx)
 	newEntity, err := t.service.Update(entity, parameters)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, newEntity)
 }
@@ -89,7 +89,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
 	if err := t.service.Delete(parameters); err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
@@ -98,29 +98,29 @@ func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
 	entity, err := t.service.Get(parameters)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, entity)
 }
 
 func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
-		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
+		return fmt.Errorf("%w: %s", BadRequestError, err)
 	}
 	parameters := extractParameters(ctx)
 	result, err := t.service.List(q, parameters)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, result)
 }
 
 func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
-		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
+		return fmt.Errorf("%w: %s", BadRequestError, err)
 	}
 	if err := validateMetadata(ctx, entity.GetMetadata()); err != nil {
-		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
+		return fmt.Errorf("%w: %s", BadRequestError, err)
 	}
 	return nil
 }
