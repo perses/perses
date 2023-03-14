@@ -83,6 +83,25 @@ func TestUpdateDashboardIncreaseVersion(t *testing.T) {
 	})
 }
 
+func TestListDashboardInEmptyProject(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
+		persesProject := e2eframework.NewProject("perses")
+		demoProject := e2eframework.NewProject("Demo")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoProject, demoDashboard)
+
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, demoProject.GetMetadata().GetName(), shared.PathDashboard)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(0)
+
+		return []api.Entity{persesProject, demoProject, demoDashboard}
+	})
+}
+
 func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashboard {
 	b, err := json.Marshal(body)
 	if err != nil {
