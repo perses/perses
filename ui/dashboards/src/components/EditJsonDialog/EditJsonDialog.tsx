@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { FormEvent, useState } from 'react';
-import { FormControl } from '@mui/material';
+import { Alert, FormControl } from '@mui/material';
 import { Dialog, JSONEditor } from '@perses-dev/components';
 import { useEditJsonDialog } from '../../context/DashboardProvider';
 import { useDashboard } from '../../context/useDashboard';
@@ -42,6 +42,9 @@ const EditJsonDialogForm = () => {
   return (
     <Dialog.Form onSubmit={handleApply}>
       <Dialog.Content sx={{ width: '100%' }}>
+        <Alert sx={{ marginBottom: (theme) => theme.spacing(1) }} severity="warning">
+          Metadata cannot be modified or saved.
+        </Alert>
         <FormControl fullWidth>
           <JSONEditor
             minHeight="300px"
