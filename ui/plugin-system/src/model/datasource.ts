@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from '@perses-dev/core';
+import { RequestHeaders, UnknownSpec } from '@perses-dev/core';
 import { Plugin } from './plugin-base';
 
 /**
@@ -23,4 +23,23 @@ export interface DatasourcePlugin<Spec = UnknownSpec, Client = unknown> extends 
 
 export interface DatasourceClientOptions {
   proxyUrl?: string;
+}
+
+/**
+ * Common properties for all clients
+ */
+export interface DatasourceClient {
+  // TODO: define common client properties
+  options: {
+    datasourceUrl: string;
+    headers?: RequestHeaders;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Determine if valid input is a valid DatasourceClient
+ */
+export function isDatasourceClient(client: unknown): client is DatasourceClient {
+  return (client as DatasourceClient).options.datasourceUrl !== undefined;
 }
