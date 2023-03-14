@@ -21,7 +21,7 @@ export const EditJsonDialog = () => {
   const { editJsonDialog, closeEditJsonDialog } = useEditJsonDialog();
 
   return (
-    <Dialog maxWidth={'lg'} scroll="paper" fullWidth open={!!editJsonDialog?.isOpen}>
+    <Dialog open={!!editJsonDialog?.isOpen} scroll="paper" fullWidth maxWidth="lg">
       <Dialog.Header onClose={() => closeEditJsonDialog()}>Edit Dashboard</Dialog.Header>
       {editJsonDialog?.isOpen && <EditJsonDialogForm />}
     </Dialog>
@@ -40,15 +40,20 @@ const EditJsonDialogForm = () => {
   };
 
   return (
-    <form onSubmit={handleApply}>
+    <Dialog.Form onSubmit={handleApply}>
       <Dialog.Content sx={{ width: '100%' }}>
         <FormControl fullWidth>
-          <JSONEditor maxHeight="700px" value={draftDashboard} onChange={(value) => setDraftDashboard(value)} />
+          <JSONEditor
+            minHeight="300px"
+            maxHeight="700px"
+            value={draftDashboard}
+            onChange={(value) => setDraftDashboard(value)}
+          />
         </FormControl>
       </Dialog.Content>
       <Dialog.Actions>
         <Dialog.PrimaryButton onClick={handleApply}>Apply</Dialog.PrimaryButton>
       </Dialog.Actions>
-    </form>
+    </Dialog.Form>
   );
 };
