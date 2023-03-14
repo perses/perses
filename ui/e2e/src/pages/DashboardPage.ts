@@ -221,13 +221,10 @@ export class DashboardPage {
   }
 
   async addMarkdownPanel(panelName: string) {
-    await this.panelEditor.isVisible();
-
-    const panelEditor = new PanelEditor(this.panelEditor);
-    await panelEditor.nameInput.type(panelName);
-    await panelEditor.selectType('Markdown');
-    await panelEditor.addButton.click();
-    await panelEditor.isClosed();
+    await this.editNewPanel(async (panelEditor) => {
+      await panelEditor.nameInput.type(panelName);
+      await panelEditor.selectType('Markdown');
+    });
   }
 
   /**
@@ -304,6 +301,25 @@ export class DashboardPage {
     await callback(panelEditor);
 
     await panelEditor.applyButton.click();
+    await panelEditor.isClosed();
+  }
+
+  /**
+   * Helper for simplifying editing new panel once you open the panel editor.
+   * - Provides the panel editor to a callback function that handles the
+   *   steps to edit the panel.
+   * - When the callback is fiished, applies the changes and waits for the panel
+   *   editor to close.
+   * @param callback - Async function that is called after the panel editor is
+   * opened and before the changes in the panel editor are applied.
+   */
+  async editNewPanel(callback: (panelEditor: PanelEditor) => Promise<void>) {
+    const panelEditor = new PanelEditor(this.panelEditor);
+    await panelEditor.isVisible();
+
+    await callback(panelEditor);
+
+    await panelEditor.addButton.click();
     await panelEditor.isClosed();
   }
 

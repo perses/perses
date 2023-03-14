@@ -42,7 +42,7 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {
 	entity := &v1.Dashboard{}
 	if err := ctx.Bind(entity); err != nil {
-		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
+		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	if err := validate.Dashboard(entity, e.sch); err != nil {
 		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
@@ -60,10 +60,10 @@ func (e *Endpoint) ValidateGlobalDatasource(ctx echo.Context) error {
 
 func validateDatasource[T v1.DatasourceInterface](entity T, sch schemas.Schemas, ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
-		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
+		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	if err := validate.Datasource(entity, nil, sch); err != nil {
-		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
+		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	return ctx.NoContent(http.StatusOK)
 }

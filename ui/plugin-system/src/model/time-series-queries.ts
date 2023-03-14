@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeSeriesValueTuple, UnknownSpec } from '@perses-dev/core';
+import { AbsoluteTimeRange, TimeSeriesValueTuple, UnknownSpec, Labels } from '@perses-dev/core';
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 
@@ -55,4 +55,5 @@ export interface TimeSeries {
   name: string;
   values: TimeSeriesValueTuple[];
   formattedName?: string;
+  labels?: Labels;
 }

@@ -73,6 +73,11 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 	return getFunc, upsertFunc
 }
 
+func CreateAndWaitUntilEntitiesExist(t *testing.T, persistenceManager dependency.PersistenceManager, objects ...interface{}) {
+	for _, object := range objects {
+		CreateAndWaitUntilEntityExists(t, persistenceManager, object)
+	}
+}
 func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
 	getFunc, upsertFunc := CreateGetFunc(t, persistenceManager, object)
 

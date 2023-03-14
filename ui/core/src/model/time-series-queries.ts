@@ -24,3 +24,5 @@ export interface TimeSeriesQuerySpec<PluginSpec> {
 }
 
 export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
+
+export type Labels = Record<string, string>;
