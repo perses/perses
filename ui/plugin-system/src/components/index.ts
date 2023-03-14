@@ -18,5 +18,4 @@ export * from './PluginEditor';
 export * from './PluginKindSelect';
 export * from './PluginRegistry';
 export * from './PluginSpecEditor';
-export * from './QueryInspector';
 export * from './TimeSeriesQueryEditor';

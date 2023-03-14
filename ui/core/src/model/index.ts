@@ -13,7 +13,6 @@
 
 export * from './dashboard';
 export * from './datasource';
-export * from './display';
 export * from './definitions';
 export * from './display';
 export * from './http';
