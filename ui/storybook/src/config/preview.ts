@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { isHappoRun, setThemeSwitcher } from 'happo-plugin-storybook/register';
+import { DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
 import { DocsContainer } from './DocsContainer';
 import { WithThemes, WithBackground, WithTimeZone } from './decorators';
-import { isHappoRun } from './addons/happo/register';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -37,6 +38,9 @@ export const parameters = {
   },
   docs: {
     container: DocsContainer,
+  },
+  happo: {
+    themes: ['light', 'dark'],
   },
   options: {
     storySort: {
@@ -81,5 +85,20 @@ export const globalTypes = {
     },
   },
 };
+
+// Set up happo to handle theme switching to enable automatically taking
+// screenshots of both light and dark mode for components.
+setThemeSwitcher(async (theme, channel) => {
+  return new Promise((resolve) => {
+    const isDarkMode = theme === 'dark';
+
+    // Listen for dark mode to change and resolve.
+    channel.once(DARK_MODE_EVENT_NAME, () => {
+      resolve();
+    });
+    // Change the theme.
+    channel.emit(DARK_MODE_EVENT_NAME, isDarkMode);
+  });
+});
 
 export const decorators = [WithTimeZone, WithBackground, WithThemes];

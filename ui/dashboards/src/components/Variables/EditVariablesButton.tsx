@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { Button } from '@mui/material';
+import { Button, ButtonProps } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { VariableDefinition } from '@perses-dev/core';
@@ -21,7 +21,29 @@ import { TOOLTIP_TEXT } from '../../constants';
 import { useTemplateVariableDefinitions, useTemplateVariableActions } from '../../context';
 import { VariableEditor } from './VariableEditor';
 
-export function EditVariablesButton() {
+export interface EditVariablesButtonProps extends Pick<ButtonProps, 'fullWidth'> {
+  /**
+   * The variant to use to display the button.
+   */
+  variant?: 'text' | 'outlined';
+
+  /**
+   * The color to use to display the button.
+   */
+  color?: 'primary' | 'secondary';
+
+  /**
+   * The label used inside the button.
+   */
+  label?: string;
+}
+
+export function EditVariablesButton({
+  variant = 'text',
+  label = 'Variables',
+  color = 'primary',
+  fullWidth,
+}: EditVariablesButtonProps) {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
   const { setVariableDefinitions } = useTemplateVariableActions();
@@ -37,8 +59,16 @@ export function EditVariablesButton() {
   return (
     <>
       <InfoTooltip description={TOOLTIP_TEXT.editVariables}>
-        <Button startIcon={<PencilIcon />} onClick={openVariableEditor} aria-label={TOOLTIP_TEXT.editVariables}>
-          Variables
+        <Button
+          startIcon={<PencilIcon />}
+          onClick={openVariableEditor}
+          aria-label={TOOLTIP_TEXT.editVariables}
+          variant={variant}
+          color={color}
+          fullWidth={fullWidth}
+          sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+        >
+          {label}
         </Button>
       </InfoTooltip>
       <Drawer

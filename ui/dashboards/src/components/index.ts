@@ -19,6 +19,7 @@ export * from './DeletePanelDialog';
 export * from './DeletePanelGroupDialog';
 export * from './DiscardChangesConfirmationDialog';
 export * from './DownloadButton';
+export * from './EmptyDashboard';
 export * from './GridLayout';
 export * from './Panel';
 export * from './PanelDrawer';

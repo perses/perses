@@ -46,12 +46,12 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 func (e *Endpoint) Migrate(ctx echo.Context) error {
 	body := &api.Migrate{}
 	if err := ctx.Bind(body); err != nil {
-		return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
+		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	grafanaDashboard := migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard))
 	persesDashboard, err := e.migrationService.Migrate([]byte(grafanaDashboard))
 	if err != nil {
-		return shared.HandleError(err)
+		return err
 	}
 
 	return ctx.JSON(http.StatusOK, persesDashboard)

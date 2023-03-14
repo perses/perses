@@ -24,14 +24,13 @@ import (
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
-	"github.com/perses/perses/internal/api/core/middleware"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
@@ -62,7 +61,6 @@ func defaultFileConfig() *config.File {
 
 func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
 	projectPath := GetRepositoryPath(t)
-	handler := echo.New()
 	conf := config.Config{
 		Schemas: config.Schemas{
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
@@ -88,20 +86,14 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 			File: defaultFileConfig(),
 		}
 	}
-	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
+	runner, persistenceManager, err := core.New(conf, "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if dbInitError := persistenceManager.GetPersesDAO().Init(); dbInitError != nil {
-		t.Fatal(dbInitError)
-	}
-	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
+	handler, err := runner.HTTPServerBuilder().PrometheusRegisterer(prometheus.NewRegistry()).BuildHandler()
 	if err != nil {
 		t.Fatal(err)
 	}
-	handler.Use(middleware.CheckProject(serviceManager.GetProject()))
-	persesAPI := core.NewPersesAPI(serviceManager, conf)
-	persesAPI.RegisterRoute(handler)
 	server := httptest.NewServer(handler)
 	return server, httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
