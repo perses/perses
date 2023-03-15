@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTitleProps,
   IconButton,
+  styled,
   Theme,
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
@@ -75,6 +76,18 @@ const SecondaryButton = ({ children, ...props }: DialogButtonProps) => (
   </Button>
 );
 
+/*
+ * Material-ui has a prop "scroll=paper" that is specifically for dialog header and actions to be sticky and body to scroll,
+ * but that doesn't work when dialog content is wrapped in form.
+ * https://github.com/mui-org/material-ui/issues/13253
+ * This component adds style to get expected behavior & should be used whenever we have a Form inside a Dialog
+ */
+const Form = styled('form')({
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+});
+
 /**
  * Render the CSS of the dialog's close button, according to the given material theme.
  * @param theme material theme
@@ -86,6 +99,7 @@ const dialogCloseIconButtonStyle = (theme: Theme) => {
 export const Dialog = ({ children, ...props }: DialogProps) => <MuiDialog {...props}>{children}</MuiDialog>;
 
 Dialog.Header = Header;
+Dialog.Form = Form;
 Dialog.Content = Content;
 Dialog.PrimaryButton = PrimaryButton;
 Dialog.SecondaryButton = SecondaryButton;

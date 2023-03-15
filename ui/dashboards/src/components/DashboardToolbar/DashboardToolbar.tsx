@@ -13,7 +13,6 @@
 
 import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
-import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { useDashboard, useEditMode } from '../../context';
@@ -23,6 +22,7 @@ import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
 import { EditDashboardButton } from '../EditDashboardButton';
+import { EditJsonButton } from '../EditJsonButton';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -122,6 +122,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 <AddGroupButton />
                 <TimeRangeControls />
                 <DownloadButton />
+                <EditJsonButton />
               </Stack>
             ) : (
               // On smaller screens, make it two rows
@@ -129,6 +130,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
                   <TimeRangeControls />
                   <DownloadButton />
+                  <EditJsonButton />
                 </Stack>
                 <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
                   <EditVariablesButton />

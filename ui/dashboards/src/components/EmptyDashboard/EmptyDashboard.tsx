@@ -75,6 +75,11 @@ const EmptyDashboardActions = ({ actions, isEditMode, onEditButtonClick }: Empty
     return actions;
   }
 
+  if (actions === false) {
+    // Disable default actions
+    return null;
+  }
+
   if (isEditMode) {
     // Default edit mode actions
     return (
