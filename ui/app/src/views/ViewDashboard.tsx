@@ -156,9 +156,9 @@ function ViewDashboard() {
                   dashboardProject={data.metadata.project}
                 />
               }
-              emptyDashboard={
-                <EmptyDashboard additionalText="In order to create a new dashboard, you need to add at least one panel!" />
-              }
+              emptyDashboardProps={{
+                additionalText: 'In order to create a new dashboard, you need to add at least one panel!',
+              }}
               onSave={handleDashboardSave}
               onDiscard={handleDashboardDiscard}
               initialVariableIsSticky={true}

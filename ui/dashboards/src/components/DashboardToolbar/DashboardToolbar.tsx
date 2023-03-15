@@ -22,6 +22,7 @@ import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
+import { EditDashboardButton } from '../EditDashboardButton';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -145,17 +146,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack direction="row" spacing={1} marginLeft="auto">
               <TimeRangeControls />
               <DownloadButton />
-              {isBiggerThanSm && (
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  startIcon={<PencilIcon />}
-                  onClick={onEditButtonClick}
-                  sx={{ marginLeft: 'auto' }}
-                >
-                  Edit
-                </Button>
-              )}
+              {isBiggerThanSm && <EditDashboardButton onClick={onEditButtonClick} />}
             </Stack>
           </Box>
           <Box paddingY={2}>

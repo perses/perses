@@ -23,11 +23,12 @@ import {
   DiscardChangesConfirmationDialog,
   DashboardToolbar,
   DeletePanelDialog,
-  DashboardProps,
+  EmptyDashboardProps,
 } from '../../components';
 import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
-export interface DashboardAppProps extends Pick<DashboardProps, 'emptyDashboard'> {
+export interface DashboardAppProps {
+  emptyDashboardProps?: Partial<EmptyDashboardProps>;
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
 
@@ -41,7 +42,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
   const {
     dashboardResource,
     dashboardTitleComponent,
-    emptyDashboard,
+    emptyDashboardProps,
     onSave,
     onDiscard,
     initialVariableIsSticky,
@@ -108,7 +109,12 @@ export const DashboardApp = (props: DashboardAppProps) => {
       />
       <Box sx={{ padding: (theme) => theme.spacing(2), height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <Dashboard emptyDashboard={emptyDashboard} />
+          <Dashboard
+            emptyDashboardProps={{
+              onEditButtonClick,
+              ...emptyDashboardProps,
+            }}
+          />
         </ErrorBoundary>
         <PanelDrawer />
         <PanelGroupDialog />
