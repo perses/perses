@@ -16,7 +16,7 @@ import { LegendOptions, LegendItem } from '../model';
 import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 
-interface LegendProps {
+export interface LegendProps {
   width: number;
   height: number;
   data: LegendItem[];
