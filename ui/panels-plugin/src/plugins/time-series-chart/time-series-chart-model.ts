@@ -14,6 +14,7 @@
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
 import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { EChartsCoreOption } from 'echarts';
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.
@@ -25,6 +26,7 @@ export interface TimeSeriesChartOptions {
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
   visual?: VisualOptions;
+  __experimentalEChartsOptionsOverride?: EChartsCoreOption;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
