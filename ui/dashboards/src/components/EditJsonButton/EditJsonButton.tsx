@@ -21,7 +21,7 @@ export const EditJsonButton = () => {
   const { openEditJsonDialog } = useEditJsonDialog();
   return (
     <InfoTooltip description={TOOLTIP_TEXT.editJson}>
-      <ToolbarIconButton variant="outlined" title="Edit JSON" onClick={() => openEditJsonDialog()}>
+      <ToolbarIconButton variant="outlined" onClick={() => openEditJsonDialog()}>
         <CodeIcon />
       </ToolbarIconButton>
     </InfoTooltip>
