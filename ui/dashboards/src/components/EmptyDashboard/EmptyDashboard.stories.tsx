@@ -34,18 +34,16 @@ export default meta;
 type Story = StoryObj<typeof EmptyDashboard>;
 
 /**
- * When viewing a dashboard, the default actions prompt the user to edit the
- * dashboard.
+ * The default empty dashboard in view mode.
  */
-export const View: Story = {
+export const ViewMode: Story = {
   args: {},
 };
 
 /**
- * When editing a dashboard, the default actions prompt the user to add panels
- * and variables.
+ * The default empty dashboard in edit mode.
  */
-export const Edit: Story = {
+export const EditMode: Story = {
   args: {},
   parameters: {
     withDashboard: {

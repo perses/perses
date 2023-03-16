@@ -21,7 +21,7 @@ import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
-import { EditDashboardButton } from '../EditDashboardButton';
+import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 
 export interface DashboardToolbarProps {
@@ -148,7 +148,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack direction="row" spacing={1} marginLeft="auto">
               <TimeRangeControls />
               <DownloadButton />
-              {isBiggerThanSm && <EditDashboardButton onClick={onEditButtonClick} />}
+              {isBiggerThanSm && <EditButton onClick={onEditButtonClick} />}
             </Stack>
           </Box>
           <Box paddingY={2}>

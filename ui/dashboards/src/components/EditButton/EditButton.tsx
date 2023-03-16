@@ -14,7 +14,7 @@
 import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 
-export interface EditDashboardButtonProps {
+export interface EditButtonProps {
   /**
    * The label used inside the button.
    */
@@ -26,7 +26,7 @@ export interface EditDashboardButtonProps {
   onClick: () => void;
 }
 
-export const EditDashboardButton = ({ label = 'Edit', onClick }: EditDashboardButtonProps) => {
+export const EditButton = ({ label = 'Edit', onClick }: EditButtonProps) => {
   return (
     <Button
       onClick={onClick}

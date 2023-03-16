@@ -15,7 +15,7 @@ import { Typography, Box } from '@mui/material';
 import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { EditVariablesButton } from '../Variables';
-import { EditDashboardButton } from '../EditDashboardButton';
+import { EditButton } from '../EditButton';
 
 export interface EmptyDashboardProps {
   /**
@@ -53,7 +53,7 @@ const DEFAULT_TITLE = "Let's get started";
 
 const DEFAULT_DESCRIPTION = {
   edit: 'We currently support time series charts, gauge charts, stat charts and more!',
-  view: 'This dashboard is currently empty. Get Started by clicking the edit button.',
+  view: 'This dashboard is currently empty. Get started by clicking the edit button.',
 };
 
 // Constants from specifics in designs to make the default messaging look good.
@@ -84,15 +84,15 @@ const EmptyDashboardActions = ({ actions, isEditMode, onEditButtonClick }: Empty
     // Default edit mode actions
     return (
       <>
-        <AddPanelButton variant="outlined" color="secondary" label="Add Panel" fullWidth={true} />
-        <EditVariablesButton variant="outlined" color="secondary" label="Add Variables" fullWidth={true} />
+        <AddPanelButton variant="outlined" color="secondary" label="Add Panel" fullWidth />
+        <EditVariablesButton variant="outlined" color="secondary" label="Add Variables" fullWidth />
       </>
     );
   }
 
   if (onEditButtonClick) {
     // Default view mode actions
-    return <EditDashboardButton {...COMMON_BUTTON_PROPS} label="Edit Dashboard" onClick={onEditButtonClick} />;
+    return <EditButton {...COMMON_BUTTON_PROPS} label="Edit Dashboard" onClick={onEditButtonClick} />;
   }
 
   return null;
@@ -105,12 +105,15 @@ export const EmptyDashboard = ({
   title = DEFAULT_TITLE,
   description,
   additionalText,
-  ...otherProps
+  actions,
+  onEditButtonClick,
 }: EmptyDashboardProps) => {
   const { isEditMode } = useEditMode();
 
   const defaultDescription = isEditMode ? DEFAULT_DESCRIPTION.edit : DEFAULT_DESCRIPTION.view;
-  const actionsContent = <EmptyDashboardActions {...otherProps} isEditMode={isEditMode} />;
+  const actionsContent = (
+    <EmptyDashboardActions actions={actions} onEditButtonClick={onEditButtonClick} isEditMode={isEditMode} />
+  );
 
   return (
     <Box sx={{ width: CONTAINER_WIDTH, textAlign: 'center', margin: '0 auto' }}>
