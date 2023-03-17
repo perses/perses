@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ViewDashboard as DashboardView, EmptyDashboard } from '@perses-dev/dashboards';
+import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -156,9 +156,9 @@ function ViewDashboard() {
                   dashboardProject={data.metadata.project}
                 />
               }
-              emptyDashboard={
-                <EmptyDashboard additionalText="In order to create a new dashboard, you need to add at least one panel!" />
-              }
+              emptyDashboardProps={{
+                additionalText: 'In order to create a new dashboard, you need to add at least one panel!',
+              }}
               onSave={handleDashboardSave}
               onDiscard={handleDashboardDiscard}
               initialVariableIsSticky={true}

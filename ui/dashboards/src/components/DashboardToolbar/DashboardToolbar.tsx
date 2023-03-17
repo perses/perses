@@ -13,7 +13,6 @@
 
 import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
-import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { useDashboard, useEditMode } from '../../context';
@@ -22,6 +21,7 @@ import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { TemplateVariableList, EditVariablesButton } from '../Variables';
+import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 
 export interface DashboardToolbarProps {
@@ -148,17 +148,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack direction="row" spacing={1} marginLeft="auto">
               <TimeRangeControls />
               <DownloadButton />
-              {isBiggerThanSm && (
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  startIcon={<PencilIcon />}
-                  onClick={onEditButtonClick}
-                  sx={{ marginLeft: 'auto' }}
-                >
-                  Edit
-                </Button>
-              )}
+              {isBiggerThanSm && <EditButton onClick={onEditButtonClick} />}
             </Stack>
           </Box>
           <Box paddingY={2}>

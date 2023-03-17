@@ -21,6 +21,7 @@ import {
   WithDashboard,
   WithPluginRegistry,
   WithQueryClient,
+  DEFAULT_DASHBOARD_INITIAL_STATE,
 } from '../../stories/decorators';
 
 const meta: Meta<typeof EmptyDashboard> = {
@@ -33,11 +34,27 @@ export default meta;
 type Story = StoryObj<typeof EmptyDashboard>;
 
 /**
- * If no props are passed, the component will use default messaging and action
- * buttons.
+ * The default empty dashboard in view mode.
  */
-export const Default: Story = {
+export const ViewMode: Story = {
   args: {},
+};
+
+/**
+ * The default empty dashboard in edit mode.
+ */
+export const EditMode: Story = {
+  args: {},
+  parameters: {
+    withDashboard: {
+      props: {
+        initialState: {
+          ...DEFAULT_DASHBOARD_INITIAL_STATE,
+          isEditMode: true,
+        },
+      },
+    },
+  },
 };
 
 /**
