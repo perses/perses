@@ -13,7 +13,7 @@
 
 import { useQuery, useQueries, useQueryClient, Query, QueryCache, QueryKey } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
-import { TimeSeriesData, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
+import { TimeSeriesData, TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap } from './template-variables';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './TimeRangeProvider';
@@ -151,26 +151,21 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
 export function useActiveTimeSeriesQueries() {
   const queryClient = useQueryClient();
   const queryCache = queryClient.getQueryCache();
-  const timeSeriesQueries = getActiveTimeSeriesQueries(queryCache);
-  return timeSeriesQueries;
+  return getActiveTimeSeriesQueries(queryCache);
 }
 
 /**
  * Filter all cached queries down to only active time series queries
  */
 export function getActiveTimeSeriesQueries(cache: QueryCache) {
-  const queries = cache
-    .findAll({ type: 'active' })
-    .filter((query) => {
-      const firstPart = query.queryKey?.[0] as UnknownSpec;
-      if (firstPart?.kind) {
-        return (firstPart?.kind as string).startsWith(TIME_SERIES_QUERY_KEY);
-      }
-      return false;
-    })
-    .filter((query) => query.isActive)
-    .map((query) => {
-      return query as Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>;
-    });
+  const queries: TimeSeriesDataQuery[] = [];
+
+  for (const query of cache.findAll({ type: 'active' })) {
+    const firstPart = query.queryKey?.[0] as UnknownSpec;
+    if (firstPart?.kind && (firstPart.kind as string).startsWith(TIME_SERIES_QUERY_KEY)) {
+      queries.push(query as Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>);
+    }
+  }
+
   return queries;
 }

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Query, QueryKey } from '@tanstack/react-query';
 import { AbsoluteTimeRange, TimeSeriesValueTuple, UnknownSpec, Labels, Notice } from '@perses-dev/core';
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
@@ -62,3 +63,5 @@ export interface TimeSeries {
 export interface TimeSeriesMetadata {
   notices?: Notice[];
 }
+
+export type TimeSeriesDataQuery = Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>;
