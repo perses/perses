@@ -100,8 +100,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
       const [{ spec, proxyUrl }, plugin] = await Promise.all([findDatasource(selector), getPlugin('Datasource', kind)]);
 
       // allows extending client
-      const datasourceSpec = { ...spec.plugin.spec };
-      const client = plugin.createClient(datasourceSpec, { proxyUrl }) as Client;
+      const client = plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
       if (onCreate !== undefined) {
         return onCreate(client) as Client;
       }
