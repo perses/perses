@@ -102,13 +102,13 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
 
       // allows extending client
       const datasourceSpec = { ...spec.plugin.spec };
-      const client = plugin.createClient(datasourceSpec, { proxyUrl }) as DatasourceClient;
+      const client = plugin.createClient(datasourceSpec, { proxyUrl }) as Client;
       if (onCreate !== undefined) {
         if (isDatasourceClient(client)) {
-          return onCreate(client) as unknown as Client;
+          return onCreate(client) as Client;
         }
       }
-      return client as Client;
+      return client;
     },
     [findDatasource, getPlugin, onCreate]
   );
