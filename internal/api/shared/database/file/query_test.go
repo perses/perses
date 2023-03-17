@@ -27,9 +27,10 @@ import (
 
 func TestBuildQuery(t *testing.T) {
 	testSuite := []struct {
-		title  string
-		query  databaseModel.Query
-		expect string
+		title              string
+		query              databaseModel.Query
+		expectedPath       string
+		expectedNamePrefix string
 	}{
 		{
 			title: "dashboardQuery",
@@ -37,14 +38,16 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expect: "/dashboards/perses/meta",
+			expectedPath:       "dashboards/perses",
+			expectedNamePrefix: "meta",
 		},
 		{
 			title: "dashboardQuery with empty project",
 			query: &dashboard.Query{
 				NamePrefix: "meta",
 			},
-			expect: "/dashboards",
+			expectedPath:       "dashboards",
+			expectedNamePrefix: "meta",
 		},
 		{
 			title: "datasourceQuery",
@@ -52,7 +55,8 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expect: "/datasources/perses/meta",
+			expectedPath:       "datasources/perses",
+			expectedNamePrefix: "meta",
 		},
 		{
 			title: "folderQuery",
@@ -60,29 +64,34 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expect: "/folders/perses/meta",
+			expectedPath:       "folders/perses",
+			expectedNamePrefix: "meta",
 		},
 		{
 			title: "globalDatasourceQuery",
 			query: &globaldatasource.Query{
 				NamePrefix: "meta",
 			},
-			expect: "/globaldatasources/meta",
+			expectedPath:       "globaldatasources",
+			expectedNamePrefix: "meta",
 		},
 		{
 			title: "projectQuery",
 			query: &project.Query{
 				NamePrefix: "meta",
 			},
-			expect: "/projects/meta",
+			expectedPath:       "projects",
+			expectedNamePrefix: "meta",
 		},
 	}
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result, err := buildQuery(test.query)
+			d := &DAO{Folder: ""}
+			result, prefix, _, err := d.buildQuery(test.query)
 			assert.NoError(t, err)
-			assert.Equal(t, test.expect, result)
+			assert.Equal(t, test.expectedPath, result)
+			assert.Equal(t, test.expectedNamePrefix, prefix)
 		})
 	}
 }

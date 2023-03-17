@@ -199,8 +199,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 	t.Run(fmt.Sprintf("Conflict test (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myProject", "myResource")
-			CreateAndWaitUntilEntityExists(t, manager, parent)
-			CreateAndWaitUntilEntityExists(t, manager, entity)
+			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
 			expect.POST(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
@@ -215,8 +214,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myProject", "myResource")
-			CreateAndWaitUntilEntityExists(t, manager, parent)
-			CreateAndWaitUntilEntityExists(t, manager, entity)
+			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
 			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
 			time.Sleep(3 * time.Second)
@@ -248,10 +246,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent1, entity1 := creator("myProject1", "myResource1")
 			parent2, entity2 := creator("myProject2", "myResource2")
-			CreateAndWaitUntilEntityExists(t, manager, parent1)
-			CreateAndWaitUntilEntityExists(t, manager, parent2)
-			CreateAndWaitUntilEntityExists(t, manager, entity1)
-			CreateAndWaitUntilEntityExists(t, manager, entity2)
+			CreateAndWaitUntilEntitiesExist(t, manager, parent1, parent2, entity1, entity2)
 
 			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
 			time.Sleep(3 * time.Second)
@@ -291,8 +286,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myProject", "myResource")
-			CreateAndWaitUntilEntityExists(t, manager, parent)
-			CreateAndWaitUntilEntityExists(t, manager, entity)
+			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
 			// call now the update endpoint, shouldn't return an error
 			o := expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
@@ -329,8 +323,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			parent, entity := creator("myParentResource", "myResource")
-			CreateAndWaitUntilEntityExists(t, manager, parent)
-			CreateAndWaitUntilEntityExists(t, manager, entity)
+			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
 			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				Expect().

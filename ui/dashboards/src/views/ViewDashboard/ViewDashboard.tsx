@@ -35,7 +35,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
     dashboardResource,
     datasourceApi,
     dashboardTitleComponent,
-    emptyDashboard,
+    emptyDashboardProps,
     onSave,
     onDiscard,
     initialVariableIsSticky,
@@ -70,7 +70,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 <DashboardApp
                   dashboardResource={dashboardResource}
                   dashboardTitleComponent={dashboardTitleComponent}
-                  emptyDashboard={emptyDashboard}
+                  emptyDashboardProps={emptyDashboardProps}
                   onSave={onSave}
                   onDiscard={onDiscard}
                   initialVariableIsSticky={initialVariableIsSticky}

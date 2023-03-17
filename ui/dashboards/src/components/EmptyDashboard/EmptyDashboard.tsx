@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { Typography, Box } from '@mui/material';
+import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { EditVariablesButton } from '../Variables';
+import { EditButton } from '../EditButton';
 
 export interface EmptyDashboardProps {
   /**
@@ -35,38 +37,83 @@ export interface EmptyDashboardProps {
   /**
    * Components that are placed below the title and description that include
    * actions for the user to take (e.g. buttons or links). If not specified,
-   * the default "add panel" and "add variable" buttons will be displayed. Set
-   * to `false` to disable the default buttons.
+   * the default buttons will be displayed. Set to `false` to disable the default
+   * buttons.
    */
-  actions?: boolean | React.ReactNode;
+  actions?: JSX.Element | boolean;
+
+  /**
+   * Handler for clicking the edit button when the dashboard is in "view" mode.
+   * Required when using the default empty state.
+   */
+  onEditButtonClick?: () => void;
 }
 
 const DEFAULT_TITLE = "Let's get started";
-const DEFAULT_DESCRIPTION = 'We currently support time series charts, gauge charts, stat charts and more!';
-const DEFAULT_ACTIONS = (
-  <>
-    <AddPanelButton variant="outlined" color="secondary" label="Add Panel" fullWidth={true} />
-    <EditVariablesButton variant="outlined" color="secondary" label="Add Variables" fullWidth={true} />
-  </>
-);
+
+const DEFAULT_DESCRIPTION = {
+  edit: 'We currently support time series charts, gauge charts, stat charts and more!',
+  view: 'This dashboard is currently empty. Get started by clicking the edit button.',
+};
 
 // Constants from specifics in designs to make the default messaging look good.
 const CONTAINER_WIDTH = '450px';
 const PRIMARY_CONTENT_WIDTH = '289px';
+
+const COMMON_BUTTON_PROPS = {
+  variant: 'outlined',
+  color: 'secondary',
+} as const;
+
+type EmptyDashboardActionsProps = Pick<EmptyDashboardProps, 'actions' | 'onEditButtonClick'> & {
+  isEditMode: boolean;
+};
+
+const EmptyDashboardActions = ({ actions, isEditMode, onEditButtonClick }: EmptyDashboardActionsProps) => {
+  if (actions && typeof actions !== 'boolean') {
+    // Custom actions
+    return actions;
+  }
+
+  if (actions === false) {
+    // Disable default actions
+    return null;
+  }
+
+  if (isEditMode) {
+    // Default edit mode actions
+    return (
+      <>
+        <AddPanelButton variant="outlined" color="secondary" label="Add Panel" fullWidth />
+        <EditVariablesButton variant="outlined" color="secondary" label="Add Variables" fullWidth />
+      </>
+    );
+  }
+
+  if (onEditButtonClick) {
+    // Default view mode actions
+    return <EditButton {...COMMON_BUTTON_PROPS} label="Edit Dashboard" onClick={onEditButtonClick} />;
+  }
+
+  return null;
+};
 
 /**
  * Communicate that a dashboard is empty and prompt the user to get started.
  */
 export const EmptyDashboard = ({
   title = DEFAULT_TITLE,
-  description = DEFAULT_DESCRIPTION,
-  actions,
+  description,
   additionalText,
+  actions,
+  onEditButtonClick,
 }: EmptyDashboardProps) => {
-  // Show actions if it is truthy or if it is undefined. This allows the
-  // `undefined` case to fall back to the default while retaining the ability to
-  // set `false` to disable the actions entirely.
-  const showActions = !!actions || typeof actions === 'undefined';
+  const { isEditMode } = useEditMode();
+
+  const defaultDescription = isEditMode ? DEFAULT_DESCRIPTION.edit : DEFAULT_DESCRIPTION.view;
+  const actionsContent = (
+    <EmptyDashboardActions actions={actions} onEditButtonClick={onEditButtonClick} isEditMode={isEditMode} />
+  );
 
   return (
     <Box sx={{ width: CONTAINER_WIDTH, textAlign: 'center', margin: '0 auto' }}>
@@ -74,11 +121,9 @@ export const EmptyDashboard = ({
         <Typography variant="h2" gutterBottom>
           {title}
         </Typography>
-        <Typography variant="body1">{description}</Typography>
-        {showActions && (
-          <Box sx={{ display: 'flex', gap: 2, marginTop: 1, justifyContent: 'center' }}>
-            {actions || DEFAULT_ACTIONS}
-          </Box>
+        <Typography variant="body1">{description ?? defaultDescription}</Typography>
+        {actionsContent && (
+          <Box sx={{ display: 'flex', gap: 2, marginTop: 1, justifyContent: 'center' }}>{actionsContent}</Box>
         )}
       </Box>
       {additionalText && (
