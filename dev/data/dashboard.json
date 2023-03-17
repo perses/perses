@@ -2009,58 +2009,6 @@
             }
           }
         },
-        "MultipleYAxes": {
-          "kind": "Panel",
-          "spec": {
-            "display": {
-              "name": "Multiple Y Axes",
-              "description": "Time series chart with multiple Y axes"
-            },
-            "plugin": {
-              "kind": "TimeSeriesChart",
-              "spec": {
-                "__experimentalEChartsOptionsOverride": {
-                  "yAxis": [
-                    { "type": "value", "name": "Percipitation", "axisLabel": { "formatter": "{value} ml" } },
-                    { "type": "value", "name": "Temperature", "axisLabel": { "formatter": "{value} °C" } }
-                  ]
-                },
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "datasource": {
-                            "kind": "PrometheusDatasource",
-                            "name": "PrometheusDemo"
-                          },
-                          "query": "2 * up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
-                        }
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        },
         "CustomVisualOptions": {
           "kind": "Panel",
           "spec": {
@@ -2194,15 +2142,6 @@
                 "width": 8,
                 "height": 10,
                 "content": { "$ref": "#/spec/panels/LegendTallFormatted" }
-              },
-              {
-                "x": 0,
-                "y": 0,
-                "width": 8,
-                "height": 7,
-                "content": {
-                  "$ref": "#/spec/panels/MultipleYAxes"
-                }
               }
             ]
           }
