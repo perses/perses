@@ -23,7 +23,7 @@ export type DashboardProps = BoxProps & {
    * is empty (i.e. has no panel groups). If not specified, the defaults will
    * be used.
    */
-  emptyDashboardProps: EmptyDashboardProps;
+  emptyDashboardProps?: EmptyDashboardProps;
 };
 
 /**

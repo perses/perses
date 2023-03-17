@@ -45,10 +45,10 @@ export const DEFAULT_DASHBOARD_INITIAL_STATE: DashboardStoreProps = {
 export const WithDashboard = (Story: StoryFn, context: StoryContext<unknown>) => {
   const initParameter = context.parameters.withDashboard;
   const parameter = isWithDashboardParameter(initParameter) ? initParameter : undefined;
-  const args = parameter?.props;
+  const props = parameter?.props;
 
   return (
-    <DashboardProvider initialState={DEFAULT_DASHBOARD_INITIAL_STATE} {...args}>
+    <DashboardProvider initialState={DEFAULT_DASHBOARD_INITIAL_STATE} {...props}>
       <Story />
     </DashboardProvider>
   );
