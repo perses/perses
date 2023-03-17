@@ -15,12 +15,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Dashboard } from '@perses-dev/dashboards';
 import { action } from '@storybook/addon-actions';
 import { Button } from '@mui/material';
-import {
-  WithDashboard,
-  WithPluginRegistry,
-  WithQueryClient,
-  DEFAULT_DASHBOARD_INITIAL_STATE,
-} from '../../stories/decorators';
+import { WithDashboard, WithPluginRegistry, WithQueryClient } from '../../stories/decorators';
 
 const meta: Meta<typeof Dashboard> = {
   component: Dashboard,
