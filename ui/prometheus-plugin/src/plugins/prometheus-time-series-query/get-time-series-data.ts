@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Notice } from '@perses-dev/core';
 import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import {
@@ -64,6 +65,19 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   // TODO: What about error responses from Prom that have a response body?
   const result = response.data?.result ?? [];
 
+  // Custom display for response header warnings, configurable error responses display coming next
+  const notices: Notice[] = [];
+  if (response.status === 'success') {
+    const warnings = response.warnings ?? [];
+    const warningMessage = warnings[0] ?? '';
+    if (warningMessage !== '') {
+      notices.push({
+        type: 'warning',
+        message: warningMessage,
+      });
+    }
+  }
+
   // Transform response
   const chartData: TimeSeriesData = {
     // Return the time range and step we actually used for the query
@@ -79,7 +93,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
         name = query;
       }
 
-      // query editor allows you to define an optional series_name_format
+      // Query editor allows you to define an optional series_name_format
       // property to customize legend and tooltip display
       const formattedName = spec.series_name_format ? formatSeriesName(spec.series_name_format, metric) : name;
 
@@ -90,6 +104,9 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
         labels: metric,
       };
     }),
+    metadata: {
+      notices,
+    },
   };
 
   return chartData;

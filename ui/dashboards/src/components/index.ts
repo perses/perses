@@ -26,6 +26,7 @@ export * from './GridLayout';
 export * from './Panel';
 export * from './PanelDrawer';
 export * from './PanelGroupDialog';
+export * from './QuerySummaryTable';
 export * from './TimeRangeControls';
 export * from './ToolbarIconButton';
 export * from './Variables';

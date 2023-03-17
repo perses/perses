@@ -24,3 +24,12 @@ export interface DatasourcePlugin<Spec = UnknownSpec, Client = unknown> extends 
 export interface DatasourceClientOptions {
   proxyUrl?: string;
 }
+
+/**
+ * Common properties for all clients
+ */
+export interface DatasourceClient {
+  // TODO: set kind and define healthCheck function
+  kind?: string;
+  healthCheck?: () => Promise<boolean>;
+}
