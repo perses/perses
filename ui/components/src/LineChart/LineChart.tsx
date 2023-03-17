@@ -68,7 +68,7 @@ export interface LineChartProps {
   legend?: LegendComponentOption;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
-  __experimentalEChartsOptionsOverride?: EChartsCoreOption;
+  __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => void;
 }
 
 export function LineChart({
@@ -177,9 +177,11 @@ export function LineChart({
       },
       grid,
       legend,
-      ...__experimentalEChartsOptionsOverride,
     };
 
+    if (__experimentalEChartsOptionsOverride) {
+      return __experimentalEChartsOptionsOverride(option);
+    }
     return option;
   }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride]);
 
