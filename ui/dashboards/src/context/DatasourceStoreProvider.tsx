@@ -27,7 +27,6 @@ import {
   usePluginRegistry,
   DatasourceMetadata,
   DatasourceClient,
-  isDatasourceClient,
 } from '@perses-dev/plugin-system';
 
 export interface DatasourceStoreProviderProps {
@@ -104,9 +103,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
       const datasourceSpec = { ...spec.plugin.spec };
       const client = plugin.createClient(datasourceSpec, { proxyUrl }) as Client;
       if (onCreate !== undefined) {
-        if (isDatasourceClient(client)) {
-          return onCreate(client) as Client;
-        }
+        return onCreate(client) as Client;
       }
       return client;
     },
