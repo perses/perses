@@ -196,7 +196,7 @@ export function VariableEditor(props: {
                   </Alert>
                 ))}
               <TableContainer>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <Table sx={{ minWidth: 650 }} aria-label="table of variables">
                   <TableHead>
                     <TableRow>
                       <TableCell>Visibility</TableCell>

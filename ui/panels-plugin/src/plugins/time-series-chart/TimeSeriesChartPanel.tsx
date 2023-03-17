@@ -13,21 +13,30 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo } from '@perses-dev/core';
+import { useDeepMemo, StepOptions } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import {
   DEFAULT_LEGEND,
-  LineChart,
   EChartsDataFormat,
-  ZoomEventData,
+  validateLegendSpec,
   Legend,
+  LineChart,
   YAxisLabel,
+  ZoomEventData,
+  useChartsTheme,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
-import { StepOptions, ThresholdColors, ThresholdColorsPalette } from '../../model/thresholds';
-import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
+  PANEL_HEIGHT_LG_BREAKPOINT,
+  LEGEND_HEIGHT_SM,
+  LEGEND_HEIGHT_LG,
+} from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -35,6 +44,7 @@ import {
   getYValues,
   getXValues,
   EMPTY_GRAPH_DATA,
+  convertPercentThreshold,
 } from './utils/data-transform';
 import { getRandomColor } from './utils/palette-gen';
 
@@ -45,17 +55,31 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     spec: { queries, thresholds, y_axis },
     contentDimensions,
   } = props;
+  const chartsTheme = useChartsTheme();
 
-  // popuate default 'position' and other future properties
-  const legend = props.spec.legend ? merge({}, DEFAULT_LEGEND, props.spec.legend) : undefined;
+  // TODO: consider refactoring how the layout/spacing/alignment are calculated
+  // the next time significant changes are made to the time series panel (e.g.
+  // when making improvements to the legend to more closely match designs).
+  // This may also want to include moving some of this logic down to the shared,
+  // embeddable components.
+  const contentPadding = chartsTheme.container.padding.default;
+  const adjustedContentDimensions: typeof contentDimensions = contentDimensions
+    ? {
+        width: contentDimensions.width - contentPadding * 2,
+        height: contentDimensions.height - contentPadding * 2,
+      }
+    : undefined;
 
-  // TODO: eventually remove props.spec.unit, add support for y_axis_alt.unit
-  let unit = DEFAULT_UNIT;
-  if (props.spec.y_axis?.unit) {
-    unit = props.spec.y_axis.unit;
-  } else if (props.spec.unit) {
-    unit = props.spec.unit;
-  }
+  const { thresholds: thresholdsColors } = useChartsTheme();
+
+  // populate default 'position' and other future properties
+  const legend =
+    props.spec.legend && validateLegendSpec(props.spec.legend)
+      ? merge({}, DEFAULT_LEGEND, props.spec.legend)
+      : undefined;
+
+  // TODO: add support for y_axis_alt.unit
+  const unit = props.spec.y_axis?.unit ?? DEFAULT_UNIT;
 
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
@@ -70,11 +94,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
-  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
+  const suggestedStepMs = useSuggestedStepMs(adjustedContentDimensions?.width);
   const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
   const fetching = queryResults.some((result) => result.isFetching);
   const loading = queryResults.some((result) => result.isLoading);
-  const hasData = queryResults.some((result) => result.data && Array.from(result.data.series).length > 0);
+  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   const { setTimeRange } = useTimeRange();
 
@@ -157,17 +181,20 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
-      const defaultThresholdColor = thresholds.default_color ?? ThresholdColors.RED;
+      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
       thresholds.steps.forEach((step: StepOptions, index: number) => {
-        const stepPaletteColor = ThresholdColorsPalette[index] ?? defaultThresholdColor;
+        const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
         const thresholdLineColor = step.color ?? stepPaletteColor;
         const stepOption: StepOptions = {
           color: thresholdLineColor,
-          value: step.value,
+          value:
+            thresholds.mode === 'Percent'
+              ? convertPercentThreshold(step.value, graphData.timeSeries, yAxis.max, yAxis.min)
+              : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
         // TODO: switch back to markLine once alternate tooltip created
-        const thresholdData = Array(xAxisData.length).fill(step.value);
+        const thresholdData = Array(xAxisData.length).fill(stepOption.value);
         const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
         graphData.timeSeries.push(thresholdLineSeries);
       });
@@ -176,9 +203,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, yAxis.max, yAxis.min]);
 
-  if (contentDimensions === undefined) {
+  if (adjustedContentDimensions === undefined) {
     return null;
   }
 
@@ -186,10 +213,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={contentDimensions.width}
-        height={contentDimensions.height}
+        width={adjustedContentDimensions.width}
+        height={adjustedContentDimensions.height}
       >
-        <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
+        <Skeleton
+          variant="text"
+          width={adjustedContentDimensions.width - 20}
+          height={adjustedContentDimensions.height / 2}
+          aria-label="Loading..."
+        />
       </Box>
     );
   }
@@ -205,20 +237,23 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  const legendWidth = legend && legend.position === 'right' ? 200 : contentDimensions.width;
-  const legendHeight = legend && legend.position === 'right' ? contentDimensions.height : 35;
+  const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
+
+  // TODO: account for number of time series returned when adjusting legend spacing
+  let legendHeight = LEGEND_HEIGHT_SM;
+  if (legend && legend.position === 'Right') {
+    legendHeight = adjustedContentDimensions.height;
+  } else if (adjustedContentDimensions.height > PANEL_HEIGHT_LG_BREAKPOINT) {
+    legendHeight = LEGEND_HEIGHT_LG;
+  }
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
     left: !yAxis.show ? 0 : gridLeft,
-    right: legend && legend.position === 'right' ? legendWidth : 20,
+    right: legend && legend.position === 'Right' ? legendWidth : 20,
+    bottom: legend && legend.position === 'Bottom' ? legendHeight : 0,
   };
-
-  const lineChartHeight =
-    legend && legend.position === 'bottom' && graphData.legendItems && graphData.legendItems.length > 0
-      ? contentDimensions.height - legendHeight
-      : contentDimensions.height;
 
   const handleDataZoom = (event: ZoomEventData) => {
     // TODO: add ECharts transition animation on zoom
@@ -226,10 +261,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   return (
-    <>
-      {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={contentDimensions.height} />}
+    <Box sx={{ padding: `${contentPadding}px`, position: 'relative' }}>
+      {y_axis && y_axis.show && y_axis.label && (
+        <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
+      )}
       <LineChart
-        height={lineChartHeight}
+        height={adjustedContentDimensions.height}
         data={graphData}
         yAxis={yAxis}
         unit={unit}
@@ -239,6 +276,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       {legend && graphData.legendItems && (
         <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
       )}
-    </>
+    </Box>
   );
 }

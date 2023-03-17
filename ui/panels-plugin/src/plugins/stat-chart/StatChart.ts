@@ -13,7 +13,8 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialStatChartOptions, StatChartOptions } from './stat-chart-model';
-import { StatChartOptionsEditor } from './StatChartOptionsEditor';
+import { StatChartQueryEditor } from './StatChartQueryEditor';
+import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 import { StatChartPanel } from './StatChartPanel';
 
 /**
@@ -21,6 +22,12 @@ import { StatChartPanel } from './StatChartPanel';
  */
 export const StatChart: PanelPlugin<StatChartOptions> = {
   PanelComponent: StatChartPanel,
-  OptionsEditorComponent: StatChartOptionsEditor,
+  PanelQueryEditorComponent: StatChartQueryEditor,
+  panelOptionsEditorComponents: [
+    {
+      label: 'Settings',
+      content: StatChartOptionsEditorSettings,
+    },
+  ],
   createInitialOptions: createInitialStatChartOptions,
 };

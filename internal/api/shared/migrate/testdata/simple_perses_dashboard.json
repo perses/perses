@@ -4,6 +4,7 @@
     "name": "DuJ3dcNVk",
     "created_at": "0001-01-01T00:00:00Z",
     "updated_at": "0001-01-01T00:00:00Z",
+    "version": 0,
     "project": ""
   },
   "spec": {
@@ -310,7 +311,7 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "bottom"
+                "position": "Bottom"
               },
               "queries": [{
                 "kind": "TimeSeriesQuery",
@@ -353,7 +354,7 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "bottom"
+                "position": "Bottom"
               },
               "queries": [{
                 "kind": "TimeSeriesQuery",

@@ -56,8 +56,9 @@ export function getNearbySeries(
         if (Array.isArray(currentSeries.data)) {
           for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
             const xValue = data.xAxis[datumIdx] ?? 0;
-            const yValue = currentSeries.data[datumIdx] ?? 0;
-            if (focusedX === datumIdx) {
+            const yValue = currentSeries.data[datumIdx];
+            // ensure null values not displayed in tooltip
+            if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;

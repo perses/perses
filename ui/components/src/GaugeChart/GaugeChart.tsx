@@ -34,7 +34,7 @@ export type GaugeSeries = {
   label: string;
 };
 
-interface GaugeChartProps {
+export interface GaugeChartProps {
   width: number;
   height: number;
   data: GaugeSeries;
@@ -181,6 +181,7 @@ export function GaugeChart(props: GaugeChartProps) {
       sx={{
         width: width,
         height: height,
+        padding: `${chartsTheme.container.padding.default}px`,
       }}
       option={option}
       theme={chartsTheme.echartsTheme}

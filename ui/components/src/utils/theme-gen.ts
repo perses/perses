@@ -176,6 +176,14 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       width: 2,
       color: '#1976d2',
     },
-    // TODO: add thresholdColors to theme
+    container: {
+      padding: {
+        default: parseInt(muiTheme.spacing(1.5), 10),
+      },
+    },
+    thresholds: {
+      defaultColor: muiTheme.palette.success.main,
+      palette: ['#FFCC00', muiTheme.palette.warning.main, muiTheme.palette.error.main],
+    },
   };
 }

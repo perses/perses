@@ -14,7 +14,7 @@
 import { useState, useMemo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { ErrorBoundary, ErrorAlert, combineSx, useId } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
@@ -51,8 +51,7 @@ export function Panel(props: PanelProps) {
     triggerOnce: true,
   });
 
-  // TODO: adjust padding for small panels, consistent way to determine isLargePanel here and in StatChart
-  const panelPadding = 1.5;
+  const chartsTheme = useChartsTheme();
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     setIsHovered(true);
@@ -91,7 +90,7 @@ export function Panel(props: PanelProps) {
         description={definition.spec.display.description}
         editHandlers={editHandlers}
         isHovered={isHovered}
-        sx={{ paddingX: (theme) => theme.spacing(panelPadding) }}
+        sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
       />
       <CardContent
         component="figure"
@@ -100,10 +99,10 @@ export function Panel(props: PanelProps) {
           overflow: 'hidden',
           flexGrow: 1,
           margin: 0,
-          padding: (theme) => theme.spacing(panelPadding),
+          padding: 0,
           // Override MUI default style for last-child
           ':last-child': {
-            padding: (theme) => theme.spacing(panelPadding),
+            padding: 0,
           },
         }}
         ref={setContentElement}

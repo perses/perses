@@ -18,12 +18,15 @@ import (
 )
 
 #legend: {
-	position: "bottom" | "right"
+	position: "Bottom" | "Right"
 }
 
 #visual: {
-	line_width?:   number & >=0.25 & <=3
-	point_radius?: number & >=0 & <=6
+	line_width?:    number & >=0.25 & <=3
+	area_opacity?:  number & >=0 & <=1
+	show_points?:   "Auto" | "Always"
+	point_radius?:  number & >=0 & <=6
+	connect_nulls?: bool
 }
 
 #y_axis: {
@@ -39,7 +42,6 @@ spec: close({
 	queries: [...#ts_query]
 	legend?:     #legend
 	y_axis?:     #y_axis
-	unit?:       common.#unit
 	thresholds?: common.#thresholds
 	visual?:     #visual
 })

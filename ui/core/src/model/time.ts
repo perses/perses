@@ -102,12 +102,86 @@ export function isDurationString(maybeDuration: string): maybeDuration is Durati
   return DURATION_REGEX.test(maybeDuration);
 }
 
+const DEFAULT_STEP_MS = 15000;
+
+const ROUNDED_STEP_INTERVALS = [
+  // max: 0.015s
+  { maxMs: 15, roundedStepMs: 10, display: '0.01s' },
+  // max: 0.035s
+  { maxMs: 35, roundedStepMs: 20, display: '0.02s' },
+  // max: 0.075s
+  { maxMs: 75, roundedStepMs: 50, display: '0.05s' },
+  // max: 0.15s
+  { maxMs: 150, roundedStepMs: 100, display: '0.1s' },
+  // max: 0.35s
+  { maxMs: 350, roundedStepMs: 200, display: '0.2s' },
+  // max: 0.75s
+  { maxMs: 750, roundedStepMs: 500, display: '0.5s' },
+  // max: 1.5s
+  { maxMs: 1500, roundedStepMs: 1000, display: '1s' },
+  // max: 3.5s
+  { maxMs: 3500, roundedStepMs: 2000, display: '2s' },
+  // max: 7.5s
+  { maxMs: 7500, roundedStepMs: 5000, display: '5s' },
+  // max: 12.5s
+  { maxMs: 12500, roundedStepMs: 10000, display: '10s' },
+  // max: 17.5s
+  { maxMs: 17500, roundedStepMs: 15000, display: '15s' },
+  // max: 25s
+  { maxMs: 25000, roundedStepMs: 20000, display: '20s' },
+  // max: 45s
+  { maxMs: 45000, roundedStepMs: 30000, display: '30s' },
+  // max: 1.5m
+  { maxMs: 90000, roundedStepMs: 60000, display: '1m' },
+  // max: 3.5m
+  { maxMs: 210000, roundedStepMs: 120000, display: '2m' },
+  // max: 7.5m
+  { maxMs: 450000, roundedStepMs: 300000, display: '5m' },
+  // max: 12.5m
+  { maxMs: 750000, roundedStepMs: 600000, display: '10m' },
+  // max: 12.5m
+  { maxMs: 1050000, roundedStepMs: 900000, display: '15m' },
+  // max: 25m
+  { maxMs: 1500000, roundedStepMs: 1200000, display: '20m' },
+  // max: 45m
+  { maxMs: 2700000, roundedStepMs: 1800000, display: '30m' },
+  // max: 1.5h
+  { maxMs: 5400000, roundedStepMs: 3600000, display: '1h' },
+  // max: 2.5h
+  { maxMs: 9000000, roundedStepMs: 7200000, display: '2h' },
+  // max: 4.5h
+  { maxMs: 16200000, roundedStepMs: 10800000, display: '3h' },
+  // max: 9h
+  { maxMs: 32400000, roundedStepMs: 21600000, display: '6h' },
+  // max: 1d
+  { maxMs: 86400000, roundedStepMs: 43200000, display: '12h' },
+  // max: 1w
+  { maxMs: 604800000, roundedStepMs: 86400000, display: '1d' },
+  // max: 3w
+  { maxMs: 1814400000, roundedStepMs: 604800000, display: '1w' },
+  // max: 6w
+  { maxMs: 3628800000, roundedStepMs: 2592000000, display: '30d' },
+  // max: 2y
+  { maxMs: 63072000000, roundedStepMs: 31536000000, display: '1y' },
+];
+
+/**
+ * Round interval to clearer increments
+ */
+export function roundStepInterval(stepMs: number) {
+  for (const { maxMs, roundedStepMs } of ROUNDED_STEP_INTERVALS) {
+    if (stepMs < maxMs) {
+      return roundedStepMs;
+    }
+  }
+  return DEFAULT_STEP_MS;
+}
+
 /**
  * Gets a suggested step/interval size for a time range based on the width of a visual component.
  */
 export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) {
-  // TODO: Should we try to suggest more "rounded" step values based around
-  // time increments that make sense (e.g. 15s, 30s, 1m, 5m, etc.)
   const queryRangeMs = timeRange.end.valueOf() - timeRange.start.valueOf();
-  return Math.floor(queryRangeMs / width);
+  const stepMs = Math.floor(queryRangeMs / width);
+  return roundStepInterval(stepMs);
 }

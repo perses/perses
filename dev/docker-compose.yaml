@@ -1,17 +1,12 @@
-version: '3.3'
+version: '3.1'
 
 services:
-  etcd:
-    image: 'quay.io/coreos/etcd:v3.5.1'
-    command:
-      - /usr/local/bin/etcd
-      - --advertise-client-urls=http://0.0.0.0:2379
-      - --listen-client-urls=http://0.0.0.0:2379
+  mariadb:
+    image: mariadb
     ports:
-      - 2379:2379
-      - 2380:2380
-
-  #prometheus:
-  #  image: 'prom/prometheus'
-  #  ports:
-  #  - 9090:9090
+      - '3306:3306'
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: perses
+      MARIADB_USER: user
+      MARIADB_PASSWORD: password

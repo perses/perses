@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { createTheme, PaletteMode, ThemeOptions, Theme } from '@mui/material';
+import { MuiAlert } from './component-overrides/alert';
 import { getPaletteOptions } from './palette/palette-options';
 import { typography } from './typography';
 
@@ -50,6 +51,7 @@ export function getTheme(mode: PaletteMode) {
 
 // Overrides for component default prop values and styles go here
 const components: ThemeOptions['components'] = {
+  MuiAlert,
   MuiFormControl: {
     defaultProps: {
       size: 'small',
@@ -66,6 +68,11 @@ const components: ThemeOptions['components'] = {
     },
   },
   MuiDialog: {
+    styleOverrides: {
+      paper: getModalBackgroundStyle,
+    },
+  },
+  MuiPopover: {
     styleOverrides: {
       paper: getModalBackgroundStyle,
     },

@@ -16,14 +16,8 @@ package main
 import (
 	"flag"
 
-	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
-	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/internal/api/shared/migrate"
-	"github.com/perses/perses/internal/api/shared/schemas"
-	"github.com/perses/perses/ui"
 	"github.com/sirupsen/logrus"
 )
 
@@ -44,47 +38,21 @@ All your monitoring dashboards in one place.               <\
 
 func main() {
 	configFile := flag.String("config", "", "Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.")
-	dbFolder := flag.String("db.folder", "", "Path to the folder to use as a database. In case the flag is not used, Perses requires a connection to etcd.")
-	dbExtension := flag.String("db.extension", "yaml", "The extension of the file to read and use when creating a file. Valid values: 'yaml' or 'json'.")
 	flag.Parse()
 	// load the config from file or/and from environment
-	conf, err := config.Resolve(*configFile, *dbFolder, *dbExtension)
+	conf, err := config.Resolve(*configFile)
 	if err != nil {
 		logrus.WithError(err).Fatalf("error reading configuration from file %q or from environment", *configFile)
 	}
-	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
+	runner, persistentManager, err := core.New(conf, banner)
 	if err != nil {
-		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
+		logrus.Fatal(err)
 	}
-	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to instantiate the service manager")
-	}
-	persesAPI := core.NewPersesAPI(serviceManager, conf)
-	persesFrontend := ui.NewPersesFrontend()
-	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
-
-	// enable hot reload of CUE schemas for dashboards validation:
-	// - watch for changes on the schemas folders
-	// - register a cron task to reload all the schemas every <interval>
-	watcher, reloader, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to instantiate the tasks for hot reload of schemas")
-	}
-	// enable hot reload of the migration schemas
-	migrateWatcher, migrateReloader, err := migrate.NewHotReloaders(serviceManager.GetMigration())
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to instantiate the tasks for hot reload of migration schema")
-	}
-	runner.WithTasks(watcher, migrateWatcher)
-	runner.WithCronTasks(conf.Schemas.Interval, reloader, migrateReloader)
-
-	// register the API
-	runner.HTTPServerBuilder().
-		APIRegistration(persesAPI).
-		APIRegistration(persesFrontend).
-		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource())).
-		Middleware(middleware.CheckProject(serviceManager.GetProject()))
+	defer func() {
+		if daoCloseErr := persistentManager.GetPersesDAO().Close(); daoCloseErr != nil {
+			logrus.WithError(daoCloseErr).Error("unable to close the connection to the database")
+		}
+	}()
 
 	// start the application
 	runner.Start()

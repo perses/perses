@@ -32,7 +32,6 @@ const (
 	PathFolder           = "folders"
 	PathGlobalDatasource = "globaldatasources"
 	PathProject          = "projects"
-	PathUser             = "users"
 )
 
 // ProjectResourcePathList is containing the list of the resource path that are part of a project.

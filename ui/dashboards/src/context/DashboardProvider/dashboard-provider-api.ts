@@ -184,18 +184,21 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
   return panel;
 }
 
-const selectPanelActions = ({ openEditPanel, openDeletePanelDialog }: DashboardStoreState) => ({
+const selectPanelActions = ({ openEditPanel, openDeletePanelDialog, duplicatePanel }: DashboardStoreState) => ({
   openEditPanel,
   openDeletePanelDialog,
+  duplicatePanel,
 });
+
 /**
  * Returns actions that can be performed on the given Panel.
  */
 export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
-  const { openEditPanel, openDeletePanelDialog } = useDashboardStore(selectPanelActions);
+  const { openEditPanel, openDeletePanelDialog, duplicatePanel } = useDashboardStore(selectPanelActions);
   return {
     openEditPanel: () => openEditPanel(panelGroupItemId),
     openDeletePanelDialog: () => openDeletePanelDialog(panelGroupItemId),
+    duplicatePanel: () => duplicatePanel(panelGroupItemId),
   };
 }
 
@@ -237,4 +240,16 @@ const selectDiscardChangesConfirmationDialog = ({
 });
 export function useDiscardChangesConfirmationDialog() {
   return useDashboardStore(selectDiscardChangesConfirmationDialog);
+}
+
+const selectEditJsonDialog = ({ editJsonDialog, openEditJsonDialog, closeEditJsonDialog }: DashboardStoreState) => ({
+  editJsonDialog,
+  openEditJsonDialog,
+  closeEditJsonDialog,
+});
+/**
+ * Gets the state for the edit JSON dialog.
+ */
+export function useEditJsonDialog() {
+  return useDashboardStore(selectEditJsonDialog);
 }

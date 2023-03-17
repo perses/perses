@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import RefreshIcon from 'mdi-material-ui/Refresh';
+import { Stack } from '@mui/material';
 import { DateTimeRangePicker, InfoTooltip, TimeOption } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isDurationString } from '@perses-dev/core';
@@ -34,17 +35,19 @@ export const TIME_OPTIONS: TimeOption[] = [
 const DEFAULT_HEIGHT = '34px';
 
 interface TimeRangeControlsProps {
-  // Height of the controls in pixels.
-  // The controls look best at heights >= 28 pixels.
-  // You can use values less than 28, but it won't look great.
+  // The controls look best at heights >= 28 pixels
   heightPx?: number;
+
+  // Whether to show the refresh button or not
+  showRefresh?: boolean;
 }
 
-export function TimeRangeControls({ heightPx }: TimeRangeControlsProps) {
+export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh } = useTimeRange();
+  // TODO: Remove this since it couples to the dashboard context
   const defaultTimeRange = useDefaultTimeRange();
 
-  // Convert height as a number to height as a string, then use this value for styling
+  // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
   // add time shortcut if one does not match duration from dashboard JSON
@@ -58,13 +61,15 @@ export function TimeRangeControls({ heightPx }: TimeRangeControlsProps) {
   }
 
   return (
-    <>
+    <Stack direction="row" spacing={1}>
       <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
-      <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
-        <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
-          <RefreshIcon />
-        </ToolbarIconButton>
-      </InfoTooltip>
-    </>
+      {showRefresh && (
+        <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
+          <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
+            <RefreshIcon />
+          </ToolbarIconButton>
+        </InfoTooltip>
+      )}
+    </Stack>
   );
 }

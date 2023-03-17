@@ -29,7 +29,14 @@ export function PanelContent(props: PanelContentProps) {
   const PanelComponent = plugin?.PanelComponent;
 
   if (isLoading) {
-    return <Skeleton variant="rectangular" width={contentDimensions?.width} height={contentDimensions?.height} />;
+    return (
+      <Skeleton
+        variant="rectangular"
+        width={contentDimensions?.width}
+        height={contentDimensions?.height}
+        aria-label="Loading..."
+      />
+    );
   }
 
   if (PanelComponent === undefined) {

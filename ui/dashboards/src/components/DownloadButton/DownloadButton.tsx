@@ -18,10 +18,16 @@ import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboard } from '../../context';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 
-// Button to download the dashboard as a JSON file.
-export function DownloadButton() {
+interface DownloadButtonProps {
+  // The button look best at heights >= 28 pixels
+  heightPx?: number;
+}
+
+// Button that enables downloading the dashboard as a JSON file
+export function DownloadButton({ heightPx }: DownloadButtonProps) {
   const { dashboard } = useDashboard();
   const hiddenLinkRef = useRef<HTMLAnchorElement>(null);
+  const height = heightPx === undefined ? undefined : `${heightPx}px`;
 
   const onDownloadButtonClick = () => {
     if (!hiddenLinkRef || !hiddenLinkRef.current) return;
@@ -41,7 +47,7 @@ export function DownloadButton() {
   return (
     <>
       <InfoTooltip description={TOOLTIP_TEXT.downloadDashboard}>
-        <ToolbarIconButton aria-label={TOOLTIP_TEXT.downloadDashboard} onClick={onDownloadButtonClick}>
+        <ToolbarIconButton aria-label={TOOLTIP_TEXT.downloadDashboard} onClick={onDownloadButtonClick} sx={{ height }}>
           <DownloadIcon />
         </ToolbarIconButton>
       </InfoTooltip>

@@ -12,5 +12,6 @@
 // limitations under the License.
 
 export * from './graph';
+export * from './legend';
 export * from './theme';
 export * from './units';

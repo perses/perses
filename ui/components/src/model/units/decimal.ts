@@ -16,7 +16,7 @@ import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 
 const decimalUnitKinds = ['Decimal'] as const;
-type DecimalUnitKind = typeof decimalUnitKinds[number];
+type DecimalUnitKind = (typeof decimalUnitKinds)[number];
 export type DecimalUnitOptions = {
   kind: DecimalUnitKind;
   decimal_places?: number;
@@ -36,7 +36,11 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
 export function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
   const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
 
-  if (unitOptions.abbreviate === true) {
+  if (value === 0) {
+    return value.toString();
+  }
+
+  if (unitOptions.abbreviate && value >= 1000) {
     return abbreviateLargeNumber(value, decimals);
   }
 

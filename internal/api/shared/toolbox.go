@@ -18,7 +18,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/common/etcd"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
 
@@ -39,7 +39,7 @@ type ToolboxService interface {
 	Update(entity api.Entity, parameters Parameters) (interface{}, error)
 	Delete(parameters Parameters) error
 	Get(parameters Parameters) (interface{}, error)
-	List(q etcd.Query, parameters Parameters) (interface{}, error)
+	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -49,7 +49,7 @@ type Toolbox interface {
 	Update(ctx echo.Context, entity api.Entity) error
 	Delete(ctx echo.Context) error
 	Get(ctx echo.Context) error
-	List(ctx echo.Context, q etcd.Query) error
+	List(ctx echo.Context, q databaseModel.Query) error
 }
 
 func NewToolBox(service ToolboxService) Toolbox {
@@ -69,7 +69,7 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	}
 	newEntity, err := t.service.Create(entity)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, newEntity)
 }
@@ -81,7 +81,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	parameters := extractParameters(ctx)
 	newEntity, err := t.service.Update(entity, parameters)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, newEntity)
 }
@@ -89,7 +89,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
 	if err := t.service.Delete(parameters); err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
@@ -98,29 +98,29 @@ func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
 	entity, err := t.service.Get(parameters)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, entity)
 }
 
-func (t *toolbox) List(ctx echo.Context, q etcd.Query) error {
+func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
-		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
+		return fmt.Errorf("%w: %s", BadRequestError, err)
 	}
 	parameters := extractParameters(ctx)
 	result, err := t.service.List(q, parameters)
 	if err != nil {
-		return HandleError(err)
+		return err
 	}
 	return ctx.JSON(http.StatusOK, result)
 }
 
 func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
-		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
+		return fmt.Errorf("%w: %s", BadRequestError, err)
 	}
 	if err := validateMetadata(ctx, entity.GetMetadata()); err != nil {
-		return HandleError(fmt.Errorf("%w: %s", BadRequestError, err))
+		return fmt.Errorf("%w: %s", BadRequestError, err)
 	}
 	return nil
 }

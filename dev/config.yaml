@@ -1,7 +1,7 @@
 database:
   file:
     folder: "dev/local_db"
-    file_extension: "json"
+    extension: "json"
 
 schemas:
   panels_path: "schemas/panels"

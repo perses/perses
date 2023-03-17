@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-system",
-  "version": "0.21.1",
+  "version": "0.24.0",
   "description": "The plugin feature in Pereses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -20,15 +20,16 @@
     "build": "concurrently \"npm:build:*\"",
     "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
     "build:esm": "swc ./src -d dist --config-file ../.swcrc",
-    "build:types": "tsc --emitDeclarationOnly --declaration --preserveWatchOutput",
+    "build:types": "tsc --project tsconfig.build.json",
+    "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "0.21.1",
-    "@perses-dev/core": "0.21.1",
+    "@perses-dev/components": "0.24.0",
+    "@perses-dev/core": "0.24.0",
     "immer": "^9.0.15",
     "use-immer": "^0.7.0",
     "use-query-params": "^2.1.2"

@@ -16,9 +16,9 @@ package dashboard
 import (
 	"fmt"
 
-	"github.com/perses/common/etcd"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/internal/api/shared/validate"
 	"github.com/perses/perses/pkg/model/api"
@@ -55,7 +55,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
-		if etcd.IsKeyConflict(err) {
+		if databaseModel.IsKeyConflict(err) {
 			logrus.Debugf("unable to create the dashboard %q. It already exists", entity.Metadata.Name)
 			return nil, shared.ConflictError
 		}
@@ -105,7 +105,7 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 
 func (s *service) Delete(parameters shared.Parameters) error {
 	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
-		if etcd.IsKeyNotFound(err) {
+		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the dashboard %q", parameters.Name)
 			return shared.NotFoundError
 		}
@@ -118,7 +118,7 @@ func (s *service) Delete(parameters shared.Parameters) error {
 func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	entity, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
-		if etcd.IsKeyNotFound(err) {
+		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the dashboard %q", parameters.Name)
 			return nil, shared.NotFoundError
 		}
@@ -128,6 +128,6 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	return entity, nil
 }
 
-func (s *service) List(q etcd.Query, _ shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }

@@ -17,20 +17,23 @@ package e2eframework
 
 import (
 	"net/http/httptest"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
-	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/shared/database"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/pkg/model/api"
+	modelAPI "github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/prometheus/client_golang/prometheus"
 )
+
+var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
 
 func GetRepositoryPath(t *testing.T) string {
 	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
@@ -40,9 +43,9 @@ func GetRepositoryPath(t *testing.T) string {
 	return strings.TrimSpace(string(projectPathByte))
 }
 
-func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
-	for _, key := range keys {
-		err := dao.Delete(key)
+func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Entity) {
+	for _, entity := range entities {
+		err := dao.Delete(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -51,18 +54,14 @@ func ClearAllKeys(t *testing.T, dao database.DAO, keys ...string) {
 
 func defaultFileConfig() *config.File {
 	return &config.File{
-		Folder:        "./test",
-		FileExtension: config.JSONExtension,
+		Folder:    "./test",
+		Extension: config.JSONExtension,
 	}
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
 	projectPath := GetRepositoryPath(t)
-	handler := echo.New()
 	conf := config.Config{
-		Database: config.Database{
-			File: defaultFileConfig(),
-		},
 		Schemas: config.Schemas{
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
 			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
@@ -71,17 +70,30 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 			Interval:        0,
 		},
 	}
-	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
+	if useSQL == "true" {
+		conf.Database = config.Database{
+			SQL: &config.SQL{
+				User:                 "user",
+				Password:             "password",
+				Net:                  "tcp",
+				Addr:                 "localhost:3306",
+				DBName:               "perses",
+				AllowNativePasswords: true,
+			},
+		}
+	} else {
+		conf.Database = config.Database{
+			File: defaultFileConfig(),
+		}
+	}
+	runner, persistenceManager, err := core.New(conf, "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
+	handler, err := runner.HTTPServerBuilder().PrometheusRegisterer(prometheus.NewRegistry()).BuildHandler()
 	if err != nil {
 		t.Fatal(err)
 	}
-	handler.Use(middleware.CheckProject(serviceManager.GetProject()))
-	persesAPI := core.NewPersesAPI(serviceManager, conf)
-	persesAPI.RegisterRoute(handler)
 	server := httptest.NewServer(handler)
 	return server, httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
@@ -89,12 +101,10 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 	}), persistenceManager
 }
 
-func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []api.Entity) {
+func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	server, expect, persistenceManager := CreateServer(t)
+	defer persistenceManager.GetPersesDAO().Close()
 	defer server.Close()
 	entities := testFunc(expect, persistenceManager)
-	for _, entity := range entities {
-		entityID := entity.GenerateID()
-		ClearAllKeys(t, persistenceManager.GetPersesDAO(), entityID)
-	}
+	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
 }

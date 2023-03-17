@@ -10,8 +10,10 @@ cd ui/
 files=("../LICENSE" "../CHANGELOG.md")
 workspaces=$(jq -r '.workspaces[]' < package.json)
 publish_workspaces=$(for workspace in ${workspaces}; do 
-  # package "app" is private so we shouldn't try to publish it.
-  if [[ "${workspace}" != "app" ]] && [[ "${workspace}" != "e2e" ]]; then
+  # packages are private so we shouldn't try to publish them.
+  # TODO: see if we can do something smarter here by checking for "private" set
+  # to true in a given package's package.json.
+  if [[ "${workspace}" != "app" ]] && [[ "${workspace}" != "e2e" ]] && [[ "${workspace}" != "storybook" ]]; then
     echo $workspace;
   fi 
 done)

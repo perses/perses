@@ -61,6 +61,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
             onChange(value);
             setShowCustomDateSelector(false);
           }}
+          onCancel={() => setShowCustomDateSelector(false)}
         />
       </Popover>
       <FormControl fullWidth>

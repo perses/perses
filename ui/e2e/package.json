@@ -1,19 +1,26 @@
 {
   "name": "@perses-dev/e2e",
-  "version": "0.21.1",
+  "version": "0.24.0",
   "private": true,
   "scripts": {
-    "e2e": "playwright test",
-    "e2e:headed": "npm run e2e -- --headed",
-    "e2e:debug": "npm run e2e -- --debug",
+    "e2e": "npm run e2e:local",
+    "e2e:local": "playwright test --config=src/config/local.playwright.config.ts",
+    "e2e:headed": "npm run e2e:local -- --headed",
+    "e2e:debug": "npm run e2e:local -- --debug",
     "e2e:report": "playwright show-report",
     "e2e:watch": "chokidar src/tests/**/**.ts -c 'playwright test {path}'",
+    "e2e:ci": "HAPPO_DOWNLOAD_ALL=true npx happo-e2e -- playwright test --config=src/config/ci.playwright.config.ts",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix"
   },
   "devDependencies": {
+    "@perses-dev/prometheus-plugin": "0.24.0",
     "@playwright/test": "^1.29.1",
     "chokidar-cli": "^3.0.0",
-    "eslint-plugin-playwright": "^0.11.2"
+    "eslint-plugin-playwright": "^0.11.2",
+    "happo-e2e": "^2.1.1",
+    "happo-playwright": "^2.0.1",
+    "happo-plugin-typescript": "^1.0.0",
+    "happo.io": "^8.3.1"
   }
 }

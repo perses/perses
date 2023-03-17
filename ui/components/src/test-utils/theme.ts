@@ -20,4 +20,13 @@ export const testChartsTheme: PersesChartsTheme = {
     width: 1,
     color: '#000000',
   },
+  container: {
+    padding: {
+      default: 12,
+    },
+  },
+  thresholds: {
+    defaultColor: '#59CC8D',
+    palette: ['#438FEB', '#FFB249', '#EE6C6C'],
+  },
 };

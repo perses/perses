@@ -11,7 +11,7 @@ Date & time selection component to customize what data renders on dashboard. Thi
 ## Props
 
 | Name        | Description                                                |
-| ----------- | ---------------------------------------------------------- |
+|-------------|------------------------------------------------------------|
 | timeOptions | List of supported shortcuts to show in the select dropdown |
 | value       | Current dashboard time range                               |
 | onChange    | Used to update active dashboard time range                 |

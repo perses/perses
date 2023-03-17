@@ -20,6 +20,18 @@ export interface PersesChartsTheme {
     width: number;
     color: string;
   };
+  /**
+   * Theming for the container that wraps a chart.
+   */
+  container: {
+    /**
+     * Padding in pixels.
+     */
+    padding: {
+      default: number;
+    };
+  };
+  thresholds: ThresholdColorPalette;
 }
 
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207
@@ -27,4 +39,9 @@ export interface EChartsTheme extends EChartsOption {
   bar?: BarSeriesOption;
   line?: LineSeriesOption;
   gauge?: GaugeSeriesOption;
+}
+
+export interface ThresholdColorPalette {
+  defaultColor: string;
+  palette: string[];
 }

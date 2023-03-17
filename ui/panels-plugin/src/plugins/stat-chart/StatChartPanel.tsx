@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatChart, StatChartData, useChartsTheme, PersesChartsTheme } from '@perses-dev/components';
+import { StatChart, StatChartData, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
-import { LineSeriesOption } from 'echarts/charts';
 import { useMemo } from 'react';
 import { TimeSeriesData, useTimeSeriesQuery, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
-import { SparklineOptions, StatChartOptions } from './stat-chart-model';
+import { StatChartOptions } from './stat-chart-model';
+import { convertSparkline } from './utils/data-transform';
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    spec: { query, calculation, unit, sparkline },
+    spec: { query, calculation, unit, sparkline, thresholds },
     contentDimensions,
   } = props;
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
@@ -54,7 +54,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       height={contentDimensions.height}
       data={chartData}
       unit={unit}
-      sparkline={convertSparkline(chartsTheme, sparkline)}
+      sparkline={convertSparkline(chartsTheme, sparkline, thresholds, chartData.calculatedValue)}
     />
   );
 }
@@ -67,29 +67,10 @@ const useChartData = (data: TimeSeriesData | undefined, calculation: Calculation
     };
     if (data === undefined) return loadingData;
 
-    const seriesData = Array.from(data.series)[0];
+    const seriesData = data.series[0];
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = seriesData !== undefined ? calculate(Array.from(seriesData.values)) : undefined;
+    const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
 
     return { calculatedValue, seriesData };
   }, [data, calculation]);
 };
-
-export function convertSparkline(
-  chartsTheme: PersesChartsTheme,
-  sparkline?: SparklineOptions
-): LineSeriesOption | undefined {
-  if (sparkline === undefined) return;
-
-  return {
-    lineStyle: {
-      width: sparkline.width ?? chartsTheme.sparkline.width,
-      color: sparkline.color ?? chartsTheme.sparkline.color,
-      opacity: 1,
-    },
-    areaStyle: {
-      color: sparkline.color ?? chartsTheme.sparkline.color,
-      opacity: 0.4,
-    },
-  };
-}

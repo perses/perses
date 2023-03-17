@@ -1,5 +1,75 @@
 # Changelog
 
+## 0.24.0 / 2023-03-06
+
+- [FEATURE] Ability to edit thresholds for Time Series and Stat Charts (#992)
+- [FEATURE] Support `connect_nulls` and `show_points` options in time series panel (#990)
+- [FEATURE] Ability to edit thresholds in panel options for gauge chart (#968)
+- [FEATURE] New `area_opacity` option in time series panel (#962)
+- [FEATURE] Support mysql for the main DB (#961)
+- [ENHANCEMENT] Legend height increased for tall panels (#998)
+- [ENHANCEMENT] Pass headers in Prometheus datasource createClient (#996)
+- [ENHANCEMENT] Fix styling of TimeRangeControls (#974)
+- [ENHANCEMENT] Migrate custom dialogs to generic dialog component (#965)
+- [BUGFIX] Do not show nulls as zero in tooltip (#990)
+- [BUGFIX] Do not include tests in compiled output (#976)
+- [BUGFIX] Remove semicolon below legend (#975)
+- [BREAKINGCHANGE] TimeSeriesValueTuple updates, null now supported for time series data (#990)
+- [BREAKINGCHANGE] TimeSeries and TimeSeriesValueTuple Iterable type change (#985)
+
+## 0.23.1 / 2023-02-20
+
+- [ENHANCEMENT] upgrade zustand to latest (#972)
+
+## 0.23.0 / 2023-02-17
+
+- [FEATURE] Add ability to duplicate panels (#949)
+- [FEATURE] UI - Add dashboard CRUD (#939)
+- [FEATURE] Generic Dialog Components (#948)
+- [FEATURE] Initiate project creation/deletion in the frontend (#916)
+- [ENHANCEMENT] Modify placement of duplicate panels (#954)
+- [ENHANCEMENT] Project routing and list view links (#953)
+- [ENHANCEMENT] Add color prop to Buttons (#917)
+- [ENHANCEMENT] Remove unnecessary background color (#915)
+- [BUGFIX] Allow editing of time range using inputs (#963)
+- [BUGFIX] Time series migration add unit inside y_axis (#952)
+- [BUGFIX] Round small decimal values when abbreviate is set (#946)
+- [BUGFIX] Fix empty dashboard spec that wasn't rejected (#931)
+- [BUGFIX] Fix discard changes confirmation dialog showing up even when there is no change (#929)
+- [BUGFIX] Fix increased metadata.version (#925)
+- [BUGFIX] Fix API error EOF that happens when decoding multiple times the body from a middleware (#923)
+- [BREAKINGCHANGE] Move panel padding to plugins (#942)
+- [BREAKINGCHANGE] Add a consistent JSON tab for every panel plugin (#922)
+- [BREAKINGCHANGE] Remove deprecated top-level `unit` in time series panel (#920)
+- [BREAKINGCHANGE] Remove the support of etcd as the main database (#933)
+
+## 0.22.0 / 2023-01-09
+
+- [FEATURE] Add offline mode for the migrate command in the CLI (#901)
+- [FEATURE] Use codemirror for query and json editing (#853)
+- [FEATURE] Support snapshot UI releases (#844)
+- [ENHANCEMENT] Toolbar uses two rows for small screens (#909)
+- [ENHANCEMENT] Add prop for adjusting the height of the DownloadButton (#907)
+- [ENHANCEMENT] Add dividers to Edit Panel Group dialog (#904)
+- [ENHANCEMENT] Use InfoTooltip for all tooltips (#902)
+- [ENHANCEMENT] Move edit variables button and make variables wrap to next line (#900)
+- [ENHANCEMENT] GaugeChart panel ability to visually edit `max` (#891)
+- [ENHANCEMENT] Enable hot reload of the migration schemas (#899)
+- [ENHANCEMENT] Add a link to the release in the footer (#880)
+- [ENHANCEMENT] CLI can use variables schemas during the validation of dashboard (#881)
+- [ENHANCEMENT] Hide horizontal scrollbar in Legend #874
+- [BUGFIX] Round suggested stepMs to improve multi query performance (#912)
+- [BUGFIX] Reduce calculated min step interval in TimeSeriesPanel (#911)
+- [BUGFIX] Fix loading of the cue schemas in the command lint (#898)
+- [BUGFIX] GaugeChart do not ignore unit decimal_places and abbreviate (#892)
+- [BUGFIX] Toolbar inputs and icons are consistent (#877)
+- [BUGFIX] Fix Unmarshal variable display (#876)
+- [BUGFIX] default_value is accepted by the backend to be a string or an array (#873)
+- [BUGFIX] Fix variable collisions with promQL function (#870)
+- [BREAKINGCHANGE] change legend position values to PascalCase, fix resize glitch (#906)
+- [BREAKINGCHANGE] tooltip format and PrometheusTimeSeriesQuery series name overhaul (#895)
+- [BREAKINGCHANGE] Remove default value for TextVariable (#872)
+
 ## 0.21.1 / 2022-12-12
 
 - [BUGFIX] Fix extracted changelog file name (#868)

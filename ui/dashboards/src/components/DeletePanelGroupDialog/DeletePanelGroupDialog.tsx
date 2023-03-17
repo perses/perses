@@ -53,7 +53,7 @@ export const DeletePanelGroupDialog = () => {
           <Button variant="contained" type="submit">
             Delete
           </Button>
-          <Button variant="outlined" onClick={() => closeDeletePanelGroupDialog()}>
+          <Button variant="outlined" color="secondary" onClick={() => closeDeletePanelGroupDialog()}>
             Cancel
           </Button>
         </DialogActions>

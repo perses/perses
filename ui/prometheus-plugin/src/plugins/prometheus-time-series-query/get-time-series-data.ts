@@ -70,8 +70,6 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
     stepMs: step * 1000,
 
-    // TODO: Maybe do a proper Iterable implementation that defers some of this
-    // processing until its needed
     series: result.map((value) => {
       const { metric, values } = value;
 
@@ -89,6 +87,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
         name,
         values: values.map(parseValueTuple),
         formattedName,
+        labels: metric,
       };
     }),
   };

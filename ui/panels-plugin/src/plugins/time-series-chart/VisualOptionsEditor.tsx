@@ -11,9 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider } from '@mui/material';
+import { Slider, Switch } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
-import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS, VISUAL_CONFIG } from './time-series-chart-model';
+import {
+  DEFAULT_AREA_OPACITY,
+  DEFAULT_CONNECT_NULLS,
+  DEFAULT_LINE_WIDTH,
+  DEFAULT_POINT_RADIUS,
+  VISUAL_CONFIG,
+  VisualOptions,
+} from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
   value: VisualOptions;
@@ -34,6 +41,14 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     onChange({
       ...value,
       line_width: newValue,
+    });
+  };
+
+  const handleAreaOpacityChange = (_: Event, sliderValue: number | number[]) => {
+    const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
+    onChange({
+      ...value,
+      area_opacity: newValue,
     });
   };
 
@@ -66,6 +81,35 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             min={VISUAL_CONFIG.line_width.min}
             max={VISUAL_CONFIG.line_width.max}
             onChange={handleLineWidthChange}
+          />
+        }
+      />
+      <OptionsEditorControl
+        label={VISUAL_CONFIG.area_opacity.label}
+        control={
+          <Slider
+            data-testid={VISUAL_CONFIG.area_opacity.testId}
+            value={value.area_opacity ?? DEFAULT_AREA_OPACITY}
+            valueLabelDisplay="auto"
+            step={VISUAL_CONFIG.area_opacity.step}
+            marks
+            min={VISUAL_CONFIG.area_opacity.min}
+            max={VISUAL_CONFIG.area_opacity.max}
+            onChange={handleAreaOpacityChange}
+          />
+        }
+      />
+      <OptionsEditorControl
+        label={VISUAL_CONFIG.connect_nulls.label}
+        control={
+          <Switch
+            checked={value.connect_nulls ?? DEFAULT_CONNECT_NULLS}
+            onChange={(e) => {
+              onChange({
+                ...value,
+                connect_nulls: e.target.checked,
+              });
+            }}
           />
         }
       />

@@ -15,6 +15,7 @@ GO                    ?= go
 CUE                   ?= cue
 GOCI                  ?= golangci-lint
 GOFMT                 ?= $(GO)fmt
+MDOX                  ?= mdox
 GOOS                  ?= $(shell $(GO) env GOOS)
 GOARCH                ?= $(shell $(GO) env GOARCH)
 GOHOSTOS              ?= $(shell $(GO) env GOHOSTOS)
@@ -50,6 +51,12 @@ checkformat:
 	@echo ">> running check for cue file format"
 	./scripts/cue.sh --checkformat
 
+.PHONY: checkdocs
+checkdocs:
+	@echo ">> check format markdown docs"
+	@make fmt-docs
+	@git diff --exit-code -- *.md
+
 .PHONY: checkunused
 checkunused:
 	@echo ">> running check for unused/missing packages in go.mod"
@@ -77,6 +84,11 @@ fmt:
 	$(GOFMT) -w -l $$(find . -name '*.go' -not -path "./ui/*" -print)
 	./scripts/cue.sh --fmt
 
+.PHONY: fmt-docs
+fmt-docs:
+	@echo ">> format markdown document"
+	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/prometheus-plugin/node_modules/*"  -not -path "./ui/storybook/node_modules/*"  -print) --links.validate.config-file=./.mdox.validate.yaml
+
 .PHONY: cue-eval
 cue-eval:
 	@echo ">> eval cue schemas"
@@ -95,6 +107,10 @@ test: generate
 .PHONY: integration-test
 integration-test: generate
 	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
+
+.PHONY: mysql-integration-test
+mysql-integration-test: generate
+	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: coverage-html
 coverage-html: integration-test
@@ -147,7 +163,7 @@ generate-changelog:
 .PHONY: clean
 clean:
 	rm -rf ./bin
-	rm EXTRACTED_CHANGELOG.md
+	rm -rf EXTRACTED_CHANGELOG.md
 	./scripts/ui_release.sh --clean
 	cd ./ui && npm run clean
 

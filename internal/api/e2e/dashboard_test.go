@@ -16,6 +16,7 @@
 package e2e
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
@@ -25,6 +26,8 @@ import (
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMainScenarioDashboard(t *testing.T) {
@@ -45,4 +48,68 @@ func TestCreateDashboardWithWrongName(t *testing.T) {
 			Status(http.StatusBadRequest)
 		return []api.Entity{project}
 	})
+}
+
+func TestUpdateDashboardIncreaseVersion(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		entity := e2eframework.NewDashboard(t, "perses", "test")
+		project := e2eframework.NewProject("perses")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+
+		dashboard := extractDashboardFromHTTPBody(expect.POST(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDashboard)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Raw(), t)
+
+		updatedDashboard := extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, dashboard.Metadata.Project, shared.PathDashboard, dashboard.Metadata.Name)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Raw(), t)
+		assert.True(t, dashboard.Metadata.Version+1 == updatedDashboard.Metadata.Version)
+
+		updatedDashboard = extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, dashboard.Metadata.Project, shared.PathDashboard, dashboard.Metadata.Name)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Raw(), t)
+
+		assert.True(t, dashboard.Metadata.Version+2 == updatedDashboard.Metadata.Version)
+		return []api.Entity{project, entity}
+	})
+}
+
+func TestListDashboardInEmptyProject(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
+		persesProject := e2eframework.NewProject("perses")
+		demoProject := e2eframework.NewProject("Demo")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoProject, demoDashboard)
+
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, demoProject.GetMetadata().GetName(), shared.PathDashboard)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(0)
+
+		return []api.Entity{persesProject, demoProject, demoDashboard}
+	})
+}
+
+func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashboard {
+	b, err := json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dashboard := &modelV1.Dashboard{}
+	if unmarshalErr := json.Unmarshal(b, dashboard); unmarshalErr != nil {
+		t.Fatal(unmarshalErr)
+	}
+	return dashboard
 }

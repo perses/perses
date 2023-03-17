@@ -11,19 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEventHandler } from 'react';
+import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
+import { LegendItem } from './legend';
 
 // adjust display when there are many time series to help with performance
 export const OPTIMIZED_MODE_SERIES_LIMIT = 1000;
 
 export type UnixTimeMs = number;
 
-export type GraphSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
-
 export interface GraphSeries {
   name: string;
-  values: Iterable<GraphSeriesValueTuple>;
+  values: TimeSeriesValueTuple[];
 }
 
 export type EChartsValues = number | null | '-';
@@ -39,25 +38,4 @@ export type EChartsDataFormat = {
   legendItems?: LegendItem[];
   xAxisMax?: number | string;
   rangeMs?: number;
-};
-
-/**
- * Supported legend options
- */
-export interface LegendOptions {
-  position: 'bottom' | 'right';
-}
-
-export interface LegendItem {
-  id: string;
-  label: string;
-  isSelected: boolean;
-  color: string;
-  onClick: MouseEventHandler<HTMLLIElement>;
-}
-
-export const DEFAULT_LEGEND_POSITION = 'bottom';
-
-export const DEFAULT_LEGEND: LegendOptions = {
-  position: DEFAULT_LEGEND_POSITION,
 };

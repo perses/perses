@@ -1,6 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": ["src", "playwright.config.ts"],
+  "include": ["src"],
   "compilerOptions": {
     "rootDir": "./src"
   }

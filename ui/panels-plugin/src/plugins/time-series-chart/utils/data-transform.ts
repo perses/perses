@@ -11,13 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange } from '@perses-dev/core';
+import { AbsoluteTimeRange, StepOptions } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
-import { EChartsTimeSeries } from '@perses-dev/components';
+import { EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
-import { StepOptions } from '../../../model/thresholds';
-import { VisualOptions, DEFAULT_LINE_WIDTH, DEFAULT_POINT_RADIUS } from '../time-series-chart-model';
+import {
+  DEFAULT_AREA_OPACITY,
+  DEFAULT_CONNECT_NULLS,
+  DEFAULT_LINE_WIDTH,
+  DEFAULT_POINT_RADIUS,
+  VisualOptions,
+} from '../time-series-chart-model';
 import { getRandomColor } from './palette-gen';
 
 export interface TimeScale {
@@ -33,6 +38,8 @@ export const EMPTY_GRAPH_DATA = {
   xAxis: [],
   legendItems: [],
 };
+
+export const MIN_STEP_INTERVAL_MS = 10;
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -72,7 +79,8 @@ export function getCommonTimeScale(queryResults: RunningQueriesState): TimeScale
   if (steps.length === 1) {
     stepMs = steps[0] as number;
   } else {
-    stepMs = gcd(...steps);
+    const calculatedStepMs = gcd(...steps);
+    stepMs = calculatedStepMs < MIN_STEP_INTERVAL_MS ? MIN_STEP_INTERVAL_MS : calculatedStepMs;
   }
 
   const startMs = timeRange.start.valueOf();
@@ -140,14 +148,20 @@ export function getLineSeries(
     type: 'line',
     name: formattedName,
     data: data,
+    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
+    showSymbol: visual.show_points === 'Always' ? true : false,
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
     },
+    areaStyle: {
+      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
+    },
     emphasis: {
+      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1,
       },
@@ -183,4 +197,28 @@ export function getThresholdSeries(
       },
     },
   };
+}
+
+/**
+ * Converts percent threshold into absolute step value
+ * If max is undefined, use the max value from time series data as default
+ */
+export function convertPercentThreshold(percent: number, data: EChartsTimeSeries[], max?: number, min?: number) {
+  const percentDecimal = percent / 100;
+  const adjustedMax = max ?? findMax(data);
+  const adjustedMin = min ?? 0;
+  const total = adjustedMax - adjustedMin;
+  return percentDecimal * total + adjustedMin;
+}
+
+function findMax(timeSeries: EChartsTimeSeries[]) {
+  let max = 0;
+  timeSeries.forEach((series) => {
+    series.data.forEach((value: EChartsValues) => {
+      if (typeof value === 'number' && value > max) {
+        max = value;
+      }
+    });
+  });
+  return max;
 }

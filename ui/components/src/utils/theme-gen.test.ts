@@ -33,6 +33,11 @@ describe('generateChartsTheme', () => {
   it('should return perses specific charts theme from converted MUI theme', () => {
     expect(chartsTheme).toMatchInlineSnapshot(`
       Object {
+        "container": Object {
+          "padding": Object {
+            "default": 12,
+          },
+        },
         "echartsTheme": Object {
           "bar": Object {
             "barMaxWidth": 150,
@@ -190,6 +195,14 @@ describe('generateChartsTheme', () => {
         "sparkline": Object {
           "color": "#1976d2",
           "width": 2,
+        },
+        "thresholds": Object {
+          "defaultColor": "#2e7d32",
+          "palette": Array [
+            "#FFCC00",
+            "#ed6c02",
+            "#d32f2f",
+          ],
         },
       }
     `);

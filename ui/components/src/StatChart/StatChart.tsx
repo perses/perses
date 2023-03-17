@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import { merge } from 'lodash-es';
 import { use, EChartsCoreOption } from 'echarts/core';
-import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -24,27 +23,17 @@ import { formatValue, UnitOptions } from '../model/units';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
 
-use([
-  EChartsGaugeChart,
-  EChartsLineChart,
-  GridComponent,
-  DatasetComponent,
-  TitleComponent,
-  TooltipComponent,
-  CanvasRenderer,
-]);
+use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
-const PANEL_PADDING = 32;
 const MIN_VALUE_SIZE = 12;
 const MAX_VALUE_SIZE = 36;
 
 export interface StatChartData {
   calculatedValue?: number;
   seriesData?: GraphSeries;
-  name?: string;
 }
 
-interface StatChartProps {
+export interface StatChartProps {
   width: number;
   height: number;
   data: StatChartData;
@@ -62,11 +51,10 @@ export function StatChart(props: StatChartProps) {
     if (data.seriesData === undefined) return chartsTheme.noDataOption;
 
     const series = data.seriesData;
-
-    const statSeries: Array<GaugeSeriesOption | LineSeriesOption> = [];
+    const statSeries: LineSeriesOption[] = [];
 
     if (sparkline !== undefined) {
-      const lineSeries: LineSeriesOption = {
+      const lineSeries = {
         type: 'line',
         data: [...series.values],
         zlevel: 1,
@@ -113,30 +101,32 @@ export function StatChart(props: StatChartProps) {
   const charactersAdjust = formattedValue.length;
   const valueSize = isLargePanel === true ? MAX_VALUE_SIZE : Math.min(width, height) / charactersAdjust;
 
+  const containerPadding = `${chartsTheme.container.padding.default}px`;
+
   return (
-    <Box>
+    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <Typography
         variant="h3"
         sx={(theme) => ({
           color: theme.palette.text.primary,
           fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
+          padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
         })}
       >
         {formattedValue}
       </Typography>
       {sparkline !== undefined && (
-        <EChart
-          sx={{
-            width: width + PANEL_PADDING, // allows sparkline to extend to edge of panel
-            height: height,
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-          }}
-          option={option}
-          theme={chartsTheme.echartsTheme}
-          renderer="svg"
-        />
+        <Box sx={{ flex: 1 }}>
+          <EChart
+            sx={{
+              width: '100%',
+              height: '100%',
+            }}
+            option={option}
+            theme={chartsTheme.echartsTheme}
+            renderer="svg"
+          />
+        </Box>
       )}
     </Box>
   );

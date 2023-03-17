@@ -20,10 +20,6 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
-func GenerateProjectID(name string) string {
-	return fmt.Sprintf("/projects/%s", name)
-}
-
 type ProjectSpec struct {
 }
 
@@ -31,10 +27,6 @@ type Project struct {
 	Kind     Kind        `json:"kind" yaml:"kind"`
 	Metadata Metadata    `json:"metadata" yaml:"metadata"`
 	Spec     ProjectSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
-}
-
-func (p *Project) GenerateID() string {
-	return GenerateProjectID(p.Metadata.Name)
 }
 
 func (p *Project) GetMetadata() modelAPI.Metadata {

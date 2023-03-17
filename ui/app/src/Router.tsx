@@ -29,7 +29,9 @@ function Router() {
       <Suspense>
         <Routes>
           <Route path="/migrate" element={<ViewMigrate />} />
+          <Route path="/projects" element={<ViewDashboardList />} />
           <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
+          <Route path="/projects/:projectName/dashboards/:dashboardName/:action" element={<ViewDashboard />} />
           <Route path="/projects/:projectName" element={<ViewProject />} />
           <Route path="/" element={<ViewDashboardList />} />
         </Routes>

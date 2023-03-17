@@ -16,7 +16,7 @@ import { PanelPlugin } from '../../../model';
 // Dummy plugins to test loading
 export const BertPanel1: PanelPlugin<{ option1: string }> = {
   PanelComponent: () => null,
-  OptionsEditorComponent: function BertPanel1Editor({ value, onChange }) {
+  PanelQueryEditorComponent: function BertPanel1Editor({ value, onChange }) {
     return (
       <div>
         <label htmlFor="editor-input">BertPanel1 editor</label>
@@ -34,18 +34,29 @@ export const BertPanel1: PanelPlugin<{ option1: string }> = {
 
 export const BertPanel2: PanelPlugin<{ option2: string }> = {
   PanelComponent: () => null,
-  OptionsEditorComponent: function BertPanel2Editor({ value, onChange }) {
-    return (
-      <div>
-        <label htmlFor="editor-input">BertPanel2 editor</label>
-        <input
-          type="text"
-          id="editor-input"
-          value={value.option2}
-          onChange={(e) => onChange({ ...value, option2: e.target.value })}
-        />
-      </div>
-    );
-  },
+  panelOptionsEditorComponents: [
+    {
+      label: 'Settings',
+      content: function BertPanel2Editor({ value, onChange }) {
+        return (
+          <div>
+            <label htmlFor="editor-input">BertPanel2 editor</label>
+            <input
+              type="text"
+              id="editor-input"
+              value={value.option2}
+              onChange={(e) => onChange({ ...value, option2: e.target.value })}
+            />
+          </div>
+        );
+      },
+    },
+    {
+      label: 'Custom Tab',
+      content: function Editor() {
+        return <div>custom content</div>;
+      },
+    },
+  ],
   createInitialOptions: () => ({ option2: '' }),
 };

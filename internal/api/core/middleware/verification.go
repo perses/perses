@@ -14,8 +14,11 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -38,7 +41,8 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			// we don't need to verify if a project exists in case we are in a PUT / GET / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
 			// Also, we avoid an additional query to the DB like that.
-			if c.Request().Method != http.MethodPost {
+			// In case the body is nil, then there is nothing to do about it as well
+			if c.Request().Method != http.MethodPost || c.Request().Body == nil {
 				return next(c)
 			}
 			projectName := shared.GetProjectParameter(c)
@@ -49,12 +53,27 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 				// And just to avoid a non-necessary deserialization, we will ensure we are managing a resource that is part of a project by checking the HTTP Path.
 				for _, path := range shared.ProjectResourcePathList {
 					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)) {
+						// Parsing the body in an Echo middleware may cause the error code=400, message=EOF.
+						//
+						// Context.Bind only can be called only once in the life of the request as it read the body which can only be read once.
+						// The request data reader is running out, Context.Bind() function read request body data from the socket buffer, once you took it out, it is just gone
+						// That’s why it returns EOF error.
+						//
+						// In this middleware we need to partially decode the body to see if the project is set.
+						// So we read the body, and then we re-inject it in the request.
+						bodyBytes, err := io.ReadAll(c.Request().Body)
+						if err != nil {
+							return fmt.Errorf("%w: %s", shared.BadRequestError, err)
+						}
+						// write back to request body
+						c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+						// now we can safely partially decode the body
 						o := &partialObject{}
-						if err := c.Bind(o); err != nil {
-							return err
+						if unmarshalErr := json.Unmarshal(bodyBytes, o); unmarshalErr != nil {
+							return fmt.Errorf("%w: %s", shared.BadRequestError, unmarshalErr)
 						}
 						if len(o.Metadata.Project) == 0 {
-							return shared.HandleError(fmt.Errorf("%w: metadata.project cannot be empty", shared.BadRequestError))
+							return fmt.Errorf("%w: metadata.project cannot be empty", shared.BadRequestError)
 						}
 						projectName = o.Metadata.Project
 						break
@@ -64,9 +83,9 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 			if len(projectName) > 0 {
 				if _, err := svc.Get(shared.Parameters{Name: projectName}); err != nil {
 					if errors.Is(err, shared.NotFoundError) {
-						return shared.HandleError(fmt.Errorf("%w, metadata.project %q doesn't exist", shared.BadRequestError, projectName))
+						return fmt.Errorf("%w, metadata.project %q doesn't exist", shared.BadRequestError, projectName)
 					}
-					return shared.HandleError(err)
+					return err
 				}
 			}
 			return next(c)
