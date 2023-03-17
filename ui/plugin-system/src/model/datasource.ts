@@ -29,15 +29,7 @@ export interface DatasourceClientOptions {
  * Common properties for all clients
  */
 export interface DatasourceClient {
+  // TODO: set kind and define healthCheck function
+  kind?: string;
   healthCheck?: () => Promise<boolean>;
-  // [key: string]: unknown;
-}
-
-/**
- * Determine if unknown input is a valid DatasourceClient
- */
-export function isDatasourceClient(client: unknown): client is DatasourceClient {
-  // TODO: define healthCheck example
-  // return (client as DatasourceClient).healthCheck !== undefined;
-  return true;
 }
