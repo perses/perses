@@ -22,7 +22,7 @@ import {
   WithPluginRegistry,
   WithQueryClient,
   DEFAULT_DASHBOARD_INITIAL_STATE,
-} from '../../stories/decorators';
+} from '@perses-dev/storybook';
 
 const meta: Meta<typeof EmptyDashboard> = {
   component: EmptyDashboard,

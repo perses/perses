@@ -19,7 +19,7 @@ import {
   WithDashboard,
   WithPluginRegistry,
   WithQueryClient,
-} from '../../stories/decorators';
+} from '@perses-dev/storybook';
 
 const meta: Meta<typeof AddPanelButton> = {
   component: AddPanelButton,

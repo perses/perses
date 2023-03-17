@@ -11,13 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StoryFn } from '@storybook/react';
-import { TemplateVariableProvider } from '@perses-dev/dashboards';
 
-export const WithTemplateVariables = (Story: StoryFn) => {
+/**
+ * Wraps the story in a `QueryClientProvider`.
+ */
+export const WithQueryClient = (Story: StoryFn) => {
+  const queryClient = new QueryClient({});
+
   return (
-    <TemplateVariableProvider>
+    <QueryClientProvider client={queryClient}>
       <Story />
-    </TemplateVariableProvider>
+    </QueryClientProvider>
   );
 };

@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './WithDashboard';
-export * from './WithPluginRegistry';
-export * from './WithQueryClient';
-export * from './WithQueryParams';
-export * from './WithTemplateVariables';
+// Decorators added to all stories via `preview.ts`.
+export * from './WithBackground';
+export * from './WithThemes';
+export * from './WithTimeZone';

@@ -11,16 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Decorator } from '@storybook/react';
-import { TimeZoneProvider } from '@perses-dev/components';
-
-export const WithTimeZone: Decorator = (Story, context) => {
-  const globalTimeZone = context.globals.timeZone;
-  const timeZone = typeof globalTimeZone === 'string' ? globalTimeZone : undefined;
-
-  return (
-    <TimeZoneProvider timeZone={timeZone}>
-      <Story />
-    </TimeZoneProvider>
-  );
-};
+// Decorators available for use in individual stories that must be explicitly
+// added.
+export * from './WithDashboard';
+export * from './WithPluginRegistry';
+export * from './WithQueryClient';
+export * from './WithQueryParams';
+export * from './WithTemplateVariables';

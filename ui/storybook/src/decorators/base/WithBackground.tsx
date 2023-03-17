@@ -48,6 +48,10 @@ export const addBackgroundStyle = (selector: string, css: string, storyId: strin
   }
 };
 
+/**
+ * Sets background color of stories based on the combination of the MUI theme,
+ * the light/dark mode, and the value selected in the Storybook toolbar.
+ */
 export const WithBackground: Decorator = (Story, context) => {
   const theme = useTheme();
 

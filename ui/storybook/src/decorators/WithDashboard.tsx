@@ -42,13 +42,17 @@ export const DEFAULT_DASHBOARD_INITIAL_STATE: DashboardStoreProps = {
   },
 };
 
+/**
+ * Wraps the story in a `DashboardProvider`. The props may be overriden by setting
+ * `parameters.withDashboard.props` in the story configuration.
+ */
 export const WithDashboard = (Story: StoryFn, context: StoryContext<unknown>) => {
   const initParameter = context.parameters.withDashboard;
   const parameter = isWithDashboardParameter(initParameter) ? initParameter : undefined;
-  const args = parameter?.props;
+  const props = parameter?.props;
 
   return (
-    <DashboardProvider initialState={DEFAULT_DASHBOARD_INITIAL_STATE} {...args}>
+    <DashboardProvider initialState={DEFAULT_DASHBOARD_INITIAL_STATE} {...props}>
       <Story />
     </DashboardProvider>
   );

@@ -11,15 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
+import { QueryParamProvider } from 'use-query-params';
 import { StoryFn } from '@storybook/react';
 
-export const WithQueryClient = (Story: StoryFn) => {
-  const queryClient = new QueryClient({});
-
+/**
+ * Wraps the story in a `QueryParamProvider` using the window-based adapter.
+ */
+export const WithQueryParams = (Story: StoryFn) => {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryParamProvider adapter={WindowHistoryAdapter}>
       <Story />
-    </QueryClientProvider>
+    </QueryParamProvider>
   );
 };

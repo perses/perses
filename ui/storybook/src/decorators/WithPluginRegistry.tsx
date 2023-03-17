@@ -22,9 +22,9 @@ import {
 // NOTE: the aliases we use for components break these top level imports, so we
 // import relatively.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const prometheusResource = require('../../../../prometheus-plugin/plugin.json');
+const prometheusResource = require('../../../prometheus-plugin/plugin.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const panelsResource = require('../../../../panels-plugin/plugin.json');
+const panelsResource = require('../../../panels-plugin/plugin.json');
 
 const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
@@ -45,6 +45,10 @@ const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   },
 ]);
 
+/**
+ * Wraps the story in a `PluginRegistry` that includes all of the plugins
+ * bundled with Perses.
+ */
 export const WithPluginRegistry = (Story: StoryFn) => {
   return (
     <PluginRegistry pluginLoader={bundledPluginLoader}>

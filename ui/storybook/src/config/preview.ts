@@ -13,8 +13,8 @@
 
 import { isHappoRun, setThemeSwitcher } from 'happo-plugin-storybook/register';
 import { DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
+import { WithThemes, WithBackground, WithTimeZone } from '../decorators/base';
 import { DocsContainer } from './DocsContainer';
-import { WithThemes, WithBackground, WithTimeZone } from './decorators';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },

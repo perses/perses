@@ -18,6 +18,9 @@ import { Decorator } from '@storybook/react';
 import { useDarkMode } from 'storybook-dark-mode';
 import { getTheme, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/components';
 
+/**
+ * Sets the MUI and ECharts themes on stories based on light/dark mode.
+ */
 export const WithThemes: Decorator = (Story) => {
   const isDarkModeEnabled = useDarkMode();
 

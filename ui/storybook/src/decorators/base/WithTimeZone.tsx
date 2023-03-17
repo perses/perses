@@ -11,14 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
-import { QueryParamProvider } from 'use-query-params';
-import { StoryFn } from '@storybook/react';
+import { Decorator } from '@storybook/react';
+import { TimeZoneProvider } from '@perses-dev/components';
 
-export const WithQueryParams = (Story: StoryFn) => {
+/**
+ * Sets the time zone based on a selection in the Storybook toolbar.
+ */
+export const WithTimeZone: Decorator = (Story, context) => {
+  const globalTimeZone = context.globals.timeZone;
+  const timeZone = typeof globalTimeZone === 'string' ? globalTimeZone : undefined;
+
   return (
-    <QueryParamProvider adapter={WindowHistoryAdapter}>
+    <TimeZoneProvider timeZone={timeZone}>
       <Story />
-    </QueryParamProvider>
+    </TimeZoneProvider>
   );
 };
