@@ -25,7 +25,7 @@ jobs:
           enable_npm: true
       - name: install deps
         run: cd ./ui && npm ci
-      - run: cd ./ui && npm run lint
+      - run: cd ./ui && npm run build && npm run lint
   type_check:
     name: "type check"
     runs-on: ubuntu-latest
