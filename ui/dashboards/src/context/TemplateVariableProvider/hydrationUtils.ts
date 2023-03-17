@@ -39,9 +39,9 @@ function hydrateTemplateVariableState(variable: VariableDefinition, initialValue
       // to end up in a buggy state if the variables are initialized with an "all"
       // value inside an array. When hydrating variables, normalize this to minimize
       // bugs.
-      if (Array.isArray(varState.value) && varState.value.length === 1 && varState.value[0] === DEFAULT_ALL_VALUE) {
-        varState.value = DEFAULT_ALL_VALUE;
-      }
+      // if (Array.isArray(varState.value) && varState.value.length === 1 && varState.value[0] === DEFAULT_ALL_VALUE) {
+      //   varState.value = DEFAULT_ALL_VALUE;
+      // }
       break;
     default:
       break;
