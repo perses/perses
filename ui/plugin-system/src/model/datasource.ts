@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders, UnknownSpec } from '@perses-dev/core';
+import { UnknownSpec } from '@perses-dev/core';
 import { Plugin } from './plugin-base';
 
 /**
@@ -29,17 +29,15 @@ export interface DatasourceClientOptions {
  * Common properties for all clients
  */
 export interface DatasourceClient {
-  // TODO: define common client properties
-  options: {
-    datasourceUrl: string;
-    headers?: RequestHeaders;
-  };
-  [key: string]: unknown;
+  healthCheck?: () => Promise<boolean>;
+  // [key: string]: unknown;
 }
 
 /**
- * Determine if valid input is a valid DatasourceClient
+ * Determine if unknown input is a valid DatasourceClient
  */
 export function isDatasourceClient(client: unknown): client is DatasourceClient {
-  return (client as DatasourceClient).options.datasourceUrl !== undefined;
+  // TODO: define healthCheck example
+  // return (client as DatasourceClient).healthCheck !== undefined;
+  return true;
 }
