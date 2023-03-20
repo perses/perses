@@ -56,7 +56,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
-  const echartsPalette = chartsTheme.echartsTheme.color as string[];
+  const echartsPalette = chartsTheme.echartsTheme.color;
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -166,24 +166,22 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const timeSeries = result.data.series[i];
         seriesCount++;
 
-        // pass echarts color to custom legend and tooltip
-        let colorIndex = 0;
-        if (Array.isArray(echartsPalette)) {
-          colorIndex = seriesCount % echartsPalette.length;
-        }
-
         if (timeSeries === undefined) {
-          return graphData;
+          return { graphData };
         }
 
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        // categorical palette taken from ECharts theme
-        const categoricalColor: string = echartsPalette[colorIndex] ?? '#000';
-        const seriesColor =
-          visual.palette?.kind === 'Auto' && echartsPalette.length > 0
-            ? getRandomColor(formattedSeriesName)
-            : categoricalColor;
+        // TODO: simplify into separate getPaletteColor util, write unit test
+        let seriesColor = getRandomColor(formattedSeriesName);
+        // pass echarts color to custom legend and tooltip
+        let colorIndex = 0;
+        if (visual.palette?.kind === 'Categorical' && Array.isArray(echartsPalette)) {
+          colorIndex = seriesCount % echartsPalette.length;
+          const paletteColor =
+            typeof echartsPalette[colorIndex] === 'string' ? String(echartsPalette[colorIndex]) : '#000'; // TODO: set fallback color from theme
+          seriesColor = paletteColor;
+        }
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
