@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createTheme, PaletteMode, ThemeOptions, Theme, alertClasses } from '@mui/material';
+import { createTheme, PaletteMode, ThemeOptions, Theme } from '@mui/material';
+import { MuiAlert } from './component-overrides/alert';
 import { getPaletteOptions } from './palette/palette-options';
 import { typography } from './typography';
 
@@ -50,6 +51,7 @@ export function getTheme(mode: PaletteMode) {
 
 // Overrides for component default prop values and styles go here
 const components: ThemeOptions['components'] = {
+  MuiAlert,
   MuiFormControl: {
     defaultProps: {
       size: 'small',
@@ -73,17 +75,6 @@ const components: ThemeOptions['components'] = {
   MuiPopover: {
     styleOverrides: {
       paper: getModalBackgroundStyle,
-    },
-  },
-  MuiAlert: {
-    styleOverrides: {
-      standardError: ({ theme }) => ({
-        backgroundColor: theme.palette.designSystem.red[500],
-        color: theme.palette.common.white,
-        [`&	.${alertClasses.icon}`]: {
-          color: theme.palette.common.white,
-        },
-      }),
     },
   },
 };

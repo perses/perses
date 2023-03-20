@@ -24,7 +24,7 @@ export interface PrometheusDatasourceSpec {
  * Creates a PrometheusClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
-  const { direct_url, headers } = spec;
+  const { direct_url, headers: specHeaders } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -38,10 +38,10 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     options: {
       datasourceUrl,
     },
-    instantQuery: (params) => instantQuery(params, { datasourceUrl, headers }),
-    rangeQuery: (params) => rangeQuery(params, { datasourceUrl, headers }),
-    labelNames: (params) => labelNames(params, { datasourceUrl, headers }),
-    labelValues: (params) => labelValues(params, { datasourceUrl, headers }),
+    instantQuery: (params, headers) => instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    rangeQuery: (params, headers) => rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    labelNames: (params, headers) => labelNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
   };
 };
 

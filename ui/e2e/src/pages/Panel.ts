@@ -73,12 +73,11 @@ export class Panel {
       await expect(this.loader).toHaveCount(0);
     }).toPass();
 
-    // Trial a click to wait for the figure to be stable. Replace this with a
-    // baked in "stable" check when one is available.
+    // Scroll into view to make sure the panel is visible and to get a free
+    // "stable" check. Consider replacing this with a baked in "stable" check
+    // when one is available.
     // https://github.com/microsoft/playwright/issues/15195#issuecomment-1176370571
-    await this.figure.click({
-      trial: true,
-    });
+    await this.figure.scrollIntoViewIfNeeded();
   }
 
   async startEditing() {

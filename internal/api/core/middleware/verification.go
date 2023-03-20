@@ -63,17 +63,17 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 						// So we read the body, and then we re-inject it in the request.
 						bodyBytes, err := io.ReadAll(c.Request().Body)
 						if err != nil {
-							return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, err))
+							return fmt.Errorf("%w: %s", shared.BadRequestError, err)
 						}
 						// write back to request body
 						c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 						// now we can safely partially decode the body
 						o := &partialObject{}
 						if unmarshalErr := json.Unmarshal(bodyBytes, o); unmarshalErr != nil {
-							return shared.HandleError(fmt.Errorf("%w: %s", shared.BadRequestError, unmarshalErr))
+							return fmt.Errorf("%w: %s", shared.BadRequestError, unmarshalErr)
 						}
 						if len(o.Metadata.Project) == 0 {
-							return shared.HandleError(fmt.Errorf("%w: metadata.project cannot be empty", shared.BadRequestError))
+							return fmt.Errorf("%w: metadata.project cannot be empty", shared.BadRequestError)
 						}
 						projectName = o.Metadata.Project
 						break
@@ -83,9 +83,9 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 			if len(projectName) > 0 {
 				if _, err := svc.Get(shared.Parameters{Name: projectName}); err != nil {
 					if errors.Is(err, shared.NotFoundError) {
-						return shared.HandleError(fmt.Errorf("%w, metadata.project %q doesn't exist", shared.BadRequestError, projectName))
+						return fmt.Errorf("%w, metadata.project %q doesn't exist", shared.BadRequestError, projectName)
 					}
-					return shared.HandleError(err)
+					return err
 				}
 			}
 			return next(c)

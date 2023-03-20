@@ -15,29 +15,32 @@ import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { usePanelGroupIds } from '../../context';
 import { GridLayout } from '../GridLayout';
-import { EmptyDashboard } from '../EmptyDashboard';
+import { EmptyDashboard, EmptyDashboardProps } from '../EmptyDashboard';
 
 export type DashboardProps = BoxProps & {
   /**
-   * Component that will be rendered when the dashboard is empty (i.e. has no
-   * panel groups). If not specified, the default `EmptyDashboard` component
-   * will be used. To customize the empty state, pass a customized `EmptyDashboard`
-   * or other component.
+   * Props for `EmptyDashboard` component that will be rendered when the dashboard
+   * is empty (i.e. has no panel groups). If not specified, the defaults will
+   * be used.
    */
-  emptyDashboard?: React.ReactNode;
+  emptyDashboardProps?: EmptyDashboardProps;
 };
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
  */
-export function Dashboard({ emptyDashboard = <EmptyDashboard />, ...boxProps }: DashboardProps) {
+export function Dashboard({ emptyDashboardProps, ...boxProps }: DashboardProps) {
   const panelGroupIds = usePanelGroupIds();
   const isEmpty = !panelGroupIds.length;
 
   return (
     <Box {...boxProps} sx={{ height: '100%' }}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        {isEmpty && <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>{emptyDashboard}</Box>}
+        {isEmpty && (
+          <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+            <EmptyDashboard {...emptyDashboardProps} />
+          </Box>
+        )}
         {!isEmpty && panelGroupIds.map((panelGroupId) => <GridLayout key={panelGroupId} panelGroupId={panelGroupId} />)}
       </ErrorBoundary>
     </Box>

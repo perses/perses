@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryDefinition } from '@perses-dev/core';
-import { useQuery, useQueries } from '@tanstack/react-query';
-import { TimeSeriesQueryContext } from '../model';
-import { TimeSeriesQueryPlugin } from '../model';
+import { useQuery, useQueries, useQueryClient, Query, QueryCache, QueryKey } from '@tanstack/react-query';
+import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { TimeSeriesData, TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap } from './template-variables';
 import { useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './TimeRangeProvider';
@@ -24,6 +23,8 @@ import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
 }
+
+export const TIME_SERIES_QUERY_KEY = 'TimeSeriesQuery';
 
 /**
  * Returns a serialized string of the current state of variable values.
@@ -65,6 +66,7 @@ function getQueryOptions({
   if (variableDependencies) {
     waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
   }
+
   const queryEnabled = plugin !== undefined && !waitToLoad;
 
   return {
@@ -77,7 +79,7 @@ function getQueryOptions({
  * Runs a time series query using a plugin and returns the results.
  */
 export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
-  const { data: plugin } = usePlugin('TimeSeriesQuery', definition.spec.plugin.kind);
+  const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
@@ -104,7 +106,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
   const context = useTimeSeriesQueryContext();
 
   const pluginLoaderResponse = usePlugins(
-    'TimeSeriesQuery',
+    TIME_SERIES_QUERY_KEY,
     definitions.map((d) => ({ kind: d.spec.plugin.kind }))
   );
 
@@ -118,7 +120,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
         queryFn: async () => {
           // Keep options out of query key so we don't re-run queries because suggested step changes
           const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
-          const plugin = await getPlugin('TimeSeriesQuery', definition.spec.plugin.kind);
+          const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
           return data;
         },
@@ -127,8 +129,10 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
   });
 }
 
+/**
+ * Build the time series query context object from data available at runtime
+ */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
-  // Build the context object from data available at runtime
   const { absoluteTimeRange, refreshKey } = useTimeRange();
   const variableState = useTemplateVariableValues();
   const datasourceStore = useDatasourceStore();
@@ -139,4 +143,29 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
     datasourceStore,
     refreshKey,
   };
+}
+
+/**
+ * Get active time series queries for query results summary
+ */
+export function useActiveTimeSeriesQueries() {
+  const queryClient = useQueryClient();
+  const queryCache = queryClient.getQueryCache();
+  return getActiveTimeSeriesQueries(queryCache);
+}
+
+/**
+ * Filter all cached queries down to only active time series queries
+ */
+export function getActiveTimeSeriesQueries(cache: QueryCache) {
+  const queries: TimeSeriesDataQuery[] = [];
+
+  for (const query of cache.findAll({ type: 'active' })) {
+    const firstPart = query.queryKey?.[0] as UnknownSpec;
+    if (firstPart?.kind && (firstPart.kind as string).startsWith(TIME_SERIES_QUERY_KEY)) {
+      queries.push(query as Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>);
+    }
+  }
+
+  return queries;
 }
