@@ -139,8 +139,8 @@ export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<numb
 export function getLineSeries(
   formattedName: string,
   data: EChartsTimeSeries['data'],
-  visual: VisualOptions
-  color?: string,
+  visual: VisualOptions,
+  color?: string
 ): EChartsTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;

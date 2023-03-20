@@ -56,7 +56,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
-  const echartsPalette = chartsTheme.echartsTheme.color;
+  const echartsPalette = chartsTheme.echartsTheme.color as string[];
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -159,19 +159,28 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       // Skip queries that are still loading or don't have data
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
-      // for (const timeSeries of result.data.series) {
       for (let i = 0; i < result.data.series.length; i++) {
         const timeSeries = result.data.series[i];
-        // TODO: pass color into legend and tooltip
-        // index = (index + 1) % echartsPalette.length;
+
+        // pass echarts color to custom legend and tooltip
+        let colorIndex = 0;
+        if (Array.isArray(echartsPalette)) {
+          colorIndex = (i + 1) % echartsPalette.length;
+        }
+
         if (timeSeries === undefined) {
           return graphData;
         }
 
-        // categorical palette taken from ECharts theme
-        const seriesColor = visual.palette?.kind === 'Auto' ? getRandomColor(timeSeries.name) : undefined;
-
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
+
+        // categorical palette taken from ECharts theme
+        const categoricalColor: string = echartsPalette[colorIndex] ?? '#000';
+        const seriesColor =
+          visual.palette?.kind === 'Auto' && echartsPalette.length > 0
+            ? getRandomColor(formattedSeriesName)
+            : categoricalColor;
+
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
         const isSelected = selectedSeriesNames.includes(timeSeries.name);
