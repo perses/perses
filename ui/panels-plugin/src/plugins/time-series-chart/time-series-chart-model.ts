@@ -26,7 +26,7 @@ export interface TimeSeriesChartOptions {
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
   visual?: VisualOptions;
-  __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => void;
+  __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;

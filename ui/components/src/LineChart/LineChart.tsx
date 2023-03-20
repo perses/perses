@@ -68,7 +68,7 @@ export interface LineChartProps {
   legend?: LegendComponentOption;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
-  __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => void;
+  __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
 export function LineChart({
