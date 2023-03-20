@@ -52,7 +52,7 @@ export function getNearbySeries(
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        const markerColor = currentSeries.color ?? '#000'; // TODO: how to get from ECharts theme
+        const markerColor = currentSeries.color ?? '#000';
         if (Array.isArray(currentSeries.data)) {
           for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
             const xValue = data.xAxis[datumIdx] ?? 0;

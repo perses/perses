@@ -164,14 +164,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
       for (let i = 0; i < result.data.series.length; i++) {
         const timeSeries = result.data.series[i];
-        seriesCount++;
-
         if (timeSeries === undefined) {
           return { graphData };
         }
 
+        // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
+        seriesCount++; // used for repeating colors in Categorical palette
         const seriesColor = getSeriesColor(
           formattedSeriesName,
           seriesCount,
