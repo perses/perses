@@ -12,7 +12,7 @@
 // limitations under the License.
 
 /**
- * Calls `global.fetch`, but throws a `FetchError` for non-200 responses.
+ * Calls `global.fetch` and determines which type of error to show for non-200 responses.
  */
 export async function fetch(...args: Parameters<typeof global.fetch>) {
   const response = await global.fetch(...args);
