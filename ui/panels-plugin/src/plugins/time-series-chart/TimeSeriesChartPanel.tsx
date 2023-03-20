@@ -171,13 +171,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        seriesCount++; // used for repeating colors in Categorical palette
         const seriesColor = getSeriesColor(
           formattedSeriesName,
           seriesCount,
           echartsPalette as string[],
           visual.palette?.kind
         );
+        seriesCount++; // used for repeating colors in Categorical palette
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
