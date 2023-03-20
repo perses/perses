@@ -16,6 +16,9 @@ package project
 import (
 	"fmt"
 
+	"github.com/perses/perses/internal/api/interface/v1/dashboard"
+	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
@@ -26,12 +29,18 @@ import (
 
 type service struct {
 	project.Service
-	dao project.DAO
+	dao           project.DAO
+	folderDAO     folder.DAO
+	datasourceDAO datasource.DAO
+	dashboardDAO  dashboard.DAO
 }
 
-func NewService(dao project.DAO) project.Service {
+func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO) project.Service {
 	return &service{
-		dao: dao,
+		dao:           dao,
+		folderDAO:     folderDAO,
+		datasourceDAO: datasourceDAO,
+		dashboardDAO:  dashboardDAO,
 	}
 }
 
@@ -83,6 +92,19 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 }
 
 func (s *service) Delete(parameters shared.Parameters) error {
+	projectName := parameters.Name
+	if err := s.folderDAO.DeleteAll(projectName); err != nil {
+		logrus.WithError(err).Error("unable to delete all folders")
+		return err
+	}
+	if err := s.dashboardDAO.DeleteAll(projectName); err != nil {
+		logrus.WithError(err).Error("unable to delete all dashboards")
+		return err
+	}
+	if err := s.datasourceDAO.DeleteAll(projectName); err != nil {
+		logrus.WithError(err).Error("unable to delete all datasources")
+		return err
+	}
 	if err := s.dao.Delete(parameters.Name); err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the project %q", parameters.Name)

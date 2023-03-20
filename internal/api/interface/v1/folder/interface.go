@@ -33,6 +33,7 @@ type DAO interface {
 	Create(entity *v1.Folder) error
 	Update(entity *v1.Folder) error
 	Delete(project string, name string) error
+	DeleteAll(project string) error
 	Get(project string, name string) (*v1.Folder, error)
 	List(q databaseModel.Query) ([]*v1.Folder, error)
 }
