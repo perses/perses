@@ -17,10 +17,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/shared/validate"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
@@ -48,13 +51,7 @@ func validateSchemas(folder string, vf validateFunc) {
 	}
 }
 
-func main() {
-	cfg := config.Schemas{}
-	_ = cfg.Verify()
-	sch, err := schemas.New(cfg)
-	if err != nil {
-		logrus.Fatal(err)
-	}
+func validateAllSchemas(sch schemas.Schemas) {
 	validateSchemas(config.DefaultPanelsPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidatePanel(plugin, name)
 	})
@@ -64,4 +61,68 @@ func main() {
 	validateSchemas(config.DefaultVariablesPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidateVariable(plugin, name)
 	})
+}
+
+func validateAllDashboards(sch schemas.Schemas) {
+	logrus.Info("validate all dashboard in dev/data")
+	data, err := os.ReadFile(path.Join("dev", "data", "dashboard.json"))
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	var dashboardList []*v1.Dashboard
+	if jsonErr := json.Unmarshal(data, &dashboardList); jsonErr != nil {
+		logrus.Fatal(jsonErr)
+	}
+	for _, dashboard := range dashboardList {
+		if vErr := validate.Dashboard(dashboard, sch); vErr != nil {
+			logrus.Fatal(vErr)
+		}
+	}
+}
+
+func validateAllDatasources(sch schemas.Schemas) {
+	logrus.Info("validate all datasources in dev/data")
+	data, err := os.ReadFile(path.Join("dev", "data", "localdatasource.json"))
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	var datasourceList []*v1.Datasource
+	if jsonErr := json.Unmarshal(data, &datasourceList); jsonErr != nil {
+		logrus.Fatal(jsonErr)
+	}
+	for _, datasource := range datasourceList {
+		if vErr := validate.Datasource(datasource, nil, sch); vErr != nil {
+			logrus.Fatal(vErr)
+		}
+	}
+}
+
+func validateAllGlobalDatasources(sch schemas.Schemas) {
+	logrus.Info("validate all globalDatasources in dev/data")
+	data, err := os.ReadFile(path.Join("dev", "data", "globaldatasource.json"))
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	var datasourceList []*v1.GlobalDatasource
+	if jsonErr := json.Unmarshal(data, &datasourceList); jsonErr != nil {
+		logrus.Fatal(jsonErr)
+	}
+	for _, datasource := range datasourceList {
+		if vErr := validate.Datasource(datasource, nil, sch); vErr != nil {
+			logrus.Fatal(vErr)
+		}
+	}
+}
+
+func main() {
+	cfg := config.Schemas{}
+	_ = cfg.Verify()
+	sch, err := schemas.New(cfg)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	validateAllSchemas(sch)
+	validateAllDashboards(sch)
+	validateAllDatasources(sch)
+	validateAllGlobalDatasources(sch)
 }

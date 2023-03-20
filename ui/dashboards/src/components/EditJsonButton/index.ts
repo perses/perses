@@ -11,16 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './display';
-export * from './http';
-export * from './layout';
-export * from './notice';
-export * from './panels';
-export * from './resource';
-export * from './thresholds';
-export * from './time';
-export * from './time-series-queries';
-export * from './variables';
+export * from './EditJsonButton';

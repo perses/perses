@@ -11,31 +11,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StoryFn } from '@storybook/react';
-import { DashboardProvider } from '@perses-dev/dashboards';
+import { StoryFn, StoryContext } from '@storybook/react';
+import { DashboardProvider, DashboardProviderProps, DashboardStoreProps } from '@perses-dev/dashboards';
 
-export const WithDashboard = (Story: StoryFn) => {
+export type WithDashboardParameter = {
+  props: Partial<DashboardProviderProps>;
+};
+
+// Type guard because storybook types parameters as `any`
+function isWithDashboardParameter(parameter: unknown | WithDashboardParameter): parameter is WithDashboardParameter {
+  return !!parameter && typeof parameter === 'object' && 'props' in parameter;
+}
+
+export const DEFAULT_DASHBOARD_INITIAL_STATE: DashboardStoreProps = {
+  dashboardResource: {
+    kind: 'Dashboard',
+    metadata: {
+      name: 'My Dashboard',
+      project: 'Storybook',
+      created_at: '2021-11-09T00:00:00Z',
+      updated_at: '2021-11-09T00:00:00Z',
+      version: 0,
+    },
+    spec: {
+      duration: '1h',
+      variables: [],
+      layouts: [],
+      panels: {},
+    },
+  },
+};
+
+export const WithDashboard = (Story: StoryFn, context: StoryContext<unknown>) => {
+  const initParameter = context.parameters.withDashboard;
+  const parameter = isWithDashboardParameter(initParameter) ? initParameter : undefined;
+  const props = parameter?.props;
+
   return (
-    <DashboardProvider
-      initialState={{
-        dashboardResource: {
-          kind: 'Dashboard',
-          metadata: {
-            name: 'My Dashboard',
-            project: 'Storybook',
-            created_at: '2021-11-09T00:00:00Z',
-            updated_at: '2021-11-09T00:00:00Z',
-            version: 0,
-          },
-          spec: {
-            duration: '1h',
-            variables: [],
-            layouts: [],
-            panels: {},
-          },
-        },
-      }}
-    >
+    <DashboardProvider initialState={DEFAULT_DASHBOARD_INITIAL_STATE} {...props}>
       <Story />
     </DashboardProvider>
   );

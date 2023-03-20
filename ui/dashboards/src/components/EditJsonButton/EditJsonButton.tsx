@@ -11,16 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './display';
-export * from './http';
-export * from './layout';
-export * from './notice';
-export * from './panels';
-export * from './resource';
-export * from './thresholds';
-export * from './time';
-export * from './time-series-queries';
-export * from './variables';
+import CodeIcon from 'mdi-material-ui/CodeBraces';
+import { InfoTooltip } from '@perses-dev/components';
+import { TOOLTIP_TEXT } from '../../constants';
+import { ToolbarIconButton } from '../ToolbarIconButton';
+import { useEditJsonDialog } from '../../context';
+
+export const EditJsonButton = () => {
+  const { openEditJsonDialog } = useEditJsonDialog();
+  return (
+    <InfoTooltip description={TOOLTIP_TEXT.editJson}>
+      <ToolbarIconButton variant="outlined" onClick={() => openEditJsonDialog()}>
+        <CodeIcon />
+      </ToolbarIconButton>
+    </InfoTooltip>
+  );
+};

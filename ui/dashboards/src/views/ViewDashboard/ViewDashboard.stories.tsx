@@ -12,7 +12,9 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { ViewDashboard, EmptyDashboard } from '@perses-dev/dashboards';
+import { Button } from '@mui/material';
+import { ViewDashboard } from '@perses-dev/dashboards';
+import { action } from '@storybook/addon-actions';
 import { WithPluginRegistry, WithQueryParams, WithQueryClient, WithDashboard } from '../../stories/decorators';
 
 const meta: Meta<typeof ViewDashboard> = {
@@ -36,7 +38,7 @@ type Story = StoryObj<typeof ViewDashboard>;
  * empty state to communicate next steps to the user. If the `emptyDashboard`
  * prop is not set, it will render a default, unconfigured [EmptyDashboard](../?path=/docs/dashboards-components-emptydashboard--docs).
  */
-export const DefaultEmptyState: Story = {
+export const ViewEmptyState: Story = {
   args: {
     dashboardResource: {
       kind: 'Dashboard',
@@ -54,6 +56,29 @@ export const DefaultEmptyState: Story = {
         panels: {},
       },
     },
+    isEditing: false,
+  },
+};
+
+export const EditEmptyState: Story = {
+  args: {
+    dashboardResource: {
+      kind: 'Dashboard',
+      metadata: {
+        name: 'My Dashboard',
+        project: 'Storybook',
+        created_at: '2021-11-09T00:00:00Z',
+        updated_at: '2021-11-09T00:00:00Z',
+        version: 0,
+      },
+      spec: {
+        duration: '1h',
+        variables: [],
+        layouts: [],
+        panels: {},
+      },
+    },
+    isEditing: true,
   },
 };
 
@@ -80,12 +105,15 @@ export const CustomEmptyState: Story = {
         panels: {},
       },
     },
-    emptyDashboard: (
-      <EmptyDashboard
-        title="Oh no!"
-        description="This dashboard is empty."
-        additionalText="Tip: Add a panel group and a panel to get started."
-      />
-    ),
+    emptyDashboardProps: {
+      title: 'Oh no!',
+      description: 'This dashboard is empty.',
+      additionalText: 'Tip: Add a panel group and a panel to get started.',
+      actions: (
+        <Button variant="outlined" color="secondary" onClick={action('click custom empty dashboard action button')}>
+          click me!
+        </Button>
+      ),
+    },
   },
 };

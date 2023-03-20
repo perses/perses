@@ -15,6 +15,8 @@ package databaseFile
 
 import (
 	"fmt"
+	"os"
+	"path"
 
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -23,33 +25,53 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/sirupsen/logrus"
 )
 
-func generateProjectResourceQuery(kind v1.Kind, project string, name string) string {
+func isFolderExist(folder string) (bool, error) {
+	_, err := os.Stat(folder)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		logrus.WithError(err).Errorf("unexpected error while trying to access to the folder %q", folder)
+		return false, err
+	}
+	return true, nil
+}
+
+func (d *DAO) generateProjectResourceQuery(kind v1.Kind, project string) string {
 	if len(project) == 0 {
 		// it's used when we query a list of object. It can happen that the project is empty.
-		return fmt.Sprintf("/%s", v1.PluralKindMap[kind])
+		return path.Join(d.Folder, v1.PluralKindMap[kind])
 	}
-	return fmt.Sprintf("/%s/%s/%s", v1.PluralKindMap[kind], project, name)
+	return path.Join(d.Folder, v1.PluralKindMap[kind], project)
 }
 
-func generateResourceQuery(kind v1.Kind, name string) string {
-	return fmt.Sprintf("/%s/%s", v1.PluralKindMap[kind], name)
+func (d *DAO) generateResourceQuery(kind v1.Kind) string {
+	return path.Join(d.Folder, v1.PluralKindMap[kind])
 }
 
-func buildQuery(query databaseModel.Query) (string, error) {
+func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix string, isExist bool, err error) {
 	switch qt := query.(type) {
 	case *dashboard.Query:
-		return generateProjectResourceQuery(v1.KindDashboard, qt.Project, qt.NamePrefix), nil
+		pathFolder = d.generateProjectResourceQuery(v1.KindDashboard, qt.Project)
+		prefix = qt.NamePrefix
 	case *datasource.Query:
-		return generateProjectResourceQuery(v1.KindDatasource, qt.Project, qt.NamePrefix), nil
+		pathFolder = d.generateProjectResourceQuery(v1.KindDatasource, qt.Project)
+		prefix = qt.NamePrefix
 	case *folder.Query:
-		return generateProjectResourceQuery(v1.KindFolder, qt.Project, qt.NamePrefix), nil
+		pathFolder = d.generateProjectResourceQuery(v1.KindFolder, qt.Project)
+		prefix = qt.NamePrefix
 	case *globaldatasource.Query:
-		return generateResourceQuery(v1.KindGlobalDatasource, qt.NamePrefix), nil
+		pathFolder = d.generateResourceQuery(v1.KindGlobalDatasource)
+		prefix = qt.NamePrefix
 	case *project.Query:
-		return generateResourceQuery(v1.KindProject, qt.NamePrefix), nil
+		pathFolder = d.generateResourceQuery(v1.KindProject)
+		prefix = qt.NamePrefix
 	default:
-		return "", fmt.Errorf("this type of query '%T' is not managed", qt)
+		return "", "", false, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}
+	isExist, err = isFolderExist(pathFolder)
+	return
 }

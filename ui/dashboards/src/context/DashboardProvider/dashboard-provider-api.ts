@@ -241,3 +241,15 @@ const selectDiscardChangesConfirmationDialog = ({
 export function useDiscardChangesConfirmationDialog() {
   return useDashboardStore(selectDiscardChangesConfirmationDialog);
 }
+
+const selectEditJsonDialog = ({ editJsonDialog, openEditJsonDialog, closeEditJsonDialog }: DashboardStoreState) => ({
+  editJsonDialog,
+  openEditJsonDialog,
+  closeEditJsonDialog,
+});
+/**
+ * Gets the state for the edit JSON dialog.
+ */
+export function useEditJsonDialog() {
+  return useDashboardStore(selectEditJsonDialog);
+}

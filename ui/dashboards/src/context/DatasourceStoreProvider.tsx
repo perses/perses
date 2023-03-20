@@ -26,12 +26,14 @@ import {
   DatasourceStore,
   usePluginRegistry,
   DatasourceMetadata,
+  DatasourceClient,
 } from '@perses-dev/plugin-system';
 
 export interface DatasourceStoreProviderProps {
   dashboardResource: DashboardResource;
   datasourceApi: DatasourceApi;
   children?: React.ReactNode;
+  onCreate?: (client: DatasourceClient) => DatasourceClient;
 }
 
 // The external API for fetching datasource resources
@@ -54,7 +56,7 @@ export interface DatasourceApi {
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
-  const { dashboardResource, datasourceApi, children } = props;
+  const { dashboardResource, datasourceApi, onCreate, children } = props;
   const { project } = dashboardResource.metadata;
 
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
@@ -93,12 +95,18 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
 
   // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
   const getDatasourceClient = useCallback(
-    async function getClient<Client>(selector: DatasourceSelector): Promise<Client> {
+    async function getClient<Client extends DatasourceClient>(selector: DatasourceSelector): Promise<Client> {
       const { kind } = selector;
       const [{ spec, proxyUrl }, plugin] = await Promise.all([findDatasource(selector), getPlugin('Datasource', kind)]);
-      return plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
+
+      // allows extending client
+      const client = plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
+      if (onCreate !== undefined) {
+        return onCreate(client) as Client;
+      }
+      return client;
     },
-    [findDatasource, getPlugin]
+    [findDatasource, getPlugin, onCreate]
   );
 
   const listDatasourceMetadata = useEvent(async (datasourcePluginKind: string): Promise<DatasourceMetadata[]> => {
