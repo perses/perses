@@ -155,17 +155,21 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
     const xAxisData = [...getXValues(timeScale)];
 
+    // ensures color does not reset for every query
+    let seriesCount = 0;
+
     for (const result of queryResults) {
       // Skip queries that are still loading or don't have data
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
       for (let i = 0; i < result.data.series.length; i++) {
         const timeSeries = result.data.series[i];
+        seriesCount++;
 
         // pass echarts color to custom legend and tooltip
         let colorIndex = 0;
         if (Array.isArray(echartsPalette)) {
-          colorIndex = (i + 1) % echartsPalette.length;
+          colorIndex = seriesCount % echartsPalette.length;
         }
 
         if (timeSeries === undefined) {
