@@ -46,7 +46,7 @@ import {
   EMPTY_GRAPH_DATA,
   convertPercentThreshold,
 } from './utils/data-transform';
-import { getRandomColor } from './utils/palette-gen';
+import { getSeriesColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
@@ -172,16 +172,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        // TODO: simplify into separate getPaletteColor util, write unit test
-        let seriesColor = getRandomColor(formattedSeriesName);
-        // pass echarts color to custom legend and tooltip
-        let colorIndex = 0;
-        if (visual.palette?.kind === 'Categorical' && Array.isArray(echartsPalette)) {
-          colorIndex = seriesCount % echartsPalette.length;
-          const paletteColor =
-            typeof echartsPalette[colorIndex] === 'string' ? String(echartsPalette[colorIndex]) : '#000'; // TODO: set fallback color from theme
-          seriesColor = paletteColor;
-        }
+        const seriesColor = getSeriesColor(
+          formattedSeriesName,
+          seriesCount,
+          echartsPalette as string[],
+          visual.palette?.kind
+        );
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
@@ -192,7 +188,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name, // TODO: should query generate an id instead of using full name here and in getRandomColor?
+            id: timeSeries.name,
             label: formattedSeriesName,
             isSelected,
             color: seriesColor,

@@ -23,7 +23,6 @@ import {
   DEFAULT_POINT_RADIUS,
   VisualOptions,
 } from '../time-series-chart-model';
-import { getRandomColor } from './palette-gen';
 
 export interface TimeScale {
   startMs: number;
