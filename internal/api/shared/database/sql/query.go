@@ -80,7 +80,7 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}
 	return sql, args, nil
 }
 
-func generateProjectResourceSelectQuery(tableName string, project string, name string) (string, []interface{}) {
+func generatSelectQuery(tableName string, project string, name string) (string, []interface{}) {
 	queryBuilder := sqlbuilder.NewSelectBuilder().
 		Select(colDoc).
 		From(tableName)
@@ -89,16 +89,6 @@ func generateProjectResourceSelectQuery(tableName string, project string, name s
 	}
 	if len(project) > 0 {
 		queryBuilder.Where(queryBuilder.Equal(colProject, project))
-	}
-	return queryBuilder.Build()
-}
-
-func generateResourceSelectQuery(tableName string, name string) (string, []interface{}) {
-	queryBuilder := sqlbuilder.NewSelectBuilder().
-		Select(colDoc).
-		From(tableName)
-	if len(name) > 0 {
-		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", name)))
 	}
 	return queryBuilder.Build()
 }
@@ -108,22 +98,22 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 	var args []interface{}
 	switch qt := query.(type) {
 	case *dashboard.Query:
-		sqlQuery, args = generateProjectResourceSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
 	case *datasource.Query:
-		sqlQuery, args = generateProjectResourceSelectQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
 	case *folder.Query:
-		sqlQuery, args = generateProjectResourceSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
-		sqlQuery, args = generateResourceSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), qt.NamePrefix)
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
 	case *project.Query:
-		sqlQuery, args = generateResourceSelectQuery(d.generateCompleteTableName(tableProject), qt.NamePrefix)
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
 	default:
 		return "", nil, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}
 	return sqlQuery, args, nil
 }
 
-func generateProjectResourceDeleteQuery(tableName string, project string, name string) (string, []interface{}) {
+func generateDeleteQuery(tableName string, project string, name string) (string, []interface{}) {
 	queryBuilder := sqlbuilder.NewDeleteBuilder().
 		DeleteFrom(tableName)
 	if len(name) > 0 {
@@ -135,29 +125,20 @@ func generateProjectResourceDeleteQuery(tableName string, project string, name s
 	return queryBuilder.Build()
 }
 
-func generateResourceDeleteQuery(tableName string, name string) (string, []interface{}) {
-	queryBuilder := sqlbuilder.NewDeleteBuilder().
-		DeleteFrom(tableName)
-	if len(name) > 0 {
-		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", name)))
-	}
-	return queryBuilder.Build()
-}
-
 func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []interface{}, error) {
 	var sqlQuery string
 	var args []interface{}
 	switch qt := query.(type) {
 	case *dashboard.Query:
-		sqlQuery, args = generateProjectResourceDeleteQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
 	case *datasource.Query:
-		sqlQuery, args = generateProjectResourceDeleteQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
 	case *folder.Query:
-		sqlQuery, args = generateProjectResourceDeleteQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
-		sqlQuery, args = generateResourceDeleteQuery(d.generateCompleteTableName(tableGlobalDatasource), qt.NamePrefix)
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
 	case *project.Query:
-		sqlQuery, args = generateResourceDeleteQuery(d.generateCompleteTableName(tableProject), qt.NamePrefix)
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
 	default:
 		return "", nil, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}
