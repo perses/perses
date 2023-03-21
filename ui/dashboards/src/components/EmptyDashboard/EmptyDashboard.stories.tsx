@@ -15,6 +15,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EmptyDashboard } from '@perses-dev/dashboards';
 import { Button } from '@mui/material';
 import { action } from '@storybook/addon-actions';
+import ViewDashboardVariantOutline from 'mdi-material-ui/ViewDashboardVariantOutline';
 import {
   WithTemplateVariables,
   WithQueryParams,
@@ -63,6 +64,7 @@ export const EditMode: Story = {
 export const Custom: Story = {
   args: {
     title: 'Oh no!',
+    image: <ViewDashboardVariantOutline sx={{ fontSize: '100px', opacity: 0.5 }} color="secondary" />,
     description: 'This dashboard is empty.',
     additionalText: 'Tip: Add a panel group and a panel to get started.',
     actions: (
