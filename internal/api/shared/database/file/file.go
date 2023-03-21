@@ -175,6 +175,33 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 	return nil
 }
 
+func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
+	folder, prefix, isExist, err := d.buildQuery(query)
+	if err != nil {
+		return fmt.Errorf("unable to build the query: %s", err)
+	}
+	if !isExist {
+		return nil
+	}
+	if len(prefix) == 0 {
+		return os.RemoveAll(folder)
+	}
+	// in case there is a prefix file name we need to delete only the files that is matching the prefix and not the folder entirely
+	var files []string
+	if files, err = d.visit(folder, prefix); err != nil {
+		return err
+	}
+	if len(files) <= 0 {
+		return nil
+	}
+	for _, file := range files {
+		if removeErr := os.Remove(file); removeErr != nil {
+			return removeErr
+		}
+	}
+	return nil
+}
+
 func (d *DAO) HealthCheck() bool {
 	return true
 }
