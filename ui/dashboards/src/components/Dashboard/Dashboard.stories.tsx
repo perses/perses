@@ -12,14 +12,31 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { Dashboard } from '@perses-dev/dashboards';
+import { Dashboard, TemplateVariableList } from '@perses-dev/dashboards';
 import { action } from '@storybook/addon-actions';
-import { Button } from '@mui/material';
-import { WithDashboard, WithPluginRegistry, WithQueryClient } from '../../stories/decorators';
+import { Button, Stack } from '@mui/material';
+import { DashboardResource } from '@perses-dev/core';
+import {
+  WithDashboard,
+  WithDatasourceStore,
+  WithPluginRegistry,
+  WithQueryClient,
+  WithQueryParams,
+  WithTemplateVariables,
+  WithTimeRange,
+} from '../../stories/decorators';
 
 const meta: Meta<typeof Dashboard> = {
   component: Dashboard,
-  decorators: [WithDashboard, WithPluginRegistry, WithQueryClient],
+  decorators: [
+    WithDashboard,
+    WithTemplateVariables,
+    WithTimeRange,
+    WithDatasourceStore,
+    WithPluginRegistry,
+    WithQueryClient,
+    WithQueryParams,
+  ],
   parameters: {
     // Overriding the default on* regex for actions becaues we expose a LOT
     // of these by exposing the MUI BoxProps, and it was making the storybook
@@ -32,6 +49,143 @@ const meta: Meta<typeof Dashboard> = {
 export default meta;
 
 type Story = StoryObj<typeof Dashboard>;
+
+const DEFAULT_ALL_DASHBOARD: DashboardResource = {
+  kind: 'Dashboard',
+  metadata: {
+    name: 'TestAll',
+    created_at: '2023-03-17T20:13:03.570631Z',
+    updated_at: '2023-03-17T20:13:03.570631Z',
+    version: 0,
+    project: 'testing',
+  },
+  spec: {
+    display: {
+      name: 'TestAll',
+    },
+    panels: {
+      TimeSeries: {
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'TimeSeries',
+          },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        query: 'up{instance=~"$instance"}',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+    layouts: [
+      {
+        kind: 'Grid',
+        spec: {
+          display: {
+            title: 'Panel Group',
+            collapse: {
+              open: true,
+            },
+          },
+          items: [
+            {
+              x: 0,
+              y: 0,
+              width: 10,
+              height: 8,
+              content: {
+                $ref: '#/spec/panels/TimeSeries',
+              },
+            },
+          ],
+        },
+      },
+    ],
+    variables: [
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'instance',
+          display: {
+            name: 'Instance',
+            hidden: false,
+          },
+          allow_all_value: true,
+          allow_multiple: true,
+          default_value: ['$__all'],
+          plugin: {
+            kind: 'PrometheusLabelValuesVariable',
+            spec: {
+              label_name: 'instance',
+            },
+          },
+        },
+      },
+    ],
+    duration: '5m',
+  },
+};
+
+function formatProviderParameters(dashboardState: DashboardResource) {
+  return {
+    withDashboard: {
+      props: {
+        initialState: {
+          dashboardResource: dashboardState,
+        },
+        dashboardResource: dashboardState,
+      },
+    },
+    withDatasourceStore: {
+      props: {
+        dashboardResource: dashboardState,
+      },
+    },
+    withTemplateVariables: {
+      props: {
+        initialVariableDefinitions: dashboardState.spec.variables,
+      },
+    },
+    WithTimeRange: {
+      props: {
+        dashboardDuration: dashboardState.spec.duration,
+      },
+    },
+  };
+}
+
+export const ListVariableWithDefaultAll: Story = {
+  args: {},
+  parameters: {
+    happo: false,
+    ...formatProviderParameters(DEFAULT_ALL_DASHBOARD),
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={1}>
+        <TemplateVariableList />
+        <Dashboard {...args} />
+      </Stack>
+    );
+  },
+};
 
 export const DefaultEmptyState: Story = {
   args: {},

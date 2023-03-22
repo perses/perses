@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
-import { DashboardProvider, DashboardProviderProps, DashboardStoreProps } from '@perses-dev/dashboards';
+import { DashboardProvider, DashboardProviderProps } from '@perses-dev/dashboards';
+import { EMPTY_DASHBOARD_RESOURCE } from './constants';
 
 export type WithDashboardParameter = {
   props: Partial<DashboardProviderProps>;
@@ -23,32 +24,13 @@ function isWithDashboardParameter(parameter: unknown | WithDashboardParameter): 
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const DEFAULT_DASHBOARD_INITIAL_STATE: DashboardStoreProps = {
-  dashboardResource: {
-    kind: 'Dashboard',
-    metadata: {
-      name: 'My Dashboard',
-      project: 'Storybook',
-      created_at: '2021-11-09T00:00:00Z',
-      updated_at: '2021-11-09T00:00:00Z',
-      version: 0,
-    },
-    spec: {
-      duration: '1h',
-      variables: [],
-      layouts: [],
-      panels: {},
-    },
-  },
-};
-
 export const WithDashboard = (Story: StoryFn, context: StoryContext<unknown>) => {
   const initParameter = context.parameters.withDashboard;
   const parameter = isWithDashboardParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;
 
   return (
-    <DashboardProvider initialState={DEFAULT_DASHBOARD_INITIAL_STATE} {...props}>
+    <DashboardProvider initialState={{ dashboardResource: EMPTY_DASHBOARD_RESOURCE }} {...props}>
       <Story />
     </DashboardProvider>
   );

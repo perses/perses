@@ -22,7 +22,7 @@ import {
   WithDashboard,
   WithPluginRegistry,
   WithQueryClient,
-  DEFAULT_DASHBOARD_INITIAL_STATE,
+  EMPTY_DASHBOARD_RESOURCE,
 } from '../../stories/decorators';
 
 const meta: Meta<typeof EmptyDashboard> = {
@@ -50,7 +50,7 @@ export const EditMode: Story = {
     withDashboard: {
       props: {
         initialState: {
-          ...DEFAULT_DASHBOARD_INITIAL_STATE,
+          dashboardResource: EMPTY_DASHBOARD_RESOURCE,
           isEditMode: true,
         },
       },

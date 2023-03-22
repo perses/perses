@@ -12,27 +12,25 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
-import { TemplateVariableProvider, TemplateVariableProviderProps } from '@perses-dev/dashboards';
+import { TimeRangeProvider, TimeRangeProviderProps } from '@perses-dev/plugin-system';
 
-export type WithTemplateVariableParameter = {
-  props: Partial<TemplateVariableProviderProps>;
+export type WithTimeRangeParameter = {
+  props: Partial<TimeRangeProviderProps>;
 };
 
 // Type guard because storybook types parameters as `any`
-function isWithTemplateVariableParameter(
-  parameter: unknown | WithTemplateVariableParameter
-): parameter is WithTemplateVariableParameter {
+function isWithTimeRangeParameter(parameter: unknown | WithTimeRangeParameter): parameter is WithTimeRangeParameter {
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithTemplateVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
-  const initParameter = context.parameters.withTemplateVariables;
-  const parameter = isWithTemplateVariableParameter(initParameter) ? initParameter : undefined;
+export const WithTimeRange = (Story: StoryFn, context: StoryContext<unknown>) => {
+  const initParameter = context.parameters.withTimeRange;
+  const parameter = isWithTimeRangeParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;
 
   return (
-    <TemplateVariableProvider {...props}>
+    <TimeRangeProvider initialTimeRange={{ pastDuration: '1h' }} {...props}>
       <Story />
-    </TemplateVariableProvider>
+    </TimeRangeProvider>
   );
 };
