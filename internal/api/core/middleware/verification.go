@@ -16,7 +16,6 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,6 +24,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/shared"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 )
 
 type partialMetadata struct {
@@ -82,7 +82,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 			}
 			if len(projectName) > 0 {
 				if _, err := svc.Get(shared.Parameters{Name: projectName}); err != nil {
-					if errors.Is(err, shared.NotFoundError) {
+					if databaseModel.IsKeyNotFound(err) {
 						return fmt.Errorf("%w, metadata.project %q doesn't exist", shared.BadRequestError, projectName)
 					}
 					return err

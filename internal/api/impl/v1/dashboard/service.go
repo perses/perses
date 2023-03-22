@@ -55,12 +55,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
-		if databaseModel.IsKeyConflict(err) {
-			logrus.Debugf("unable to create the dashboard %q. It already exists", entity.Metadata.Name)
-			return nil, shared.ConflictError
-		}
-		logrus.WithError(err).Errorf("unable to perform the creation of the dashboard %q, something wrong with the database", entity.Metadata.Name)
-		return nil, shared.InternalError
+		return nil, err
 	}
 	return entity, nil
 }
@@ -90,42 +85,24 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 	}
 
 	// find the previous version of the dashboard
-	oldEntity, err := s.Get(parameters)
+	oldEntity, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
 		return nil, err
 	}
-	oldObject := oldEntity.(*v1.Dashboard)
-	entity.Metadata.Update(oldObject.Metadata)
-	if err := s.dao.Update(entity); err != nil {
-		logrus.WithError(err).Errorf("unable to perform the update of the dashboard %q, something wrong with the database", entity.Metadata.Name)
-		return nil, shared.InternalError
+	entity.Metadata.Update(oldEntity.Metadata)
+	if updateErr := s.dao.Update(entity); updateErr != nil {
+		logrus.WithError(updateErr).Errorf("unable to perform the update of the dashboard %q, something wrong with the database", entity.Metadata.Name)
+		return nil, updateErr
 	}
 	return entity, nil
 }
 
 func (s *service) Delete(parameters shared.Parameters) error {
-	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
-		if databaseModel.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the dashboard %q", parameters.Name)
-			return shared.NotFoundError
-		}
-		logrus.WithError(err).Errorf("unable to delete the dashboard %q, something wrong with the database", parameters.Name)
-		return shared.InternalError
-	}
-	return nil
+	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
 func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
-	entity, err := s.dao.Get(parameters.Project, parameters.Name)
-	if err != nil {
-		if databaseModel.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the dashboard %q", parameters.Name)
-			return nil, shared.NotFoundError
-		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the dashboard %q, something wrong with the database", parameters.Name)
-		return nil, shared.InternalError
-	}
-	return entity, nil
+	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {

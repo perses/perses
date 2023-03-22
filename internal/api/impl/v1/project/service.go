@@ -55,12 +55,7 @@ func (s *service) create(entity *v1.Project) (*v1.Project, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
-		if databaseModel.IsKeyConflict(err) {
-			logrus.Debugf("unable to create the project %q. It already exits", entity.Metadata.Name)
-			return nil, shared.ConflictError
-		}
-		logrus.WithError(err).Errorf("unable to perform the creation of the project %q, something wrong with the database", entity.Metadata.Name)
-		return nil, shared.InternalError
+		return nil, err
 	}
 	return entity, nil
 }
@@ -78,15 +73,14 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request don't match", shared.BadRequestError)
 	}
 	// find the previous version of the project
-	oldEntity, err := s.Get(parameters)
+	oldEntity, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		return nil, err
 	}
-	oldObject := oldEntity.(*v1.Project)
-	entity.Metadata.Update(oldObject.Metadata)
-	if err := s.dao.Update(entity); err != nil {
-		logrus.WithError(err).Errorf("unable to perform the update of the project %q, something wrong with the database", entity.Metadata.Name)
-		return nil, shared.InternalError
+	entity.Metadata.Update(oldEntity.Metadata)
+	if updateErr := s.dao.Update(entity); updateErr != nil {
+		logrus.WithError(updateErr).Errorf("unable to perform the update of the project %q, something wrong with the database", entity.Metadata.Name)
+		return nil, updateErr
 	}
 	return entity, nil
 }
@@ -105,28 +99,11 @@ func (s *service) Delete(parameters shared.Parameters) error {
 		logrus.WithError(err).Error("unable to delete all datasources")
 		return err
 	}
-	if err := s.dao.Delete(parameters.Name); err != nil {
-		if databaseModel.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the project %q", parameters.Name)
-			return shared.NotFoundError
-		}
-		logrus.WithError(err).Errorf("unable to delete the project %q, something wrong with the database", parameters.Name)
-		return shared.InternalError
-	}
-	return nil
+	return s.dao.Delete(parameters.Name)
 }
 
 func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
-	entity, err := s.dao.Get(parameters.Name)
-	if err != nil {
-		if databaseModel.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the project %q", parameters.Name)
-			return nil, shared.NotFoundError
-		}
-		logrus.WithError(err).Errorf("unable to find the previous version of the project %q, something wrong with the database", parameters.Name)
-		return nil, shared.InternalError
-	}
-	return entity, nil
+	return s.dao.Get(parameters.Name)
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
