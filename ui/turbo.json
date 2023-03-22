@@ -23,7 +23,8 @@
     // than our packages and this makes it easier to separate.
     "storybook:start": {
       "dependsOn": [],
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "storybook:build": {
       "dependsOn": [],
