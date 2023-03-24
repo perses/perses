@@ -1,7 +1,7 @@
 if #panel.type == "timeseries" || #panel.type == "graph" {
     kind: "TimeSeriesChart"
     spec: {
-        queries: [ for _, target in #panel.targets {
+        queries: [ if #panel.targets != _|_ for _, target in #panel.targets {
             kind: "TimeSeriesQuery"
             spec: {
                 #target: target
