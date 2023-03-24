@@ -52,7 +52,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { queries, thresholds, y_axis, __experimentalEChartsOptionsOverride },
+    spec: { queries, thresholds, y_axis },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
@@ -272,7 +272,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         unit={unit}
         grid={gridOverrides}
         onDataZoom={handleDataZoom}
-        __experimentalEChartsOptionsOverride={__experimentalEChartsOptionsOverride}
       />
       {legend && graphData.legendItems && (
         <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />

@@ -19,6 +19,7 @@ import type {
   LineSeriesOption,
   LegendComponentOption,
   YAXisComponentOption,
+  TooltipComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
@@ -212,7 +213,7 @@ export function LineChart({
       }}
       onDoubleClick={handleOnDoubleClick}
     >
-      {showTooltip === true && (
+      {showTooltip === true && (option.tooltip as TooltipComponentOption).showContent === false && (
         <TimeSeriesTooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit} />
       )}
 
