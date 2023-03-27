@@ -19,7 +19,7 @@ channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) on [Matrix](ht
 
 To help during the release process, we created a script that generates the changelog based on the git history.
 
-To make it works correctly, commit or PR's title should follow the following naming convention:
+To make it work correctly, commit or PR's title should follow the following naming convention:
 
 `[<catalog_entry>] <commit message>`
 
