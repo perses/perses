@@ -131,7 +131,7 @@ export function getUniqueKeyForPrometheusResult(
  */
 export function getFormattedPrometheusSeriesName(query: string, metric: Metric, formatter?: string) {
   if (isEmptyObject(metric)) {
-    return query;
+    return { name: query };
   }
 
   // Name the series after the metric labels or if no metric, use the query
