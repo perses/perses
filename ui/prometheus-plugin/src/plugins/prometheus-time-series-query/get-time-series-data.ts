@@ -89,7 +89,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
 
       // Name the series after the metric labels or if no metric, use the query
       let name = getUniqueKeyForPrometheusResult(metric);
-      if (name === '') {
+      if (name === '' || name === '{}') {
         name = query;
       }
 
