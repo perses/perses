@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Notice } from '@perses-dev/core';
-import { TimeSeriesData, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { Notice, TimeSeriesData } from '@perses-dev/core';
+import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import {
   parseValueTuple,
