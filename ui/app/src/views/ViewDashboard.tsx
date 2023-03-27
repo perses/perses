@@ -18,14 +18,14 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { DashboardResource } from '@perses-dev/core';
 import { dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
-import { useDatasourceApi } from '../model/datasource-api';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 import { useIsReadonly } from '../model/config-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { CreateAction } from '../model/action';
+import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
 
 /**
  * Generated a resource name valid for the API.
@@ -52,7 +52,12 @@ function ViewDashboard() {
 
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar, warningSnackbar } = useSnackbar();
-  const datasourceApi = useDatasourceApi();
+  const [datasourceApi] = useState(new CachedDatasourceAPI(new HTTPDatasourceAPI()));
+  useEffect(() => {
+    // warm up the caching of the datasources
+    datasourceApi.listDatasources(projectName, undefined);
+    datasourceApi.listGlobalDatasources(undefined);
+  }, [datasourceApi, projectName]);
   const { isLoading } = useDashboard(projectName, dashboardName);
   let { data } = useDashboard(projectName, dashboardName);
   const isReadonly = useIsReadonly();
