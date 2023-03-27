@@ -15,6 +15,7 @@ package shared
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -57,4 +58,8 @@ func HandleError(err error) error {
 	}
 	logrus.WithError(err).Error("unexpected error not handle")
 	return echo.NewHTTPError(http.StatusInternalServerError, InternalError.message)
+}
+
+func HandleBadRequestError(msg string) error {
+	return fmt.Errorf("%w: %s", BadRequestError, msg)
 }

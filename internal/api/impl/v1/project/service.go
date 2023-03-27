@@ -48,7 +48,7 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 	if projectObject, ok := entity.(*v1.Project); ok {
 		return s.create(projectObject)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting project format, received '%T'", shared.BadRequestError, entity)
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
 func (s *service) create(entity *v1.Project) (*v1.Project, error) {
@@ -64,13 +64,13 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 	if projectObject, ok := entity.(*v1.Project); ok {
 		return s.update(projectObject, parameters)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting project format, received '%T'", shared.BadRequestError, entity)
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
 func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.Project, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in project %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
-		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request don't match", shared.BadRequestError)
+		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
 	// find the previous version of the project
 	oldEntity, err := s.dao.Get(parameters.Name)

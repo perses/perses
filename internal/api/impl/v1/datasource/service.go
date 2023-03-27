@@ -43,12 +43,12 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 	if datasourceObject, ok := entity.(*v1.Datasource); ok {
 		return s.create(datasourceObject)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting Datasource format, received '%T'", shared.BadRequestError, entity)
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Datasource format, received '%T'", entity))
 }
 
 func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
 	if err := s.validate(entity); err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+		return nil, shared.HandleBadRequestError(err.Error())
 	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
@@ -62,22 +62,22 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 	if DatasourceObject, ok := entity.(*v1.Datasource); ok {
 		return s.update(DatasourceObject, parameters)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting Datasource format, received '%T'", shared.BadRequestError, entity)
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Datasource format, received '%T'", entity))
 }
 
 func (s *service) update(entity *v1.Datasource, parameters shared.Parameters) (*v1.Datasource, error) {
 	if err := s.validate(entity); err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+		return nil, shared.HandleBadRequestError(err.Error())
 	}
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
-		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request don't match", shared.BadRequestError)
+		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
 	if len(entity.Metadata.Project) == 0 {
 		entity.Metadata.Project = parameters.Project
 	} else if entity.Metadata.Project != parameters.Project {
 		logrus.Debugf("project in datasource %q and project from the http request %q don't match", entity.Metadata.Project, parameters.Project)
-		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request don't match", shared.BadRequestError)
+		return nil, shared.HandleBadRequestError("metadata.project and the project name in the http path request don't match")
 	}
 	// find the previous version of the Datasource
 	oldEntity, err := s.dao.Get(parameters.Project, parameters.Name)

@@ -43,13 +43,13 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 	if dashboardObject, ok := entity.(*v1.Dashboard); ok {
 		return s.create(dashboardObject)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting dashboard format, received '%T'", shared.BadRequestError, entity)
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
 }
 
 func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// verify this new dashboard passes the validation
 	if err := validate.Dashboard(entity, s.sch); err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+		return nil, shared.HandleBadRequestError(err.Error())
 	}
 
 	// Update the time contains in the entity
@@ -64,24 +64,24 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 	if dashboardObject, ok := entity.(*v1.Dashboard); ok {
 		return s.update(dashboardObject, parameters)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting dashboard format, received '%T'", shared.BadRequestError, entity)
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
 }
 
 func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v1.Dashboard, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in dashboard %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
-		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request don't match", shared.BadRequestError)
+		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
 	if len(entity.Metadata.Project) == 0 {
 		entity.Metadata.Project = parameters.Project
 	} else if entity.Metadata.Project != parameters.Project {
 		logrus.Debugf("project in dashboard %q and project from the http request %q don't match", entity.Metadata.Project, parameters.Project)
-		return nil, fmt.Errorf("%w: metadata.project and the project name in the http path request don't match", shared.BadRequestError)
+		return nil, shared.HandleBadRequestError("metadata.project and the project name in the http path request don't match")
 	}
 
 	// verify this new dashboard passes the validation
 	if err := validate.Dashboard(entity, s.sch); err != nil {
-		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
+		return nil, shared.HandleBadRequestError(err.Error())
 	}
 
 	// find the previous version of the dashboard
