@@ -162,7 +162,7 @@ func (m *mig) Migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
 	err := mappingVal.Err()
 	if err != nil {
 		logrus.WithError(err).Trace("Unable to compile the migration schema using the received dashboard to resolve the paths")
-		return nil, shared.HandleBadRequestError(err.Error())
+		return nil, shared.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses dashboard: %s", err))
 	}
 	logrus.Tracef("final value: %#v", mappingVal)
 
@@ -175,7 +175,7 @@ func (m *mig) Migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
 	err = json.Unmarshal(persesDashboardJSON, &persesDashboard)
 	if err != nil {
 		logrus.WithError(err).Trace("Unable to unmarshall JSON bytes to Dashboard struct")
-		return nil, shared.HandleBadRequestError(err.Error())
+		return nil, shared.HandleBadRequestError(fmt.Sprintf("the Perses dashboard constraints are not met: %s", err))
 	}
 
 	return &persesDashboard, nil
