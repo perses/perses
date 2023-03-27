@@ -16,6 +16,7 @@ import {
   replaceTemplateVariable,
   replaceTemplateVariables,
   formatSeriesName,
+  getFormattedPrometheusSeriesName,
   getUniqueKeyForPrometheusResult,
 } from './utils';
 
@@ -152,5 +153,13 @@ describe('getUniqueKeyForPrometheusResult', () => {
     };
     const result = getUniqueKeyForPrometheusResult(labels, { removeExprWrap: false });
     expect(result).toEqual('node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}');
+  });
+});
+
+describe('getFormattedPrometheusSeriesName', () => {
+  it('should resolve empty metric to instead show query', () => {
+    const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
+    const metric = {};
+    expect(getFormattedPrometheusSeriesName(query, metric)).toEqual(query);
   });
 });

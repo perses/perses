@@ -13,5 +13,6 @@
 
 export * from './event';
 export * from './fetch';
+export * from './is-empty-object';
 export * from './memo';
 export * from './panel-refs';

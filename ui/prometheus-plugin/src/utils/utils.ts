@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableValue } from '@perses-dev/core';
+import { isEmptyObject, VariableValue } from '@perses-dev/core';
 import { VariableStateMap } from '@perses-dev/plugin-system';
+import { Metric } from '../model/api-types';
 
 export function replaceTemplateVariables(text: string, variableState: VariableStateMap): string {
   const variables = parseTemplateVariables(text);
@@ -123,4 +124,24 @@ export function getUniqueKeyForPrometheusResult(
     return stringifyPrometheusMetricLabels(metricLabels, removeExprWrap);
   }
   return '';
+}
+
+/*
+ * Determine human-readable series name to be used in legend and tooltip
+ */
+export function getFormattedPrometheusSeriesName(query: string, metric: Metric, formatter?: string) {
+  if (isEmptyObject(metric)) {
+    return query;
+  }
+
+  // Name the series after the metric labels or if no metric, use the query
+  let name = getUniqueKeyForPrometheusResult(metric);
+  if (name === '') {
+    name = query;
+  }
+
+  // Query editor allows you to define an optional series_name_format
+  // property to customize legend and tooltip display
+  const formattedName = formatter ? formatSeriesName(formatter, metric) : name;
+  return { name, formattedName };
 }

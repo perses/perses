@@ -22,7 +22,7 @@ import {
   getRangeStep,
   DEFAULT_PROM,
 } from '../../model';
-import { getUniqueKeyForPrometheusResult, replaceTemplateVariables, formatSeriesName } from '../../utils';
+import { getFormattedPrometheusSeriesName, replaceTemplateVariables } from '../../utils';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
@@ -87,15 +87,8 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     series: result.map((value) => {
       const { metric, values } = value;
 
-      // Name the series after the metric labels or if no metric, use the query
-      let name = getUniqueKeyForPrometheusResult(metric);
-      if (name === '' || name === '{}') {
-        name = query;
-      }
-
-      // Query editor allows you to define an optional series_name_format
-      // property to customize legend and tooltip display
-      const formattedName = spec.series_name_format ? formatSeriesName(spec.series_name_format, metric) : name;
+      // Account for series_name_format from query editor when determining name to show in legend, tooltip, etc.
+      const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, spec.series_name_format);
 
       return {
         name,
