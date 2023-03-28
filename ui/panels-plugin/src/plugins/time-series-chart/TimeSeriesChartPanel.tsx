@@ -243,7 +243,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   let legendHeight = LEGEND_HEIGHT_SM;
   if (legend && legend.position === 'Right') {
     legendHeight = adjustedContentDimensions.height;
-  } else if (adjustedContentDimensions.height > PANEL_HEIGHT_LG_BREAKPOINT) {
+  } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
     legendHeight = LEGEND_HEIGHT_LG;
   }
 

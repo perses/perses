@@ -42,6 +42,7 @@ export type VisualOptions = {
   area_opacity?: number;
   show_points?: 'Auto' | 'Always';
   point_radius?: number;
+  stack?: StackOptions;
   connect_nulls?: boolean;
 };
 
@@ -88,6 +89,9 @@ export const VISUAL_CONFIG = {
     max: 1,
     step: 0.05,
   },
+  stack: {
+    label: 'Stack Series',
+  },
   connect_nulls: {
     label: 'Connect Nulls',
   },
@@ -108,6 +112,22 @@ export const Y_AXIS_CONFIG = {
   min: { label: 'Min' },
   max: { label: 'Max' },
 };
+
+// None is equivalent to undefined since stack is optional
+export type StackOptions = 'None' | 'All' | 'Percent'; // TODO: add Percent option support
+
+export const STACK_CONFIG = {
+  None: { label: 'None' },
+  All: { label: 'All' },
+  Percent: { label: 'Percent' }, // temporarily disabled
+};
+
+export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {
+  return {
+    id: id as StackOptions,
+    ...config,
+  };
+});
 
 export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
 export const LEGEND_HEIGHT_SM = 40;
