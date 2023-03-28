@@ -28,7 +28,15 @@ import {
   useChartsTheme,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
-import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_Y_AXIS,
+  PANEL_HEIGHT_LG_BREAKPOINT,
+  LEGEND_HEIGHT_SM,
+  LEGEND_HEIGHT_LG,
+} from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -36,6 +44,7 @@ import {
   getYValues,
   getXValues,
   EMPTY_GRAPH_DATA,
+  convertPercentThreshold,
 } from './utils/data-transform';
 import { getRandomColor } from './utils/palette-gen';
 
@@ -178,11 +187,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const thresholdLineColor = step.color ?? stepPaletteColor;
         const stepOption: StepOptions = {
           color: thresholdLineColor,
-          value: step.value,
+          value:
+            thresholds.mode === 'Percent'
+              ? convertPercentThreshold(step.value, graphData.timeSeries, yAxis.max, yAxis.min)
+              : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
         // TODO: switch back to markLine once alternate tooltip created
-        const thresholdData = Array(xAxisData.length).fill(step.value);
+        const thresholdData = Array(xAxisData.length).fill(stepOption.value);
         const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
         graphData.timeSeries.push(thresholdLineSeries);
       });
@@ -191,7 +203,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, yAxis.max, yAxis.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
@@ -226,7 +238,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   }
 
   const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
-  const legendHeight = legend && legend.position === 'Right' ? adjustedContentDimensions.height : 40;
+
+  // TODO: account for number of time series returned when adjusting legend spacing
+  let legendHeight = LEGEND_HEIGHT_SM;
+  if (legend && legend.position === 'Right') {
+    legendHeight = adjustedContentDimensions.height;
+  } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
+    legendHeight = LEGEND_HEIGHT_LG;
+  }
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;

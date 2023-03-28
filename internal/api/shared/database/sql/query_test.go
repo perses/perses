@@ -19,35 +19,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateResourceSelectQuery(t *testing.T) {
-	testSuite := []struct {
-		title    string
-		name     string
-		sqlQuery string
-		sqlArgs  []interface{}
-	}{
-		{
-			title:    "with a prefix name",
-			name:     "test",
-			sqlQuery: "SELECT doc FROM perses.project WHERE name LIKE ?",
-			sqlArgs:  []interface{}{"test%"},
-		},
-		{
-			title:    "empty query",
-			name:     "",
-			sqlQuery: "SELECT doc FROM perses.project",
-		},
-	}
-
-	for _, test := range testSuite {
-		t.Run(test.title, func(t *testing.T) {
-			sqlQuery, args := generateResourceSelectQuery("perses.project", test.name)
-			assert.Equal(t, test.sqlQuery, sqlQuery)
-			assert.Equal(t, test.sqlArgs, args)
-		})
-	}
-}
-
 func TestGenerateProjectResourceSelectQuery(t *testing.T) {
 	testSuite := []struct {
 		title    string
@@ -58,6 +29,13 @@ func TestGenerateProjectResourceSelectQuery(t *testing.T) {
 	}{
 		{
 			title:    "no project with a prefix name",
+			project:  "",
+			name:     "test",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []interface{}{"test%"},
+		},
+		{
+			title:    "with a prefix name",
 			project:  "",
 			name:     "test",
 			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
@@ -80,7 +58,7 @@ func TestGenerateProjectResourceSelectQuery(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			sqlQuery, args := generateProjectResourceSelectQuery("perses.dashboard", test.project, test.name)
+			sqlQuery, args := generatSelectQuery("perses.dashboard", test.project, test.name)
 			assert.Equal(t, test.sqlQuery, sqlQuery)
 			assert.Equal(t, test.sqlArgs, args)
 		})

@@ -2,7 +2,7 @@
 
 This package is used to generate documentation for Perses UI components using [Storybook](https://storybook.js.org/).
 
-> This project currently uses the [v7 beta](https://storybook.js.org/docs/7.0/react/get-started/introduction) of Storybook. Be sure to reference the associated [v7 beta documentation](https://storybook.js.org/docs/7.0/react/get-started/introduction).
+> This project currently uses the [v7 beta](https://storybook.js.org/docs/7.0/react/writing-stories/introduction) of Storybook. Be sure to reference the associated [v7 beta documentation](https://storybook.js.org/docs/7.0/react/writing-stories/introduction).
 
 ## Getting started
 
@@ -99,6 +99,66 @@ Storybook configuration lives in `src/config` and includes the following:
 - `DocsContainer` - Custom container for the docs addon to make it work with the dark mode addon.
 
 Storybook is currently configured to build with [Webpack 5](https://storybook.js.org/docs/react/builders/webpack#webpack-5).
+
+## Visual tests
+
+This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. Visual tests generated for storybook use `happo-plugin-storybook` ([relevant documentation](https://docs.happo.io/docs/storybook)) and are listed under the `perses-storybook` project in Happo. See the `e2e` package for information about visual tests generated using that tooling.
+
+- Use visual tests for use cases where a different type of test will not provide adequate coverage (e.g. canvas-based visualizations, styling).
+- Only create visual tests that can reliably be reproduced. Flaky tests are often worse than no tests at all because they lead to toil and reduce trust in the overall test set. Some examples of things that can lead to unreliable tests are:
+  - Inconsistent data sources. Consider using consistent mock data to avoid this. See `mockQueryRangeRequests` in `DashboardPage` for an example. Make sure to reset any mocked routes using `unroute` when the test is finished.
+  - Time zones. Tests are automatically decorated with `TimeZoneProvider` set to `UTC` when running in Happo to provide consistent time zone usage for visual testing.
+  - Current time.
+  - Dynamic content. Wait for everything to load before taking a snapshot.
+  - If individual elements are known to cause inconsistencies, consider adding the `data-happo-hide` attribute. This will render the element invisible in the screenshot.
+
+### Configuration
+
+By default, visual tests will be taken for every story in storybook. You can disable stories by setting `parameters.happo` to `false` (see [relevant docs](https://docs.happo.io/docs/storybook#disabling-a-story)).
+
+By default, visual tests will be taking for both light mode and dark mode. You can modify this by setting `parameters.happo.themes` to an array of the themes you want (e.g. `['light']` to just use light mode). This is a customization we configured on top of happo's built in behavior, so this is not mentioned in their documentation.
+
+#### Waiting for stable canvas
+
+Happo does its best to wait for the page to stabilize before taking a screenshot, but it does not do anything special for canvas. To work around this, you can use the `parameters.happo.beforeScreenshot` in concert with an internal `waitForStableCanvas` utility in the storybook package to attempt to wait for a stable canvas element before taking a screenshot.
+
+```ts
+import { waitForStableCanvas } from '@perses-dev/storybook';
+
+const meta: Meta<typeof LineChart> = {
+  component: LineChart,
+  parameters: {
+    happo: {
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
+      },
+    },
+  },
+};
+```
+
+### Happo issues
+
+We have some customization over the default `happo-storybook` configuration related to some differences in our codebase.
+
+- We explicitly build storybook before running happo and have `usePrebuiltPackage` set to `true`. This is needed because the name of the executable for storybook changed in v7 and happo hasn't updated to account for it yet.
+- We need to set explicitly set the `HAPPO_COMMAND` env var when calling `happo-ci-github-actions` to run in CI. Their default script looks in the wrong location because it doesn't fully account for the complexity of a monorepo setup like ours.
+
+#### Debugging
+
+- Open the storybook iframe url: http://localhost:6006/iframe.html
+- Run the following in the console to move through stories the way happo does when taking snapshots: `happo.nextExample().then((item) => console.log(item))`
+
+## Using storybook package utilities
+
+We have a small number of common helper utilities for use in stories that live in the `storybook` package. In order to avoid errors around TS rootDir, you can leverage these utilities by doing the following:
+
+- Add `@perses-dev/storybook` as a `devDependency`. This is important to avoid attempting to ship these utilities when we build the public packages. Referencing the utilities this way avoids TS `rootDir` errors that would occur if we attempted to reference them using a relative file path.
+
+To make this work properly, we must do the following in the `storybook` package config:
+
+- DO NOT set other packages as dependencies in `package.json`. If we do this, turborepo will throw circular dependency errors. Instead, we use a combination of webpack and tsconfig aliases to reference the source code for these packages.
+- Set an alias for `@perses-dev/storybook` in the storybook webpack config. Otherwise, it has trouble finding the package code.
 
 ## Known issues
 

@@ -27,6 +27,7 @@ import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-pan
 import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 import { createDiscardChangesDialogSlice, DiscardChangesConfirmationDialogSlice } from './discard-changes-dialog-slice';
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
+import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -36,7 +37,8 @@ export interface DashboardStoreState
     PanelEditorSlice,
     DeletePanelSlice,
     DiscardChangesConfirmationDialogSlice,
-    DuplicatePanelSlice {
+    DuplicatePanelSlice,
+    EditJsonDialogSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   defaultTimeRange: RelativeTimeRange;
@@ -95,33 +97,46 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, layouts, panels, duration },
+    spec: { display, duration },
     metadata,
   } = dashboardResource;
+
+  let {
+    spec: { layouts, panels },
+  } = dashboardResource;
+
+  // Set fallbacks in case the frontend is used with a non-Perses backend
+  layouts = layouts ?? [];
+  panels = panels ?? {};
+
   const store = createStore<DashboardStoreState>()(
     immer(
       devtools((...args) => {
         const [set] = args;
         return {
+          /* Groups */
           ...createPanelGroupSlice(layouts)(...args),
-          ...createPanelSlice(panels)(...args),
           ...createPanelGroupEditorSlice(...args),
           ...createDeletePanelGroupSlice(...args),
+          /* Panels */
+          ...createPanelSlice(panels)(...args),
           ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
-          ...createDiscardChangesDialogSlice(...args),
           ...createDuplicatePanelSlice()(...args),
+          /* General */
+          ...createDiscardChangesDialogSlice(...args),
+          ...createEditJsonDialogSlice(...args),
           metadata,
           display,
           defaultTimeRange: { pastDuration: duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { display, panels, layouts } }) => {
+          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [] } }) => {
             set((state) => {
               state.metadata = metadata;
               state.display = display;
-              const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panels = panels;
+              const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
             });

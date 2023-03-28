@@ -33,7 +33,7 @@ export interface StatChartData {
   seriesData?: GraphSeries;
 }
 
-interface StatChartProps {
+export interface StatChartProps {
   width: number;
   height: number;
   data: StatChartData;

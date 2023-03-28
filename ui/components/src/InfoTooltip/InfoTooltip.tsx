@@ -41,6 +41,11 @@ export const InfoTooltip = ({
   enterDelay,
   enterNextDelay,
 }: InfoTooltipProps) => {
+  // Only wrap in a div if passed a non-element. This enables the tooltip to
+  // support text with a wrapper div while avoiding breaking css on element
+  // children by unnecessarily wrapping them.
+  const formattedChildren = React.isValidElement(children) ? children : <div>{children}</div>;
+
   return (
     <StyledTooltip
       arrow
@@ -50,7 +55,7 @@ export const InfoTooltip = ({
       enterDelay={enterDelay ?? 500}
       enterNextDelay={enterNextDelay ?? 500}
     >
-      <div>{children}</div>
+      {formattedChildren}
     </StyledTooltip>
   );
 };

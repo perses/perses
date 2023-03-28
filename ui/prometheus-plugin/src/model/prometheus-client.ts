@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson } from '@perses-dev/core';
+import { fetch, fetchJson, RequestHeaders } from '@perses-dev/core';
+import { DatasourceClient } from '@perses-dev/plugin-system';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -25,18 +26,20 @@ import {
 
 interface PrometheusClientOptions {
   datasourceUrl: string;
+  headers?: RequestHeaders;
 }
 
-export interface PrometheusClient {
+export interface PrometheusClient extends DatasourceClient {
   options: PrometheusClientOptions;
-  instantQuery(params: InstantQueryRequestParameters): Promise<InstantQueryResponse>;
-  rangeQuery(params: RangeQueryRequestParameters): Promise<RangeQueryResponse>;
-  labelNames(params: LabelNamesRequestParameters): Promise<LabelNamesResponse>;
-  labelValues(params: LabelValuesRequestParameters): Promise<LabelValuesResponse>;
+  instantQuery(params: InstantQueryRequestParameters, headers?: RequestHeaders): Promise<InstantQueryResponse>;
+  rangeQuery(params: RangeQueryRequestParameters, headers?: RequestHeaders): Promise<RangeQueryResponse>;
+  labelNames(params: LabelNamesRequestParameters, headers?: RequestHeaders): Promise<LabelNamesResponse>;
+  labelValues(params: LabelValuesRequestParameters, headers?: RequestHeaders): Promise<LabelValuesResponse>;
 }
 
 export interface QueryOptions {
   datasourceUrl: string;
+  headers?: RequestHeaders;
 }
 
 /**
@@ -81,17 +84,18 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, par
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
-  const { datasourceUrl } = queryOptions;
+  const { datasourceUrl, headers } = queryOptions;
 
   const url = `${datasourceUrl}${apiURI}`;
   const init = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
+      ...headers,
     },
     body: createSearchParams(params),
   };
-  return fetchJson<TResponse>(url, init);
+  return fetchResults<TResponse>(url, init);
 }
 
 // Request parameter values we know how to serialize
@@ -127,4 +131,13 @@ function createSearchParams<T extends RequestParams<T>>(params: T) {
     }
   }
   return searchParams;
+}
+
+/**
+ * Fetch JSON and parse warnings for query inspector
+ */
+export async function fetchResults<T>(...args: Parameters<typeof global.fetch>) {
+  const response = await fetch(...args);
+  const json: T = await response.json();
+  return { ...json, rawResponse: response };
 }

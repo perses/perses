@@ -129,6 +129,10 @@ export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => 
   };
 });
 
+export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
+export const LEGEND_HEIGHT_SM = 40;
+export const LEGEND_HEIGHT_LG = 100;
+
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
  */

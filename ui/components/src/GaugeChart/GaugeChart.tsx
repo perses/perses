@@ -34,7 +34,7 @@ export type GaugeSeries = {
   label: string;
 };
 
-interface GaugeChartProps {
+export interface GaugeChartProps {
   width: number;
   height: number;
   data: GaugeSeries;

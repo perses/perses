@@ -37,6 +37,7 @@ type DAO interface {
 	Create(entity *v1.Datasource) error
 	Update(entity *v1.Datasource) error
 	Delete(project string, name string) error
+	DeleteAll(project string) error
 	Get(project string, name string) (*v1.Datasource, error)
 	List(q databaseModel.Query) ([]*v1.Datasource, error)
 }

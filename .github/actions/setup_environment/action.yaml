@@ -14,7 +14,7 @@ runs:
       uses: actions/setup-go@v3
       if: inputs.enable_go == 'true'
       with:
-        go-version: 1.19.x
+        go-version: 1.20.x
     - uses: actions/cache@v3.0.8
       if: inputs.enable_go == 'true'
       with:

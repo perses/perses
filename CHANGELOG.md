@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.25.0 / 2023-03-20
+
+- [FEATURE] Implement Edit JSON Dialog (#1012)
+- [ENHANCEMENT] Logo added to app header (#1010)
+- [ENHANCEMENT] Extend datasource with onCreate prop, return warnings (#1019)
+- [ENHANCEMENT] TimeSeriesData now supports labels (#1014)
+- [ENHANCEMENT] Dashboard displays empty state (#1009)
+- [BUGFIX] Make emptyDashboardProps optional on Dashboard (#1028)
+- [BUGFIX] Add story for Legend and export LegendProps (#1025)
+- [BUGFIX] Fix react warnings (#1021)
+- [BUGFIX] Fix getting dashboard from an empty project (#1017)
+- [BUGFIX] Add stories for chart components and export prop types (#1008)
+- [BUGFIX] Add null checks for layouts and panels in DashboardProvider (#999)
+- [BREAKINGCHANGE] Add view mode to empty state (#1022)
+
+## 0.24.0 / 2023-03-06
+
+- [FEATURE] Ability to edit thresholds for Time Series and Stat Charts (#992)
+- [FEATURE] Support `connect_nulls` and `show_points` options in time series panel (#990)
+- [FEATURE] Ability to edit thresholds in panel options for gauge chart (#968)
+- [FEATURE] New `area_opacity` option in time series panel (#962)
+- [FEATURE] Support mysql for the main DB (#961)
+- [ENHANCEMENT] Legend height increased for tall panels (#998)
+- [ENHANCEMENT] Pass headers in Prometheus datasource createClient (#996)
+- [ENHANCEMENT] Fix styling of TimeRangeControls (#974)
+- [ENHANCEMENT] Migrate custom dialogs to generic dialog component (#965)
+- [BUGFIX] Do not show nulls as zero in tooltip (#990)
+- [BUGFIX] Do not include tests in compiled output (#976)
+- [BUGFIX] Remove semicolon below legend (#975)
+- [BREAKINGCHANGE] TimeSeriesValueTuple updates, null now supported for time series data (#990)
+- [BREAKINGCHANGE] TimeSeries and TimeSeriesValueTuple Iterable type change (#985)
+
 ## 0.23.1 / 2023-02-20
 
 - [ENHANCEMENT] upgrade zustand to latest (#972)

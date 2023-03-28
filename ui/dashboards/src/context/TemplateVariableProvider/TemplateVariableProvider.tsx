@@ -24,6 +24,7 @@ import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/plugin-system';
 import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
+import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQueryParamName } from './query-params';
 
 type TemplateVariableStore = {
@@ -191,13 +192,12 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
   return store;
 }
 
-export function TemplateVariableProvider({
-  children,
-  initialVariableDefinitions = [],
-}: {
+export interface TemplateVariableProviderProps {
   children: React.ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
-}) {
+}
+
+export function TemplateVariableProvider({ children, initialVariableDefinitions = [] }: TemplateVariableProviderProps) {
   const queryParams = useVariableQueryParams(initialVariableDefinitions);
   const [store] = useState(createTemplateVariableSrvStore({ initialVariableDefinitions, queryParams }));
 
@@ -206,45 +206,4 @@ export function TemplateVariableProvider({
       <PluginProvider>{children}</PluginProvider>
     </TemplateVariableStoreContext.Provider>
   );
-}
-
-/** Helpers */
-
-function hydrateTemplateVariableState(variable: VariableDefinition, initialValue?: VariableValue) {
-  const varState: VariableState = {
-    value: null,
-    loading: false,
-  };
-  switch (variable.kind) {
-    case 'TextVariable':
-      varState.value = initialValue ?? variable.spec.value;
-      break;
-    case 'ListVariable':
-      varState.options = [];
-      varState.value = initialValue ?? variable.spec.default_value ?? null;
-      if (varState.options.length > 0 && !varState.value) {
-        const firstOptionValue = varState.options[0]?.value ?? null;
-        if (firstOptionValue !== null) {
-          varState.value = variable.spec.allow_multiple ? [firstOptionValue] : firstOptionValue;
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  return varState;
-}
-
-function hydrateTemplateVariableStates(
-  definitions: VariableDefinition[],
-  initialValues: Record<string, VariableValue>
-): VariableStateMap {
-  const state: VariableStateMap = {};
-  definitions.forEach((v) => {
-    const name = v.spec.name;
-    const param = initialValues[name];
-    const initialValue = param ? param : null;
-    state[name] = hydrateTemplateVariableState(v, initialValue);
-  });
-  return state;
 }

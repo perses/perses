@@ -33,7 +33,14 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await happoPlaywright.finish();
   });
 
-  ['Single Line', 'Custom Visual Options', 'Connected Nulls'].forEach((panelName) => {
+  [
+    'Single Line',
+    'Custom Visual Options',
+    'Connected Nulls',
+    'Legend Position Bottom',
+    'Legend Position Right',
+    'Legend Tall Formatted',
+  ].forEach((panelName) => {
     test(`displays ${panelName} as expected`, async ({ page, dashboardPage, mockNow }) => {
       // Mock data response, so we can make assertions on consistent response data.
       await dashboardPage.mockQueryRangeRequests({
@@ -86,6 +93,65 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
           variant: `${panelName} [${themeName}]`,
         });
       });
+    });
+  });
+
+  test('should be able to add and edit thresholds', async ({ page, dashboardPage, mockNow }) => {
+    // Mock data response, so we can make assertions on consistent response data.
+    await dashboardPage.mockQueryRangeRequests({
+      queries: [
+        {
+          query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+          response: {
+            status: 200,
+            body: JSON.stringify(
+              mockTimeSeriesResponseWithStableValue({
+                metrics: [
+                  {
+                    metric: {
+                      __name__: 'up',
+                      instance: 'demo.do.prometheus.io:3000',
+                      job: 'grafana',
+                    },
+                    value: '1',
+                  },
+                ],
+                startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+                endTimeMs: mockNow,
+              })
+            ),
+          },
+        },
+      ],
+    });
+
+    await dashboardPage.startEditing();
+    await dashboardPage.editPanel('Single Line', async (panelEditor) => {
+      await panelEditor.selectTab('Settings');
+      await panelEditor.addThreshold();
+      await panelEditor.addThreshold();
+      await panelEditor.editThreshold('T1', '50');
+      await panelEditor.toggleThresholdModes('Percent');
+      await panelEditor.container
+        .getByRole('spinbutton', {
+          name: 'Max',
+        })
+        .fill('5');
+      await panelEditor.openThresholdColorPicker('T2');
+      const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+      await colorPicker.isVisible();
+      const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
+      await colorInput.clear();
+      await colorInput.type('EE6C6C', { delay: 100 });
+      await page.keyboard.press('Escape');
+    });
+    const panel = dashboardPage.getPanelByName('Single Line');
+    await panel.isLoaded();
+    await waitForStableCanvas(panel.canvas);
+
+    await happoPlaywright.screenshot(page, panel.parent, {
+      component: 'Time Series Chart Panel',
+      variant: `Single Line with Percent Threshold`,
     });
   });
 });

@@ -108,31 +108,16 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	if typeParameter.Kind() != reflect.Slice {
 		return fmt.Errorf("slice in parameter is not actually a slice but a %q", typeParameter.Kind())
 	}
-	q, err := buildQuery(query)
+	folder, prefix, isExist, err := d.buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
-	// the query returned looks like a path and can finish with a partial name.
-	// So we have to figure if the last path is the actual directory to looking for.
-	// Or it's the partial name, and it should only be used to filter the list of the document.
-	// For example: `/projects/per`.
-	// `/projects` is the folder we are looking for, `per` is the partial name.
-	folder := path.Join(d.Folder, q)
-	prefix := ""
-	// An easy way to achieve is to:
-	// 1. try if the path exist with the given query.
-	if _, err = os.Stat(folder); os.IsNotExist(err) {
-		// The path doesn't exist. So we certainly have to move to the parent path.
-		prefix = filepath.Base(folder)
-		folder = filepath.Dir(folder)
-		// Let's try again if the path exists this time.
-		if _, err = os.Stat(folder); os.IsNotExist(err) {
-			// worst case, there is nothing to return. So let's initialize the slice just to avoid returning a nil slice
-			sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
-			//and finally reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
-			result.Elem().Set(sliceElem)
-			return nil
-		}
+	if !isExist {
+		// there is nothing to return. So let's initialize the slice just to avoid returning a nil slice
+		sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
+		//and finally reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
+		result.Elem().Set(sliceElem)
+		return nil
 	}
 	// so now we have the proper folder to looking for and potentially a filter to use
 	var files []string
@@ -169,7 +154,6 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		} else {
 			sliceElem.Set(reflect.Append(sliceElem, value))
 		}
-
 	}
 	// at the end reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
 	result.Elem().Set(sliceElem)
@@ -187,6 +171,33 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 			return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
 		}
 		return err
+	}
+	return nil
+}
+
+func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
+	folder, prefix, isExist, err := d.buildQuery(query)
+	if err != nil {
+		return fmt.Errorf("unable to build the query: %s", err)
+	}
+	if !isExist {
+		return nil
+	}
+	if len(prefix) == 0 {
+		return os.RemoveAll(folder)
+	}
+	// in case there is a prefix file name we need to delete only the files that is matching the prefix and not the folder entirely
+	var files []string
+	if files, err = d.visit(folder, prefix); err != nil {
+		return err
+	}
+	if len(files) <= 0 {
+		return nil
+	}
+	for _, file := range files {
+		if removeErr := os.Remove(file); removeErr != nil {
+			return removeErr
+		}
 	}
 	return nil
 }

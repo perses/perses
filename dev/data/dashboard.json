@@ -19,11 +19,7 @@
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
-                "values": [
-                  "demo.do.prometheus.io:9100",
-                  "demo.do.prometheus.io:3000",
-                  "demo.promlabs.com:9100"
-                ]
+                "values": ["demo.do.prometheus.io:9100", "demo.do.prometheus.io:3000", "demo.promlabs.com:9100"]
               }
             }
           }
@@ -1912,6 +1908,107 @@
             }
           }
         },
+        "LegendBottom": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Position Bottom",
+              "description": "Time series chart with a default legend"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "Bottom"
+                },
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "LegendRight": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Position Right",
+              "description": "Time series chart with a legend positioned to the right"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "Right"
+                },
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "LegendTallFormatted": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Legend Tall Formatted",
+              "description": "Time series chart with large legend and formatted series names"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": { "position": "Bottom" },
+                "queries": [
+                  {
+                    "kind": "TimeSeriesQuery",
+                    "spec": {
+                      "plugin": {
+                        "kind": "PrometheusTimeSeriesQuery",
+                        "spec": {
+                          "datasource": {
+                            "kind": "PrometheusDatasource",
+                            "name": "PrometheusDemo"
+                          },
+                          "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
+                          "series_name_format": "formatted series name example - {{job}} job - instance {{instance}}"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
         "CustomVisualOptions": {
           "kind": "Panel",
           "spec": {
@@ -2022,6 +2119,29 @@
                 "content": {
                   "$ref": "#/spec/panels/ConnectedNulls"
                 }
+              },
+              {
+                "x": 0,
+                "y": 7,
+                "width": 8,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/LegendBottom"
+                }
+              },
+              {
+                "x": 8,
+                "y": 7,
+                "width": 8,
+                "height": 7,
+                "content": { "$ref": "#/spec/panels/LegendRight" }
+              },
+              {
+                "x": 16,
+                "y": 7,
+                "width": 8,
+                "height": 10,
+                "content": { "$ref": "#/spec/panels/LegendTallFormatted" }
               }
             ]
           }
@@ -2066,10 +2186,7 @@
                 "thresholds": {
                   "steps": [
                     {
-                      "value": 0.8
-                    },
-                    {
-                      "value": 0.9
+                      "value": 20
                     }
                   ]
                 },

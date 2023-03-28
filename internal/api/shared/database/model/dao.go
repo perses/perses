@@ -35,5 +35,6 @@ type DAO interface {
 	// slice is an interface for casting simplification. But slice must be a pointer to a slice of modelAPI.Metadata
 	Query(query Query, slice interface{}) error
 	Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error
+	DeleteByQuery(query Query) error
 	HealthCheck() bool
 }

@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { isHappoRun, setThemeSwitcher } from 'happo-plugin-storybook/register';
+import { DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
 import { DocsContainer } from './DocsContainer';
-import { WithThemes, WithBackground } from './decorators';
+import { WithThemes, WithBackground, WithTimeZone } from './decorators';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -37,12 +39,23 @@ export const parameters = {
   docs: {
     container: DocsContainer,
   },
+  happo: {
+    themes: ['light', 'dark'],
+  },
   options: {
     storySort: {
       method: 'alphabetical',
     },
   },
 };
+
+// TypeScript doesn't know about `supportedValuesOf` even though it's available
+// on modern browsers. Since this is just a config file, ts-ignoring as a quick
+// fix.
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/supportedValuesOf
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const timeZoneNames = (Intl.supportedValuesOf('timeZone') as string[]) || [];
 
 export const globalTypes = {
   bgColor: {
@@ -56,6 +69,36 @@ export const globalTypes = {
       dynamicTitle: true,
     },
   },
+  timeZone: {
+    name: 'Time Zone',
+    description: 'Time zone',
+
+    // When running in Happo, we always use UTC for consistency in screenshots
+    // regardless of the server they run on. When being used by humans, use local
+    // to start because that will make more sense for viewing documentation.
+    defaultValue: isHappoRun() ? 'UTC' : 'local',
+    toolbar: {
+      icon: 'time',
+      items: ['local', 'UTC', ...timeZoneNames],
+      // Change title based on selected value
+      dynamicTitle: true,
+    },
+  },
 };
 
-export const decorators = [WithBackground, WithThemes];
+// Set up happo to handle theme switching to enable automatically taking
+// screenshots of both light and dark mode for components.
+setThemeSwitcher(async (theme, channel) => {
+  return new Promise((resolve) => {
+    const isDarkMode = theme === 'dark';
+
+    // Listen for dark mode to change and resolve.
+    channel.once(DARK_MODE_EVENT_NAME, () => {
+      resolve();
+    });
+    // Change the theme.
+    channel.emit(DARK_MODE_EVENT_NAME, isDarkMode);
+  });
+});
+
+export const decorators = [WithTimeZone, WithBackground, WithThemes];

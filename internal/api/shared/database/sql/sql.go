@@ -273,6 +273,18 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 	return deleteQuery.Close()
 }
 
+func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
+	q, args, buildQueryErr := d.buildDeleteQuery(query)
+	if buildQueryErr != nil {
+		return fmt.Errorf("unable to build the query: %s", buildQueryErr)
+	}
+	rows, runQueryErr := d.DB.Query(q, args...)
+	if runQueryErr != nil {
+		return runQueryErr
+	}
+	return rows.Close()
+}
+
 func (d *DAO) HealthCheck() bool {
 	if err := d.DB.Ping(); err != nil {
 		logrus.WithError(err).Error("unable to ping the database")

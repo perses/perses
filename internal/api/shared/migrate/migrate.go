@@ -151,6 +151,7 @@ func (m *mig) Migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
 		m.cuectx.CompileBytes(grafanaDashboard),
 	)
 	if err := grafanaDashboardVal.Validate(cue.Final()); err != nil {
+		logrus.WithError(err).Trace("Unable to wrap the received json into a CUE definition")
 		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 
@@ -158,22 +159,23 @@ func (m *mig) Migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
 	m.mutex.RLock()
 	mappingVal := m.cuectx.CompileString(m.migrationSchemaString, cue.Scope(grafanaDashboardVal))
 	m.mutex.RUnlock()
-	if mappingVal.Err() != nil {
-		return nil, fmt.Errorf("%w: %s", shared.InternalError, mappingVal.Err())
+	err := mappingVal.Err()
+	if err != nil {
+		logrus.WithError(err).Trace("Unable to compile the migration schema using the received dashboard to resolve the paths")
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 	logrus.Tracef("final value: %#v", mappingVal)
 
 	// marshall to Json then unmarshall in v1.Dashboard struct to pass the final checks & build the final dashboard to return
 	persesDashboardJSON, err := json.Marshal(mappingVal)
 	if err != nil {
-		logrus.WithError(err).Error("Unable to marshall Cue Value to json")
-		return nil, fmt.Errorf("%w: %s", shared.InternalError, err)
+		return nil, fmt.Errorf("%w: Unable to marshall CUE Value to json: %s", shared.InternalError, err)
 	}
 	var persesDashboard v1.Dashboard
 	err = json.Unmarshal(persesDashboardJSON, &persesDashboard)
 	if err != nil {
-		logrus.WithError(err).Error("Unable to unmarshall JSON bytes to Dashboard struct")
-		return nil, fmt.Errorf("%w: %s", shared.InternalError, err)
+		logrus.WithError(err).Trace("Unable to unmarshall JSON bytes to Dashboard struct")
+		return nil, fmt.Errorf("%w: %s", shared.BadRequestError, err)
 	}
 
 	return &persesDashboard, nil

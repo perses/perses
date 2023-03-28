@@ -44,6 +44,10 @@ func (d *dao) Delete(project string, name string) error {
 	return d.client.Delete(d.kind, v1.NewProjectMetadata(project, name))
 }
 
+func (d *dao) DeleteAll(project string) error {
+	return d.client.DeleteByQuery(&datasource.Query{Project: project})
+}
+
 func (d *dao) Get(project string, name string) (*v1.Datasource, error) {
 	entity := &v1.Datasource{}
 	return entity, d.client.Get(d.kind, v1.NewProjectMetadata(project, name), entity)

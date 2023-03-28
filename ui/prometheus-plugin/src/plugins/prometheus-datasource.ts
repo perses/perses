@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { RequestHeaders } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
 
 export interface PrometheusDatasourceSpec {
   direct_url?: string;
+  headers?: RequestHeaders;
 }
 
 /**
  * Creates a PrometheusClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
-  const { direct_url } = spec;
+  const { direct_url, headers: specHeaders } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -36,10 +38,10 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     options: {
       datasourceUrl,
     },
-    instantQuery: (params) => instantQuery(params, { datasourceUrl }),
-    rangeQuery: (params) => rangeQuery(params, { datasourceUrl }),
-    labelNames: (params) => labelNames(params, { datasourceUrl }),
-    labelValues: (params) => labelValues(params, { datasourceUrl }),
+    instantQuery: (params, headers) => instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    rangeQuery: (params, headers) => rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    labelNames: (params, headers) => labelNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
   };
 };
 
