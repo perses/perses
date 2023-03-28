@@ -14,7 +14,6 @@
 package migrate
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -46,7 +45,7 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 func (e *Endpoint) Migrate(ctx echo.Context) error {
 	body := &api.Migrate{}
 	if err := ctx.Bind(body); err != nil {
-		return fmt.Errorf("%w: %s", shared.BadRequestError, err)
+		return shared.HandleBadRequestError(err.Error())
 	}
 	grafanaDashboard := migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard))
 	persesDashboard, err := e.migrationService.Migrate([]byte(grafanaDashboard))
