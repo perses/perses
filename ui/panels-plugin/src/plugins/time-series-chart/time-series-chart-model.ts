@@ -113,13 +113,13 @@ export const Y_AXIS_CONFIG = {
   max: { label: 'Max' },
 };
 
-// TODO: add Percent mode support for stacked area charts
-export type StackOptions = 'None' | 'Normal';
+// None is equivalent to undefined since stack is optional
+export type StackOptions = 'None' | 'All' | 'Percent'; // TODO: add Percent option support
 
 export const STACK_CONFIG = {
   None: { label: 'None' },
-  Normal: { label: 'Normal' },
-  // Percent: { label: '%' },
+  All: { label: 'All' },
+  Percent: { label: 'Percent' }, // temporarily disabled
 };
 
 export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {

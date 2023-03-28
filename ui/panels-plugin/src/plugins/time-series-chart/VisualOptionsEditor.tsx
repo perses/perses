@@ -114,13 +114,19 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
               id: currentStack,
             }}
             options={STACK_OPTIONS}
+            getOptionDisabled={(option) => option.label === 'Percent'} // TODO: enable option after 'Percent' implemented
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => <TextField {...params} />}
             onChange={(__, newValue) => {
-              onChange({
+              const updatedValue: VisualOptions = {
                 ...value,
-                stack: newValue.id,
-              });
+                stack: newValue.id === 'None' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
+              };
+              // stacked area chart preset to automatically set area under a curve shading
+              if (newValue.id === 'All' && !value.area_opacity) {
+                updatedValue.area_opacity = 0.3;
+              }
+              onChange(updatedValue);
             }}
             disabled={value === undefined}
             disableClearable
