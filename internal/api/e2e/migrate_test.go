@@ -42,8 +42,8 @@ func TestMigrateEndpoint(t *testing.T) {
 		},
 		{
 			title:                "grafana dashboard containing old-formatted elements (text panels without `options` field & a legacy graph panel)",
-			initialDashboardPath: "internal/api/shared/migrate/testdata/old_format_grafana_dashboard.json",
-			resultDashboardPath:  "internal/api/shared/migrate/testdata/old_format_perses_dashboard.json",
+			initialDashboardPath: "internal/api/shared/migrate/testdata/old_grafana_panels_grafana_dashboard.json",
+			resultDashboardPath:  "internal/api/shared/migrate/testdata/old_grafana_panels_perses_dashboard.json",
 		},
 	}
 	for _, test := range testSuite {

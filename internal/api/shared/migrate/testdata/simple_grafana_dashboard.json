@@ -1,32 +1,35 @@
 {
   "annotations": {
-    "list": [{
-      "builtIn": 1,
-      "datasource": {
-        "type": "grafana",
-        "uid": "-- Grafana --"
-      },
-      "enable": true,
-      "hide": true,
-      "iconColor": "rgba(0, 211, 255, 1)",
-      "name": "Annotations & Alerts",
-      "target": {
-        "limit": 100,
-        "matchAny": false,
-        "tags": [],
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
-      },
-      "type": "dashboard"
-    }]
+      }
+    ]
   },
   "description": " A simple grafana dashboard to be converted to perses format",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 34819,
+  "id": 40381,
   "links": [],
   "liveNow": false,
-  "panels": [{
+  "panels": [
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "argos-world"
@@ -40,7 +43,8 @@
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{
+            "steps": [
+              {
                 "color": "green",
                 "value": null
               },
@@ -75,18 +79,20 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.2.6",
-      "targets": [{
-        "datasource": {
-          "type": "prometheus",
-          "uid": "argos-world"
-        },
-        "editorMode": "code",
-        "expr": "vector(4)",
-        "legendFormat": "__auto",
-        "range": true,
-        "refId": "A"
-      }],
+      "pluginVersion": "9.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "editorMode": "code",
+          "expr": "vector(4)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "My Stat chart",
       "type": "stat"
     },
@@ -104,7 +110,8 @@
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{
+            "steps": [
+              {
                 "color": "green",
                 "value": null
               },
@@ -137,18 +144,20 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.2.6",
-      "targets": [{
-        "datasource": {
-          "type": "prometheus",
-          "uid": "argos-world"
-        },
-        "editorMode": "code",
-        "expr": "vector(2)",
-        "legendFormat": "__auto",
-        "range": true,
-        "refId": "A"
-      }],
+      "pluginVersion": "9.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "editorMode": "code",
+          "expr": "vector(2)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "My 2nd panel",
       "type": "gauge"
     },
@@ -196,7 +205,8 @@
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{
+            "steps": [
+              {
                 "color": "green",
                 "value": null
               },
@@ -228,17 +238,19 @@
           "sort": "none"
         }
       },
-      "targets": [{
-        "datasource": {
-          "type": "prometheus",
-          "uid": "argos-world"
-        },
-        "editorMode": "code",
-        "expr": "vector(1)",
-        "legendFormat": "__auto",
-        "range": true,
-        "refId": "A"
-      }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "editorMode": "code",
+          "expr": "vector(1)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "My 1rst panel",
       "type": "timeseries"
     },
@@ -251,7 +263,8 @@
         "y": 16
       },
       "id": 11,
-      "panels": [{
+      "panels": [
+        {
           "datasource": {
             "type": "prometheus",
             "uid": "argos-world"
@@ -295,8 +308,10 @@
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{
-                    "color": "green"
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -326,17 +341,19 @@
               "sort": "none"
             }
           },
-          "targets": [{
-            "datasource": {
-              "type": "prometheus",
-              "uid": "argos-world"
-            },
-            "editorMode": "code",
-            "expr": "vector(3)",
-            "legendFormat": "__auto",
-            "range": true,
-            "refId": "A"
-          }],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "argos-world"
+              },
+              "editorMode": "code",
+              "expr": "vector(3)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
           "title": "My 3rd panel",
           "type": "timeseries"
         },
@@ -400,7 +417,7 @@
               "reverse": false
             }
           },
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "9.4.3",
           "title": "Empty heatmap",
           "type": "heatmap"
         },
@@ -426,7 +443,7 @@
             "content": "# Title\n\nFor markdown syntax help: [commonmark.org/help](https://commonmark.org/help/)",
             "mode": "markdown"
           },
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "9.4.3",
           "title": "My Text panel",
           "type": "text"
         }
@@ -435,11 +452,14 @@
       "type": "row"
     }
   ],
-  "schemaVersion": 37,
+  "refresh": "",
+  "revision": 1,
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": [{
+    "list": [
+      {
         "current": {
           "selected": false,
           "text": "one",
@@ -449,7 +469,8 @@
         "includeAll": false,
         "multi": false,
         "name": "listVar",
-        "options": [{
+        "options": [
+          {
             "selected": true,
             "text": "one",
             "value": "one"
@@ -486,7 +507,8 @@
         "includeAll": false,
         "multi": false,
         "name": "firstNames",
-        "options": [{
+        "options": [
+          {
             "selected": true,
             "text": "alice",
             "value": "alice"
@@ -509,18 +531,20 @@
       {
         "current": {
           "selected": false,
-          "text": "net6",
-          "value": "net6"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "argos-world"
         },
         "definition": "label_values(stack)",
+        "description": "Label values, 1rst flavor",
         "hide": 0,
         "includeAll": true,
+        "label": "Stack",
         "multi": false,
-        "name": "Stack",
+        "name": "lv1",
         "options": [],
         "query": {
           "query": "label_values(stack)",
@@ -535,21 +559,79 @@
       {
         "current": {
           "selected": false,
-          "text": "net6",
-          "value": "net6"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "argos-world"
         },
         "definition": "label_values(thanos_build_info, stack)",
+        "description": "Label values, 2nd flavor",
         "hide": 0,
         "includeAll": true,
+        "label": "Stack with Metric",
         "multi": false,
-        "name": "stack_with_metric",
+        "name": "lv2",
         "options": [],
         "query": {
           "query": "label_values(thanos_build_info, stack)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "definition": "label_values(thanos_build_info{stack=~\"erd.+\"}, stack)",
+        "description": "Label values, 3rd flavor",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Stack with Timeserie",
+        "multi": false,
+        "name": "lv3",
+        "options": [],
+        "query": {
+          "query": "label_values(thanos_build_info{stack=~\"erd.+\"}, stack)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
+        },
+        "definition": "label_values(thanos_build_info{stack=~\"$lv1\"}, stack)",
+        "description": "Label values, 4th flavor",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Stack with Timeserie reusing other variable",
+        "multi": false,
+        "name": "lv4",
+        "options": [],
+        "query": {
+          "query": "label_values(thanos_build_info{stack=~\"$lv1\"}, stack)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -570,7 +652,8 @@
         "description": "ad hoc filter",
         "hide": 0,
         "name": "interval",
-        "options": [{
+        "options": [
+          {
             "selected": true,
             "text": "1m",
             "value": "1m"
@@ -695,8 +778,12 @@
       {
         "current": {
           "selected": false,
-          "text": "{type=\"Azure\"} 1 1670489608000",
-          "value": "{type=\"Azure\"} 1 1670489608000"
+          "text": "{type=\"ACUS\"} 1 1680018176000",
+          "value": "{type=\"ACUS\"} 1 1680018176000"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
         },
         "definition": "query_result(group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range])))",
         "description": "query result var for volatile series (relies $__range global var)",
@@ -718,8 +805,12 @@
       {
         "current": {
           "selected": false,
-          "text": "{app_part_of=\"1ASMTP\",application=\"1ASMTP\",applicationdetailed=\"1ASMTP\",componentmodel=\"UNDEFINED\",componentname=\"UNDEFINED\",firecell=\"UNDEFINED\",hostname=\"mrelay-dev-vm-01\",instance=\"10.56.163.36:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"mrelay-dev-vm-01\",osname=\"Linux\",owner=\"UNDEFINED\",partition=\"-\",phase=\"DEV\",prometheus=\"system\",prometheus_instance=\"iaasvms\",prometheus_namespace=\"argos-external\",region=\"azure\",role=\"UNDEFINED\",serversite=\"rnd-we\",stack=\"external\",type=\"Azure\",virtual=\"yes\"} 1 1670489615000",
-          "value": "{app_part_of=\"1ASMTP\",application=\"1ASMTP\",applicationdetailed=\"1ASMTP\",componentmodel=\"UNDEFINED\",componentname=\"UNDEFINED\",firecell=\"UNDEFINED\",hostname=\"mrelay-dev-vm-01\",instance=\"10.56.163.36:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"mrelay-dev-vm-01\",osname=\"Linux\",owner=\"UNDEFINED\",partition=\"-\",phase=\"DEV\",prometheus=\"system\",prometheus_instance=\"iaasvms\",prometheus_namespace=\"argos-external\",region=\"azure\",role=\"UNDEFINED\",serversite=\"rnd-we\",stack=\"external\",type=\"Azure\",virtual=\"yes\"} 1 1670489615000"
+          "text": "{AS=\"001_APA\",app_name=\"APA\",app_part_of=\"APA\",application=\"APA\",applicationdetailed=\"Amadeus Protocol Adapter\",componentmodel=\"Amadeus OTF OLTP v0\",componentname=\"APA\",discoverytype=\"OBELike\",firecell=\"A1\",hostname=\"apavp001.muc.amadeus.net\",instance=\"apavp001.muc.amadeus.net:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"apavp001\",osname=\"SuSE Linux\",owner=\"PSV-IAP-AAA-SRE\",partition=\"UNDEFINED\",phase=\"PRD\",physicalhost=\"hfe10241pb01\",prometheus=\"system\",prometheus_instance=\"obe\",prometheus_namespace=\"argos-external\",region=\"ERD\",role=\"sync\",serversite=\"ADP\",stack=\"erd4\",type=\"OBE\",virtual=\"Yes\"} 1 1680018176000",
+          "value": "{AS=\"001_APA\",app_name=\"APA\",app_part_of=\"APA\",application=\"APA\",applicationdetailed=\"Amadeus Protocol Adapter\",componentmodel=\"Amadeus OTF OLTP v0\",componentname=\"APA\",discoverytype=\"OBELike\",firecell=\"A1\",hostname=\"apavp001.muc.amadeus.net\",instance=\"apavp001.muc.amadeus.net:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"apavp001\",osname=\"SuSE Linux\",owner=\"PSV-IAP-AAA-SRE\",partition=\"UNDEFINED\",phase=\"PRD\",physicalhost=\"hfe10241pb01\",prometheus=\"system\",prometheus_instance=\"obe\",prometheus_namespace=\"argos-external\",region=\"ERD\",role=\"sync\",serversite=\"ADP\",stack=\"erd4\",type=\"OBE\",virtual=\"Yes\"} 1 1680018176000"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "argos-world"
         },
         "definition": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
         "description": "query result var with no <aggr> by clause",
@@ -746,8 +837,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Simple grafana dashboard",
-  "uid": "DuJ3dcNVk",
-  "version": 1,
+  "title": "Perses testing / Simple grafana dashboard",
+  "uid": "xRV24sBVk",
+  "version": 2,
   "weekStart": ""
 }
