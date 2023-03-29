@@ -52,11 +52,11 @@ function ViewDashboard() {
 
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar, warningSnackbar } = useSnackbar();
-  const [datasourceApi] = useState(new CachedDatasourceAPI(new HTTPDatasourceAPI()));
+  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {
     // warm up the caching of the datasources
-    datasourceApi.listDatasources(projectName, undefined);
-    datasourceApi.listGlobalDatasources(undefined);
+    datasourceApi.listDatasources(projectName);
+    datasourceApi.listGlobalDatasources();
   }, [datasourceApi, projectName]);
   const { isLoading } = useDashboard(projectName, dashboardName);
   let { data } = useDashboard(projectName, dashboardName);

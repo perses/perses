@@ -46,11 +46,11 @@ export class HTTPDatasourceAPI implements DatasourceApi {
     });
   }
 
-  listDatasources(project: string, pluginKind: string | undefined): Promise<Datasource[]> {
+  listDatasources(project: string, pluginKind?: string): Promise<Datasource[]> {
     return fetchDatasourceList(project, pluginKind);
   }
 
-  listGlobalDatasources(pluginKind: string | undefined): Promise<GlobalDatasource[]> {
+  listGlobalDatasources(pluginKind?: string): Promise<GlobalDatasource[]> {
     return fetchGlobalDatasourceList(pluginKind);
   }
 }
@@ -61,6 +61,9 @@ class Cache {
   private globalDatasources: LRUCache<string, GlobalDatasource>;
 
   constructor() {
+    // We want to have a cache expiration set to 5min and removed automatically the old values.
+    // The option below is setting that.
+    // Note: TTL (Time To Leave) is in millisecond.
     const option = { ttl: 5 * 60 * 1000, ttlAutopurge: true };
     this.globalDatasources = new LRUCache<string, GlobalDatasource>(option);
     this.datasources = new LRUCache<string, Datasource>(option);
@@ -91,11 +94,11 @@ class Cache {
   getDatasource(project: string, selector: DatasourceSelector) {
     const key = this.generateKey(selector, project);
     const resource = this.datasources.get(this.generateKey(selector, project));
-    let keyExist = true;
+    let keyExists = true;
     if (resource === undefined) {
-      keyExist = this.emptyDatasources.has(key);
+      keyExists = this.emptyDatasources.has(key);
     }
-    return { resource: resource, keyExist: keyExist };
+    return { resource: resource, keyExist: keyExists };
   }
 
   setGlobalDatasources(list: GlobalDatasource[]) {
@@ -121,11 +124,11 @@ class Cache {
   getGlobalDatasource(selector: DatasourceSelector) {
     const key = this.generateKey(selector);
     const resource = this.globalDatasources.get(this.generateKey(selector));
-    let keyExist = true;
+    let keyExists = true;
     if (resource === undefined) {
-      keyExist = this.emptyDatasources.has(key);
+      keyExists = this.emptyDatasources.has(key);
     }
-    return { resource: resource, keyExist: keyExist };
+    return { resource: resource, keyExist: keyExists };
   }
 
   private generateKey(selector: DatasourceSelector, project?: string): string {
@@ -195,14 +198,14 @@ export class CachedDatasourceAPI implements DatasourceApi {
     });
   }
 
-  listDatasources(project: string, pluginKind: string | undefined): Promise<Datasource[]> {
+  listDatasources(project: string, pluginKind?: string): Promise<Datasource[]> {
     return this.client.listDatasources(project, pluginKind).then((list) => {
       this.cache.setDatasources(list);
       return list;
     });
   }
 
-  listGlobalDatasources(pluginKind: string | undefined): Promise<GlobalDatasource[]> {
+  listGlobalDatasources(pluginKind?: string): Promise<GlobalDatasource[]> {
     return this.client.listGlobalDatasources(pluginKind).then((list) => {
       this.cache.setGlobalDatasources(list);
       return list;
