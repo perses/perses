@@ -24,3 +24,4 @@ export * from './thresholds';
 export * from './time';
 export * from './time-series-queries';
 export * from './variables';
+export * from './annotations';

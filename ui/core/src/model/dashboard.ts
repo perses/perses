@@ -18,7 +18,7 @@ import { ProjectMetadata } from './resource';
 import { DurationString } from './time';
 import { VariableDefinition } from './variables';
 import { Display } from './display';
-
+import { AnnotationDefinition } from './annotations';
 export interface DashboardResource {
   kind: 'Dashboard';
   metadata: ProjectMetadata;
@@ -31,5 +31,6 @@ export interface DashboardSpec {
   duration: DurationString;
   variables: VariableDefinition[];
   layouts: LayoutDefinition[];
+  annotations?: AnnotationDefinition[];
   panels: Record<string, PanelDefinition>;
 }
