@@ -33,20 +33,20 @@ export function assembleTransform(
 
   const cursorPaddingX = 32;
   const cursorPaddingY = 16;
-  const x = mousePos.viewport.x;
-  let y = mousePos.viewport.y + cursorPaddingY;
+  const x = mousePos.page.x;
+  let y = mousePos.page.y + cursorPaddingY;
 
-  const isCloseToBottom = mousePos.viewport.y > window.innerHeight * 0.8;
+  const isCloseToBottom = mousePos.page.y > window.innerHeight * 0.8;
   const yPosAdjustThreshold = chartHeight * 0.75;
   // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
   if (isCloseToBottom === true) {
     if (seriesNum > 6) {
-      y = mousePos.viewport.y * 0.65;
+      y = mousePos.page.y * 0.75;
     } else {
-      y = mousePos.viewport.y * 0.75;
+      y = mousePos.page.y * 0.85;
     }
   } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
-    y = mousePos.viewport.y * 0.85;
+    y = mousePos.page.y * 0.95;
   }
 
   // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)

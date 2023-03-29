@@ -59,6 +59,10 @@ export interface CursorCoordinates {
     x: number;
     y: number;
   };
+  page: {
+    x: number;
+    y: number;
+  };
   plotCanvas: {
     x: number;
     y: number;
@@ -99,6 +103,10 @@ export const useMousePosition = (): CursorData['coords'] => {
         viewport: {
           x: e.clientX,
           y: e.clientY,
+        },
+        page: {
+          x: e.pageX,
+          y: e.pageY,
         },
         plotCanvas: {
           x: e.offsetX,
