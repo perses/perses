@@ -34,8 +34,7 @@
     "@perses-dev/components": "0.25.0",
     "@perses-dev/core": "0.25.0",
     "@perses-dev/plugin-system": "0.25.0",
-    "@prometheus-io/codemirror-promql": "^0.40.5",
-    "@prometheus-io/lezer-promql": "^0.37.0",
+    "@prometheus-io/codemirror-promql": "^0.43.0",
     "@uiw/react-codemirror": "^4.19.1",
     "date-fns": "^2.28.0",
     "immer": "^9.0.15"
