@@ -34,8 +34,9 @@ import {
   LegendComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { AnnotationEvent } from '@perses-dev/core';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
+import { EChartsDataFormat, EChartsTimeSeries, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
@@ -66,11 +67,22 @@ export interface LineChartProps {
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
+  annotations: AnnotationEvent[];
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
 }
 
-export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom, onDoubleClick }: LineChartProps) {
+export function LineChart({
+  height,
+  data,
+  yAxis,
+  unit,
+  grid,
+  legend,
+  onDataZoom,
+  onDoubleClick,
+  annotations = [],
+}: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -133,18 +145,89 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
+    let series = data.timeSeries;
+
+    const startTime = data.xAxis[0];
+    const endTime = data.xAxis[data.xAxis.length - 1];
+
+    if (annotations.length > 0) {
+      const annotationLines = annotations.filter((a) => !a.endTimestamp);
+      const annotationAreas = annotations.filter((a) => a.endTimestamp);
+      series = series.concat([
+        {
+          name: 'Annotations',
+          type: 'line',
+          xAxisIndex: 1,
+          data: [[startTime, null] as unknown],
+          markArea: {
+            data: annotationAreas.map((a) => {
+              return [
+                {
+                  xAxis: a.timestamp,
+                  itemStyle: {
+                    color: a.color,
+                    opacity: 0.2,
+                  },
+                },
+                { xAxis: a.endTimestamp },
+              ];
+            }),
+          },
+          markLine: {
+            label: {
+              show: false,
+            },
+            symbol: 'none',
+            lineStyle: {
+              width: 1,
+              type: 'dashed',
+            },
+            data: annotationLines.map((a) => ({
+              symbol: 'none',
+              symbolSize: 0,
+
+              itemStyle: {
+                color: a.color ?? undefined,
+              },
+              xAxis: a.timestamp,
+            })),
+          },
+        } as EChartsTimeSeries,
+      ]);
+    }
+
     const option: EChartsCoreOption = {
-      series: data.timeSeries,
-      xAxis: {
-        type: 'category',
-        data: data.xAxis,
-        max: data.xAxisMax,
-        axisLabel: {
-          formatter: (value: number) => {
-            return getFormattedDate(value, rangeMs, timeZone);
+      series: series,
+      xAxis: [
+        {
+          type: 'category',
+          data: data.xAxis,
+          max: data.xAxisMax,
+          axisLabel: {
+            formatter: (value: number) => {
+              return getFormattedDate(value, rangeMs, timeZone);
+            },
           },
         },
-      },
+        {
+          show: false,
+          type: 'time',
+          data: data.xAxis,
+          max: endTime,
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          axisPointer: {
+            show: false,
+          },
+        },
+      ],
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
@@ -167,6 +250,7 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
       grid,
       legend,
     };
+    console.log(option);
 
     return option;
   }, [data, yAxis, unit, grid, legend, noDataOption, timeZone]);
