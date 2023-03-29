@@ -50,6 +50,17 @@ const meta: Meta<typeof LineChart> = {
       right: 20,
       bottom: 0,
     },
+    annotations: [
+      {
+        timestamp: 1673784000000,
+        color: 'red',
+      },
+      {
+        timestamp: 1673784060000,
+        endTimestamp: 1673784120000,
+        color: 'red',
+      },
+    ],
   },
   parameters: {
     happo: {
