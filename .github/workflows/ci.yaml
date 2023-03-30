@@ -89,7 +89,7 @@ jobs:
       - name: Install UI deps
         run: cd ./ui && npm install
       - name: Build the typedoc docs
-        run: cd ./ui && npm run typedoc
+        run: cd ./ui && npm run build && npm run typedoc
       - name: store typedoc build
         uses: actions/upload-artifact@v3
         with:
