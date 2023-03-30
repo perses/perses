@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions } from '@perses-dev/core';
-import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
+import { PanelProps, useTimeSeriesQueries, useTimeRange, useAnnotationContext } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton } from '@mui/material';
 import {
@@ -56,6 +56,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
+  const { annotations } = useAnnotationContext();
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -271,6 +272,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         yAxis={yAxis}
         unit={unit}
         grid={gridOverrides}
+        annotations={annotations}
         onDataZoom={handleDataZoom}
       />
       {legend && graphData.legendItems && (
