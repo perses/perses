@@ -23,10 +23,11 @@ export interface SeriesInfoProps {
   markerColor: string;
   totalSeries: number;
   wrapLabels?: boolean;
+  showQuery?: boolean;
 }
 
 export function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, formattedY, markerColor, totalSeries, wrapLabels } = props;
+  const { seriesName, formattedY, markerColor, totalSeries, wrapLabels, showQuery = true } = props;
 
   // metric __name__ comes before opening curly brace, ignore if not populated
   // ex with metric name: node_load15{env="demo",job="node"}
@@ -51,8 +52,9 @@ export function SeriesInfo(props: SeriesInfoProps) {
     );
   }
 
-  // add space after commas when more than one focused series
-  const inlineSeriesLabels = formattedSeriesLabels.replace(/[,]/g, ', ');
+  // when more than one series, either show full series name or formatted labels only
+  const inlineSeriesInfo = showQuery ? seriesName : formattedSeriesLabels.replace(/[,]/g, ', ');
+
   return (
     <Box
       sx={{
@@ -80,7 +82,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
         >
-          {inlineSeriesLabels}
+          {inlineSeriesInfo}
         </Box>
       </Box>
       <Box
