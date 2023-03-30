@@ -67,7 +67,7 @@ export interface LineChartProps {
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
-  annotations: AnnotationEvent[];
+  annotations?: AnnotationEvent[];
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
 }
