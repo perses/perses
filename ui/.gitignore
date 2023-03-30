@@ -23,6 +23,7 @@ yarn-error.log*
 
 # Build output
 dist
+typedoc
 
 # Ignore turborepo cache
 .turbo
