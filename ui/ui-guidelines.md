@@ -192,9 +192,10 @@ React [context](https://react.dev/learn/passing-data-deeply-with-context) can be
 - Does this state need to be accessible by many components at different nesting levels?
 - Can this be accomplished with component composition?
 
-It can be really frustrating to try to use a component and run into several levels of provider hell trying to get started. In use cases where context is the right way to manage state, reduce this pain for consumers by:
-Ensuring that there is documentation for how to use the context and when it is needed.
-When possible, have a reasonable fallback behavior when the context is not set.
+It can be really frustrating to try to use a component and run into several levels of providers trying to get started. In use cases where context is the right way to manage state, reduce this pain for consumers by:
+
+- Ensuring that there is documentation for how to use the context and when it is needed.
+- When possible, have a reasonable fallback behavior when the context is not set.
 
 #### Zustand & immer
 
