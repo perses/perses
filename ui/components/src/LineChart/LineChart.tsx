@@ -250,7 +250,6 @@ export function LineChart({
       grid,
       legend,
     };
-    console.log(option);
 
     return option;
   }, [data, yAxis, unit, grid, legend, noDataOption, timeZone]);
