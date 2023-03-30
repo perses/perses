@@ -16,6 +16,7 @@ package migrate
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -140,7 +141,10 @@ func (m *mig) BuildMigrationSchemaString() {
 	m.migrationSchemaString = migrationSchemaString
 }
 
-func (m *mig) Migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
+func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
+	// preprocessing in Go before passing it to CUE
+	grafanaDashboard := rearrangeGrafanaPanelsWithinExpandedRows(userInput)
+
 	// Build a CUE value that is just the received grafana dashboard wrapped in a definition. By doing this we isolate the
 	// fields from the Grafana dashboard together in a common namespace, so that they are not mixed with the ones from the
 	// migration schema. This make sure we have no wrong overlapping between Grafana & Perses objects, and also makes the
@@ -166,7 +170,7 @@ func (m *mig) Migrate(grafanaDashboard []byte) (*v1.Dashboard, error) {
 	}
 	logrus.Tracef("final value: %#v", mappingVal)
 
-	// marshall to Json then unmarshall in v1.Dashboard struct to pass the final checks & build the final dashboard to return
+	// marshall to JSON then unmarshall in v1.Dashboard struct to pass the final checks & build the final dashboard to return
 	persesDashboardJSON, err := json.Marshal(mappingVal)
 	if err != nil {
 		return nil, fmt.Errorf("%w: Unable to marshall CUE Value to json: %s", shared.InternalError, err)
@@ -189,4 +193,141 @@ func (m *mig) init() error {
 	}
 	m.BuildMigrationSchemaString()
 	return nil
+}
+
+/**
+ * This function addresses an issue we have with Grafana datamodel when it comes to migrating dashboards to Perses: When
+ * a row is expanded in Grafana, its children panels are moved up in the main panels list, thus become siblings of the row.
+ * When it comes to Perses migration we need to recompose the parent->children relationships. However in its current state
+ * the CUE language doesn't permit us to achieve this recomposition, hence this processing in the backend code.
+ *
+ * So what this function does is basically the following: whenever such pattern is encountered in the panels list:
+ * ...
+ * row1,
+ * panelA,
+ * panelB,
+ * panelC,
+ * row2,
+ * ...
+ * the objects gets rearranged like:
+ * ...
+ * row1: {
+ *   panelA,
+ *   panelB,
+ *   panelC,
+ * },
+ * row2,
+ * ...
+ */
+func rearrangeGrafanaPanelsWithinExpandedRows(grafanaDashboardRaw json.RawMessage) json.RawMessage {
+	// unmarshall the received raw Json
+	var grafanaDashboard map[string]any
+	if err := json.Unmarshal(grafanaDashboardRaw, &grafanaDashboard); err != nil {
+		logrus.WithError(err).Error("Unable to unmarshall the received Grafana dashboard")
+		return grafanaDashboardRaw
+	}
+
+	// retrieve the panels
+	if _, found := grafanaDashboard["panels"]; !found {
+		logrus.Error(errors.New("expected `panels` field not found"))
+		return grafanaDashboardRaw
+	}
+	panels, ok := grafanaDashboard["panels"].([]any)
+	if !ok {
+		logrus.Error(errors.New("failed to assert `panels` to array of any"))
+		return grafanaDashboardRaw
+	}
+
+	// iterate over the panels & achieve recomposition of parent->children relationship when needed
+	var newPanelList []map[string]any
+	var parentRow map[string]any
+	for _, panelAsAny := range panels {
+		panel, ok := panelAsAny.(map[string]any)
+		if !ok {
+			logrus.Error(errors.New("failed to assert current panel to map of any"))
+			return grafanaDashboardRaw
+		}
+
+		if panel["type"] == "row" {
+			if _, found := panel["collapsed"]; !found {
+				logrus.Error(errors.New("expected attribute `collapsed` not found in row"))
+				return grafanaDashboardRaw
+			}
+			collapsed, ok := panel["collapsed"].(bool)
+			if !ok {
+				logrus.Error(errors.New("failed to assert the row's `collapsed` field to bool"))
+				return grafanaDashboardRaw
+			}
+
+			if parentRow != nil {
+				// situation corresponding to this case:
+				// row1,   <- current parentRow
+				// panelA,
+				// panelB,
+				// panelC,
+				// row2,   <- current iterated panel
+				// ...
+				// -> in this case, we should stop appending panels to the previously-registered parentRow,
+				// because we encountered a new row (we don't care if it is expanded or collapsed), thus we
+				// append parentRow to our new panel list. We also reset its value afterwards (parentRow will
+				// eventually be set to the newly-encountered row if it matches the expanded condition below)
+				newPanelList = append(newPanelList, parentRow)
+				parentRow = nil
+			}
+
+			if collapsed {
+				// any collapsed row should be appended as-is to our new panel list, without modifications.
+				newPanelList = append(newPanelList, panel)
+			} else {
+				// in this case we save the newly-encountered expanded row for the next iteration(s), since
+				// it's expanded.  We'll eventually have to append the next panel within it.
+				parentRow = panel
+			}
+		} else {
+			if parentRow != nil {
+				// situation corresponding to this case:
+				// row1,   <- current parentRow
+				// panelA,
+				// panelB, <- current iterated panel
+				// ...
+				// -> in this case we have to move this non-row panel inside the saved parentRow
+				if _, found := parentRow["panels"]; !found {
+					logrus.Error(errors.New("expected attribute `panels` not found in row"))
+					return grafanaDashboardRaw
+				}
+				subPanelsList, ok := parentRow["panels"].([]any)
+				if !ok {
+					logrus.Error(errors.New("failed to assert the row's `panels` field to array of any"))
+					return grafanaDashboardRaw
+				}
+				parentRow["panels"] = append(subPanelsList, panel)
+			} else {
+				// situation corresponding to this case:
+				// panelA,
+				// panelB, <- current iterated panel
+				// row1,
+				// ...
+				// -> in this case we append the panel as-is. Technically this case applies only when there are panels
+				// placed before any row
+				newPanelList = append(newPanelList, panel)
+			}
+		}
+	}
+	// once the loop is over, it's possible that the last row we iterated over was expanded, but the loop finished,
+	// thus we need to append it here
+	if parentRow != nil {
+		newPanelList = append(newPanelList, parentRow)
+	}
+
+	// overwrite the previous list of panels with the modified one & return:
+
+	grafanaDashboard["panels"] = newPanelList
+
+	newGrafanaDashboardRaw, err := json.Marshal(grafanaDashboard)
+	if err != nil {
+		logrus.WithError(err).Error("Unable to marshal the modified dashboard")
+		return grafanaDashboardRaw
+	}
+
+	return newGrafanaDashboardRaw
 }

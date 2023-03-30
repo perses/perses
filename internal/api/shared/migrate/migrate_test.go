@@ -71,3 +71,13 @@ func TestMigrate(t *testing.T) {
 		})
 	}
 }
+
+func TestRearrangeGrafanaPanelsWithinExpandedRows(t *testing.T) {
+	input, _ := os.ReadFile("testdata/expanded_rows_before.json")
+	expectedAfter, _ := os.ReadFile("testdata/expanded_rows_after.json")
+
+	t.Run("It should move any wrongly-orphaned panels into the right expanded row", func(t *testing.T) {
+		actualAfter := rearrangeGrafanaPanelsWithinExpandedRows(input)
+		require.JSONEq(t, string(expectedAfter), string(actualAfter))
+	})
+}

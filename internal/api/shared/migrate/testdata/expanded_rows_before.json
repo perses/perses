@@ -1,0 +1,78 @@
+{
+  "title": "Oversimplified grafana dashboard",
+  "description": "This file is like an oversimplified grafana dashboard, where we care only about the dashboard attributes used in rearrangePanelsWithinExpandedRows (also put some random fields to ensure we are not loosing content in the process)",
+  "panels": [
+    {
+      "title": "My 1rst panel is an orphan",
+      "type": "stat"
+    },
+    {
+      "title": "My 2nd panel is an orphan",
+      "type": "timeseries"
+    },
+    {
+      "title": "My 3rd panel is a collapsed row",
+      "type": "row",
+      "collapsed": true,
+      "panels": [
+        {
+          "title": "My 4th panel has a parent",
+          "type": "gauge"
+        },
+        {
+          "title": "My 5th panel has a parent",
+          "type": "bargauge"
+        }
+      ]
+    },
+    {
+      "title": "My 6th panel is an expanded row",
+      "type": "row",
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "title": "My 7th panel has a parent",
+      "type": "graph"
+    },
+    {
+      "title": "My 8th panel has a parent",
+      "type": "heatmap"
+    },
+    {
+      "title": "My 9th panel is an expanded row",
+      "type": "row",
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "title": "My 10th panel has a parent",
+      "type": "piechart"
+    },
+    {
+      "title": "My 11th panel has a parent",
+      "type": "statetimeline"
+    },
+    {
+      "title": "My 12th panel is a collapsed row",
+      "type": "row",
+      "collapsed": true,
+      "panels": [
+        {
+          "title": "My 13th panel has a parent",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "title": "My 14th panel is an expanded row",
+      "type": "row",
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "title": "My 15th panel has a parent",
+      "type": "stat"
+    }
+  ]
+}
