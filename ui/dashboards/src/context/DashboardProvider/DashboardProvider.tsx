@@ -28,6 +28,7 @@ import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 import { createDiscardChangesDialogSlice, DiscardChangesConfirmationDialogSlice } from './discard-changes-dialog-slice';
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
+import { createPanelDefinition } from './common';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -80,25 +81,11 @@ export function DashboardProvider(props: DashboardProviderProps) {
 
   useEffect(() => {
     if (plugin === undefined) return;
-    const spec = plugin.createInitialOptions();
+    const defaultPanelSpec = plugin.createInitialOptions();
     // set default panel kind, spec, and queries for add panel editor
     store.setState({
       initialValues: {
-        kind: defaultPanelKind,
-        spec,
-        queries: [
-          {
-            kind: 'TimeSeriesQuery',
-            spec: {
-              plugin: {
-                kind: defaultTimeSeriesQueryKind,
-                spec: {
-                  query: '',
-                },
-              },
-            },
-          },
-        ],
+        panelDefinition: createPanelDefinition(defaultPanelKind, defaultPanelSpec, defaultTimeSeriesQueryKind),
       },
     });
   }, [plugin, store, defaultPanelKind, defaultTimeSeriesQueryKind]);

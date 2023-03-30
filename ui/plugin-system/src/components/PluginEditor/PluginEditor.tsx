@@ -42,7 +42,6 @@ export function PluginEditor(props: PluginEditorProps) {
         />
         <FormHelperText>{error?.message ?? ''}</FormHelperText>
       </FormControl>
-
       <PluginSpecEditor pluginType={pluginType} pluginKind={value.kind} value={value.spec} onChange={onSpecChange} />
     </Box>
   );

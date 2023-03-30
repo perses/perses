@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
+import { ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
@@ -22,14 +22,11 @@ export const DEFAULT_MAX_PERCENT = 100;
 export const DEFAULT_MAX_PERCENT_DECIMAL = 1;
 
 export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
-export interface GaugeChartQueryEditorProps extends GaugeChartOptionsEditorProps {
-  queries: TimeSeriesQueryDefinition[];
-}
+
 /**
  * The Options object type supported by the GaugeChart panel plugin.
  */
 export interface GaugeChartOptions {
-  query: TimeSeriesQueryDefinition;
   calculation: CalculationType;
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
@@ -41,18 +38,6 @@ export interface GaugeChartOptions {
  */
 export function createInitialGaugeChartOptions(): GaugeChartOptions {
   return {
-    // TODO: How do you represent an initially empty/unset graph query?
-    query: {
-      kind: 'TimeSeriesQuery',
-      spec: {
-        plugin: {
-          kind: 'PrometheusTimeSeriesQuery',
-          spec: {
-            query: '',
-          },
-        },
-      },
-    },
     calculation: 'LastNumber',
     unit: DEFAULT_UNIT,
     thresholds: {

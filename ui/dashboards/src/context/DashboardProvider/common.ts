@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
+
 /**
  * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
  */
@@ -29,4 +31,38 @@ export function generateId() {
     globalThis.dashboardStoreId = 0;
   }
   return globalThis.dashboardStoreId++;
+}
+
+// Helper function to create initial PanelDefinitions
+export function createPanelDefinition(
+  defaultPanelKind?: string,
+  defaultPanelSpec?: UnknownSpec,
+  defaultTimeSeriesQueryKind?: string
+): PanelDefinition {
+  return {
+    kind: 'Panel',
+    spec: {
+      display: {
+        name: '',
+        description: undefined,
+      },
+      plugin: {
+        kind: defaultPanelKind ?? '',
+        spec: defaultPanelSpec ?? {},
+      },
+      queries: [
+        {
+          kind: 'TimeSeriesQuery',
+          spec: {
+            plugin: {
+              kind: defaultTimeSeriesQueryKind ?? '',
+              spec: {
+                query: '',
+              },
+            },
+          },
+        },
+      ],
+    },
+  };
 }

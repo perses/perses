@@ -11,21 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ErrorAlert, JSONEditor } from '@perses-dev/components';
-import { QueryDefinition, UnknownSpec } from '@perses-dev/core';
-import { OptionsEditorProps, PanelPlugin, PluginType } from '../model';
+import { ErrorAlert } from '@perses-dev/components';
+import { UnknownSpec } from '@perses-dev/core';
+import { OptionsEditorProps, PluginType } from '../model';
 import { usePlugin } from '../runtime';
-import { OptionsEditorTabsProps, OptionsEditorTabs } from './OptionsEditorTabs';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: PluginType;
   pluginKind: string;
-  // TO DO: consider removing query editor out of plugin spec so we don't need to pass queries to plugin spec editor
-  queries?: QueryDefinition[];
 }
 
 export function PluginSpecEditor(props: PluginSpecEditorProps) {
-  const { pluginType, pluginKind, queries, ...others } = props;
+  const { pluginType, pluginKind, ...others } = props;
   const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
 
   if (error) {
@@ -39,27 +36,6 @@ export function PluginSpecEditor(props: PluginSpecEditorProps) {
 
   if (plugin === undefined) {
     throw new Error(`Missing implementation for ${pluginType} plugin with kind '${pluginKind}'`);
-  }
-
-  if (pluginType === 'Panel') {
-    const { PanelQueryEditorComponent, panelOptionsEditorComponents } = plugin as PanelPlugin;
-    let tabs: OptionsEditorTabsProps['tabs'] = [];
-    if (PanelQueryEditorComponent !== undefined && queries !== undefined) {
-      tabs.push({ label: 'Query', content: <PanelQueryEditorComponent {...others} queries={queries} /> });
-    }
-    if (panelOptionsEditorComponents !== undefined) {
-      tabs = tabs.concat(
-        panelOptionsEditorComponents.map(({ label, content: OptionsEditorComponent }) => ({
-          label,
-          content: <OptionsEditorComponent {...others} />,
-        }))
-      );
-    }
-
-    // always show json editor by default
-    tabs.push({ label: 'JSON', content: <JSONEditor {...others} /> });
-
-    return <OptionsEditorTabs tabs={tabs} />;
   }
 
   const { OptionsEditorComponent } = plugin;

@@ -122,5 +122,5 @@ export function usePluginEditor(props: UsePluginEditorProps) {
     );
   };
 
-  return { pendingKind, isLoading: isFetching, error, onKindChange, onSpecChange };
+  return { pendingKind, isLoading: isFetching, error, onKindChange, onSpecChange, rememberCurrentSpecState };
 }
