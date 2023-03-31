@@ -46,14 +46,14 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
-  const { panelOptionsEditorComponents } = plugin as PanelPlugin;
+  const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
   let tabs: OptionsEditorTabsProps['tabs'] = [];
 
-  if (panelDefinition.spec.queries !== undefined) {
+  if (!hideQueryEditor) {
     // Since we only support TimeSeriesQuery for now, we will always show a TimeSeriesQueryEditor
     tabs.push({
       label: 'Query',
-      content: <TimeSeriesQueryEditor queries={panelDefinition.spec.queries} onChange={onQueriesChange} />,
+      content: <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />,
     });
   }
 
@@ -69,5 +69,5 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   // always show json editor by default
   tabs.push({ label: 'JSON', content: <JSONEditor value={panelDefinition} onChange={onJSONChange} /> });
 
-  return <OptionsEditorTabs tabs={tabs} />;
+  return <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
 }

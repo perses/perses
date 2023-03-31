@@ -22,17 +22,16 @@ import {
   Select,
   SelectProps,
   TextField,
-  TextFieldProps,
   Typography,
 } from '@mui/material';
-import produce from 'immer';
 import { PanelDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginKindSelect, usePluginEditor } from '@perses-dev/plugin-system';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { PanelPreview } from './PanelPreview';
-import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
+import { PanelSpecEditor } from './PanelSpecEditor';
+import { usePanelEditor } from './usePanelEditor';
 
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
@@ -47,7 +46,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   const panelGroups = useListPanelGroups();
   const [groupId, setGroupId] = useState(initialGroupId);
-  const [panelDefinition, setPanelDefinition] = useState<PanelDefinition>(initialPanelDef);
+  const { panelDefinition, setName, setDescription, setQueries, setPlugin, setPanelDefinition } =
+    usePanelEditor(initialPanelDef);
   const { plugin } = panelDefinition.spec;
 
   // Use common plugin editor logic even though we've split the inputs up in this form
@@ -55,11 +55,10 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     pluginType: 'Panel',
     value: { kind: plugin.kind, spec: plugin.spec },
     onChange: (plugin) => {
-      setPanelDefinition(
-        produce(panelDefinition, (draft: PanelDefinition) => {
-          draft.spec.plugin = plugin;
-        })
-      );
+      setPlugin(plugin);
+    },
+    onHideQueryEditorChange: (isHidden) => {
+      setQueries(undefined, isHidden);
     },
   });
 
@@ -74,7 +73,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   const handlePanelDefinitionChange = (nextPanelDef: PanelDefinition) => {
     const { kind: pluginKind, spec: pluginSpec } = nextPanelDef.spec.plugin;
-    // check if panel plugin kind and spec are modified
+    // if panel plugin kind and spec are modified, then need to save current spec
     if (
       panelDefinition.spec.plugin.kind !== pluginKind &&
       JSON.stringify(panelDefinition.spec.plugin.spec) !== JSON.stringify(pluginSpec)
@@ -83,32 +82,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     }
 
     setPanelDefinition(nextPanelDef);
-  };
-
-  const handleNameChange: TextFieldProps['onChange'] = (e) => {
-    const name = e.target.value;
-    setPanelDefinition(
-      produce(panelDefinition, (draft) => {
-        draft.spec.display.name = name;
-      })
-    );
-  };
-
-  const handleDescriptionChange: TextFieldProps['onChange'] = (e) => {
-    const description = e.target.value;
-    setPanelDefinition(
-      produce(panelDefinition, (draft) => {
-        draft.spec.display.description = description;
-      })
-    );
-  };
-
-  const handleQueriesChange: PanelSpecEditorProps['onQueriesChange'] = (queries) => {
-    setPanelDefinition(
-      produce(panelDefinition, (draft) => {
-        draft.spec.queries = queries;
-      })
-    );
   };
 
   useEffect(() => {
@@ -131,7 +104,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             label="Name"
             value={panelDefinition.spec.display.name ?? ''}
             variant="outlined"
-            onChange={handleNameChange}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
           />
         </Grid>
         <Grid item xs={4}>
@@ -152,7 +127,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             label="Description"
             value={panelDefinition.spec.display.description ?? ''}
             variant="outlined"
-            onChange={handleDescriptionChange}
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
           />
         </Grid>
         <Grid item xs={4}>
@@ -182,7 +159,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             <PanelSpecEditor
               panelDefinition={panelDefinition}
               onJSONChange={handlePanelDefinitionChange}
-              onQueriesChange={handleQueriesChange}
+              onQueriesChange={(queries) => {
+                setQueries(queries);
+              }}
               onPluginSpecChange={(spec) => {
                 pluginEditor.onSpecChange(spec);
               }}

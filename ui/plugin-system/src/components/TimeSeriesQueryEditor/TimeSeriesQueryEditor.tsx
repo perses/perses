@@ -13,14 +13,11 @@
 
 import { useState } from 'react';
 import { produce } from 'immer';
-import { Box, BoxProps, Button, IconButton, Stack, Typography } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import ChevronDown from 'mdi-material-ui/ChevronDown';
-import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { TimeSeriesQueryDefinition, QueryDefinition } from '@perses-dev/core';
-import { usePlugin, usePluginRegistry } from '../runtime';
-import { PluginEditor, PluginEditorProps } from './PluginEditor';
+import { usePlugin, usePluginRegistry } from '../../runtime';
+import { TimeSeriesQueryInput } from './TimeSeriesQueryInput';
 
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 
@@ -99,71 +96,39 @@ export function TimeSeriesQueryEditor(props: TimeSeriesQueryEditorProps) {
     });
   };
 
+  // show one query input if queries is empty
+  const queryDefinitions: TimeSeriesQueryDefinition[] = queries.length
+    ? queries
+    : [
+        {
+          kind: 'TimeSeriesQuery',
+          spec: {
+            plugin: {
+              kind: defaultPluginKinds?.['TimeSeriesQuery'] ?? '',
+              spec: {
+                query: '',
+              },
+            },
+          },
+        },
+      ];
+
   return (
     <Stack spacing={1}>
       <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
         Add Query
       </Button>
-      {queries.map((query: TimeSeriesQueryDefinition, i: number) => (
-        <Stack key={i} spacing={1}>
-          <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
-            <IconButton size="small" onClick={() => handleQueryCollapseExpand(i)}>
-              {queriesCollapsed[i] ? <ChevronRight /> : <ChevronDown />}
-            </IconButton>
-            <Typography variant="overline" component="h4">
-              Query {i + 1}
-            </Typography>
-            <IconButton
-              size="small"
-              // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
-              sx={{ marginLeft: 'auto', visibility: `${hasMoreThanOneQuery ? 'visible' : 'hidden'}` }}
-              onClick={() => handleQueryDelete(i)}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Stack>
-          {!queriesCollapsed[i] && <QueryEditor value={query} onChange={(next) => handleQueryChange(i, next)} />}
-        </Stack>
+      {queryDefinitions.map((query: TimeSeriesQueryDefinition, i: number) => (
+        <TimeSeriesQueryInput
+          key={i}
+          index={i}
+          query={query}
+          isCollapsed={!!queriesCollapsed[i]}
+          onChange={handleQueryChange}
+          onDelete={hasMoreThanOneQuery ? handleQueryDelete : undefined}
+          onCollapseExpand={handleQueryCollapseExpand}
+        />
       ))}
     </Stack>
-  );
-}
-
-// Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
-// this component
-type OmittedMuiProps = 'children' | 'value' | 'onChange';
-
-interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
-  value: TimeSeriesQueryDefinition;
-  onChange: (next: TimeSeriesQueryDefinition) => void;
-}
-
-/**
- * Displays an editor for TimeSeriesQueryDefinition objects.
- */
-export function QueryEditor(props: QueryEditorProps) {
-  const { value, onChange, ...others } = props;
-  const {
-    spec: { plugin },
-  } = value;
-
-  const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
-    onChange(
-      produce(value, (draft) => {
-        draft.spec.plugin = next;
-      })
-    );
-  };
-
-  return (
-    <Box {...others}>
-      {/* If TimeSeriesQuery plugins ever have common props on the definition, the inputs could go here */}
-      <PluginEditor
-        pluginType="TimeSeriesQuery"
-        pluginKindLabel="Query Type"
-        value={plugin}
-        onChange={handlePluginChange}
-      />
-    </Box>
   );
 }

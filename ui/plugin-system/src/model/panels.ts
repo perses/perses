@@ -28,6 +28,11 @@ export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
    * React components for custom tabs
    */
   panelOptionsEditorComponents?: Array<PanelOptionsEditorComponent<Spec>>;
+  /**
+   * If true, query editor will be hidden for panel plugin
+   * @default false
+   */
+  hideQueryEditor?: boolean;
 }
 
 /**

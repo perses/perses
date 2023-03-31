@@ -34,11 +34,7 @@ export function generateId() {
 }
 
 // Helper function to create initial PanelDefinitions
-export function createPanelDefinition(
-  defaultPanelKind?: string,
-  defaultPanelSpec?: UnknownSpec,
-  defaultTimeSeriesQueryKind?: string
-): PanelDefinition {
+export function createPanelDefinition(defaultPanelKind?: string, defaultPanelSpec?: UnknownSpec): PanelDefinition {
   return {
     kind: 'Panel',
     spec: {
@@ -50,19 +46,7 @@ export function createPanelDefinition(
         kind: defaultPanelKind ?? '',
         spec: defaultPanelSpec ?? {},
       },
-      queries: [
-        {
-          kind: 'TimeSeriesQuery',
-          spec: {
-            plugin: {
-              kind: defaultTimeSeriesQueryKind ?? '',
-              spec: {
-                query: '',
-              },
-            },
-          },
-        },
-      ],
+      queries: [],
     },
   };
 }
