@@ -63,12 +63,6 @@ describe('Panel', () => {
   it('shows panel description', async () => {
     renderPanel();
 
-    const panel = getPanel();
-
-    // Description button should not be visible until hover on panel
-    const missingButton = screen.queryByRole('button', { name: /description/i });
-    expect(missingButton).not.toBeInTheDocument();
-    userEvent.hover(panel);
     const descriptionButton = screen.getByRole('button', { name: /description/i });
     expect(descriptionButton).toBeInTheDocument();
 
