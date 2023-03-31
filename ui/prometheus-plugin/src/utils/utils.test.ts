@@ -16,6 +16,7 @@ import {
   replaceTemplateVariable,
   replaceTemplateVariables,
   formatSeriesName,
+  getFormattedPrometheusSeriesName,
   getUniqueKeyForPrometheusResult,
 } from './utils';
 
@@ -152,5 +153,30 @@ describe('getUniqueKeyForPrometheusResult', () => {
     };
     const result = getUniqueKeyForPrometheusResult(labels, { removeExprWrap: false });
     expect(result).toEqual('node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}');
+  });
+});
+
+describe('getFormattedPrometheusSeriesName', () => {
+  it('should resolve empty metric to instead show query', () => {
+    const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
+    const metric = {};
+    const output = { name: query };
+    expect(getFormattedPrometheusSeriesName(query, metric)).toEqual(output);
+  });
+
+  it('should show correct formatted series name', () => {
+    const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
+    const metric = {
+      __name__: 'node_memory_Buffers_bytes',
+      env: 'demo',
+      instance: 'demo.do.prometheus.io:9100',
+      job: 'node',
+    };
+    const series_name_format = 'custom example {{env}} {{instance}} {{node}}';
+    const output = {
+      formattedName: 'custom example demo demo.do.prometheus.io:9100 node',
+      name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+    };
+    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
   });
 });

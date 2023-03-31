@@ -271,6 +271,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         yAxis={yAxis}
         unit={unit}
         grid={gridOverrides}
+        tooltipConfig={{ showQuery: true, wrapLabels: true }}
         onDataZoom={handleDataZoom}
       />
       {legend && graphData.legendItems && (
