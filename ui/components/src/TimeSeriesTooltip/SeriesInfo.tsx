@@ -53,7 +53,8 @@ export function SeriesInfo(props: SeriesInfoProps) {
   }
 
   // when more than one series, either show full series name or formatted labels only
-  const inlineSeriesInfo = showQuery ? seriesName : formattedSeriesLabels.replace(/[,]/g, ', ');
+  const seriesInfo = showQuery ? seriesName : formattedSeriesLabels;
+  const formattedSeriesInfo = seriesInfo.replace(/[,]/g, ', '); // add space after commas so wrapLabels works
 
   return (
     <Box
@@ -82,7 +83,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
         >
-          {inlineSeriesInfo}
+          {formattedSeriesInfo}
         </Box>
       </Box>
       <Box

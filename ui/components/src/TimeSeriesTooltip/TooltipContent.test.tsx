@@ -68,6 +68,7 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
+      showQuery: false,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('84.64M')).toBeInTheDocument();
