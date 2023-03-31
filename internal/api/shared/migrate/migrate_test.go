@@ -26,8 +26,8 @@ import (
 func TestMigrate(t *testing.T) {
 	simpleGrafanaDashboard, _ := os.ReadFile("testdata/simple_grafana_dashboard.json")
 	simplePersesDashboard, _ := os.ReadFile("testdata/simple_perses_dashboard.json")
-	oldFormatGrafanaDashboard, _ := os.ReadFile("testdata/old_format_grafana_dashboard.json")
-	oldFormatPersesDashboard, _ := os.ReadFile("testdata/old_format_perses_dashboard.json")
+	oldFormatGrafanaDashboard, _ := os.ReadFile("testdata/old_grafana_panels_grafana_dashboard.json")
+	oldFormatPersesDashboard, _ := os.ReadFile("testdata/old_grafana_panels_perses_dashboard.json")
 
 	testSuite := []struct {
 		title            string

@@ -1,7 +1,7 @@
 {
   "kind": "Dashboard",
   "metadata": {
-    "name": "DuJ3dcNVk",
+    "name": "xRV24sBVk",
     "created_at": "0001-01-01T00:00:00Z",
     "updated_at": "0001-01-01T00:00:00Z",
     "version": 0,
@@ -9,10 +9,11 @@
   },
   "spec": {
     "display": {
-      "name": "Simple grafana dashboard"
+      "name": "Perses testing / Simple grafana dashboard"
     },
     "duration": "1h",
-    "variables": [{
+    "variables": [
+      {
         "kind": "ListVariable",
         "spec": {
           "name": "listVar",
@@ -58,7 +59,12 @@
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "Stack",
+          "name": "lv1",
+          "display": {
+            "name": "Stack",
+            "description": "Label values, 1rst flavor",
+            "hidden": false
+          },
           "allow_all_value": true,
           "allow_multiple": false,
           "plugin": {
@@ -73,14 +79,65 @@
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "stack_with_metric",
+          "name": "lv2",
+          "display": {
+            "name": "Stack with Metric",
+            "description": "Label values, 2nd flavor",
+            "hidden": false
+          },
           "allow_all_value": true,
           "allow_multiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "label_name": "stack",
-              "matchers": []
+              "matchers": [
+                "thanos_build_info"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "lv3",
+          "display": {
+            "name": "Stack with Timeserie",
+            "description": "Label values, 3rd flavor",
+            "hidden": false
+          },
+          "allow_all_value": true,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "stack",
+              "matchers": [
+                "thanos_build_info{stack=~\"erd.+\"}"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "lv4",
+          "display": {
+            "name": "Stack with Timeserie reusing other variable",
+            "description": "Label values, 4th flavor",
+            "hidden": false
+          },
+          "allow_all_value": true,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "stack",
+              "matchers": [
+                "thanos_build_info{stack=~\"$lv1\"}"
+              ]
             }
           }
         }
@@ -242,7 +299,8 @@
                 }
               },
               "thresholds": {
-                "steps": [{
+                "steps": [
+                  {
                     "color": "green",
                     "value": 0
                   },
@@ -283,7 +341,8 @@
                 }
               },
               "thresholds": {
-                "steps": [{
+                "steps": [
+                  {
                     "color": "green",
                     "value": 0
                   },
@@ -313,23 +372,26 @@
               "legend": {
                 "position": "Bottom"
               },
-              "queries": [{
-                "kind": "TimeSeriesQuery",
-                "spec": {
-                  "plugin": {
-                    "kind": "PrometheusTimeSeriesQuery",
-                    "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "argos-world"
-                      },
-                      "query": "vector(1)"
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "datasource": {
+                          "kind": "PrometheusDatasource",
+                          "name": "argos-world"
+                        },
+                        "query": "vector(1)"
+                      }
                     }
                   }
                 }
-              }],
+              ],
               "thresholds": {
-                "steps": [{
+                "steps": [
+                  {
                     "color": "green",
                     "value": 0
                   },
@@ -356,26 +418,34 @@
               "legend": {
                 "position": "Bottom"
               },
-              "queries": [{
-                "kind": "TimeSeriesQuery",
-                "spec": {
-                  "plugin": {
-                    "kind": "PrometheusTimeSeriesQuery",
-                    "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "argos-world"
-                      },
-                      "query": "vector(3)"
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {
+                    "plugin": {
+                      "kind": "PrometheusTimeSeriesQuery",
+                      "spec": {
+                        "datasource": {
+                          "kind": "PrometheusDatasource",
+                          "name": "argos-world"
+                        },
+                        "query": "vector(3)"
+                      }
                     }
                   }
                 }
-              }],
+              ],
               "thresholds": {
-                "steps": [{
-                  "color": "red",
-                  "value": 80
-                }]
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
               }
             }
           }
@@ -410,10 +480,12 @@
         }
       }
     },
-    "layouts": [{
+    "layouts": [
+      {
         "kind": "Grid",
         "spec": {
-          "items": [{
+          "items": [
+            {
               "x": 0,
               "y": 0,
               "width": 12,
@@ -452,7 +524,8 @@
               "open": false
             }
           },
-          "items": [{
+          "items": [
+            {
               "x": 0,
               "y": 17,
               "width": 12,

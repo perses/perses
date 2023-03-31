@@ -19,6 +19,7 @@ import type {
   LineSeriesOption,
   LegendComponentOption,
   YAXisComponentOption,
+  TooltipComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
@@ -68,9 +69,20 @@ export interface LineChartProps {
   legend?: LegendComponentOption;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
+  __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
-export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom, onDoubleClick }: LineChartProps) {
+export function LineChart({
+  height,
+  data,
+  yAxis,
+  unit,
+  grid,
+  legend,
+  onDataZoom,
+  onDoubleClick,
+  __experimentalEChartsOptionsOverride,
+}: LineChartProps) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -168,8 +180,11 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
       legend,
     };
 
+    if (__experimentalEChartsOptionsOverride) {
+      return __experimentalEChartsOptionsOverride(option);
+    }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone]);
+  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride]);
 
   return (
     <Box
@@ -198,7 +213,7 @@ export function LineChart({ height, data, yAxis, unit, grid, legend, onDataZoom,
       }}
       onDoubleClick={handleOnDoubleClick}
     >
-      {showTooltip === true && (
+      {showTooltip === true && (option.tooltip as TooltipComponentOption).showContent === false && (
         <TimeSeriesTooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit} />
       )}
 

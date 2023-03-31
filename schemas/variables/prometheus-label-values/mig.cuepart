@@ -1,7 +1,8 @@
 if #var.type == "query" if #var.query.query =~ "^label_values\\(.*\\)$" {
     kind: "PrometheusLabelValuesVariable"
     spec: {
-        label_name: regexp.FindSubmatch("^label_values\\(.*?,?([a-zA-Z0-9-_]+)\\)$", #var.query.query)[1] // TODO manage the 2 different kinds of label_values 
-        matchers: []
+        #matches: regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #var.query.query)
+        label_name: #matches[3]
+        matchers: [ if #matches[2] != "" { #matches[2] } ]
     }
 },

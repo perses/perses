@@ -14,7 +14,6 @@
 package shared
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -105,7 +104,7 @@ func (t *toolbox) Get(ctx echo.Context) error {
 
 func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
-		return fmt.Errorf("%w: %s", BadRequestError, err)
+		return HandleBadRequestError(err.Error())
 	}
 	parameters := extractParameters(ctx)
 	result, err := t.service.List(q, parameters)
@@ -117,10 +116,10 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 
 func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
-		return fmt.Errorf("%w: %s", BadRequestError, err)
+		return HandleBadRequestError(err.Error())
 	}
 	if err := validateMetadata(ctx, entity.GetMetadata()); err != nil {
-		return fmt.Errorf("%w: %s", BadRequestError, err)
+		return HandleBadRequestError(err.Error())
 	}
 	return nil
 }
