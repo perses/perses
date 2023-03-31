@@ -13,8 +13,7 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
-import { ChartsThemeProvider, generateChartsTheme, PersesChartsTheme } from '@perses-dev/components';
-import { getTheme } from '@perses-dev/components';
+import { ChartsThemeProvider, generateChartsTheme, PersesChartsTheme, getTheme } from '@perses-dev/components';
 import { useLocalStorage } from '../utils/browser-storage';
 
 // app specific echarts option overrides, empty since perses uses default
