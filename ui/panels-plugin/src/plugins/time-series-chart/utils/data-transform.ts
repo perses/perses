@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
-import { EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
+import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
 import { useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,

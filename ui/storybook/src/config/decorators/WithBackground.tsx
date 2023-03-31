@@ -11,11 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { useTheme } from '@mui/material';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Decorator } from '@storybook/react';
-import { useEffect } from 'react';
 
 // Much of the code for this decorator is cribbed from the backgrounds addon. We cannot
 // use that addon directly because it requires hardcoding the colors instead
