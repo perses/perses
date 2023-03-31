@@ -20,7 +20,7 @@ describe('TooltipContent', () => {
     render(<TooltipContent {...props} />);
   };
 
-  it('render tooltip content with a single series name', () => {
+  it('should display a single series name', () => {
     const tooltipContent: TooltipContentProps = {
       focusedSeries: [
         {
@@ -43,7 +43,7 @@ describe('TooltipContent', () => {
     expect(screen.getByText('0.1')).toBeInTheDocument();
   });
 
-  it('render tooltip content with multiple series data', () => {
+  it('should display multiple series data', () => {
     const tooltipContent: TooltipContentProps = {
       focusedSeries: [
         {
@@ -74,5 +74,41 @@ describe('TooltipContent', () => {
     expect(screen.getByText('84.64M')).toBeInTheDocument();
     expect(screen.getByText('33.77M')).toBeInTheDocument();
     expect(screen.getAllByText('env="demo", instance="demo.do.prometheus.io:9100", job="node"')).toHaveLength(2);
+  });
+
+  it('should display query before wrapped labels', () => {
+    const tooltipContent: TooltipContentProps = {
+      focusedSeries: [
+        {
+          seriesIdx: 2,
+          datumIdx: 48,
+          seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 'Dec 23, 2022, 1:44:00 PM',
+          x: 1671821040000,
+          y: 84635648,
+          formattedY: '84.64M',
+          markerColor: 'hsla(1887856572,50%,50%,0.8)',
+        },
+        {
+          seriesIdx: 1,
+          datumIdx: 48,
+          seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 'Dec 23, 2022, 1:44:00 PM',
+          x: 1671821040000,
+          y: 33771520,
+          formattedY: '33.77M',
+          markerColor: 'hsla(158479636,50%,50%,0.8)',
+        },
+      ],
+      wrapLabels: true,
+      showQuery: true,
+    };
+    renderComponent(tooltipContent);
+    expect(
+      screen.getByText('node_memory_MemFree_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+    ).toBeInTheDocument();
   });
 });

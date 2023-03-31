@@ -57,7 +57,7 @@ use([
   CanvasRenderer,
 ]);
 
-type TooltipConfig = {
+export type TooltipConfig = {
   showQuery: boolean;
   wrapLabels: boolean;
   hidden?: boolean;
