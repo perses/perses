@@ -13,8 +13,16 @@
 
 package prometheusPromQL
 
+import (
+	"github.com/perses/perses/schemas/datasources/prometheus"
+)
+
 kind: "PrometheusPromQLVariable"
 spec: close({
+	datasource?: {
+		kind:  prometheus.kind
+		name?: string
+	}
 	expr:       string
 	label_name: string
 })
