@@ -1,4 +1,6 @@
-# Perses
+<h1 align="center" style="border-bottom: none">
+    <img alt="Perses" src="/docs/images/perses_logo_cropped.svg"><br>Perses
+</h1>
 
 [![build](https://github.com/perses/perses/workflows/ci/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Aci)
 [![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago)
