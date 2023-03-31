@@ -27,7 +27,7 @@ export interface SeriesInfoProps {
 }
 
 export function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, formattedY, markerColor, totalSeries, wrapLabels, showQuery = true } = props;
+  const { seriesName, formattedY, markerColor, totalSeries, wrapLabels = true, showQuery = true } = props;
 
   // metric __name__ comes before opening curly brace, ignore if not populated
   // ex with metric name: node_load15{env="demo",job="node"}

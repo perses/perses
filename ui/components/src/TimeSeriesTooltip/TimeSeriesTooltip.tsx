@@ -24,6 +24,7 @@ interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
   pinTooltip: boolean;
+  showQuery?: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
 }
@@ -32,6 +33,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,
+  showQuery,
   pinTooltip,
   unit,
 }: TimeSeriesTooltipProps) {
@@ -83,7 +85,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
+        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} showQuery={showQuery} />
       </Box>
     </Portal>
   );
