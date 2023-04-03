@@ -86,6 +86,20 @@ async function deleteDashboard(projectName: string, dashboardName: string) {
   return result;
 }
 
+// We want to throw on console errors that may mean the app is broken.
+// Some of the libraries we use (e.g. emotion) throw console errors we do not
+// care about at this time. We track those here, so they can be ignored.
+const IGNORE_CONSOLE_ERRORS = [
+  // See https://github.com/emotion-js/emotion/issues/1105
+  'potentially unsafe when doing server-side rendering',
+];
+function shouldIgnoreConsoleError(message: ConsoleMessage) {
+  console.log('should ignore');
+  const msgText = message.text();
+  console.log(msgText);
+  return IGNORE_CONSOLE_ERRORS.some((ignoreErr) => msgText.includes(ignoreErr));
+}
+
 /**
  * Generates a dashboard name to use when duplicating a dashboard for a given
  * test.
@@ -143,7 +157,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
 
     const consoleErrors: ConsoleMessage[] = [];
     page.on('console', (msg) => {
-      if (msg.type() === 'error') {
+      if (msg.type() === 'error' && !shouldIgnoreConsoleError(msg)) {
         // Watch for console errors because they are often a sign that something
         // is wrong.
         consoleErrors.push(msg);
