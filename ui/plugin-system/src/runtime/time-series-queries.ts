@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { useQuery, useQueries, useQueryClient, Query, QueryCache, QueryKey } from '@tanstack/react-query';
-import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
-import { TimeSeriesData, TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
-import { VariableStateMap } from './template-variables';
-import { useTemplateVariableValues } from './template-variables';
+import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
+import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
+import { VariableStateMap, useTemplateVariableValues } from './template-variables';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';

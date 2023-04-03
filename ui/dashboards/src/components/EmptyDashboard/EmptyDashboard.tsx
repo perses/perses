@@ -24,6 +24,11 @@ export interface EmptyDashboardProps {
   title?: string;
 
   /**
+   * Imagery to display above the title.
+   */
+  image?: React.ReactNode;
+
+  /**
    * Descriptive text, which can be a bit longer.
    */
   description?: string;
@@ -103,6 +108,7 @@ const EmptyDashboardActions = ({ actions, isEditMode, onEditButtonClick }: Empty
  */
 export const EmptyDashboard = ({
   title = DEFAULT_TITLE,
+  image,
   description,
   additionalText,
   actions,
@@ -118,6 +124,7 @@ export const EmptyDashboard = ({
   return (
     <Box sx={{ width: CONTAINER_WIDTH, textAlign: 'center', margin: '0 auto' }}>
       <Box sx={{ width: PRIMARY_CONTENT_WIDTH, margin: '0 auto' }}>
+        {!!image && image}
         <Typography variant="h2" gutterBottom>
           {title}
         </Typography>

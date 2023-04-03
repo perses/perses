@@ -15,9 +15,11 @@ package shared
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -45,10 +47,10 @@ func HandleError(err error) error {
 	if errors.Is(err, InternalError) {
 		return echo.NewHTTPError(http.StatusInternalServerError, InternalError.message)
 	}
-	if errors.Is(err, NotFoundError) {
+	if databaseModel.IsKeyNotFound(err) || errors.Is(err, NotFoundError) {
 		return echo.NewHTTPError(http.StatusNotFound, NotFoundError.message)
 	}
-	if errors.Is(err, ConflictError) {
+	if databaseModel.IsKeyConflict(err) || errors.Is(err, ConflictError) {
 		return echo.NewHTTPError(http.StatusConflict, ConflictError.message)
 	}
 	if errors.Is(err, BadRequestError) {
@@ -56,4 +58,8 @@ func HandleError(err error) error {
 	}
 	logrus.WithError(err).Error("unexpected error not handle")
 	return echo.NewHTTPError(http.StatusInternalServerError, InternalError.message)
+}
+
+func HandleBadRequestError(msg string) error {
+	return fmt.Errorf("%w: %s", BadRequestError, msg)
 }

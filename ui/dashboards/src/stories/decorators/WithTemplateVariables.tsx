@@ -11,12 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StoryFn } from '@storybook/react';
-import { TemplateVariableProvider } from '@perses-dev/dashboards';
+import { StoryFn, StoryContext } from '@storybook/react';
+import { TemplateVariableProvider, TemplateVariableProviderProps } from '@perses-dev/dashboards';
 
-export const WithTemplateVariables = (Story: StoryFn) => {
+export type WithTemplateVariableParameter = {
+  props: Partial<TemplateVariableProviderProps>;
+};
+
+// Type guard because storybook types parameters as `any`
+function isWithTemplateVariableParameter(
+  parameter: unknown | WithTemplateVariableParameter
+): parameter is WithTemplateVariableParameter {
+  return !!parameter && typeof parameter === 'object' && 'props' in parameter;
+}
+
+export const WithTemplateVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
+  const initParameter = context.parameters.withTemplateVariables;
+  const parameter = isWithTemplateVariableParameter(initParameter) ? initParameter : undefined;
+  const props = parameter?.props;
+
   return (
-    <TemplateVariableProvider>
+    <TemplateVariableProvider {...props}>
       <Story />
     </TemplateVariableProvider>
   );

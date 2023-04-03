@@ -15,13 +15,14 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EmptyDashboard } from '@perses-dev/dashboards';
 import { Button } from '@mui/material';
 import { action } from '@storybook/addon-actions';
+import ViewDashboardVariantOutline from 'mdi-material-ui/ViewDashboardVariantOutline';
 import {
   WithTemplateVariables,
   WithQueryParams,
   WithDashboard,
   WithPluginRegistry,
   WithQueryClient,
-  DEFAULT_DASHBOARD_INITIAL_STATE,
+  EMPTY_DASHBOARD_RESOURCE,
 } from '../../stories/decorators';
 
 const meta: Meta<typeof EmptyDashboard> = {
@@ -49,7 +50,7 @@ export const EditMode: Story = {
     withDashboard: {
       props: {
         initialState: {
-          ...DEFAULT_DASHBOARD_INITIAL_STATE,
+          dashboardResource: EMPTY_DASHBOARD_RESOURCE,
           isEditMode: true,
         },
       },
@@ -63,6 +64,7 @@ export const EditMode: Story = {
 export const Custom: Story = {
   args: {
     title: 'Oh no!',
+    image: <ViewDashboardVariantOutline sx={{ fontSize: '100px', opacity: 0.5 }} color="secondary" />,
     description: 'This dashboard is empty.',
     additionalText: 'Tip: Add a panel group and a panel to get started.',
     actions: (

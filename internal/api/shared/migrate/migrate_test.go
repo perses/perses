@@ -26,8 +26,8 @@ import (
 func TestMigrate(t *testing.T) {
 	simpleGrafanaDashboard, _ := os.ReadFile("testdata/simple_grafana_dashboard.json")
 	simplePersesDashboard, _ := os.ReadFile("testdata/simple_perses_dashboard.json")
-	oldFormatGrafanaDashboard, _ := os.ReadFile("testdata/old_format_grafana_dashboard.json")
-	oldFormatPersesDashboard, _ := os.ReadFile("testdata/old_format_perses_dashboard.json")
+	oldFormatGrafanaDashboard, _ := os.ReadFile("testdata/old_grafana_panels_grafana_dashboard.json")
+	oldFormatPersesDashboard, _ := os.ReadFile("testdata/old_grafana_panels_perses_dashboard.json")
 
 	testSuite := []struct {
 		title            string
@@ -70,4 +70,14 @@ func TestMigrate(t *testing.T) {
 			require.JSONEq(t, string(test.resultDashboard), string(persesDashboardJSON))
 		})
 	}
+}
+
+func TestRearrangeGrafanaPanelsWithinExpandedRows(t *testing.T) {
+	input, _ := os.ReadFile("testdata/expanded_rows_before.json")
+	expectedAfter, _ := os.ReadFile("testdata/expanded_rows_after.json")
+
+	t.Run("It should move any wrongly-orphaned panels into the right expanded row", func(t *testing.T) {
+		actualAfter := rearrangeGrafanaPanelsWithinExpandedRows(input)
+		require.JSONEq(t, string(expectedAfter), string(actualAfter))
+	})
 }

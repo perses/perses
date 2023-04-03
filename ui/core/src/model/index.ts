@@ -22,5 +22,6 @@ export * from './panels';
 export * from './resource';
 export * from './thresholds';
 export * from './time';
+export * from './time-series-data';
 export * from './time-series-queries';
 export * from './variables';

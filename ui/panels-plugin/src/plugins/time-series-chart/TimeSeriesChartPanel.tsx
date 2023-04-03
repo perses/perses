@@ -13,7 +13,7 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo, StepOptions } from '@perses-dev/core';
+import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
@@ -40,9 +40,7 @@ import {
 import {
   getLineSeries,
   getThresholdSeries,
-  getCommonTimeScale,
-  getYValues,
-  getXValues,
+  getCommonTimeScaleForQueries,
   EMPTY_GRAPH_DATA,
   convertPercentThreshold,
 } from './utils/data-transform';
@@ -141,7 +139,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
-    const timeScale = getCommonTimeScale(queryResults);
+    const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
       return {
         graphData: EMPTY_GRAPH_DATA,
@@ -263,7 +261,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   let legendHeight = LEGEND_HEIGHT_SM;
   if (legend && legend.position === 'Right') {
     legendHeight = adjustedContentDimensions.height;
-  } else if (adjustedContentDimensions.height > PANEL_HEIGHT_LG_BREAKPOINT) {
+  } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
     legendHeight = LEGEND_HEIGHT_LG;
   }
 
@@ -291,6 +289,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         yAxis={yAxis}
         unit={unit}
         grid={gridOverrides}
+        tooltipConfig={{ showQuery: true, wrapLabels: true }}
         onDataZoom={handleDataZoom}
       />
       {legend && graphData.legendItems && (

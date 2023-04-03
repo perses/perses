@@ -51,12 +51,12 @@ test.describe('App', () => {
     const projectPage = new AppProjectPage(page);
     await projectPage.createDashboard('my new dashboard');
 
-    // Should see empty state
-    await expect(page.getByRole('main')).toContainText("Let's get started");
-
     const dashboardPage = new DashboardPage(page);
 
     await dashboardPage.forEachTheme(async (themeName) => {
+      // Should see empty state
+      await expect(page.getByRole('main')).toContainText("Let's get started");
+
       await happoPlaywright.screenshot(page, dashboardPage.root, {
         component: 'Empty State',
         variant: themeName,

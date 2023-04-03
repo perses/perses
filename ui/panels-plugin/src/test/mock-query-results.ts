@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesData } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/core';
 
 export const MOCK_TIME_SERIES_QUERY_RESULT = [
   {

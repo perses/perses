@@ -70,7 +70,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	folderService := folderImpl.NewService(dao.GetFolder())
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
-	projectService := projectImpl.NewService(dao.GetProject())
+	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard())
 	return &service{
 		dashboard:        dashboardService,
 		datasource:       datasourceService,

@@ -13,9 +13,8 @@
 
 import { merge } from 'lodash-es';
 import { TextField } from '@mui/material';
-import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
+import { CalculationSelector, CalculationSelectorProps, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import {
   UnitSelector,
   UnitSelectorProps,
@@ -23,8 +22,8 @@ import {
   OptionsEditorGrid,
   OptionsEditorColumn,
   OptionsEditorControl,
+  ThresholdsEditor,
 } from '@perses-dev/components';
-import { ThresholdsEditor } from '@perses-dev/components';
 import { ThresholdOptions } from '@perses-dev/core';
 import {
   GaugeChartOptions,

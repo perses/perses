@@ -16,7 +16,6 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,6 +24,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/shared"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 )
 
 type partialMetadata struct {
@@ -63,17 +63,17 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 						// So we read the body, and then we re-inject it in the request.
 						bodyBytes, err := io.ReadAll(c.Request().Body)
 						if err != nil {
-							return fmt.Errorf("%w: %s", shared.BadRequestError, err)
+							return shared.HandleBadRequestError(err.Error())
 						}
 						// write back to request body
 						c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 						// now we can safely partially decode the body
 						o := &partialObject{}
 						if unmarshalErr := json.Unmarshal(bodyBytes, o); unmarshalErr != nil {
-							return fmt.Errorf("%w: %s", shared.BadRequestError, unmarshalErr)
+							return shared.HandleBadRequestError(unmarshalErr.Error())
 						}
 						if len(o.Metadata.Project) == 0 {
-							return fmt.Errorf("%w: metadata.project cannot be empty", shared.BadRequestError)
+							return shared.HandleBadRequestError("metadata.project cannot be empty")
 						}
 						projectName = o.Metadata.Project
 						break
@@ -82,8 +82,8 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 			}
 			if len(projectName) > 0 {
 				if _, err := svc.Get(shared.Parameters{Name: projectName}); err != nil {
-					if errors.Is(err, shared.NotFoundError) {
-						return fmt.Errorf("%w, metadata.project %q doesn't exist", shared.BadRequestError, projectName)
+					if databaseModel.IsKeyNotFound(err) {
+						return shared.HandleBadRequestError(fmt.Sprintf("metadata.project %q doesn't exist", projectName))
 					}
 					return err
 				}

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.25.0 / 2023-03-20
+
+- [FEATURE] Implement Edit JSON Dialog (#1012)
+- [ENHANCEMENT] Logo added to app header (#1010)
+- [ENHANCEMENT] Extend datasource with onCreate prop, return warnings (#1019)
+- [ENHANCEMENT] TimeSeriesData now supports labels (#1014)
+- [ENHANCEMENT] Dashboard displays empty state (#1009)
+- [BUGFIX] Make emptyDashboardProps optional on Dashboard (#1028)
+- [BUGFIX] Add story for Legend and export LegendProps (#1025)
+- [BUGFIX] Fix react warnings (#1021)
+- [BUGFIX] Fix getting dashboard from an empty project (#1017)
+- [BUGFIX] Add stories for chart components and export prop types (#1008)
+- [BUGFIX] Add null checks for layouts and panels in DashboardProvider (#999)
+- [BREAKINGCHANGE] Add view mode to empty state (#1022)
+
 ## 0.24.0 / 2023-03-06
 
 - [FEATURE] Ability to edit thresholds for Time Series and Stat Charts (#992)

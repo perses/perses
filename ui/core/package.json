@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -23,13 +23,15 @@
     "build:types": "tsc --project tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
-    "test": "echo 'no test to run' && exit 0",
+    "test": "TZ=UTC jest",
+    "test:watch": "TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
     "date-fns": "^2.28.0",
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.21",
+    "mathjs": "^10.6.4"
   },
   "peerDependencies": {
     "react": "^17.0.2 || ^18.0.0",

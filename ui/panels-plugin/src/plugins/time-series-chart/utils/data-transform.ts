@@ -11,11 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, StepOptions } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
-import { EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
-import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
-import { gcd } from '../../../utils/mathjs';
+import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
+import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
+import { useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -23,12 +21,6 @@ import {
   DEFAULT_POINT_RADIUS,
   VisualOptions,
 } from '../time-series-chart-model';
-
-export interface TimeScale {
-  startMs: number;
-  endMs: number;
-  stepMs: number;
-}
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
 
@@ -38,98 +30,14 @@ export const EMPTY_GRAPH_DATA = {
   legendItems: [],
 };
 
-export const MIN_STEP_INTERVAL_MS = 10;
-
 /**
  * Given a list of running queries, calculates a common time scale for use on
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScale(queryResults: RunningQueriesState): TimeScale | undefined {
-  let timeRange: AbsoluteTimeRange | undefined = undefined;
-  const steps: number[] = [];
-  for (const { isLoading, data } of queryResults) {
-    if (isLoading || data === undefined || data.timeRange === undefined || data.stepMs === undefined) continue;
-
-    // Keep track of query steps so we can calculate a common one for the graph
-    steps.push(data.stepMs);
-
-    // If we don't have an overall time range yet, just start with this one
-    if (timeRange === undefined) {
-      timeRange = data.timeRange;
-      continue;
-    }
-
-    // Otherwise, see if this query has a start or end outside of the current
-    // time range
-    if (data.timeRange.start < timeRange.start) {
-      timeRange.start = data.timeRange.start;
-    }
-    if (data.timeRange.end > timeRange.end) {
-      timeRange.end = data.timeRange.end;
-    }
-  }
-
-  if (timeRange === undefined) return undefined;
-
-  // Use the greatest common divisor of all step values as the overall step
-  // for the x axis (or if only one query, just use that query's step value)
-  let stepMs: number;
-  if (steps.length === 1) {
-    stepMs = steps[0] as number;
-  } else {
-    const calculatedStepMs = gcd(...steps);
-    stepMs = calculatedStepMs < MIN_STEP_INTERVAL_MS ? MIN_STEP_INTERVAL_MS : calculatedStepMs;
-  }
-
-  const startMs = timeRange.start.valueOf();
-  const endMs = timeRange.end.valueOf();
-
-  return { startMs, endMs, stepMs };
-}
-
-/**
- * Given a common time scale, generates an array of timestamp (in ms) values
- * for the x axis of a graph.
- */
-export function getXValues(timeScale: TimeScale): number[] {
-  const xValues: number[] = [];
-  let timestamp = timeScale.startMs;
-  while (timestamp <= timeScale.endMs) {
-    xValues.push(timestamp);
-    timestamp += timeScale.stepMs;
-  }
-  return xValues;
-}
-
-/**
- * Given a TimeSeries from a query and the time scale, gets the values for the
- * y axis of a graph, filling in any timestamps that are missing from the time
- * series data with `null` values.
- */
-export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<number | null> {
-  let timestamp = timeScale.startMs;
-
-  const yValues: Array<number | null> = [];
-  for (const valueTuple of series.values) {
-    // Fill in values up to the current series value timestamp with nulls
-    while (timestamp < valueTuple[0]) {
-      yValues.push(null);
-      timestamp += timeScale.stepMs;
-    }
-
-    // Now add the current value since timestamp should match
-    yValues.push(valueTuple[1]);
-    timestamp += timeScale.stepMs;
-  }
-
-  // Add null values at the end of the series if necessary
-  while (timestamp <= timeScale.endMs) {
-    yValues.push(null);
-    timestamp += timeScale.stepMs;
-  }
-
-  return yValues;
+export function getCommonTimeScaleForQueries(queries: RunningQueriesState): TimeScale | undefined {
+  const seriesData = queries.map((query) => (query.isLoading ? undefined : query.data));
+  return getCommonTimeScale(seriesData);
 }
 
 /**
@@ -139,7 +47,7 @@ export function getLineSeries(
   formattedName: string,
   data: EChartsTimeSeries['data'],
   visual: VisualOptions,
-  color?: string
+  paletteColor?: string
 ): EChartsTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
@@ -148,7 +56,8 @@ export function getLineSeries(
     name: formattedName,
     data: data,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
-    color: color,
+    color: paletteColor,
+    stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: visual.show_points === 'Always' ? true : false,

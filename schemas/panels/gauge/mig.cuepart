@@ -4,7 +4,7 @@ if #panel.type == "gauge" {
         query: {
             kind: "TimeSeriesQuery"
             spec: {
-                #target: #panel.targets[0] // Perses's GaugeChart doesn't support multi queries
+                #target: *#panel.targets[0] | null // Perses's GaugeChart doesn't support multi queries
                 plugin: [ // switch
                     %(conditional_timeserie_queries)
                 ][0]
