@@ -1,4 +1,6 @@
-# Perses
+<h1 align="center" style="border-bottom: none">
+    <a href="https://github.com/perses" target="_blank"><img alt="Perses" src="/docs/images/perses_logo_cropped.svg"></a><br>Perses
+</h1>
 
 [![build](https://github.com/perses/perses/workflows/ci/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Aci)
 [![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago)
@@ -17,7 +19,7 @@ Perses is going to tackle multiple different goals:
 1. It aims to become a **standard** dashboard visualization tool for Prometheus and other datasources. It will focus on
    being GitOps-compatible and thus enabling a smooth "dashboards as code" workflow via a new and well-defined dashboard
    definition model.
-2. While becoming another visualization tool, Perses also aims to provide different npm packages, so it can benefit to
+2. While becoming another visualization tool, Perses also aims to provide different npm packages, so it can benefit
    anyone that would like to embed charts and dashboards in their UI. For example, these packages might be used to
    improve the display of the data in the Prometheus UI.
 3. It also aims to offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from
@@ -32,36 +34,33 @@ Perses is going to tackle multiple different goals:
 While we already released a certain amount of versions, Perses is still in an early alpha stage and still work in
 progress. The current pieces that are in place are:
 
-* The Plugin architecture has finally reached a stable point.
-  * The plugins concerned the Variables, the Panels, The Queries and the Datasources definitions.
-  * To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
+- The Plugin architecture has finally reached a stable point.
+  - The plugins concern the Variables, Panels, Queries and Datasources definitions.
+  - To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
     All schemas are available in the [schemas](./schemas) folder.
-* A backend REST API provides R/W access to dashboard and datasource definitions.
-* A CLI that can be used to interact with the REST API. A short docs is available [here](./docs/cli.md)
-* While the UI is still in progress, we already have:
-  * a beginning of navigation that will help to move from a dashboard to another.
-  * a support of the following panel types:
-    * Time series charts.
-    * Gauge panels.
-    * Stat panels (single value with sparkline).
-    * Markdown panels (as an alternative to the Text panel)
-  * The editing of dashboard is well advanced. Most of the remaining work is in panel options, right now you have to
-    use the JSON editor for a lot of properties, but those will be form controls soon.
-* A migration script that will help to move from Grafana to Perses is on going.
-* The dashboard data model is still evolving along with the dashboard implementation and new requirements. Before
-  reaching a stable state regarding the data model, we are waiting for feedback to know if we need to adjust and
-  potentially break things.
+- A backend REST API provides R/W access to dashboard and datasource definitions.
+- A CLI that can be used to interact with the REST API. A short docs is available [here](./docs/cli.md)
+- While the UI is still in progress, we already have:
+  - a beginning of navigation that will help to move from a dashboard to another.
+  - a support of the following panel types:
+    - Time series charts.
+    - Gauge panels.
+    - Stat panels (single value with sparkline).
+    - Markdown panels (as an alternative to the Text panel)
+  - Visual editing of the dashboard is available, which includes a number of editable panel options
+- A migration script that will help to move from Grafana to Perses is on going.
+- The dashboard data model is still evolving along with the dashboard implementation and new requirements. Before reaching a stable state regarding the data model, we are waiting for feedback to know if we need to adjust and potentially break things.
 
 ## What's next
 
 Here is a not ordered list of what it can come in the future in Perses:
 
-* Perses native on Kubernetes using CRDs
-* Traces Visualization support
-* Docs, a lot of docs :)
-* Generating Panel #200
-* Sub folder management #183
-* Datasource discovery #74
+- Perses native on Kubernetes using CRDs
+- Traces Visualization support
+- Docs, a lot of docs :)
+- Generating Panel #200
+- Sub folder management #183
+- Datasource discovery #74
 
 ## Install
 
@@ -87,9 +86,9 @@ docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 
 To build Perses from source code, You need:
 
-* Go [version 1.18 or greater](https://golang.org/doc/install).
-* NodeJS [version 16 or greater](https://nodejs.org/).
-* npm [version 8 or greater](https://www.npmjs.com/).
+- Go [version 1.18 or greater](https://golang.org/doc/install).
+- NodeJS [version 16 or greater](https://nodejs.org/).
+- npm [version 8 or greater](https://www.npmjs.com/).
 
 Start by cloning the repository:
 

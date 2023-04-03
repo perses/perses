@@ -36,6 +36,7 @@ export const commonConfig: Configuration = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './src/index.html'),
       templateParameters: {},
+      favicon: './src/favicon.ico',
     }),
     // Does TS type-checking in a separate process
     new ForkTsCheckerWebpackPlugin({

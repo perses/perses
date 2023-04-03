@@ -11,23 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prometheus
-
-import (
-	"github.com/perses/perses/schemas/datasources/prometheus"
-)
-
-spec: {
-	plugin: {
-		kind: "PrometheusTimeSeriesQuery"
-		spec: close({
-			datasource?: {
-				kind: prometheus.kind
-			}
-			query:               string
-			series_name_format?: string
-			min_step?:           =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-			resolution?:         number
-		})
-	}
+/**
+ * Determines if an object is an empty object
+ */
+export function isEmptyObject(obj: object) {
+  return Object.getOwnPropertyNames(obj).length === 0;
 }

@@ -18,7 +18,7 @@ spec: close({
 	plugin: close({
 		kind: string
 		spec: {
-			datasource: close({
+			datasource?: close({
 				kind:  string
 				name?: string
 			})

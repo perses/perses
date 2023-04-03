@@ -71,6 +71,11 @@ module.exports = {
     // Not necessary in React 17
     'react/react-in-jsx-scope': 'off',
 
+    // We use this rule instead of the core eslint `no-duplicate-imports`
+    // because it avoids false errors on cases where we have a regular
+    // import and an `import type`.
+    'import/no-duplicates': 'error',
+
     'no-restricted-imports': [
       'error',
       {

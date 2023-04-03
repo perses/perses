@@ -36,7 +36,6 @@ export function Panel(props: PanelProps) {
   const headerId = `${generatedPanelId}-header`;
 
   const [contentElement, setContentElement] = useState<HTMLElement | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
 
   const { width, height } = useResizeObserver({ ref: contentElement });
 
@@ -54,12 +53,10 @@ export function Panel(props: PanelProps) {
   const chartsTheme = useChartsTheme();
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
-    setIsHovered(true);
     onMouseEnter?.(e);
   };
 
   const handleMouseLeave: CardProps['onMouseLeave'] = (e) => {
-    setIsHovered(false);
     onMouseLeave?.(e);
   };
 
@@ -89,7 +86,6 @@ export function Panel(props: PanelProps) {
         title={definition.spec.display.name}
         description={definition.spec.display.description}
         editHandlers={editHandlers}
-        isHovered={isHovered}
         sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
       />
       <CardContent
