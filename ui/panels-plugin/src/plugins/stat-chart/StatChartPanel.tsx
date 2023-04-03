@@ -14,13 +14,8 @@
 import { StatChart, StatChartData, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
-import {
-  TimeSeriesData,
-  useTimeSeriesQuery,
-  PanelProps,
-  CalculationsMap,
-  CalculationType,
-} from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/core';
+import { useTimeSeriesQuery, PanelProps, CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline } from './utils/data-transform';

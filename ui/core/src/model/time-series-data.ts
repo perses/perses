@@ -11,17 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './display';
-export * from './http';
-export * from './layout';
-export * from './notice';
-export * from './panels';
-export * from './resource';
-export * from './thresholds';
-export * from './time';
-export * from './time-series-data';
-export * from './time-series-queries';
-export * from './variables';
+import { Notice } from './notice';
+import { AbsoluteTimeRange } from './time';
+import { Labels, TimeSeriesValueTuple } from './time-series-queries';
+
+export interface TimeScale {
+  startMs: number;
+  endMs: number;
+  stepMs: number;
+}
+
+export interface TimeSeriesData {
+  timeRange?: AbsoluteTimeRange;
+  stepMs?: number;
+  series: TimeSeries[];
+  metadata?: TimeSeriesMetadata;
+}
+
+export interface TimeSeries {
+  name: string;
+  values: TimeSeriesValueTuple[];
+  formattedName?: string;
+  labels?: Labels;
+}
+
+export interface TimeSeriesMetadata {
+  notices?: Notice[];
+}

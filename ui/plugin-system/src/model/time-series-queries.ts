@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Query, QueryKey } from '@tanstack/react-query';
-import { AbsoluteTimeRange, TimeSeriesValueTuple, UnknownSpec, Labels, Notice } from '@perses-dev/core';
+import { AbsoluteTimeRange, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 
@@ -44,24 +44,6 @@ export interface TimeSeriesQueryContext {
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
   refreshKey: string;
-}
-
-export interface TimeSeriesData {
-  timeRange?: AbsoluteTimeRange;
-  stepMs?: number;
-  series: TimeSeries[];
-  metadata?: TimeSeriesMetadata;
-}
-
-export interface TimeSeries {
-  name: string;
-  values: TimeSeriesValueTuple[];
-  formattedName?: string;
-  labels?: Labels;
-}
-
-export interface TimeSeriesMetadata {
-  notices?: Notice[];
 }
 
 export type TimeSeriesDataQuery = Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>;
