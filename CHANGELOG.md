@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.26.1 / 2023-04-03
+
+- [BUGFIX] Add undef check to fix add panel showContent error (#1067)
+
 ## 0.26.0 / 2023-04-03
 
 - [FEATURE] Add __experimentalEChartsOptionsOverride prop to line chart component (#1023)
