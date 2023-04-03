@@ -93,9 +93,8 @@ function ViewMigrate() {
         </Alert>
         <Alert variant={'outlined'} severity={'warning'}>
           <Typography>
-            It is recommended to <u>collapse all the rows</u> of your Grafana dashboard before attempting to migrate it.
-            This ensures that your dashboard structure wont be alterated & that Library panels will get migrated nicely
-            (deep copied).
+            If your dashboard contains Library panels, in order to migrate these nicely you should collapse their
+            respective parent row (if applicable) before pasting the JSON here.
           </Typography>
         </Alert>
         <Button
