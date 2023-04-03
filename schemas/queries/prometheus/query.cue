@@ -21,7 +21,7 @@ spec: {
 	plugin: {
 		kind: "PrometheusTimeSeriesQuery"
 		spec: close({
-			datasource: {
+			datasource?: {
 				kind: prometheus.kind
 			}
 			query:               string

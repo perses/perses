@@ -31,10 +31,9 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
     onDuplicatePanelClick: () => void;
     onDeletePanelClick: () => void;
   };
-  isHovered: boolean;
 }
 
-export function PanelHeader({ id, title, description, editHandlers, isHovered, sx, ...rest }: PanelHeaderProps) {
+export function PanelHeader({ id, title, description, editHandlers, sx, ...rest }: PanelHeaderProps) {
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
 
@@ -84,7 +83,7 @@ export function PanelHeader({ id, title, description, editHandlers, isHovered, s
         </InfoTooltip>
       </>
     );
-  } else if (description !== undefined && isHovered) {
+  } else if (description !== undefined) {
     // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
     actions = (
       <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>

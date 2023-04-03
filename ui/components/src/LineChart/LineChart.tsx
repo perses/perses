@@ -57,6 +57,12 @@ use([
   CanvasRenderer,
 ]);
 
+export type TooltipConfig = {
+  showQuery: boolean;
+  wrapLabels: boolean;
+  hidden?: boolean;
+};
+
 export interface LineChartProps {
   /**
    * Height of the chart
@@ -67,6 +73,7 @@ export interface LineChartProps {
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
+  tooltipConfig?: TooltipConfig;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -79,6 +86,7 @@ export function LineChart({
   unit,
   grid,
   legend,
+  tooltipConfig = { wrapLabels: true, showQuery: true },
   onDataZoom,
   onDoubleClick,
   __experimentalEChartsOptionsOverride,
@@ -213,10 +221,19 @@ export function LineChart({
       }}
       onDoubleClick={handleOnDoubleClick}
     >
-      {showTooltip === true && (option.tooltip as TooltipComponentOption).showContent === false && (
-        <TimeSeriesTooltip chartRef={chartRef} chartData={data} wrapLabels={true} pinTooltip={pinTooltip} unit={unit} />
-      )}
-
+      {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead */}
+      {showTooltip === true &&
+        (option.tooltip as TooltipComponentOption).showContent === false &&
+        tooltipConfig.hidden !== true && (
+          <TimeSeriesTooltip
+            chartRef={chartRef}
+            chartData={data}
+            showQuery={tooltipConfig.showQuery}
+            wrapLabels={tooltipConfig.wrapLabels}
+            pinTooltip={pinTooltip}
+            unit={unit}
+          />
+        )}
       <EChart
         sx={{
           width: '100%',

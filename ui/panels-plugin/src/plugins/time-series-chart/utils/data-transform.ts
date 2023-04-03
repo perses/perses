@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange, StepOptions } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT } from '@perses-dev/components';
-import { EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
+import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
 import { TimeSeries, useTimeSeriesQueries } from '@perses-dev/plugin-system';
 import { gcd } from '../../../utils/mathjs';
 import {
