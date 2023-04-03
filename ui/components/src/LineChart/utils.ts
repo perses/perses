@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { getUnixTime, roundToNearestMinutes } from 'date-fns';
 import { merge } from 'lodash-es';
 import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
@@ -75,15 +76,24 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
     },
     timeZone
   );
+  let roundToNearestFiveMinutes = true;
   const thirtyMinMs = 1800000;
   const dayMs = 86400000;
   if (rangeMs <= thirtyMinMs) {
     dateFormatOptions.second = 'numeric';
+    roundToNearestFiveMinutes = false;
   } else if (rangeMs >= dayMs) {
     dateFormatOptions.month = 'numeric';
     dateFormatOptions.day = 'numeric';
   }
   const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
+
+  if (roundToNearestFiveMinutes === true) {
+    // https://date-fns.org/v2.29.3/docs/roundToNearestMinutes
+    const roundedValue = roundToNearestMinutes(Number(value), { nearestTo: 5, roundingMethod: 'round' });
+    return DATE_FORMAT.format(roundedValue).replace(/, /g, ' ');
+  }
+
   // remove comma when month / day present
   return DATE_FORMAT.format(value).replace(/, /g, ' ');
 }
