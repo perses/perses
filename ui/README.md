@@ -31,6 +31,12 @@ Follow the steps for "Perses app", but start using this script: `npm run start-w
 - Install dependencies: `npm install`
 - Run tests: `npm run test`
 
+### Run end-to-end tests
+
+- Follow the instructions to start the Perses app.
+- Change to the `ui` directory.
+- Run the end-to-end tests from the command line: `npm run e2e`
+
 ## Package organization
 
 The UI-based code for Perses is organized as a monorepo using [turborepo](https://turbo.build/repo).
