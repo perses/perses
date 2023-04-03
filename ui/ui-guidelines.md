@@ -162,7 +162,7 @@ are reflected in how the packages are organized. There is some variability from 
   components in the theme
 - The theme includes our color palette, typography, spacing units and more and is
   available and used by our custom component styles as well
-- When writing CSS, _always_ use the variables from our Theme instead of writing
+- When writing CSS, **ALWAYS** use the variables from our Theme instead of writing
   your own magic numbers/colors unless required
 - External CSS files should typically only be used for third-party libraries that
   require them for styling
