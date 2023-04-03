@@ -25,6 +25,12 @@ If you are new to Perses, please review the rest of this README first before sta
 
 Follow the steps for "Perses app", but start using this script: `npm run start-with-storybook`.
 
+### Run Jest tests
+
+- Change to the `ui` directory.
+- Install dependencies: `npm install`
+- Run tests: `npm run test`
+
 ## Package organization
 
 The UI-based code for Perses is organized as a monorepo using [turborepo](https://turbo.build/repo).
