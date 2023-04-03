@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import happoPlaywright from 'happo-playwright';
 import { AppHomePage, AppProjectPage, DashboardPage } from '../pages';
 
@@ -36,16 +36,23 @@ test.describe('App', () => {
     await navigationPromise;
   });
 
+  test('can navigate to a project', async ({ page }) => {
+    const homePage = new AppHomePage(page);
+
+    await homePage.goto();
+
+    // Go to testing project
+    const navigationPromise = page.waitForNavigation();
+    await homePage.clickProjectLink('testing');
+    await navigationPromise;
+  });
+
   test('can create a new dashboard', async ({ page }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
     // Go to testing project
-    await homePage.showDashboardList('testing');
-    const projectLink = await page.getByRole('link', { name: 'testing' });
-    const navigationPromise = page.waitForNavigation();
-    await projectLink.click();
-    await navigationPromise;
+    await homePage.navigateToProject('testing');
 
     // Create a new dashboard
     const projectPage = new AppProjectPage(page);

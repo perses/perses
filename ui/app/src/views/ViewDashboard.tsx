@@ -26,6 +26,7 @@ import { useIsReadonly } from '../model/config-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { CreateAction } from '../model/action';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
+import { useNavHistoryDispatch } from '../context/DashboardNavHistory';
 
 /**
  * Generated a resource name valid for the API.
@@ -64,6 +65,12 @@ function ViewDashboard() {
 
   const createDashboardMutation = useCreateDashboardMutation();
   const updateDashboardMutation = useUpdateDashboardMutation();
+
+  const navHistoryDispatch = useNavHistoryDispatch();
+  useEffect(
+    () => navHistoryDispatch({ project: projectName, name: dashboardName }),
+    [navHistoryDispatch, projectName, dashboardName]
+  );
 
   let isEditing = false;
 
@@ -157,7 +164,7 @@ function ViewDashboard() {
               datasourceApi={datasourceApi}
               dashboardTitleComponent={
                 <DashboardBreadcrumbs
-                  dashboardName={data.spec.display ? data.spec.display.name : data.metadata.name}
+                  dashboardName={dashboardDisplayName(data)}
                   dashboardProject={data.metadata.project}
                 />
               }
