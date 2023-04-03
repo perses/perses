@@ -13,8 +13,16 @@
 
 package prometheusLabelValues
 
+import (
+	"github.com/perses/perses/schemas/datasources/prometheus"
+)
+
 kind: "PrometheusLabelValuesVariable"
 spec: close({
+	datasource?: {
+		kind:  prometheus.kind
+		name?: string
+	}
 	label_name: string
 	matchers: [...string]
 })
