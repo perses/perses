@@ -67,7 +67,7 @@ export function getDateRange(data: number[]) {
 /*
  * Determines time granularity for axis labels, defaults to hh:mm
  */
-export function getFormattedDate(value: number, rangeMs: number, timeZone?: string) {
+export function getFormattedDate(value: string, rangeMs: number, timeZone?: string) {
   const dateFormatOptions: Intl.DateTimeFormatOptions = dateFormatOptionsWithTimeZone(
     {
       hour: 'numeric',
@@ -95,7 +95,7 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
   }
 
   // remove comma when month / day present
-  return DATE_FORMAT.format(value).replace(/, /g, ' ');
+  return DATE_FORMAT.format(Number(value)).replace(/, /g, ' ');
 }
 
 /*
