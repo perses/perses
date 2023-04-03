@@ -33,6 +33,10 @@ export function assembleTransform(
 
   const cursorPaddingX = 32;
   const cursorPaddingY = 16;
+
+  // Tooltip is located in a Portal attached to the body.
+  // Using page coordinates instead of viewport ensures the tooltip is
+  // absolutely positioned correctly as the user scrolls
   const x = mousePos.page.x;
   let y = mousePos.page.y + cursorPaddingY;
 
@@ -43,7 +47,7 @@ export function assembleTransform(
     if (seriesNum > 6) {
       y = mousePos.page.y * 0.75;
     } else {
-      y = mousePos.page.y * 0.85;
+      y = mousePos.page.y * 0.9;
     }
   } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
     y = mousePos.page.y * 0.95;
