@@ -13,8 +13,6 @@
 
 import { PaletteOptions } from '../time-series-chart-model';
 
-const FALLBACK_PALETTE_COLOR = '#1473e6';
-
 /**
  * Helper function to generate a random color for a chart series based on its name
  */
@@ -37,16 +35,15 @@ export function getSeriesColor(
   palette: string[],
   paletteKind: PaletteOptions['kind'] = 'Auto'
 ): string {
-  if (paletteKind === 'Auto') {
-    return getRandomColor(name);
-  }
-
   if (paletteKind === 'Categorical' && Array.isArray(palette)) {
     const colorIndex = seriesCount % palette.length;
     // TODO: take fallback color from theme
-    const seriesColor = palette[colorIndex] ?? FALLBACK_PALETTE_COLOR;
-    return seriesColor;
+    const seriesColor = palette[colorIndex];
+    if (seriesColor !== undefined) {
+      return seriesColor;
+    }
   }
 
-  return FALLBACK_PALETTE_COLOR;
+  // corresponds to 'Auto' in palette.kind
+  return getRandomColor(name);
 }

@@ -16,7 +16,7 @@ import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
-import { Box, Skeleton } from '@mui/material';
+import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   DEFAULT_LEGEND,
   EChartsDataFormat,
@@ -56,7 +56,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
-  const echartsPalette = chartsTheme.echartsTheme.color;
+  const muiTheme = useTheme();
+  const echartsPalette = chartsTheme.echartsTheme.color ?? [muiTheme.palette.primary];
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
