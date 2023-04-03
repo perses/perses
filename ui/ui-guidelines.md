@@ -16,7 +16,7 @@ Below is a list of notable tooling that is used throughout the Perses UI.
 
 - Development utilities
   - Monorepo management: [turborepo](https://turbo.build/)
-  - Code compiling: [swc](https://swc.rs/)
+  - Code compiling: [swc](https://swc.rs/) (used for libraries), [webpack](https://webpack.js.org/) (used for applications)
   - Code linting/formatting: [eslint](https://eslint.org/), [prettier](https://prettier.io/)
   - Language: [TypeScript](https://www.typescriptlang.org/) (with a few exceptions for things like config files)
   - Package manager: [npm](https://docs.npmjs.com/) with [workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces)
