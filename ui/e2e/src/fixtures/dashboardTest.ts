@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { test as testBase } from '@playwright/test';
+import { ConsoleMessage, test as testBase } from '@playwright/test';
 import fetch from 'node-fetch';
 import { AppHomePage, DashboardPage } from '../pages';
 
@@ -140,6 +140,16 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     }
 
     const persesApp = new AppHomePage(page);
+
+    const consoleErrors: ConsoleMessage[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        // Watch for console errors because they are often a sign that something
+        // is wrong.
+        consoleErrors.push(msg);
+      }
+    });
+
     await persesApp.navigateToDashboard(projectName, testDashboardName);
 
     const dashboardPage = new DashboardPage(page);
@@ -155,6 +165,15 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
       if (!result.ok) {
         console.error('Failed to clean up the dashboard after a test.');
       }
+    }
+
+    // If console errors are found, log the errors to help with debugging and
+    // fail the test.
+    if (consoleErrors.length) {
+      consoleErrors.forEach((pageError) => {
+        console.error(pageError);
+      });
+      throw new Error(`${consoleErrors.length} console errors seen while running test.`);
     }
   },
 });
