@@ -5,12 +5,12 @@
 - [FEATURE] Add __experimentalEChartsOptionsOverride prop to line chart component (#1023)
 - [FEATURE] Stack option support in time series panel (#997)
 - [ENHANCEMENT] always show info icon when panel has a description (#1059)
-- [ENHANCEMENT] PrometheusLabelValuesVariable plugin: Improve the migration logic to preserve the eventual matcher
+- [ENHANCEMENT] PrometheusLabelValuesVariable plugin: Improve the migration logic to preserve the eventual matcher (#1047)
 - [ENHANCEMENT] Ensure all bad request error has the same format (#1043)
-- [ENHANCEMENT] small improvements to the Migrate feature - backend: update plugins mig.cuepart files so that migration don't fail the on empty panels (no query) - Migrate screen: more meaningful errors on wrong inputs - Migrate screen: add missing margin to container - Migrate screen: adjust warning message
+- [ENHANCEMENT] small improvements to the Migrate feature - backend: update plugins mig.cuepart files so that migration don't fail the on empty panels (no query) - Migrate screen: more meaningful errors on wrong inputs - Migrate screen: add missing margin to container - Migrate screen: adjust warning message (#1041)
 - [ENHANCEMENT] Empty state can include image (#1035)
 - [ENHANCEMENT] Fetch updates to show full error message (#1015)
-- [BUGFIX] Migrate feature: fix issue with children panels not attached to their parent row when it's expanded
+- [BUGFIX] Migrate feature: fix issue with children panels not attached to their parent row when it's expanded (#1052)
 - [BUGFIX] Add missing datasource selector in the variable schemas (#1057)
 - [BUGFIX] Fix datasource spamming by using a cache (#1042)
 - [BUGFIX] Fallback to query when metric labels are empty (#1045)
