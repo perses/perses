@@ -27,7 +27,7 @@ import (
 type PanelSpec struct {
 	Display common.Display `json:"display" yaml:"display"`
 	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
-	Queries []Query  `json:"queries" yaml:"queries"`
+	Queries []Query        `json:"queries,omitempty" yaml:"queries, omitempty"`
 }
 
 type Panel struct {
@@ -41,7 +41,7 @@ type Query struct {
 }
 
 type QuerySpec struct {
-	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
+	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 type DashboardSpec struct {
