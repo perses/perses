@@ -11,63 +11,76 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package migrate
 
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/perses/perses/internal/api/config"
+	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+const testDataFolder = "testdata"
+
 func TestMigrate(t *testing.T) {
-	simpleGrafanaDashboard, _ := os.ReadFile("testdata/simple_grafana_dashboard.json")
-	simplePersesDashboard, _ := os.ReadFile("testdata/simple_perses_dashboard.json")
-	oldFormatGrafanaDashboard, _ := os.ReadFile("testdata/old_grafana_panels_grafana_dashboard.json")
-	oldFormatPersesDashboard, _ := os.ReadFile("testdata/old_grafana_panels_perses_dashboard.json")
 
 	testSuite := []struct {
-		title            string
-		initialDashboard []byte
-		resultDashboard  []byte
-		errMsg           string
+		title                       string
+		inputGrafanaDashboardFile   string
+		expectedPersesDashboardFile string
+		expectedErrorStr            string
 	}{
 		{
-			title:            "grafana dashboard containing simple vars & panels",
-			initialDashboard: simpleGrafanaDashboard,
-			resultDashboard:  simplePersesDashboard,
-			errMsg:           "",
+			title:                       "dashboard with simple vars & panels",
+			inputGrafanaDashboardFile:   "simple_grafana_dashboard.json",
+			expectedPersesDashboardFile: "simple_perses_dashboard.json",
+			expectedErrorStr:            "",
 		},
 		{
-			title:            "grafana dashboard containing old-formatted elements (text panels without `options` field & a legacy graph panel)",
-			initialDashboard: oldFormatGrafanaDashboard,
-			resultDashboard:  oldFormatPersesDashboard,
-			errMsg:           "",
+			title:                       "dashboard with old-formatted elements (text panels without `options` field & a legacy graph panel)",
+			inputGrafanaDashboardFile:   "old_grafana_panels_grafana_dashboard.json",
+			expectedPersesDashboardFile: "old_grafana_panels_perses_dashboard.json",
+			expectedErrorStr:            "",
 		},
 	}
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
+			inputGrafanaDashboardRaw, readErr := os.ReadFile(filepath.Join(testDataFolder, test.inputGrafanaDashboardFile))
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			expectedPersesDashboardRaw, readErr := os.ReadFile(filepath.Join(testDataFolder, test.expectedPersesDashboardFile))
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+
+			projectPath := e2eframework.GetRepositoryPath(t)
 			svc, err := New(config.Schemas{
 				// use the real schemas for these tests
-				VariablesPath: "../../../../schemas/variables",
-				PanelsPath:    "../../../../schemas/panels",
-				QueriesPath:   "../../../../schemas/queries",
+				PanelsPath:    filepath.Join(projectPath, config.DefaultPanelsPath),
+				QueriesPath:   filepath.Join(projectPath, config.DefaultQueriesPath),
+				VariablesPath: filepath.Join(projectPath, config.DefaultVariablesPath),
 			})
 			assert.NoError(t, err)
 
-			persesDashboardStruct, err := svc.Migrate(test.initialDashboard)
-			errString := ""
-			if err != nil {
-				errString = err.Error()
-			}
-			assert.Equal(t, test.errMsg, errString)
+			actualPersesDashboard, err := svc.Migrate(inputGrafanaDashboardRaw)
 
-			persesDashboardJSON, _ := json.Marshal(persesDashboardStruct)
-			require.JSONEq(t, string(test.resultDashboard), string(persesDashboardJSON))
+			actualErrorStr := ""
+			if err != nil {
+				actualErrorStr = err.Error()
+			}
+			assert.Equal(t, test.expectedErrorStr, actualErrorStr)
+
+			actualPersesDashboardRaw, _ := json.Marshal(actualPersesDashboard)
+			require.JSONEq(t, string(expectedPersesDashboardRaw), string(actualPersesDashboardRaw))
 		})
 	}
 }
