@@ -21,6 +21,10 @@ import (
 	position: "Bottom" | "Right"
 }
 
+#tooltip: {
+	show_query?: bool
+}
+
 #visual: {
 	line_width?:    number & >=0.25 & <=3
 	area_opacity?:  number & >=0 & <=1
@@ -45,6 +49,7 @@ spec: close({
 	y_axis?:     #y_axis
 	thresholds?: common.#thresholds
 	visual?:     #visual
+	tooltip?:    #tooltip
 })
 
 #ts_query: _

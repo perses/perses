@@ -25,6 +25,7 @@ export interface TimeSeriesChartOptions {
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
   visual?: VisualOptions;
+  tooltip?: TooltipOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -45,6 +46,10 @@ export type VisualOptions = {
   stack?: StackOptions;
   connect_nulls?: boolean;
 };
+
+export interface TooltipOptions {
+  show_query?: boolean;
+}
 
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',

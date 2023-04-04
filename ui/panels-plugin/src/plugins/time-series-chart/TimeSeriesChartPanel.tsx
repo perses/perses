@@ -26,6 +26,7 @@ import {
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
+  TooltipConfig,
 } from '@perses-dev/components';
 import { useSuggestedStepMs } from '../../model/time';
 import {
@@ -75,6 +76,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     props.spec.legend && validateLegendSpec(props.spec.legend)
       ? merge({}, DEFAULT_LEGEND, props.spec.legend)
       : undefined;
+
+  // control whether query is visible in TimeSeriesTooltip SeriesInfo component
+  const tooltipConfig: TooltipConfig = {
+    showQuery: props.spec.tooltip?.show_query ?? true,
+    wrapLabels: true,
+  };
 
   // TODO: add support for y_axis_alt.unit
   const unit = props.spec.y_axis?.unit ?? DEFAULT_UNIT;
@@ -269,7 +276,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         yAxis={yAxis}
         unit={unit}
         grid={gridOverrides}
-        tooltipConfig={{ showQuery: true, wrapLabels: true }}
+        tooltipConfig={tooltipConfig}
         onDataZoom={handleDataZoom}
       />
       {legend && graphData.legendItems && (
