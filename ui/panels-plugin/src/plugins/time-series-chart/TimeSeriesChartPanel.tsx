@@ -81,7 +81,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // control whether query is visible in TimeSeriesTooltip SeriesInfo component
   const tooltipConfig: TooltipConfig = {
-    showQuery: props.spec.tooltip?.show_query ?? true,
+    showQuery: props.spec.tooltip?.show_query ?? false,
     wrapLabels: true,
   };
 
