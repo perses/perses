@@ -40,20 +40,13 @@ spec: {
 	unit?:        common.#unit
 	thresholds?:  common.#thresholds
 }
-
-#ts_query: _
 ```
 
 it should contain:
 
 - a package name.
 - the panel's `kind`.
-- the panel's `spec` containing:
-  - \* a field that maps to the `#ts_query` definition (like `queries: [...#ts_query]`, `query: #ts_query` etc.)
-  - any other field you want for this panel plugin.
-- \* a placeholder value `_` for `#ts_query`. _This is mandatory to pass the initial "compilation" of the plugin, then when it will be used to validate a panel the relevant definitions will be injected at runtime._
-
-_\* guidelines that apply if your panel defines a query & a datasource (e.g TimeseriesChart), otherwise don't apply (e.g TextPanel)_
+- the panel's `spec` containing any field you want for this panel plugin.
 
 ## Query
 
