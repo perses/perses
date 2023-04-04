@@ -34,6 +34,7 @@ Below is a list of notable tooling that is used throughout the Perses UI.
   - Code editor: [CodeMirror](https://codemirror.net/), [@uiw/react-codemirror](https://uiwjs.github.io/react-codemirror/), [@lezer/highlight](https://github.com/lezer-parser/highlight), [@lezer/lr](https://github.com/lezer-parser/lr)
   - Markdown parser: [marked](https://marked.js.org/)
   - Math: [math.js](https://mathjs.org/)
+  - Color utils: [react-colorful](https://github.com/omgovich/react-colorful)
   - XSS util: [dompurify](https://github.com/cure53/DOMPurify)
   - Other: [use-resize-observer](https://github.com/ZeeCoder/use-resize-observer), [lodash-es](https://lodash.com/), [react-error-boundary](https://github.com/bvaughn/react-error-boundary)
 - Testing tools
