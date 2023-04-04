@@ -94,9 +94,7 @@ const IGNORE_CONSOLE_ERRORS = [
   'potentially unsafe when doing server-side rendering',
 ];
 function shouldIgnoreConsoleError(message: ConsoleMessage) {
-  console.log('should ignore');
   const msgText = message.text();
-  console.log(msgText);
   return IGNORE_CONSOLE_ERRORS.some((ignoreErr) => msgText.includes(ignoreErr));
 }
 
