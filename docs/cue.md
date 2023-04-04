@@ -21,6 +21,7 @@ spec: close({
 ```
 
 it should contain:
+
 - a package name.
 - the variable's `kind`.
 - the variable's `spec` containing any field you want for this query plugin.
@@ -35,7 +36,7 @@ package <panel type> // e.g package timeserie
 kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
 spec: {
 	queries: [...#ts_query]
-	legend?:      #legend 
+	legend?:      #legend
 	unit?:        common.#unit
 	thresholds?:  common.#thresholds
 }
@@ -44,14 +45,15 @@ spec: {
 ```
 
 it should contain:
+
 - a package name.
 - the panel's `kind`.
 - the panel's `spec` containing:
   - \* a field that maps to the `#ts_query` definition (like `queries: [...#ts_query]`, `query: #ts_query` etc.)
   - any other field you want for this panel plugin.
-- \* a placeholder value `_` for `#ts_query`. *This is mandatory to pass the initial "compilation" of the plugin, then when it will be used to validate a panel the relevant definitions will be injected at runtime.*
+- \* a placeholder value `_` for `#ts_query`. _This is mandatory to pass the initial "compilation" of the plugin, then when it will be used to validate a panel the relevant definitions will be injected at runtime._
 
-_* guidelines that apply if your panel defines a query & a datasource (e.g TimeseriesChart), otherwise don't apply (e.g TextPanel)_
+_\* guidelines that apply if your panel defines a query & a datasource (e.g TimeseriesChart), otherwise don't apply (e.g TextPanel)_
 
 ## Query
 
@@ -76,6 +78,7 @@ spec: {
 ```
 
 it should contain:
+
 - a package name.
 - under `spec.plugin` :
   - the query's `kind`.
@@ -85,11 +88,11 @@ it should contain:
 
 # Migration from Grafana
 
-A Perses plugin can optionally embed a `mig.cuepart`* file that is basically describing in CUE language how to convert a given Grafana object into an instance of this plugin. In such case your plugin is considered as the Perses equivalent of this Grafana object type, and it will be used as part of the translation process when a Grafana dashboard is received on the `/api/migrate` endpoint.
+A Perses plugin can optionally embed a `mig.cuepart`\* file that is basically describing in CUE language how to convert a given Grafana object into an instance of this plugin. In such case your plugin is considered as the Perses equivalent of this Grafana object type, and it will be used as part of the translation process when a Grafana dashboard is received on the `/api/migrate` endpoint.
 
-*\* this is mandatory to have it named that way. We put in place this constraint because it makes sense to have a single file containing the remapping logic, with the benefit of making the backend logic easier (no need to search for the file). It's also easier to check the migration logic of the different plugins, because you know which file to look for.*
+_\* this is mandatory to have it named that way. We put in place this constraint because it makes sense to have a single file containing the remapping logic, with the benefit of making the backend logic easier (no need to search for the file). It's also easier to check the migration logic of the different plugins, because you know which file to look for._
 
-*\* the .cuepart extension is a homemade one. It is used for CUE files that may contain some placeholders for string replacements, that are not valid CUE syntax.*
+_\* the .cuepart extension is a homemade one. It is used for CUE files that may contain some placeholders for string replacements, that are not valid CUE syntax._
 
 ## Variable
 
@@ -105,6 +108,7 @@ if #var.type == "custom" || #var.type == "interval" {
     }
 },
 ```
+
 - The file is named `mig.cuepart`.
 - The file content is made of **one or more conditional block(s)**, separated by a coma (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#var` definition.
@@ -120,21 +124,13 @@ A panel migration file looks like the following:
 if #panel.type == "timeseries" || #panel.type == "graph" {
     kind: "TimeSeriesChart"
     spec: {
-        queries: [ for _, target in #panel.targets {
-            kind: "TimeSeriesQuery"
-            spec: {
-                plugin: {
-                    #target: target
-                    %(conditional_timeserie_queries)
-                }
-            }
-        }]
         legend: {
             position: #panel.options.legend.placement
         }
     }
 },
 ```
+
 - The file is named `mig.cuepart`.
 - The file content is made of **one or more conditional block(s)**, separated by a coma (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#panel` definition.
@@ -145,14 +141,15 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
 
   ```
   #target: <relevant attribute name>
-  %(conditional_timeserie_queries)
+  %(conditional_timeseries_queries)
   ```
 
-  the `%(conditional_timeserie_queries)` placeholder will get replaced by conditionals later in the translation process. `#target` is the standard alias expected for the target object, just like `#panel` is for panels.
+  the `%(conditional_timeseries_queries)` placeholder will get replaced by conditionals later in the translation process. `#target` is the standard alias expected for the target object, just like `#panel` is for panels.
 
 ### Utilities
 
 There are some utilities that you can use in your panel plugin:
+
 - `#mapping.unit`: mapping table for the unit attribute (key = grafana unit, value = perses equivalent)
 - `#mapping.calc`: mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
 - `#defaultCalc`: standard default value for the calculation attribute
@@ -173,6 +170,7 @@ if #target.datasource.type != _|_ if #target.datasource.type == "prometheus" {
     }
 },
 ```
+
 - The file is named `mig.cuepart`.
 - The file content is made of **one or more conditional block(s)**, separated by a coma (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#target` definition.

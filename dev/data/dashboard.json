@@ -99,20 +99,6 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "queries": [
-                  {
-                    "kind": "TimeSeriesQuery",
-                    "spec": {
-                      "plugin": {
-                        "kind": "PrometheusTimeSeriesQuery",
-                        "spec": {
-                          "series_name_format": "Node memory - {{device}} {{instance}}",
-                          "query": "1 - node_filesystem_free_bytes{job='$job',instance=~'$instance',fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job='$job',instance=~'$instance'}"
-                        }
-                      }
-                    }
-                  }
-                ],
                 "y_axis": {
                   "unit": { "kind": "Decimal" }
                 },

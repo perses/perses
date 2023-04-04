@@ -45,11 +45,8 @@ import (
 
 kind: "TimeSeriesChart"
 spec: close({
-	queries: [...#ts_query]
 	legend?:     #legend
 	y_axis?:     #y_axis
 	thresholds?: common.#thresholds
 	visual?:     #visual
 })
-
-#ts_query: _
