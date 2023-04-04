@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Divider, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { dashboardDisplayName } from '@perses-dev/core/dist/utils/text';
 import { DeleteDashboardDialog } from './DeleteDashboardDialog/DeleteDashboardDialog';
 import { RenameDashboardDialog } from './RenameDashboardDialog/RenameDashboardDialog';
@@ -49,31 +49,33 @@ function DashboardList(props: DashboardListProperties) {
       <List>
         {dashboardList.map((dashboard, i) => {
           return (
-            <>
+            <Fragment key={dashboard.metadata.name}>
               {i !== 0 && <Divider key={`divider-${i}`} />}
               <ListItem
                 disablePadding
                 sx={{ backgroundColor: (theme) => theme.palette.primary.main + '10' }}
                 key={`list-item-${i}`}
                 secondaryAction={
-                  <ListItem>
-                    <IconButton
-                      edge="start"
-                      aria-label="rename"
-                      onClick={() => onRenameButtonClick(dashboard)}
-                      disabled={isRenameDashboardDialogStateOpened || isDeleteDashboardDialogStateOpened}
-                    >
-                      <PencilIcon />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => onDeleteButtonClick(dashboard)}
-                      disabled={isRenameDashboardDialogStateOpened || isDeleteDashboardDialogStateOpened}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItem>
+                  <List>
+                    <ListItem>
+                      <IconButton
+                        edge="start"
+                        aria-label="rename"
+                        onClick={() => onRenameButtonClick(dashboard)}
+                        disabled={isRenameDashboardDialogStateOpened || isDeleteDashboardDialogStateOpened}
+                      >
+                        <PencilIcon />
+                      </IconButton>
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => onDeleteButtonClick(dashboard)}
+                        disabled={isRenameDashboardDialogStateOpened || isDeleteDashboardDialogStateOpened}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItem>
+                  </List>
                 }
               >
                 <ListItemButton
@@ -84,7 +86,7 @@ function DashboardList(props: DashboardListProperties) {
                   <ListItemText primary={dashboardDisplayName(dashboard)} />
                 </ListItemButton>
               </ListItem>
-            </>
+            </Fragment>
           );
         })}
       </List>

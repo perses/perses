@@ -41,10 +41,13 @@ export const InfoTooltip = ({
   enterDelay,
   enterNextDelay,
 }: InfoTooltipProps) => {
-  // Only wrap in a div if passed a non-element. This enables the tooltip to
-  // support text with a wrapper div while avoiding breaking css on element
-  // children by unnecessarily wrapping them.
-  const formattedChildren = React.isValidElement(children) ? children : <div>{children}</div>;
+  // Wrap children in a span to cover the following use cases:
+  //  - Disabled buttons. MUI console.errors on putting these inside a tooltip.
+  //  - Non-element tooltip children (e.g. text). The tooltip needs something that
+  //   can have a ref as a child.
+  // We wrap in a `span` and not a `div` to minimize the impact on page layout
+  // and styles.
+  const wrappedChildren = <span>{children}</span>;
 
   return (
     <StyledTooltip
@@ -55,7 +58,7 @@ export const InfoTooltip = ({
       enterDelay={enterDelay ?? 500}
       enterNextDelay={enterNextDelay ?? 500}
     >
-      {formattedChildren}
+      {wrappedChildren}
     </StyledTooltip>
   );
 };
