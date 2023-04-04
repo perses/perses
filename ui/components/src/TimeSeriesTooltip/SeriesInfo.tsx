@@ -41,7 +41,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
   // determine whether to show labels on separate lines
   const splitLabels = formattedSeriesLabels.split(',');
   if (totalSeries === 1 && splitLabels.length > 1) {
-    const metricName = splitName[0] ? `${splitName[0]}:` : 'value:';
+    const metricName = splitName[0] && showQuery ? `${splitName[0]}:` : 'value:';
     return (
       <SeriesLabelsStack
         formattedY={formattedY}

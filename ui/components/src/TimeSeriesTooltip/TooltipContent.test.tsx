@@ -43,7 +43,46 @@ describe('TooltipContent', () => {
     expect(screen.getByText('0.1')).toBeInTheDocument();
   });
 
-  it('should display multiple series data', () => {
+  it('should default to showing query', () => {
+    const tooltipContent: TooltipContentProps = {
+      focusedSeries: [
+        {
+          seriesIdx: 1,
+          datumIdx: 48,
+          seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 'Dec 23, 2022, 1:44:00 PM',
+          x: 1671821040000,
+          y: 33771520,
+          formattedY: '33.77M',
+          markerColor: 'hsla(158479636,50%,50%,0.8)',
+        },
+      ],
+    };
+    renderComponent(tooltipContent);
+    expect(screen.getByText('node_memory_Buffers_bytes:')).toBeInTheDocument();
+  });
+
+  it('should show value label instead of query', () => {
+    const tooltipContent: TooltipContentProps = {
+      focusedSeries: [
+        {
+          seriesIdx: 1,
+          datumIdx: 48,
+          seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 'Dec 23, 2022, 1:44:00 PM',
+          x: 1671821040000,
+          y: 33771520,
+          formattedY: '33.77M',
+          markerColor: 'hsla(158479636,50%,50%,0.8)',
+        },
+      ],
+      showQuery: false,
+    };
+    renderComponent(tooltipContent);
+    expect(screen.getByText('value:')).toBeInTheDocument();
+  });
+
+  it('should display wrapped series data with queries hidden', () => {
     const tooltipContent: TooltipContentProps = {
       focusedSeries: [
         {
