@@ -102,7 +102,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const { setTimeRange } = useTimeRange();
 
-  const onLegendItemClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, seriesName: string) => {
+  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesName: string) => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
     setSelectedSeriesNames((current) => {

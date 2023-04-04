@@ -45,10 +45,13 @@
     "mathjs": "^10.6.4",
     "mdi-material-ui": "^7.4.0",
     "react-colorful": "^5.6.1",
-    "react-error-boundary": "^3.1.4"
+    "react-error-boundary": "^3.1.4",
+    "react-virtualized-auto-sizer": "^1.0.11",
+    "react-window": "^1.8.8"
   },
   "devDependencies": {
-    "@perses-dev/storybook": "0.26.1"
+    "@perses-dev/storybook": "0.26.1",
+    "@types/react-window": "^1.8.5"
   },
   "peerDependencies": {
     "@mui/material": "^5.10.0",

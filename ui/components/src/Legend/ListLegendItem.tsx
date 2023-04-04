@@ -11,20 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
 import { LegendItem } from '../model';
 import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
 
-interface ListLegendItemProps extends ListItemProps {
+interface ListLegendItemProps extends ListItemProps<'div'> {
   item: LegendItem;
 }
 
-export const ListLegendItem = React.memo(function ListLegendItem({ item, sx, ...others }: ListLegendItemProps) {
+const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
+  { item, sx, ...others },
+  ref
+) {
   return (
     <ListItem
       {...others}
+      component="div"
       sx={combineSx(
         {
           padding: 0,
@@ -36,6 +40,7 @@ export const ListLegendItem = React.memo(function ListLegendItem({ item, sx, ...
       key={item.id}
       onClick={item.onClick}
       selected={item.isSelected}
+      ref={ref}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <LegendColorBadge color={item.color} />
@@ -44,3 +49,5 @@ export const ListLegendItem = React.memo(function ListLegendItem({ item, sx, ...
     </ListItem>
   );
 });
+
+export const ListLegendItem = React.memo(ListLegendItemBase);

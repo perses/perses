@@ -23,6 +23,13 @@ export interface LegendProps {
   options: LegendOptions;
 }
 
+// When the number of items to display is above this number, it is likely to
+// cause performance issues in the browser. The legend will be displayed in a
+// format (list) that allows for virtualization to minimize the performance impact.
+// Set this number based on testing, but it may need to be tuned a bit on the
+// future as people test this out on different machines.
+const NEED_VIRTUALIZATION_LIMIT = 500;
+
 export function Legend({ width, height, options, data }: LegendProps) {
   if (options.position === 'Right') {
     return (
@@ -33,8 +40,6 @@ export function Legend({ width, height, options, data }: LegendProps) {
           position: 'absolute',
           top: 0,
           right: 0,
-          overflowX: 'hidden',
-          overflowY: 'scroll',
         }}
       >
         <ListLegend items={data} />
@@ -42,6 +47,11 @@ export function Legend({ width, height, options, data }: LegendProps) {
     );
   }
 
+  // The bottom legend is displayed as a list when the number of items is too
+  // large and requires virtualization. Otherwise, it is rendered more compactly.
+  // We do not need this check for the right-side legend because it is always
+  // a virtualized list.
+  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
   return (
     <Box
       sx={{
@@ -51,7 +61,7 @@ export function Legend({ width, height, options, data }: LegendProps) {
         bottom: 0,
       }}
     >
-      <CompactLegend items={data} height={height} />
+      {needsVirtualization ? <ListLegend items={data} /> : <CompactLegend items={data} height={height} />}
     </Box>
   );
 }

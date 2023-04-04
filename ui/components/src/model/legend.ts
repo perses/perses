@@ -26,7 +26,7 @@ export interface LegendItem {
   label: string;
   isSelected: boolean;
   color: string;
-  onClick: MouseEventHandler<HTMLLIElement>;
+  onClick: MouseEventHandler<HTMLElement>;
 }
 
 export type LegendPositionConfig = {

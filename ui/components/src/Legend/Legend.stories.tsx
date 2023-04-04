@@ -14,7 +14,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Legend, LegendProps } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
-import { Box } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
 
 const COLOR_SHADES = ['400', '800'] as const;
@@ -28,12 +28,12 @@ const MOCK_COLORS = COLOR_SHADES.reduce((results, colorShade) => {
   return results;
 }, [] as string[]);
 
-function generateMockLegendData(count: number): LegendProps['data'] {
+function generateMockLegendData(count: number, labelPrefix = 'legend item'): LegendProps['data'] {
   const data: LegendProps['data'] = [];
   for (let i = 0; i < count; i++) {
     data.push({
       id: `${i}`,
-      label: `legend item ${i}`,
+      label: `${labelPrefix} ${i}`,
       isSelected: false,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
       onClick: action(`onClick legendItem ${i}`),
@@ -45,12 +45,16 @@ function generateMockLegendData(count: number): LegendProps['data'] {
 // Simple wrapper to try to help visualize that the legend is positioned absolutely
 // inside a relative ancestor.
 const LegendWrapper = (props: LegendProps) => {
+  const {
+    options: { position },
+  } = props;
+
   return (
     <Box
       sx={{
         position: 'relative',
-        width: props.width + 100,
-        height: props.height + 100,
+        width: position === 'Right' ? props.width + 100 : props.width,
+        height: position === 'Right' ? props.height : props.height + 100,
         border: (theme) => `solid 1px ${theme.palette.divider}`,
       }}
     >
@@ -89,8 +93,8 @@ export const Bottom: Story = {
 
 export const Right: Story = {
   args: {
-    width: 100,
-    height: 200,
+    width: 200,
+    height: 300,
     options: {
       position: 'Right',
     },
@@ -98,24 +102,124 @@ export const Right: Story = {
 };
 
 /**
- * The legend currently is not virtualized, so it can have performance issues
- * with larger amounts of data.
+ * When the legend is positioned on the right, items with long labels will be
+ * displayed in full when there are a small number of items.
+ *
+ * When there are a larger number of items, longer labels will be truncated to
+ * fit within the width. On hover, the full label will be displayed.
+ */
+export const RightWithLongLabels: Story = {
+  args: {
+    width: 200,
+    height: 300,
+  },
+  argTypes: {
+    data: {
+      table: {
+        disable: true,
+      },
+    },
+    options: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => {
+    const labelPrefix = 'long_legend_label{env="demo", namespace="prometheus"}';
+
+    return (
+      <Stack spacing={3}>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            Small number of items
+          </Typography>
+          <LegendWrapper {...args} options={{ position: 'Right' }} data={generateMockLegendData(4, labelPrefix)} />
+        </div>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            Large number of items
+          </Typography>
+          <LegendWrapper {...args} options={{ position: 'Right' }} data={generateMockLegendData(1000, labelPrefix)} />
+        </div>
+      </Stack>
+    );
+
+    return <LegendWrapper {...args} data={generateMockLegendData(3)} />;
+  },
+};
+
+/**
+ * The legend uses virtualization to avoid performance issues when there are a
+ * large number of items to display.
+ *
+ * When the legend is positioned on the right, it is always rendered in a
+ * virtualized list with a single item per row.
+ *
+ * When the legend is positioned on the bottom with a small number of items,
+ * it is rendered in a compact, non-virtualized inline list with a variable number
+ * of items per row. When the number of items is large enough to cause performance,
+ * issues, it is rendered in a virtualized list with a single item per row.
  */
 export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> = {
   argTypes: {
     data: {
-      control: false,
+      table: {
+        disable: true,
+      },
+    },
+    width: {
+      table: {
+        disable: true,
+      },
+    },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    options: {
+      table: {
+        disable: true,
+      },
     },
   },
   args: {
     // Custom arg for just this story to easily control how many items are rendered
     // to test performance.
-    legendItemsCount: 100,
+    legendItemsCount: 1000,
   },
   parameters: {
     happo: false,
   },
   render: (args) => {
-    return <LegendWrapper {...args} data={generateMockLegendData(args.legendItemsCount)} />;
+    return (
+      <Stack spacing={3}>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            Position: right
+          </Typography>
+          <LegendWrapper
+            {...args}
+            width={400}
+            height={200}
+            options={{ position: 'Right' }}
+            data={generateMockLegendData(args.legendItemsCount)}
+          />
+        </div>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            Position: bottom
+          </Typography>
+          <LegendWrapper
+            {...args}
+            width={500}
+            height={100}
+            options={{ position: 'Bottom' }}
+            data={generateMockLegendData(args.legendItemsCount)}
+          />
+        </div>
+      </Stack>
+    );
   },
 };
