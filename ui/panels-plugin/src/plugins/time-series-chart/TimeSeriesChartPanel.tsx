@@ -16,7 +16,7 @@ import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
-import { Box, Skeleton } from '@mui/material';
+import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   DEFAULT_LEGEND,
   EChartsDataFormat,
@@ -45,7 +45,7 @@ import {
   EMPTY_GRAPH_DATA,
   convertPercentThreshold,
 } from './utils/data-transform';
-import { getRandomColor } from './utils/palette-gen';
+import { getSeriesColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
@@ -55,6 +55,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
+  const muiTheme = useTheme();
+  const echartsPalette = chartsTheme.echartsTheme.color ?? [muiTheme.palette.primary];
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -159,14 +161,32 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
     const xAxisData = [...getXValues(timeScale)];
 
+    // ensures color does not reset for every query
+    let seriesCount = 0;
+
     for (const result of queryResults) {
       // Skip queries that are still loading or don't have data
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
-      for (const timeSeries of result.data.series) {
+      for (let i = 0; i < result.data.series.length; i++) {
+        const timeSeries = result.data.series[i];
+        if (timeSeries === undefined) {
+          return { graphData };
+        }
+
+        // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
+
+        const seriesColor = getSeriesColor(
+          formattedSeriesName,
+          seriesCount,
+          echartsPalette as string[],
+          visual.palette?.kind
+        );
+        seriesCount++; // used for repeating colors in Categorical palette
+
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries = getLineSeries(timeSeries.name, formattedSeriesName, yValues, visual);
+        const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
         const isSelected = selectedSeriesNames.includes(timeSeries.name);
 
         if (!selectedSeriesNames.length || isSelected) {
@@ -174,10 +194,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name, // TODO: should query generate an id instead of using full name here and in getRandomColor?
+            id: timeSeries.name,
             label: formattedSeriesName,
             isSelected,
-            color: getRandomColor(timeSeries.name),
+            color: seriesColor,
             onClick: (e) => onLegendItemClick(e, timeSeries.name),
           });
         }

@@ -21,7 +21,6 @@ import {
   DEFAULT_POINT_RADIUS,
   VisualOptions,
 } from '../time-series-chart-model';
-import { getRandomColor } from './palette-gen';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
 
@@ -45,10 +44,10 @@ export function getCommonTimeScaleForQueries(queries: RunningQueriesState): Time
  * Gets default ECharts line series option properties
  */
 export function getLineSeries(
-  name: string,
   formattedName: string,
   data: EChartsTimeSeries['data'],
-  visual: VisualOptions
+  visual: VisualOptions,
+  paletteColor?: string
 ): EChartsTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
@@ -57,7 +56,7 @@ export function getLineSeries(
     name: formattedName,
     data: data,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
-    color: getRandomColor(name), // use full series name as generated color seed (must match param in legendItems)
+    color: paletteColor,
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold

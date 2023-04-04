@@ -25,10 +25,15 @@ import (
 	show_query?: bool
 }
 
+#palette: {
+	kind: "Auto" | "Categorical"
+}
+
 #visual: {
 	line_width?:    number & >=0.25 & <=3
 	area_opacity?:  number & >=0 & <=1
 	show_points?:   "Auto" | "Always"
+	palette?:       #palette
 	point_radius?:  number & >=0 & <=6
 	stack?:         "All" | "Percent" // TODO: Percent option is disabled until support is added
 	connect_nulls?: bool

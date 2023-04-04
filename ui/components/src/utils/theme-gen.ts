@@ -39,7 +39,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       left: 20,
       containLabel: true,
     },
-    color: ['#8dd3c7', '#bebada', '#fb8072', '#80b1d3', '#fdb462'],
+    color: ['#8dd3c7', '#fb8072', '#80b1d3', '#bebada', '#fdb462'],
     categoryAxis: {
       show: true,
       axisLabel: {
