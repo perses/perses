@@ -29,7 +29,7 @@ Tests are run during local development using the configuration in `local.playwri
 
 ### Locally with screenshots (maintainers only)
 
-*This option is limited to maintainers because it requires access to secrets in the Happo account.*
+_This option is limited to maintainers because it requires access to secrets in the Happo account._
 
 Occasionally, you may want to generate screenshots locally to debug an issue with visual tests.
 
@@ -86,3 +86,7 @@ This project uses a free open source account from [Happo](https://happo.io/) for
 
 - Go to the failing action in GitHub.
 - Follow the Playwright instructions for [viewing test logs](https://playwright.dev/docs/ci-intro#viewing-test-logs) and [viewing the html report](https://playwright.dev/docs/ci-intro#html-report).
+
+### Tests complaining about console errors
+
+Tests that use the `dashboardTest` fixture check for console errors and fail tests when they are found because they are often a sign of a subtle bug we have not accounted for. When debugging these issues, it can be helpful to run the e2e tests with a headed browser (using [headed mode](https://playwright.dev/docs/debug#headed-mode) or using the vcode extension with "show browser" checked) with the debugger console open. This will often provide you with a more detailed error message and a stack trace.
