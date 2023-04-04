@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ConsoleMessage, test as testBase } from '@playwright/test';
+import { ConsoleMessage, test as testBase, expect } from '@playwright/test';
 import fetch from 'node-fetch';
 import { AppHomePage, DashboardPage } from '../pages';
 
@@ -153,12 +153,12 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
 
     const persesApp = new AppHomePage(page);
 
-    const consoleErrors: ConsoleMessage[] = [];
+    const consoleErrors: string[] = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error' && !shouldIgnoreConsoleError(msg)) {
         // Watch for console errors because they are often a sign that something
         // is wrong.
-        consoleErrors.push(msg);
+        consoleErrors.push(msg.text());
       }
     });
 
@@ -181,12 +181,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
 
     // If console errors are found, log the errors to help with debugging and
     // fail the test.
-    if (consoleErrors.length) {
-      consoleErrors.forEach((pageError) => {
-        console.error(pageError);
-      });
-      throw new Error(`${consoleErrors.length} console errors seen while running test.`);
-    }
+    expect(consoleErrors, `${consoleErrors.length} console errors seen while running test.`).toHaveLength(0);
   },
 });
 
