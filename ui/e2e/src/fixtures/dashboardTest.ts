@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { test as testBase } from '@playwright/test';
+import { ConsoleMessage, test as testBase, expect } from '@playwright/test';
 import fetch from 'node-fetch';
 import { AppHomePage, DashboardPage } from '../pages';
 
@@ -86,6 +86,18 @@ async function deleteDashboard(projectName: string, dashboardName: string) {
   return result;
 }
 
+// We want to throw on console errors that may mean the app is broken.
+// Some of the libraries we use (e.g. emotion) throw console errors we do not
+// care about at this time. We track those here, so they can be ignored.
+const IGNORE_CONSOLE_ERRORS = [
+  // See https://github.com/emotion-js/emotion/issues/1105
+  'potentially unsafe when doing server-side rendering',
+];
+function shouldIgnoreConsoleError(message: ConsoleMessage) {
+  const msgText = message.text();
+  return IGNORE_CONSOLE_ERRORS.some((ignoreErr) => msgText.includes(ignoreErr));
+}
+
 /**
  * Generates a dashboard name to use when duplicating a dashboard for a given
  * test.
@@ -140,6 +152,16 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     }
 
     const persesApp = new AppHomePage(page);
+
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error' && !shouldIgnoreConsoleError(msg)) {
+        // Watch for console errors because they are often a sign that something
+        // is wrong.
+        consoleErrors.push(msg.text());
+      }
+    });
+
     await persesApp.navigateToDashboard(projectName, testDashboardName);
 
     const dashboardPage = new DashboardPage(page);
@@ -156,6 +178,10 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
         console.error('Failed to clean up the dashboard after a test.');
       }
     }
+
+    // If console errors are found, log the errors to help with debugging and
+    // fail the test.
+    expect(consoleErrors, `${consoleErrors.length} console errors seen while running test.`).toHaveLength(0);
   },
 });
 

@@ -85,9 +85,9 @@ describe('generateChartsTheme', () => {
           },
           "color": Array [
             "#8dd3c7",
-            "#bebada",
             "#fb8072",
             "#80b1d3",
+            "#bebada",
             "#fdb462",
           ],
           "gauge": Object {

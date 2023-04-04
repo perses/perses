@@ -47,7 +47,7 @@ export function ThresholdInput({
         key={key}
         inputRef={inputRef}
         type="number"
-        value={value === 0 ? undefined : value}
+        value={value === 0 ? '' : value}
         placeholder="0"
         onChange={onChange}
         onBlur={onBlur}

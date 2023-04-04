@@ -223,7 +223,7 @@ export function LineChart({
     >
       {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead */}
       {showTooltip === true &&
-        (option.tooltip as TooltipComponentOption).showContent === false &&
+        (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
           <TimeSeriesTooltip
             chartRef={chartRef}

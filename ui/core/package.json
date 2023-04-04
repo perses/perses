@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.25.0",
+  "version": "0.26.1",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
