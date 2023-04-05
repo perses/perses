@@ -29,6 +29,7 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
     <ListItem
       {...others}
       component="div"
+      role="listitem"
       sx={combineSx(
         {
           padding: 0,

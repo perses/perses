@@ -142,6 +142,7 @@ export function ListLegend({ items }: ListLegendProps) {
     return (
       <div
         ref={ref}
+        role="list"
         style={{
           ...style,
           // Adjust height to account for simulated padding.
