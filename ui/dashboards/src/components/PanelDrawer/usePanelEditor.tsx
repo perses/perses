@@ -34,20 +34,14 @@ export const usePanelEditor = (panelDefinition: PanelDefinition) => {
    */
   const setQueries = useCallback(
     (queries?: QueryDefinition[], hideQueryEditor?: boolean) => {
-      if (queries === undefined) {
-        if (hideQueryEditor) {
-          setPrevQueries(currentQueries);
-          setCurrentQueries(undefined);
-        } else {
-          setCurrentQueries(prevQueries);
-        }
-        return;
+      if (hideQueryEditor) {
+        setPrevQueries(currentQueries);
+        setCurrentQueries(undefined);
+      } else {
+        setCurrentQueries(queries === undefined ? prevQueries : queries);
       }
-
-      setPrevQueries(currentQueries);
-      setCurrentQueries(queries ?? []);
     },
-    [setCurrentQueries, currentQueries, prevQueries]
+    [setCurrentQueries, currentQueries, setPrevQueries, prevQueries]
   );
 
   // reset panel definition
