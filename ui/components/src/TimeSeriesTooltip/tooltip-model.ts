@@ -32,10 +32,6 @@ export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
 
 export const defaultCursorData = {
   coords: {
-    viewport: {
-      x: 0,
-      y: 0,
-    },
     plotCanvas: {
       x: 0,
       y: 0,
@@ -55,10 +51,6 @@ export const emptyTooltipData = {
 };
 
 export interface CursorCoordinates {
-  viewport: {
-    x: number;
-    y: number;
-  };
   page: {
     x: number;
     y: number;
@@ -100,10 +92,6 @@ export const useMousePosition = (): CursorData['coords'] => {
   useEffect(() => {
     const setFromEvent = (e: ZRRawMouseEvent) => {
       return setCoords({
-        viewport: {
-          x: e.clientX,
-          y: e.clientY,
-        },
         page: {
           x: e.pageX,
           y: e.pageY,
