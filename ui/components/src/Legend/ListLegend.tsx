@@ -25,7 +25,7 @@ interface ListLegendProps {
 
 // Default height used to start while virtualizing the list before a true
 // height is determined.
-const DEFAULT_ROW_HEIGHT = 24;
+const DEFAULT_ROW_HEIGHT = 26;
 
 /**
  * ListLegend is used when legend.position is 'right' since legend items are
@@ -121,6 +121,7 @@ export function ListLegend({ items, height, width }: ListLegendProps) {
             // work correctly. Subtract padding to simulate padding.
             width: width - LIST_PADDING,
             wordBreak: 'break-word',
+            overflow: 'hidden',
           }}
         />
       </div>
