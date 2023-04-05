@@ -51,5 +51,8 @@
   "devDependencies": {
     "@types/dompurify": "^2.3.4",
     "@types/marked": "^4.0.7"
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts"
   }
 }
