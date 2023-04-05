@@ -53,17 +53,17 @@ const LegendWrapper = (props: LegendProps) => {
     <Box
       sx={{
         border: (theme) => `solid 1px ${theme.palette.divider}`,
+        position: 'relative',
+        width: position === 'Right' ? props.width + 100 : props.width,
+        height: position === 'Right' ? props.height : props.height + 100,
+
+        // This is a rare case where content-box is helpful because we want to
+        // have the border be additive, so we don't have to do any special
+        // math with the height/width or end up with an off-by-2px issue.
+        boxSizing: 'content-box',
       }}
     >
-      <Box
-        sx={{
-          position: 'relative',
-          width: position === 'Right' ? props.width + 100 : props.width,
-          height: position === 'Right' ? props.height : props.height + 100,
-        }}
-      >
-        <Legend {...props} />
-      </Box>
+      <Legend {...props} />
     </Box>
   );
 };
