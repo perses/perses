@@ -13,13 +13,10 @@
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
 import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
-import {
-  usePlugin,
-  PanelPlugin,
-  OptionsEditorTabsProps,
-  TimeSeriesQueryEditor,
-  OptionsEditorTabs,
-} from '@perses-dev/plugin-system';
+import { usePlugin } from '../runtime';
+import { PanelPlugin } from '../model';
+import { OptionsEditorTabsProps, OptionsEditorTabs } from './OptionsEditorTabs';
+import { TimeSeriesQueryEditor } from './TimeSeriesQueryEditor';
 
 export interface PanelSpecEditorProps {
   panelDefinition: PanelDefinition;

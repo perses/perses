@@ -26,11 +26,10 @@ import {
 } from '@mui/material';
 import { PanelDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginKindSelect, usePluginEditor } from '@perses-dev/plugin-system';
+import { PluginKindSelect, usePluginEditor, PanelSpecEditor } from '@perses-dev/plugin-system';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { PanelPreview } from './PanelPreview';
-import { PanelSpecEditor } from './PanelSpecEditor';
 import { usePanelEditor } from './usePanelEditor';
 
 export interface PanelEditorFormProps {
