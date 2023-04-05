@@ -52,13 +52,18 @@ const LegendWrapper = (props: LegendProps) => {
   return (
     <Box
       sx={{
-        position: 'relative',
-        width: position === 'Right' ? props.width + 100 : props.width,
-        height: position === 'Right' ? props.height : props.height + 100,
         border: (theme) => `solid 1px ${theme.palette.divider}`,
       }}
     >
-      <Legend {...props} />
+      <Box
+        sx={{
+          position: 'relative',
+          width: position === 'Right' ? props.width + 100 : props.width,
+          height: position === 'Right' ? props.height : props.height + 100,
+        }}
+      >
+        <Legend {...props} />
+      </Box>
     </Box>
   );
 };

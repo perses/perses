@@ -36,13 +36,13 @@ export function Legend({ width, height, options, data }: LegendProps) {
       <Box
         sx={{
           width: width,
-          height: '100%',
+          height: height,
           position: 'absolute',
           top: 0,
           right: 0,
         }}
       >
-        <ListLegend items={data} />
+        <ListLegend items={data} width={width} height={height} />
       </Box>
     );
   }
@@ -61,7 +61,11 @@ export function Legend({ width, height, options, data }: LegendProps) {
         bottom: 0,
       }}
     >
-      {needsVirtualization ? <ListLegend items={data} /> : <CompactLegend items={data} height={height} />}
+      {needsVirtualization ? (
+        <ListLegend items={data} width={width} height={height} />
+      ) : (
+        <CompactLegend items={data} height={height} />
+      )}
     </Box>
   );
 }

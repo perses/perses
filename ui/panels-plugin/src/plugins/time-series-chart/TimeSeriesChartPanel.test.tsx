@@ -23,18 +23,8 @@ import {
   mockPluginRegistry,
   MockPlugin,
 } from '@perses-dev/plugin-system';
-import { Props as AutoSizerProps } from 'react-virtualized-auto-sizer';
 import { MOCK_TIME_SERIES_QUERY_RESULT, MOCK_TIME_SERIES_DATA } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
-
-// Mock AutoSizer because it does not play well with jsdom.
-jest.mock('react-virtualized-auto-sizer', () => {
-  return {
-    ...jest.requireActual('react-virtualized-auto-sizer'),
-    __esModule: true,
-    default: ({ children }: AutoSizerProps) => children({ height: 1000, width: 1000 }),
-  };
-});
 
 jest.mock('@perses-dev/plugin-system', () => {
   return {

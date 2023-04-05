@@ -13,13 +13,14 @@
 
 import { useTheme } from '@mui/material';
 import { VariableSizeList, ListChildComponentProps } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import { useRef, useEffect, forwardRef } from 'react';
+import { useRef, useEffect, forwardRef, useCallback } from 'react';
 import { LegendItem } from '../model';
 import { ListLegendItem } from './ListLegendItem';
 
 interface ListLegendProps {
   items: LegendItem[];
+  height: number;
+  width: number;
 }
 
 // Default height used to start while virtualizing the list before a true
@@ -32,7 +33,7 @@ const DEFAULT_ROW_HEIGHT = 24;
  * large number of items because it is virtualized and easier to visually scan
  * large numbers of items when there is a single item per row.
  */
-export function ListLegend({ items }: ListLegendProps) {
+export function ListLegend({ items, height, width }: ListLegendProps) {
   // Storing a ref to the react-window `VariableSizeList`, so we can call
   // `resetAfterIndex` to resize the list after mouseover/out events to account
   // for the change in list items on hover.
@@ -81,12 +82,14 @@ export function ListLegend({ items }: ListLegendProps) {
       }
     }, [rowRef, index]);
 
-    // Handle size changes from hover on mouseover/mouseout
-    function handleMouseOverOut() {
+    // useCallback is important here to avoid constantly running the useEffect
+    // that calls this in `ListLegendItem`.
+    const handleRowLayoutChange = useCallback(() => {
+      // Handle size changes from hovering on a list item.
       if (rowRef.current) {
         setRowHeight(index, rowRef.current.clientHeight);
       }
-    }
+    }, [index]);
 
     const item = items[index];
 
@@ -105,25 +108,19 @@ export function ListLegend({ items }: ListLegendProps) {
           ...style,
           // Adjust the top position to simulate top padding on the list.
           top: `${originalTop + LIST_PADDING}px`,
-          paddingRight: `${LIST_PADDING}px`,
         }}
       >
         <ListLegendItem
           ref={rowRef}
           key={item.id}
           item={item}
-          onMouseOver={handleMouseOverOut}
-          onMouseOut={handleMouseOverOut}
+          truncateLabel={truncateLabels}
+          onLayoutChange={handleRowLayoutChange}
           sx={{
-            textOverflow: 'ellipsis',
+            // Having an explicit width is important for the ellipsizing to
+            // work correctly. Subtract padding to simulate padding.
+            width: width - LIST_PADDING,
             wordBreak: 'break-word',
-            overflow: truncateLabels ? 'hidden' : 'visible',
-            whiteSpace: truncateLabels ? 'nowrap' : 'normal',
-            // TODO: add optional hover effect to show unformatted label
-            '&:hover': {
-              overflow: 'visible',
-              whiteSpace: 'normal', // this allow you to see the full label on hover
-            },
           }}
         />
       </div>
@@ -154,21 +151,15 @@ export function ListLegend({ items }: ListLegendProps) {
   });
 
   return (
-    <AutoSizer>
-      {({ height, width }) => {
-        return (
-          <VariableSizeList
-            height={height ?? 0}
-            width={width ?? 0}
-            itemCount={items.length}
-            itemSize={getRowHeight}
-            innerElementType={InnerElementType}
-            ref={listRef}
-          >
-            {ListLegendRow}
-          </VariableSizeList>
-        );
-      }}
-    </AutoSizer>
+    <VariableSizeList
+      height={height}
+      width={width}
+      itemCount={items.length}
+      itemSize={getRowHeight}
+      innerElementType={InnerElementType}
+      ref={listRef}
+    >
+      {ListLegendRow}
+    </VariableSizeList>
   );
 }

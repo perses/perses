@@ -260,7 +260,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // TODO: account for number of time series returned when adjusting legend spacing
   let legendHeight = LEGEND_HEIGHT_SM;
   if (legend && legend.position === 'Right') {
-    legendHeight = adjustedContentDimensions.height;
+    legendHeight = contentDimensions?.height || adjustedContentDimensions.height;
   } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
     legendHeight = LEGEND_HEIGHT_LG;
   }
