@@ -18,7 +18,8 @@ import (
 
 	"github.com/perses/perses/internal/cli/resource"
 	cmdTest "github.com/perses/perses/internal/cli/test"
-	"github.com/perses/perses/pkg/client/fake/api"
+	test "github.com/perses/perses/internal/test"
+	fakeapi "github.com/perses/perses/pkg/client/fake/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -59,7 +60,7 @@ func TestDescribeCMD(t *testing.T) {
 			Args:            []string{"project", "perses", "-ojson"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdTest.JSONMarshalStrict(
+			ExpectedMessage: string(test.JSONMarshalStrict(
 				&modelV1.Project{
 					Kind: modelV1.KindProject,
 					Metadata: modelV1.Metadata{
@@ -72,7 +73,7 @@ func TestDescribeCMD(t *testing.T) {
 			Args:            []string{"project", "perses", "-oyaml"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdTest.YAMLMarshalStrict(
+			ExpectedMessage: string(test.YAMLMarshalStrict(
 				&modelV1.Project{
 					Kind: modelV1.KindProject,
 					Metadata: modelV1.Metadata{
@@ -85,7 +86,7 @@ func TestDescribeCMD(t *testing.T) {
 			Args:            []string{"folder", "myFolder", "-ojson", "-p", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdTest.JSONMarshalStrict(&modelV1.Folder{
+			ExpectedMessage: string(test.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,
 				Metadata: modelV1.ProjectMetadata{
 					Metadata: modelV1.Metadata{
@@ -101,7 +102,7 @@ func TestDescribeCMD(t *testing.T) {
 			Project:         "perses",
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: string(cmdTest.JSONMarshalStrict(&modelV1.Folder{
+			ExpectedMessage: string(test.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,
 				Metadata: modelV1.ProjectMetadata{
 					Metadata: modelV1.Metadata{

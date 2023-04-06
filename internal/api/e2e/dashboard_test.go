@@ -16,7 +16,6 @@
 package e2e
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
@@ -25,6 +24,7 @@ import (
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
@@ -103,13 +103,8 @@ func TestListDashboardInEmptyProject(t *testing.T) {
 }
 
 func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashboard {
-	b, err := json.Marshal(body)
-	if err != nil {
-		t.Fatal(err)
-	}
+	b := testUtils.JSONMarshalStrict(body)
 	dashboard := &modelV1.Dashboard{}
-	if unmarshalErr := json.Unmarshal(b, dashboard); unmarshalErr != nil {
-		t.Fatal(unmarshalErr)
-	}
+	testUtils.JSONUnmarshal(b, dashboard)
 	return dashboard
 }
