@@ -13,7 +13,7 @@
 
 import { Box } from '@mui/material';
 import { LegendOptions, LegendItem } from '../model';
-import { ListLegend } from './ListLegend';
+import { ListLegend, ListLegendProps } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 
 export interface LegendProps {
@@ -21,27 +21,46 @@ export interface LegendProps {
   height: number;
   data: LegendItem[];
   options: LegendOptions;
+
+  /**
+   * Additional props that will be passed to the list variation of the legend
+   * that is used when:
+   * - The legend is positioned on the right.
+   * - The legend has a large number of items to display and requires virtualization
+   *   to render performantly.
+   */
+  listProps?: Pick<ListLegendProps, 'initialRowHeight'>;
 }
 
-export function Legend({ width, height, options, data }: LegendProps) {
+// When the number of items to display is above this number, it is likely to
+// cause performance issues in the browser. The legend will be displayed in a
+// format (list) that allows for virtualization to minimize the performance impact.
+// Set this number based on testing, but it may need to be tuned a bit on the
+// future as people test this out on different machines.
+const NEED_VIRTUALIZATION_LIMIT = 500;
+
+export function Legend({ width, height, options, data, listProps }: LegendProps) {
   if (options.position === 'Right') {
     return (
       <Box
         sx={{
           width: width,
-          height: '100%',
+          height: height,
           position: 'absolute',
           top: 0,
           right: 0,
-          overflowX: 'hidden',
-          overflowY: 'scroll',
         }}
       >
-        <ListLegend items={data} />
+        <ListLegend items={data} width={width} height={height} {...listProps} />
       </Box>
     );
   }
 
+  // The bottom legend is displayed as a list when the number of items is too
+  // large and requires virtualization. Otherwise, it is rendered more compactly.
+  // We do not need this check for the right-side legend because it is always
+  // a virtualized list.
+  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
   return (
     <Box
       sx={{
@@ -51,7 +70,11 @@ export function Legend({ width, height, options, data }: LegendProps) {
         bottom: 0,
       }}
     >
-      <CompactLegend items={data} height={height} />
+      {needsVirtualization ? (
+        <ListLegend items={data} width={width} height={height} {...listProps} />
+      ) : (
+        <CompactLegend items={data} height={height} />
+      )}
     </Box>
   );
 }
