@@ -76,24 +76,24 @@
             "spec": {
               "legend": {
                 "position": "Bottom"
-              },
-              "queries": [{
-                "kind": "TimeSeriesQuery",
-                "spec": {
-                  "plugin": {
-                    "kind": "PrometheusTimeSeriesQuery",
-                    "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "MigrationFromGrafanaNotSupported"
-                      },
-                      "query": "migration_from_grafana_not_supported"
-                    }
-                  }
-                }
-              }]
+              }
             }
-          }
+          },
+          "queries": [{
+            "kind": "TimeSeriesQuery",
+            "spec": {
+              "plugin": {
+                "kind": "PrometheusTimeSeriesQuery",
+                "spec": {
+                  "datasource": {
+                    "kind": "PrometheusDatasource",
+                    "name": "MigrationFromGrafanaNotSupported"
+                  },
+                  "query": "migration_from_grafana_not_supported"
+                }
+              }
+            }
+          }]
         }
       }
     },

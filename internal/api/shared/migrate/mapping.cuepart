@@ -92,6 +92,7 @@ spec: {
                         plugin: [ // switch
                             %(conditional_panels)
                         ][0]
+                        // in case of no targets, the resulting empty array will be removed via unmarshaling in Go (omitempty)
                         queries: [ if innerPanel.targets != _|_ for _, target in innerPanel.targets {
                             kind: "TimeSeriesQuery"
                             spec: {

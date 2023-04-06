@@ -41,7 +41,7 @@ type Query struct {
 }
 
 type QuerySpec struct {
-	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
+	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 type DashboardSpec struct {
