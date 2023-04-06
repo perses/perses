@@ -22,12 +22,11 @@ import { TimeSeriesQueryInput } from './TimeSeriesQueryInput';
 const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 
 export interface TimeSeriesQueryEditorProps {
-  queries: TimeSeriesQueryDefinition[];
+  queries?: TimeSeriesQueryDefinition[];
   onChange: (queries: QueryDefinition[]) => void;
 }
 
-export function TimeSeriesQueryEditor(props: TimeSeriesQueryEditorProps) {
-  const { onChange, queries } = props;
+export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQueryEditorProps) {
   const hasMoreThanOneQuery = queries.length > 1;
   const { defaultPluginKinds } = usePluginRegistry();
   const defaultTimeSeriesQueryKind = defaultPluginKinds?.[DEFAULT_QUERY_PLUGIN_TYPE] ?? '';

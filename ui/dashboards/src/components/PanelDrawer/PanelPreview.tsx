@@ -24,15 +24,7 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
     return null;
   }
 
-  const queries = panelDefinition.spec.queries;
-  // ex: markdown panel does not have a query
-  if (!queries) {
-    return (
-      <Box height={PANEL_PREVIEW_HEIGHT}>
-        <Panel definition={panelDefinition} />
-      </Box>
-    );
-  }
+  const queries = panelDefinition.spec.queries ?? [];
 
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
