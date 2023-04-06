@@ -49,6 +49,11 @@ const LegendWrapper = (props: LegendProps) => {
     options: { position },
   } = props;
 
+  // The legend does not look very interesting by itself in stories, especially
+  // when considering the positioning. This wrapper puts a box with a border
+  // and some additional height/width (depending on the positioning of the
+  // legend) to make it easier to see how the legend would look in context
+  // alongside other content.
   return (
     <Box
       sx={{
