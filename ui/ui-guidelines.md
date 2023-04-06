@@ -267,7 +267,7 @@ Code intended for use by library consumers should include documentation using th
 
 > ⚠️ Note: this is an aspirational guideline that should impact _new_ development. There is a small amount of documentation for the current codebase, and we are slowly working on expanding it.
 
-## Additional best bractices
+## Additional best practices
 
 These are things we look for in code review. Most of these are general guidelines
 to ensure you are writing modular UI code.
