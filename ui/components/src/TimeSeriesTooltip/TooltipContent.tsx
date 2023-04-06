@@ -19,12 +19,11 @@ import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
-  showQuery?: boolean;
   wrapLabels?: boolean;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { focusedSeries, showQuery, wrapLabels } = props;
+  const { focusedSeries, wrapLabels } = props;
   const { formatWithUserTimeZone } = useTimeZone();
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
@@ -82,7 +81,6 @@ export function TooltipContent(props: TooltipContentProps) {
                 formattedY={formattedY}
                 markerColor={markerColor}
                 totalSeries={sortedFocusedSeries.length}
-                showQuery={showQuery}
                 wrapLabels={wrapLabels}
               />
             );

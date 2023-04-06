@@ -68,12 +68,16 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      showQuery: false,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('84.64M')).toBeInTheDocument();
     expect(screen.getByText('33.77M')).toBeInTheDocument();
-    expect(screen.getAllByText('env="demo", instance="demo.do.prometheus.io:9100", job="node"')).toHaveLength(2);
+    expect(
+      screen.getAllByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+    ).toHaveLength(1);
+    expect(
+      screen.getAllByText('node_memory_MemFree_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+    ).toHaveLength(1);
   });
 
   it('should display query before wrapped labels', () => {
@@ -101,7 +105,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      showQuery: true,
     };
     renderComponent(tooltipContent);
     expect(

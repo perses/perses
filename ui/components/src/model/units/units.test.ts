@@ -22,14 +22,75 @@ interface UnitTestCase {
 describe('formatValue', () => {
   const tests: UnitTestCase[] = [
     {
+      value: 10,
+      unit: { kind: 'Decimal' },
+      expected: '10',
+    },
+    {
+      value: 10,
+      unit: { kind: 'Decimal', decimal_places: 0 },
+      expected: '10',
+    },
+    {
+      value: 10,
+      unit: { kind: 'Decimal', decimal_places: 1 },
+      expected: '10',
+    },
+    {
+      value: 10,
+      unit: { kind: 'Decimal', decimal_places: 2 },
+      expected: '10',
+    },
+    {
+      value: 10,
+      unit: { kind: 'Decimal', decimal_places: 3 },
+      expected: '10',
+    },
+    {
+      value: 10,
+      unit: { kind: 'Decimal', decimal_places: 4 },
+      expected: '10',
+    },
+    {
+      value: 10.123456,
+      unit: { kind: 'Decimal' },
+      // The default for decimal_places is 2. This can be changed if we want.
+      expected: '10.12',
+    },
+    {
+      value: 10.123456,
+      unit: { kind: 'Decimal', decimal_places: 0 },
+      expected: '10',
+    },
+    {
+      value: 10.123456,
+      unit: { kind: 'Decimal', decimal_places: 1 },
+      expected: '10.1',
+    },
+    {
+      value: 10.123456,
+      unit: { kind: 'Decimal', decimal_places: 2 },
+      expected: '10.12',
+    },
+    {
+      value: 10.123456,
+      unit: { kind: 'Decimal', decimal_places: 3 },
+      expected: '10.123',
+    },
+    {
+      value: 10.123456,
+      unit: { kind: 'Decimal', decimal_places: 4 },
+      expected: '10.1235',
+    },
+    {
       value: 100000,
       unit: { kind: 'Decimal' },
-      expected: '100,000.00',
+      expected: '100,000',
     },
     {
       value: 155900,
       unit: { kind: 'Decimal', decimal_places: 4 },
-      expected: '155,900.0000',
+      expected: '155,900',
     },
     {
       value: 1000,
@@ -94,47 +155,47 @@ describe('formatValue', () => {
     {
       value: 505200,
       unit: { kind: 'Bytes' },
-      expected: '505,200.00 bytes',
+      expected: '505,200 bytes',
     },
     {
       value: 8000,
       unit: { kind: 'Milliseconds' },
-      expected: '8,000.00 milliseconds',
+      expected: '8,000 milliseconds',
     },
     {
       value: 200900,
       unit: { kind: 'Seconds' },
-      expected: '200,900.00 seconds',
+      expected: '200,900 seconds',
     },
     {
       value: 300,
       unit: { kind: 'Minutes' },
-      expected: '300.00 minutes',
+      expected: '300 minutes',
     },
     {
       value: 300,
       unit: { kind: 'Hours' },
-      expected: '300.00 hours',
+      expected: '300 hours',
     },
     {
       value: 300,
       unit: { kind: 'Days' },
-      expected: '300.00 days',
+      expected: '300 days',
     },
     {
       value: 300,
       unit: { kind: 'Weeks' },
-      expected: '300.00 weeks',
+      expected: '300 weeks',
     },
     {
       value: 300,
       unit: { kind: 'Months' },
-      expected: '300.00 months',
+      expected: '300 months',
     },
     {
       value: 300,
       unit: { kind: 'Years' },
-      expected: '300.00 years',
+      expected: '300 years',
     },
   ];
   it.each(tests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {

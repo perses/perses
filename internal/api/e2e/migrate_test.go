@@ -18,13 +18,13 @@ package e2e
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	testUtils "github.com/perses/perses/internal/test"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -48,22 +48,14 @@ func TestMigrateEndpoint(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			rawGrafanaDashboard, err := os.ReadFile(filepath.Join(e2eframework.GetRepositoryPath(t), test.initialDashboardPath))
-			if err != nil {
-				t.Fatal(err)
-			}
-			rawPersesDashboard, err := os.ReadFile(filepath.Join(e2eframework.GetRepositoryPath(t), test.resultDashboardPath))
-			if err != nil {
-				t.Fatal(err)
-			}
+			rawGrafanaDashboard := testUtils.ReadFile(filepath.Join(testUtils.GetRepositoryPath(), test.initialDashboardPath))
+			rawPersesDashboard := testUtils.ReadFile(filepath.Join(testUtils.GetRepositoryPath(), test.resultDashboardPath))
+
 			var grafanaDashboard json.RawMessage
-			if unmarshalErr := json.Unmarshal(rawGrafanaDashboard, &grafanaDashboard); unmarshalErr != nil {
-				t.Fatal(unmarshalErr)
-			}
+			testUtils.JSONUnmarshal(rawGrafanaDashboard, &grafanaDashboard)
 			var persesDashboard modelV1.Dashboard
-			if unmarshallErr := json.Unmarshal(rawPersesDashboard, &persesDashboard); unmarshallErr != nil {
-				t.Fatal(unmarshallErr)
-			}
+			testUtils.JSONUnmarshal(rawPersesDashboard, &persesDashboard)
+
 			e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 				entity := modelAPI.Migrate{
 					GrafanaDashboard: grafanaDashboard,

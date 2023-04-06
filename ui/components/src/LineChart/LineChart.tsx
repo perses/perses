@@ -58,7 +58,6 @@ use([
 ]);
 
 export type TooltipConfig = {
-  showQuery: boolean;
   wrapLabels: boolean;
   hidden?: boolean;
 };
@@ -86,7 +85,7 @@ export function LineChart({
   unit,
   grid,
   legend,
-  tooltipConfig = { wrapLabels: true, showQuery: true },
+  tooltipConfig = { wrapLabels: true },
   onDataZoom,
   onDoubleClick,
   __experimentalEChartsOptionsOverride,
@@ -228,7 +227,6 @@ export function LineChart({
           <TimeSeriesTooltip
             chartRef={chartRef}
             chartData={data}
-            showQuery={tooltipConfig.showQuery}
             wrapLabels={tooltipConfig.wrapLabels}
             pinTooltip={pinTooltip}
             unit={unit}

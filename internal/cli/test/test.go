@@ -15,31 +15,13 @@ package test
 
 import (
 	"bytes"
-	"encoding/json"
 	"testing"
 
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 )
-
-func JSONMarshalStrict(obj interface{}) []byte {
-	data, err := json.Marshal(obj)
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
-
-func YAMLMarshalStrict(obj interface{}) []byte {
-	data, err := yaml.Marshal(obj)
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
 
 type Suite struct {
 	Title           string
