@@ -80,13 +80,6 @@ export function ListLegend({ items, height, width, initialRowHeight = DEFAULT_IN
     // heights on hover.
     const rowRef = useRef<HTMLDivElement | null>(null);
 
-    // Adjust row heights when the row being rendered changes.
-    useEffect(() => {
-      if (rowRef.current) {
-        setRowHeight(index, rowRef.current.clientHeight);
-      }
-    }, [rowRef, index]);
-
     // useCallback is important here to avoid constantly running the useEffect
     // that calls this in `ListLegendItem`.
     const handleRowLayoutChange = useCallback(() => {
@@ -95,6 +88,11 @@ export function ListLegend({ items, height, width, initialRowHeight = DEFAULT_IN
         setRowHeight(index, rowRef.current.clientHeight);
       }
     }, [index]);
+
+    // Adjust row heights when the row being rendered changes.
+    useEffect(() => {
+      handleRowLayoutChange();
+    }, [handleRowLayoutChange]);
 
     const item = items[index];
 
