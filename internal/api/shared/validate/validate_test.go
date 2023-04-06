@@ -11,19 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package validate
 
 import (
-	"encoding/json"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/perses/perses/internal/api/config"
-	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	testUtils "github.com/perses/perses/internal/test"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -46,11 +42,9 @@ func TestDashboard(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			persesDashboardRaw, readErr := os.ReadFile(filepath.Join(testDataFolder, test.dashboardFile))
-			if readErr != nil {
-				t.Fatal(readErr)
-			}
-			projectPath := e2eframework.GetRepositoryPath(t)
+			persesDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.dashboardFile))
+
+			projectPath := testUtils.GetRepositoryPath()
 			schemasService, schErr := schemas.New(config.Schemas{
 				// use the real schemas for these tests
 				PanelsPath:    filepath.Join(projectPath, config.DefaultPanelsPath),
@@ -62,10 +56,7 @@ func TestDashboard(t *testing.T) {
 			}
 
 			var persesDashboard modelV1.Dashboard
-			unmarshallErr := json.Unmarshal(persesDashboardRaw, &persesDashboard)
-			if unmarshallErr != nil {
-				t.Fatal(unmarshallErr)
-			}
+			testUtils.JSONUnmarshal(persesDashboardRaw, &persesDashboard)
 
 			err := Dashboard(&persesDashboard, schemasService)
 

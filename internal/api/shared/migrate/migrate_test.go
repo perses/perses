@@ -11,18 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package migrate
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/perses/perses/internal/api/config"
-	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	testUtils "github.com/perses/perses/internal/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -53,16 +50,10 @@ func TestMigrate(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			inputGrafanaDashboardRaw, readErr := os.ReadFile(filepath.Join(testDataFolder, test.inputGrafanaDashboardFile))
-			if readErr != nil {
-				t.Fatal(readErr)
-			}
-			expectedPersesDashboardRaw, readErr := os.ReadFile(filepath.Join(testDataFolder, test.expectedPersesDashboardFile))
-			if readErr != nil {
-				t.Fatal(readErr)
-			}
+			inputGrafanaDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.inputGrafanaDashboardFile))
+			expectedPersesDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.expectedPersesDashboardFile))
 
-			projectPath := e2eframework.GetRepositoryPath(t)
+			projectPath := testUtils.GetRepositoryPath()
 			svc, err := New(config.Schemas{
 				// use the real schemas for these tests
 				PanelsPath:    filepath.Join(projectPath, config.DefaultPanelsPath),
@@ -79,7 +70,7 @@ func TestMigrate(t *testing.T) {
 			}
 			assert.Equal(t, test.expectedErrorStr, actualErrorStr)
 
-			actualPersesDashboardRaw, _ := json.Marshal(actualPersesDashboard)
+			actualPersesDashboardRaw := testUtils.JSONMarshalStrict(actualPersesDashboard)
 			require.JSONEq(t, string(expectedPersesDashboardRaw), string(actualPersesDashboardRaw))
 		})
 	}
