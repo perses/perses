@@ -29,7 +29,7 @@ export interface LegendProps {
    * - The legend has a large number of items to display and requires virtualization
    *   to render performantly.
    */
-  listLegendProps?: Pick<ListLegendProps, 'initialRowHeight'>;
+  listProps?: Pick<ListLegendProps, 'initialRowHeight'>;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -39,7 +39,7 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, listLegendProps }: LegendProps) {
+export function Legend({ width, height, options, data, listProps }: LegendProps) {
   if (options.position === 'Right') {
     return (
       <Box
@@ -51,7 +51,7 @@ export function Legend({ width, height, options, data, listLegendProps }: Legend
           right: 0,
         }}
       >
-        <ListLegend items={data} width={width} height={height} {...listLegendProps} />
+        <ListLegend items={data} width={width} height={height} {...listProps} />
       </Box>
     );
   }
@@ -71,7 +71,7 @@ export function Legend({ width, height, options, data, listLegendProps }: Legend
       }}
     >
       {needsVirtualization ? (
-        <ListLegend items={data} width={width} height={height} {...listLegendProps} />
+        <ListLegend items={data} width={width} height={height} {...listProps} />
       ) : (
         <CompactLegend items={data} height={height} />
       )}
