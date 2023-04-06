@@ -17,15 +17,20 @@ import { useRef, useEffect, forwardRef, useCallback } from 'react';
 import { LegendItem } from '../model';
 import { ListLegendItem } from './ListLegendItem';
 
-interface ListLegendProps {
+export interface ListLegendProps {
   items: LegendItem[];
   height: number;
   width: number;
+
+  /**
+   * The height used when initially laying out items in the list. Once items
+   * render, the height is determined based on the content. This is needed
+   * because the list is virtualized.
+   */
+  initialRowHeight?: number;
 }
 
-// Default height used to start while virtualizing the list before a true
-// height is determined.
-const DEFAULT_ROW_HEIGHT = 26;
+const DEFAULT_INITIAL_ROW_HEIGHT = 26;
 
 /**
  * ListLegend is used when legend.position is 'right' since legend items are
@@ -33,7 +38,7 @@ const DEFAULT_ROW_HEIGHT = 26;
  * large number of items because it is virtualized and easier to visually scan
  * large numbers of items when there is a single item per row.
  */
-export function ListLegend({ items, height, width }: ListLegendProps) {
+export function ListLegend({ items, height, width, initialRowHeight = DEFAULT_INITIAL_ROW_HEIGHT }: ListLegendProps) {
   // Storing a ref to the react-window `VariableSizeList`, so we can call
   // `resetAfterIndex` to resize the list after mouseover/out events to account
   // for the change in list items on hover.
@@ -56,7 +61,7 @@ export function ListLegend({ items, height, width }: ListLegendProps) {
   // render the row properly.
   function getRowHeight(index: number) {
     const currentHeight = rowHeights.current[index];
-    return currentHeight ?? DEFAULT_ROW_HEIGHT;
+    return currentHeight ?? initialRowHeight;
   }
 
   // Set the height for a given item to enable the virtualized list to
