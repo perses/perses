@@ -18,9 +18,7 @@ package e2eframework
 import (
 	"net/http/httptest"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -28,20 +26,13 @@ import (
 	"github.com/perses/perses/internal/api/core"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	test "github.com/perses/perses/internal/test"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
-
-func GetRepositoryPath(t *testing.T) string {
-	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
-	if err != nil {
-		t.Fatal(err)
-	}
-	return strings.TrimSpace(string(projectPathByte))
-}
 
 func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Entity) {
 	for _, entity := range entities {
@@ -60,7 +51,7 @@ func defaultFileConfig() *config.File {
 }
 
 func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
-	projectPath := GetRepositoryPath(t)
+	projectPath := test.GetRepositoryPath()
 	conf := config.Config{
 		Schemas: config.Schemas{
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),

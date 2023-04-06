@@ -1,0 +1,113 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "dlDJrcf4z",
+    "created_at": "0001-01-01T00:00:00Z",
+    "updated_at": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Perses testing / .* in label matcher"
+    },
+    "duration": "1h",
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "iaas_loc",
+          "display": {
+            "name": "IaaS location",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "stack",
+              "matchers": [
+                "thanos_build_info{stack=~\"\\\\w{4}\"}"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "stack",
+          "display": {
+            "name": "Stack (label_values)",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "label_name": "stack",
+              "matchers": [
+                "thanos_build_info{stack=~\"$iaas_loc.*\"}"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "stack_bis",
+          "display": {
+            "name": "Stack (query_result)",
+            "hidden": false
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "expr": "group by (stack) (thanos_build_info{stack=~\"$iaas_loc.*\"})",
+              "label_name": "stack"
+            }
+          }
+        }
+      }
+    ],
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Just a text panel"
+          },
+          "plugin": {
+            "kind": "Markdown",
+            "spec": {
+              "text": "# Title\n\nLorem ipsum"
+            }
+          }
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 10,
+              "y": 0,
+              "width": 4,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -220,7 +220,7 @@ export function VariableEditForm({
             <TextField
               fullWidth
               label="Display Label"
-              value={state.title}
+              value={state.title || ''}
               onChange={(v) => {
                 setState((draft) => {
                   draft.title = v.target.value;
@@ -289,7 +289,7 @@ export function VariableEditForm({
                   <TextField
                     sx={{ mb: 1 }}
                     label="Capturing Regexp Filter"
-                    value={state.listVariableFields.capturing_regexp}
+                    value={state.listVariableFields.capturing_regexp || ''}
                     onChange={(e) => {
                       setState((draft) => {
                         draft.listVariableFields.capturing_regexp = e.target.value;

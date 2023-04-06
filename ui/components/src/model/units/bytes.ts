@@ -43,19 +43,18 @@ export function formatBytes(bytes: number, unitOptions: BytesUnitOptions) {
   // default to full 'Bytes' formatting
   const options = unitOptions.abbreviate === undefined ? { ...unitOptions, abbreviate: false } : unitOptions;
 
-  let decimals = options.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+  let decimalPlaces = options.decimal_places ?? DEFAULT_DECIMAL_PLACES;
   // avoids minimumFractionDigits value is out of range error, possible values are 0 to 20
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
-  if (decimals < 0) {
-    decimals = 0;
-  } else if (decimals > 20) {
-    decimals = 20;
+  if (decimalPlaces < 0) {
+    decimalPlaces = 0;
+  } else if (decimalPlaces > 20) {
+    decimalPlaces = 20;
   }
 
   const formatParams: Intl.NumberFormatOptions = {
     style: 'decimal',
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    maximumFractionDigits: decimalPlaces,
     useGrouping: true,
   };
   const formatter = new Intl.NumberFormat('en-US', formatParams);

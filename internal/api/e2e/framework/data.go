@@ -18,13 +18,13 @@ package e2eframework
 import (
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	test "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -117,7 +117,7 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 	if err != nil {
 		t.Fatal(err)
 	}
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
+
 	pluginSpec := &datasource.Prometheus{
 		Proxy: datasourceHTTP.Proxy{
 			Kind: "HTTPProxy",
@@ -152,6 +152,8 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 			},
 		},
 	}
+
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	data, err := json.Marshal(pluginSpec)
 	if err != nil {
 		t.Fatal(err)
@@ -160,6 +162,7 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 	if err := json.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
 		t.Fatal(err)
 	}
+
 	return v1.DatasourceSpec{
 		Default: false,
 		Plugin: common.Plugin{
@@ -197,16 +200,13 @@ func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 }
 
 func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	// Creating a full dashboard is quite long and to ensure the changes are still matching the dev environment,
 	// it's better to use the dashboard written in the dev/data/dashboard.json
-	persesRepositoryPath := GetRepositoryPath(t)
+	persesRepositoryPath := test.GetRepositoryPath()
 	dashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "dashboard.json")
 	var list []*v1.Dashboard
-	data, err := os.ReadFile(dashboardJSONFilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
+	data := test.ReadFile(dashboardJSONFilePath)
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	if unmarshallErr := json.Unmarshal(data, &list); unmarshallErr != nil {
 		t.Fatal(unmarshallErr)
 	}

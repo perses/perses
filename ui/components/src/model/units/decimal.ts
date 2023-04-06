@@ -34,20 +34,19 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
 };
 
 export function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
-  const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+  const decimalPlaces = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
 
   if (value === 0) {
     return value.toString();
   }
 
   if (unitOptions.abbreviate && value >= 1000) {
-    return abbreviateLargeNumber(value, decimals);
+    return abbreviateLargeNumber(value, decimalPlaces);
   }
 
   const formatParams: Intl.NumberFormatOptions = {
     style: 'decimal',
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    maximumFractionDigits: decimalPlaces,
     useGrouping: true,
   };
   const decimalFormatter = new Intl.NumberFormat('en-US', formatParams);
@@ -59,8 +58,8 @@ export function formatDecimal(value: number, unitOptions: DecimalUnitOptions): s
  * 10123 -> 10.123k
  * 1000000 -> 1M
  */
-export function abbreviateLargeNumber(num: number, decimals = 2) {
-  const modifier = (n: number) => round(n, decimals);
+export function abbreviateLargeNumber(num: number, decimalPlaces = 2) {
+  const modifier = (n: number) => round(n, decimalPlaces);
   return formatNumber(num, modifier);
 }
 
