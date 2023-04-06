@@ -74,14 +74,13 @@ export enum TimeIntlDuration {
 }
 
 export function formatTime(value: number, unitOptions: TimeUnitOptions): string {
-  const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+  const decimalPlaces = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
   const timeUnit: string = TimeIntlDuration[unitOptions.kind];
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'unit',
     unit: timeUnit,
     unitDisplay: 'long',
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    maximumFractionDigits: decimalPlaces,
   });
   return formatter.format(value);
 }

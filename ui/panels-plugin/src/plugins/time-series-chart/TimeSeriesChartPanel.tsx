@@ -102,7 +102,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const { setTimeRange } = useTimeRange();
 
-  const onLegendItemClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, seriesName: string) => {
+  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesName: string) => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
     setSelectedSeriesNames((current) => {
@@ -260,7 +260,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // TODO: account for number of time series returned when adjusting legend spacing
   let legendHeight = LEGEND_HEIGHT_SM;
   if (legend && legend.position === 'Right') {
-    legendHeight = adjustedContentDimensions.height;
+    legendHeight = contentDimensions?.height || adjustedContentDimensions.height;
   } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
     legendHeight = LEGEND_HEIGHT_LG;
   }
@@ -289,7 +289,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         yAxis={yAxis}
         unit={unit}
         grid={gridOverrides}
-        tooltipConfig={{ showQuery: true, wrapLabels: true }}
+        tooltipConfig={{ wrapLabels: true }}
         onDataZoom={handleDataZoom}
       />
       {legend && graphData.legendItems && (

@@ -11,20 +11,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
 import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
 import { LegendItem } from '../model';
 import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
 
-interface ListLegendItemProps extends ListItemProps {
+interface ListLegendItemProps extends ListItemProps<'div'> {
   item: LegendItem;
+
+  /**
+   * When `true`, will keep labels to a single line with overflow ellipsized. The
+   * full content will be shown on hover.
+   *
+   * When `false` or unset, will show the full label.
+   */
+  truncateLabel?: boolean;
+
+  /**
+   * Called when the layout of the legend item changes as a result of the hover
+   * behavior when `truncateLabel` is `true`.
+   */
+  onLayoutChange?: () => void;
 }
 
-export const ListLegendItem = React.memo(function ListLegendItem({ item, sx, ...others }: ListLegendItemProps) {
+const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
+  { item, sx, truncateLabel, onLayoutChange, ...others },
+  ref
+) {
+  const [noWrap, setNoWrap] = useState(truncateLabel);
+
+  function handleMouseOver() {
+    if (truncateLabel) {
+      setNoWrap(false);
+    }
+  }
+
+  function handleMouseOut() {
+    if (truncateLabel) {
+      setNoWrap(true);
+    }
+  }
+
+  useEffect(() => {
+    // When `noWrap` changes, so does the layout of the component. Notifies the
+    // parent, so it can handle those changes.
+    onLayoutChange?.();
+  }, [noWrap, onLayoutChange]);
+
   return (
     <ListItem
       {...others}
+      component="div"
+      role="listitem"
       sx={combineSx(
         {
           padding: 0,
@@ -36,11 +75,19 @@ export const ListLegendItem = React.memo(function ListLegendItem({ item, sx, ...
       key={item.id}
       onClick={item.onClick}
       selected={item.isSelected}
+      ref={ref}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <LegendColorBadge color={item.color} />
       </Box>
-      <ListItemText primary={item.label}></ListItemText>
+      <ListItemText
+        primary={item.label}
+        primaryTypographyProps={{ noWrap: noWrap }}
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseOut}
+      ></ListItemText>
     </ListItem>
   );
 });
+
+export const ListLegendItem = React.memo(ListLegendItemBase);

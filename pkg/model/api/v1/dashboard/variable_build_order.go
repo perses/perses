@@ -22,7 +22,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$([a-zA-Z0-9_.:-]+)`)
+var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
 
 type VariableGroup struct {
 	Variables []string
