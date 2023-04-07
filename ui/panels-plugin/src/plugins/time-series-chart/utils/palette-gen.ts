@@ -65,71 +65,61 @@ export const stringToColor = (() => {
     stringToColorHash: {},
     nextVeryDifferentColorIdx: 0,
     veryDifferentColors: [
-      '#000000',
-      '#00FF00',
-      '#0000FF',
-      '#FF0000',
-      '#01FFFE',
-      '#FFA6FE',
-      '#FFDB66',
-      '#006401',
-      '#010067',
-      '#95003A',
-      '#007DB5',
-      '#FF00F6',
-      '#FFEEE8',
-      '#774D00',
-      '#90FB92',
-      '#0076FF',
-      '#D5FF00',
-      '#FF937E',
-      '#6A826C',
-      '#FF029D',
-      '#FE8900',
-      '#7A4782',
-      '#7E2DD2',
-      '#85A900',
-      '#FF0056',
-      '#A42400',
-      '#00AE7E',
-      '#683D3B',
-      '#BDC6FF',
-      '#263400',
-      '#BDD393',
-      '#00B917',
-      '#9E008E',
-      '#001544',
-      '#C28C9F',
-      '#FF74A3',
-      '#01D0FF',
-      '#004754',
-      '#E56FFE',
-      '#788231',
-      '#0E4CA1',
-      '#91D0CB',
-      '#BE9970',
-      '#968AE8',
-      '#BB8800',
-      '#43002C',
-      '#DEFF74',
-      '#00FFC6',
-      '#FFE502',
-      '#620E00',
-      '#008F9C',
-      '#98FF52',
-      '#7544B1',
-      '#B500FF',
-      '#00FF78',
-      '#FF6E41',
-      '#005F39',
-      '#6B6882',
-      '#5FAD4E',
-      '#A75740',
-      '#A5FFD2',
-      '#FFB167',
-      '#009BFF',
-      '#E85EBE',
+      '#01FFFE', // Cyan
+      '#FFA6FE', // Pink
+      '#006401', // Dark Green
+      '#010067', // Dark Blue
+      '#95003A', // Dark Red
+      '#007DB5', // Azure
+      '#FF00F6', // Magenta
+      '#FFEEE8', // Very Light Pink
+      '#774D00', // Dark Brown
+      '#90FB92', // Light Green
+      '#0076FF', // Azure Blue
+      '#FF937E', // Light Salmon
+      '#6A826C', // Khaki
+      '#FF029D', // Magenta (pink-purple)
+      '#FE8900', // Dark Orange
+      '#7A4782', // Dark Purple
+      '#7E2DD2', // Purple
+      '#85A900', // Olive
+      '#FF0056', // Red
+      '#A42400', // Burnt Umber
+      '#00AE7E', // Green
+      '#683D3B', // Reddish Brown
+      '#BDC6FF', // Light Blue
+      '#263400', // Dark Olive Green
+      '#BDD393', // Light Greenish Gray
+      '#9E008E', // Deep Magenta
+      '#001544', // Dark Blue (Navy)
+      '#C28C9F', // Pale Pinkish Grey
+      '#FF74A3', // Light Pink
+      '#01D0FF', // Bright Cyan
+      '#004754', // Very Dark Blue
+      '#E56FFE', // Pinkish Purple
+      '#788231', // Olive Drab
+      '#0E4CA1', // Indigo
+      '#91D0CB', // Light Bluish Green
+      '#BE9970', // Tan
+      '#968AE8', // Light Lavender
+      '#BB8800', // Goldenrod
+      '#43002C', // Dark Raspberry (Purplish Red)
     ],
+    // https://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12
+    // veryDifferentColors: [
+    //   '#a6cee3',
+    //   '#1f78b4',
+    //   '#b2df8a',
+    //   '#33a02c',
+    //   '#fb9a99',
+    //   '#e31a1c',
+    //   '#fdbf6f',
+    //   '#ff7f00',
+    //   '#cab2d6',
+    //   '#6a3d9a',
+    //   '#ffff99',
+    //   '#b15928',
+    // ],
   };
 
   return {
