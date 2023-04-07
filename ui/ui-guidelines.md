@@ -272,6 +272,7 @@ Code intended for use by library consumers should include documentation using th
 These are things we look for in code review. Most of these are general guidelines
 to ensure you are writing modular UI code.
 
+- When exporting modules, you should use named exports (instead of default exports).
 - Avoid breaking things out into a reusable global component unless it needs to be
   used in 3 or more places.
 - Start thinking about breaking a module into smaller modules or sub components when
