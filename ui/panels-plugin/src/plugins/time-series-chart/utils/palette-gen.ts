@@ -111,7 +111,9 @@ export const stringToColor = (() => {
   return {
     next: (str: string) => {
       if (!instance.stringToColorHash[str]) {
-        instance.stringToColorHash[str] = instance.contrastPalette[instance.contrastPaletteColorIdx++];
+        instance.contrastPaletteColorIdx++;
+        instance.contrastPaletteColorIdx %= instance.contrastPalette.length;
+        instance.stringToColorHash[str] = instance.contrastPalette[instance.contrastPaletteColorIdx];
       }
       return instance.stringToColorHash[str];
     },
