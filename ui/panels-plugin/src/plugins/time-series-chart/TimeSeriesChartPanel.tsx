@@ -55,7 +55,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const echartsPalette = chartsTheme.echartsTheme.color ?? [muiTheme.palette.primary];
+  const echartsPalette = chartsTheme.echartsTheme.color;
+  const fallbackColor =
+    Array.isArray(echartsPalette) && echartsPalette.length > 0 ? echartsPalette[0] : muiTheme.palette.primary;
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -174,6 +176,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           formattedSeriesName,
           seriesCount,
           echartsPalette as string[],
+          fallbackColor as string,
           visual.palette?.kind
         );
         seriesCount++; // used for repeating colors in Categorical palette
