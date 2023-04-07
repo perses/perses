@@ -110,8 +110,9 @@ make build
 General instructions about how you can contribute to Perses are available in the
 document [CONTRIBUTING.md](CONTRIBUTING.md).
 
-In case you are more interested into the React UI development, please refer to [UI Readme](./ui/README.md). It will give
-you instruction about how to build, run or test the React UI. It will also some insight about how it is designed.
+### UI development
+
+If you are primarily interested in contributing to the UI application and libraries, please refer to the [UI Readme](./ui/README.md). It includes quick start instructions for how to build, run, and test the React UI. It also includes details about the architecture and [guidelines](./ui/ui-guidelines.md) for development.
 
 ## License
 
