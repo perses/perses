@@ -130,13 +130,9 @@ export function getUniqueKeyForPrometheusResult(
  * Determine human-readable series name to be used in legend and tooltip
  */
 export function getFormattedPrometheusSeriesName(query: string, metric: Metric, formatter?: string) {
-  if (isEmptyObject(metric)) {
-    return { name: query };
-  }
-
   // Name the series after the metric labels or if no metric, use the query
   let name = getUniqueKeyForPrometheusResult(metric);
-  if (name === '') {
+  if (name === '' || isEmptyObject(metric)) {
     name = query;
   }
 

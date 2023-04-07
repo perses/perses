@@ -160,7 +160,7 @@ describe('getFormattedPrometheusSeriesName', () => {
   it('should resolve empty metric to instead show query', () => {
     const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
     const metric = {};
-    const output = { name: query };
+    const output = { name: query, formattedName: 'node_load15{instance=~"(demo.do.prometheus.io:9100)"' };
     expect(getFormattedPrometheusSeriesName(query, metric)).toEqual(output);
   });
 
