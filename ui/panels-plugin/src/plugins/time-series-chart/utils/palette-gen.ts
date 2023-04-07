@@ -52,19 +52,21 @@ export function getSeriesColor(
 
 interface StringToColorInstance {
   stringToColorHash: Record<string, string | undefined>;
-  nextVeryDifferentColorIdx: number;
-  veryDifferentColors: string[];
+  contrastPaletteColorIdx: number;
+  contrastPalette: string[];
 }
 
 /*
- * Color conversion from string using palette for contrast
- * https://stackoverflow.com/a/31037383/17575201
+ * Color conversion from string using predefined palette for contrast
+ * String to color approach from: https://stackoverflow.com/a/31037383/17575201
+ * Contrast colors started from: https://stackoverflow.com/a/12224359/17575201
  */
 export const stringToColor = (() => {
   const instance: StringToColorInstance = {
     stringToColorHash: {},
-    nextVeryDifferentColorIdx: 0,
-    veryDifferentColors: [
+    contrastPaletteColorIdx: 0,
+    contrastPalette: [
+      '#8DD3C7', // Turquoise
       '#01FFFE', // Cyan
       '#FFA6FE', // Pink
       '#006401', // Dark Green
@@ -72,13 +74,12 @@ export const stringToColor = (() => {
       '#95003A', // Dark Red
       '#007DB5', // Azure
       '#FF00F6', // Magenta
-      '#FFEEE8', // Very Light Pink
       '#774D00', // Dark Brown
       '#90FB92', // Light Green
       '#0076FF', // Azure Blue
       '#FF937E', // Light Salmon
       '#6A826C', // Khaki
-      '#FF029D', // Magenta (pink-purple)
+      '#FF029D', // Magenta
       '#FE8900', // Dark Orange
       '#7A4782', // Dark Purple
       '#7E2DD2', // Purple
@@ -103,29 +104,14 @@ export const stringToColor = (() => {
       '#BE9970', // Tan
       '#968AE8', // Light Lavender
       '#BB8800', // Goldenrod
-      '#43002C', // Dark Raspberry (Purplish Red)
+      '#43002C', // Dark Raspberry
     ],
-    // https://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12
-    // veryDifferentColors: [
-    //   '#a6cee3',
-    //   '#1f78b4',
-    //   '#b2df8a',
-    //   '#33a02c',
-    //   '#fb9a99',
-    //   '#e31a1c',
-    //   '#fdbf6f',
-    //   '#ff7f00',
-    //   '#cab2d6',
-    //   '#6a3d9a',
-    //   '#ffff99',
-    //   '#b15928',
-    // ],
   };
 
   return {
     next: (str: string) => {
       if (!instance.stringToColorHash[str]) {
-        instance.stringToColorHash[str] = instance.veryDifferentColors[instance.nextVeryDifferentColorIdx++];
+        instance.stringToColorHash[str] = instance.contrastPalette[instance.contrastPaletteColorIdx++];
       }
       return instance.stringToColorHash[str];
     },
