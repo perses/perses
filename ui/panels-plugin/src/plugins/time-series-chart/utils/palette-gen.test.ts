@@ -16,7 +16,7 @@ import { getSeriesColor } from './palette-gen';
 describe('getSeriesColor', () => {
   const fallbackColor = '#ff0000';
 
-  it('should return Auto generated color', () => {
+  it('should return generated color from series name', () => {
     const value = getSeriesColor(
       'p90 test api subdomain',
       2,
@@ -24,7 +24,12 @@ describe('getSeriesColor', () => {
       '#ff0000',
       'Auto'
     );
-    expect(value).toEqual('hsla(1008901844,50%,50%,0.8)');
+    expect(value).toEqual('#8DD3C7');
+  });
+
+  it('should return alternate contrast palette color', () => {
+    const value = getSeriesColor('test series name', 3, ['#fff', '000', '#111', '#222', '#333'], '#ff0000', 'Auto');
+    expect(value).toEqual('#01FFFE');
   });
 
   it('should return 1st color in Categorical palette', () => {
