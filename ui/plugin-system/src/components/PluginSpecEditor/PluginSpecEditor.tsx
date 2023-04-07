@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ErrorAlert, JSONEditor } from '@perses-dev/components';
+import { ErrorAlert } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/core';
-import { OptionsEditorProps, PanelPlugin, PluginType } from '../model';
-import { usePlugin } from '../runtime';
-import { OptionsEditorTabsProps, OptionsEditorTabs } from './OptionsEditorTabs';
+import { OptionsEditorProps, PluginType } from '../../model';
+import { usePlugin } from '../../runtime';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: PluginType;
@@ -40,22 +39,7 @@ export function PluginSpecEditor(props: PluginSpecEditorProps) {
   }
 
   if (pluginType === 'Panel') {
-    const { panelOptionsEditorComponents } = plugin as PanelPlugin;
-    let tabs: OptionsEditorTabsProps['tabs'] = [];
-
-    if (panelOptionsEditorComponents !== undefined) {
-      tabs = tabs.concat(
-        panelOptionsEditorComponents.map(({ label, content: OptionsEditorComponent }) => ({
-          label,
-          content: <OptionsEditorComponent {...others} />,
-        }))
-      );
-    }
-
-    // always show json editor by default
-    tabs.push({ label: 'JSON', content: <JSONEditor {...others} /> });
-
-    return <OptionsEditorTabs tabs={tabs} />;
+    throw new Error('This editor should not be used for panel type. Please use Panel Spec Editor instead.');
   }
 
   const { OptionsEditorComponent } = plugin;

@@ -66,4 +66,5 @@ export const BertPanel2: PanelPlugin<{ option2: string }> = {
     },
   ],
   createInitialOptions: () => ({ option2: '' }),
+  hideQueryEditor: true,
 };

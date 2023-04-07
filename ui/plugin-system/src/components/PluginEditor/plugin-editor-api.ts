@@ -16,8 +16,8 @@ import { Definition, UnknownSpec, useEvent } from '@perses-dev/core';
 import { useState, useRef, useEffect } from 'react';
 import { produce } from 'immer';
 import { PanelPlugin, PluginType } from '../../model';
-import { PluginKindSelectProps } from '../PluginKindSelect';
-import { PluginSpecEditorProps } from '../PluginSpecEditor';
+import { PluginKindSelectProps } from '../PluginKindSelect/PluginKindSelect';
+import { PluginSpecEditorProps } from '../PluginSpecEditor/PluginSpecEditor';
 import { usePlugin, usePluginRegistry } from '../../runtime';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
@@ -49,7 +49,7 @@ export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value
  */
 export function usePluginEditor(props: UsePluginEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const { pluginType, value, onHideQueryEditorChange = () => {} } = props; // setting onHideQueryEditorChange to empty functio here because useEvent requires a function
+  const { pluginType, value, onHideQueryEditorChange = () => {} } = props; // setting onHideQueryEditorChange to empty function here because useEvent requires a function
 
   // Keep a stable reference so we don't run the effect below when we don't need to
   const onChange = useEvent(props.onChange);

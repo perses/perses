@@ -13,7 +13,7 @@
 
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { renderWithContext } from '../test';
+import { renderWithContext } from '../../test';
 import { PluginKindSelect, PluginKindSelectProps } from './PluginKindSelect';
 
 describe('PluginKindSelect', () => {
@@ -48,11 +48,11 @@ describe('PluginKindSelect', () => {
   it('shows the correct selected value', async () => {
     renderComponent({
       pluginType: 'Variable',
-      value: 'ErnieVariable',
+      value: 'ErnieVariable1',
     });
 
     // Use findByRole to wait for loading to finish and selected value to appear
-    const select = await screen.findByRole('button', { name: 'Ernie Variable' });
+    const select = await screen.findByRole('button', { name: 'Ernie Variable 1' });
     expect(select).toBeInTheDocument();
   });
 
@@ -63,7 +63,7 @@ describe('PluginKindSelect', () => {
     });
     renderComponent({
       pluginType: 'Variable',
-      value: 'ErnieVariable',
+      value: 'ErnieVariable1',
       onChange,
     });
 
