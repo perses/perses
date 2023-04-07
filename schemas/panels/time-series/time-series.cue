@@ -39,7 +39,7 @@ import (
 	show?:  bool
 	label?: string
 	unit?:  common.#unit
-	min?:   number
+	min?:   number | "ScaleToData"
 	max?:   number
 }
 

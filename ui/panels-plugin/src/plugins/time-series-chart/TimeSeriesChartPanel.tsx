@@ -88,7 +88,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // convert Perses dashboard format to be ECharts compatible
   const yAxis = {
     show: y_axis?.show ?? DEFAULT_Y_AXIS.show,
-    min: y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
+    // dataMin sets minimum axis label relative to data instead of zero
+    min: y_axis?.min === 'ScaleToData' ? 'dataMin' : y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
     max: y_axis?.max,
   };
 

@@ -33,9 +33,11 @@ export interface YAxisOptions {
   show?: boolean;
   label?: string;
   unit?: UnitOptions;
-  min?: number;
+  min?: YAxisMin;
   max?: number;
 }
+
+export type YAxisMin = number | 'ScaleToData';
 
 export interface PaletteOptions {
   kind: 'Auto' | 'Categorical';
