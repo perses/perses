@@ -174,6 +174,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           formattedSeriesName,
           seriesCount,
           echartsPalette as string[],
+          echartsPalette[0],
           visual.palette?.kind
         );
         seriesCount++; // used for repeating colors in Categorical palette

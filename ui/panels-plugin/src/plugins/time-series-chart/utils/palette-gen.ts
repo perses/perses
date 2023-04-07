@@ -33,6 +33,7 @@ export function getSeriesColor(
   name: string,
   seriesCount: number,
   palette: string[],
+  fallbackColor: string,
   paletteKind: PaletteOptions['kind'] = 'Auto'
 ): string {
   if (paletteKind === 'Categorical' && Array.isArray(palette)) {
@@ -45,22 +46,20 @@ export function getSeriesColor(
   }
 
   // corresponds to 'Auto' in palette.kind
-  // return getRandomColor(name);
   const generatedColor = stringToColor.next(name);
-  return generatedColor;
+  return generatedColor ?? fallbackColor;
+}
+
+interface StringToColorInstance {
+  stringToColorHash: Record<string, string | undefined>;
+  nextVeryDifferentColorIdx: number;
+  veryDifferentColors: string[];
 }
 
 /*
  * Color conversion from string using palette for contrast
  * https://stackoverflow.com/a/31037383/17575201
  */
-
-interface StringToColorInstance {
-  stringToColorHash: Record<string, string>;
-  nextVeryDifferentColorIdx: number;
-  veryDifferentColors: string[];
-}
-
 export const stringToColor = (() => {
   const instance: StringToColorInstance = {
     stringToColorHash: {},
@@ -136,7 +135,7 @@ export const stringToColor = (() => {
   return {
     next: (str: string) => {
       if (!instance.stringToColorHash[str]) {
-        instance.stringToColorHash[str] = instance.veryDifferentColors[instance.nextVeryDifferentColorIdx++] ?? '#000';
+        instance.stringToColorHash[str] = instance.veryDifferentColors[instance.nextVeryDifferentColorIdx++];
       }
       return instance.stringToColorHash[str];
     },

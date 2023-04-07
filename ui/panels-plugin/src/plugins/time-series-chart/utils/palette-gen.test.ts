@@ -14,23 +14,49 @@
 import { getSeriesColor } from './palette-gen';
 
 describe('getSeriesColor', () => {
+  const fallbackColor = '#ff0000';
+
   it('should return Auto generated color', () => {
-    const value = getSeriesColor('p90 test api subdomain', 2, ['#fff', '000', '#111', '#222', '#333'], 'Auto');
+    const value = getSeriesColor(
+      'p90 test api subdomain',
+      2,
+      ['#fff', '000', '#111', '#222', '#333'],
+      '#ff0000',
+      'Auto'
+    );
     expect(value).toEqual('hsla(1008901844,50%,50%,0.8)');
   });
 
   it('should return 1st color in Categorical palette', () => {
-    const value = getSeriesColor('p90 test api subdomain', 0, ['#fff', '000', '#111', '#222', '#333'], 'Categorical');
+    const value = getSeriesColor(
+      'p90 test api subdomain',
+      0,
+      ['#fff', '000', '#111', '#222', '#333'],
+      fallbackColor,
+      'Categorical'
+    );
     expect(value).toEqual('#fff');
   });
 
   it('should return 3rd color in Categorical palette', () => {
-    const value = getSeriesColor('p90 test api subdomain', 2, ['#fff', '000', '#111', '#222', '#333'], 'Categorical');
+    const value = getSeriesColor(
+      'p90 test api subdomain',
+      2,
+      ['#fff', '000', '#111', '#222', '#333'],
+      fallbackColor,
+      'Categorical'
+    );
     expect(value).toEqual('#111');
   });
 
   it('should return repeated 1st color in Categorical palette', () => {
-    const value = getSeriesColor('p90 test api subdomain', 5, ['#fff', '000', '#111', '#222', '#333'], 'Categorical');
+    const value = getSeriesColor(
+      'p90 test api subdomain',
+      5,
+      ['#fff', '000', '#111', '#222', '#333'],
+      fallbackColor,
+      'Categorical'
+    );
     expect(value).toEqual('#fff');
   });
 });
