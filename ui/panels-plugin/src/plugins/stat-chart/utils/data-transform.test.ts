@@ -15,28 +15,46 @@ import { testChartsTheme } from '@perses-dev/components';
 import { ThresholdOptions } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts';
 import { SparklineOptions } from '../stat-chart-model';
-import { convertSparkline } from './data-transform';
+import { convertSparkline, getColorFromThresholds } from './data-transform';
+
+const thresholds: ThresholdOptions = {
+  steps: [
+    {
+      color: 'yellow',
+      value: 10,
+    },
+    {
+      color: 'orange',
+      value: 20,
+    },
+    {
+      color: 'red',
+      value: 30,
+    },
+  ],
+};
+
+describe('getColorFromThresholds', () => {
+  it('should return default color if defined', () => {
+    const defaultColor = 'pink';
+    const value = getColorFromThresholds(testChartsTheme, thresholds, 5, defaultColor);
+    expect(value).toEqual(defaultColor);
+  });
+
+  it('should return charts theme default threshold color if default color is undefined', () => {
+    const value = getColorFromThresholds(testChartsTheme, thresholds, 5);
+    expect(value).toEqual(testChartsTheme.thresholds.defaultColor);
+  });
+
+  it('should return orange if value meets the threshold', () => {
+    const value = getColorFromThresholds(testChartsTheme, thresholds, 25);
+    expect(value).toEqual('orange');
+  });
+});
 
 describe('convertSparkline', () => {
   const sparkline: SparklineOptions = {
     color: 'purple',
-  };
-
-  const thresholds: ThresholdOptions = {
-    steps: [
-      {
-        color: 'yellow',
-        value: 10,
-      },
-      {
-        color: 'orange',
-        value: 20,
-      },
-      {
-        color: 'red',
-        value: 30,
-      },
-    ],
   };
 
   it('should render charts theme default threshold color if sparkline.color is undefined', () => {
