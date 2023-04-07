@@ -16,7 +16,7 @@ import { PaletteOptions } from '../time-series-chart-model';
 /**
  * Helper function to generate a random color for a chart series based on its name
  */
-export function getRandomColor(identifier: string): string {
+export function generateColorFromString(identifier: string): string {
   let hash = 0;
   for (let index = 0; index < identifier.length; index++) {
     hash = identifier.charCodeAt(index) + ((hash << 5) - hash);
@@ -56,12 +56,13 @@ export function getSeriesColor(
  * Contrast colors started from: https://stackoverflow.com/a/12224359/17575201
  */
 export const getSeriesNameColor = (() => {
-  const stringToColorHash: Record<string, string | undefined> = {};
+  const stringToColorHash: Record<string, string> = {};
   return (inputString: string) => {
     // check whether color has already been generated for a given series name
     if (!stringToColorHash[inputString]) {
+      // deterministic shuffle of series name so generated color is distinct
       const adjustedSeriesName = modifyString(inputString);
-      stringToColorHash[inputString] = getRandomColor(adjustedSeriesName);
+      stringToColorHash[inputString] = generateColorFromString(adjustedSeriesName);
     }
     return stringToColorHash[inputString];
   };
