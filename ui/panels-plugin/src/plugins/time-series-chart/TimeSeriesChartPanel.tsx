@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
-import type { GridComponentOption } from 'echarts';
+import type { GridComponentOption, YAXisComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   DEFAULT_LEGEND,
@@ -86,12 +86,23 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
 
   // convert Perses dashboard format to be ECharts compatible
-  const yAxis = {
+  const yAxis: YAXisComponentOption = {
     show: y_axis?.show ?? DEFAULT_Y_AXIS.show,
-    // dataMin sets minimum axis label relative to data instead of zero
-    min: y_axis?.min === 'ScaleToData' ? 'dataMin' : y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
+    min: y_axis?.min,
     max: y_axis?.max,
   };
+
+  if (yAxis.min === undefined) {
+    // sets minimum axis label relative to data instead of zero
+    yAxis.min = (value) => {
+      // https://echarts.apache.org/en/option.html#yAxis.min
+      if (value.min <= 1) {
+        return 0;
+      }
+      // allows for padding between origin and first series
+      return value.min * 0.8;
+    };
+  }
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
@@ -208,7 +219,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           color: thresholdLineColor,
           value:
             thresholds.mode === 'Percent'
-              ? convertPercentThreshold(step.value, graphData.timeSeries, yAxis.max, yAxis.min)
+              ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
               : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
