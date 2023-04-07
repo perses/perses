@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import stc from 'string-to-color';
 import { PaletteOptions } from '../time-series-chart-model';
 
 /**
@@ -45,5 +46,5 @@ export function getSeriesColor(
   }
 
   // corresponds to 'Auto' in palette.kind
-  return getRandomColor(name);
+  return stc(name);
 }

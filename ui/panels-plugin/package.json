@@ -37,7 +37,8 @@
     "echarts": "^5.4.1",
     "immer": "^9.0.15",
     "lodash-es": "^4.17.21",
-    "marked": "^4.2.12"
+    "marked": "^4.2.12",
+    "string-to-color": "^2.2.2"
   },
   "peerDependencies": {
     "@mui/material": "^5.10.0",
