@@ -104,7 +104,7 @@ function ListVariable({ name }: TemplateVariableProps) {
         <Select
           sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
-          label={name}
+          label={title}
           value={selectValue}
           onChange={(e) => {
             // Must be selected
