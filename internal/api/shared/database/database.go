@@ -33,10 +33,10 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 	} else if conf.SQL != nil {
 		c := conf.SQL
 		mysqlConfig := mysql.Config{
-			User:                     c.User,
-			Passwd:                   c.Password,
+			User:                     string(c.User),
+			Passwd:                   string(c.Password),
 			Net:                      c.Net,
-			Addr:                     c.Addr,
+			Addr:                     string(c.Addr),
 			DBName:                   c.DBName,
 			Collation:                c.Collation,
 			Loc:                      c.Loc,
