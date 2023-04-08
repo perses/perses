@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import numbro from 'numbro';
+
 import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 
@@ -27,6 +29,7 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   abbreviate: true,
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
+  // Using units that are powers of 1000. In other words, 1KB = 1000 bytes.
   Bytes: {
     group: 'Bytes',
     label: 'Bytes',
@@ -34,41 +37,38 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
 };
 
 /**
- * Format value as bytes, use abbreviate option for more readable sizes (KB, MB, GB, etc.)
- * https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript/18650828#18650828
+ * Format value as bytes. Use abbreviate option for more readable numbers (KB, MB, GB, etc.).
  */
-export function formatBytes(bytes: number, unitOptions: BytesUnitOptions) {
+export function formatBytes(bytes: number, { abbreviate, decimal_places }: BytesUnitOptions) {
   if (bytes === 0) return '0 bytes';
 
-  // default to full 'Bytes' formatting
-  const options = unitOptions.abbreviate === undefined ? { ...unitOptions, abbreviate: false } : unitOptions;
-
-  let decimalPlaces = options.decimal_places ?? DEFAULT_DECIMAL_PLACES;
-  // avoids minimumFractionDigits value is out of range error, possible values are 0 to 20
+  decimal_places = decimal_places ?? DEFAULT_DECIMAL_PLACES;
+  // avoids maximumFractionDigits value is out of range error, possible values are 0 to 20
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
-  if (decimalPlaces < 0) {
-    decimalPlaces = 0;
-  } else if (decimalPlaces > 20) {
-    decimalPlaces = 20;
+  if (decimal_places < 0) {
+    decimal_places = 0;
+  } else if (decimal_places > 20) {
+    decimal_places = 20;
   }
 
-  const formatParams: Intl.NumberFormatOptions = {
-    style: 'decimal',
-    maximumFractionDigits: decimalPlaces,
-    useGrouping: true,
-  };
-  const formatter = new Intl.NumberFormat('en-US', formatParams);
+  const showFullNumber = abbreviate == false || bytes < 1000;
 
-  if (options.abbreviate === false) {
-    return `${formatter.format(bytes)} bytes`;
+  if (showFullNumber) {
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'unit',
+      unit: 'byte',
+      unitDisplay: 'long',
+      maximumFractionDigits: decimal_places,
+      useGrouping: true,
+    });
+    return formatter.format(bytes);
   }
 
-  const k = 1024;
-  const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-  // Math.max(0, ...) ensures that we don't return -1 as a value for the index.
-  // Why? When the number of bytes are between -1 and 1, Math.floor(Math.log(bytes)/Math.log(1024)) returns -1.
-  const i = Math.max(0, Math.floor(Math.log(bytes) / Math.log(k)));
-  const abbreviatedValue = bytes / Math.pow(k, i);
-  return `${formatter.format(abbreviatedValue)} ${sizes[i]}`;
+  return numbro(bytes).format({
+    output: 'byte',
+    base: 'decimal',
+    mantissa: decimal_places,
+    trimMantissa: true,
+    optionalMantissa: true,
+  });
 }
