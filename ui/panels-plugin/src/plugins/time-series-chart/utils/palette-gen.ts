@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import ColorHash from 'color-hash';
 import { PaletteOptions } from '../time-series-chart-model';
 
 /**
@@ -56,13 +57,13 @@ export function getSeriesColor(
  * Contrast colors started from: https://stackoverflow.com/a/12224359/17575201
  */
 export const getSeriesNameColor = (() => {
+  const colorHash = new ColorHash();
   const stringToColorHash: Record<string, string> = {};
   return (inputString: string) => {
     // check whether color has already been generated for a given series name
     if (!stringToColorHash[inputString]) {
-      // deterministic shuffle of series name so generated color is distinct
-      const adjustedSeriesName = modifyString(inputString);
-      stringToColorHash[inputString] = generateColorFromString(adjustedSeriesName);
+      const hslColor = colorHash.hsl(inputString);
+      stringToColorHash[inputString] = `hsla(${hslColor[0]},50%,50%,0.8)`;
     }
     return stringToColorHash[inputString];
   };
