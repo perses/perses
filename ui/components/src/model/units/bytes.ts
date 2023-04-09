@@ -29,21 +29,19 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   abbreviate: true,
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
-  // Using units that are powers of 1000. In other words, 1KB = 1000 bytes.
+  // This uses units that are powers of 1000.
+  // In other words, 1KB = 1000 bytes.
   Bytes: {
     group: 'Bytes',
     label: 'Bytes',
   },
 };
 
-/**
- * Format value as bytes. Use abbreviate option for more readable numbers (KB, MB, GB, etc.).
- */
 export function formatBytes(bytes: number, { abbreviate, decimal_places }: BytesUnitOptions) {
   if (bytes === 0) return '0 bytes';
 
   decimal_places = decimal_places ?? DEFAULT_DECIMAL_PLACES;
-  // avoids maximumFractionDigits value is out of range error, possible values are 0 to 20
+  // Avoids maximumFractionDigits value is out of range error. Possible values are 0 to 20.
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
   if (decimal_places < 0) {
     decimal_places = 0;
