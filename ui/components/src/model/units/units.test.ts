@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { formatValue, UnitOptions } from './units';
+import { bytesTests } from './bytes.test';
 
-interface UnitTestCase {
+export interface UnitTestCase {
   value: number;
   unit: UnitOptions;
   expected: string;
@@ -139,189 +140,6 @@ describe('formatValue', () => {
       unit: { kind: 'PercentDecimal' },
       expected: '10.00%',
     },
-    // Bytes
-    { value: 0, unit: { kind: 'Bytes' }, expected: '0 bytes' },
-    { value: 1, unit: { kind: 'Bytes' }, expected: '1 byte' },
-    {
-      value: 10,
-      unit: { kind: 'Bytes' },
-      expected: '10 bytes',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Bytes', abbreviate: false },
-      expected: '10 bytes',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 2 },
-      expected: '10 bytes',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Bytes', abbreviate: true },
-      expected: '10 bytes',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 2 },
-      expected: '10 bytes',
-    },
-    {
-      value: 10.12345,
-      unit: { kind: 'Bytes' },
-      expected: '10.12 bytes',
-    },
-    {
-      value: 10.12345,
-      unit: { kind: 'Bytes', abbreviate: false },
-      expected: '10.12 bytes',
-    },
-    {
-      value: 10.12345,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 2 },
-      expected: '10.12 bytes',
-    },
-    {
-      value: 10.12345,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 4 },
-      expected: '10.1235 bytes',
-    },
-    {
-      value: 10.12345,
-      unit: { kind: 'Bytes', abbreviate: true },
-      expected: '10.12 bytes',
-    },
-    {
-      value: 10.12345,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 2 },
-      expected: '10.12 bytes',
-    },
-    {
-      value: 10.12345,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
-      expected: '10.1235 bytes',
-    },
-    {
-      value: 1000,
-      unit: { kind: 'Bytes' },
-      expected: '1KB',
-    },
-    {
-      value: 1000,
-      unit: { kind: 'Bytes', abbreviate: false },
-      expected: '1,000 bytes',
-    },
-    {
-      value: 1000,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 2 },
-      expected: '1,000 bytes',
-    },
-    {
-      value: 1000,
-      unit: { kind: 'Bytes', abbreviate: true },
-      expected: '1KB',
-    },
-    {
-      value: 1000,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 2 },
-      expected: '1KB',
-    },
-    {
-      value: 1000.12345,
-      unit: { kind: 'Bytes' },
-      expected: '1KB',
-    },
-    {
-      value: 1000.12345,
-      unit: { kind: 'Bytes', abbreviate: false },
-      expected: '1,000.12 bytes',
-    },
-    {
-      value: 1000.12345,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 2 },
-      expected: '1,000.12 bytes',
-    },
-    {
-      value: 1000.12345,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 4 },
-      expected: '1,000.1235 bytes',
-    },
-    {
-      value: 1000.12345,
-      unit: { kind: 'Bytes', abbreviate: true },
-      expected: '1KB',
-    },
-    {
-      value: 1000.12345,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 2 },
-      expected: '1KB',
-    },
-    {
-      value: 1000.12345,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
-      expected: '1.0001KB',
-    },
-    {
-      value: 100000,
-      unit: { kind: 'Bytes' },
-      expected: '100KB',
-    },
-    {
-      value: 100000,
-      unit: { kind: 'Bytes', abbreviate: false },
-      expected: '100,000 bytes',
-    },
-    {
-      value: 100000,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 2 },
-      expected: '100,000 bytes',
-    },
-    {
-      value: 100000,
-      unit: { kind: 'Bytes', abbreviate: true },
-      expected: '100KB',
-    },
-    {
-      value: 100000,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 2 },
-      expected: '100KB',
-    },
-    {
-      value: 100000.12345,
-      unit: { kind: 'Bytes' },
-      expected: '100KB',
-    },
-    {
-      value: 100000.12345,
-      unit: { kind: 'Bytes', abbreviate: false },
-      expected: '100,000.12 bytes',
-    },
-    {
-      value: 100000.12345,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 2 },
-      expected: '100,000.12 bytes',
-    },
-    {
-      value: 100000.12345,
-      unit: { kind: 'Bytes', abbreviate: false, decimal_places: 4 },
-      expected: '100,000.1235 bytes',
-    },
-    {
-      value: 100000.12345,
-      unit: { kind: 'Bytes', abbreviate: true },
-      expected: '100KB',
-    },
-    {
-      value: 100000.12345,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 2 },
-      expected: '100KB',
-    },
-    {
-      value: 100000.12345,
-      unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
-      expected: '100.0001KB',
-    },
     // Time
     {
       value: 8000,
@@ -364,7 +182,7 @@ describe('formatValue', () => {
       expected: '300 years',
     },
   ];
-  it.each(tests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
+  it.each([...tests, ...bytesTests])('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
     const { value, unit, expected } = args;
     expect(formatValue(value, unit)).toEqual(expected);
   });

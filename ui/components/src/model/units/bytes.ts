@@ -67,6 +67,7 @@ export function formatBytes(bytes: number, { abbreviate, decimal_places }: Bytes
   return numbro(bytes).format({
     output: 'byte',
     base: 'decimal',
+    spaceSeparated: true,
     mantissa: decimal_places,
     trimMantissa: true,
     optionalMantissa: true,
