@@ -39,7 +39,21 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       left: 20,
       containLabel: true,
     },
-    color: ['#8dd3c7', '#fb8072', '#80b1d3', '#bebada', '#fdb462'],
+    // Accessible categorical palette from: https://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12
+    color: [
+      '#a6cee3',
+      '#1f78b4',
+      '#b2df8a',
+      '#33a02c',
+      '#fb9a99',
+      '#e31a1c',
+      '#fdbf6f',
+      '#ff7f00',
+      '#cab2d6',
+      '#6a3d9a',
+      '#ffff99',
+      '#b15928',
+    ],
     categoryAxis: {
       show: true,
       axisLabel: {
