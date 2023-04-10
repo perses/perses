@@ -34,8 +34,8 @@ export const OptionsEditorControl = ({ label, control, description }: OptionsEdi
   return (
     <FormControl>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <FormLabel htmlFor={controlId}>
-          {label}
+        <Stack direction="row" alignItems="center" justifyContent="center">
+          <FormLabel htmlFor={controlId}>{label}</FormLabel>
           {description && (
             <InfoTooltip description={description} enterDelay={100}>
               <IconButton
@@ -51,7 +51,7 @@ export const OptionsEditorControl = ({ label, control, description }: OptionsEdi
               </IconButton>
             </InfoTooltip>
           )}
-        </FormLabel>
+        </Stack>
         <Box sx={{ width: '150px', textAlign: 'right' }}> {React.cloneElement(control, controlProps)}</Box>
       </Stack>
     </FormControl>

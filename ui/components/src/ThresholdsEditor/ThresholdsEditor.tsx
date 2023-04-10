@@ -19,6 +19,7 @@ import { Stack } from '@mui/system';
 import { ThresholdOptions } from '@perses-dev/core';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
+import { InfoTooltip } from '../InfoTooltip';
 import { ThresholdColorPicker } from './ThresholdColorPicker';
 import { ThresholdInput } from './ThresholdInput';
 
@@ -119,10 +120,16 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
 
   const addThresholdInput = (): void => {
     focusRef.current = true;
-    if (thresholds?.steps === undefined) {
+    if (thresholds === undefined) {
       onChange({
         steps: [{ value: DEFAULT_STEP }],
       });
+    } else if (thresholds && thresholds.steps === undefined) {
+      onChange(
+        produce(thresholds, (draft) => {
+          draft.steps = [{ value: DEFAULT_STEP }];
+        })
+      );
     } else {
       onChange(
         produce(thresholds, (draft) => {
@@ -156,9 +163,11 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
     <OptionsEditorGroup
       title="Thresholds"
       icon={
-        <IconButton size="small" aria-label="add threshold" onClick={addThresholdInput}>
-          <PlusIcon />
-        </IconButton>
+        <InfoTooltip description={'Add threshold'}>
+          <IconButton size="small" aria-label="add threshold" onClick={addThresholdInput}>
+            <PlusIcon />
+          </IconButton>
+        </InfoTooltip>
       }
     >
       <OptionsEditorControl
