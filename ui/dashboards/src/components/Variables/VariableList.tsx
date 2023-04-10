@@ -17,7 +17,7 @@ import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { VariableDefinition } from '@perses-dev/core';
 import { useTemplateVariableDefinitions } from '../../context';
-import { TemplateVariable } from './Variable';
+import { TemplateVariable } from './TemplateVariable';
 
 const VARIABLE_INPUT_MIN_WIDTH = '120px';
 const VARIABLE_INPUT_MAX_WIDTH = '240px';
