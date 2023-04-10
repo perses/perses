@@ -13,7 +13,7 @@
 
 import { formatValue, UnitOptions } from './units';
 
-interface UnitTestCase {
+export interface UnitTestCase {
   value: number;
   unit: UnitOptions;
   expected: string;
@@ -21,6 +21,7 @@ interface UnitTestCase {
 
 describe('formatValue', () => {
   const tests: UnitTestCase[] = [
+    // Decimal
     {
       value: 10,
       unit: { kind: 'Decimal' },
@@ -122,6 +123,7 @@ describe('formatValue', () => {
       unit: { kind: 'Decimal', decimal_places: 2, abbreviate: true },
       expected: '0',
     },
+    // Percent
     {
       value: 10,
       unit: { kind: 'Percent' },
@@ -137,26 +139,7 @@ describe('formatValue', () => {
       unit: { kind: 'PercentDecimal' },
       expected: '10.00%',
     },
-    {
-      value: 100,
-      unit: { kind: 'Bytes', decimal_places: 0, abbreviate: false },
-      expected: '100 bytes',
-    },
-    {
-      value: 100,
-      unit: { kind: 'Bytes', decimal_places: -1, abbreviate: false },
-      expected: '100 bytes',
-    },
-    {
-      value: 225000,
-      unit: { kind: 'Bytes', decimal_places: 0, abbreviate: true },
-      expected: '220 KB',
-    },
-    {
-      value: 505200,
-      unit: { kind: 'Bytes' },
-      expected: '505,200 bytes',
-    },
+    // Time
     {
       value: 8000,
       unit: { kind: 'Milliseconds' },
