@@ -34,9 +34,15 @@ export function getCategoricalPaletteColor(palette: string[], paletteIndex: numb
 }
 
 // Valid hue values are 0 to 360 and can be adjusted to control the generated colors.
-// Picked min of 80 and max of 340 to exclude common threshold colors (orange / reddish).
-// See: https://github.com/zenozeng/color-hash#custom-hue
-const colorHash = new ColorHash({ hue: { min: 80, max: 340 } });
+// More info: https://github.com/zenozeng/color-hash#custom-hue
+// Picked min of 30 and max of 350 to exclude common threshold colors (reddish).
+// Series names with "error" in them will always be generated as red.
+const ERROR_HUE_CUTOFF = 30;
+const colorGenerator = new ColorHash({ hue: { min: ERROR_HUE_CUTOFF, max: 350 } });
+const redColorGenerator = new ColorHash({ hue: { min: 0, max: ERROR_HUE_CUTOFF } });
+
+// To check whether a color has already been generated for a given string.
+// TODO: Predefined color aliases will be defined here
 const seriesNameToColorLookup: Record<string, string> = {};
 
 /*
@@ -47,7 +53,10 @@ export const getConsistentSeriesNameColor = (() => {
     // Check whether color has already been generated for a given series name.
     // Ensures colors are consistent across panels
     if (!seriesNameToColorLookup[inputString]) {
-      const [hue, saturation, lightness] = colorHash.hsl(inputString);
+      const seriesNameContainsError = inputString.toLowerCase().includes('error');
+      const [hue, saturation, lightness] = seriesNameContainsError
+        ? redColorGenerator.hsl(inputString)
+        : colorGenerator.hsl(inputString);
       const saturationPercent = `${(saturation * 100).toFixed(0)}%`;
       const lightnessPercent = `${(lightness * 100).toFixed(0)}%`;
       const colorString = `hsla(${hue},${saturationPercent},${lightnessPercent},0.8)`;
