@@ -93,6 +93,42 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
           },
         },
       },
+      TimeSeriesGeneratedColors: {
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Generated Colors',
+          },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+              y_axis: {
+                unit: {
+                  kind: 'PercentDecimal',
+                  decimal_places: 0,
+                },
+              },
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        query:
+                          'avg without (cpu)(rate(node_cpu_seconds_total{job="$job",instance=~"$instance"}[$interval]))',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
     },
     layouts: [
       {
@@ -108,10 +144,19 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             {
               x: 0,
               y: 0,
-              width: 10,
+              width: 12,
               height: 8,
               content: {
                 $ref: '#/spec/panels/TimeSeries',
+              },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 10,
+              height: 8,
+              content: {
+                $ref: '#/spec/panels/TimeSeriesGeneratedColors',
               },
             },
           ],
@@ -119,6 +164,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
       },
     ],
     variables: [
+      { kind: 'TextVariable', spec: { name: 'job', value: 'node' } },
       {
         kind: 'ListVariable',
         spec: {
@@ -135,6 +181,19 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             spec: {
               label_name: 'instance',
             },
+          },
+        },
+      },
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'interval',
+          default_value: '5m',
+          allow_all_value: false,
+          allow_multiple: false,
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: { values: ['1m', '5m'] },
           },
         },
       },
