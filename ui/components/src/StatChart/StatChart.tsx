@@ -40,10 +40,12 @@ export interface StatChartProps {
   unit: UnitOptions;
   color?: string;
   sparkline?: LineSeriesOption;
+  textAlignment?: 'auto' | 'center';
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, color, sparkline } = props;
+  const { width, height, data, unit, color, sparkline, textAlignment = 'auto' } = props;
+  const isTextCentered = textAlignment === 'center';
   const chartsTheme = useChartsTheme();
 
   const formattedValue = data.calculatedValue === undefined ? '' : formatValue(data.calculatedValue, unit);
@@ -104,24 +106,42 @@ export function StatChart(props: StatChartProps) {
 
   const containerPadding = `${chartsTheme.container.padding.default}px`;
 
+  const textStyles = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: textAlignment,
+    alignItems: textAlignment,
+  };
+
   return (
-    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography
-        variant="h3"
-        sx={(theme) => ({
-          color: color ?? theme.palette.text.primary,
-          fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
-          padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
-        })}
-      >
-        {formattedValue}
-      </Typography>
+    <Box sx={{ height: '100%', width: '100%', ...textStyles }}>
+      <Box sx={{ flexGrow: 1, ...textStyles }}>
+        <Typography
+          variant="h3"
+          sx={(theme) => ({
+            color: theme.palette.text.primary,
+            fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
+            padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
+          })}
+        >
+          {formattedValue}
+        </Typography>
+      </Box>
       {sparkline !== undefined && (
-        <Box sx={{ flex: 1 }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            width: '100%',
+            height: '100%',
+          }}
+        >
           <EChart
             sx={{
               width: '100%',
               height: '100%',
+              position: isTextCentered ? 'absolute' : 'relative',
             }}
             option={option}
             theme={chartsTheme.echartsTheme}

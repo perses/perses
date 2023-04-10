@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Switch, SwitchProps } from '@mui/material';
+import { Switch, SwitchProps, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { CalculationSelector, CalculationSelectorProps, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import {
   UnitSelector,
@@ -64,6 +64,14 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
+  const handleTextAlignment = (event: React.MouseEvent, alignment: StatChartOptions['textAlignment']) => {
+    onChange(
+      produce(value, (draft: StatChartOptions) => {
+        draft.textAlignment = alignment === 'center' ? 'center' : undefined;
+      })
+    );
+  };
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -74,6 +82,26 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           />
           <UnitSelector value={value.unit} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+        </OptionsEditorGroup>
+        <OptionsEditorGroup title="Text">
+          <OptionsEditorControl
+            label="Alignment"
+            control={
+              <ToggleButtonGroup
+                exclusive
+                value={value.textAlignment ?? 'auto'}
+                onChange={handleTextAlignment}
+                sx={{ height: '36px', marginLeft: 'auto' }}
+              >
+                <ToggleButton aria-label="absolute" value="auto" sx={{ fontWeight: 500 }}>
+                  Auto
+                </ToggleButton>
+                <ToggleButton aria-label="percent" value="center" sx={{ fontWeight: 500 }}>
+                  Center
+                </ToggleButton>
+              </ToggleButtonGroup>
+            }
+          />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

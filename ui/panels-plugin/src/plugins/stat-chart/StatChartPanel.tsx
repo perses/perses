@@ -24,7 +24,7 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    spec: { query, calculation, unit, sparkline, thresholds },
+    spec: { query, calculation, unit, sparkline, thresholds, textAlignment },
     contentDimensions,
   } = props;
   const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
@@ -56,6 +56,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       unit={unit}
       color={getColorFromThresholds(chartsTheme, thresholds, chartData.calculatedValue)}
       sparkline={convertSparkline(chartsTheme, sparkline, thresholds, chartData.calculatedValue)}
+      textAlignment={textAlignment}
     />
   );
 }
