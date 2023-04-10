@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { formatValue, UnitOptions } from './units';
-import { bytesTests } from './bytes.test';
 
 export interface UnitTestCase {
   value: number;
@@ -182,7 +181,7 @@ describe('formatValue', () => {
       expected: '300 years',
     },
   ];
-  it.each([...tests, ...bytesTests])('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
+  it.each(tests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
     const { value, unit, expected } = args;
     expect(formatValue(value, unit)).toEqual(expected);
   });

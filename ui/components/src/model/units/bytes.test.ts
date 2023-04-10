@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { formatValue } from './units';
 import { UnitTestCase } from './units.test';
 
-export const bytesTests: UnitTestCase[] = [
+const bytesTests: UnitTestCase[] = [
   { value: 0, unit: { kind: 'Bytes' }, expected: '0 bytes' },
   { value: 1, unit: { kind: 'Bytes' }, expected: '1 byte' },
   {
@@ -242,3 +243,10 @@ export const bytesTests: UnitTestCase[] = [
     expected: '1.2346 GB',
   },
 ];
+
+describe('formatValue', () => {
+  it.each(bytesTests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
+    const { value, unit, expected } = args;
+    expect(formatValue(value, unit)).toEqual(expected);
+  });
+});
