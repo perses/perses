@@ -56,8 +56,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
   const echartsPalette = chartsTheme.echartsTheme.color;
-  const fallbackColor =
-    Array.isArray(echartsPalette) && echartsPalette.length > 0 ? echartsPalette[0] : muiTheme.palette.primary;
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -173,12 +171,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
         // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
-        const fallbackColorStr = fallbackColor as string;
+        const fallbackColor =
+          Array.isArray(echartsPalette) && echartsPalette[0]
+            ? (echartsPalette[0] as string)
+            : muiTheme.palette.primary.main;
         // Check which color palette was chosen and get appropriate color.
         const seriesColor =
           visual.palette?.kind === 'Categorical'
-            ? getCategoricalPaletteColor(seriesCount, echartsPalette as string[], fallbackColorStr)
-            : getAutoPaletteColor(formattedSeriesName, fallbackColorStr);
+            ? getCategoricalPaletteColor(echartsPalette as string[], seriesCount, fallbackColor)
+            : getAutoPaletteColor(formattedSeriesName, fallbackColor);
 
         // Used for repeating colors in Categorical palette
         seriesCount++;
