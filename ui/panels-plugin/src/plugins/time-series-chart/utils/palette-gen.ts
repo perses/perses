@@ -59,7 +59,7 @@ export const getConsistentSeriesNameColor = (() => {
         : colorGenerator.hsl(inputString);
       const saturationPercent = `${(saturation * 100).toFixed(0)}%`;
       const lightnessPercent = `${(lightness * 100).toFixed(0)}%`;
-      const colorString = `hsla(${hue},${saturationPercent},${lightnessPercent},0.8)`;
+      const colorString = `hsla(${hue.toFixed(2)},${saturationPercent},${lightnessPercent},0.8)`;
       seriesNameToColorLookup[inputString] = colorString;
     }
     return seriesNameToColorLookup[inputString];

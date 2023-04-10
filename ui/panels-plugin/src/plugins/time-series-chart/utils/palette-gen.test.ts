@@ -37,7 +37,7 @@ describe('getAutoPaletteColor', () => {
 
   it('should Auto palette generated color', () => {
     const generatedColor = getAutoPaletteColor('Incoming Writes per second', fallbackColor);
-    expect(generatedColor).toEqual('hsla(253.45254470426408,65%,65%,0.8)');
+    expect(generatedColor).toEqual('hsla(243.48,65%,65%,0.8)');
   });
 });
 
@@ -45,14 +45,14 @@ describe('getConsistentSeriesNameColor', () => {
   it('should generate a consistent custom hsla color', () => {
     const color = getConsistentSeriesNameColor('test');
     const colorAlt = getConsistentSeriesNameColor('test');
-    expect(color).toEqual('hsla(285.9972489683631,35%,50%,0.8)');
-    expect(colorAlt).toEqual('hsla(285.9972489683631,35%,50%,0.8)');
+    expect(color).toEqual('hsla(283.54,35%,50%,0.8)');
+    expect(colorAlt).toEqual('hsla(283.54,35%,50%,0.8)');
   });
 
   it('should generate a color from the given series name', () => {
     const generatedColor = getConsistentSeriesNameColor(
       'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}'
     );
-    expect(generatedColor).toEqual('hsla(163.32874828060523,50%,35%,0.8)');
+    expect(generatedColor).toEqual('hsla(132.56,50%,35%,0.8)');
   });
 });
