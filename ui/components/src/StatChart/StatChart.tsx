@@ -122,6 +122,7 @@ export function StatChart(props: StatChartProps) {
             color: theme.palette.text.primary,
             fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
             padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
+            zIndex: '1', // set zIndex to 1 so text goes on top of graph
           })}
         >
           {formattedValue}
