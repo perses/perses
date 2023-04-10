@@ -35,15 +35,17 @@ const thresholds: ThresholdOptions = {
 };
 
 describe('getColorFromThresholds', () => {
-  it('should return default color if defined', () => {
-    const defaultColor = 'pink';
-    const value = getColorFromThresholds(testChartsTheme, thresholds, 5, defaultColor);
-    expect(value).toEqual(defaultColor);
-  });
+  describe('if threshold is not met', () => {
+    it('should return thresholds.default_color if defined', () => {
+      const default_color = 'purple';
+      const value = getColorFromThresholds(testChartsTheme, { ...thresholds, default_color }, 5);
+      expect(value).toEqual(default_color);
+    });
 
-  it('should return charts theme default threshold color if default color is undefined', () => {
-    const value = getColorFromThresholds(testChartsTheme, thresholds, 5);
-    expect(value).toEqual(testChartsTheme.thresholds.defaultColor);
+    it('should return charts theme default threshold color if thresholds.default_color is undefined', () => {
+      const value = getColorFromThresholds(testChartsTheme, thresholds, 5);
+      expect(value).toEqual(testChartsTheme.thresholds.defaultColor);
+    });
   });
 
   it('should return orange if value meets the threshold', () => {
@@ -57,17 +59,23 @@ describe('convertSparkline', () => {
     color: 'purple',
   };
 
-  it('should render charts theme default threshold color if sparkline.color is undefined', () => {
+  it('should render charts theme default threshold color', () => {
     testChartsTheme.thresholds.defaultColor = 'green';
     const options = convertSparkline(testChartsTheme, {}, thresholds, 5) as LineSeriesOption;
     expect(options.lineStyle?.color).toEqual('green');
     expect(options.areaStyle?.color).toEqual('green');
   });
 
-  it('should render sparkline.color if threshold is not met ', () => {
-    const options = convertSparkline(testChartsTheme, sparkline, thresholds, 5) as LineSeriesOption;
-    expect(options.lineStyle?.color).toEqual(sparkline.color);
-    expect(options.areaStyle?.color).toEqual(sparkline.color);
+  it('should render threshold default color if threshold is not met ', () => {
+    const default_color = 'purple';
+    const options = convertSparkline(
+      testChartsTheme,
+      sparkline,
+      { ...thresholds, default_color },
+      5
+    ) as LineSeriesOption;
+    expect(options.lineStyle?.color).toEqual(default_color);
+    expect(options.areaStyle?.color).toEqual(default_color);
   });
 
   it('should render orange if value meets the threshold', () => {

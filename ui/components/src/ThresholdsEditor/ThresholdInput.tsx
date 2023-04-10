@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { RefObject, useState } from 'react';
-import { Stack, FormLabel, TextField, IconButton } from '@mui/material';
+import { Stack, FormLabel, TextField, IconButton, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import { ThresholdOptions } from '@perses-dev/core';
 import { ThresholdColorPicker } from './ThresholdColorPicker';
 
 export interface ThresholdInputProps {
@@ -25,6 +26,7 @@ export interface ThresholdInputProps {
   onBlur: () => void;
   onDelete: () => void;
   inputRef?: RefObject<HTMLInputElement | null>;
+  mode?: ThresholdOptions['mode'];
 }
 
 export function ThresholdInput({
@@ -32,6 +34,7 @@ export function ThresholdInput({
   label,
   color,
   value,
+  mode,
   onChange,
   onColorChange,
   onBlur,
@@ -56,6 +59,9 @@ export function ThresholdInput({
             onBlur();
             setKey(key + 1);
           }
+        }}
+        InputProps={{
+          endAdornment: mode === 'Percent' ? <Box paddingX={1}>%</Box> : undefined,
         }}
       />
       <IconButton aria-label={`delete threshold ${label}`} size="small" onClick={onDelete}>

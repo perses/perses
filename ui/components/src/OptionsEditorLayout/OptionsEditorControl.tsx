@@ -11,13 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, FormLabel, FormControlLabelProps, Stack, Box } from '@mui/material';
+import { FormControl, FormLabel, FormControlLabelProps, Stack, Box, IconButton } from '@mui/material';
 import React from 'react';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import { useId } from '../utils';
+import { InfoTooltip } from '../InfoTooltip';
 
-export type OptionsEditorControlProps = Pick<FormControlLabelProps, 'label' | 'control'>;
+export type OptionsEditorControlProps = Pick<FormControlLabelProps, 'label' | 'control'> & {
+  description?: string;
+};
 
-export const OptionsEditorControl = ({ label, control }: OptionsEditorControlProps) => {
+export const OptionsEditorControl = ({ label, control, description }: OptionsEditorControlProps) => {
   // Make sure we have a unique ID we can use for associating labels and
   // controls for a11y.
   const generatedControlId = useId('EditorSectionControl');
@@ -30,7 +34,24 @@ export const OptionsEditorControl = ({ label, control }: OptionsEditorControlPro
   return (
     <FormControl>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <FormLabel htmlFor={controlId}>{label}</FormLabel>
+        <FormLabel htmlFor={controlId}>
+          {label}
+          {description && (
+            <InfoTooltip description={description} enterDelay={100}>
+              <IconButton
+                size="small"
+                sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4x', margin: '0 2px' })}
+              >
+                <InformationOutlineIcon
+                  aria-describedby="info-tooltip"
+                  aria-hidden={false}
+                  fontSize="inherit"
+                  sx={{ color: (theme) => theme.palette.grey[700] }}
+                />
+              </IconButton>
+            </InfoTooltip>
+          )}
+        </FormLabel>
         <Box sx={{ width: '150px', textAlign: 'right' }}> {React.cloneElement(control, controlProps)}</Box>
       </Stack>
     </FormControl>
