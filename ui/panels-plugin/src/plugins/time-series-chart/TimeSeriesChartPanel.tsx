@@ -44,7 +44,7 @@ import {
   EMPTY_GRAPH_DATA,
   convertPercentThreshold,
 } from './utils/data-transform';
-import { getSeriesColor } from './utils/palette-gen';
+import { getAutoPaletteColor, getCategoricalPaletteColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
@@ -172,14 +172,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        const seriesColor = getSeriesColor(
-          formattedSeriesName,
-          seriesCount,
-          echartsPalette as string[],
-          fallbackColor as string,
-          visual.palette?.kind
-        );
-        seriesCount++; // used for repeating colors in Categorical palette
+        // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
+        const fallbackColorStr = fallbackColor as string;
+        // Check which color palette was chosen and get appropriate color.
+        const seriesColor =
+          visual.palette?.kind === 'Categorical'
+            ? getCategoricalPaletteColor(seriesCount, echartsPalette as string[], fallbackColorStr)
+            : getAutoPaletteColor(formattedSeriesName, fallbackColorStr);
+
+        // Used for repeating colors in Categorical palette
+        seriesCount++;
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);

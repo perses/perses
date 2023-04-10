@@ -11,71 +11,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getSeriesColor, modifyString } from './palette-gen';
+import { getAutoPaletteColor, getCategoricalPaletteColor, getConsistentSeriesNameColor } from './palette-gen';
 
-describe('getSeriesColor', () => {
+describe('getCategoricalPaletteColor', () => {
   const fallbackColor = '#ff0000';
 
-  it('should return generated color from series name', () => {
-    const value = getSeriesColor(
-      'p90 test api subdomain',
-      2,
-      ['#fff', '000', '#111', '#222', '#333'],
-      '#ff0000',
-      'Auto'
-    );
-    expect(value).toEqual('hsla(1642107604,50%,50%,0.8)');
-  });
-
-  it('should return an alternate color based on series name', () => {
-    const value = getSeriesColor('test series name', 3, ['#fff', '000', '#111', '#222', '#333'], '#ff0000', 'Auto');
-    expect(value).toEqual('hsla(1569429816,50%,50%,0.8)');
-  });
-
   it('should return 1st color in Categorical palette', () => {
-    const value = getSeriesColor(
-      'p90 test api subdomain',
-      0,
-      ['#fff', '000', '#111', '#222', '#333'],
-      fallbackColor,
-      'Categorical'
-    );
-    expect(value).toEqual('#fff');
+    const paletteColor = getCategoricalPaletteColor(0, ['#fff', '000', '#111', '#222', '#333'], fallbackColor);
+    expect(paletteColor).toEqual('#fff');
   });
 
   it('should return 3rd color in Categorical palette', () => {
-    const value = getSeriesColor(
-      'p90 test api subdomain',
-      2,
-      ['#fff', '000', '#111', '#222', '#333'],
-      fallbackColor,
-      'Categorical'
-    );
-    expect(value).toEqual('#111');
+    const paletteColor = getCategoricalPaletteColor(2, ['#fff', '000', '#111', '#222', '#333'], fallbackColor);
+    expect(paletteColor).toEqual('#111');
   });
 
-  it('should return repeated 1st color in Categorical palette', () => {
-    const value = getSeriesColor(
-      'p90 test api subdomain',
-      5,
-      ['#fff', '000', '#111', '#222', '#333'],
-      fallbackColor,
-      'Categorical'
-    );
-    expect(value).toEqual('#fff');
+  it('should repeat color after looping through entire palette', () => {
+    const paletteColor = getCategoricalPaletteColor(5, ['#fff', '000', '#111', '#222', '#333'], fallbackColor);
+    expect(paletteColor).toEqual('#fff');
   });
 });
 
-describe('modifyString', () => {
-  it('should adjust string characters', () => {
-    const value = modifyString('test');
-    expect(value).toEqual('ttse');
+describe('getAutoPaletteColor', () => {
+  const fallbackColor = '#ff0000';
+
+  it('should Auto palette generated color', () => {
+    const generatedColor = getAutoPaletteColor('Incoming Writes per second', fallbackColor);
+    expect(generatedColor).toEqual('hsla(253.45254470426408,65%,65%,0.8)');
+  });
+});
+
+describe('getConsistentSeriesNameColor', () => {
+  it('should generate a consistent custom hsla color', () => {
+    const color = getConsistentSeriesNameColor('test');
+    const colorAlt = getConsistentSeriesNameColor('test');
+    expect(color).toEqual('hsla(285.9972489683631,35%,50%,0.8)');
+    expect(colorAlt).toEqual('hsla(285.9972489683631,35%,50%,0.8)');
   });
 
-  it('should change order of characters in series name', () => {
-    const value = modifyString(
+  it('should generate a color from the given series name', () => {
+    const generatedColor = getConsistentSeriesNameColor(
       'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}'
     );
-    expect(value).toEqual('ni,{euoonjeuf.dsonsfdetbv.eo_a==ir.mn""ospecnd:_rmeoe9boo=dm1ymr"eo0teyd""0et_e},"shBm');
+    expect(generatedColor).toEqual('hsla(163.32874828060523,50%,35%,0.8)');
   });
 });
