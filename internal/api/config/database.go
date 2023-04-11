@@ -16,6 +16,8 @@ package config
 import (
 	"fmt"
 	"time"
+
+	"github.com/prometheus/common/config"
 )
 
 type FileExtension string
@@ -42,13 +44,13 @@ func (f *File) Verify() error {
 
 type SQL struct {
 	// Username
-	User string `json:"user,omitempty" yaml:"user,omitempty"`
+	User config.Secret `json:"user,omitempty" yaml:"user,omitempty"`
 	// Password (requires User)
-	Password string `json:"password,omitempty" yaml:"password,omitempty"`
+	Password config.Secret `json:"password,omitempty" yaml:"password,omitempty"`
 	// Network type
 	Net string `json:"net,omitempty" yaml:"net,omitempty"`
 	// Network address (requires Net)
-	Addr string `json:"addr,omitempty" yaml:"addr,omitempty"`
+	Addr config.Secret `json:"addr,omitempty" yaml:"addr,omitempty"`
 	// Database name
 	DBName string `json:"db_name" yaml:"db_name"`
 	// Connection collation

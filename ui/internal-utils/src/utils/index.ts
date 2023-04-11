@@ -11,7 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './animationUtils';
-export * from './canvasUtils';
-export * from './formUtils';
-export * from './timeUtils';
+export * from './time-series';

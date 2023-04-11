@@ -12,7 +12,7 @@
 // limitations under the License.
 
 export * from './EditVariablesButton';
-export * from './Variable';
+export * from './TemplateVariable';
 export * from './VariableEditor';
 export * from './VariableEditorForm';
 export * from './VariableList';

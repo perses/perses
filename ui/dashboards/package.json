@@ -44,6 +44,8 @@
     "zustand": "^4.3.3"
   },
   "devDependencies": {
+    "@perses-dev/internal-utils": "0.26.1",
+    "@perses-dev/storybook": "0.26.1",
     "intersection-observer": "^0.12.2"
   },
   "peerDependencies": {

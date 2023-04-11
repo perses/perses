@@ -17,9 +17,9 @@ import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/ma
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
 import { ThresholdOptions } from '@perses-dev/core';
-import { InfoTooltip } from '../InfoTooltip';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { OptionsEditorGroup } from '../OptionsEditorLayout';
+import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
+import { InfoTooltip } from '../InfoTooltip';
 import { ThresholdColorPicker } from './ThresholdColorPicker';
 import { ThresholdInput } from './ThresholdInput';
 
@@ -85,6 +85,10 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
           draft.default_color = color;
         })
       );
+    } else {
+      onChange({
+        default_color: color,
+      });
     }
   };
 
@@ -120,6 +124,12 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
       onChange({
         steps: [{ value: DEFAULT_STEP }],
       });
+    } else if (thresholds && thresholds.steps === undefined) {
+      onChange(
+        produce(thresholds, (draft) => {
+          draft.steps = [{ value: DEFAULT_STEP }];
+        })
+      );
     } else {
       onChange(
         produce(thresholds, (draft) => {
@@ -153,25 +163,33 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
     <OptionsEditorGroup
       title="Thresholds"
       icon={
-        <IconButton size="small" aria-label="add threshold" onClick={addThresholdInput}>
-          <PlusIcon />
-        </IconButton>
+        <InfoTooltip description={'Add threshold'}>
+          <IconButton size="small" aria-label="add threshold" onClick={addThresholdInput}>
+            <PlusIcon />
+          </IconButton>
+        </InfoTooltip>
       }
     >
-      <ToggleButtonGroup
-        exclusive
-        disabled={disablePercentMode}
-        value={thresholds?.mode ?? 'Absolute'}
-        onChange={handleModeChange}
-        sx={{ height: '36px', marginLeft: 'auto' }}
-      >
-        <ToggleButton aria-label="absolute" value="Absolute">
-          <InfoTooltip description="Absolute">#</InfoTooltip>
-        </ToggleButton>
-        <ToggleButton aria-label="percent" value="Percent">
-          <InfoTooltip description="Percentage means thresholds relative to min & max">%</InfoTooltip>
-        </ToggleButton>
-      </ToggleButtonGroup>
+      <OptionsEditorControl
+        label="Mode"
+        description="Percentage means thresholds relative to min & max"
+        control={
+          <ToggleButtonGroup
+            exclusive
+            disabled={disablePercentMode}
+            value={thresholds?.mode ?? 'Absolute'}
+            onChange={handleModeChange}
+            sx={{ height: '36px', marginLeft: 'auto' }}
+          >
+            <ToggleButton aria-label="absolute" value="Absolute" sx={{ fontWeight: 500 }}>
+              Absolute
+            </ToggleButton>
+            <ToggleButton aria-label="percent" value="Percent" sx={{ fontWeight: 500 }}>
+              Percent
+            </ToggleButton>
+          </ToggleButtonGroup>
+        }
+      />
       {steps &&
         steps
           .map((step, i) => (
@@ -181,6 +199,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
               label={`T${i + 1}`}
               color={step.color ?? palette[i] ?? defaultThresholdColor}
               value={step.value}
+              mode={thresholds?.mode}
               onColorChange={(color) => handleThresholdColorChange(color, i)}
               onChange={(e) => {
                 handleThresholdValueChange(e, i);

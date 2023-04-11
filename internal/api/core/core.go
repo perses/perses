@@ -33,7 +33,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	}
 	persesDAO := persistenceManager.GetPersesDAO()
 	if dbInitError := persesDAO.Init(); dbInitError != nil {
-		return nil, nil, fmt.Errorf("unable to initialize the database: %w", err)
+		return nil, nil, fmt.Errorf("unable to initialize the database: %w", dbInitError)
 	}
 	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
 	if err != nil {
