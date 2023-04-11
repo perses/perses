@@ -18,7 +18,7 @@ import { TimeSeriesData } from '@perses-dev/core';
 import { useTimeSeriesQuery, PanelProps, CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
 import { useSuggestedStepMs } from '../../model/time';
 import { StatChartOptions } from './stat-chart-model';
-import { convertSparkline } from './utils/data-transform';
+import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
@@ -54,6 +54,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       height={contentDimensions.height}
       data={chartData}
       unit={unit}
+      color={getColorFromThresholds(chartsTheme, thresholds, chartData.calculatedValue)}
       sparkline={convertSparkline(chartsTheme, sparkline, thresholds, chartData.calculatedValue)}
     />
   );
