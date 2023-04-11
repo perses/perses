@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "TimeSeriesQuery",
+    "spec": {
+      "plugin": {
+        "kind": "CustomGraphQuery",
+        "spec": {
+          "datasource": {
+            "kind": "CustomDatasource",
+            "name": "MyCustomDatasource"
+          },
+          "custom": true,
+          "aaaaaa": "I shouldnt be there"
+        }
+      }
+    }
+  }
+]

@@ -17,17 +17,13 @@ import (
 	"github.com/perses/perses/schemas/datasources/prometheus"
 )
 
-spec: {
-	plugin: {
-		kind: "PrometheusTimeSeriesQuery"
-		spec: close({
-			datasource?: {
-				kind: prometheus.kind
-			}
-			query:               string
-			series_name_format?: string
-			min_step?:           =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-			resolution?:         number
-		})
+kind: "PrometheusTimeSeriesQuery"
+spec: close({
+	datasource?: {
+		kind: prometheus.kind
 	}
-}
+	query:               string
+	series_name_format?: string
+	min_step?:           =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+	resolution?:         number
+})

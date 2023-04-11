@@ -11,16 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package invalid
+package custom
 
-spec: {
-	plugin: {
-		kind:     "RejectedQuery"
-		rejected: true
-		spec: {
-			datasource: {
-				kind: "PrometheusDatasource"
-			}
-		}
+kind: "CustomGraphQuery"
+spec: close({
+	datasource: {
+		kind: "CustomDatasource"
 	}
-}
+	custom: bool
+})

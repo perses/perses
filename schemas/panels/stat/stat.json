@@ -1,20 +1,6 @@
 {
   "kind": "StatChart",
   "spec": {
-    "query": {
-      "kind": "TimeSeriesQuery",
-      "spec": {
-        "plugin": {
-          "kind": "PrometheusTimeSeriesQuery",
-          "spec": {
-            "datasource": {
-              "kind": "PrometheusDatasource"
-            },
-            "query": "count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))"
-          }
-        }
-      }
-    },
     "calculation": "Sum",
     "unit": {
       "kind": "Decimal",

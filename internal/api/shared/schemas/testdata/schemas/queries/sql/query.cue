@@ -11,20 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package first
+package sql
 
-kind: "FirstChart"
+kind: "SQLGraphQuery"
 spec: {
-	queries: [...#ts_query]
-	a: string
-	b: {
-		c: [...#d]
+	datasource: {
+		kind: "SQLDatasource"
 	}
+	select: string
+	from:   string
+	where?: string
 }
-
-#d: {
-	e:  string
-	f?: string
-}
-
-#ts_query: _
