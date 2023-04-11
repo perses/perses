@@ -168,7 +168,7 @@ function formatProviderParameters(dashboardState: DashboardResource) {
         initialVariableDefinitions: dashboardState.spec.variables,
       },
     },
-    WithTimeRange: {
+    withTimeRange: {
       props: {
         dashboardDuration: dashboardState.spec.duration,
       },
@@ -415,9 +415,18 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
 };
 
 const TIMESERIES_EXAMPLE_MOCK_NOW = 1673805600000;
+const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000;
 export const ExampleWithTimeSeriesPanels: Story = {
   parameters: {
     ...formatProviderParameters(TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE),
+    withTimeRange: {
+      props: {
+        initialTimeRange: {
+          start: TIMESERIES_EXAMPLE_MOCK_START,
+          end: TIMESERIES_EXAMPLE_MOCK_NOW,
+        },
+      },
+    },
     msw: {
       handlers: {
         queryRange: mockQueryRangeRequests({
@@ -436,7 +445,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
                       value: '1',
                     },
                   ],
-                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000,
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
                 }),
               },
@@ -445,7 +454,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
               query: 'fake_graphite_query_with_nulls',
               response: {
                 body: mockTimeSeriesResponseWithNullValues({
-                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000,
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
                 }),
               },
