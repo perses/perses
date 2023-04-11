@@ -22,8 +22,8 @@ spec: close({
 
 it should contain:
 
-- a package name.
-- the variable's `kind`.
+- a package name,
+- the variable's `kind`,
 - the variable's `spec` containing any field you want for this query plugin.
 
 ## Panel
@@ -44,8 +44,8 @@ spec: {
 
 it should contain:
 
-- a package name.
-- the panel's `kind`.
+- a package name,
+- the panel's `kind`,
 - the panel's `spec` containing any field you want for this panel plugin.
 
 ## Query
@@ -55,37 +55,34 @@ A query plugin looks like the following:
 ```cue
 package <query type> // e.g package prometheus
 
+kind: "<Query name>" // e.g kind: "PrometheusTimeSeriesQuery"
 spec: {
-	plugin: {
-		kind: "<Query name>" // e.g kind: "PrometheusTimeSeriesQuery"
-		spec: {
-			datasource: {
-				kind: "<Datasource type>" // e.g kind: "PrometheusDatasource"
-			}
-			query:       string
-			min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-			resolution?: number
-		}
-	}
+  datasource: {
+    kind: "<Datasource type>" // e.g kind: "PrometheusDatasource"
+  }
+  query:       string
+  min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+  resolution?: number
 }
 ```
 
 it should contain:
 
 - a package name.
-- under `spec.plugin` :
-  - the query's `kind`.
-  - the query's `spec` containing:
-    - a `datasource` field that holds the `kind` of datasource corresponding to this query type.
-    - any other field you want for this query plugin.
+- the query's `kind`,
+- the query's `spec` containing:
+  - a `datasource` field that holds the `kind` of datasource corresponding to this query type,
+  - any other field you want for this query plugin.
 
 # Migration from Grafana
 
 A Perses plugin can optionally embed a `mig.cuepart`\* file that is basically describing in CUE language how to convert a given Grafana object into an instance of this plugin. In such case your plugin is considered as the Perses equivalent of this Grafana object type, and it will be used as part of the translation process when a Grafana dashboard is received on the `/api/migrate` endpoint.
 
-_\* this is mandatory to have it named that way. We put in place this constraint because it makes sense to have a single file containing the remapping logic, with the benefit of making the backend logic easier (no need to search for the file). It's also easier to check the migration logic of the different plugins, because you know which file to look for._
+_\* this is mandatory to have it named that way. We put in place this constraint because it makes sense to have a single file containing the remapping logic, with the benefit of making the backend logic easier (no need to search for the file). It's also easier to check the migration file of the different plugins, because you know which one to look for._
 
-_\* the .cuepart extension is a homemade one. It is used for CUE files that may contain some placeholders for string replacements, that are not valid CUE syntax._
+_\* the .cuepart extension is a homemade one. It is used for partial CUE files, partial here meaning that they either contain unknown references (the files are part of a larger processing thus are not "standalone"), or contain some placeholders for later string replacements, that are not valid CUE syntax._
+
+_:warning: If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana panel type, be aware that the first one encountered by alphabetical order will take priority._
 
 ## Variable
 
@@ -130,22 +127,14 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
   - `#panel` is a panel object from Grafana. You can access the different fields with like `#panel.field.subfield`. To know the list of fields available, check the Grafana datamodel for this panel (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
   - You most certainly want a check on the `#panel.type` value like shown in above example.
 - Each conditional block contains a list of fields & assignments, meeting the requirements of the considered Perses panel plugin. Use the `#panel.field.subfield` syntax to access the values from the Grafana panel, thus achieve its remapping into Perses.
-- If applies (it most probably does), you have to provide these instructions to allow the migration of your panel's query(ies):
-
-  ```
-  #target: <relevant attribute name>
-  %(conditional_timeseries_queries)
-  ```
-
-  the `%(conditional_timeseries_queries)` placeholder will get replaced by conditionals later in the translation process. `#target` is the standard alias expected for the target object, just like `#panel` is for panels.
 
 ### Utilities
 
-There are some utilities that you can use in your panel plugin:
+There are some utilities that you can use in your plugin migration logic:
 
-- `#mapping.unit`: mapping table for the unit attribute (key = grafana unit, value = perses equivalent)
-- `#mapping.calc`: mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
-- `#defaultCalc`: standard default value for the calculation attribute
+- `#mapping.unit`: mapping table for the `unit` attribute (key = grafana unit, value = perses equivalent).
+- `#mapping.calc`: mapping table for the `calculation` attribute (key = grafana unit, value = perses equivalent).
+- `#defaultCalc`: standard default value for the `calculation` attribute.
 
 ## Query
 
