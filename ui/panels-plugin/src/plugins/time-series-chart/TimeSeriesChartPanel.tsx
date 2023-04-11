@@ -221,7 +221,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, y_axis.max, y_axis.min]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, y_axis?.max, y_axis?.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
