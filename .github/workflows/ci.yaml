@@ -63,7 +63,7 @@ jobs:
         with:
           enable_npm: true
       - name: Install UI deps
-        run: cd ./ui && npm install && ls -al node_modules/.cache
+        run: cd ./ui && npm install && ls -al node_modules
       - name: Build the storybook
         run: cd ./ui && npm run storybook:build
       - name: Generate storybook visual diffs with happo
