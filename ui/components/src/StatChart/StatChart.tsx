@@ -109,7 +109,7 @@ export function StatChart(props: StatChartProps) {
   const textStyles = {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: textAlignment,
+    justifyContent: sparkline ? 'auto' : textAlignment,
     alignItems: textAlignment,
   };
 
@@ -118,12 +118,12 @@ export function StatChart(props: StatChartProps) {
       <Box sx={{ flexGrow: 1, ...textStyles }}>
         <Typography
           variant="h3"
-          sx={(theme) => ({
-            color: theme.palette.text.primary,
+          sx={{
+            color,
             fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
             padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
             zIndex: '1', // set zIndex to 1 so text goes on top of graph
-          })}
+          }}
         >
           {formattedValue}
         </Typography>
