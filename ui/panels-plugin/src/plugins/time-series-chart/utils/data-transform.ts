@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
 import { useTimeSeriesQueries } from '@perses-dev/plugin-system';
@@ -19,7 +20,10 @@ import {
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
+  DEFAULT_Y_AXIS,
+  MIN_VALUE_PADDING_MULTIPLIER,
   VisualOptions,
+  YAxisOptions,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -129,4 +133,29 @@ function findMax(timeSeries: EChartsTimeSeries[]) {
     });
   });
   return max;
+}
+
+/**
+ * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
+ */
+export function convertPanelYAxis(inputAxis: YAxisOptions): YAXisComponentOption {
+  const yAxis: YAXisComponentOption = {
+    show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
+    min: inputAxis?.min,
+    max: inputAxis?.max,
+  };
+
+  if (inputAxis?.min === undefined) {
+    // Sets minimum axis label relative to data instead of zero.
+    yAxis.min = (value) => {
+      // https://echarts.apache.org/en/option.html#yAxis.min
+      if (value.min <= 1) {
+        return 0;
+      }
+      // Allows for padding between origin and first series.
+      // Current value was chosen arbitrarily and will need to be adjusted.
+      return value.min * MIN_VALUE_PADDING_MULTIPLIER;
+    };
+  }
+  return yAxis;
 }

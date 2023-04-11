@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
 import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
-import type { GridComponentOption, YAXisComponentOption } from 'echarts';
+import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   DEFAULT_LEGEND,
@@ -32,7 +32,6 @@ import {
   TimeSeriesChartOptions,
   DEFAULT_UNIT,
   DEFAULT_VISUAL,
-  DEFAULT_Y_AXIS,
   PANEL_HEIGHT_LG_BREAKPOINT,
   LEGEND_HEIGHT_SM,
   LEGEND_HEIGHT_LG,
@@ -43,6 +42,7 @@ import {
   getCommonTimeScaleForQueries,
   EMPTY_GRAPH_DATA,
   convertPercentThreshold,
+  convertPanelYAxis,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 
@@ -86,23 +86,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
 
   // convert Perses dashboard format to be ECharts compatible
-  const yAxis: YAXisComponentOption = {
-    show: y_axis?.show ?? DEFAULT_Y_AXIS.show,
-    min: y_axis?.min,
-    max: y_axis?.max,
-  };
-
-  if (yAxis.min === undefined) {
-    // sets minimum axis label relative to data instead of zero
-    yAxis.min = (value) => {
-      // https://echarts.apache.org/en/option.html#yAxis.min
-      if (value.min <= 1) {
-        return 0;
-      }
-      // allows for padding between origin and first series
-      return value.min * 0.8;
-    };
-  }
+  const yAxis = convertPanelYAxis(y_axis);
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { EChartsTimeSeries } from '@perses-dev/components';
-import { convertPercentThreshold } from './data-transform';
+import { convertPercentThreshold, convertPanelYAxis } from './data-transform';
 
 const MAX_VALUE = 120;
 const MOCK_ECHART_TIME_SERIES_DATA: EChartsTimeSeries[] = [
@@ -38,5 +38,23 @@ describe('convertPercentThreshold', () => {
   it('should return 50% of the max value in time series data if max is undefined', () => {
     const value = convertPercentThreshold(50, MOCK_ECHART_TIME_SERIES_DATA);
     expect(value).toEqual(0.5 * MAX_VALUE);
+  });
+});
+
+describe('convertPanelYAxis', () => {
+  it('should convert a Perses y_axis spec to the ECharts equivalent', () => {
+    const persesAxis = {
+      show: true,
+      label: 'Axis Label',
+      unit: {
+        kind: 'PercentDecimal',
+        decimal_places: 0,
+      },
+      min: 0.1,
+      max: 1,
+    };
+    const echartsAxis = convertPanelYAxis(persesAxis);
+    // Axis label is handled outside of echarts since it is built with a custom React component.
+    expect(echartsAxis).toEqual({ max: 1, min: 0.1, show: true });
   });
 });
