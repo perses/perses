@@ -28,11 +28,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const kindPath = "kind"
+
 //go:embed base_def_query.cue
 var baseQueryDef []byte
-
-//go:embed query_disjunction_generator.cue
-var queryDisjunctionGenerator []byte
 
 var cueValidationOptions = []cue.Option{
 	cue.Concrete(true),
@@ -42,7 +41,7 @@ var cueValidationOptions = []cue.Option{
 }
 
 // retrieveSchemaForKind returns the schema corresponding to the provided kind
-func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, kindPath string, schemasMap *sync.Map) (cue.Value, error) {
+func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, schemasMap *sync.Map) (cue.Value, error) {
 	// retrieve the value of the Kind field
 	kind, err := panelVal.LookupPath(cue.ParsePath(kindPath)).String()
 	if err != nil {
@@ -83,22 +82,16 @@ func New(conf config.Schemas) (Schemas, error) {
 			context:     ctx,
 			schemas:     &sync.Map{},
 			schemasPath: conf.PanelsPath,
-			kindCuePath: "kind",
 		}
 		loaders = append(loaders, panels)
 		s.panels = panels
 	}
 	if len(conf.QueriesPath) != 0 {
-		queries := &cueDefsWithDisjunction{
-			cueDefs: cueDefs{
-				context:     ctx,
-				baseDef:     &baseQueryDefVal,
-				schemas:     &sync.Map{},
-				schemasPath: conf.QueriesPath,
-				kindCuePath: "spec.plugin.kind",
-			},
-			disjSchema: cue.Value{},
-			mapID:      "#query_types",
+		queries := &cueDefs{
+			context:     ctx,
+			baseDef:     &baseQueryDefVal,
+			schemas:     &sync.Map{},
+			schemasPath: conf.QueriesPath,
 		}
 		loaders = append(loaders, queries)
 		s.queries = queries
@@ -108,7 +101,6 @@ func New(conf config.Schemas) (Schemas, error) {
 			context:     ctx,
 			schemas:     &sync.Map{},
 			schemasPath: conf.DatasourcesPath,
-			kindCuePath: "kind",
 		}
 		loaders = append(loaders, dts)
 		s.dts = dts
@@ -118,7 +110,6 @@ func New(conf config.Schemas) (Schemas, error) {
 			context:     ctx,
 			schemas:     &sync.Map{},
 			schemasPath: conf.VariablesPath,
-			kindCuePath: "kind",
 		}
 		loaders = append(loaders, vars)
 		s.vars = vars
@@ -136,7 +127,7 @@ type sch struct {
 	panels  *cueDefs
 	dts     *cueDefs
 	vars    *cueDefs
-	queries *cueDefsWithDisjunction
+	queries *cueDefs
 	loaders []Loader
 }
 
@@ -149,9 +140,7 @@ func (s *sch) ValidateDatasource(plugin common.Plugin) error {
 		logrus.Warning("datasource schemas are not loaded")
 		return nil
 	}
-	return s.validatePlugin(plugin, "datasource", "", s.dts, func(originalValue cue.Value) cue.Value {
-		return originalValue
-	})
+	return s.validatePlugin(plugin, "datasource", "", s.dts)
 }
 
 // ValidatePanels verify a list of panels.
@@ -169,19 +158,22 @@ func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
 		if err := s.ValidatePanel(panel.Spec.Plugin, panelName); err != nil {
 			return err
 		}
+		for _, query := range panel.Spec.Queries {
+			if err := s.ValidateQuery(query.Spec.Plugin); err != nil {
+				return err
+			}
+		}
 	}
 	logrus.Debug("All panels are valid")
 	return nil
 }
 
 func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
-	return s.validatePlugin(plugin, "panel", panelName, s.panels, func(originalValue cue.Value) cue.Value {
-		if s.queries != nil {
-			// Then merge with the queries disjunction schema
-			return originalValue.Unify(s.queries.disjSchema)
-		}
-		return originalValue
-	})
+	return s.validatePlugin(plugin, "panel", panelName, s.panels)
+}
+
+func (s *sch) ValidateQuery(plugin common.Plugin) error {
+	return s.validatePlugin(plugin, "query", "", s.queries)
 }
 
 // ValidateVariables verify a list of variables.
@@ -216,12 +208,10 @@ func (s *sch) ValidateVariables(variables []dashboard.Variable) error {
 }
 
 func (s *sch) ValidateVariable(plugin common.Plugin, variableName string) error {
-	return s.validatePlugin(plugin, "variable", variableName, s.vars, func(originalValue cue.Value) cue.Value {
-		return originalValue
-	})
+	return s.validatePlugin(plugin, "variable", variableName, s.vars)
 }
 
-func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName string, cueDefs *cueDefs, enrichSchema func(originalValue cue.Value) cue.Value) error {
+func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName string, cueDefs *cueDefs) error {
 	pluginData, err := plugin.JSONMarshal()
 	if err != nil {
 		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
@@ -231,15 +221,9 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 	value := s.context.CompileBytes(pluginData)
 
 	// retrieve the corresponding schema
-	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.kindCuePath, cueDefs.schemas)
+	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.schemas)
 	if err != nil {
 		return err
-	}
-
-	pluginSchema = enrichSchema(pluginSchema)
-	if pluginSchema.Err() != nil {
-		logrus.WithError(pluginSchema.Err()).Errorf("Error enriching %s schema", modelKind)
-		return pluginSchema.Err()
 	}
 
 	unified := value.Unify(pluginSchema)

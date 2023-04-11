@@ -1,15 +1,6 @@
 if #panel.type == "gauge" {
     kind: "GaugeChart"
     spec: {
-        query: {
-            kind: "TimeSeriesQuery"
-            spec: {
-                #target: *#panel.targets[0] | null // Perses's GaugeChart doesn't support multi queries
-                plugin: [ // switch
-                    %(conditional_timeserie_queries)
-                ][0]
-            }
-        }
         #calcName: "\(#panel.options.reduceOptions.calcs[0])" // only consider [0] here as Perses's GaugeChart doesn't support multi queries
         calculation: [ // switch
             if #mapping.calc[#calcName] != _|_ { #mapping.calc[#calcName] },
