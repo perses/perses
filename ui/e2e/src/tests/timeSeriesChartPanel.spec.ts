@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import happoPlaywright from 'happo-playwright';
-import { test } from '../fixtures/dashboardTest';
 import {
   mockTimeSeriesResponseWithStableValue,
   mockTimeSeriesResponseWithNullValues,
-  waitForStableCanvas,
-} from '../utils';
+} from '@perses-dev/internal-utils';
+import { test } from '../fixtures/dashboardTest';
+import { waitForStableCanvas } from '../utils';
 
 test.use({
   dashboardName: 'TimeSeriesChartPanel',

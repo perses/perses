@@ -17,6 +17,11 @@ import { action } from '@storybook/addon-actions';
 import { Button, Stack } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import {
+  mockTimeSeriesResponseWithNullValues,
+  mockTimeSeriesResponseWithStableValue,
+} from '@perses-dev/internal-utils';
+import { mockQueryRangeRequests } from '@perses-dev/storybook';
+import {
   WithDashboard,
   WithDatasourceStore,
   WithPluginRegistry,
@@ -210,6 +215,244 @@ export const CustomEmptyState: Story = {
           click me!
         </Button>
       ),
+    },
+  },
+};
+
+const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
+  kind: 'Dashboard',
+  metadata: {
+    name: 'TimeSeriesChartPanel',
+    created_at: '2022-12-21T00:00:00Z',
+    updated_at: '2023-01-25T17:43:56.745494Z',
+    version: 3,
+    project: 'testing',
+  },
+  spec: {
+    duration: '6h',
+    variables: [],
+    panels: {
+      ConnectedNulls: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Connected Nulls', description: 'Time series chart with connected null values' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                        query: 'fake_graphite_query_with_nulls',
+                      },
+                    },
+                  },
+                },
+              ],
+              visual: { connect_nulls: true, show_points: 'Always' },
+            },
+          },
+        },
+      },
+      CustomVisualOptions: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Custom Visual Options', description: 'Time series chart with custom visual options' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                      },
+                    },
+                  },
+                },
+              ],
+              visual: { area_opacity: 0.5, connect_nulls: false, line_width: 3, point_radius: 6 },
+            },
+          },
+        },
+      },
+      LegendBottom: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Legend Position Bottom', description: 'Time series chart with a default legend' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: { position: 'Bottom' },
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      LegendRight: {
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Legend Position Right',
+            description: 'Time series chart with a legend positioned to the right',
+          },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: { position: 'Right' },
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      LegendTallFormatted: {
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Legend Tall Formatted',
+            description: 'Time series chart with large legend and formatted series names',
+          },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: { position: 'Bottom' },
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                        series_name_format: 'formatted series name example - {{job}} job - instance {{instance}}',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      SingleLine: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Single Line', description: 'Time series chart with a single line' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              queries: [
+                {
+                  kind: 'TimeSeriesQuery',
+                  spec: {
+                    plugin: {
+                      kind: 'PrometheusTimeSeriesQuery',
+                      spec: {
+                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+    layouts: [
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 1', collapse: { open: true } },
+          items: [
+            { x: 0, y: 0, width: 8, height: 7, content: { $ref: '#/spec/panels/SingleLine' } },
+            { x: 8, y: 0, width: 8, height: 7, content: { $ref: '#/spec/panels/CustomVisualOptions' } },
+            { x: 16, y: 0, width: 8, height: 7, content: { $ref: '#/spec/panels/ConnectedNulls' } },
+            { x: 0, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendBottom' } },
+            { x: 8, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendRight' } },
+            { x: 16, y: 7, width: 8, height: 10, content: { $ref: '#/spec/panels/LegendTallFormatted' } },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+const TIMESERIES_EXAMPLE_MOCK_NOW = 1673805600000;
+export const ExampleWithTimeSeriesPanels: Story = {
+  parameters: {
+    ...formatProviderParameters(TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE),
+    msw: {
+      handlers: {
+        queryRange: mockQueryRangeRequests({
+          queries: [
+            {
+              query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+              response: {
+                body: mockTimeSeriesResponseWithStableValue({
+                  metrics: [
+                    {
+                      metric: {
+                        __name__: 'up',
+                        instance: 'demo.do.prometheus.io:3000',
+                        job: 'grafana',
+                      },
+                      value: '1',
+                    },
+                  ],
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                }),
+              },
+            },
+            {
+              query: 'fake_graphite_query_with_nulls',
+              response: {
+                body: mockTimeSeriesResponseWithNullValues({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                }),
+              },
+            },
+          ],
+        }),
+      },
     },
   },
 };
