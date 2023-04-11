@@ -19,7 +19,7 @@ import { DashboardResource } from '@perses-dev/core';
 import {
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
-} from '@perses-dev/internal-utilities';
+} from '@perses-dev/internal-utils';
 import { mockQueryRangeRequests } from '@perses-dev/storybook';
 import {
   WithDashboard,

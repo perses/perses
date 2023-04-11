@@ -1,5 +1,5 @@
 {
-  "name": "@perses-dev/internal-utilities",
+  "name": "@perses-dev/internal-utils",
   "version": "0.26.1",
   "private": true,
   "main": "src/index.ts",

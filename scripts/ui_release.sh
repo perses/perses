@@ -13,7 +13,7 @@ publish_workspaces=$(for workspace in ${workspaces}; do
   # packages are private so we shouldn't try to publish them.
   # TODO: see if we can do something smarter here by checking for "private" set
   # to true in a given package's package.json.
-  if [[ "${workspace}" != "app" ]] && [[ "${workspace}" != "e2e" ]] && [[ "${workspace}" != "storybook" ]] && [[ "${workspace}" != "internal-utilities" ]]; then
+  if [[ "${workspace}" != "app" ]] && [[ "${workspace}" != "e2e" ]] && [[ "${workspace}" != "storybook" ]] && [[ "${workspace}" != "internal-utils" ]]; then
     echo $workspace;
   fi 
 done)

@@ -15,7 +15,7 @@ import happoPlaywright from 'happo-playwright';
 import {
   mockTimeSeriesResponseWithStableValue,
   mockTimeSeriesResponseWithNullValues,
-} from '@perses-dev/internal-utilities';
+} from '@perses-dev/internal-utils';
 import { test } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
 

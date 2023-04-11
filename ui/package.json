@@ -29,7 +29,7 @@
     "core",
     "dashboards",
     "e2e",
-    "internal-utilities",
+    "internal-utils",
     "panels-plugin",
     "plugin-system",
     "prometheus-plugin",

@@ -13,7 +13,7 @@
 
 import { expect } from '@playwright/test';
 import happoPlaywright from 'happo-playwright';
-import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utilities';
+import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
 import { test } from '../fixtures/dashboardTest';
 import { DashboardPage } from '../pages';
 import { waitForStableCanvas } from '../utils';
