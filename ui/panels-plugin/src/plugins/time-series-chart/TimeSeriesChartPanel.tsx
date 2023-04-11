@@ -187,7 +187,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name,
+            id: timeSeries.name + seriesCount,
             label: formattedSeriesName,
             isSelected,
             color: seriesColor,
