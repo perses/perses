@@ -156,6 +156,7 @@ const config: StorybookConfig = {
       plugins: ['react-require'],
     };
   },
+  staticDirs: ['../public'],
 };
 
 export default config;
