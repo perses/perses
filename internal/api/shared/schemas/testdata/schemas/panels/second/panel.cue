@@ -11,18 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sql
+package second
 
+kind: "SecondChart"
 spec: {
-	plugin: {
-		kind: "SQLGraphQuery"
-		spec: {
-			datasource: {
-				kind: "SQLDatasource"
-			}
-			select: string
-			from:   string
-			where?: string
-		}
+	a: string
+	b: {
+		c?: bool
+		d: [...#e]
 	}
+}
+
+#e: {
+	f: number
 }

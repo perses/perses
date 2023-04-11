@@ -1,7 +1,7 @@
 {
-  "kind": "FirstChart",
+  "kind": "UnknownChart",
   "spec": {
-    "a": "yes",
+    "a": "no",
     "b": {
       "c": [
         {
