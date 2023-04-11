@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Box } from '@mui/material';
 import { Panel } from '@perses-dev/dashboards';
@@ -39,7 +39,7 @@ const panelDefinition: PanelDefinition = {
               plugin: {
                 kind: 'PrometheusTimeSeriesQuery',
                 spec: {
-                  query: 'node_memory_Mapped_bytes',
+                  query: 'up',
                 },
               },
             },
@@ -75,6 +75,8 @@ const meta: Meta<typeof Panel> = {
 
 export default meta;
 
+type Story = StoryObj<typeof Panel>;
+
 export const ViewMode: StoryFn<typeof Panel> = (args) => {
   return (
     <Box width={'500px'} height={'300px'}>
@@ -96,5 +98,59 @@ EditMode.args = {
     onEditPanelClick: action('edit panel clicked'),
     onDuplicatePanelClick: action('duplicate panel clicked'),
     onDeletePanelClick: action('delete panel clicked'),
+  },
+};
+
+/**
+ * You can use the props to customize the messaging and actions.
+ */
+const customAxisPanel: PanelDefinition = {
+  kind: 'Panel',
+  spec: {
+    display: { name: 'Custom Y Axis', description: 'This is a panel showing custom y axis options' },
+    plugin: {
+      kind: 'TimeSeriesChart',
+      spec: {
+        y_axis: {
+          show: true,
+          label: 'Axis Label',
+          unit: {
+            kind: 'Decimal',
+            decimal_places: 1,
+            abbreviate: true,
+          },
+          max: 1200,
+        },
+        queries: [
+          {
+            kind: 'TimeSeriesQuery',
+            spec: {
+              plugin: {
+                kind: 'PrometheusTimeSeriesQuery',
+                spec: {
+                  query: 'node_network_transmit_queue_length',
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+};
+export const AxisCustom: Story = {
+  args: {
+    definition: customAxisPanel,
+  },
+  parameters: {
+    actions: { argTypesRegex: '' },
+    happo: false,
+  },
+  render: (args) => {
+    return (
+      <Box width={'500px'} height={'300px'}>
+        <Panel {...args} />
+      </Box>
+    );
   },
 };
