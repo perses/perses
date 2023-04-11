@@ -42,9 +42,6 @@ export function mockQueryRangeRequests({ queries }: MockQueryRangeConfig): Reque
       const requestQuery = typeof requestPostData === 'object' ? requestPostData['query'] : undefined;
       const mockQuery = queries.find((mockQueryConfig) => mockQueryConfig.query === requestQuery);
 
-      console.log(requestQuery);
-      console.log(queries);
-
       if (mockQuery) {
         // Found a config for mocking this query. Return the mock response.
         return res(ctx.json(mockQuery.response.body));
