@@ -1,15 +1,6 @@
 if #panel.type == "timeseries" || #panel.type == "graph" {
     kind: "TimeSeriesChart"
     spec: {
-        queries: [ if #panel.targets != _|_ for _, target in #panel.targets {
-            kind: "TimeSeriesQuery"
-            spec: {
-                #target: target
-                plugin: [ // switch
-                    %(conditional_timeserie_queries)
-                ][0]
-            }
-        }]
         legend: {
             if #panel.type == "timeseries" {
             	  position: [

@@ -1,20 +1,6 @@
 {
   "kind": "GaugeChart",
   "spec": {
-    "query": {
-      "kind": "TimeSeriesQuery",
-      "spec": {
-        "plugin": {
-          "kind": "PrometheusTimeSeriesQuery",
-          "spec": {
-            "datasource": {
-              "kind": "PrometheusDatasource"
-            },
-            "query": "(((count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))) - avg(sum by (mode)(rate(node_cpu_seconds_total{mode='idle',job='node',instance='$instance'}[$interval])))) * 100) / count(count(node_cpu_seconds_total{job='node',instance='$instance'}) by (cpu))"
-          }
-        }
-      }
-    },
     "calculation": "LastNumber",
     "unit": {
       "kind": "Percent",
@@ -32,4 +18,3 @@
     }
   }
 }
-

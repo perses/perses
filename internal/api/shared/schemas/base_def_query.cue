@@ -13,16 +13,11 @@
 
 package base
 
-kind: "TimeSeriesQuery"
-spec: close({
-	plugin: close({
-		kind: string
-		spec: {
-			datasource?: close({
-				kind:  string
-				name?: string
-			})
-			// additional fields allowed
-		}
+kind: string
+spec: {
+	datasource?: close({
+		kind:  string
+		name?: string
 	})
-})
+	// additional fields allowed
+}

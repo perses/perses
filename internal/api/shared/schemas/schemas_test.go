@@ -27,21 +27,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func loadPlugin(testDataPath string) common.Plugin {
-	data, _ := os.ReadFile(testDataPath)
+func loadPlugin(testDataPath string, t *testing.T) common.Plugin {
+	data, readErr := os.ReadFile(testDataPath)
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+
 	plg := common.Plugin{}
-	_ = json.Unmarshal(data, &plg)
+	unmarshallErr := json.Unmarshal(data, &plg)
+	if unmarshallErr != nil {
+		t.Fatal(unmarshallErr)
+	}
+
 	return plg
 }
 
+func loadQueries(testDataPath string, t *testing.T) []v1.Query {
+	data, readErr := os.ReadFile(testDataPath)
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+
+	queries := []v1.Query{}
+	unmarshallErr := json.Unmarshal(data, &queries)
+	if unmarshallErr != nil {
+		t.Fatal(unmarshallErr)
+	}
+
+	return queries
+}
+
 func TestValidatePanels(t *testing.T) {
-	validFirstPanel := loadPlugin("testdata/samples/panels/valid_first_panel.json")
-	validSecondPanel := loadPlugin("testdata/samples/panels/valid_second_panel.json")
-	validThirdPanel := loadPlugin("testdata/samples/panels/valid_third_panel.json")
-	invalidKind := loadPlugin("testdata/samples/panels/invalid_kind.json")
-	invalidDatasourceKind := loadPlugin("testdata/samples/panels/invalid_datasource_kind.json")
-	invalidUnwantedQueryField := loadPlugin("testdata/samples/panels/invalid_unwanted_query_field.json")
-	invalidQueryDatasourceMismatch := loadPlugin("testdata/samples/panels/invalid_query_datasource_mismatch.json")
+	// panels plugins samples
+	validFirstPanel := loadPlugin("testdata/samples/panels/valid_first_panel.json", t)
+	validSecondPanel := loadPlugin("testdata/samples/panels/valid_second_panel.json", t)
+	validThirdPanel := loadPlugin("testdata/samples/panels/valid_third_panel.json", t)
+	invalidKindPanel := loadPlugin("testdata/samples/panels/invalid_kind_panel.json", t)
+	// queries plugins samples
+	validCustomQueries := loadQueries("testdata/samples/queries/valid_custom_queries.json", t)
+	validSQLQuery := loadQueries("testdata/samples/queries/valid_sql_query.json", t)
+	invalidKindQuery := loadQueries("testdata/samples/queries/invalid_kind_query.json", t)
+	invalidDatasourceMismatchQuery := loadQueries("testdata/samples/queries/invalid_datasource_mismatch_query.json", t)
+	invalidUnwantedFieldQuery := loadQueries("testdata/samples/queries/invalid_unwanted_field_query.json", t)
 
 	metadata := v1.ProjectMetadata{
 		Metadata: v1.Metadata{
@@ -66,17 +93,20 @@ func TestValidatePanels(t *testing.T) {
 					Panels: map[string]*v1.Panel{
 						"MyFirstPanel": {
 							Spec: v1.PanelSpec{
-								Plugin: validFirstPanel,
+								Plugin:  validFirstPanel,
+								Queries: validCustomQueries,
 							},
 						},
 						"MySecondPanel": {
 							Spec: v1.PanelSpec{
-								Plugin: validSecondPanel,
+								Plugin:  validSecondPanel,
+								Queries: validSQLQuery,
 							},
 						},
 						"MyThirdPanel": {
 							Spec: v1.PanelSpec{
-								Plugin: validThirdPanel,
+								Plugin:  validThirdPanel,
+								Queries: validCustomQueries,
 							},
 						},
 					},
@@ -96,7 +126,8 @@ func TestValidatePanels(t *testing.T) {
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
-								Plugin: invalidKind,
+								Plugin:  invalidKindPanel,
+								Queries: validCustomQueries,
 							},
 						},
 					},
@@ -106,7 +137,7 @@ func TestValidatePanels(t *testing.T) {
 			result: "invalid panel MyInvalidPanel: Unknown kind UnknownChart",
 		},
 		{
-			title: "dashboard containing an invalid panel (unknown datasource kind)",
+			title: "dashboard containing a panel with an invalid query (unknown query type)",
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
@@ -116,18 +147,18 @@ func TestValidatePanels(t *testing.T) {
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
-								Plugin: invalidDatasourceKind,
+								Plugin:  validFirstPanel,
+								Queries: invalidKindQuery,
 							},
 						},
 					},
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid panel MyInvalidPanel: spec.queries.0: 2 errors in empty disjunction: (and 2 more errors)",
-			// TODO : should be: result: "invalid panel MyInvalidPanel: Unknown datasource.kind UnknownDatasource",
+			result: "invalid query : Unknown kind UnknownGraphQuery",
 		},
 		{
-			title: "dashboard containing an invalid panel (query field not allowed)",
+			title: "dashboard containing a panel with an invalid query (field not allowed)",
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
@@ -137,18 +168,18 @@ func TestValidatePanels(t *testing.T) {
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
-								Plugin: invalidUnwantedQueryField,
+								Plugin:  validSecondPanel,
+								Queries: invalidUnwantedFieldQuery,
 							},
 						},
 					},
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid panel MyInvalidPanel: spec.queries.0: 2 errors in empty disjunction: (and 2 more errors)",
-			// TODO : should be: result: "invalid panel MyInvalidPanel: options.queries.0: field not allowed: unwanted",
+			result: "invalid query : spec: field not allowed: aaaaaa",
 		},
 		{
-			title: "dashboard containing an invalid panel (query not matching datasource type)",
+			title: "dashboard containing a panel with an invalid query (datasource type not matching query type)",
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
@@ -158,22 +189,22 @@ func TestValidatePanels(t *testing.T) {
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
 							Spec: v1.PanelSpec{
-								Plugin: invalidQueryDatasourceMismatch,
+								Plugin:  validSecondPanel,
+								Queries: invalidDatasourceMismatchQuery,
 							},
 						},
 					},
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid panel MyInvalidPanel: spec.queries.0: 2 errors in empty disjunction: (and 2 more errors)",
-			// TODO : should be: result: "invalid panel MyInvalidPanel: options.queries.1.kind: conflicting values \"CustomGraphQuery\" and \"SQLGraphQuery\"",
+			result: "invalid query : spec.datasource.kind: conflicting values \"CustomDatasource\" and \"SQLDatasource\"",
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			schema, err := New(config.Schemas{
-				PanelsPath:  "testdata/panels",
-				QueriesPath: "testdata/queries",
+				PanelsPath:  "testdata/schemas/panels",
+				QueriesPath: "testdata/schemas/queries",
 			})
 			if err != nil {
 				t.Fatal(err)
@@ -190,9 +221,9 @@ func TestValidatePanels(t *testing.T) {
 }
 
 func TestValidateVariables(t *testing.T) {
-	validFirstVariable := loadPlugin("testdata/samples/variables/valid_first_variable.json")
-	validSecondVariable := loadPlugin("testdata/samples/variables/valid_second_variable.json")
-	invalidUnknownVariable := loadPlugin("testdata/samples/variables/invalid_unknown_variable.json")
+	validFirstVariable := loadPlugin("testdata/samples/variables/valid_first_variable.json", t)
+	validSecondVariable := loadPlugin("testdata/samples/variables/valid_second_variable.json", t)
+	invalidUnknownVariable := loadPlugin("testdata/samples/variables/invalid_unknown_variable.json", t)
 
 	metadata := v1.ProjectMetadata{
 		Metadata: v1.Metadata{
@@ -288,7 +319,7 @@ func TestValidateVariables(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			schema, err := New(config.Schemas{
-				VariablesPath: "testdata/variables",
+				VariablesPath: "testdata/schemas/variables",
 			})
 			if err != nil {
 				t.Fatal(err)

@@ -11,20 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package second
+package first
 
-kind: "SecondChart"
+kind: "FirstChart"
 spec: {
-	query: #ts_query
-	a:     string
+	a: string
 	b: {
-		c?: bool
-		d: [...#e]
+		c: [...#d]
 	}
 }
 
-#e: {
-	f: number
+#d: {
+	e:  string
+	f?: string
 }
-
-#ts_query: _
