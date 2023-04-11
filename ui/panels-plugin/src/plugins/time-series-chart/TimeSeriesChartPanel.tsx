@@ -86,7 +86,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
 
   // convert Perses dashboard format to be ECharts compatible
-  const yAxis = convertPanelYAxis(y_axis);
+  const echartsYAxis = convertPanelYAxis(y_axis);
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
@@ -195,6 +195,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
+      // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
+      // These are styled with predefined colors and a dashed style to look different than series from query results.
+      // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
       const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
       thresholds.steps.forEach((step: StepOptions, index: number) => {
         const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
@@ -202,6 +205,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const stepOption: StepOptions = {
           color: thresholdLineColor,
           value:
+            // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
             thresholds.mode === 'Percent'
               ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
               : step.value,
@@ -217,7 +221,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, yAxis.max, yAxis.min]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, y_axis.max, y_axis.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
@@ -264,7 +268,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
-    left: !yAxis.show ? 0 : gridLeft,
+    left: !echartsYAxis.show ? 0 : gridLeft,
     right: legend && legend.position === 'Right' ? legendWidth : 20,
     bottom: legend && legend.position === 'Bottom' ? legendHeight : 0,
   };
@@ -282,7 +286,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       <LineChart
         height={adjustedContentDimensions.height}
         data={graphData}
-        yAxis={yAxis}
+        yAxis={echartsYAxis}
         unit={unit}
         grid={gridOverrides}
         tooltipConfig={{ wrapLabels: true }}
