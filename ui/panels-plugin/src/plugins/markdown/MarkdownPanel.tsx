@@ -28,7 +28,7 @@ function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme)
     height: '100%',
     overflowY: 'auto',
     // Ignore top margin on the first element.
-    '& :first-of-type': {
+    '& :first-child': {
       marginTop: 0,
     },
     // Styles for headers
