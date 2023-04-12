@@ -24,11 +24,12 @@ export interface DataQueriesProviderProps<QueryPluginDefinition = Definition<Unk
   children?: React.ReactNode;
 }
 
-export interface UseDataQueriesResult<QueryPluginDefinition = Definition<UnknownSpec>> {
+export interface UseDataQueryResults<QueryPluginDefinition = Definition<UnknownSpec>> {
   queryResults: Array<QueryData<QueryPluginDefinition>>;
   refetchAll: () => void;
   isFetching: boolean;
   isLoading: boolean;
+  errors: unknown[];
 }
 
 export interface QueryData<QueryPluginDefinition> {

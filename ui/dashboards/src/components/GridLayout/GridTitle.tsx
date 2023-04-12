@@ -91,26 +91,22 @@ export function GridTitle(props: GridTitleProps) {
                 </IconButton>
               </InfoTooltip>
               <InfoTooltip description={TOOLTIP_TEXT.moveGroupDown}>
-                <span>
-                  <IconButton
-                    aria-label={ARIA_LABEL_TEXT.moveGroupDown(title)}
-                    disabled={moveDown === undefined}
-                    onClick={moveDown}
-                  >
-                    <ArrowDownIcon />
-                  </IconButton>
-                </span>
+                <IconButton
+                  aria-label={ARIA_LABEL_TEXT.moveGroupDown(title)}
+                  disabled={moveDown === undefined}
+                  onClick={moveDown}
+                >
+                  <ArrowDownIcon />
+                </IconButton>
               </InfoTooltip>
               <InfoTooltip description={TOOLTIP_TEXT.moveGroupUp}>
-                <span>
-                  <IconButton
-                    aria-label={ARIA_LABEL_TEXT.moveGroupUp(title)}
-                    disabled={moveUp === undefined}
-                    onClick={moveUp}
-                  >
-                    <ArrowUpIcon />
-                  </IconButton>
-                </span>
+                <IconButton
+                  aria-label={ARIA_LABEL_TEXT.moveGroupUp(title)}
+                  disabled={moveUp === undefined}
+                  onClick={moveUp}
+                >
+                  <ArrowUpIcon />
+                </IconButton>
               </InfoTooltip>
             </Stack>
           )}

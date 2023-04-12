@@ -14,14 +14,14 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { Definition, TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { useTimeSeriesQueries } from '../time-series-queries';
-import { DataQueriesProviderProps, QueryData, UseDataQueriesResult } from './model';
+import { DataQueriesProviderProps, QueryData, UseDataQueryResults } from './model';
 
-export function useDataQueries(): UseDataQueriesResult {
+export function useDataQueries(): UseDataQueryResults {
   const ctx = useDataQueriesContext();
   return ctx;
 }
 
-export const DataQueriesContext = createContext<UseDataQueriesResult | undefined>(undefined);
+export const DataQueriesContext = createContext<UseDataQueryResults | undefined>(undefined);
 
 export function useDataQueriesContext() {
   const ctx = useContext(DataQueriesContext);
@@ -69,6 +69,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
       isFetching: results.some((result) => result.isFetching),
       isLoading: results.some((result) => result.isLoading),
       refetchAll,
+      errors: results.map((result) => result.error),
     };
   }, [data, results, refetchAll]);
 
