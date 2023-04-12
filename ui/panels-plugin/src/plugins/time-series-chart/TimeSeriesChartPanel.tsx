@@ -150,8 +150,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
     const xAxisData = [...getXValues(timeScale)];
 
-    // ensures color does not reset for every query
-    let seriesCount = 0;
+    // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
+    let seriesIndex = 0;
 
     for (const result of queryResults) {
       // Skip queries that are still loading or don't have data
@@ -168,11 +168,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         const seriesColor = getSeriesColor(
           formattedSeriesName,
-          seriesCount,
+          seriesIndex,
           echartsPalette as string[],
           visual.palette?.kind
         );
-        seriesCount++; // used for repeating colors in Categorical palette
+        seriesIndex++; // Used for repeating colors in Categorical palette
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
@@ -183,7 +183,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name + seriesCount,
+            id: timeSeries.name + seriesIndex, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
             isSelected,
             color: seriesColor,
