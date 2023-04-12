@@ -26,6 +26,12 @@ type WaitForStableCanvasOptions = {
    * @default 5000
    */
   timeout?: number;
+
+  /**
+   * Number of canvas elements you expect to see. This can be helpful for
+   * validating complex cases with lots of canvas elements.
+   */
+  expectedCount?: number;
 };
 
 /**
@@ -36,7 +42,7 @@ type WaitForStableCanvasOptions = {
  */
 export async function waitForStableCanvas(
   canvasSelector: string,
-  { interval = 250, timeout = 5000 }: WaitForStableCanvasOptions = {}
+  { interval = 250, timeout = 5000, expectedCount }: WaitForStableCanvasOptions = {}
 ) {
   const maxChecks = Math.floor(timeout / interval);
 
@@ -54,7 +60,13 @@ export async function waitForStableCanvas(
 
   async function checkCanvas() {
     const canvasData = getCanvasData();
-    if (prevCanvasData.length === canvasData.length && JSON.stringify(prevCanvasData) === JSON.stringify(canvasData)) {
+    const hasExpectedCount = expectedCount === undefined || expectedCount === canvasData.length;
+
+    if (
+      hasExpectedCount &&
+      prevCanvasData.length === canvasData.length &&
+      JSON.stringify(prevCanvasData) === JSON.stringify(canvasData)
+    ) {
       // Helpful for debugging
       console.log(`Canvas stable after ${totalChecks + 1} check(s).`);
 

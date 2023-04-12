@@ -429,7 +429,9 @@ export const ExampleWithTimeSeriesPanels: Story = {
     },
     happo: {
       beforeScreenshot: async () => {
-        await waitForStableCanvas('canvas');
+        await waitForStableCanvas('canvas', {
+          expectedCount: 6,
+        });
       },
     },
     msw: {
