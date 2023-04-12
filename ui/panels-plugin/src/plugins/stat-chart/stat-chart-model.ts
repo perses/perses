@@ -29,7 +29,6 @@ export interface StatChartOptions {
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
   sparkline?: SparklineOptions;
-  textAlignment?: 'auto' | 'center';
 }
 
 export function createInitialStatChartOptions(): StatChartOptions {
