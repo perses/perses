@@ -57,19 +57,6 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
     height: 500,
   },
   spec: {
-    queries: [
-      {
-        kind: 'TimeSeriesQuery',
-        spec: {
-          plugin: {
-            kind: 'PrometheusTimeSeriesQuery',
-            spec: {
-              query: 'rate(caddy_http_response_duration_seconds_sum["5m"])',
-            },
-          },
-        },
-      },
-    ],
     unit: { kind: 'Decimal', decimal_places: 2 },
     legend: {
       position: 'Right',

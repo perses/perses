@@ -50,21 +50,18 @@ export function GridItemContent(props: GridItemContentProps) {
   const { width } = useResizeObserver({ ref: panelRef.current });
   const suggestedStepMs = useSuggestedStepMs(width);
 
-  if (queries) {
-    // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
-    const definitions = queries.map((query: QueryDefinition) => {
-      return {
-        kind: query.spec.plugin.kind,
-        spec: query.spec.plugin.spec,
-      };
-    });
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
+  const queryDefinitions = queries ?? [];
+  const definitions = queryDefinitions.map((query: QueryDefinition) => {
+    return {
+      kind: query.spec.plugin.kind,
+      spec: query.spec.plugin.spec,
+    };
+  });
 
-    return (
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-        <Panel ref={panelRef} definition={panelDefinition} editHandlers={editHandlers} />
-      </DataQueriesProvider>
-    );
-  }
-
-  return <Panel ref={panelRef} definition={panelDefinition} editHandlers={editHandlers} />;
+  return (
+    <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
+      <Panel ref={panelRef} definition={panelDefinition} editHandlers={editHandlers} />
+    </DataQueriesProvider>
+  );
 }

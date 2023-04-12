@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
+import { ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
@@ -21,13 +21,9 @@ export interface SparklineOptions {
 }
 
 export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
-export interface StatChartQueryEditorProps extends StatChartOptionsEditorProps {
-  queries: TimeSeriesQueryDefinition[];
-}
 
 export interface StatChartOptions {
   name: string;
-  query: TimeSeriesQueryDefinition;
   calculation: CalculationType;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
@@ -37,18 +33,6 @@ export interface StatChartOptions {
 export function createInitialStatChartOptions(): StatChartOptions {
   return {
     name: '',
-    // TODO: How do you represent an initially empty/unset graph query?
-    query: {
-      kind: 'TimeSeriesQuery',
-      spec: {
-        plugin: {
-          kind: 'PrometheusTimeSeriesQuery',
-          spec: {
-            query: '',
-          },
-        },
-      },
-    },
     calculation: 'LastNumber',
     unit: {
       kind: 'Decimal',

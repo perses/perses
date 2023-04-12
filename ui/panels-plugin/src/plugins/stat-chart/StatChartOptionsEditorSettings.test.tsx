@@ -17,18 +17,6 @@ import userEvent from '@testing-library/user-event';
 import { StatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 
-const MOCK_QUERY = {
-  kind: 'TimeSeriesQuery',
-  spec: {
-    plugin: {
-      kind: 'PrometheusTimeSeriesQuery',
-      spec: {
-        query: '',
-      },
-    },
-  },
-} as const;
-
 describe('StatChartOptionsEditorSettings', () => {
   const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = jest.fn()) => {
     render(
@@ -47,7 +35,6 @@ describe('StatChartOptionsEditorSettings', () => {
           kind: 'Minutes',
         },
         calculation: 'Last',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -75,7 +62,6 @@ describe('StatChartOptionsEditorSettings', () => {
           kind: 'Days',
         },
         calculation: 'Sum',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -101,7 +87,6 @@ describe('StatChartOptionsEditorSettings', () => {
           kind: 'Days',
         },
         calculation: 'Sum',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -128,7 +113,6 @@ describe('StatChartOptionsEditorSettings', () => {
         sparkline: {
           color: '#ff0000',
         },
-        query: MOCK_QUERY,
       },
       onChange
     );
