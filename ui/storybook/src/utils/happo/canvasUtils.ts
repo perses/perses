@@ -29,10 +29,10 @@ type WaitForStableCanvasOptions = {
 };
 
 /**
- * Wait for a canvas element to become stable (i.e. stop changing its contents).
- * Validates stability by comparing that the result of `toDataURL` is consistent
- * after a specified `interval`. Will throw an error if stability is not found
- * after the specified `timeout`.
+ * Wait for canvas element(s) to become stable (i.e. stop changing their contents).
+ * Validates stability by waiting for a consistent number of canvases with
+ * consistent  `toDataURL` values after a specified `interval`. Will throw an
+ * error if stability is not found after the specified `timeout`.
  */
 export async function waitForStableCanvas(
   canvasSelector: string,
@@ -44,18 +44,17 @@ export async function waitForStableCanvas(
     throw new Error('The canvas cannot be checked for stability with the current `interval` and `timeout` options.');
   }
 
-  function getCanvasDataURL() {
-    const canvas = document.querySelector(canvasSelector) as HTMLCanvasElement | null;
-    const dataUrl = canvas?.toDataURL();
-    return dataUrl;
+  function getCanvasData() {
+    const canvases = document.querySelectorAll<HTMLCanvasElement>(canvasSelector);
+    return [...canvases].map((canvas) => canvas?.toDataURL());
   }
 
-  let prevCanvasData = getCanvasDataURL();
+  let prevCanvasData = getCanvasData();
   let totalChecks = 0;
 
   async function checkCanvas() {
-    const canvasData = getCanvasDataURL();
-    if (canvasData && canvasData === prevCanvasData) {
+    const canvasData = getCanvasData();
+    if (prevCanvasData.length === canvasData.length && JSON.stringify(prevCanvasData) === JSON.stringify(canvasData)) {
       // Helpful for debugging
       console.log(`Canvas stable after ${totalChecks + 1} check(s).`);
 

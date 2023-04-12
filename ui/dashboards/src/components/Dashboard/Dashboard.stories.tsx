@@ -20,7 +20,7 @@ import {
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
 } from '@perses-dev/internal-utils';
-import { mockQueryRangeRequests } from '@perses-dev/storybook';
+import { mockQueryRangeRequests, waitForStableCanvas } from '@perses-dev/storybook';
 import {
   WithDashboard,
   WithDatasourceStore,
@@ -425,6 +425,11 @@ export const ExampleWithTimeSeriesPanels: Story = {
           start: TIMESERIES_EXAMPLE_MOCK_START,
           end: TIMESERIES_EXAMPLE_MOCK_NOW,
         },
+      },
+    },
+    happo: {
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
       },
     },
     msw: {
