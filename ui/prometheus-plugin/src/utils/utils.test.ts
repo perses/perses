@@ -160,11 +160,19 @@ describe('getFormattedPrometheusSeriesName', () => {
   it('should resolve empty metric to instead show query', () => {
     const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
     const metric = {};
-    const output = { name: query };
+    const output = { name: query, formattedName: query };
     expect(getFormattedPrometheusSeriesName(query, metric)).toEqual(output);
   });
 
-  it('should show correct formatted series name', () => {
+  it('should show a metric with empty labels with the appropriate series_name_format', () => {
+    const query = 'up';
+    const metric = {};
+    const series_name_format = 'Custom series name';
+    const output = { name: query, formattedName: 'Custom series name' };
+    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+  });
+
+  it('should show correct formatted series name when labels are populated', () => {
     const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
     const metric = {
       __name__: 'node_memory_Buffers_bytes',
@@ -178,5 +186,20 @@ describe('getFormattedPrometheusSeriesName', () => {
       name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
     };
     expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+  });
+
+  it('should show correct raw series name', () => {
+    const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
+    const metric = {
+      __name__: 'node_memory_Buffers_bytes',
+      env: 'demo',
+      instance: 'demo.do.prometheus.io:9100',
+      job: 'node',
+    };
+    const output = {
+      name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+      formattedName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+    };
+    expect(getFormattedPrometheusSeriesName(query, metric, undefined)).toEqual(output);
   });
 });
