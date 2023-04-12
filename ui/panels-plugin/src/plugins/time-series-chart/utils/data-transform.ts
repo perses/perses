@@ -149,12 +149,19 @@ export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentO
     // Sets minimum axis label relative to data instead of zero.
     yAxis.min = (value) => {
       // https://echarts.apache.org/en/option.html#yAxis.min
-      if (value.min <= 1) {
+      if (value.min >= 0 && value.min <= 1) {
+        // Helps with PercentDecimal units, or datasets that return 0 or 1 booleans
         return 0;
       }
-      // Allows for padding between origin and first series.
-      // Current value was chosen arbitrarily and will need to be adjusted.
-      return value.min * MIN_VALUE_PADDING_MULTIPLIER;
+
+      if (value.min > 0) {
+        // Allows for padding between origin and first series.
+        // Current value was chosen arbitrarily and will need to be adjusted.
+        return value.min * MIN_VALUE_PADDING_MULTIPLIER;
+      }
+
+      // No padding added since negative numbers for min throws it off.
+      return value.min;
     };
   }
   return yAxis;
