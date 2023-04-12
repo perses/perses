@@ -40,12 +40,10 @@ export interface StatChartProps {
   unit: UnitOptions;
   color?: string;
   sparkline?: LineSeriesOption;
-  textAlignment?: 'auto' | 'center';
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, color, sparkline, textAlignment = 'auto' } = props;
-  const isTextCentered = textAlignment === 'center';
+  const { width, height, data, unit, color, sparkline } = props;
   const chartsTheme = useChartsTheme();
 
   const formattedValue = data.calculatedValue === undefined ? '' : formatValue(data.calculatedValue, unit);
@@ -106,10 +104,11 @@ export function StatChart(props: StatChartProps) {
 
   const containerPadding = `${chartsTheme.container.padding.default}px`;
 
+  const textAlignment = sparkline ? 'auto' : 'center';
   const textStyles = {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: sparkline ? 'auto' : textAlignment,
+    justifyContent: textAlignment,
     alignItems: textAlignment,
   };
 
@@ -122,7 +121,6 @@ export function StatChart(props: StatChartProps) {
             color,
             fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
             padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
-            zIndex: '1', // set zIndex to 1 so text goes on top of graph
           }}
         >
           {formattedValue}
@@ -142,7 +140,7 @@ export function StatChart(props: StatChartProps) {
             sx={{
               width: '100%',
               height: '100%',
-              position: isTextCentered ? 'absolute' : 'relative',
+              position: textAlignment === 'center' ? 'absolute' : 'relative',
             }}
             option={option}
             theme={chartsTheme.echartsTheme}
