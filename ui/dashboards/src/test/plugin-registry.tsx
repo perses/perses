@@ -14,13 +14,20 @@
 import { UnknownSpec } from '@perses-dev/core';
 import { PanelPlugin, MockPlugin } from '@perses-dev/plugin-system';
 
+const FakeTimeSeriesChartOptionEditor = () => {
+  return <div>TimeSeriesChart options</div>;
+};
+
 const FakeTimeSeriesPlugin: PanelPlugin<UnknownSpec> = {
   PanelComponent: () => {
     return <div>TimeSeriesChart panel</div>;
   },
-  OptionsEditorComponent: () => {
-    return <div>TimeSeriesChart options</div>;
-  },
+  panelOptionsEditorComponents: [
+    {
+      label: 'Settings',
+      content: FakeTimeSeriesChartOptionEditor,
+    },
+  ],
   createInitialOptions: () => ({}),
 };
 

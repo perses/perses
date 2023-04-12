@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { OptionsEditorProps, PanelPlugin } from '../../../model';
 
 function BertPanel1Editor({ value, onChange }: OptionsEditorProps<{ option1: string }>) {
@@ -31,7 +30,6 @@ function BertPanel1Editor({ value, onChange }: OptionsEditorProps<{ option1: str
 // Dummy plugins to test loading
 export const BertPanel1: PanelPlugin<{ option1: string }> = {
   PanelComponent: () => null,
-  PanelQueryEditorComponent: BertPanel1Editor,
   panelOptionsEditorComponents: [
     {
       label: 'Editor',
@@ -68,4 +66,5 @@ export const BertPanel2: PanelPlugin<{ option2: string }> = {
     },
   ],
   createInitialOptions: () => ({ option2: '' }),
+  hideQueryEditor: true,
 };

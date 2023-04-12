@@ -24,12 +24,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { PanelDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { OptionsEditorProps, PluginKindSelect, PluginSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
+import { PluginKindSelect, usePluginEditor, PanelSpecEditor } from '@perses-dev/plugin-system';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { PanelPreview } from './PanelPreview';
+import { usePanelEditor } from './usePanelEditor';
 
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
@@ -37,24 +38,26 @@ export interface PanelEditorFormProps {
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps) {
-  const { initialValues, onChange } = props;
+  const {
+    initialValues: { panelDefinition: initialPanelDef, groupId: initialGroupId },
+    onChange,
+  } = props;
 
   const panelGroups = useListPanelGroups();
-
-  const [name, setName] = useState(initialValues.name);
-  const [description, setDescription] = useState(initialValues.description);
-  const [groupId, setGroupId] = useState(initialValues.groupId);
-  const [kind, setKind] = useState(initialValues.kind);
-  const [spec, setSpec] = useState(initialValues.spec);
-  const [queries, setQueries] = useState(initialValues.queries);
+  const [groupId, setGroupId] = useState(initialGroupId);
+  const { panelDefinition, setName, setDescription, setQueries, setPlugin, setPanelDefinition } =
+    usePanelEditor(initialPanelDef);
+  const { plugin } = panelDefinition.spec;
 
   // Use common plugin editor logic even though we've split the inputs up in this form
   const pluginEditor = usePluginEditor({
     pluginType: 'Panel',
-    value: { kind, spec },
+    value: { kind: plugin.kind, spec: plugin.spec },
     onChange: (plugin) => {
-      setKind(plugin.kind);
-      setSpec(plugin.spec);
+      setPlugin(plugin);
+    },
+    onHideQueryEditorChange: (isHidden) => {
+      setQueries(undefined, isHidden);
     },
   });
 
@@ -67,19 +70,23 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     setGroupId(value);
   };
 
-  // TO DO: once we remove query editor from panel plugin, we can remove this method
-  const handlePluginSpecChange: OptionsEditorProps<UnknownSpec>['onChange'] = (spec) => {
-    // time series chart query editor returns spec.queries while gauge and stat charts return spec.query
-    if (spec?.queries || spec?.query) {
-      setQueries((spec?.queries ?? [spec?.query]) as QueryDefinition[]);
+  const handlePanelDefinitionChange = (nextPanelDef: PanelDefinition) => {
+    const { kind: pluginKind, spec: pluginSpec } = nextPanelDef.spec.plugin;
+    // if panel plugin kind and spec are modified, then need to save current spec
+    if (
+      panelDefinition.spec.plugin.kind !== pluginKind &&
+      JSON.stringify(panelDefinition.spec.plugin.spec) !== JSON.stringify(pluginSpec)
+    ) {
+      pluginEditor.rememberCurrentSpecState();
     }
-    pluginEditor.onSpecChange(spec);
+
+    setPanelDefinition(nextPanelDef);
   };
 
   useEffect(() => {
-    const values: PanelEditorValues = { name, description, groupId, kind, spec, queries };
+    const values: PanelEditorValues = { groupId, panelDefinition };
     onChange(values);
-  }, [name, description, groupId, kind, spec, queries, onChange]);
+  }, [groupId, panelDefinition, onChange]);
 
   return (
     // Grid maxHeight allows user to scroll inside Drawer to see all content
@@ -94,9 +101,11 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             required
             fullWidth
             label="Name"
-            value={name}
+            value={panelDefinition.spec.display.name ?? ''}
             variant="outlined"
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
           />
         </Grid>
         <Grid item xs={4}>
@@ -115,9 +124,11 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           <TextField
             fullWidth
             label="Description"
-            value={description}
+            value={panelDefinition.spec.display.description ?? ''}
             variant="outlined"
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
           />
         </Grid>
         <Grid item xs={4}>
@@ -128,7 +139,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
               required
               labelId="panel-type-label"
               label="Type"
-              value={pluginEditor.pendingKind ? pluginEditor.pendingKind : kind}
+              value={pluginEditor.pendingKind ? pluginEditor.pendingKind : plugin.kind}
               onChange={pluginEditor.onKindChange}
             />
           </FormControl>
@@ -139,24 +150,20 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             Preview
           </Typography>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <PanelPreview
-              kind={kind}
-              name={name}
-              description={description}
-              spec={spec}
-              groupId={groupId}
-              queries={queries}
-            />
+            <PanelPreview panelDefinition={panelDefinition} />
           </ErrorBoundary>
         </Grid>
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <PluginSpecEditor
-              pluginType="Panel"
-              pluginKind={kind}
-              queries={queries}
-              value={spec}
-              onChange={handlePluginSpecChange}
+            <PanelSpecEditor
+              panelDefinition={panelDefinition}
+              onJSONChange={handlePanelDefinitionChange}
+              onQueriesChange={(queries) => {
+                setQueries(queries);
+              }}
+              onPluginSpecChange={(spec) => {
+                pluginEditor.onSpecChange(spec);
+              }}
             />
           </ErrorBoundary>
         </Grid>
