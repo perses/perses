@@ -14,8 +14,7 @@
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
-import { dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
+import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
 import { useSnackbar } from '../../context/SnackbarProvider';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 

@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, dashboardDisplayName } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridActionsCellItem, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
-import { dashboardDisplayName } from '@perses-dev/core/dist/utils/text';
 import { intlFormatDistance } from 'date-fns';
 import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
 import { RenameDashboardDialog } from '../RenameDashboardDialog/RenameDashboardDialog';
