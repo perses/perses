@@ -13,21 +13,20 @@
 
 import { QueryDefinition } from '@perses-dev/core';
 import { DataQueriesProvider } from '@perses-dev/plugin-system';
-import { useRef } from 'react';
-import useResizeObserver from 'use-resize-observer';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
 import { useSuggestedStepMs } from '../../utils';
 import { Panel, PanelProps } from '../Panel/Panel';
 
 export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
+  width: number;
 }
 
 /**
  * Resolves the reference to panel content in a GridItemDefinition and renders the panel.
  */
 export function GridItemContent(props: GridItemContentProps) {
-  const { panelGroupItemId } = props;
+  const { panelGroupItemId, width } = props;
   const panelDefinition = usePanel(panelGroupItemId);
   const {
     spec: { queries },
@@ -45,12 +44,8 @@ export function GridItemContent(props: GridItemContentProps) {
     };
   }
 
-  // calculate width for suggestedStepMs
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const { width } = useResizeObserver({ ref: panelRef.current });
-  const suggestedStepMs = useSuggestedStepMs(width);
-
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
+  const suggestedStepMs = useSuggestedStepMs(width);
   const queryDefinitions = queries ?? [];
   const definitions = queryDefinitions.map((query: QueryDefinition) => {
     return {
@@ -61,7 +56,7 @@ export function GridItemContent(props: GridItemContentProps) {
 
   return (
     <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-      <Panel ref={panelRef} definition={panelDefinition} editHandlers={editHandlers} />
+      <Panel definition={panelDefinition} editHandlers={editHandlers} />
     </DataQueriesProvider>
   );
 }
