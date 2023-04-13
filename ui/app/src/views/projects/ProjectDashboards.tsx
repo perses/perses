@@ -23,6 +23,7 @@ import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/Cr
 interface ProjectDashboardsProps {
   projectName: string;
   hideToolbar?: boolean;
+  id?: string;
 }
 
 export function ProjectDashboards(props: ProjectDashboardsProps) {
@@ -37,7 +38,7 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
   };
 
   return (
-    <Box>
+    <Box id={props.id}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Stack direction="row" alignItems="center" gap={1} my={2}>
           <ViewDashboard />

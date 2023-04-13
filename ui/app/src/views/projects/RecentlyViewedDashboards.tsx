@@ -22,6 +22,7 @@ import { RecentDashboardList } from '../../components/DashboardList/RecentDashbo
 
 interface RecentlyViewedDashboardsProps {
   projectName: string;
+  id?: string;
 }
 
 export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
@@ -35,7 +36,7 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
   };
 
   return (
-    <Box>
+    <Box id={props.id}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Stack direction="row" alignItems="center" gap={1} my={2}>
           <HistoryIcon />

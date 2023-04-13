@@ -16,7 +16,7 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridActionsCellItem, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { dashboardDisplayName } from '@perses-dev/core/dist/utils/text';
 import { intlFormatDistance } from 'date-fns';
 import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
@@ -42,23 +42,20 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
     [dashboardList]
   );
 
-  const [rows, setRows] = useState<Row[]>([]);
-  useEffect(() => {
-    setRows(
-      dashboardList.map(
-        (datedDashboard) =>
-          ({
-            project: datedDashboard.dashboard.metadata.project,
-            name: datedDashboard.dashboard.metadata.name,
-            displayName: dashboardDisplayName(datedDashboard.dashboard),
-            version: datedDashboard.dashboard.metadata.version,
-            createdAt: datedDashboard.dashboard.metadata.created_at,
-            updatedAt: datedDashboard.dashboard.metadata.updated_at,
-            viewedAt: datedDashboard.date,
-          } as Row)
-      )
+  const rows = useMemo(() => {
+    return dashboardList.map(
+      (datedDashboard) =>
+        ({
+          project: datedDashboard.dashboard.metadata.project,
+          name: datedDashboard.dashboard.metadata.name,
+          displayName: dashboardDisplayName(datedDashboard.dashboard),
+          version: datedDashboard.dashboard.metadata.version,
+          createdAt: datedDashboard.dashboard.metadata.created_at,
+          updatedAt: datedDashboard.dashboard.metadata.updated_at,
+          viewedAt: datedDashboard.date,
+        } as Row)
     );
-  }, [setRows, dashboardList]);
+  }, [dashboardList]);
 
   const [targetedDashboard, setTargetedDashboard] = useState<DashboardResource>();
   const [isRenameDashboardDialogStateOpened, setRenameDashboardDialogStateOpened] = useState<boolean>(false);

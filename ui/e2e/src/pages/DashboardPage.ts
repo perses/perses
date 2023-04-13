@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Page, Locator, expect } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 import { PanelEditor } from './PanelEditor';
 import { VariableEditor } from './VariableEditor';
 import { PanelGroup } from './PanelGroup';
@@ -374,5 +374,20 @@ export class DashboardPage {
 
   async cleanupMockRequests() {
     await this.page.unroute('**/api/v1/query_range');
+  }
+
+  /**
+   * Beadcrumbs Helper
+   */
+  async goBackToHomePage() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.page.getByRole('link', { name: 'Home' }).click();
+    await navigationPromise;
+  }
+
+  async goBackToProjectPage(projectName: string) {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.page.getByRole('link', { name: projectName }).click();
+    await navigationPromise;
   }
 }

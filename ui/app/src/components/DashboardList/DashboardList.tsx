@@ -16,7 +16,7 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridActionsCellItem, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { dashboardDisplayName } from '@perses-dev/core/dist/utils/text';
 import { intlFormatDistance } from 'date-fns';
 import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
@@ -40,22 +40,19 @@ export function DashboardList(props: DashboardListProperties) {
     [dashboardList]
   );
 
-  const [rows, setRows] = useState<Row[]>([]);
-  useEffect(() => {
-    setRows(
-      dashboardList.map(
-        (dashboard) =>
-          ({
-            project: dashboard.metadata.project,
-            name: dashboard.metadata.name,
-            displayName: dashboardDisplayName(dashboard),
-            version: dashboard.metadata.version,
-            createdAt: dashboard.metadata.created_at,
-            updatedAt: dashboard.metadata.updated_at,
-          } as Row)
-      )
+  const rows = useMemo(() => {
+    return dashboardList.map(
+      (dashboard) =>
+        ({
+          project: dashboard.metadata.project,
+          name: dashboard.metadata.name,
+          displayName: dashboardDisplayName(dashboard),
+          version: dashboard.metadata.version,
+          createdAt: dashboard.metadata.created_at,
+          updatedAt: dashboard.metadata.updated_at,
+        } as Row)
     );
-  }, [setRows, dashboardList]);
+  }, [dashboardList]);
 
   const [targetedDashboard, setTargetedDashboard] = useState<DashboardResource>();
   const [isRenameDashboardDialogStateOpened, setRenameDashboardDialogStateOpened] = useState<boolean>(false);
