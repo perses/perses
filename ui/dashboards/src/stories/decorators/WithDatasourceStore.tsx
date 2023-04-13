@@ -13,8 +13,7 @@
 
 import { StoryFn, StoryContext } from '@storybook/react';
 import { DatasourceStoreProvider, DatasourceStoreProviderProps } from '@perses-dev/dashboards';
-import { GlobalDatasource } from '@perses-dev/core';
-import { EMPTY_DASHBOARD_RESOURCE } from './constants';
+import { defaultDatasourceProps } from '../../test';
 
 export type WithDatasourceStoreParameter = {
   props: Partial<DatasourceStoreProviderProps>;
@@ -27,53 +26,10 @@ function isWithDatasourceStoreParameter(
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-const prometheusDemoUrl = 'https://prometheus.demo.do.prometheus.io';
-const prometheusDemo: GlobalDatasource = {
-  kind: 'GlobalDatasource',
-  metadata: {
-    name: 'PrometheusDemo',
-    created_at: '0001-01-01T00:00:00Z',
-    updated_at: '0001-01-01T00:00:00Z',
-    version: 0,
-  },
-  spec: {
-    default: true,
-    plugin: {
-      kind: 'PrometheusDatasource',
-      spec: { direct_url: prometheusDemoUrl },
-    },
-  },
-} as const;
-
 export const WithDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>) => {
   const initParameter = context.parameters.withDatasourceStore;
   const parameter = isWithDatasourceStoreParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;
-
-  // This default currently defines the bare minimum to get a story working in
-  // the `Dashboard` storybook with the Prometheus demo api. We'll likely want
-  // to expand it to do more in the future.
-  const defaultDatasourceProps: Pick<DatasourceStoreProviderProps, 'datasourceApi' | 'dashboardResource'> = {
-    dashboardResource: EMPTY_DASHBOARD_RESOURCE,
-    datasourceApi: {
-      getDatasource: () => {
-        return Promise.resolve(undefined);
-      },
-      getGlobalDatasource: (selector) => {
-        if (selector.kind === 'PrometheusDatasource') {
-          return Promise.resolve({ resource: prometheusDemo, proxyUrl: prometheusDemoUrl });
-        }
-
-        return Promise.resolve(undefined);
-      },
-      listDatasources: () => {
-        return Promise.resolve([]);
-      },
-      listGlobalDatasources: () => {
-        return Promise.resolve([]);
-      },
-    },
-  };
 
   return (
     <DatasourceStoreProvider {...defaultDatasourceProps} {...props}>

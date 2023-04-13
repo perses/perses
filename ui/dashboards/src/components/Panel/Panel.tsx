@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo, memo, forwardRef } from 'react';
+import { useState, useMemo, memo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
 import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
@@ -28,7 +28,7 @@ export interface PanelProps extends CardProps<'section'> {
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
-const PanelWithFowardRef = forwardRef<HTMLDivElement, PanelProps>(function Panel(props: PanelProps, panelRef) {
+export const Panel = memo(function Panel(props: PanelProps) {
   const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, ...others } = props;
 
   // Make sure we have an ID we can use for aria attributes
@@ -62,14 +62,7 @@ const PanelWithFowardRef = forwardRef<HTMLDivElement, PanelProps>(function Panel
 
   return (
     <Card
-      ref={(element) => {
-        if (typeof panelRef === 'function') {
-          panelRef(element);
-        } else if (panelRef !== null) {
-          panelRef.current = element;
-        }
-        ref(element);
-      }}
+      ref={ref}
       component="section"
       sx={combineSx(
         {
@@ -123,5 +116,3 @@ const PanelWithFowardRef = forwardRef<HTMLDivElement, PanelProps>(function Panel
     </Card>
   );
 });
-
-export const Panel = memo(PanelWithFowardRef);

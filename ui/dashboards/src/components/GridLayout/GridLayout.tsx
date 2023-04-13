@@ -38,6 +38,8 @@ export function GridLayout(props: GridLayoutProps) {
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
   const { isEditMode } = useEditMode();
 
+  const [gridColWidth, setGridColWidth] = useState(0);
+
   const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts) => {
     // Using the value from `allLayouts` instead of `currentLayout` because of
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
@@ -47,6 +49,12 @@ export function GridLayout(props: GridLayoutProps) {
     if (smallLayout) {
       updatePanelGroupLayouts(smallLayout);
     }
+  };
+
+  const handleWidthChange = (containerWidth: number, margin: [number, number], cols: number) => {
+    const marginX = margin[0];
+    const marginWidth = marginX * (cols - 1); // exclude margin from container width
+    setGridColWidth((containerWidth - marginWidth) / cols);
   };
 
   return (
@@ -75,11 +83,15 @@ export function GridLayout(props: GridLayoutProps) {
           containerPadding={[0, 10]}
           layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: groupDefinition.itemLayouts }}
           onLayoutChange={handleLayoutChange}
+          onWidthChange={handleWidthChange}
         >
-          {groupDefinition.itemLayouts.map(({ i }) => (
+          {groupDefinition.itemLayouts.map(({ i, w }) => (
             <div key={i}>
               <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }} />
+                <GridItemContent
+                  panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }}
+                  width={w * gridColWidth}
+                />
               </ErrorBoundary>
             </div>
           ))}

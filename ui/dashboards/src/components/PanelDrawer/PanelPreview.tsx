@@ -11,15 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useRef } from 'react';
 import { Box } from '@mui/material';
 import { QueryDefinition } from '@perses-dev/core';
 import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '../../context';
 import { Panel } from '../Panel';
+import { useSuggestedStepMs } from '../../utils';
 
 const PANEL_PREVIEW_HEIGHT = 300;
+const PANEL_PREVIEW_DEFAULT_WIDTH = 800;
 
 export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panelDefinition'>) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  let width = PANEL_PREVIEW_DEFAULT_WIDTH;
+  if (boxRef.current !== null) {
+    width = boxRef.current.getBoundingClientRect().width;
+  }
+  const suggestedStepMs = useSuggestedStepMs(width);
+
   if (panelDefinition.spec.plugin.kind === '') {
     return null;
   }
@@ -37,8 +47,8 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
     : [];
 
   return (
-    <Box height={PANEL_PREVIEW_HEIGHT}>
-      <DataQueriesProvider definitions={definitions}>
+    <Box ref={boxRef} height={PANEL_PREVIEW_HEIGHT}>
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
         <Panel definition={panelDefinition} />
       </DataQueriesProvider>
     </Box>
