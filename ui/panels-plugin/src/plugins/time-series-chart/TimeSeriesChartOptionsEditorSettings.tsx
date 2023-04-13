@@ -16,7 +16,6 @@ import { produce } from 'immer';
 import {
   LegendOptionsEditor,
   LegendOptionsEditorProps,
-  OptionsEditorControl,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
