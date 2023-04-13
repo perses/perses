@@ -16,6 +16,7 @@ import { produce } from 'immer';
 import {
   LegendOptionsEditor,
   LegendOptionsEditorProps,
+  OptionsEditorControl,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -80,23 +81,25 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={handleThresholdsChange} />
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => {
-            onChange(
-              produce(value, (draft: TimeSeriesChartOptions) => {
-                // reset button removes all optional panel options
-                draft.y_axis = undefined;
-                draft.legend = undefined;
-                draft.visual = undefined;
-                draft.thresholds = undefined;
-              })
-            );
-          }}
-        >
-          Reset All Settings
-        </Button>
+        <OptionsEditorGroup title="Reset Settings">
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              onChange(
+                produce(value, (draft: TimeSeriesChartOptions) => {
+                  // reset button removes all optional panel options
+                  draft.y_axis = undefined;
+                  draft.legend = undefined;
+                  draft.visual = undefined;
+                  draft.thresholds = undefined;
+                })
+              );
+            }}
+          >
+            Reset To Defaults
+          </Button>
+        </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );
