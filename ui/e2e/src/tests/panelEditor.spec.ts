@@ -51,4 +51,24 @@ test.describe('Dashboard: Panel Editor', () => {
     await expect(discardChangesConfirmationDialog).toBeHidden();
     await panelEditor.isClosed();
   });
+
+  test('should reset y axis panel option to default', async ({ dashboardPage }) => {
+    await dashboardPage.startEditing();
+    await dashboardPage.addPanel();
+    const panelEditor = dashboardPage.getPanelEditor();
+    await panelEditor.isVisible();
+    const settingsTab = dashboardPage.page.getByRole('tab', { name: 'Settings', exact: true });
+    await settingsTab.click();
+    const resetButton = dashboardPage.page.getByRole('button', { name: 'Reset To Defaults', exact: true });
+    await expect(resetButton).toBeVisible();
+    await resetButton.click();
+    const EXAMPLE_AXIS_LABEL = 'Memory';
+    const yAxisLabelInput = dashboardPage.page.getByRole('textbox', { name: 'enter y axis label' });
+    await yAxisLabelInput.clear();
+    await yAxisLabelInput.type(EXAMPLE_AXIS_LABEL, { delay: 100 });
+    const yAxisLabelText = dashboardPage.page.getByText(EXAMPLE_AXIS_LABEL);
+    await expect(yAxisLabelText).toBeVisible();
+    await resetButton.click();
+    expect(await yAxisLabelText.count()).toEqual(0);
+  });
 });
