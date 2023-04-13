@@ -17,7 +17,6 @@ import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
-  DEFAULT_POINT_RADIUS,
   STACK_CONFIG,
   StackOptions,
   STACK_OPTIONS,
@@ -31,14 +30,6 @@ export interface VisualOptionsEditorProps {
 }
 
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
-  const handlePointRadiusChange = (_: Event, sliderValue: number | number[]) => {
-    const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
-    onChange({
-      ...value,
-      point_radius: newValue,
-    });
-  };
-
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     onChange({
@@ -60,21 +51,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
 
   return (
     <OptionsEditorGroup title="Visual">
-      <OptionsEditorControl
-        label={VISUAL_CONFIG.point_radius.label}
-        control={
-          <Slider
-            data-testid={VISUAL_CONFIG.point_radius.testId}
-            value={value.point_radius ?? DEFAULT_POINT_RADIUS}
-            valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.point_radius.step}
-            marks
-            min={VISUAL_CONFIG.point_radius.min}
-            max={VISUAL_CONFIG.point_radius.max}
-            onChange={handlePointRadiusChange}
-          />
-        }
-      />
       <OptionsEditorControl
         label={VISUAL_CONFIG.line_width.label}
         control={
