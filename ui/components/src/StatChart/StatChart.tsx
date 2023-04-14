@@ -114,39 +114,26 @@ export function StatChart(props: StatChartProps) {
 
   return (
     <Box sx={{ height: '100%', width: '100%', ...textStyles }}>
-      <Box sx={{ flexGrow: 1, ...textStyles }}>
-        <Typography
-          variant="h3"
-          sx={{
-            color,
-            fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
-            padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
-          }}
-        >
-          {formattedValue}
-        </Typography>
-      </Box>
+      <Typography
+        variant="h3"
+        sx={(theme) => ({
+          color: color ?? theme.palette.text.primary,
+          fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
+          padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
+        })}
+      >
+        {formattedValue}
+      </Typography>
       {sparkline !== undefined && (
-        <Box
+        <EChart
           sx={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
             width: '100%',
             height: '100%',
           }}
-        >
-          <EChart
-            sx={{
-              width: '100%',
-              height: '100%',
-              position: textAlignment === 'center' ? 'absolute' : 'relative',
-            }}
-            option={option}
-            theme={chartsTheme.echartsTheme}
-            renderer="svg"
-          />
-        </Box>
+          option={option}
+          theme={chartsTheme.echartsTheme}
+          renderer="svg"
+        />
       )}
     </Box>
   );
