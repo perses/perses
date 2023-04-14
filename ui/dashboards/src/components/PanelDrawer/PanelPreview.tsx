@@ -20,7 +20,7 @@ import { Panel } from '../Panel';
 import { useSuggestedStepMs } from '../../utils';
 
 const PANEL_PREVIEW_HEIGHT = 300;
-const PANEL_PREVIEW_DEFAULT_WIDTH = 800;
+const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
 
 export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panelDefinition'>) {
   const boxRef = useRef<HTMLDivElement>(null);

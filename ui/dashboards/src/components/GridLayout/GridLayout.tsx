@@ -20,6 +20,7 @@ import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 import { GridContainer } from './GridContainer';
 
+const DEFAULT_MARGIN = 10;
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps {
@@ -51,10 +52,16 @@ export function GridLayout(props: GridLayoutProps) {
     }
   };
 
-  const handleWidthChange = (containerWidth: number, margin: [number, number], cols: number) => {
+  const handleWidthChange = (
+    containerWidth: number,
+    margin: [number, number],
+    cols: number,
+    containerPadding: [number, number]
+  ) => {
     const marginX = margin[0];
     const marginWidth = marginX * (cols - 1); // exclude margin from container width
-    setGridColWidth((containerWidth - marginWidth) / cols);
+    const containerPaddingWidth = containerPadding[0] * 2;
+    setGridColWidth(Math.round((containerWidth - marginWidth - containerPaddingWidth) / cols));
   };
 
   return (
@@ -80,6 +87,7 @@ export function GridLayout(props: GridLayoutProps) {
           resizeHandles={['se']}
           isDraggable={isEditMode}
           isResizable={isEditMode}
+          margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
           containerPadding={[0, 10]}
           layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: groupDefinition.itemLayouts }}
           onLayoutChange={handleLayoutChange}
@@ -90,7 +98,7 @@ export function GridLayout(props: GridLayoutProps) {
               <ErrorBoundary FallbackComponent={ErrorAlert}>
                 <GridItemContent
                   panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }}
-                  width={w * gridColWidth}
+                  width={calculateGridItemWidth(w, gridColWidth)}
                 />
               </ErrorBoundary>
             </div>
@@ -100,3 +108,15 @@ export function GridLayout(props: GridLayoutProps) {
     </GridContainer>
   );
 }
+
+/**
+ * Calculates grid item width
+ * @param w number of columns the grid item spans
+ * @param colWidth the width of each column in px
+ * @returns grid item's width in px
+ */
+const calculateGridItemWidth = (w: number, colWidth: number) => {
+  // 0 * Infinity === NaN, which causes problems with resize contraints
+  if (!Number.isFinite(w)) return w;
+  return colWidth * w + Math.max(0, w - 1) * DEFAULT_MARGIN;
+};
