@@ -41,7 +41,8 @@ jobs:
           DEBUG: pw:webserver
           # HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
           # HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}
-          HAPPO_CHANGE_URL: ${{ github.event.pull_request.html_url || github.head_commit.url }}
+          # TODO: test the order of these. I'm not sure if it fails gracefully.
+          HAPPO_CHANGE_URL: ${{ github.head_commit.url || github.event.pull_request.html_url }}
       - uses: actions/upload-artifact@v3
         if: always()
         with:
