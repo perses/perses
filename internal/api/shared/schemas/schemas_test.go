@@ -176,7 +176,7 @@ func TestValidatePanels(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid query : spec: field not allowed: aaaaaa",
+			result: "invalid query : spec.aaaaaa: field not allowed",
 		},
 		{
 			title: "dashboard containing a panel with an invalid query (datasource type not matching query type)",
