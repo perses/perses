@@ -19,10 +19,16 @@ interface DashboardBreadcrumbsProps {
   dashboardName?: string;
 }
 
+/*
+ * DashboardBreadcrumbs provide a naviguation helper
+ * For dashboard breadcrumb, dashboardProject & dashboardName are mandatory
+ * For project breadcrumb, dashboardProject is mandatory
+ * For home breadcrumb, all props need to be empty or undefined
+ */
 function DashboardBreadcrumbs(props: DashboardBreadcrumbsProps) {
   const { dashboardProject, dashboardName } = props;
 
-  if (dashboardName) {
+  if (dashboardName && dashboardProject) {
     return (
       <Breadcrumbs sx={{ fontSize: 'large' }}>
         <Link underline={'hover'} variant={'h3'} component={RouterLink} to={'/'}>
