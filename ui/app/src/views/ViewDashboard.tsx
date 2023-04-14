@@ -158,7 +158,6 @@ function ViewDashboard() {
           }}
         >
           <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <strong>I MADE A CHANGE</strong>
             <DashboardView
               dashboardResource={data}
               datasourceApi={datasourceApi}
