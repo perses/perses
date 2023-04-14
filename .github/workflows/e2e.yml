@@ -47,7 +47,7 @@ jobs:
           # a one-off token for this use case.
           # https://github.com/happo/happo-e2e/blob/master/src/loadHappoConfig.js
           # https://github.com/happo/happo.io/blob/master/src/loadUserConfig.js
-          HAPPO_CHANGE_URL: ${{  github.event_name == 'pull_request' && github.event.pull_request.html_url }}
+          CHANGE_URL: ${{  github.event_name == 'pull_request' && github.event.pull_request.html_url }}
       - uses: actions/upload-artifact@v3
         if: always()
         with:
