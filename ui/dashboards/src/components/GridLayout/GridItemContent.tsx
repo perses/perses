@@ -19,7 +19,7 @@ import { Panel, PanelProps } from '../Panel/Panel';
 
 export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
-  width: number;
+  width: number; // necessary for determining the suggested step ms
 }
 
 /**
