@@ -41,7 +41,7 @@ jobs:
           DEBUG: pw:webserver
           # HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
           # HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}
-          HAPPO_CHANGE_URL: ${{ github.pull_request.html_url || json.head_commit.url }}
+          HAPPO_CHANGE_URL: ${{ github.event.pull_request.html_url || github.head_commit.url }}
       - uses: actions/upload-artifact@v3
         if: always()
         with:
