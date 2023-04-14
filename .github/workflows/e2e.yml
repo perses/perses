@@ -41,6 +41,13 @@ jobs:
           DEBUG: pw:webserver
           HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
           HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}
+          # When a pull request is made from a fork, the secrets above are 
+          # not available for security reasons, so happo cannot use them. This 
+          # value enables happo to use a fallback behavior where it generates
+          # a one-off token for this use case.
+          # https://github.com/happo/happo-e2e/blob/master/src/loadHappoConfig.js
+          # https://github.com/happo/happo.io/blob/master/src/loadUserConfig.js
+          HAPPO_CHANGE_URL: ${{  github.event_name == 'pull_request' && github.event.pull_request.html_url }}
       - uses: actions/upload-artifact@v3
         if: always()
         with:
