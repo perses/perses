@@ -73,9 +73,16 @@ export function getLineSeries(
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     emphasis: {
+      focus: 'series',
+      blurScope: 'coordinateSystem',
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 1,
+        width: lineWidth,
+      },
+    },
+    blur: {
+      lineStyle: {
+        opacity: 0.6,
       },
     },
   };
