@@ -16,8 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardResource } from '@perses-dev/core';
-import { dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
+import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
@@ -26,6 +25,7 @@ import { useIsReadonly } from '../model/config-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { CreateAction } from '../model/action';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
+import { useNavHistoryDispatch } from '../context/DashboardNavHistory';
 
 /**
  * Generated a resource name valid for the API.
@@ -64,6 +64,12 @@ function ViewDashboard() {
 
   const createDashboardMutation = useCreateDashboardMutation();
   const updateDashboardMutation = useUpdateDashboardMutation();
+
+  const navHistoryDispatch = useNavHistoryDispatch();
+  useEffect(
+    () => navHistoryDispatch({ project: projectName, name: dashboardName }),
+    [navHistoryDispatch, projectName, dashboardName]
+  );
 
   let isEditing = false;
 
@@ -157,7 +163,7 @@ function ViewDashboard() {
               datasourceApi={datasourceApi}
               dashboardTitleComponent={
                 <DashboardBreadcrumbs
-                  dashboardName={data.spec.display ? data.spec.display.name : data.metadata.name}
+                  dashboardName={dashboardDisplayName(data)}
                   dashboardProject={data.metadata.project}
                 />
               }

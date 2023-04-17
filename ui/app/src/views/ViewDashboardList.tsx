@@ -34,7 +34,7 @@ import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardList } from '../model/dashboard-client';
 import { ProjectModel } from '../model/project-client';
-import DashboardList from '../components/DashboardList';
+import { DashboardList } from '../components/DashboardList/DashboardList';
 import { DeleteProjectDialog } from '../components/DeleteProjectDialog/DeleteProjectDialog';
 import { AddProjectDialog } from '../components/AddProjectDialog/AddProjectDialog';
 
@@ -61,7 +61,7 @@ function RenderDashboardList() {
 
   const dashboardListAsMap = new Map<string, DashboardResource[]>();
   if (Array.isArray(data)) {
-    data.map((dashboard) => {
+    data.forEach((dashboard) => {
       const project = dashboard.metadata.project;
       const list = dashboardListAsMap.get(project);
       if (list !== undefined) {
@@ -91,7 +91,7 @@ function RenderDashboardList() {
           </Stack>
         </AccordionSummary>
         <AccordionDetails>
-          <DashboardList dashboardList={list} />
+          <DashboardList dashboardList={list} hideToolbar={true} />
         </AccordionDetails>
       </Accordion>
     );

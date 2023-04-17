@@ -20,6 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import { DarkModeContextProvider } from './context/DarkMode';
 import App from './App';
+import { NavHistoryProvider } from './context/DashboardNavHistory';
 
 /**
  * Renders the Perses application in the target container.
@@ -49,9 +50,11 @@ export function renderApp(container: Element | null) {
         <QueryClientProvider client={queryClient}>
           <QueryParamProvider adapter={ReactRouter6Adapter}>
             <DarkModeContextProvider>
-              <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                <App />
-              </SnackbarProvider>
+              <NavHistoryProvider>
+                <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                  <App />
+                </SnackbarProvider>
+              </NavHistoryProvider>
             </DarkModeContextProvider>
           </QueryParamProvider>
         </QueryClientProvider>

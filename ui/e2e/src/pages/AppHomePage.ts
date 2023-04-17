@@ -41,6 +41,18 @@ export class AppHomePage {
     await navigationPromise;
   }
 
+  /**
+   * Navigates to the specified project using the home page UI.
+   * @param projectName - Name of the project.
+   */
+  async navigateToProject(projectName: string) {
+    this.goto();
+
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickProjectLink(projectName);
+    await navigationPromise;
+  }
+
   async showDashboardList(projectName: string) {
     const projectButton = this.page.getByRole('button', {
       expanded: false,
@@ -49,9 +61,13 @@ export class AppHomePage {
     await projectButton.click();
   }
 
+  async clickProjectLink(projectName: string) {
+    const projectLink = this.page.getByRole('link', { name: projectName });
+    await projectLink.click();
+  }
+
   async clickDashboardItem(dashboardName: string) {
-    const dashboardButton = this.page.getByRole('button', {
-      name: dashboardName,
+    const dashboardButton = this.page.locator('//div[contains(@class, "MuiDataGrid-root")]').getByText(dashboardName, {
       exact: true,
     });
     await dashboardButton.click();

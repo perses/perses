@@ -13,6 +13,9 @@
 
 import { Locator, Page } from '@playwright/test';
 
+const mainDashboardListId = 'main-dashboards-list';
+const recentDashboardListId = 'recent-dashboards-list';
+
 /**
  * The Perses App project page.
  */
@@ -32,6 +35,10 @@ export class AppProjectPage {
     });
   }
 
+  async goto(projectName: string) {
+    await this.page.goto(`/projects/${projectName}`);
+  }
+
   async createDashboard(name: string) {
     await this.addDashboardButton.click();
 
@@ -41,5 +48,38 @@ export class AppProjectPage {
     await nameInput.type(name);
 
     await this.createDashboardDialog.getByRole('button', { name: 'Add' }).click();
+  }
+
+  /**
+   * Navigates to the specified project dashboard using the project page UI.
+   * @param projectName - Name of the project.
+   * @param dashboardName - Name of the dashboard.
+   */
+  async navigateToDashboard(projectName: string, dashboardName: string) {
+    await this.goto(projectName);
+
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickDashboardItemInList(dashboardName, mainDashboardListId);
+    await navigationPromise;
+  }
+
+  /**
+   * Navigates to the specified project dashboard using the project page
+   * @param projectName - Name of the project.
+   * @param dashboardName - Name of the dashboard.
+   */
+  async navigateToDashboardFromRecentDashboards(projectName: string, dashboardName: string) {
+    await this.goto(projectName);
+
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickDashboardItemInList(dashboardName, recentDashboardListId);
+    await navigationPromise;
+  }
+
+  async clickDashboardItemInList(dashboardName: string, dashboardListId: string) {
+    const dashboardButton = this.page.locator(`#${dashboardListId}`).getByText(dashboardName, {
+      exact: true,
+    });
+    await dashboardButton.click();
   }
 }
