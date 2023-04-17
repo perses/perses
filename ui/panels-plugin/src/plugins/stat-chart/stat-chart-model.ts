@@ -23,7 +23,6 @@ export interface SparklineOptions {
 export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
 export interface StatChartOptions {
-  name: string;
   calculation: CalculationType;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
@@ -32,7 +31,6 @@ export interface StatChartOptions {
 
 export function createInitialStatChartOptions(): StatChartOptions {
   return {
-    name: '',
     calculation: 'LastNumber',
     unit: {
       kind: 'Decimal',

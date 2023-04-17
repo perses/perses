@@ -30,7 +30,6 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'Stats',
         unit: {
           kind: 'Minutes',
         },
@@ -57,7 +56,6 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'My Stats',
         unit: {
           kind: 'Days',
         },
@@ -82,7 +80,6 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'enable spark stats',
         unit: {
           kind: 'Days',
         },
@@ -105,7 +102,6 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'enable spark stats',
         unit: {
           kind: 'Days',
         },
