@@ -15,6 +15,9 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
 import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
+export const DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER = 3.5; // adjusts how many focused series show in tooltip
+export const NARROW_NEARBY_SERIES_RANGE_MULTIPLIER = 0.5; // used to reduce number of focused series for heavy queries
+
 export interface FocusedSeriesInfo {
   seriesIdx: number | null;
   datumIdx: number | null;
@@ -141,9 +144,13 @@ export function getFocusedSeriesData(
   const chartModel = chart['_model'];
   const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
 
-  // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const seriesNum = chartData.timeSeries.length;
-  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 3.5;
+
+  // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
+  const yBuffer =
+    seriesNum > TOOLTIP_MAX_ITEMS
+      ? yAxisInterval * NARROW_NEARBY_SERIES_RANGE_MULTIPLIER
+      : yAxisInterval * DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER;
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
