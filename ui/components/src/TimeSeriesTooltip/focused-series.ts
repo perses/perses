@@ -36,6 +36,7 @@ export function getNearbySeries(
   data: EChartsDataFormat,
   pointInGrid: number[],
   yBuffer: number,
+  chart: EChartsInstance,
   unit?: UnitOptions
 ): FocusedSeriesArray {
   const currentFocusedData: FocusedSeriesArray = [];
@@ -64,6 +65,12 @@ export function getNearbySeries(
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
                 const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
                 const formattedY = formatValue(yValue, unit);
+                // trigger emphasis state of nearby series so tooltip matches highlighted lines
+                // https://echarts.apache.org/en/api.html#action.highlight
+                chart.dispatchAction({
+                  type: 'highlight',
+                  seriesIndex: seriesIdx,
+                });
                 currentFocusedData.push({
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,
@@ -73,6 +80,12 @@ export function getNearbySeries(
                   y: yValue,
                   formattedY: formattedY,
                   markerColor: markerColor.toString(),
+                });
+              } else {
+                // clear emphasis state of lines that are not focused
+                chart.dispatchAction({
+                  type: 'downplay',
+                  seriesIndex: seriesIdx,
                 });
               }
             }
@@ -126,14 +139,23 @@ export function getFocusedSeriesData(
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const seriesNum = chartData.timeSeries.length;
-  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
+  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 4;
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return getNearbySeries(chartData, pointInGrid, yBuffer, unit);
+      return getNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
     }
+  }
+
+  // clear all highlighted series when cursor exits canvas
+  // https://echarts.apache.org/en/api.html#action.downplay
+  for (let i = 0; i < seriesNum; i++) {
+    chart.dispatchAction({
+      type: 'downplay',
+      seriesIndex: i,
+    });
   }
   return [];
 }
