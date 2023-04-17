@@ -13,7 +13,7 @@
 
 import { Definition, UnknownSpec } from './definitions';
 import { Display } from './display';
-
+import { QueryDefinition } from './query';
 export interface PanelDefinition<PluginSpec = UnknownSpec> extends Definition<PanelSpec<PluginSpec>> {
   kind: 'Panel';
 }
@@ -21,6 +21,7 @@ export interface PanelDefinition<PluginSpec = UnknownSpec> extends Definition<Pa
 export interface PanelSpec<PluginSpec> {
   display: Display;
   plugin: Definition<PluginSpec>;
+  queries?: QueryDefinition[];
 }
 
 /**

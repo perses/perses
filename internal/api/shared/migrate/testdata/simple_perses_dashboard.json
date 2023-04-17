@@ -283,21 +283,6 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "LastNumber",
-              "query": {
-                "kind": "TimeSeriesQuery",
-                "spec": {
-                  "plugin": {
-                    "kind": "PrometheusTimeSeriesQuery",
-                    "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "argos-world"
-                      },
-                      "query": "vector(4)"
-                    }
-                  }
-                }
-              },
               "thresholds": {
                 "steps": [
                   {
@@ -311,7 +296,24 @@
                 ]
               }
             }
-          }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "argos-world"
+                    },
+                    "query": "vector(4)"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "1": {
@@ -325,21 +327,6 @@
             "kind": "GaugeChart",
             "spec": {
               "calculation": "LastNumber",
-              "query": {
-                "kind": "TimeSeriesQuery",
-                "spec": {
-                  "plugin": {
-                    "kind": "PrometheusTimeSeriesQuery",
-                    "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "argos-world"
-                      },
-                      "query": "vector(2)"
-                    }
-                  }
-                }
-              },
               "thresholds": {
                 "steps": [
                   {
@@ -356,7 +343,24 @@
                 "kind": "Hours"
               }
             }
-          }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "argos-world"
+                    },
+                    "query": "vector(2)"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "2": {
@@ -372,23 +376,6 @@
               "legend": {
                 "position": "Bottom"
               },
-              "queries": [
-                {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "datasource": {
-                          "kind": "PrometheusDatasource",
-                          "name": "argos-world"
-                        },
-                        "query": "vector(1)"
-                      }
-                    }
-                  }
-                }
-              ],
               "thresholds": {
                 "steps": [
                   {
@@ -402,7 +389,24 @@
                 ]
               }
             }
-          }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "argos-world"
+                    },
+                    "query": "vector(1)"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "3_0": {
@@ -418,23 +422,6 @@
               "legend": {
                 "position": "Bottom"
               },
-              "queries": [
-                {
-                  "kind": "TimeSeriesQuery",
-                  "spec": {
-                    "plugin": {
-                      "kind": "PrometheusTimeSeriesQuery",
-                      "spec": {
-                        "datasource": {
-                          "kind": "PrometheusDatasource",
-                          "name": "argos-world"
-                        },
-                        "query": "vector(3)"
-                      }
-                    }
-                  }
-                }
-              ],
               "thresholds": {
                 "steps": [
                   {
@@ -448,7 +435,24 @@
                 ]
               }
             }
-          }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "argos-world"
+                    },
+                    "query": "vector(3)"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "3_1": {

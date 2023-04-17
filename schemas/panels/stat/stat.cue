@@ -19,7 +19,6 @@ import (
 
 kind: "StatChart"
 spec: close({
-	query:       #ts_query
 	calculation: common.#calculation
 	unit?:       common.#unit
 	thresholds?: common.#thresholds
@@ -30,5 +29,3 @@ spec: close({
 		width?: number
 	}
 })
-
-#ts_query: _

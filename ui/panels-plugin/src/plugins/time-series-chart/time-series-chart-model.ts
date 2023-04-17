@@ -12,14 +12,13 @@
 // limitations under the License.
 
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
+import { ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.
  */
 export interface TimeSeriesChartOptions {
-  queries: TimeSeriesQueryDefinition[];
   legend?: LegendOptions;
   y_axis?: YAxisOptions;
   unit?: UnitOptions;
@@ -150,19 +149,5 @@ export const MIN_VALUE_PADDING_MULTIPLIER = 0.8;
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
  */
 export function createInitialTimeSeriesChartOptions(): TimeSeriesChartOptions {
-  return {
-    queries: [
-      {
-        kind: 'TimeSeriesQuery',
-        spec: {
-          plugin: {
-            kind: 'PrometheusTimeSeriesQuery',
-            spec: {
-              query: '',
-            },
-          },
-        },
-      },
-    ],
-  };
+  return {};
 }

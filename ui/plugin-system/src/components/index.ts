@@ -14,6 +14,7 @@
 export * from './CalculationSelector';
 export * from './DatasourceSelect';
 export * from './OptionsEditorTabs';
+export * from './PanelSpecEditor';
 export * from './PluginEditor';
 export * from './PluginKindSelect';
 export * from './PluginRegistry';
