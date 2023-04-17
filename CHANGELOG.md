@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.28.0 / 2023-04-17
+
+- [FEATURE] Revamp project page (#1062)
+- [ENHANCEMENT] Highlight behavior slight improvement using opacity blur (#1107)
+- [ENHANCEMENT] Increase tooltip max height to fit more series w/o scrolling (#1111)
+- [BREAKINGCHANGE] Define queries in panel spec instead of panel plugin spec (#1032)
+
 ## 0.27.0 / 2023-04-12
 
 - [FEATURE] Categorical color palette support in time series panel spec (JSON only) (#1031)
