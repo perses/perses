@@ -68,6 +68,7 @@ export function getLineSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
+      opacity: 0.9,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
@@ -76,6 +77,7 @@ export function getLineSeries(
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1.5,
+        opacity: 1,
       },
     },
   };

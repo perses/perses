@@ -139,7 +139,7 @@ export function getFocusedSeriesData(
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const seriesNum = chartData.timeSeries.length;
-  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 4;
+  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 3.5;
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
