@@ -62,7 +62,7 @@ describe('getNearbySeries', () => {
       kind: 'Decimal',
       decimal_places: 2,
     };
-    expect(getNearbySeries(chartData, pointInGrid, yBuffer, decimalUnit)).toEqual(focusedSeriesOutput);
+    expect(getNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(focusedSeriesOutput);
   });
 
   it('should return series values formatted as a percent', () => {
@@ -74,6 +74,8 @@ describe('getNearbySeries', () => {
       kind: 'PercentDecimal',
       decimal_places: 0,
     };
-    expect(getNearbySeries(chartData, pointInGrid, yBuffer, percentFormattedUnit)).toEqual(percentFormattedOutput);
+    expect(getNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
+      percentFormattedOutput
+    );
   });
 });

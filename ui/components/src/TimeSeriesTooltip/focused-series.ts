@@ -36,7 +36,7 @@ export function getNearbySeries(
   data: EChartsDataFormat,
   pointInGrid: number[],
   yBuffer: number,
-  chart: EChartsInstance,
+  chart?: EChartsInstance,
   unit?: UnitOptions
 ): FocusedSeriesArray {
   const currentFocusedData: FocusedSeriesArray = [];
@@ -67,10 +67,12 @@ export function getNearbySeries(
                 const formattedY = formatValue(yValue, unit);
                 // trigger emphasis state of nearby series so tooltip matches highlighted lines
                 // https://echarts.apache.org/en/api.html#action.highlight
-                chart.dispatchAction({
-                  type: 'highlight',
-                  seriesIndex: seriesIdx,
-                });
+                if (chart?.dispatchAction !== undefined) {
+                  chart.dispatchAction({
+                    type: 'highlight',
+                    seriesIndex: seriesIdx,
+                  });
+                }
                 currentFocusedData.push({
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,
@@ -83,10 +85,12 @@ export function getNearbySeries(
                 });
               } else {
                 // clear emphasis state of lines that are not focused
-                chart.dispatchAction({
-                  type: 'downplay',
-                  seriesIndex: seriesIdx,
-                });
+                if (chart?.dispatchAction !== undefined) {
+                  chart.dispatchAction({
+                    type: 'downplay',
+                    seriesIndex: seriesIdx,
+                  });
+                }
               }
             }
           }
@@ -152,10 +156,12 @@ export function getFocusedSeriesData(
   // clear all highlighted series when cursor exits canvas
   // https://echarts.apache.org/en/api.html#action.downplay
   for (let i = 0; i < seriesNum; i++) {
-    chart.dispatchAction({
-      type: 'downplay',
-      seriesIndex: i,
-    });
+    if (chart?.dispatchAction !== undefined) {
+      chart.dispatchAction({
+        type: 'downplay',
+        seriesIndex: i,
+      });
+    }
   }
   return [];
 }
