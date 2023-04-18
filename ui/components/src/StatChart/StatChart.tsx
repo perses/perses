@@ -104,8 +104,16 @@ export function StatChart(props: StatChartProps) {
 
   const containerPadding = `${chartsTheme.container.padding.default}px`;
 
+  const textAlignment = sparkline ? 'auto' : 'center';
+  const textStyles = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: textAlignment,
+    alignItems: textAlignment,
+  };
+
   return (
-    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: '100%', width: '100%', ...textStyles }}>
       <Typography
         variant="h3"
         sx={(theme) => ({
@@ -117,17 +125,15 @@ export function StatChart(props: StatChartProps) {
         {formattedValue}
       </Typography>
       {sparkline !== undefined && (
-        <Box sx={{ flex: 1 }}>
-          <EChart
-            sx={{
-              width: '100%',
-              height: '100%',
-            }}
-            option={option}
-            theme={chartsTheme.echartsTheme}
-            renderer="svg"
-          />
-        </Box>
+        <EChart
+          sx={{
+            width: '100%',
+            height: '100%',
+          }}
+          option={option}
+          theme={chartsTheme.echartsTheme}
+          renderer="svg"
+        />
       )}
     </Box>
   );
