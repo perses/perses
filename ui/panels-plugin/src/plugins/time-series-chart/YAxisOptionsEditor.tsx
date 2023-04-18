@@ -51,6 +51,7 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
         control={
           <TextField
             value={value.label ?? ''}
+            inputProps={{ 'aria-label': 'enter y axis label' }}
             onChange={(e) =>
               onChange({
                 ...value,

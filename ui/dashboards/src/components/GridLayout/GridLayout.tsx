@@ -20,6 +20,7 @@ import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 import { GridContainer } from './GridContainer';
 
+const DEFAULT_MARGIN = 10;
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps {
@@ -38,6 +39,8 @@ export function GridLayout(props: GridLayoutProps) {
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
   const { isEditMode } = useEditMode();
 
+  const [gridColWidth, setGridColWidth] = useState(0);
+
   const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts) => {
     // Using the value from `allLayouts` instead of `currentLayout` because of
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
@@ -47,6 +50,23 @@ export function GridLayout(props: GridLayoutProps) {
     if (smallLayout) {
       updatePanelGroupLayouts(smallLayout);
     }
+  };
+
+  /**
+   * Calculate the column width so we can determine the width of each panel for suggested step ms
+   * https://github.com/react-grid-layout/react-grid-layout/blob/master/lib/calculateUtils.js#L14-L35
+   */
+  const handleWidthChange = (
+    containerWidth: number,
+    margin: [number, number],
+    cols: number,
+    containerPadding: [number, number]
+  ) => {
+    const marginX = margin[0];
+    const marginWidth = marginX * (cols - 1);
+    const containerPaddingWidth = containerPadding[0] * 2;
+    // exclude margin and padding from total width
+    setGridColWidth((containerWidth - marginWidth - containerPaddingWidth) / cols);
   };
 
   return (
@@ -72,14 +92,19 @@ export function GridLayout(props: GridLayoutProps) {
           resizeHandles={['se']}
           isDraggable={isEditMode}
           isResizable={isEditMode}
+          margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
           containerPadding={[0, 10]}
           layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: groupDefinition.itemLayouts }}
           onLayoutChange={handleLayoutChange}
+          onWidthChange={handleWidthChange}
         >
-          {groupDefinition.itemLayouts.map(({ i }) => (
+          {groupDefinition.itemLayouts.map(({ i, w }) => (
             <div key={i}>
               <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <GridItemContent panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }} />
+                <GridItemContent
+                  panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }}
+                  width={calculateGridItemWidth(w, gridColWidth)}
+                />
               </ErrorBoundary>
             </div>
           ))}
@@ -88,3 +113,16 @@ export function GridLayout(props: GridLayoutProps) {
     </GridContainer>
   );
 }
+
+/**
+ * Calculates grid item width
+ * @param w number of columns the grid item spans
+ * @param colWidth the width of each column in px
+ * @returns grid item's width in px
+ * https://github.com/react-grid-layout/react-grid-layout/blob/master/lib/calculateUtils.js#L14-L35
+ */
+const calculateGridItemWidth = (w: number, colWidth: number) => {
+  // 0 * Infinity === NaN, which causes problems with resize contraints
+  if (!Number.isFinite(w)) return w;
+  return Math.round(colWidth * w + Math.max(0, w - 1) * DEFAULT_MARGIN);
+};

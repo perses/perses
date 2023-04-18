@@ -11,15 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
-import { useTimeSeriesQueries } from '@perses-dev/plugin-system';
+import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
+  DEFAULT_Y_AXIS,
+  MIN_VALUE_PADDING_MULTIPLIER,
   VisualOptions,
+  YAxisOptions,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -35,7 +39,7 @@ export const EMPTY_GRAPH_DATA = {
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScaleForQueries(queries: RunningQueriesState): TimeScale | undefined {
+export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['queryResults']): TimeScale | undefined {
   const seriesData = queries.map((query) => (query.isLoading ? undefined : query.data));
   return getCommonTimeScale(seriesData);
 }
@@ -69,9 +73,16 @@ export function getLineSeries(
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     emphasis: {
+      focus: 'series',
+      blurScope: 'coordinateSystem',
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 1,
+        width: lineWidth,
+      },
+    },
+    blur: {
+      lineStyle: {
+        opacity: 0.6,
       },
     },
   };
@@ -129,4 +140,36 @@ function findMax(timeSeries: EChartsTimeSeries[]) {
     });
   });
   return max;
+}
+
+/**
+ * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
+ */
+export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentOption {
+  const yAxis: YAXisComponentOption = {
+    show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
+    min: inputAxis?.min,
+    max: inputAxis?.max,
+  };
+
+  if (inputAxis?.min === undefined) {
+    // Sets minimum axis label relative to data instead of zero.
+    yAxis.min = (value) => {
+      // https://echarts.apache.org/en/option.html#yAxis.min
+      if (value.min >= 0 && value.min <= 1) {
+        // Helps with PercentDecimal units, or datasets that return 0 or 1 booleans
+        return 0;
+      }
+
+      if (value.min > 0) {
+        // Allows for padding between origin and first series.
+        // Current value was chosen arbitrarily and will need to be adjusted.
+        return value.min * MIN_VALUE_PADDING_MULTIPLIER;
+      }
+
+      // No padding added since negative numbers for min throws it off.
+      return value.min;
+    };
+  }
+  return yAxis;
 }

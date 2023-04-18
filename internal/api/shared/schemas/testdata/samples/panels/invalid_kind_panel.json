@@ -1,0 +1,14 @@
+{
+  "kind": "UnknownChart",
+  "spec": {
+    "a": "no",
+    "b": {
+      "c": [
+        {
+          "e": "up",
+          "f": "the up metric"
+        }
+      ]
+    }
+  }
+}

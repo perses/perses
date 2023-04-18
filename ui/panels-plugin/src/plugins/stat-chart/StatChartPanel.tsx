@@ -15,8 +15,7 @@ import { StatChart, StatChartData, useChartsTheme } from '@perses-dev/components
 import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { TimeSeriesData } from '@perses-dev/core';
-import { useTimeSeriesQuery, PanelProps, CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
-import { useSuggestedStepMs } from '../../model/time';
+import { useDataQueries, PanelProps, CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
 
@@ -24,15 +23,15 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    spec: { query, calculation, unit, sparkline, thresholds },
+    spec: { calculation, unit, sparkline, thresholds },
     contentDimensions,
   } = props;
-  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
-  const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
-  const chartData = useChartData(data, calculation);
+
+  const { queryResults, isLoading } = useDataQueries();
+  const chartData = useChartData(queryResults[0]?.data, calculation);
   const chartsTheme = useChartsTheme();
 
-  if (error) throw error;
+  if (queryResults[0]?.error) throw queryResults[0]?.error;
 
   if (contentDimensions === undefined) return null;
 

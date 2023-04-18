@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { QueryDefinition } from '@perses-dev/core';
 import React from 'react';
 
 /**
@@ -36,4 +37,11 @@ export interface OptionsEditorProps<Spec> {
   // with whatever makes sense as visual editing evolves
   value: Spec;
   onChange: (next: Spec) => void;
+}
+
+/**
+ * Common props passed to query editor component
+ */
+export interface QueryEditorProps<Spec> extends OptionsEditorProps<Spec> {
+  queries: QueryDefinition[];
 }

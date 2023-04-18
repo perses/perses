@@ -11,17 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, UnknownSpec } from './definitions';
+import { UnknownSpec } from './definitions';
+import { QueryDefinition } from './query';
 import { UnixTimeMs } from './time';
 
-export interface TimeSeriesQueryDefinition<PluginSpec = UnknownSpec>
-  extends Definition<TimeSeriesQuerySpec<PluginSpec>> {
-  kind: 'TimeSeriesQuery';
-}
-
-export interface TimeSeriesQuerySpec<PluginSpec> {
-  plugin: Definition<PluginSpec>;
-}
+export type TimeSeriesQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TimeSeriesQuery', PluginSpec>;
 
 export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
 

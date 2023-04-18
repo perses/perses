@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { round } from '../../utils/mathjs';
 import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 
@@ -33,50 +32,24 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
   },
 };
 
-export function formatDecimal(value: number, unitOptions: DecimalUnitOptions): string {
-  const decimalPlaces = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+export function formatDecimal(value: number, { abbreviate, decimal_places }: DecimalUnitOptions): string {
+  decimal_places = decimal_places ?? DEFAULT_DECIMAL_PLACES;
 
-  if (value === 0) {
-    return value.toString();
+  // Avoids maximumFractionDigits value is out of range error. Possible values are 0 to 20.
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
+  if (decimal_places < 0) {
+    decimal_places = 0;
+  } else if (decimal_places > 20) {
+    decimal_places = 20;
   }
 
-  if (unitOptions.abbreviate && value >= 1000) {
-    return abbreviateLargeNumber(value, decimalPlaces);
-  }
+  const showFullNumber = abbreviate == false || value < 1000;
 
-  const formatParams: Intl.NumberFormatOptions = {
+  const formatter = new Intl.NumberFormat('en-US', {
     style: 'decimal',
-    maximumFractionDigits: decimalPlaces,
+    notation: showFullNumber ? 'standard' : 'compact',
+    maximumFractionDigits: decimal_places,
     useGrouping: true,
-  };
-  const decimalFormatter = new Intl.NumberFormat('en-US', formatParams);
-  return decimalFormatter.format(value);
-}
-
-/**
- * Takes large numbers and abbreviates them with the appropriate suffix
- * 10123 -> 10.123k
- * 1000000 -> 1M
- */
-export function abbreviateLargeNumber(num: number, decimalPlaces = 2) {
-  const modifier = (n: number) => round(n, decimalPlaces);
-  return formatNumber(num, modifier);
-}
-
-/**
- * Takes large numbers, rounds and abbreviates them with the appropriate suffix
- * Add modifier to run on output value prior to unit being added (defaults to rounding)
- */
-export function formatNumber(num: number, modifier?: (n: number) => number): string {
-  const fn = modifier ?? Math.round;
-
-  return num >= 1e12
-    ? fn(num / 1e12) + 'T'
-    : num >= 1e9
-    ? fn(num / 1e9) + 'B'
-    : num >= 1e6
-    ? fn(num / 1e6) + 'M'
-    : num >= 1e3
-    ? fn(num / 1e3) + 'K'
-    : num.toString();
+  });
+  return formatter.format(value);
 }

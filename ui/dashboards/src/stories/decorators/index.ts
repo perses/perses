@@ -13,6 +13,7 @@
 
 export * from './constants';
 export * from './WithDashboard';
+export * from './WithDataQueriesProvider';
 export * from './WithDatasourceStore';
 export * from './WithPluginRegistry';
 export * from './WithQueryClient';

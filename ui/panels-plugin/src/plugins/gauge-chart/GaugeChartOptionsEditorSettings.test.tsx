@@ -17,18 +17,6 @@ import userEvent from '@testing-library/user-event';
 import { GaugeChartOptions } from './gauge-chart-model';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
-const MOCK_QUERY = {
-  kind: 'TimeSeriesQuery',
-  spec: {
-    plugin: {
-      kind: 'PrometheusTimeSeriesQuery',
-      spec: {
-        query: '',
-      },
-    },
-  },
-} as const;
-
 describe('GaugeChartOptionsEditorSettings', () => {
   const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = jest.fn()) => {
     render(
@@ -46,7 +34,6 @@ describe('GaugeChartOptionsEditorSettings', () => {
           kind: 'Decimal',
         },
         calculation: 'First',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -73,7 +60,6 @@ describe('GaugeChartOptionsEditorSettings', () => {
           kind: 'Days',
         },
         calculation: 'First',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -102,7 +88,6 @@ describe('GaugeChartOptionsEditorSettings', () => {
         },
         max: 1,
         calculation: 'LastNumber',
-        query: MOCK_QUERY,
       },
       onChange
     );

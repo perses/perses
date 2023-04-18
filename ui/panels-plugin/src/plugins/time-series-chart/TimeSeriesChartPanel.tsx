@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
-import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
+import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
@@ -27,12 +27,10 @@ import {
   ZoomEventData,
   useChartsTheme,
 } from '@perses-dev/components';
-import { useSuggestedStepMs } from '../../model/time';
 import {
   TimeSeriesChartOptions,
   DEFAULT_UNIT,
   DEFAULT_VISUAL,
-  DEFAULT_Y_AXIS,
   PANEL_HEIGHT_LG_BREAKPOINT,
   LEGEND_HEIGHT_SM,
   LEGEND_HEIGHT_LG,
@@ -43,6 +41,7 @@ import {
   getCommonTimeScaleForQueries,
   EMPTY_GRAPH_DATA,
   convertPercentThreshold,
+  convertPanelYAxis,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 
@@ -50,12 +49,16 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { queries, thresholds, y_axis },
+    spec: { thresholds, y_axis },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
   const echartsPalette = chartsTheme.echartsTheme.color ?? [muiTheme.palette.primary];
+
+  const { isFetching, isLoading, queryResults } = useDataQueries();
+
+  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -86,19 +89,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
 
   // convert Perses dashboard format to be ECharts compatible
-  const yAxis = {
-    show: y_axis?.show ?? DEFAULT_Y_AXIS.show,
-    min: y_axis?.min, // leaves min and max undefined by default to let ECharts calcualate
-    max: y_axis?.max,
-  };
+  const echartsYAxis = convertPanelYAxis(y_axis);
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
-
-  const suggestedStepMs = useSuggestedStepMs(adjustedContentDimensions?.width);
-  const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
-  const fetching = queryResults.some((result) => result.isFetching);
-  const loading = queryResults.some((result) => result.isLoading);
-  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   const { setTimeRange } = useTimeRange();
 
@@ -133,7 +126,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const { graphData } = useDeepMemo(() => {
     // If loading or fetching, we display a loading indicator.
     // We skip the expensive loops below until we are done loading or fetching.
-    if (loading || fetching) {
+    if (isLoading || isFetching) {
       return {
         graphData: EMPTY_GRAPH_DATA,
       };
@@ -154,8 +147,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
     const xAxisData = [...getXValues(timeScale)];
 
-    // ensures color does not reset for every query
-    let seriesCount = 0;
+    // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
+    let seriesIndex = 0;
 
     for (const result of queryResults) {
       // Skip queries that are still loading or don't have data
@@ -172,11 +165,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         const seriesColor = getSeriesColor(
           formattedSeriesName,
-          seriesCount,
+          seriesIndex,
           echartsPalette as string[],
           visual.palette?.kind
         );
-        seriesCount++; // used for repeating colors in Categorical palette
+        seriesIndex++; // Used for repeating colors in Categorical palette
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
@@ -187,7 +180,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name,
+            id: timeSeries.name + seriesIndex, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
             isSelected,
             color: seriesColor,
@@ -199,6 +192,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
+      // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
+      // These are styled with predefined colors and a dashed style to look different than series from query results.
+      // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
       const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
       thresholds.steps.forEach((step: StepOptions, index: number) => {
         const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
@@ -206,8 +202,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const stepOption: StepOptions = {
           color: thresholdLineColor,
           value:
+            // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
             thresholds.mode === 'Percent'
-              ? convertPercentThreshold(step.value, graphData.timeSeries, yAxis.max, yAxis.min)
+              ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
               : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
@@ -221,13 +218,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, yAxis.max, yAxis.min]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
   }
 
-  if (loading === true || fetching == true) {
+  if (isLoading || isFetching) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -268,7 +265,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
-    left: !yAxis.show ? 0 : gridLeft,
+    left: !echartsYAxis.show ? 0 : gridLeft,
     right: legend && legend.position === 'Right' ? legendWidth : 20,
     bottom: legend && legend.position === 'Bottom' ? legendHeight : 0,
   };
@@ -286,7 +283,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       <LineChart
         height={adjustedContentDimensions.height}
         data={graphData}
-        yAxis={yAxis}
+        yAxis={echartsYAxis}
         unit={unit}
         grid={gridOverrides}
         tooltipConfig={{ wrapLabels: true }}

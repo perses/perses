@@ -1,17 +1,34 @@
 # Changelog
 
+## 0.27.0 / 2023-04-12
+
+- [FEATURE] Categorical color palette support in time series panel spec (JSON only) (#1031)
+- [ENHANCEMENT] Y axis origin now auto adjusts based on the data min (#1046)
+- [ENHANCEMENT] Add more unit tests for formatDecimal (#1095)
+- [ENHANCEMENT] Format bytes with units that are powers of 1000 (#1084)
+- [ENHANCEMENT] Virtualize legend to fix perf issues (#1074)
+- [ENHANCEMENT] Remove minimumFractionDigits (#1075)
+- [ENHANCEMENT] Hide secret when getting the config through the API (#1078)
+- [BUGFIX] Respect `series_name_format` in legend and tooltip when metric labels are empty (#1085)
+- [BUGFIX] Stat chart value to use threshold color (#1081)
+- [BUGFIX] List variable input label should match fieldset (#1083)
+- [BUGFIX] Fix tooltip position on long dashboards (#1064)
+- [BUGFIX] Dashboard validation: fix issue with variable parsing when the query embeds a regexp
+- [BUGFIX] Revert tooltip prop to show full query and always show resolved series name (#1073)
+- [BUGFIX] miscellaneous fixes to address console errors (#1068)
+
 ## 0.26.1 / 2023-04-03
 
 - [BUGFIX] Add undef check to fix add panel showContent error (#1067)
 
 ## 0.26.0 / 2023-04-03
 
-- [FEATURE] Add __experimentalEChartsOptionsOverride prop to line chart component (#1023)
+- [FEATURE] Add experimentalEChartsOptionsOverride prop to line chart component (#1023)
 - [FEATURE] Stack option support in time series panel (#997)
 - [ENHANCEMENT] always show info icon when panel has a description (#1059)
 - [ENHANCEMENT] PrometheusLabelValuesVariable plugin: Improve the migration logic to preserve the eventual matcher (#1047)
 - [ENHANCEMENT] Ensure all bad request error has the same format (#1043)
-- [ENHANCEMENT] small improvements to the Migrate feature - backend: update plugins mig.cuepart files so that migration don't fail the on empty panels (no query) - Migrate screen: more meaningful errors on wrong inputs - Migrate screen: add missing margin to container - Migrate screen: adjust warning message (#1041)
+- [ENHANCEMENT] Small improvements to the Migrate feature for empty panels and meaningful errors (#1041)
 - [ENHANCEMENT] Empty state can include image (#1035)
 - [ENHANCEMENT] Fetch updates to show full error message (#1015)
 - [BUGFIX] Migrate feature: fix issue with children panels not attached to their parent row when it's expanded (#1052)

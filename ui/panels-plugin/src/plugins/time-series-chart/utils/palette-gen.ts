@@ -31,12 +31,12 @@ export function getRandomColor(identifier: string): string {
  */
 export function getSeriesColor(
   name: string,
-  seriesCount: number,
+  seriesIndex: number,
   palette: string[],
   paletteKind: PaletteOptions['kind'] = 'Auto'
 ): string {
   if (paletteKind === 'Categorical' && Array.isArray(palette)) {
-    const colorIndex = seriesCount % palette.length;
+    const colorIndex = seriesIndex % palette.length;
     // TODO: take fallback color from theme
     const seriesColor = palette[colorIndex];
     if (seriesColor !== undefined) {
