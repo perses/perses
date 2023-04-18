@@ -91,7 +91,7 @@ Signing a tag with a GPG key is appreciated, but in case you can't add a GPG key
 following [procedure](https://docs.github.com/en/authentication/managing-commit-signature-verification), you can replace
 the `-s` flag by `-a` flag of the git tag command to only annotate the tag without signing.
 
-Once a tag is created, an automated release process for this tag is trigger via Github Actions. This automated process includes:
+Once a tag is created, an automated release process for this tag is triggered via Github Actions. This automated process includes:
 - Publishing new versions of the UI libraries to npm.
 - Building new go binaries and docker images.
 - Creating a new Github release that uses the changelog as the release notes and provides tarballs with the latest go binaries & docker images.
