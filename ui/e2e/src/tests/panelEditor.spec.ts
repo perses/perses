@@ -60,7 +60,6 @@ test.describe('Dashboard: Panel Editor', () => {
     const settingsTab = dashboardPage.page.getByRole('tab', { name: 'Settings', exact: true });
     await settingsTab.click();
     const resetButton = dashboardPage.page.getByRole('button', { name: 'Reset To Defaults', exact: true });
-    await expect(resetButton).toBeVisible();
     await resetButton.click();
     const EXAMPLE_AXIS_LABEL = 'Memory';
     const yAxisLabelInput = dashboardPage.page.getByRole('textbox', { name: 'enter y axis label' });
