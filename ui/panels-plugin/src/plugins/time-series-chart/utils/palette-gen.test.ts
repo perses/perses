@@ -17,17 +17,17 @@ describe('getCategoricalPaletteColor', () => {
   const fallbackColor = '#ff0000';
 
   it('should return 1st color in Categorical palette', () => {
-    const paletteColor = getCategoricalPaletteColor(0, ['#fff', '000', '#111', '#222', '#333'], fallbackColor);
+    const paletteColor = getCategoricalPaletteColor(['#fff', '000', '#111', '#222', '#333'], 0, fallbackColor);
     expect(paletteColor).toEqual('#fff');
   });
 
   it('should return 3rd color in Categorical palette', () => {
-    const paletteColor = getCategoricalPaletteColor(2, ['#fff', '000', '#111', '#222', '#333'], fallbackColor);
+    const paletteColor = getCategoricalPaletteColor(['#fff', '000', '#111', '#222', '#333'], 2, fallbackColor);
     expect(paletteColor).toEqual('#111');
   });
 
   it('should repeat color after looping through entire palette', () => {
-    const paletteColor = getCategoricalPaletteColor(5, ['#fff', '000', '#111', '#222', '#333'], fallbackColor);
+    const paletteColor = getCategoricalPaletteColor(['#fff', '000', '#111', '#222', '#333'], 5, fallbackColor);
     expect(paletteColor).toEqual('#fff');
   });
 });
