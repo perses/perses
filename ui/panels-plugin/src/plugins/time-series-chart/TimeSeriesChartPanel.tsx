@@ -55,13 +55,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
   const echartsPalette = chartsTheme.echartsTheme.color;
-<<<<<<< HEAD
-=======
 
   const { isFetching, isLoading, queryResults } = useDataQueries();
 
   const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
->>>>>>> sjcobb/color-palette-gen-hash-lib-controls
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
