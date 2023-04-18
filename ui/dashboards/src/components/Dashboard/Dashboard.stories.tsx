@@ -459,7 +459,12 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           display: { name: 'Auto Palette', description: 'Time series chart with Auto palette example' },
           plugin: {
             kind: 'TimeSeriesChart',
-            spec: {},
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+              visual: { connect_nulls: true },
+            },
           },
           queries: [
             {
@@ -470,6 +475,40 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
                     query: 'fake_query_with_multiple_series',
+                    series_name_format: '{{job}} {{le}} {{instance}}',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      ColorPaletteCategorical: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Categorical Palette', description: 'Time series chart with Categorical palette example' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+              visual: {
+                palette: { kind: 'Categorical' },
+                connect_nulls: true,
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_multiple_series',
+                    series_name_format: '{{job}} {{le}} {{instance}}',
                   },
                 },
               },
@@ -490,7 +529,8 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             { x: 0, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendBottom' } },
             { x: 8, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendRight' } },
             { x: 16, y: 7, width: 8, height: 10, content: { $ref: '#/spec/panels/LegendTallFormatted' } },
-            { x: 0, y: 0, width: 16, height: 7, content: { $ref: '#/spec/panels/ColorPaletteAuto' } },
+            { x: 0, y: 14, width: 16, height: 7, content: { $ref: '#/spec/panels/ColorPaletteAuto' } },
+            { x: 0, y: 21, width: 16, height: 7, content: { $ref: '#/spec/panels/ColorPaletteCategorical' } },
           ],
         },
       },
@@ -553,7 +593,10 @@ export const ExampleWithTimeSeriesPanels: Story = {
             {
               query: 'fake_query_with_multiple_series',
               response: {
-                body: mockTimeSeriesResponseWithManySeries(),
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                }),
               },
             },
           ],
