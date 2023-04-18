@@ -17,6 +17,7 @@ import { action } from '@storybook/addon-actions';
 import { Button, Stack } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import {
+  mockTimeSeriesResponseWithManySeries,
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
 } from '@perses-dev/internal-utils';
@@ -452,6 +453,30 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           ],
         },
       },
+      ColorPaletteAuto: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Auto Palette', description: 'Time series chart with Auto palette example' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {},
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_multiple_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
     },
     layouts: [
       {
@@ -465,6 +490,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             { x: 0, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendBottom' } },
             { x: 8, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendRight' } },
             { x: 16, y: 7, width: 8, height: 10, content: { $ref: '#/spec/panels/LegendTallFormatted' } },
+            { x: 0, y: 0, width: 16, height: 7, content: { $ref: '#/spec/panels/ColorPaletteAuto' } },
           ],
         },
       },
@@ -522,6 +548,12 @@ export const ExampleWithTimeSeriesPanels: Story = {
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
                 }),
+              },
+            },
+            {
+              query: 'fake_query_with_multiple_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries(),
               },
             },
           ],
