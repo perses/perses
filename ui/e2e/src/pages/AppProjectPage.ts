@@ -13,8 +13,8 @@
 
 import { Locator, Page } from '@playwright/test';
 
-const mainDashboardListId = 'main-dashboards-list';
-const recentDashboardListId = 'recent-dashboards-list';
+const mainDashboardListId = 'main-dashboard-list';
+const recentDashboardListId = 'recent-dashboard-list';
 
 /**
  * The Perses App project page.

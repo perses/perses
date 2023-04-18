@@ -15,7 +15,7 @@ import { expect, test } from '@playwright/test';
 import happoPlaywright from 'happo-playwright';
 import { AppHomePage, AppProjectPage, DashboardPage } from '../pages';
 
-test.describe('App', () => {
+test.describe('homeView', () => {
   test.beforeEach(async ({ context }) => {
     await happoPlaywright.init(context);
   });
@@ -26,24 +26,61 @@ test.describe('App', () => {
 
   test('can navigate to a dashboard', async ({ page }) => {
     const homePage = new AppHomePage(page);
-
     await homePage.goto();
 
     await homePage.showDashboardList('perses');
 
     const navigationPromise = page.waitForNavigation();
-    await homePage.clickDashboardItem('Demo');
+    await homePage.clickDashboardItem('perses', 'Demo');
+    await navigationPromise;
+  });
+
+  test('can navigate to an important dashboard', async ({ page }) => {
+    const homePage = new AppHomePage(page);
+    await homePage.goto();
+
+    const navigationPromise = page.waitForNavigation();
+    await homePage.clickImportantDashboardItem('perses', 'Demo');
+    await navigationPromise;
+  });
+
+  test('can navigate to an recent dashboard', async ({ page }) => {
+    const project = 'perses';
+    const dashboard = 'Demo';
+
+    const homePage = new AppHomePage(page);
+    await homePage.goto();
+
+    await homePage.navigateToDashboard(project, dashboard);
+
+    const dashboardPage = new DashboardPage(page);
+    await dashboardPage.goBackToHomePage();
+
+    const navigationPromise = page.waitForNavigation();
+    await homePage.clickRecentDashboardItem(project, dashboard);
     await navigationPromise;
   });
 
   test('can navigate to a project', async ({ page }) => {
     const homePage = new AppHomePage(page);
-
     await homePage.goto();
 
     // Go to testing project
     const navigationPromise = page.waitForNavigation();
     await homePage.clickProjectLink('testing');
+    await navigationPromise;
+  });
+
+  test('can search a dashboard', async ({ page }) => {
+    const homePage = new AppHomePage(page);
+    await homePage.goto();
+
+    // Benchmark dashboard is located in Perses project
+    await homePage.searchDashboardOrProject('Benchmark');
+
+    // Go to testing project
+    const navigationPromise = page.waitForNavigation();
+    await homePage.clickProjectLink('perses');
     await navigationPromise;
   });
 

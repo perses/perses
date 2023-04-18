@@ -18,6 +18,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
+import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
 import { RenameDashboardDialog } from '../RenameDashboardDialog/RenameDashboardDialog';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
@@ -25,10 +26,19 @@ import { DashboardDataGrid, Row } from './DashboardDataGrid';
 export interface DashboardListProperties {
   dashboardList: DashboardResource[];
   hideToolbar?: boolean;
+  initialState?: GridInitialStateCommunity;
+  isLoading?: boolean;
 }
 
+/**
+ * DataGrid used to display dashboards.
+ * @param props.dashboardList Contains all dashboards to display
+ * @param props.hideToolbar Hide toolbar if enabled
+ * @param props.initialState Provide a way to override default initialState
+ * @param props.isLoading Display a loading circle if enabled
+ */
 export function DashboardList(props: DashboardListProperties) {
-  const { dashboardList, hideToolbar } = props;
+  const { dashboardList, hideToolbar, isLoading, initialState } = props;
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -72,6 +82,28 @@ export function DashboardList(props: DashboardListProperties) {
     },
     [getDashboard]
   );
+
+  // Merging default initial state with the props initial state (props initial state will overwrite properties)
+  const mergedInitialState = useMemo(() => {
+    return {
+      ...{
+        columns: {
+          columnVisibilityModel: {
+            project: false,
+            id: false,
+            version: false,
+          },
+        },
+        sorting: {
+          sortModel: [{ field: 'displayName', sort: 'asc' }],
+        },
+        pagination: {
+          paginationModel: { pageSize: 10, page: 0 },
+        },
+      },
+      ...(initialState || {}),
+    } as GridInitialStateCommunity;
+  }, [initialState]);
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
@@ -142,22 +174,9 @@ export function DashboardList(props: DashboardListProperties) {
       <DashboardDataGrid
         rows={rows}
         columns={columns}
-        initialState={{
-          columns: {
-            columnVisibilityModel: {
-              project: false,
-              id: false,
-              version: false,
-            },
-          },
-          sorting: {
-            sortModel: [{ field: 'displayName', sort: 'asc' }],
-          },
-          pagination: {
-            paginationModel: { pageSize: 10, page: 0 },
-          },
-        }}
+        initialState={mergedInitialState}
         hideToolbar={hideToolbar}
+        isLoading={isLoading}
       ></DashboardDataGrid>
       <Box>
         {targetedDashboard && (

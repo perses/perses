@@ -12,11 +12,15 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { fetchJson } from '@perses-dev/core';
+import { DashboardSelector, fetchJson } from '@perses-dev/core';
+import { useMemo } from 'react';
+import { marked } from 'marked';
+import * as DOMPurify from 'dompurify';
 import { useSnackbar } from '../context/SnackbarProvider';
 import buildURL from './url-builder';
 
 const resource = 'config';
+const importantDashboardListName = 'importants';
 
 export interface ConfigSchemasModel {
   panels_path: string;
@@ -29,6 +33,8 @@ export interface ConfigSchemasModel {
 export interface ConfigModel {
   readonly: boolean;
   schemas: ConfigSchemasModel;
+  dashboard_lists: Map<string, DashboardSelector[]>;
+  information: string;
 }
 
 type ConfigOptions = Omit<UseQueryOptions<ConfigModel, Error>, 'queryKey' | 'queryFn'>;
@@ -51,4 +57,30 @@ export function useIsReadonly() {
     return undefined;
   }
   return data.readonly;
+}
+
+export function useDashboardLists() {
+  const { exceptionSnackbar } = useSnackbar();
+  const { data, isLoading } = useConfig({ onError: exceptionSnackbar });
+  const dashboardLists = useMemo(() => {
+    return data && data.dashboard_lists
+      ? new Map<string, DashboardSelector[]>(Object.entries(data.dashboard_lists))
+      : new Map<string, DashboardSelector[]>();
+  }, [data]);
+  return { data: dashboardLists, isLoading: isLoading };
+}
+
+export function useImportantDashboardSelectors() {
+  const { data, isLoading } = useDashboardLists();
+  return { data: data.get(importantDashboardListName) || [], isLoading: isLoading };
+}
+
+export function useInformation() {
+  const { exceptionSnackbar } = useSnackbar();
+  const { data, isLoading } = useConfig({ onError: exceptionSnackbar });
+
+  const html = useMemo(() => marked.parse(data?.information || '', { gfm: true }), [data?.information]);
+  const sanitizedHTML = useMemo(() => DOMPurify.sanitize(html), [html]);
+
+  return { data: sanitizedHTML, isLoading: isLoading };
 }

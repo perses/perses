@@ -29,7 +29,7 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
   const navigate = useNavigate();
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
-  const data = useRecentDashboardList(props.projectName);
+  const { data, isLoading } = useRecentDashboardList(props.projectName);
 
   const handleDashboardCreation = function (name: string) {
     navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
@@ -45,7 +45,7 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <Card>
-          <RecentDashboardList dashboardList={data} />
+          <RecentDashboardList dashboardList={data} isLoading={isLoading} />
         </Card>
       </ErrorBoundary>
       <CreateDashboardDialog

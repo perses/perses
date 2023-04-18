@@ -69,10 +69,11 @@ export interface DashboardDataGridProperties {
   rows: Row[];
   initialState?: GridInitialStateCommunity;
   hideToolbar?: boolean;
+  isLoading?: boolean;
 }
 
 export function DashboardDataGrid(props: DashboardDataGridProperties) {
-  const { columns, rows, initialState, hideToolbar } = props;
+  const { columns, rows, initialState, hideToolbar, isLoading } = props;
 
   const navigate = useNavigate();
 
@@ -83,6 +84,7 @@ export function DashboardDataGrid(props: DashboardDataGridProperties) {
       rows={rows}
       columns={columns}
       getRowId={(row) => row.name}
+      loading={isLoading}
       slots={
         hideToolbar
           ? { noRowsOverlay: NoDashboardRowOverlay }

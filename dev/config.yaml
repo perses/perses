@@ -1,3 +1,5 @@
+readonly: false
+
 database:
   file:
     folder: "dev/local_db"
@@ -10,4 +12,15 @@ schemas:
   variables_path: "schemas/variables"
   interval: "5m"
 
-readonly: false
+dashboard_lists:
+  importants:
+    - project: "perses"
+      dashboard: "Demo"
+    - project: "testing"
+      dashboard: "DuplicatePanels"
+    - project: "Unknown"
+      dashboard: "Dashboard"
+
+information: |-
+  # Hello World
+  ## File Database setup

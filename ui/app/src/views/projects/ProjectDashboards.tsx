@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Stack, Typography, Button, Card } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import ViewDashboard from 'mdi-material-ui/ViewDashboard';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
@@ -31,11 +31,14 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
 
-  const { data } = useDashboardList(props.projectName);
+  const { data, isLoading } = useDashboardList(props.projectName);
 
-  const handleDashboardCreation = function (name: string) {
-    navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
-  };
+  const handleDashboardCreation = useCallback(
+    (name: string) => {
+      navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
+    },
+    [navigate, props.projectName]
+  );
 
   return (
     <Box id={props.id}>
@@ -44,13 +47,18 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
           <ViewDashboard />
           <Typography variant="h3">Dashboards</Typography>
         </Stack>
-        <Button variant="contained" size="small" onClick={() => setOpenCreateDashboardDialogState(true)}>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ textTransform: 'uppercase' }}
+          onClick={() => setOpenCreateDashboardDialogState(true)}
+        >
           Add Dashboard
         </Button>
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <Card>
-          <DashboardList dashboardList={data || []} hideToolbar={props.hideToolbar} />
+          <DashboardList dashboardList={data || []} hideToolbar={props.hideToolbar} isLoading={isLoading} />
         </Card>
       </ErrorBoundary>
       <CreateDashboardDialog

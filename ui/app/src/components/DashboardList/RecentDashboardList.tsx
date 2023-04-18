@@ -26,10 +26,11 @@ import { DashboardDataGrid, Row } from './DashboardDataGrid';
 export interface RecentDashboardListProperties {
   dashboardList: DatedDashboards[];
   hideToolbar?: boolean;
+  isLoading?: boolean;
 }
 
 export function RecentDashboardList(props: RecentDashboardListProperties) {
-  const { dashboardList, hideToolbar } = props;
+  const { dashboardList, hideToolbar, isLoading } = props;
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -177,6 +178,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
           },
         }}
         hideToolbar={hideToolbar}
+        isLoading={isLoading}
       ></DashboardDataGrid>
       <Box>
         {targetedDashboard && (
