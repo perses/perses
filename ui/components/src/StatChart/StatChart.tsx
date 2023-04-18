@@ -38,11 +38,12 @@ export interface StatChartProps {
   height: number;
   data: StatChartData;
   unit: UnitOptions;
+  color?: string;
   sparkline?: LineSeriesOption;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, sparkline } = props;
+  const { width, height, data, unit, color, sparkline } = props;
   const chartsTheme = useChartsTheme();
 
   const formattedValue = data.calculatedValue === undefined ? '' : formatValue(data.calculatedValue, unit);
@@ -108,7 +109,7 @@ export function StatChart(props: StatChartProps) {
       <Typography
         variant="h3"
         sx={(theme) => ({
-          color: theme.palette.text.primary,
+          color: color ?? theme.palette.text.primary,
           fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
           padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
         })}

@@ -11,32 +11,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useRef } from 'react';
 import { Box } from '@mui/material';
+import { QueryDefinition } from '@perses-dev/core';
+import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '../../context';
-import { Panel, PanelProps } from '../Panel';
+import { Panel } from '../Panel';
+import { useSuggestedStepMs } from '../../utils';
 
-export function PanelPreview({ name, description, kind, spec }: PanelEditorValues) {
-  const definition: PanelProps['definition'] = {
-    kind: 'Panel',
-    spec: {
-      display: {
-        name,
-        description: description === '' ? undefined : description,
-      },
-      plugin: {
-        kind,
-        spec,
-      },
-    },
-  };
+const PANEL_PREVIEW_HEIGHT = 300;
+const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
 
-  if (kind === '') {
+export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panelDefinition'>) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  let width = PANEL_PREVIEW_DEFAULT_WIDTH;
+  if (boxRef.current !== null) {
+    width = boxRef.current.getBoundingClientRect().width;
+  }
+  const suggestedStepMs = useSuggestedStepMs(width);
+
+  if (panelDefinition.spec.plugin.kind === '') {
     return null;
   }
 
+  const queries = panelDefinition.spec.queries ?? [];
+
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
+  const definitions = queries.length
+    ? queries.map((query: QueryDefinition) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      })
+    : [];
+
   return (
-    <Box height={300}>
-      <Panel definition={definition} />
+    <Box ref={boxRef} height={PANEL_PREVIEW_HEIGHT}>
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
+        <Panel definition={panelDefinition} />
+      </DataQueriesProvider>
     </Box>
   );
 }

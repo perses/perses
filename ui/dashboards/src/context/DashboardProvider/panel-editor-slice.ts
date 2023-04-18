@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
+import { PanelDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
 import { getYForNewRow, getValidPanelKey } from '../../utils/panelUtils';
-import { generateId, Middleware } from './common';
+import { generateId, Middleware, createPanelDefinition } from './common';
 import {
   PanelGroupSlice,
   PanelGroupItemId,
@@ -33,7 +33,7 @@ export interface PanelEditorSlice {
   /**
    * Initial values for add panel if default panel kind is defined
    */
-  initialValues?: Pick<PanelEditorValues, 'kind' | 'spec'>;
+  initialValues?: Pick<PanelEditorValues, 'panelDefinition'>;
 
   /**
    * State for the panel editor when its open, otherwise undefined when it's closed.
@@ -77,11 +77,8 @@ export interface PanelEditorState {
  * Panel values that can be edited in the panel editor.
  */
 export interface PanelEditorValues {
-  name: string;
-  description: string;
   groupId: PanelGroupId;
-  kind: string;
-  spec: UnknownSpec;
+  panelDefinition: PanelDefinition;
 }
 
 /**
@@ -117,16 +114,12 @@ export function createPanelEditorSlice(): StateCreator<
       const editorState: PanelEditorState = {
         mode: 'Edit',
         initialValues: {
-          name: panelToEdit.spec.display.name,
-          description: panelToEdit.spec.display.description ?? '',
           groupId: panelGroupItemId.panelGroupId,
-          kind: panelToEdit.spec.plugin.kind,
-          spec: panelToEdit.spec.plugin.spec,
+          panelDefinition: panelToEdit,
         },
         applyChanges: (next) => {
-          const panelDefinititon = createPanelDefinitionFromEditorValues(next);
           set((state) => {
-            state.panels[panelKey] = panelDefinititon;
+            state.panels[panelKey] = next.panelDefinition;
 
             // If the panel didn't change groups, nothing else to do
             if (next.groupId === panelGroupId) {
@@ -192,19 +185,16 @@ export function createPanelEditorSlice(): StateCreator<
       const editorState: PanelEditorState = {
         mode: 'Add',
         initialValues: {
-          name: '',
-          description: '',
           groupId: panelGroupId,
-          kind: get().initialValues?.kind ?? '',
-          spec: get().initialValues?.spec ?? {},
+          panelDefinition: get().initialValues?.panelDefinition ?? createPanelDefinition(),
         },
         applyChanges: (next) => {
-          const panelDef = createPanelDefinitionFromEditorValues(next);
-          const panelKey = getValidPanelKey(next.name, get().panels);
+          const name = next.panelDefinition.spec.display.name;
+          const panelKey = getValidPanelKey(name, get().panels);
 
           set((state) => {
             // Add a panel
-            state.panels[panelKey] = panelDef;
+            state.panels[panelKey] = next.panelDefinition;
 
             // Also add a panel group item referencing the panel
             const group = state.panelGroups[next.groupId];
@@ -240,21 +230,4 @@ export function createPanelEditorSlice(): StateCreator<
       });
     },
   });
-}
-
-// Helper to create PanelDefinitions when saving
-function createPanelDefinitionFromEditorValues(editorValues: PanelEditorValues): PanelDefinition {
-  return {
-    kind: 'Panel',
-    spec: {
-      display: {
-        name: editorValues.name,
-        description: editorValues.description !== '' ? editorValues.description : undefined,
-      },
-      plugin: {
-        kind: editorValues.kind,
-        spec: editorValues.spec,
-      },
-    },
-  };
 }

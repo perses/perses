@@ -14,5 +14,4 @@
 export * from './animationUtils';
 export * from './canvasUtils';
 export * from './formUtils';
-export * from './mockTimeSeries';
 export * from './timeUtils';

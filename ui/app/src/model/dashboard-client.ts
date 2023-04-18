@@ -13,8 +13,10 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardResource, fetch, fetchJson } from '@perses-dev/core';
+import { useMemo } from 'react';
+import { useNavHistory } from '../context/DashboardNavHistory';
+import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodDELETE, HTTPMethodPOST, HTTPMethodPUT } from './http';
 
 const resource = 'dashboards';
 
@@ -45,8 +47,7 @@ export function useCreateDashboardMutation(
  */
 export function useDashboard(project: string, name: string) {
   return useQuery<DashboardResource, Error>([resource, project, name], () => {
-    const url = buildURL({ resource: resource, name: name, project: project });
-    return fetchJson<DashboardResource>(url);
+    return getDashboard(project, name);
   });
 }
 
@@ -56,9 +57,40 @@ export function useDashboard(project: string, name: string) {
  */
 export function useDashboardList(project?: string) {
   return useQuery<DashboardResource[], Error>([resource, project], () => {
-    const url = buildURL({ resource: resource, project: project });
-    return fetchJson<DashboardResource[]>(url);
+    return getDashboards(project);
   });
+}
+
+export interface DatedDashboards {
+  dashboard: DashboardResource;
+  date: string;
+}
+
+/**
+ * Used to get dashboards seen recently by the user.
+ * Will automatically be refreshed when cache is invalidated or history modified
+ */
+export function useRecentDashboardList(project?: string) {
+  const { data } = useDashboardList(project);
+  const history = useNavHistory();
+
+  return useMemo(() => {
+    // Wrapping dashboard with their last seen date from nav history context
+    const result: DatedDashboards[] = [];
+
+    // Iterating with history first to keep history order in the result
+    (history || []).forEach((historyItem) => {
+      const dashboard = (data || []).find(
+        (dashboard) =>
+          historyItem.project === dashboard.metadata.project && historyItem.name === dashboard.metadata.name
+      );
+      if (dashboard) {
+        result.push({ dashboard: dashboard, date: historyItem.date });
+      }
+    });
+
+    return result;
+  }, [data, history]);
 }
 
 /**
@@ -105,6 +137,22 @@ export function createDashboard(entity: DashboardResource) {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
     body: JSON.stringify(entity),
+  });
+}
+
+export function getDashboard(project: string, name: string) {
+  const url = buildURL({ resource: resource, project: project, name: name });
+  return fetchJson<DashboardResource>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+export function getDashboards(project?: string) {
+  const url = buildURL({ resource: resource, project: project });
+  return fetchJson<DashboardResource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
   });
 }
 

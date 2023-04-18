@@ -14,22 +14,25 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { DashboardProvider, TemplateVariableProvider } from '../../../context';
-import { getTestDashboard, renderWithContext } from '../../../test';
+import { DashboardProvider, DatasourceStoreProvider, TemplateVariableProvider } from '../../../context';
+import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 
 describe('Panel Groups', () => {
   const renderDashboard = () => {
     renderWithContext(
-      <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
-        <TemplateVariableProvider>
-          <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
-            <DashboardApp dashboardResource={getTestDashboard()} isReadonly={false} />
-          </DashboardProvider>
-        </TemplateVariableProvider>
-      </TimeRangeProvider>
+      <DatasourceStoreProvider {...defaultDatasourceProps}>
+        <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
+          <TemplateVariableProvider>
+            <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
+              <DashboardApp dashboardResource={getTestDashboard()} isReadonly={false} />
+            </DashboardProvider>
+          </TemplateVariableProvider>
+        </TimeRangeProvider>
+      </DatasourceStoreProvider>
     );
   };
+
   it('should delete panel', () => {
     renderDashboard();
     const panelTitle = 'CPU';

@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './happo';
+export * from './requests';

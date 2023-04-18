@@ -130,18 +130,15 @@ export function getUniqueKeyForPrometheusResult(
  * Determine human-readable series name to be used in legend and tooltip
  */
 export function getFormattedPrometheusSeriesName(query: string, metric: Metric, formatter?: string) {
-  if (isEmptyObject(metric)) {
-    return { name: query };
-  }
-
-  // Name the series after the metric labels or if no metric, use the query
+  // Name the series after the metric labels by default.
+  // Use the query if no metric or metric labels are empty.
   let name = getUniqueKeyForPrometheusResult(metric);
-  if (name === '') {
+  if (name === '' || isEmptyObject(metric)) {
     name = query;
   }
 
-  // Query editor allows you to define an optional series_name_format
-  // property to customize legend and tooltip display
+  // Query editor allows you to define an optional series_name_format property.
+  // This controls the regex used to customize legend and tooltip display.
   const formattedName = formatter ? formatSeriesName(formatter, metric) : name;
   return { name, formattedName };
 }

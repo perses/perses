@@ -12,5 +12,6 @@
 // limitations under the License.
 
 export * from './dashboard-provider';
+export * from './datasource-provider';
 export * from './plugin-registry';
 export * from './render';

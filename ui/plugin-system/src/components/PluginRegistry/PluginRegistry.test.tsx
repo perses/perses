@@ -23,7 +23,7 @@ describe('PluginRegistry', () => {
   };
 
   it('can load a plugin that exists', async () => {
-    renderPluginRegistry(<PluginConsumer pluginType="Variable" kind="ErnieVariable" />);
+    renderPluginRegistry(<PluginConsumer pluginType="Variable" kind="ErnieVariable1" />);
 
     const hasPlugin = await screen.findByText('Has plugin: true', undefined, { timeout: 3000 });
     expect(hasPlugin).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe('PluginRegistry', () => {
     const table = await screen.findByRole('table');
     expect(table).toBeInTheDocument();
     const rows = screen.getAllByRole('row');
-    expect(rows).toHaveLength(3);
+    expect(rows).toHaveLength(4);
   });
 
   it('lists metadata for plugin types with no plugins available', async () => {

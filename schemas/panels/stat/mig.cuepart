@@ -1,15 +1,6 @@
 if #panel.type == "stat" {
     kind: "StatChart"
     spec: {
-        query: {
-            kind: "TimeSeriesQuery"
-            spec: {
-                #target: *#panel.targets[0] | null // Perses's StatChart doesn't support multi queries
-                plugin: [ // switch
-                    %(conditional_timeserie_queries)
-                ][0]
-            }
-        }
         #calcPath: "\(#panel.options.reduceOptions.calcs[0])" // only consider [0] here as Perses's StatChart doesn't support multi queries
         calculation: [ // switch
             if #mapping.calc[#calcPath] != _|_ { #mapping.calc[#calcPath] },

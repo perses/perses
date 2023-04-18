@@ -15,18 +15,47 @@ import { Breadcrumbs, Link, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 interface DashboardBreadcrumbsProps {
-  dashboardName: string;
-  dashboardProject: string;
+  dashboardProject?: string;
+  dashboardName?: string;
 }
 
+/*
+ * DashboardBreadcrumbs provide a naviguation helper
+ * For dashboard breadcrumb, dashboardProject & dashboardName are mandatory
+ * For project breadcrumb, dashboardProject is mandatory
+ * For home breadcrumb, all props need to be empty or undefined
+ */
 function DashboardBreadcrumbs(props: DashboardBreadcrumbsProps) {
-  const { dashboardName, dashboardProject } = props;
+  const { dashboardProject, dashboardName } = props;
+
+  if (dashboardName && dashboardProject) {
+    return (
+      <Breadcrumbs sx={{ fontSize: 'large' }}>
+        <Link underline={'hover'} variant={'h3'} component={RouterLink} to={'/'}>
+          Home
+        </Link>
+        <Link underline={'hover'} variant={'h3'} component={RouterLink} to={`/projects/${dashboardProject}`}>
+          {dashboardProject}
+        </Link>
+        <Typography variant={'h3'}>{dashboardName}</Typography>
+      </Breadcrumbs>
+    );
+  }
+
+  if (dashboardProject) {
+    return (
+      <Breadcrumbs sx={{ fontSize: 'large' }}>
+        <Link underline={'hover'} variant={'h3'} component={RouterLink} to={'/'}>
+          Home
+        </Link>
+        <Typography variant={'h3'}>{dashboardProject}</Typography>
+      </Breadcrumbs>
+    );
+  }
+
   return (
     <Breadcrumbs sx={{ fontSize: 'large' }}>
-      <Link underline={'hover'} variant={'h2'} component={RouterLink} to={`/projects/${dashboardProject}`}>
-        {dashboardProject}
-      </Link>
-      <Typography variant={'h2'}>{dashboardName}</Typography>
+      <Typography variant={'h3'}>Home</Typography>
     </Breadcrumbs>
   );
 }

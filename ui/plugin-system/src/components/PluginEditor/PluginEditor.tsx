@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Box, FormControl, FormHelperText, InputLabel } from '@mui/material';
-import { PluginKindSelect } from '../PluginKindSelect';
-import { PluginSpecEditor } from '../PluginSpecEditor';
+import { PluginKindSelect } from '../PluginKindSelect/PluginKindSelect';
+import { PluginSpecEditor } from '../PluginSpecEditor/PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
 
 /**
@@ -42,7 +42,6 @@ export function PluginEditor(props: PluginEditorProps) {
         />
         <FormHelperText>{error?.message ?? ''}</FormHelperText>
       </FormControl>
-
       <PluginSpecEditor pluginType={pluginType} pluginKind={value.kind} value={value.spec} onChange={onSpecChange} />
     </Box>
   );

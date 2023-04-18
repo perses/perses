@@ -62,7 +62,7 @@ const (
 			query: "migration_from_grafana_not_supported"
 		}
 	`
-	queryPlaceholderText = "%(conditional_timeserie_queries)"
+	queryPlaceholderText = "%(conditional_timeseries_queries)"
 )
 
 func ReplaceInputValue(input map[string]string, grafanaDashboard string) string {

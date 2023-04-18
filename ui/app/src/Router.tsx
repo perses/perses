@@ -20,7 +20,7 @@ import ViewMigrate from './views/ViewMigrate';
 
 // Other routes are lazy-loaded for code-splitting
 const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
-const ViewProject = lazy(() => import('./views/ViewProject'));
+const ViewProject = lazy(() => import('./views/projects/ProjectView'));
 
 function Router() {
   return (

@@ -17,3 +17,4 @@ export * from './is-empty-object';
 export * from './memo';
 export * from './panel-refs';
 export * from './time-series-data';
+export * from './text';

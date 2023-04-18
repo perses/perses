@@ -17,7 +17,7 @@ import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeRangeValue, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
 import {
   PluginRegistry,
-  useTimeSeriesQueries,
+  useDataQueries,
   TimeRangeContext,
   TimeSeriesQueryPlugin,
   mockPluginRegistry,
@@ -29,7 +29,7 @@ import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPan
 jest.mock('@perses-dev/plugin-system', () => {
   return {
     ...jest.requireActual('@perses-dev/plugin-system'),
-    useTimeSeriesQueries: jest.fn(),
+    useDataQueries: jest.fn(),
   };
 });
 
@@ -57,19 +57,6 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
     height: 500,
   },
   spec: {
-    queries: [
-      {
-        kind: 'TimeSeriesQuery',
-        spec: {
-          plugin: {
-            kind: 'PrometheusTimeSeriesQuery',
-            spec: {
-              query: 'rate(caddy_http_response_duration_seconds_sum["5m"])',
-            },
-          },
-        },
-      },
-    ],
     unit: { kind: 'Decimal', decimal_places: 2 },
     legend: {
       position: 'Right',
@@ -92,7 +79,11 @@ function getLegendByName(name?: string) {
 describe('TimeSeriesChartPanel', () => {
   beforeEach(() => {
     // TODO: remove and instead use addMockPlugin after rest of runtime dependencies are mocked
-    (useTimeSeriesQueries as jest.Mock).mockReturnValue(MOCK_TIME_SERIES_QUERY_RESULT);
+    (useDataQueries as jest.Mock).mockReturnValue({
+      queryResults: MOCK_TIME_SERIES_QUERY_RESULT,
+      isLoading: false,
+      isFetching: false,
+    });
   });
 
   // Helper to render the panel with some context set

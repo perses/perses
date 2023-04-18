@@ -13,115 +13,16 @@
 
 import { formatValue, UnitOptions } from './units';
 
-interface UnitTestCase {
+export interface UnitTestCase {
   value: number;
   unit: UnitOptions;
   expected: string;
 }
 
+// TODO: Create test files for percent and time. Write more tests for percent and time.
 describe('formatValue', () => {
   const tests: UnitTestCase[] = [
-    {
-      value: 10,
-      unit: { kind: 'Decimal' },
-      expected: '10',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Decimal', decimal_places: 0 },
-      expected: '10',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Decimal', decimal_places: 1 },
-      expected: '10',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Decimal', decimal_places: 2 },
-      expected: '10',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Decimal', decimal_places: 3 },
-      expected: '10',
-    },
-    {
-      value: 10,
-      unit: { kind: 'Decimal', decimal_places: 4 },
-      expected: '10',
-    },
-    {
-      value: 10.123456,
-      unit: { kind: 'Decimal' },
-      // The default for decimal_places is 2. This can be changed if we want.
-      expected: '10.12',
-    },
-    {
-      value: 10.123456,
-      unit: { kind: 'Decimal', decimal_places: 0 },
-      expected: '10',
-    },
-    {
-      value: 10.123456,
-      unit: { kind: 'Decimal', decimal_places: 1 },
-      expected: '10.1',
-    },
-    {
-      value: 10.123456,
-      unit: { kind: 'Decimal', decimal_places: 2 },
-      expected: '10.12',
-    },
-    {
-      value: 10.123456,
-      unit: { kind: 'Decimal', decimal_places: 3 },
-      expected: '10.123',
-    },
-    {
-      value: 10.123456,
-      unit: { kind: 'Decimal', decimal_places: 4 },
-      expected: '10.1235',
-    },
-    {
-      value: 100000,
-      unit: { kind: 'Decimal' },
-      expected: '100,000',
-    },
-    {
-      value: 155900,
-      unit: { kind: 'Decimal', decimal_places: 4 },
-      expected: '155,900',
-    },
-    {
-      value: 1000,
-      unit: { kind: 'Decimal', decimal_places: 2, abbreviate: true },
-      expected: '1K',
-    },
-    {
-      value: 1590.878787,
-      unit: { kind: 'Decimal', decimal_places: 3, abbreviate: true },
-      expected: '1.591K',
-    },
-    {
-      value: 0.123456789,
-      unit: { kind: 'Decimal', decimal_places: 2, abbreviate: true },
-      expected: '0.12',
-    },
-    {
-      value: 0.123456789,
-      unit: { kind: 'Decimal', decimal_places: 4, abbreviate: false },
-      expected: '0.1235',
-    },
-    {
-      value: -0.123456789,
-      unit: { kind: 'Decimal', decimal_places: 3, abbreviate: true },
-      expected: '-0.123',
-    },
-    {
-      value: 0,
-      unit: { kind: 'Decimal', decimal_places: 2, abbreviate: true },
-      expected: '0',
-    },
+    // Percent
     {
       value: 10,
       unit: { kind: 'Percent' },
@@ -137,26 +38,7 @@ describe('formatValue', () => {
       unit: { kind: 'PercentDecimal' },
       expected: '10.00%',
     },
-    {
-      value: 100,
-      unit: { kind: 'Bytes', decimal_places: 0, abbreviate: false },
-      expected: '100 bytes',
-    },
-    {
-      value: 100,
-      unit: { kind: 'Bytes', decimal_places: -1, abbreviate: false },
-      expected: '100 bytes',
-    },
-    {
-      value: 225000,
-      unit: { kind: 'Bytes', decimal_places: 0, abbreviate: true },
-      expected: '220 KB',
-    },
-    {
-      value: 505200,
-      unit: { kind: 'Bytes' },
-      expected: '505,200 bytes',
-    },
+    // Time
     {
       value: 8000,
       unit: { kind: 'Milliseconds' },

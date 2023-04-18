@@ -5,9 +5,17 @@
     "plugins": [
       {
         "pluginType": "Variable",
-        "kind": "ErnieVariable",
+        "kind": "ErnieVariable1",
         "display": {
-          "name": "Ernie Variable",
+          "name": "Ernie Variable 1",
+          "description": "A variable plugin that exists in the plugin module"
+        }
+      },
+      {
+        "pluginType": "Variable",
+        "kind": "ErnieVariable2",
+        "display": {
+          "name": "Ernie Variable 2",
           "description": "A variable plugin that exists in the plugin module"
         }
       },
