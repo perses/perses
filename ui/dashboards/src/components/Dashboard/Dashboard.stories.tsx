@@ -104,42 +104,20 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
           display: {
             name: 'Generated Colors',
           },
-          plugin: {
-            kind: 'TimeSeriesChart',
-            spec: {
-              legend: {
-                position: 'Right',
-              },
-              y_axis: {
-                unit: {
-                  kind: 'PercentDecimal',
-                  decimal_places: 0,
-                },
-              },
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
                   spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query:
-                          'avg without (cpu)(rate(node_cpu_seconds_total{job="$job",instance=~"$instance"}[$interval]))',
-                      },
-                    },
+                    query:
+                      'avg without (cpu)(rate(node_cpu_seconds_total{job="$job",instance=~"$instance"}[$interval]))',
                   },
                 },
-              ],
+              },
             },
-          },
-        },
-      },
-      TimeSeriesGeneratedColors: {
-        kind: 'Panel',
-        spec: {
-          display: {
-            name: 'Generated Colors',
-          },
+          ],
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
@@ -152,20 +130,6 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
                   decimal_places: 0,
                 },
               },
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query:
-                          'avg without (cpu)(rate(node_cpu_seconds_total{job="$job",instance=~"$instance"}[$interval]))',
-                      },
-                    },
-                  },
-                },
-              ],
             },
           },
         },
