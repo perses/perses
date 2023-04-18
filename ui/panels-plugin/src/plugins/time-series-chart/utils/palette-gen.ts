@@ -33,17 +33,53 @@ export function getSeriesColor(
   name: string,
   seriesIndex: number,
   palette: string[],
+  fallbackColor: string,
   paletteKind: PaletteOptions['kind'] = 'Auto'
 ): string {
   if (paletteKind === 'Categorical' && Array.isArray(palette)) {
     const colorIndex = seriesIndex % palette.length;
-    // TODO: take fallback color from theme
     const seriesColor = palette[colorIndex];
     if (seriesColor !== undefined) {
       return seriesColor;
     }
   }
-
   // corresponds to 'Auto' in palette.kind
-  return getRandomColor(name);
+  const generatedColor = getSeriesNameColor(name);
+  // fallback color comes from echarts theme
+  return generatedColor ?? fallbackColor;
+}
+
+/*
+ * Color conversion from string using predefined palette for contrast
+ * String to color approach from: https://stackoverflow.com/a/31037383/17575201
+ * Contrast colors started from: https://stackoverflow.com/a/12224359/17575201
+ */
+export const getSeriesNameColor = (() => {
+  const stringToColorHash: Record<string, string | undefined> = {};
+  return (inputString: string) => {
+    // check whether color has already been generated for a given series name
+    if (!stringToColorHash[inputString]) {
+      const adjustedSeriesName = modifyString(inputString);
+      stringToColorHash[inputString] = getRandomColor(adjustedSeriesName);
+    }
+    return stringToColorHash[inputString];
+  };
+})();
+
+// Prime number shuffles the string more evenly, changing this multiplier adjusts the overall colors that are generated
+// For example, a multiplier of 17 results in more purple colors, 11 looks nice but series names that start with 'n'
+// looked too similar, 7 seems to provide just enough randomness while still having colors with enough contrast
+const INDEX_MULTIPLIER = 7;
+
+/*
+ * Deterministic way to slightly modify the string that is used to generate colors.
+ * This allows series names that are very similar to produce distinct colors.
+ */
+export function modifyString(str: string): string {
+  const modifiedArr = new Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const newIndex = (i * INDEX_MULTIPLIER) % str.length;
+    modifiedArr[newIndex] = str[i];
+  }
+  return modifiedArr.join('');
 }
