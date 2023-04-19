@@ -18,7 +18,7 @@ import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;
   listPluginMetadata(pluginType: PluginType): Promise<PluginMetadata[]>;
-  defaultPluginKinds?: DefaultPluginKinds;
+  defaultPluginKinds: DefaultPluginKinds;
 }
 
 export const PluginRegistryContext = createContext<PluginRegistryContextType | undefined>(undefined);

@@ -47,7 +47,10 @@ const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
 
 export const WithPluginRegistry = (Story: StoryFn) => {
   return (
-    <PluginRegistry pluginLoader={bundledPluginLoader}>
+    <PluginRegistry
+      pluginLoader={bundledPluginLoader}
+      defaultPluginKinds={{ TimeSeriesQuery: 'PrometheusTimeSeriesQuery' }}
+    >
       <Story />
     </PluginRegistry>
   );
