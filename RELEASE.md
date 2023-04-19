@@ -49,7 +49,7 @@ Create a branch that follows the naming pattern `release/v<X.Y>` and includes th
 
 #### Create a PR with the changes
 
-- Create a branch with the changes for the release (e.g. `yourname/release-v<major>.<minor>.<patch>`).
+- Create a branch using the release branch `release/v<X.Y>` you just created in the step above (e.g. `yourname/release-v<major>.<minor>.<patch>`).
 - Update the file `VERSION` with the new version to be created.
 - Generate `CHANGELOG.md` updates based on git history:
 
