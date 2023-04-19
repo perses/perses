@@ -2,8 +2,6 @@
 
 This package is used to generate documentation for Perses UI components using [Storybook](https://storybook.js.org/).
 
-> This project currently uses the [v7 beta](https://storybook.js.org/docs/7.0/react/writing-stories/introduction) of Storybook. Be sure to reference the associated [v7 beta documentation](https://storybook.js.org/docs/7.0/react/writing-stories/introduction).
-
 ## Getting started
 
 ### Running Storybook
@@ -81,11 +79,54 @@ Below are some notable addons this project currently uses.
 - [Docs](https://storybook.js.org/addons/@storybook/addon-docs/) - Document component usage and properties in Markdown.
 - [Links](https://storybook.js.org/addons/@storybook/addon-links/) - Use to create links that navigate between stories.
 - [Measure](https://storybook.js.org/addons/@storybook/addon-measure/) - Helpful for inspecting layouts by visualizing the box model.
+- [Mock Service Worker](https://storybook.js.org/addons/msw-storybook-addon) - Allows mocking of api calls using [Mock Service Worker](https://mswjs.io/).
 - [Outline](https://storybook.js.org/addons/@storybook/addon-outline/) - Outline all elements with CSS to help with layout placement and alignment.
 - [Storysource](https://storybook.js.org/addons/@storybook/addon-storysource/) - Used to show stories source in the addon panel
 - [Viewport](https://storybook.js.org/addons/@storybook/addon-viewport/) - Allows stories to be displayed in different sizes and layouts.
 
 We primarily use first party addons maintained by Storybook to avoid pain with upgrades and interoperability with the relatively complex Storybook ecosystem.
+
+## Defining and using decorators
+
+[Decorators](https://storybook.js.org/docs/react/writing-stories/decorators) provide a way to wrap a story in extra "rendering" functionality.
+
+### Global decorators
+
+Global decorators are specified in the [Storybook configuration](#configuring-storybook) and are applied to all stories. These decorators live in the `storybook` package in `src/config/decorators` and are primarily related to global storybook behavior (e.g. theming, time zones).
+
+## Package-specific decorators
+
+Perses relies heavily on React context, which can be tedious to set up over and over again in every story. We simplify this by creating decorators to cover common cases related to React context. These decorators should:
+
+- Live in the package that defines the associated context/providers. E.g. a decorator for `PluginRegistry` should live in the `plugin-system` package.
+- Be located in `src/stories/shared-utils/decorators` in that package. This provides a consistent place to look for decorators that communicates it is shareable across packages.
+- Named starting with `With` followed by the name of the matching context (e.g. the decorator for the `PluginRegistry` provider is named `WithPluginRegistry`, the decorator for `TimeSeriesProvider` is named `WithTimeSeries`).
+- When possible, the decorator should have a default value for the context/provider that enables it to be used out-of-the-box in common use cases.
+- When possible, the decorator should include an option to modify the behavior using storybook `parameters`. See the current decorators for some examples.
+
+### Importing
+
+We do not expose Storybook utilties like decorators on our compiled packages because they are internal tooling. Shared decorators need to be imported by including a more specific path. For example.
+
+```ts
+import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
+```
+
+## Generic decorators
+
+Some decorators are not related to a specific Perses package (e.g. decorators for context from an external library like `use-query-params`) and are not global. These packages should:
+
+- Live in the `storybook` package.
+- Be located in `src/decorators`.
+- If they are related to context, follow the decorator naming configuration guidelines recommended for [package-specific decorators](#package-specific-decorators).
+
+### Importing
+
+The `storybook` package is an internal utility that is not published, so we can export shared utilities from it and import from the top level export. For example:
+
+```ts
+import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+```
 
 ## Configuring Storybook
 
