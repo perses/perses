@@ -45,9 +45,7 @@ with `make upgrade-npm-deps`
 
 Create a branch that follows the naming pattern `release/v<X.Y>` and includes the changes you intend to release (usually the latest from `main`). Push it to github. You will use this branch as the base in the next step.
 
-Release candidates and patch releases
-for any given major or minor release happen in the same `release/v<major>.<minor>` branch. Do not
-create `release/<version>` for patch or release candidate releases.
+> ⚠️ Release candidates and patch releases for any given major or minor release happen in the same `release/v<major>.<minor>` branch. Do not create `release/<version>` for patch or release candidate releases.
 
 #### Create a PR with the changes
 
