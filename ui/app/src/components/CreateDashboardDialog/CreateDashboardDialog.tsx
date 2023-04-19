@@ -12,52 +12,68 @@
 // limitations under the License.
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Button, TextField } from '@mui/material';
+import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
+import { DashboardSelector } from '@perses-dev/core';
 
-export interface CreateDashboardDialogProps {
+export interface CreateDashboardProps {
   open: boolean;
+  projectOptions: string[];
   onClose: DispatchWithoutAction;
-  onSuccess?: Dispatch<string>;
+  onSuccess?: Dispatch<DashboardSelector>;
 }
 
 /**
  * Dialog used to create a dashboard.
  * @param props.open Define if the dialog should be opened or not.
- * @param props.closeDialog Provides the function to close itself.
- * @param props.onConfirm Action to perform when user confirmed.
- * @param props.projectName The project where the dashboard will be created.
+ * @param props.projectOptions The project where the dashboard will be created.
+ * If it contains only one element, it will be used as project value and will hide the project selection.
+ * @param props.onClose Provides the function to close itself.
+ * @param props.onSuccess Action to perform when user confirmed.
  * @constructor
  */
-export const CreateDashboardDialog = (props: CreateDashboardDialogProps) => {
-  const { open, onClose, onSuccess } = props;
-  const [name, setName] = useState<string>();
-  const [error, setError] = useState<string>();
+export const CreateDashboardDialog = (props: CreateDashboardProps) => {
+  const { open, projectOptions, onClose, onSuccess } = props;
 
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
+  const [projectName, setProjectName] = useState<string | undefined>(projectOptions[0]);
+  const [projectError, setProjectError] = useState<string>();
+
+  const [dashboardName, setDashboardName] = useState<string>();
+  const [dashboardError, setDashboardError] = useState<string>();
+
+  const handleProjectChange = useCallback((e: SelectChangeEvent) => {
+    setProjectName(e.target.value);
     if (!e.target.value) {
-      setError('Required');
+      setProjectError('Required');
     } else {
-      setError(undefined);
+      setProjectError(undefined);
+    }
+  }, []);
+
+  const handleDashboardChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setDashboardName(e.target.value);
+    if (!e.target.value) {
+      setDashboardError('Required');
+    } else {
+      setDashboardError(undefined);
     }
   }, []);
 
   // Reinitialize form for next time the dialog is opened
   const resetForm = useCallback(() => {
-    setName(undefined);
-    setError(undefined);
+    setDashboardName(undefined);
+    setDashboardError(undefined);
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (name) {
+    if (projectName && dashboardName) {
       onClose();
       if (onSuccess) {
-        onSuccess(name);
+        onSuccess({ project: projectName, dashboard: dashboardName } as DashboardSelector);
       }
       resetForm();
     }
-  }, [name, onClose, onSuccess, resetForm]);
+  }, [dashboardName, onClose, onSuccess, projectName, resetForm]);
 
   const handleClose = useCallback(() => {
     onClose();
@@ -68,21 +84,46 @@ export const CreateDashboardDialog = (props: CreateDashboardDialogProps) => {
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
       <Dialog.Header>Create Dashboard</Dialog.Header>
       <Dialog.Content>
-        <TextField
-          required
-          margin="dense"
-          id="name"
-          label="Name"
-          type="text"
-          fullWidth
-          onChange={handleChange}
-          value={name}
-          error={!!error}
-          helperText={error}
-        />
+        <Stack gap={1}>
+          {projectOptions && projectOptions.length > 1 && (
+            <FormControl size="small" fullWidth>
+              <InputLabel>Project name</InputLabel>
+              <Select
+                required
+                id="project"
+                label="Project name"
+                type="text"
+                fullWidth
+                onChange={handleProjectChange}
+                value={projectName}
+                error={!!projectError}
+              >
+                {projectOptions.map((option) => {
+                  return (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          )}
+          <TextField
+            required
+            margin="dense"
+            id="name"
+            label="Dashboard Name"
+            type="text"
+            fullWidth
+            onChange={handleDashboardChange}
+            value={dashboardName}
+            error={!!dashboardError}
+            helperText={dashboardError}
+          />
+        </Stack>
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" disabled={!!error} onClick={handleSubmit}>
+        <Button variant="contained" disabled={!!dashboardError} onClick={handleSubmit}>
           Add
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClose}>

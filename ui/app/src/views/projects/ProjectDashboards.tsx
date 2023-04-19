@@ -16,6 +16,7 @@ import { Box, Stack, Typography, Button, Card } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import ViewDashboard from 'mdi-material-ui/ViewDashboard';
 import { useCallback, useState } from 'react';
+import { DashboardSelector } from '@perses-dev/core';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
@@ -34,10 +35,9 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
   const { data, isLoading } = useDashboardList(props.projectName);
 
   const handleDashboardCreation = useCallback(
-    (name: string) => {
-      navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
-    },
-    [navigate, props.projectName]
+    (dashboardSelector: DashboardSelector) =>
+      navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`),
+    [navigate]
   );
 
   return (
@@ -63,8 +63,9 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
       </ErrorBoundary>
       <CreateDashboardDialog
         open={openCreateDashboardDialogState}
+        projectOptions={[props.projectName]}
         onClose={() => setOpenCreateDashboardDialogState(false)}
-        onSuccess={(name: string) => handleDashboardCreation(name)}
+        onSuccess={handleDashboardCreation}
       />
     </Box>
   );

@@ -21,7 +21,7 @@ import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { DashboardSelector } from '@perses-dev/core';
 import { ProjectModel, useProjectList } from '../../model/project-client';
 import { AddProjectDialog } from '../../components/AddProjectDialog/AddProjectDialog';
-import { CreateDashboardInProjectDialog } from '../../components/CreateDashboardDialog/CreateDashboardInProjectDialog';
+import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
 import { InformationSection } from './InformationSection';
 import { RecentDashboardsMosaic } from './RecentDashboardsMosaic';
@@ -98,7 +98,7 @@ function HomeView() {
               onClose={handleAddProjectDialogClose}
               onSuccess={handleAddProjectDialogSubmit}
             />
-            <CreateDashboardInProjectDialog
+            <CreateDashboardDialog
               open={isAddDashboardDialogOpen}
               projectOptions={projectOptions}
               onClose={handleAddDashboardDialogClose}

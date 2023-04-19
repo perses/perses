@@ -44,7 +44,7 @@ test.describe('homeView', () => {
     await navigationPromise;
   });
 
-  test('can navigate to an recent dashboard', async ({ page }) => {
+  test('can navigate to a recent dashboard', async ({ page }) => {
     const project = 'perses';
     const dashboard = 'Demo';
 

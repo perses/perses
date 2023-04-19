@@ -11,13 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useNavigate } from 'react-router-dom';
 import { Box, Stack, Typography, Card } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import HistoryIcon from 'mdi-material-ui/History';
-import { useState } from 'react';
 import { useRecentDashboardList } from '../../model/dashboard-client';
-import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
 import { RecentDashboardList } from '../../components/DashboardList/RecentDashboardList';
 
 interface RecentlyViewedDashboardsProps {
@@ -26,14 +23,7 @@ interface RecentlyViewedDashboardsProps {
 }
 
 export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
-  const navigate = useNavigate();
-
-  const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
   const { data, isLoading } = useRecentDashboardList(props.projectName);
-
-  const handleDashboardCreation = function (name: string) {
-    navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
-  };
 
   return (
     <Box id={props.id}>
@@ -48,11 +38,6 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
           <RecentDashboardList dashboardList={data} isLoading={isLoading} />
         </Card>
       </ErrorBoundary>
-      <CreateDashboardDialog
-        open={openCreateDashboardDialogState}
-        onClose={() => setOpenCreateDashboardDialogState(false)}
-        onSuccess={(name: string) => handleDashboardCreation(name)}
-      />
     </Box>
   );
 }

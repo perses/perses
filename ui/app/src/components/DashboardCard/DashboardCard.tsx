@@ -29,7 +29,7 @@ export function DashboardCard(props: DashboardCardProps) {
     <Button
       variant="contained"
       fullWidth
-      sx={{ justifyContent: 'start' }}
+      sx={{ justifyContent: 'start', backgroundColor: (theme) => theme.palette.designSystem.blue[700] }}
       onClick={() =>
         naviguate(`/projects/${props.dashboard.metadata.project}/dashboards/${props.dashboard.metadata.name}`)
       }
