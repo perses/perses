@@ -73,7 +73,7 @@ these changes.
   ```
 - Push the branch to github and create a pull request with the release branch as the base. This gives others the opportunity to chime in on the release,
   in general, and on the addition to the changelog, in particular. 
-  - It's also helpful to drop a link to the release PR in [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) to get extra visibility.
+  - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
 - Address any necessary feedback.
 - Once the pull request is approved, merge the it into the release branch.
 
