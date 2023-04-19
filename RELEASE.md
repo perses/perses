@@ -94,7 +94,8 @@ the `-s` flag by `-a` flag of the git tag command to only annotate the tag witho
 Once a tag is created, an automated release process for this tag is triggered via Github Actions. This automated process includes:
 - Publishing new versions of the UI libraries to npm.
 - Building new go binaries and docker images.
-- Creating a new Github release that uses the changelog as the release notes and provides tarballs with the latest go binaries & docker images.
+- Publishing the docker images to Docker Hub.
+- Creating a new Github release that uses the changelog as the release notes and provides tarballs with the latest go binaries.
 
 Please verify that the Github Actions complete successfully. Once they are completed, check that everything looks good in the new Github Release. If you realize we need to adjust something in the release notes, you can edit it directly in the Github UI.
 
