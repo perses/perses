@@ -475,7 +475,6 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
                     query: 'fake_query_with_multiple_series',
-                    series_name_format: '{{job}} {{le}} {{instance}}',
                   },
                 },
               },
@@ -508,7 +507,6 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
                     query: 'fake_query_with_multiple_series',
-                    series_name_format: '{{job}} {{le}} {{instance}}',
                   },
                 },
               },

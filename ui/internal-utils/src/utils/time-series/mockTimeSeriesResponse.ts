@@ -107,7 +107,22 @@ export function mockTimeSeriesResponseWithNullValues({
 type MockManySeriesValueConfig = {
   startTimeMs: number;
   endTimeMs: number;
-  count?: number;
+  totalSeries?: number;
+  totalDatapoints?: number;
+};
+
+type ExampleMetric = {
+  __name__: string;
+  instance: string;
+  job: string;
+  le: string;
+};
+
+type Datapoint = [number, string];
+
+type SeriesData = {
+  metric: ExampleMetric;
+  values: Datapoint[];
 };
 
 /*
@@ -118,59 +133,43 @@ type MockManySeriesValueConfig = {
 export function mockTimeSeriesResponseWithManySeries({
   startTimeMs,
   endTimeMs,
-  count = 1000,
+  totalSeries = 16,
+  totalDatapoints = 1000,
 }: MockManySeriesValueConfig): MockResponse {
   const startTimeS = Math.floor(startTimeMs / 1000);
   const endTimeS = Math.floor(endTimeMs / 1000);
-  const stepSize = Math.floor((endTimeS - startTimeS) / count);
-  return mockSuccessfulTimeSeriesResponse([
-    {
-      metric: {
-        __name__: 'rpc_durations_histogram_seconds_bucket',
-        instance: 'demo.do.prometheus.io:8996',
-        job: 'random',
-        le: '+Inf',
-      },
-      values: [...Array(count)].map((_, i) => {
-        const timestamp = i < count - 1 ? startTimeS + i * stepSize : endTimeS;
-        return [timestamp, String(100)];
-      }),
-    },
-    {
-      metric: {
-        __name__: 'rpc_durations_histogram_seconds_bucket',
-        instance: 'demo.do.prometheus.io:8996',
-        job: 'random',
-        le: '0.1',
-      },
-      values: [...Array(count)].map((_, i) => {
-        const timestamp = i < count - 1 ? startTimeS + i * stepSize : endTimeS;
-        return [timestamp, String(200)];
-      }),
-    },
-    {
-      metric: {
-        __name__: 'caddy_http_request_duration_seconds_bucket',
-        instance: 'demo.do.prometheus.io:8996',
-        job: 'caddy',
-        le: '+Inf',
-      },
-      values: [...Array(count)].map((_, i) => {
-        const timestamp = i < count - 1 ? startTimeS + i * stepSize : endTimeS;
-        return [timestamp, String(150)];
-      }),
-    },
-    {
-      metric: {
-        __name__: 'caddy_http_request_duration_seconds_bucket',
-        instance: 'demo.do.prometheus.io:8996',
-        job: 'caddy',
-        le: '0.05',
-      },
-      values: [...Array(count)].map((_, i) => {
-        const timestamp = i < count - 1 ? startTimeS + i * stepSize : endTimeS;
-        return [timestamp, String(300)];
-      }),
-    },
-  ]);
+  const stepSize = Math.floor((endTimeS - startTimeS) / totalDatapoints);
+
+  const mockData: SeriesData[] = [];
+
+  // Test data cycles back and forth depending on seriesIsEven condition
+  const exampleJobs = ['demo', 'caddy'];
+  const exampleMetric = ['rpc_durations_histogram_seconds_bucket', 'caddy_http_request_duration_seconds_bucket'];
+  const exampleInstances = ['demo.do.prometheus.io:8996', 'rc-demo-environment/data/prom'];
+
+  const GAP_BETWEEN_SERIES_MULTIPLIER = totalSeries * 1000;
+  const STATIC_GAP = 10;
+
+  for (let i = 0; i < totalSeries; i++) {
+    const seriesIsEven = i % 2;
+    const metric: ExampleMetric = {
+      __name__: exampleMetric[seriesIsEven] ?? 'up',
+      instance: exampleInstances[seriesIsEven] ?? 'instance',
+      job: exampleJobs[seriesIsEven] ?? 'node',
+      le: `0.${i}`,
+    };
+
+    const values: Datapoint[] = [];
+
+    for (let j = 0; j < totalDatapoints; j++) {
+      const TREND_UPWARDS_INCREMENT = j * 30;
+      const timestamp = j < totalDatapoints - 1 ? startTimeS + j * stepSize : endTimeS;
+      // TODO: better approach for realistic trends for test data
+      const testValue = i * GAP_BETWEEN_SERIES_MULTIPLIER + STATIC_GAP + TREND_UPWARDS_INCREMENT;
+      values.push([timestamp, String(1000 + testValue)]);
+    }
+
+    mockData.push({ metric, values });
+  }
+  return mockSuccessfulTimeSeriesResponse(mockData);
 }
