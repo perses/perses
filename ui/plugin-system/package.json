@@ -34,6 +34,9 @@
     "use-immer": "^0.7.0",
     "use-query-params": "^2.1.2"
   },
+  "devDependencies": {
+    "@perses-dev/storybook": "0.27.0"
+  },
   "peerDependencies": {
     "@mui/material": "^5.10.0",
     "@tanstack/react-query": "^4.7.1",

@@ -20,16 +20,9 @@ import {
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
 } from '@perses-dev/internal-utils';
-import { mockQueryRangeRequests, waitForStableCanvas } from '@perses-dev/storybook';
-import {
-  WithDashboard,
-  WithDatasourceStore,
-  WithPluginRegistry,
-  WithQueryClient,
-  WithQueryParams,
-  WithTemplateVariables,
-  WithTimeRange,
-} from '../../stories/decorators';
+import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
+import { WithDashboard, WithDatasourceStore, WithTemplateVariables } from '../../stories/decorators';
 
 const meta: Meta<typeof Dashboard> = {
   component: Dashboard,

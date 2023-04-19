@@ -146,6 +146,8 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
       addResult(globalDatasource.spec, selectorName);
     }
 
+    console.log(results);
+
     return results;
   });
 
