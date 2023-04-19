@@ -101,7 +101,7 @@ Please verify that the Github Actions complete successfully. Once they are compl
 
 It can be helpful to leave the release branch up for a little while in case we need to create a patch release to address bugs or minor issues with the release you just made. 
 
-Once the release branch is no longer needed, you should open a new PR based on `main` to merge those changes. When this PR is approved, merge it into `main` using the "merge pull request" option (instead of "squash and merge," which can have issues with release branches).
+Once the release branch is no longer needed, you should open a new PR based on `main` to merge those changes. When this PR is approved, merge it into `main` using the "merge pull request" option (using "squash and merge" will lose the commit needed for the release tag, which can lead to problems).
 
 ## How to cut a UI snapshot release
 
