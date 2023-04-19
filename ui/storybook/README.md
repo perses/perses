@@ -94,7 +94,7 @@ We primarily use first party addons maintained by Storybook to avoid pain with u
 
 Global decorators are specified in the [Storybook configuration](#configuring-storybook) and are applied to all stories. These decorators live in the `storybook` package in `src/config/decorators` and are primarily related to global storybook behavior (e.g. theming, time zones).
 
-## Package-specific decorators
+### Package-specific decorators
 
 Perses relies heavily on React context, which can be tedious to set up over and over again in every story. We simplify this by creating decorators to cover common cases related to React context. These decorators should:
 
@@ -104,7 +104,7 @@ Perses relies heavily on React context, which can be tedious to set up over and 
 - When possible, the decorator should have a default value for the context/provider that enables it to be used out-of-the-box in common use cases.
 - When possible, the decorator should include an option to modify the behavior using storybook `parameters`. See the current decorators for some examples.
 
-### Importing
+#### Importing
 
 We do not expose Storybook utilties like decorators on our compiled packages because they are internal tooling. Shared decorators need to be imported by including a more specific path. For example.
 
@@ -112,7 +112,7 @@ We do not expose Storybook utilties like decorators on our compiled packages bec
 import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
 ```
 
-## Generic decorators
+### Generic decorators
 
 Some decorators are not related to a specific Perses package (e.g. decorators for context from an external library like `use-query-params`) and are not global. These packages should:
 
@@ -120,7 +120,7 @@ Some decorators are not related to a specific Perses package (e.g. decorators fo
 - Be located in `src/decorators`.
 - If they are related to context, follow the decorator naming configuration guidelines recommended for [package-specific decorators](#package-specific-decorators).
 
-### Importing
+#### Importing
 
 The `storybook` package is an internal utility that is not published, so we can export shared utilities from it and import from the top level export. For example:
 
