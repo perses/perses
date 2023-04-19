@@ -27,4 +27,4 @@ dashboard_lists:
 
 information: |-
   # Hello World
-  ## File Database setup
+  ## MariaDB Database setup
