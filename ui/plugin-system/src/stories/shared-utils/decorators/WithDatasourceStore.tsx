@@ -22,7 +22,7 @@ export type WithDatasourceStoreParameter = {
 const prometheusDemoUrl = 'https://prometheus.demo.do.prometheus.io';
 
 // Type guard because storybook types parameters as `any`
-function isWithDatastoreParameter(
+function isWithDatastoreStoreParameter(
   parameter: unknown | WithDatasourceStoreParameter
 ): parameter is WithDatasourceStoreParameter {
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
@@ -39,14 +39,17 @@ export const WithDatasourceStore = (Story: StoryFn, context: StoryContext<unknow
   // for `DatasourceStoreContext` that is more generic than the one available
   // in in the `dashboard` package for non-dashboard use cases.
   const defaultValue: DatasourceStore = {
-    getDatasource: () => {
-      return Promise.resolve({
-        default: true,
-        plugin: {
-          kind: 'PrometheusDatasource',
-          spec: {},
-        },
-      });
+    getDatasource: (selector) => {
+      if (selector.kind === 'PrometheusDatasource') {
+        return Promise.resolve({
+          default: true,
+          plugin: {
+            kind: 'PrometheusDatasource',
+            spec: {},
+          },
+        });
+      }
+      throw new Error(`WithDatasourceStore is not configured to support kind: ${selector.kind}`);
     },
     getDatasourceClient: async <Client,>(selector: DatasourceSelector) => {
       if (selector.kind === 'PrometheusDatasource') {
@@ -68,11 +71,11 @@ export const WithDatasourceStore = (Story: StoryFn, context: StoryContext<unknow
           },
         ]);
       }
-      return Promise.resolve([]);
+      throw new Error(`WithDatasourceStore is not configured to support kind: ${datasourcePluginKind}`);
     },
   };
 
-  const parameter = isWithDatastoreParameter(initParameter) ? initParameter : { props: defaultValue };
+  const parameter = isWithDatastoreStoreParameter(initParameter) ? initParameter : { props: defaultValue };
   const props = parameter?.props;
 
   return (
