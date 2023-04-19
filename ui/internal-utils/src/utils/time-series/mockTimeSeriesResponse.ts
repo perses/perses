@@ -143,7 +143,7 @@ export function mockTimeSeriesResponseWithManySeries({
   const mockData: SeriesData[] = [];
 
   // Test data cycles back and forth depending on seriesIsEven condition
-  const exampleJobs = ['demo', 'caddy'];
+  const exampleJobs = ['node', 'caddy'];
   const exampleMetric = ['rpc_durations_histogram_seconds_bucket', 'caddy_http_request_duration_seconds_bucket'];
   const exampleInstances = ['demo.do.prometheus.io:8996', 'rc-demo-environment/data/prom'];
 
@@ -155,8 +155,8 @@ export function mockTimeSeriesResponseWithManySeries({
     const metric: ExampleMetric = {
       __name__: exampleMetric[seriesIsEven] ?? 'up',
       instance: exampleInstances[seriesIsEven] ?? 'instance',
-      job: exampleJobs[seriesIsEven] ?? 'node',
-      le: `0.${i}`,
+      job: exampleJobs[seriesIsEven] ?? 'demo',
+      le: `${i}.${seriesIsEven}`,
     };
 
     const values: Datapoint[] = [];
