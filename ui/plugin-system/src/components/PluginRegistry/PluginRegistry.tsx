@@ -25,9 +25,9 @@ import { PluginRegistryContext } from '../../runtime';
 import { usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
 
 export interface PluginRegistryProps {
-  children?: React.ReactNode;
   pluginLoader: PluginLoader;
-  defaultPluginKinds?: DefaultPluginKinds;
+  defaultPluginKinds: DefaultPluginKinds;
+  children?: React.ReactNode;
 }
 
 /**
