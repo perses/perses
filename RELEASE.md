@@ -49,9 +49,10 @@ Create a branch that follows the naming pattern `release/v<X.Y>` and includes th
 
 #### Create a PR with the changes
 
-- Create a branch with the changes for the release (e.g. `yourname/release-v<major>.<minor>.<patch>`). 
+- Create a branch with the changes for the release (e.g. `yourname/release-v<major>.<minor>.<patch>`).
 - Update the file `VERSION` with the new version to be created.
 - Generate `CHANGELOG.md` updates based on git history:
+
   ```bash
   make generate-changelog
   ```
@@ -63,14 +64,15 @@ Create a branch that follows the naming pattern `release/v<X.Y>` and includes th
     * `[BREAKINGCHANGE]`
   - Entries that map to a pull request should include a pull request number.
   - As we have many libraries we publish, it's better if you also put a clear indication about what library is affected by
-these changes.
+    these changes.
   - Consumers understand how to handle breaking changes either through the messaging in the changelog or through the linked pull requests.
 - Update the `package.json` files for all packages with the corresponding version:
+
   ```bash
   make bump-version
   ```
 - Push the branch to github and create a pull request with the release branch as the base. This gives others the opportunity to chime in on the release,
-  in general, and on the addition to the changelog, in particular. 
+  in general, and on the addition to the changelog, in particular.
   - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
 - Address any necessary feedback.
 - Once the pull request is approved, merge the it into the release branch.
@@ -79,6 +81,7 @@ these changes.
 
 - Pull down the latest updates to the release branch on your local machine to ensure you have the updates from the previous step.
 - Tag the new release via the following commands:
+
   ```bash
   git checkout release/v<version_to_be_replaced>
   make tag
@@ -99,7 +102,7 @@ Please verify that the Github Actions complete successfully. Once they are compl
 
 ### 3. Merge the release into `main`
 
-It can be helpful to leave the release branch up for a little while in case we need to create a patch release to address bugs or minor issues with the release you just made. 
+It can be helpful to leave the release branch up for a little while in case we need to create a patch release to address bugs or minor issues with the release you just made.
 
 Once the release branch is no longer needed, you should open a new PR based on `main` to merge those changes. When this PR is approved, merge it into `main` using the "merge pull request" option (using "squash and merge" will lose the commit needed for the release tag, which can lead to problems).
 
