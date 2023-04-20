@@ -77,7 +77,7 @@ Create a branch that follows the naming pattern `release/v<X.Y>` and includes th
 - Address any necessary feedback.
 - Once the pull request is approved, merge the it into the release branch.
 
-### 2. Draft the new release
+### 2. Create release tag and validate release
 
 - Pull down the latest updates to the release branch on your local machine to ensure you have the updates from the previous step.
 - Tag the new release via the following commands:
