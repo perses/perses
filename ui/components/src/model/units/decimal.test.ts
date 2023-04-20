@@ -14,7 +14,7 @@
 import { formatValue } from './units';
 import { UnitTestCase } from './units.test';
 
-const decimalTests: UnitTestCase[] = [
+const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: -10,
     unit: { kind: 'Decimal' },
@@ -287,7 +287,7 @@ const decimalTests: UnitTestCase[] = [
 ];
 
 describe('formatValue', () => {
-  it.each(decimalTests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
+  it.each(DECIMAL_TESTS)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
     const { value, unit, expected } = args;
     expect(formatValue(value, unit)).toEqual(expected);
   });
