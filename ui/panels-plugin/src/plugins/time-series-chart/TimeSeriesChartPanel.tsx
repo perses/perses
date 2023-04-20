@@ -150,6 +150,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
 
+    // Total series count across all queries is needed before mapping below to determine which color palette to use
+    // This calculation should not impact performance since total number of queries rarely exceeds ~5
+    let totalSeries = 0;
+    for (let i = 0; i < queryResults.length; i++) {
+      totalSeries += queryResults[i]?.data?.series?.length ?? 0;
+    }
+
+    // Mapping of each set of query results to be ECharts option compatible
+    // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
     for (const result of queryResults) {
       // Skip queries that are still loading or don't have data
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
@@ -168,12 +177,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           Array.isArray(echartsPalette) && echartsPalette[0]
             ? (echartsPalette[0] as string)
             : muiTheme.palette.primary.main;
-        // Check which color palette was chosen and get appropriate color.
+
+        // Decide which palette to use based on total series returned.
+        // When series number exceeds number of colors in palette, use generative colors instead.
+        const paletteLength = Array.isArray(echartsPalette) ? echartsPalette.length : 4;
         const seriesColor =
-          visual.palette?.kind === 'Categorical'
+          totalSeries < paletteLength
             ? getCategoricalPaletteColor(echartsPalette as string[], seriesIndex, fallbackColor)
             : getAutoPaletteColor(formattedSeriesName, fallbackColor);
-
         // Used for repeating colors in Categorical palette
         seriesIndex++;
 
