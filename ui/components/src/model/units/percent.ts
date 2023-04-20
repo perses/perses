@@ -43,6 +43,8 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
   },
 };
 
+const MAX_SIGNIFICANT_DIGITS = 3;
+
 export function formatPercent(value: number, { kind, decimal_places }: PercentUnitOptions): string {
   // Intl.NumberFormat translates 0 -> 0%, 0.5 -> 50%, 1 -> 100%
   if (kind === 'Percent') {
@@ -53,15 +55,17 @@ export function formatPercent(value: number, { kind, decimal_places }: PercentUn
 
   let formatter;
   if (hasDecimalPlaces) {
+    // If there is a specified # of decimal places, use maximumFractionDigits
     formatter = new Intl.NumberFormat('en-US', {
       style: 'percent',
       maximumFractionDigits: decimal_places,
       useGrouping: true,
     });
   } else {
+    // By default, use maximumSignificantDigits
     formatter = new Intl.NumberFormat('en-US', {
       style: 'percent',
-      maximumSignificantDigits: 3,
+      maximumSignificantDigits: MAX_SIGNIFICANT_DIGITS,
       useGrouping: true,
     });
   }
