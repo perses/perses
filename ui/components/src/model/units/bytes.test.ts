@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { formatValue } from './units';
-import { UnitTestCase } from './units.test';
+import { UnitTestCase } from './types';
 
 const BYTES_TESTS: UnitTestCase[] = [
   { value: 0, unit: { kind: 'Bytes' }, expected: '0 bytes' },

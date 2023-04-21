@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { formatValue } from './units';
-import { UnitTestCase } from './units.test';
+import { UnitTestCase } from './types';
 
 const TIME_TESTS: UnitTestCase[] = [
   {
