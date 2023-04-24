@@ -182,7 +182,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // When series number exceeds number of colors in palette, use generative colors instead.
         const paletteLength = Array.isArray(echartsPalette) ? echartsPalette.length : 4;
         const seriesColor =
-          totalSeries < paletteLength
+          totalSeries <= paletteLength
             ? getCategoricalPaletteColor(echartsPalette as string[], seriesIndex, fallbackColor)
             : getAutoPaletteColor(formattedSeriesName, fallbackColor);
         // Used for repeating colors in Categorical palette
