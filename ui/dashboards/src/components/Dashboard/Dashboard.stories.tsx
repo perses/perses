@@ -159,7 +159,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             {
               x: 12,
               y: 0,
-              width: 10,
+              width: 12,
               height: 8,
               content: {
                 $ref: '#/spec/panels/TimeSeriesGeneratedColors',
