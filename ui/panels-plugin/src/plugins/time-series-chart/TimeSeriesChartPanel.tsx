@@ -54,7 +54,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const echartsPalette = chartsTheme.echartsTheme.color;
+
+  // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
+  // Colors are manually applied since our legend and tooltip are built custom with React.
+  const categoricalPalette = chartsTheme.echartsTheme.color;
 
   const { isFetching, isLoading, queryResults } = useDataQueries();
 
@@ -174,16 +177,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
         const fallbackColor =
-          Array.isArray(echartsPalette) && echartsPalette[0]
-            ? (echartsPalette[0] as string)
+          Array.isArray(categoricalPalette) && categoricalPalette[0]
+            ? categoricalPalette[0]
             : muiTheme.palette.primary.main;
 
         // Decide which palette to use based on total series returned.
         // When series number exceeds number of colors in palette, use generative colors instead.
-        const paletteLength = Array.isArray(echartsPalette) ? echartsPalette.length : 4;
+        const paletteLength = Array.isArray(categoricalPalette) ? categoricalPalette.length : 4;
         const seriesColor =
           totalSeries <= paletteLength
-            ? getCategoricalPaletteColor(echartsPalette as string[], seriesIndex, fallbackColor)
+            ? getCategoricalPaletteColor(categoricalPalette as string[], seriesIndex, fallbackColor)
             : getAutoPaletteColor(formattedSeriesName, fallbackColor);
         // Used for repeating colors in Categorical palette
         seriesIndex++;
