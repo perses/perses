@@ -45,7 +45,14 @@ export function renderWithContext(
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <PluginRegistry pluginLoader={testPluginLoader} defaultPluginKinds={contextOptions?.defaultPluginKinds}>
+      <PluginRegistry
+        pluginLoader={testPluginLoader}
+        defaultPluginKinds={
+          contextOptions?.defaultPluginKinds ?? {
+            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+          }
+        }
+      >
         {ui}
       </PluginRegistry>
     </QueryClientProvider>,
