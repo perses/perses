@@ -71,4 +71,5 @@ export type PluginImplementation<Type extends PluginType> = SupportedPlugins[Typ
 /**
  * Default plugin kinds by plugin type.
  */
-export type DefaultPluginKinds = Partial<Record<PluginType, string>>;
+type PluginKinds = Partial<Record<PluginType, string>>;
+export type DefaultPluginKinds = Required<Pick<PluginKinds, 'TimeSeriesQuery'>> & Omit<PluginKinds, 'TimeSeriesQuery'>;

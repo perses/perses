@@ -14,7 +14,7 @@
 import { formatValue } from './units';
 import { UnitTestCase } from './units.test';
 
-const bytesTests: UnitTestCase[] = [
+const BYTES_TESTS: UnitTestCase[] = [
   { value: 0, unit: { kind: 'Bytes' }, expected: '0 bytes' },
   { value: 1, unit: { kind: 'Bytes' }, expected: '1 byte' },
   {
@@ -245,7 +245,7 @@ const bytesTests: UnitTestCase[] = [
 ];
 
 describe('formatValue', () => {
-  it.each(bytesTests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
+  it.each(BYTES_TESTS)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
     const { value, unit, expected } = args;
     expect(formatValue(value, unit)).toEqual(expected);
   });

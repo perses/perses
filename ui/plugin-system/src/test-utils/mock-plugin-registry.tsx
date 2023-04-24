@@ -65,6 +65,9 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
 
   return {
     pluginLoader,
+    defaultPluginKinds: {
+      TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+    },
   };
 }
 
