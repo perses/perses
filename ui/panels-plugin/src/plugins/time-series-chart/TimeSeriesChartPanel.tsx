@@ -43,7 +43,7 @@ import {
   convertPercentThreshold,
   convertPanelYAxis,
 } from './utils/data-transform';
-import { getSeriesColor } from './utils/palette-gen';
+import { getAutoPaletteColor, getCategoricalPaletteColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
@@ -54,7 +54,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const echartsPalette = chartsTheme.echartsTheme.color ?? [muiTheme.palette.primary];
+  const echartsPalette = chartsTheme.echartsTheme.color;
 
   const { isFetching, isLoading, queryResults } = useDataQueries();
 
@@ -163,13 +163,19 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        const seriesColor = getSeriesColor(
-          formattedSeriesName,
-          seriesIndex,
-          echartsPalette as string[],
-          visual.palette?.kind
-        );
-        seriesIndex++; // Used for repeating colors in Categorical palette
+        // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
+        const fallbackColor =
+          Array.isArray(echartsPalette) && echartsPalette[0]
+            ? (echartsPalette[0] as string)
+            : muiTheme.palette.primary.main;
+        // Check which color palette was chosen and get appropriate color.
+        const seriesColor =
+          visual.palette?.kind === 'Categorical'
+            ? getCategoricalPaletteColor(echartsPalette as string[], seriesIndex, fallbackColor)
+            : getAutoPaletteColor(formattedSeriesName, fallbackColor);
+
+        // Used for repeating colors in Categorical palette
+        seriesIndex++;
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
