@@ -26,8 +26,11 @@ export function getAutoPaletteColor(name: string, fallbackColor: string): string
  * Get line color as well as color for tooltip and legend, account for whether palette is 'Cateogrical' or 'Auto' (generative)
  */
 export function getCategoricalPaletteColor(palette: string[], paletteIndex: number, fallbackColor: string): string {
-  const paletteTotalColors = palette.length ?? 0;
+  if (palette === undefined) {
+    return fallbackColor;
+  }
   // Loop through predefined static color palette
+  const paletteTotalColors = palette.length ?? 1;
   const colorIndex = paletteIndex % paletteTotalColors;
   // fallback color comes from echarts theme
   const seriesColor = palette[colorIndex] ?? fallbackColor;
