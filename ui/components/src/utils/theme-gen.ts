@@ -39,20 +39,15 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       left: 20,
       containLabel: true,
     },
-    // Accessible categorical palette from: https://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12
+    // Accessible categorical palette from: https://davidmathlogic.com/colorblind
     color: [
-      '#a6cee3',
-      '#1f78b4',
-      '#b2df8a',
-      '#33a02c',
-      '#fb9a99',
-      '#e31a1c',
-      '#fdbf6f',
-      '#ff7f00',
-      '#cab2d6',
-      '#6a3d9a',
-      '#ffff99',
-      '#b15928',
+      '#56B4E9', // lt blue
+      '#009E73', // med green
+      '#0072B2', // dk blue
+      '#CC79A7', // lt purple
+      '#F0E442', // yellow
+      '#E69F00', // orange
+      '#D55E00', // red
     ],
     categoryAxis: {
       show: true,
