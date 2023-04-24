@@ -178,7 +178,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
         const fallbackColor =
           Array.isArray(categoricalPalette) && categoricalPalette[0]
-            ? categoricalPalette[0]
+            ? (categoricalPalette[0] as string) // needed since echarts color property isn't always an array
             : muiTheme.palette.primary.main;
 
         // Decide which palette to use based on total series returned.
