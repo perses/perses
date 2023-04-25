@@ -43,7 +43,7 @@ import {
   convertPercentThreshold,
   convertPanelYAxis,
 } from './utils/data-transform';
-import { getAutoPaletteColor, getCategoricalPaletteColor } from './utils/palette-gen';
+import { getPaletteColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
@@ -175,19 +175,17 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
-        const fallbackColor =
-          Array.isArray(categoricalPalette) && categoricalPalette[0]
-            ? (categoricalPalette[0] as string) // needed since echarts color property isn't always an array
-            : muiTheme.palette.primary.main;
+        // Color is used for line, tooltip, and legend
+        const seriesColor = getPaletteColor(
+          // ECharts type for color is not always an array but it is always an array in ChartsThemeProvider
+          categoricalPalette as string[],
+          visual,
+          muiTheme.palette.primary.main,
+          formattedSeriesName,
+          seriesIndex,
+          totalSeries
+        );
 
-        // Decide which palette to use based on total series returned.
-        // When series number exceeds number of colors in palette, use generative colors instead.
-        const paletteLength = Array.isArray(categoricalPalette) ? categoricalPalette.length : 4;
-        const seriesColor =
-          totalSeries <= paletteLength
-            ? getCategoricalPaletteColor(categoricalPalette as string[], seriesIndex, fallbackColor)
-            : getAutoPaletteColor(formattedSeriesName, fallbackColor);
         // Used for repeating colors in Categorical palette
         seriesIndex++;
 
