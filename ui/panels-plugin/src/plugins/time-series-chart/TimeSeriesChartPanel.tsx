@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
-import { PanelProps, useTimeSeriesQueries, useTimeRange } from '@perses-dev/plugin-system';
+import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
@@ -27,7 +27,6 @@ import {
   ZoomEventData,
   useChartsTheme,
 } from '@perses-dev/components';
-import { useSuggestedStepMs } from '../../model/time';
 import {
   TimeSeriesChartOptions,
   DEFAULT_UNIT,
@@ -50,12 +49,19 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { queries, thresholds, y_axis },
+    spec: { thresholds, y_axis },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const echartsPalette = chartsTheme.echartsTheme.color ?? [muiTheme.palette.primary];
+
+  // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
+  // Colors are manually applied since our legend and tooltip are built custom with React.
+  const categoricalPalette = chartsTheme.echartsTheme.color;
+
+  const { isFetching, isLoading, queryResults } = useDataQueries();
+
+  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -90,12 +96,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
-  const suggestedStepMs = useSuggestedStepMs(adjustedContentDimensions?.width);
-  const queryResults = useTimeSeriesQueries(queries, { suggestedStepMs });
-  const fetching = queryResults.some((result) => result.isFetching);
-  const loading = queryResults.some((result) => result.isLoading);
-  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
-
   const { setTimeRange } = useTimeRange();
 
   const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesName: string) => {
@@ -129,7 +129,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const { graphData } = useDeepMemo(() => {
     // If loading or fetching, we display a loading indicator.
     // We skip the expensive loops below until we are done loading or fetching.
-    if (loading || fetching) {
+    if (isLoading || isFetching) {
       return {
         graphData: EMPTY_GRAPH_DATA,
       };
@@ -153,6 +153,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
 
+    // Total series count across all queries is needed before mapping below to determine which color palette to use
+    // This calculation should not impact performance since total number of queries rarely exceeds ~5
+    let totalSeries = 0;
+    for (let i = 0; i < queryResults.length; i++) {
+      totalSeries += queryResults[i]?.data?.series?.length ?? 0;
+    }
+
+    // Mapping of each set of query results to be ECharts option compatible
+    // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
     for (const result of queryResults) {
       // Skip queries that are still loading or don't have data
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
@@ -166,13 +175,19 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        const seriesColor = getSeriesColor(
-          formattedSeriesName,
+        // Color is used for line, tooltip, and legend
+        const seriesColor = getSeriesColor({
+          // ECharts type for color is not always an array but it is always an array in ChartsThemeProvider
+          categoricalPalette: categoricalPalette as string[],
+          visual,
+          muiPrimaryColor: muiTheme.palette.primary.main,
+          seriesName: formattedSeriesName,
           seriesIndex,
-          echartsPalette as string[],
-          visual.palette?.kind
-        );
-        seriesIndex++; // Used for repeating colors in Categorical palette
+          totalSeries,
+        });
+
+        // Used for repeating colors in Categorical palette
+        seriesIndex++;
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
@@ -221,13 +236,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, fetching, loading, y_axis?.max, y_axis?.min]);
+  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
   }
 
-  if (loading === true || fetching == true) {
+  if (isLoading || isFetching) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}

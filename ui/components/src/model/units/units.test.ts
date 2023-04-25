@@ -19,25 +19,9 @@ export interface UnitTestCase {
   expected: string;
 }
 
-// TODO: Create test files for percent and time. Write more tests for percent and time.
+// TODO: Create test files for time units. Write more tests for time units.
 describe('formatValue', () => {
   const tests: UnitTestCase[] = [
-    // Percent
-    {
-      value: 10,
-      unit: { kind: 'Percent' },
-      expected: '10.00%',
-    },
-    {
-      value: 50,
-      unit: { kind: 'Percent', decimal_places: 0 },
-      expected: '50%',
-    },
-    {
-      value: 0.1,
-      unit: { kind: 'PercentDecimal' },
-      expected: '10.00%',
-    },
     // Time
     {
       value: 8000,

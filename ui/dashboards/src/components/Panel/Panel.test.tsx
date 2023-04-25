@@ -29,6 +29,7 @@ describe('Panel', () => {
         kind: 'TimeSeriesChart',
         spec: {},
       },
+      queries: [],
     },
   });
 

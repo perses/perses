@@ -11,9 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DocsContainer as BaseContainer, DocsContainerProps } from '@storybook/addon-docs';
+import { DocsContainer as BaseContainer } from '@storybook/addon-docs';
 import { useDarkMode } from 'storybook-dark-mode';
 import { themes } from '@storybook/theming';
+
+// Doing this instead of using the exported `DocsContainerProps` because it is
+// missing the `children` property (they modify it to add `children` when
+// using it in the `DocsContainer` definition).
+type DocsContainerProps = React.ComponentProps<typeof BaseContainer>;
 
 // Solution for having dark mode on docs page combo of the following:
 // https://github.com/hipstersmoothie/storybook-dark-mode/issues/127#issuecomment-1070524402

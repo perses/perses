@@ -28,4 +28,5 @@ export const Markdown: PanelPlugin<MarkdownPanelOptions> = {
     },
   ],
   createInitialOptions: createInitialMarkdownPanelOptions,
+  hideQueryEditor: true,
 };

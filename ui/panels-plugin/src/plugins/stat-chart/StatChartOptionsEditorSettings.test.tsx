@@ -17,18 +17,6 @@ import userEvent from '@testing-library/user-event';
 import { StatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 
-const MOCK_QUERY = {
-  kind: 'TimeSeriesQuery',
-  spec: {
-    plugin: {
-      kind: 'PrometheusTimeSeriesQuery',
-      spec: {
-        query: '',
-      },
-    },
-  },
-} as const;
-
 describe('StatChartOptionsEditorSettings', () => {
   const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = jest.fn()) => {
     render(
@@ -42,12 +30,10 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'Stats',
         unit: {
           kind: 'Minutes',
         },
         calculation: 'Last',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -70,12 +56,10 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'My Stats',
         unit: {
           kind: 'Days',
         },
         calculation: 'Sum',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -96,12 +80,10 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'enable spark stats',
         unit: {
           kind: 'Days',
         },
         calculation: 'Sum',
-        query: MOCK_QUERY,
       },
       onChange
     );
@@ -120,7 +102,6 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        name: 'enable spark stats',
         unit: {
           kind: 'Days',
         },
@@ -128,7 +109,6 @@ describe('StatChartOptionsEditorSettings', () => {
         sparkline: {
           color: '#ff0000',
         },
-        query: MOCK_QUERY,
       },
       onChange
     );

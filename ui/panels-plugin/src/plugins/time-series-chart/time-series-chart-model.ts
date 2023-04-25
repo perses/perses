@@ -12,14 +12,13 @@
 // limitations under the License.
 
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { TimeSeriesQueryDefinition, ThresholdOptions } from '@perses-dev/core';
+import { ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.
  */
 export interface TimeSeriesChartOptions {
-  queries: TimeSeriesQueryDefinition[];
   legend?: LegendOptions;
   y_axis?: YAxisOptions;
   unit?: UnitOptions;
@@ -62,10 +61,6 @@ export const DEFAULT_LINE_WIDTH = 1.5;
 
 export const DEFAULT_AREA_OPACITY = 0;
 
-export const DEFAULT_PALETTE: PaletteOptions = {
-  kind: 'Auto',
-};
-
 export const DEFAULT_POINT_RADIUS = 4;
 
 export const DEFAULT_CONNECT_NULLS = false;
@@ -73,7 +68,6 @@ export const DEFAULT_CONNECT_NULLS = false;
 export const DEFAULT_VISUAL: VisualOptions = {
   line_width: DEFAULT_LINE_WIDTH,
   area_opacity: DEFAULT_AREA_OPACITY,
-  palette: DEFAULT_PALETTE,
   point_radius: DEFAULT_POINT_RADIUS,
   connect_nulls: DEFAULT_CONNECT_NULLS,
 };
@@ -150,19 +144,5 @@ export const MIN_VALUE_PADDING_MULTIPLIER = 0.8;
  * Creates an initial/empty options object for the TimeSeriesChartPanel.
  */
 export function createInitialTimeSeriesChartOptions(): TimeSeriesChartOptions {
-  return {
-    queries: [
-      {
-        kind: 'TimeSeriesQuery',
-        spec: {
-          plugin: {
-            kind: 'PrometheusTimeSeriesQuery',
-            spec: {
-              query: '',
-            },
-          },
-        },
-      },
-    ],
-  };
+  return {};
 }

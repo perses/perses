@@ -17,6 +17,7 @@ import { action } from '@storybook/addon-actions';
 import { Button, Stack } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import {
+  mockTimeSeriesResponseWithManySeries,
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
 } from '@perses-dev/internal-utils';
@@ -81,19 +82,55 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
               legend: {
                 position: 'Right',
               },
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
                   spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'up{instance=~"$instance"}',
-                      },
-                    },
+                    query: 'up{instance=~"$instance"}',
                   },
                 },
-              ],
+              },
+            },
+          ],
+        },
+      },
+      TimeSeriesGeneratedColors: {
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Generated Colors',
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query:
+                      'avg without (cpu)(rate(node_cpu_seconds_total{job="$job",instance=~"$instance"}[$interval]))',
+                  },
+                },
+              },
+            },
+          ],
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+              y_axis: {
+                unit: {
+                  kind: 'PercentDecimal',
+                  decimal_places: 0,
+                },
+              },
             },
           },
         },
@@ -113,10 +150,19 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             {
               x: 0,
               y: 0,
-              width: 10,
+              width: 12,
               height: 8,
               content: {
                 $ref: '#/spec/panels/TimeSeries',
+              },
+            },
+            {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 8,
+              content: {
+                $ref: '#/spec/panels/TimeSeriesGeneratedColors',
               },
             },
           ],
@@ -124,6 +170,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
       },
     ],
     variables: [
+      { kind: 'TextVariable', spec: { name: 'job', value: 'node' } },
       {
         kind: 'ListVariable',
         spec: {
@@ -140,6 +187,19 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             spec: {
               label_name: 'instance',
             },
+          },
+        },
+      },
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'interval',
+          default_value: '5m',
+          allow_all_value: false,
+          allow_multiple: false,
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: { values: ['1m', '5m'] },
           },
         },
       },
@@ -239,23 +299,23 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                        query: 'fake_graphite_query_with_nulls',
-                      },
-                    },
-                  },
-                },
-              ],
               visual: { connect_nulls: true, show_points: 'Always' },
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_graphite_query_with_nulls',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       CustomVisualOptions: {
@@ -265,23 +325,23 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-                      },
-                    },
-                  },
-                },
-              ],
               visual: { area_opacity: 0.5, connect_nulls: false, line_width: 3, point_radius: 6 },
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       LegendBottom: {
@@ -292,22 +352,22 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: { position: 'Bottom' },
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-                      },
-                    },
-                  },
-                },
-              ],
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       LegendRight: {
@@ -321,22 +381,22 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: { position: 'Right' },
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-                      },
-                    },
-                  },
-                },
-              ],
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       LegendTallFormatted: {
@@ -350,23 +410,23 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: { position: 'Bottom' },
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-                        series_name_format: 'formatted series name example - {{job}} job - instance {{instance}}',
-                      },
-                    },
-                  },
-                },
-              ],
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+                    series_name_format: 'formatted series name example - {{job}} job - instance {{instance}}',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       SingleLine: {
@@ -375,23 +435,86 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           display: { name: 'Single Line', description: 'Time series chart with a single line' },
           plugin: {
             kind: 'TimeSeriesChart',
-            spec: {
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
+            spec: {},
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
                   spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                        query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-                      },
-                    },
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
                   },
                 },
-              ],
+              },
+            },
+          ],
+        },
+      },
+      ColorPaletteAuto: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Auto Palette (Many Series)', description: 'Time series chart with Auto palette example' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+              visual: { connect_nulls: true },
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_many_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      ColorPaletteCategorical: {
+        kind: 'Panel',
+        spec: {
+          display: {
+            name: 'Categorical Palette (Default)',
+            description: 'Time series chart with Categorical palette example',
+          },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+              visual: {
+                palette: { kind: 'Categorical' },
+                connect_nulls: true,
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_few_series',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
     },
@@ -407,6 +530,8 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             { x: 0, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendBottom' } },
             { x: 8, y: 7, width: 8, height: 7, content: { $ref: '#/spec/panels/LegendRight' } },
             { x: 16, y: 7, width: 8, height: 10, content: { $ref: '#/spec/panels/LegendTallFormatted' } },
+            { x: 0, y: 14, width: 8, height: 7, content: { $ref: '#/spec/panels/ColorPaletteAuto' } },
+            { x: 8, y: 14, width: 8, height: 7, content: { $ref: '#/spec/panels/ColorPaletteCategorical' } },
           ],
         },
       },
@@ -430,7 +555,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
     happo: {
       beforeScreenshot: async () => {
         await waitForStableCanvas('canvas', {
-          expectedCount: 6,
+          expectedCount: 8,
         });
       },
     },
@@ -463,6 +588,26 @@ export const ExampleWithTimeSeriesPanels: Story = {
                 body: mockTimeSeriesResponseWithNullValues({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_few_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  totalSeries: 7,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_many_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  totalSeries: 20,
                 }),
               },
             },

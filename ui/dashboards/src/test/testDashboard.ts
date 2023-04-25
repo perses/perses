@@ -55,23 +55,23 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query:
-                          'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
-                      },
-                    },
-                  },
-                },
-              ],
               unit: { kind: '%' },
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query:
+                      'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance="$instance",mode!="idle"}[$interval]))',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       memory: {
@@ -81,56 +81,56 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query:
-                          'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
-                      },
-                    },
-                  },
-                },
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
-                      },
-                    },
-                  },
-                },
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
-                      },
-                    },
-                  },
-                },
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
-                      },
-                    },
-                  },
-                },
-              ],
               unit: { kind: 'Bytes' },
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query:
+                      'node_memory_MemTotal_bytes{job="node",instance="$instance"} - node_memory_MemFree_bytes{job="node",instance="$instance"} - node_memory_Buffers_bytes{job="node",instance="$instance"} - node_memory_Cached_bytes{job="node",instance="$instance"}',
+                  },
+                },
+              },
+            },
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query: 'node_memory_Buffers_bytes{job="node",instance="$instance"}',
+                  },
+                },
+              },
+            },
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query: 'node_memory_Cached_bytes{job="node",instance="$instance"}',
+                  },
+                },
+              },
+            },
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query: 'node_memory_MemFree_bytes{job="node",instance="$instance"}',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       // This panel is referenced in more than one layout below
@@ -141,23 +141,23 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query:
-                          'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
-                      },
-                    },
-                  },
-                },
-              ],
               unit: { kind: 'Percent' },
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query:
+                      'rate(node_disk_io_time_seconds_total{job="node",instance="$instance",device!~"^(md\\\\d+$|dm-)"}[$interval])',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       filesystemFullness: {
@@ -167,23 +167,23 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              queries: [
-                {
-                  kind: 'TimeSeriesQuery',
-                  spec: {
-                    plugin: {
-                      kind: 'PrometheusTimeSeriesQuery',
-                      spec: {
-                        query:
-                          '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
-                      },
-                    },
-                  },
-                },
-              ],
               unit: { kind: 'Percent' },
             },
           },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    query:
+                      '1 - node_filesystem_free_bytes{job="node",instance="$instance",fstype!="rootfs",mountpoint!~"/(run|var).*",mountpoint!=""} / node_filesystem_size_bytes{job="node",instance="$instance"}',
+                  },
+                },
+              },
+            },
+          ],
         },
       },
     },

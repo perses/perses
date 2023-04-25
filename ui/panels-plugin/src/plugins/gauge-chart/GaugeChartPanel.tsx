@@ -13,12 +13,11 @@
 
 import type { GaugeSeriesOption } from 'echarts';
 import { merge } from 'lodash-es';
-import { useTimeSeriesQuery, PanelProps, CalculationsMap } from '@perses-dev/plugin-system';
+import { PanelProps, CalculationsMap, useDataQueries } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
-import { useSuggestedStepMs } from '../../model/time';
 import { GaugeChartOptions, DEFAULT_UNIT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
@@ -29,24 +28,23 @@ export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
 export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
-  const { query, calculation, max } = pluginSpec;
+  const { calculation, max } = pluginSpec;
 
   const { thresholds: thresholdsColors } = useChartsTheme();
+
+  const { queryResults, isLoading } = useDataQueries();
 
   // ensures all default unit properties set if undef
   const unit = merge({}, DEFAULT_UNIT, pluginSpec.unit);
 
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
-  const suggestedStepMs = useSuggestedStepMs(contentDimensions?.width);
-  const { data, isLoading, error } = useTimeSeriesQuery(query, { suggestedStepMs });
-
   const gaugeData: GaugeSeries[] = useMemo(() => {
-    if (data === undefined) {
+    if (queryResults[0]?.data === undefined) {
       return [];
     }
     const seriesData: GaugeSeries[] = [];
-    for (const timeSeries of data.series) {
+    for (const timeSeries of queryResults[0].data.series) {
       const calculate = CalculationsMap[calculation];
       const series = {
         value: calculate(timeSeries.values),
@@ -55,14 +53,14 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
       seriesData.push(series);
     }
     return seriesData;
-  }, [data, calculation]);
+  }, [queryResults, calculation]);
 
-  if (error) throw error;
+  if (queryResults[0]?.error) throw queryResults[0]?.error;
 
   if (contentDimensions === undefined) return null;
 
   // TODO: remove Skeleton, add loading state to match mockups
-  if (isLoading === true) {
+  if (isLoading) {
     return (
       <Skeleton
         sx={{ margin: '0 auto' }}
