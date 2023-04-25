@@ -73,13 +73,16 @@ export enum TimeIntlDuration {
   Years = 'year',
 }
 
-export function formatTime(value: number, unitOptions: TimeUnitOptions): string {
-  const decimalPlaces = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
-  const timeUnit: string = TimeIntlDuration[unitOptions.kind];
+export function formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
+  const decimalPlaces = decimal_places ?? DEFAULT_DECIMAL_PLACES;
+
+  const timeUnit: string = TimeIntlDuration[kind];
+  const isMonthOrYear = kind === 'Months' || kind === 'Years';
+
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'unit',
     unit: timeUnit,
-    unitDisplay: 'long',
+    unitDisplay: isMonthOrYear ? 'long' : 'narrow',
     maximumFractionDigits: decimalPlaces,
   });
   return formatter.format(value);
