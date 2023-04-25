@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import {
-  getPaletteColor,
+  getSeriesColor,
   getAutoPaletteColor,
   getCategoricalPaletteColor,
   getConsistentSeriesNameColor,
 } from './palette-gen';
 
-describe('getPaletteColor', () => {
+describe('getSeriesColor', () => {
   const fallbackColor = '#000';
   const testCategoricalPalette = [
     '#56B4E9', // lt blue
@@ -32,17 +32,17 @@ describe('getPaletteColor', () => {
   const testSeriesName = 'Test series name';
 
   it('should return the first color from default Categorical palette', () => {
-    const paletteColor = getPaletteColor(testCategoricalPalette, {}, fallbackColor, testSeriesName, 0, 1);
+    const paletteColor = getSeriesColor(testCategoricalPalette, {}, fallbackColor, testSeriesName, 0, 1);
     expect(paletteColor).toEqual('#56B4E9');
   });
 
   it('should return the last color from default Categorical palette', () => {
-    const paletteColor = getPaletteColor(testCategoricalPalette, {}, '#0000FF', testSeriesName, 6, 1);
+    const paletteColor = getSeriesColor(testCategoricalPalette, {}, '#0000FF', testSeriesName, 6, 1);
     expect(paletteColor).toEqual('#D55E00');
   });
 
   it('should return color from the generative Auto palette when all Categorical colors have been used', () => {
-    const paletteColor = getPaletteColor(testCategoricalPalette, {}, '#0000FF', testSeriesName, 0, 8);
+    const paletteColor = getSeriesColor(testCategoricalPalette, {}, '#0000FF', testSeriesName, 0, 8);
     expect(paletteColor).toEqual('hsla(17.70,50%,50%,0.9)');
   });
 });

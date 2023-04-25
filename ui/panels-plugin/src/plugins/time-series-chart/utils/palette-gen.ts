@@ -12,13 +12,12 @@
 // limitations under the License.
 
 import ColorHash from 'color-hash';
-import { Theme } from '@mui/material';
 import { VisualOptions } from '../time-series-chart-model';
 
 /**
  * Get line color as well as color for tooltip and legend, account for whether palette is 'Cateogrical' or 'Auto' (generative)
  */
-export function getPaletteColor(
+export function getSeriesColor(
   categoricalPalette: string[],
   visual: VisualOptions,
   muiPrimaryColor: string,

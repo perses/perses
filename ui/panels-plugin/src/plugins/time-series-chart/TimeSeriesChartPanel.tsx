@@ -43,7 +43,7 @@ import {
   convertPercentThreshold,
   convertPanelYAxis,
 } from './utils/data-transform';
-import { getPaletteColor } from './utils/palette-gen';
+import { getSeriesColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
@@ -176,7 +176,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
         // Color is used for line, tooltip, and legend
-        const seriesColor = getPaletteColor(
+        const seriesColor = getSeriesColor(
           // ECharts type for color is not always an array but it is always an array in ChartsThemeProvider
           categoricalPalette as string[],
           visual,
