@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Button, Grid, Stack, Typography } from '@mui/material';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
 import { useNavigate } from 'react-router-dom';
 import { DashboardSelector } from '@perses-dev/core';
@@ -35,34 +35,26 @@ function HomeView() {
     return (data || []).map((project) => project.metadata.name);
   }, [data]);
 
-  const handleAddProjectDialogSubmit = useCallback(
-    (entity: ProjectModel) => navigate(`/projects/${entity.metadata.name}`),
-    [navigate]
-  );
-
-  const handleAddDashboardDialogSubmit = useCallback(
-    (dashboardSelector: DashboardSelector) =>
-      navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`),
-    [navigate]
-  );
+  const handleAddProjectDialogSubmit = (entity: ProjectModel) => navigate(`/projects/${entity.metadata.name}`);
+  const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector) =>
+    navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
 
   // Open/Close management for dialogs
   const [isAddProjectDialogOpen, setIsAddProjectDialogOpen] = useState(false);
   const [isAddDashboardDialogOpen, setIsAddDashboardDialogOpen] = useState(false);
 
-  const handleAddProjectDialogOpen = useCallback(() => {
+  const handleAddProjectDialogOpen = () => {
     setIsAddProjectDialogOpen(true);
-  }, []);
-  const handleAddProjectDialogClose = useCallback(() => {
+  };
+  const handleAddProjectDialogClose = () => {
     setIsAddProjectDialogOpen(false);
-  }, []);
-
-  const handleAddDashboardDialogOpen = useCallback(() => {
+  };
+  const handleAddDashboardDialogOpen = () => {
     setIsAddDashboardDialogOpen(true);
-  }, []);
-  const handleAddDashboardDialogClose = useCallback(() => {
+  };
+  const handleAddDashboardDialogClose = () => {
     setIsAddDashboardDialogOpen(false);
-  }, []);
+  };
 
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
