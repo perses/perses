@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
+import HistoryIcon from 'mdi-material-ui/History';
 import { useRecentDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
 
-export function RecentDashboardsMosaic() {
-  const { data, isLoading } = useRecentDashboardList();
+function RecentDashboardsMosaic() {
+  const { data, isLoading } = useRecentDashboardList(undefined, 6);
 
   if (isLoading) {
     return (
@@ -36,11 +37,25 @@ export function RecentDashboardsMosaic() {
 
   return (
     <>
-      {data.slice(0, 6).map((datedDashboard) => (
+      {data.map((datedDashboard) => (
         <Grid key={datedDashboard.dashboard.metadata.name} item xs={6} lg={4}>
           <DashboardCard dashboard={datedDashboard.dashboard}></DashboardCard>
         </Grid>
       ))}
     </>
+  );
+}
+
+export function RecentDashboards() {
+  return (
+    <Stack>
+      <Stack direction="row" alignItems="center" gap={1}>
+        <HistoryIcon />
+        <h2>Recent Dashboards</h2>
+      </Stack>
+      <Grid container spacing={2}>
+        <RecentDashboardsMosaic />
+      </Grid>
+    </Stack>
   );
 }

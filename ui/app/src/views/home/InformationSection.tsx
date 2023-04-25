@@ -31,7 +31,7 @@ export function InformationSection() {
 
   if (data) {
     return (
-      <>
+      <Stack my={2}>
         <Stack direction="row" alignItems="center" gap={1}>
           <InformationIcon />
           <h2>Information</h2>
@@ -39,7 +39,7 @@ export function InformationSection() {
         <Card>
           <CardContent dangerouslySetInnerHTML={{ __html: data }}></CardContent>
         </Card>
-      </>
+      </Stack>
     );
   }
 

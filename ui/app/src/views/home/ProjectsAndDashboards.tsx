@@ -31,6 +31,7 @@ import FolderPoundIcon from 'mdi-material-ui/FolderPound';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
+import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { DeleteProjectDialog } from '../../components/DeleteProjectDialog/DeleteProjectDialog';
@@ -79,7 +80,19 @@ function RenderDashboardList(props: RenderDashboardListProps) {
             </Stack>
           </AccordionSummary>
           <AccordionDetails id={`${row.project}-dashboard-list`}>
-            <DashboardList dashboardList={row.dashboards} hideToolbar={true} />
+            <DashboardList
+              dashboardList={row.dashboards}
+              hideToolbar={true}
+              initialState={{
+                columns: {
+                  columnVisibilityModel: {
+                    id: false,
+                    project: false,
+                    version: false,
+                  },
+                },
+              }}
+            />
           </AccordionDetails>
         </Accordion>
       );
@@ -175,6 +188,18 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <RenderDashboardList projectRows={filteredProjectRows} />
       </ErrorBoundary>
+    </Stack>
+  );
+}
+
+export function ProjectsAndDashboards() {
+  return (
+    <Stack my={2}>
+      <Stack direction="row" alignItems="center" gap={1}>
+        <FormatListBulletedIcon />
+        <h2>Projects & Dashboards</h2>
+      </Stack>
+      <SearchableDashboards id="project-dashboard-list" />
     </Stack>
   );
 }

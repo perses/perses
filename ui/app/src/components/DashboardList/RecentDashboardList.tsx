@@ -173,9 +173,6 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
           sorting: {
             sortModel: [{ field: 'viewedAt', sort: 'desc' }],
           },
-          pagination: {
-            paginationModel: { pageSize: 10, page: 0 },
-          },
         }}
         hideToolbar={hideToolbar}
         isLoading={isLoading}

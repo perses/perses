@@ -19,7 +19,7 @@ import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethod
 import buildURL from './url-builder';
 import { useImportantDashboardSelectors } from './config-client';
 
-const resource = 'dashboards';
+export const resource = 'dashboards';
 
 /**
  * Used to create a dashboard in the API.
@@ -71,7 +71,7 @@ export interface DatedDashboards {
  * Used to get dashboards seen recently by the user.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
-export function useRecentDashboardList(project?: string) {
+export function useRecentDashboardList(project?: string, maxSize?: number) {
   const { data, isLoading } = useDashboardList(project);
   const history = useNavHistory();
 
@@ -90,14 +90,18 @@ export function useRecentDashboardList(project?: string) {
       }
     });
 
+    if (maxSize) {
+      return result.slice(0, maxSize);
+    }
+
     return result;
-  }, [data, history]);
+  }, [data, history, maxSize]);
 
   return { data: result, isLoading: isLoading };
 }
 
 /**
- * Used to get dashboards seen recently by the user.
+ * Used to get important dashboards.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string) {

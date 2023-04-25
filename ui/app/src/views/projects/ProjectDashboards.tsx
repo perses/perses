@@ -58,7 +58,20 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <Card>
-          <DashboardList dashboardList={data || []} hideToolbar={props.hideToolbar} isLoading={isLoading} />
+          <DashboardList
+            dashboardList={data || []}
+            hideToolbar={props.hideToolbar}
+            isLoading={isLoading}
+            initialState={{
+              columns: {
+                columnVisibilityModel: {
+                  id: false,
+                  project: false,
+                  version: false,
+                },
+              },
+            }}
+          />
         </Card>
       </ErrorBoundary>
       <CreateDashboardDialog

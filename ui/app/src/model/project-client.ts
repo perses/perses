@@ -15,6 +15,7 @@ import { fetch, fetchJson, Metadata } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodPOST } from './http';
+import { resource as dashboardResource } from './dashboard-client';
 
 const resource = 'projects';
 
@@ -90,8 +91,14 @@ export function useDeleteProjectMutation() {
         return name;
       });
     },
-    onSuccess: () => {
-      return queryClient.invalidateQueries([resource]);
+    onSuccess: (name) => {
+      queryClient.removeQueries([resource, name]);
+      queryClient.removeQueries([dashboardResource, name]);
+
+      return Promise.all([
+        queryClient.invalidateQueries([dashboardResource]),
+        queryClient.invalidateQueries([resource]),
+      ]);
     },
   });
 }

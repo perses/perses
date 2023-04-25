@@ -11,20 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Card, Stack } from '@mui/material';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { ImportantDashboardList } from '../../components/DashboardList/ImportantDashboardList';
+import { useImportantDashboardList } from '../../model/dashboard-client';
+import { DashboardList } from './DashboardList';
 
-export function ImportantDashboards() {
+export function ImportantDashboardList() {
+  const { data, isLoading } = useImportantDashboardList();
+
   return (
-    <Stack>
-      <Stack direction="row" alignItems="center" gap={1}>
-        <ViewDashboardIcon />
-        <h2>Important Dashboards</h2>
-      </Stack>
-      <Card id="important-dashboard-list">
-        <ImportantDashboardList />
-      </Card>
-    </Stack>
+    <DashboardList
+      dashboardList={data}
+      hideToolbar={true}
+      isLoading={isLoading}
+      initialState={{
+        columns: {
+          columnVisibilityModel: {
+            id: false,
+            version: false,
+            createdAt: false,
+            updatedAt: false,
+            actions: false,
+          },
+        },
+      }}
+    />
   );
 }

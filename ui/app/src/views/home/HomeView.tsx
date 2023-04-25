@@ -11,22 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Card, Grid, Stack, Typography } from '@mui/material';
+import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
 import { useNavigate } from 'react-router-dom';
-import HistoryIcon from 'mdi-material-ui/History';
-import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { DashboardSelector } from '@perses-dev/core';
 import { ProjectModel, useProjectList } from '../../model/project-client';
 import { AddProjectDialog } from '../../components/AddProjectDialog/AddProjectDialog';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
 import { InformationSection } from './InformationSection';
-import { RecentDashboardsMosaic } from './RecentDashboardsMosaic';
-import { SearchableDashboards } from './SearchableDashboards';
-import { ImportantDashboard } from './ImportantDashboards';
+import { RecentDashboards } from './RecentDashboards';
+import { ProjectsAndDashboards } from './ProjectsAndDashboards';
+import { ImportantDashboards } from './ImportantDashboards';
 
 function HomeView() {
   // Navigate to the project page if the project has been successfully added
@@ -109,36 +106,12 @@ function HomeView() {
       </Box>
       <Grid container spacing={8}>
         <Grid item xs={12} lg={8}>
-          <Stack>
-            <Stack direction="row" alignItems="center" gap={1}>
-              <HistoryIcon />
-              <h2>Recent Dashboards</h2>
-            </Stack>
-            <Grid container spacing={2}>
-              <RecentDashboardsMosaic></RecentDashboardsMosaic>
-            </Grid>
-          </Stack>
-          <Stack my={2}>
-            <Stack direction="row" alignItems="center" gap={1}>
-              <FormatListBulletedIcon />
-              <h2>Projects & Dashboards</h2>
-            </Stack>
-            <SearchableDashboards id="project-dashboard-list"></SearchableDashboards>
-          </Stack>
+          <RecentDashboards />
+          <ProjectsAndDashboards />
         </Grid>
         <Grid item xs={12} lg={4}>
-          <Stack>
-            <Stack direction="row" alignItems="center" gap={1}>
-              <ViewDashboardIcon />
-              <h2>Important Dashboards</h2>
-            </Stack>
-            <Card>
-              <ImportantDashboard id="important-dashboard-list"></ImportantDashboard>
-            </Card>
-          </Stack>
-          <Stack my={2}>
-            <InformationSection></InformationSection>
-          </Stack>
+          <ImportantDashboards />
+          <InformationSection />
         </Grid>
       </Grid>
     </Stack>

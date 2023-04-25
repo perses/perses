@@ -22,9 +22,21 @@ import {
   GridRow,
   GridColumnHeaders,
 } from '@mui/x-data-grid';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+
+const DATA_GRID_INITIAL_STATE = {
+  columns: {
+    columnVisibilityModel: {},
+  },
+  sorting: {
+    sortModel: [{ field: 'displayName', sort: 'asc' }],
+  },
+  pagination: {
+    paginationModel: { pageSize: 10, page: 0 },
+  },
+};
 
 // https://mui.com/x/react-data-grid/performance/
 const MemoizedRow = memo(GridRow);
@@ -77,6 +89,14 @@ export function DashboardDataGrid(props: DashboardDataGridProperties) {
 
   const navigate = useNavigate();
 
+  // Merging default initial state with the props initial state (props initial state will overwrite properties)
+  const mergedInitialState = useMemo(() => {
+    return {
+      ...DATA_GRID_INITIAL_STATE,
+      ...(initialState || {}),
+    } as GridInitialStateCommunity;
+  }, [initialState]);
+
   return (
     <DataGrid
       autoHeight={true}
@@ -96,7 +116,7 @@ export function DashboardDataGrid(props: DashboardDataGridProperties) {
             }
       }
       pageSizeOptions={[10, 25, 50, 100]}
-      initialState={initialState}
+      initialState={mergedInitialState}
       sx={{
         // disable cell selection style
         '.MuiDataGrid-columnHeader:focus': {

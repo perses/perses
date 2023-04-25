@@ -31,7 +31,7 @@ export interface DashboardListProperties {
 }
 
 /**
- * DataGrid used to display dashboards.
+ * Display dashboards in a table style.
  * @param props.dashboardList Contains all dashboards to display
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.initialState Provide a way to override default initialState
@@ -82,28 +82,6 @@ export function DashboardList(props: DashboardListProperties) {
     },
     [getDashboard]
   );
-
-  // Merging default initial state with the props initial state (props initial state will overwrite properties)
-  const mergedInitialState = useMemo(() => {
-    return {
-      ...{
-        columns: {
-          columnVisibilityModel: {
-            project: false,
-            id: false,
-            version: false,
-          },
-        },
-        sorting: {
-          sortModel: [{ field: 'displayName', sort: 'asc' }],
-        },
-        pagination: {
-          paginationModel: { pageSize: 10, page: 0 },
-        },
-      },
-      ...(initialState || {}),
-    } as GridInitialStateCommunity;
-  }, [initialState]);
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
@@ -174,7 +152,7 @@ export function DashboardList(props: DashboardListProperties) {
       <DashboardDataGrid
         rows={rows}
         columns={columns}
-        initialState={mergedInitialState}
+        initialState={initialState}
         hideToolbar={hideToolbar}
         isLoading={isLoading}
       ></DashboardDataGrid>
