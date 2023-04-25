@@ -20,7 +20,6 @@ import { useSnackbar } from '../context/SnackbarProvider';
 import buildURL from './url-builder';
 
 const resource = 'config';
-const importantDashboardListName = 'importants';
 
 export interface ConfigSchemasModel {
   panels_path: string;
@@ -33,7 +32,7 @@ export interface ConfigSchemasModel {
 export interface ConfigModel {
   readonly: boolean;
   schemas: ConfigSchemasModel;
-  dashboard_lists: Map<string, DashboardSelector[]>;
+  important_dashboards: DashboardSelector[];
   information: string;
 }
 
@@ -59,20 +58,10 @@ export function useIsReadonly() {
   return data.readonly;
 }
 
-export function useDashboardLists() {
+export function useImportantDashboardSelectors() {
   const { exceptionSnackbar } = useSnackbar();
   const { data, isLoading } = useConfig({ onError: exceptionSnackbar });
-  const dashboardLists = useMemo(() => {
-    return data && data.dashboard_lists
-      ? new Map<string, DashboardSelector[]>(Object.entries(data.dashboard_lists))
-      : new Map<string, DashboardSelector[]>();
-  }, [data]);
-  return { data: dashboardLists, isLoading: isLoading };
-}
-
-export function useImportantDashboardSelectors() {
-  const { data, isLoading } = useDashboardLists();
-  return { data: data.get(importantDashboardListName) || [], isLoading: isLoading };
+  return { data: data?.important_dashboards || [], isLoading: isLoading };
 }
 
 export function useInformation() {

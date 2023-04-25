@@ -12,14 +12,13 @@ schemas:
   variables_path: "schemas/variables"
   interval: "5m"
 
-dashboard_lists:
-  importants:
-    - project: "perses"
-      dashboard: "Demo"
-    - project: "testing"
-      dashboard: "DuplicatePanels"
-    - project: "Unknown"
-      dashboard: "Dashboard"
+important_dashboards:
+  - project: "perses"
+    dashboard: "Demo"
+  - project: "testing"
+    dashboard: "DuplicatePanels"
+  - project: "Unknown"
+    dashboard: "Dashboard"
 
 information: |-
   # Hello World
