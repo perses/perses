@@ -12,12 +12,17 @@
 // limitations under the License.
 
 import { StatChart, StatChartData, useChartsTheme } from '@perses-dev/components';
-import { Box, Skeleton } from '@mui/material';
+import { Box, Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
-import { TimeSeriesData, CalculationsMap, CalculationType } from '@perses-dev/core';
-import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
+import { CalculationType, CalculationsMap } from '@perses-dev/core';
+import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
+// import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
+// import { TimeSeriesChartOptionsEditorSettings } from '../time-series-chart/TimeSeriesChartOptionsEditorSettings';
+
+const MIN_WIDTH = 150;
+const PANEL_PADDING_OFFSET = 0;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
@@ -28,7 +33,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   } = props;
 
   const { queryResults, isLoading } = useDataQueries();
-  const chartData = useChartData(queryResults[0]?.data, calculation);
+  const statChartData = useStatChartData(queryResults, calculation);
   const chartsTheme = useChartsTheme();
 
   if (queryResults[0]?.error) throw queryResults[0]?.error;
@@ -47,30 +52,56 @@ export function StatChartPanel(props: StatChartPanelProps) {
     );
   }
 
+  // accounts for showing a separate chart for each time series
+  let chartWidth = contentDimensions.width / statChartData.length - PANEL_PADDING_OFFSET;
+  if (chartWidth < MIN_WIDTH && statChartData.length > 1) {
+    // enables horizontal scroll when charts overflow outside of panel
+    chartWidth = MIN_WIDTH;
+  }
+
   return (
-    <StatChart
-      width={contentDimensions.width}
-      height={contentDimensions.height}
-      data={chartData}
-      unit={unit}
-      color={getColorFromThresholds(chartsTheme, thresholds, chartData.calculatedValue)}
-      sparkline={convertSparkline(chartsTheme, sparkline, thresholds, chartData.calculatedValue)}
-    />
+    <Stack
+      direction="row"
+      height="100%"
+      spacing={0.5}
+      justifyContent={statChartData.length > 1 ? 'left' : 'center'}
+      alignItems="center"
+      sx={{
+        // so scrollbar only shows when necessary
+        overflowX: statChartData.length > 1 ? 'scroll' : 'auto',
+      }}
+    >
+      {statChartData.map((series, index) => (
+        <StatChart
+          key={index}
+          width={chartWidth}
+          height={contentDimensions.height}
+          data={series}
+          unit={unit}
+          color={getColorFromThresholds(chartsTheme, thresholds, series.calculatedValue)}
+          sparkline={convertSparkline(chartsTheme, sparkline, thresholds, series.calculatedValue)}
+        />
+      ))}
+    </Stack>
   );
 }
 
-const useChartData = (data: TimeSeriesData | undefined, calculation: CalculationType): StatChartData => {
+const useStatChartData = (
+  queryResults: UseDataQueryResults['queryResults'],
+  calculation: CalculationType
+): StatChartData[] => {
   return useMemo(() => {
-    const loadingData = {
-      calculatedValue: undefined,
-      seriesData: undefined,
-    };
-    if (data === undefined) return loadingData;
-
-    const seriesData = data.series[0];
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
+    const chartData: StatChartData[] = [];
+    for (const result of queryResults) {
+      // Skip queries that are still loading or don't have data
+      if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
-    return { calculatedValue, seriesData };
-  }, [data, calculation]);
+      for (const seriesData of result.data.series) {
+        const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
+        chartData.push({ calculatedValue, seriesData });
+      }
+    }
+    return chartData;
+  }, [queryResults, calculation]);
 };
