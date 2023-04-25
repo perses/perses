@@ -41,7 +41,7 @@ export function getSeriesColor(props: SeriesColorProps) {
 
   // Explicit way to always cycle through classical palette instead of changing when based on number of series.
   if (visual.palette?.kind === 'Categorical') {
-    return getCategoricalPaletteColor(categoricalPalette as string[], seriesIndex, fallbackColor);
+    return getCategoricalPaletteColor(categoricalPalette, seriesIndex, fallbackColor);
   }
 
   // Decide which palette to use based on total series returned.
@@ -49,7 +49,7 @@ export function getSeriesColor(props: SeriesColorProps) {
   const paletteLength = Array.isArray(categoricalPalette) ? categoricalPalette.length : 0;
   const seriesColor =
     totalSeries <= paletteLength
-      ? getCategoricalPaletteColor(categoricalPalette as string[], seriesIndex, fallbackColor)
+      ? getCategoricalPaletteColor(categoricalPalette, seriesIndex, fallbackColor)
       : getAutoPaletteColor(seriesName, fallbackColor);
   return seriesColor;
 }
