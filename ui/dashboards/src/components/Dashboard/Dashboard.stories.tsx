@@ -159,7 +159,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             {
               x: 12,
               y: 0,
-              width: 10,
+              width: 12,
               height: 8,
               content: {
                 $ref: '#/spec/panels/TimeSeriesGeneratedColors',
@@ -456,7 +456,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       ColorPaletteAuto: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Auto Palette', description: 'Time series chart with Auto palette example' },
+          display: { name: 'Auto Palette (Many Series)', description: 'Time series chart with Auto palette example' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
@@ -474,7 +474,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   kind: 'PrometheusTimeSeriesQuery',
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                    query: 'fake_query_with_multiple_series',
+                    query: 'fake_query_with_many_series',
                   },
                 },
               },
@@ -485,7 +485,10 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       ColorPaletteCategorical: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Categorical Palette', description: 'Time series chart with Categorical palette example' },
+          display: {
+            name: 'Categorical Palette (Default)',
+            description: 'Time series chart with Categorical palette example',
+          },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
@@ -506,7 +509,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   kind: 'PrometheusTimeSeriesQuery',
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                    query: 'fake_query_with_multiple_series',
+                    query: 'fake_query_with_few_series',
                   },
                 },
               },
@@ -589,11 +592,22 @@ export const ExampleWithTimeSeriesPanels: Story = {
               },
             },
             {
-              query: 'fake_query_with_multiple_series',
+              query: 'fake_query_with_few_series',
               response: {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  totalSeries: 7,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_many_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  totalSeries: 20,
                 }),
               },
             },
