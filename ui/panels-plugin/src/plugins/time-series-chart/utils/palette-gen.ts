@@ -14,17 +14,20 @@
 import ColorHash from 'color-hash';
 import { VisualOptions } from '../time-series-chart-model';
 
+export interface SeriesColorProps {
+  categoricalPalette: string[];
+  visual: VisualOptions;
+  muiPrimaryColor: string;
+  seriesName: string;
+  seriesIndex: number;
+  totalSeries: number;
+}
+
 /**
  * Get line color as well as color for tooltip and legend, account for whether palette is 'Cateogrical' or 'Auto' (generative)
  */
-export function getSeriesColor(
-  categoricalPalette: string[],
-  visual: VisualOptions,
-  muiPrimaryColor: string,
-  seriesName: string,
-  seriesIndex: number,
-  totalSeries: number
-) {
+export function getSeriesColor(props: SeriesColorProps) {
+  const { categoricalPalette, visual, muiPrimaryColor, seriesName, seriesIndex, totalSeries } = props;
   // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
   const fallbackColor =
     Array.isArray(categoricalPalette) && categoricalPalette[0]

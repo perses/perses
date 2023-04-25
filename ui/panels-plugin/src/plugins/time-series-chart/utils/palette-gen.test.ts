@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VisualOption } from '../time-series-chart-model';
+import { VisualOptions } from '../time-series-chart-model';
 import {
   getSeriesColor,
   getAutoPaletteColor,
   getCategoricalPaletteColor,
   getConsistentSeriesNameColor,
+  SeriesColorProps,
 } from './palette-gen';
 
 describe('getSeriesColor', () => {
@@ -31,47 +32,94 @@ describe('getSeriesColor', () => {
     '#D55E00', // red
   ];
   const testSeriesName = 'Test series name';
+  const testSeriesNameGeneratedColor = 'hsla(17.70,50%,50%,0.9)';
 
   it('should return the first color from default Categorical palette', () => {
-    const paletteColor = getSeriesColor(testCategoricalPalette, {}, fallbackColor, testSeriesName, 0, 1);
-    expect(paletteColor).toEqual('#56B4E9');
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: {},
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      totalSeries: 1,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual(testCategoricalPalette[0]);
   });
 
   it('should return the last color from default Categorical palette', () => {
-    const paletteColor = getSeriesColor(testCategoricalPalette, {}, '#0000FF', testSeriesName, 6, 1);
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: {},
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 6,
+      totalSeries: 1,
+    };
+    const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('#D55E00');
   });
 
   it('should return color from the generative Auto palette when all Categorical colors have been used', () => {
-    const paletteColor = getSeriesColor(testCategoricalPalette, {}, '#0000FF', testSeriesName, 0, 8);
-    expect(paletteColor).toEqual('hsla(17.70,50%,50%,0.9)');
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: {},
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      totalSeries: 8,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
   });
 
   it('should return color from the generative Auto palette when visual option is defined', () => {
-    const visualOptionAuto: VisualOption = {
+    const visualOptionAuto: VisualOptions = {
       palette: {
         kind: 'Auto',
       },
     };
-    const paletteColor = getSeriesColor(testCategoricalPalette, visualOptionAuto, '#0000FF', testSeriesName, 0, 1);
-    expect(paletteColor).toEqual('hsla(17.70,50%,50%,0.9)');
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionAuto,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      totalSeries: 1,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
   });
 
   it('should return color from the Categorical palette when visual option is defined', () => {
-    const visualOptionCategorical: VisualOption = {
+    const visualOptionCategorical: VisualOptions = {
       palette: {
         kind: 'Categorical',
       },
     };
-    const paletteColor = getSeriesColor(
-      testCategoricalPalette,
-      visualOptionCategorical,
-      '#0000FF',
-      testSeriesName,
-      0,
-      8
-    );
-    expect(paletteColor).toEqual('#56B4E9');
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionCategorical,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      totalSeries: 8,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual(testCategoricalPalette[0]);
+  });
+
+  it('should return Auto generated color when the Categorical palette is undefined', () => {
+    const props = {
+      categoricalPalette: undefined,
+      visual: {},
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      totalSeries: 8,
+    } as unknown as SeriesColorProps;
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
   });
 });
 

@@ -176,15 +176,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
         // Color is used for line, tooltip, and legend
-        const seriesColor = getSeriesColor(
+        const seriesColor = getSeriesColor({
           // ECharts type for color is not always an array but it is always an array in ChartsThemeProvider
-          categoricalPalette as string[],
+          categoricalPalette: categoricalPalette as string[],
           visual,
-          muiTheme.palette.primary.main,
-          formattedSeriesName,
+          muiPrimaryColor: muiTheme.palette.primary.main,
+          seriesName: formattedSeriesName,
           seriesIndex,
-          totalSeries
-        );
+          totalSeries,
+        });
 
         // Used for repeating colors in Categorical palette
         seriesIndex++;
