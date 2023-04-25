@@ -66,7 +66,7 @@ describe('StatChart', () => {
       kind: 'Seconds',
     };
     renderChart(unit);
-    expect(screen.getByText('7.73 seconds')).toBeInTheDocument();
+    expect(screen.getByText('7.73s')).toBeInTheDocument();
   });
 
   it('show value with months time unit formatting', () => {
