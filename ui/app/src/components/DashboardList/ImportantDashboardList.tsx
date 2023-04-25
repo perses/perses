@@ -32,6 +32,7 @@ export function ImportantDashboardList() {
             actions: false,
           },
         },
+        sorting: {},
       }}
     />
   );
