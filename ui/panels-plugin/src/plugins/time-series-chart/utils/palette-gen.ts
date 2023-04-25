@@ -44,7 +44,7 @@ export function getPaletteColor(
 
   // Decide which palette to use based on total series returned.
   // When series number exceeds number of colors in palette, use generative colors instead.
-  const paletteLength = Array.isArray(categoricalPalette) ? categoricalPalette.length : 4;
+  const paletteLength = Array.isArray(categoricalPalette) ? categoricalPalette.length : 0;
   const seriesColor =
     totalSeries <= paletteLength
       ? getCategoricalPaletteColor(categoricalPalette as string[], seriesIndex, fallbackColor)
