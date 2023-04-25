@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { VisualOption } from '../time-series-chart-model';
 import {
   getSeriesColor,
   getAutoPaletteColor,
@@ -44,6 +45,33 @@ describe('getSeriesColor', () => {
   it('should return color from the generative Auto palette when all Categorical colors have been used', () => {
     const paletteColor = getSeriesColor(testCategoricalPalette, {}, '#0000FF', testSeriesName, 0, 8);
     expect(paletteColor).toEqual('hsla(17.70,50%,50%,0.9)');
+  });
+
+  it('should return color from the generative Auto palette when visual option is defined', () => {
+    const visualOptionAuto: VisualOption = {
+      palette: {
+        kind: 'Auto',
+      },
+    };
+    const paletteColor = getSeriesColor(testCategoricalPalette, visualOptionAuto, '#0000FF', testSeriesName, 0, 1);
+    expect(paletteColor).toEqual('hsla(17.70,50%,50%,0.9)');
+  });
+
+  it('should return color from the Categorical palette when visual option is defined', () => {
+    const visualOptionCategorical: VisualOption = {
+      palette: {
+        kind: 'Categorical',
+      },
+    };
+    const paletteColor = getSeriesColor(
+      testCategoricalPalette,
+      visualOptionCategorical,
+      '#0000FF',
+      testSeriesName,
+      0,
+      8
+    );
+    expect(paletteColor).toEqual('#56B4E9');
   });
 });
 
