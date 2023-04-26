@@ -16,8 +16,9 @@ import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
 import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
-export const DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER = 4; // adjusts how many focused series show in tooltip
-export const NARROW_NEARBY_SERIES_RANGE_MULTIPLIER = 0.5; // used to reduce number of focused series for heavy queries
+export const DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER = 5; // adjusts how many focused series show in tooltip
+export const NARROW_NEARBY_SERIES_RANGE_MULTIPLIER = 1.5; // used to reduce number of focused series for heavy queries
+export const SHOW_MORE_NEARBY_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
   seriesIdx: number | null;
@@ -149,7 +150,7 @@ export function getFocusedSeriesData(
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const yBuffer =
-    seriesNum > TOOLTIP_MAX_ITEMS
+    seriesNum > SHOW_MORE_NEARBY_SERIES_LIMIT
       ? yAxisInterval * NARROW_NEARBY_SERIES_RANGE_MULTIPLIER
       : yAxisInterval * DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER;
 
