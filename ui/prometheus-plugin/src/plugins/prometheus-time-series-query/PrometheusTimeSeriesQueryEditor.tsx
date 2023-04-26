@@ -57,9 +57,9 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       />
       <TextField
         fullWidth
-        label="Series Name Format"
-        placeholder="Templating ex: {{instance}} will be replaced with label value for instance"
-        helperText="Controls legend and tooltip formatting"
+        label="Name"
+        placeholder="Tip: Use {{variable_name}}. Example: {{instance}} will be replaced with values such as 'webserver-123' and 'webserver-456'."
+        helperText="Set the name for each series in the legend and the tooltip."
         value={format ?? ''}
         onChange={(e) => handleFormatChange(e.target.value)}
         onBlur={handleFormatBlur}
