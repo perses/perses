@@ -456,7 +456,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       ColorPaletteAuto: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Auto Palette (Many Series)', description: 'Time series chart with Auto palette example' },
+          display: { name: '1000 Series (time axis)', description: 'Time series chart with Auto palette example' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
@@ -522,7 +522,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       {
         kind: 'Grid',
         spec: {
-          display: { title: 'Row 1', collapse: { open: true } },
+          display: { title: 'Row 1', collapse: { open: false } },
           items: [
             { x: 0, y: 0, width: 8, height: 7, content: { $ref: '#/spec/panels/SingleLine' } },
             { x: 8, y: 0, width: 8, height: 7, content: { $ref: '#/spec/panels/CustomVisualOptions' } },
@@ -532,6 +532,17 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             { x: 16, y: 7, width: 8, height: 10, content: { $ref: '#/spec/panels/LegendTallFormatted' } },
             { x: 0, y: 14, width: 8, height: 7, content: { $ref: '#/spec/panels/ColorPaletteAuto' } },
             { x: 8, y: 14, width: 8, height: 7, content: { $ref: '#/spec/panels/ColorPaletteCategorical' } },
+          ],
+        },
+      },
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 2', collapse: { open: true } },
+          items: [
+            { x: 0, y: 0, width: 24, height: 20, content: { $ref: '#/spec/panels/ColorPaletteAuto' } },
+            // { x: 0, y: 0, width: 12, height: 12, content: { $ref: '#/spec/panels/ColorPaletteAuto' } },
+            // { x: 12, y: 0, width: 12, height: 12, content: { $ref: '#/spec/panels/ColorPaletteCategorical' } },
           ],
         },
       },
@@ -607,7 +618,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
-                  totalSeries: 20,
+                  totalSeries: 1000,
                 }),
               },
             },
