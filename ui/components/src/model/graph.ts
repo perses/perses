@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { EChartsOption } from 'echarts';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { LegendItem } from './legend';
@@ -33,7 +34,9 @@ export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
 }
 
 export type EChartsDataFormat = {
-  timeSeries: EChartsTimeSeries[];
+  // timeSeries: EChartsTimeSeries[];
+  timeSeries: Array<EChartsOption['series']>;
+  dataset?: EChartsOption['dataset'];
   xAxis: number[];
   legendItems?: LegendItem[];
   xAxisMax?: number | string;

@@ -11,13 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from './definitions';
-import { QueryDefinition } from './query';
-import { UnixTimeMs } from './time';
-
-export type TimeSeriesQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TimeSeriesQuery', PluginSpec>;
-
-// export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
-export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number]; // TODO: fix null for graphite to work with dataset
-
-export type Labels = Record<string, string>;
+export * from './TimeChart';

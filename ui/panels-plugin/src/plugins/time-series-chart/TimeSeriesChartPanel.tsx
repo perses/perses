@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { merge } from 'lodash-es';
 import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
 import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
-import type { GridComponentOption } from 'echarts';
+import type { EChartsOption, GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   DEFAULT_LEGEND,
@@ -23,6 +23,7 @@ import {
   validateLegendSpec,
   Legend,
   LineChart,
+  TimeChart,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
@@ -49,7 +50,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { thresholds, y_axis },
+    spec: { thresholds, y_axis, mode = 'Debug' },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
@@ -142,8 +143,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
+    const dataset: EChartsOption['dataset'] = [];
+
     const graphData: EChartsDataFormat = {
       timeSeries: [],
+      dataset: dataset,
       xAxis: [],
       legendItems: [],
       rangeMs: timeScale.endMs - timeScale.startMs,
@@ -172,6 +176,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           return { graphData };
         }
 
+        // const id = dataset.length;
+
+        dataset.push({
+          id: seriesIndex,
+          source: [['timestamp', 'value'], ...timeSeries.values],
+        });
+
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
@@ -190,9 +201,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         seriesIndex++;
 
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
+
+        // TODO: fix time axis label formatting
+        // - https://echarts.apache.org/examples/en/editor.html?c=area-time-axis
+        // - Luke orig PR: https://github.com/perses/perses/pull/112
+        // - https://github.com/perses/perses/blob/ac701d8a39c99663e82d92ffe10271a71378f640/ui/panels-plugin/src/plugins/line-chart/LineChart.tsx
+        const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesIndex, seriesColor);
         const isSelected = selectedSeriesNames.includes(timeSeries.name);
 
+        // TODO: fix legend using dataset
         if (!selectedSeriesNames.length || isSelected) {
           graphData.timeSeries.push(lineSeries);
         }
@@ -207,31 +224,33 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
       }
     }
+    graphData.dataset = dataset;
     graphData.xAxis = xAxisData;
 
-    if (thresholds && thresholds.steps) {
-      // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
-      // These are styled with predefined colors and a dashed style to look different than series from query results.
-      // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
-      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
-      thresholds.steps.forEach((step: StepOptions, index: number) => {
-        const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
-        const thresholdLineColor = step.color ?? stepPaletteColor;
-        const stepOption: StepOptions = {
-          color: thresholdLineColor,
-          value:
-            // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
-            thresholds.mode === 'Percent'
-              ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
-              : step.value,
-        };
-        const thresholdName = step.name ?? `Threshold ${index + 1} `;
-        // TODO: switch back to markLine once alternate tooltip created
-        const thresholdData = Array(xAxisData.length).fill(stepOption.value);
-        const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
-        graphData.timeSeries.push(thresholdLineSeries);
-      });
-    }
+    // TODO: fix thresholds using dataset
+    // if (thresholds && thresholds.steps) {
+    //   // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
+    //   // These are styled with predefined colors and a dashed style to look different than series from query results.
+    //   // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
+    //   const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
+    //   thresholds.steps.forEach((step: StepOptions, index: number) => {
+    //     const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
+    //     const thresholdLineColor = step.color ?? stepPaletteColor;
+    //     const stepOption: StepOptions = {
+    //       color: thresholdLineColor,
+    //       value:
+    //         // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
+    //         thresholds.mode === 'Percent'
+    //           ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
+    //           : step.value,
+    //     };
+    //     const thresholdName = step.name ?? `Threshold ${index + 1} `;
+    //     // TODO: switch back to markLine once alternate tooltip created
+    //     const thresholdData = Array(xAxisData.length).fill(stepOption.value);
+    //     const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
+    //     graphData.timeSeries.push(thresholdLineSeries);
+    //   });
+    // }
 
     return {
       graphData,
@@ -298,15 +317,28 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       {y_axis && y_axis.show && y_axis.label && (
         <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
       )}
-      <LineChart
-        height={adjustedContentDimensions.height}
-        data={graphData}
-        yAxis={echartsYAxis}
-        unit={unit}
-        grid={gridOverrides}
-        tooltipConfig={{ wrapLabels: true }}
-        onDataZoom={handleDataZoom}
-      />
+      {mode === 'Debug' && (
+        <TimeChart
+          height={adjustedContentDimensions.height}
+          data={graphData}
+          yAxis={echartsYAxis}
+          unit={unit}
+          grid={gridOverrides}
+          tooltipConfig={{ wrapLabels: true }}
+          onDataZoom={handleDataZoom}
+        />
+      )}
+      {mode !== 'Debug' && (
+        <LineChart
+          height={adjustedContentDimensions.height}
+          data={graphData}
+          yAxis={echartsYAxis}
+          unit={unit}
+          grid={gridOverrides}
+          tooltipConfig={{ wrapLabels: true }}
+          onDataZoom={handleDataZoom}
+        />
+      )}
       {legend && graphData.legendItems && (
         <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
       )}

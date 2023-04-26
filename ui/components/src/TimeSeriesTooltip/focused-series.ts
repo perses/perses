@@ -51,33 +51,34 @@ export function getNearbySeries(
       const currentSeries = data.timeSeries[seriesIdx];
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
-        const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        const markerColor = currentSeries.color ?? '#000';
-        if (Array.isArray(currentSeries.data)) {
-          for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
-            const xValue = data.xAxis[datumIdx] ?? 0;
-            const yValue = currentSeries.data[datumIdx];
-            // ensure null values not displayed in tooltip
-            if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
-              if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-                // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-                const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-                const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
-                const formattedY = formatValue(yValue, unit);
-                currentFocusedData.push({
-                  seriesIdx: seriesIdx,
-                  datumIdx: datumIdx,
-                  seriesName: currentSeriesName,
-                  date: formattedDate,
-                  x: xValue,
-                  y: yValue,
-                  formattedY: formattedY,
-                  markerColor: markerColor.toString(),
-                });
-              }
-            }
-          }
-        }
+        // TODO: pass dataset into tooltip
+        // const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
+        // const markerColor = currentSeries.color ?? '#000';
+        // if (Array.isArray(currentSeries.data)) {
+        //   for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
+        //     const xValue = data.xAxis[datumIdx] ?? 0;
+        //     const yValue = currentSeries.data[datumIdx];
+        //     // ensure null values not displayed in tooltip
+        //     if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
+        //       if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+        //         // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+        //         const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
+        //         const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
+        //         const formattedY = formatValue(yValue, unit);
+        //         currentFocusedData.push({
+        //           seriesIdx: seriesIdx,
+        //           datumIdx: datumIdx,
+        //           seriesName: currentSeriesName,
+        //           date: formattedDate,
+        //           x: xValue,
+        //           y: yValue,
+        //           formattedY: formattedY,
+        //           markerColor: markerColor.toString(),
+        //         });
+        //       }
+        //     }
+        //   }
+        // }
       }
     }
   }
@@ -96,6 +97,8 @@ export function getFocusedSeriesData(
   unit?: UnitOptions
 ) {
   if (chart === undefined || mousePos === null) return [];
+
+  if (chartData.timeSeries === undefined) return [];
 
   // prevents multiple tooltips showing from adjacent charts
   let cursorTargetMatchesChart = false;

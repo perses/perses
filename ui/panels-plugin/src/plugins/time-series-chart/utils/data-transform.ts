@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { YAXisComponentOption } from 'echarts';
+import type { EChartsOption, YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
-  DEFAULT_CONNECT_NULLS,
+  // DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
   DEFAULT_Y_AXIS,
@@ -51,15 +51,18 @@ export function getLineSeries(
   formattedName: string,
   data: EChartsTimeSeries['data'],
   visual: VisualOptions,
+  seriesIndex: number,
   paletteColor?: string
-): EChartsTimeSeries {
+): EChartsOption['series'] {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
   return {
     type: 'line',
+    datasetId: seriesIndex,
     name: formattedName,
-    data: data,
-    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
+    // data: data,
+    // connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
+    connectNulls: true,
     color: paletteColor,
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
