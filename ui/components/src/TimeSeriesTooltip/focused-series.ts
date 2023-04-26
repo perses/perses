@@ -12,7 +12,9 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
+import { LineSeriesOption } from 'echarts';
+import { TimeSeriesValueTuple } from '@perses-dev/core';
+import { formatValue, UnitOptions, EChartsDataFormat, EChartsValues } from '../model';
 import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
 export interface FocusedSeriesInfo {
@@ -41,6 +43,8 @@ export function getNearbySeries(
   const currentFocusedData: FocusedSeriesArray = [];
   const focusedX: number | null = pointInGrid[0] ?? null;
   const focusedY: number | null = pointInGrid[1] ?? null;
+  // console.log('focusedX: ', focusedX);
+  // console.log('focusedY: ', focusedY);
 
   if (focusedX === null || focusedY === null) {
     return currentFocusedData;
@@ -51,34 +55,62 @@ export function getNearbySeries(
       const currentSeries = data.timeSeries[seriesIdx];
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
+        const lineSeries = currentSeries as LineSeriesOption;
+        // console.log('lineSeries -> ', lineSeries);
         // TODO: pass dataset into tooltip
-        // const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        // const markerColor = currentSeries.color ?? '#000';
-        // if (Array.isArray(currentSeries.data)) {
-        //   for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
-        //     const xValue = data.xAxis[datumIdx] ?? 0;
-        //     const yValue = currentSeries.data[datumIdx];
-        //     // ensure null values not displayed in tooltip
-        //     if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
-        //       if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-        //         // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-        //         const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-        //         const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
-        //         const formattedY = formatValue(yValue, unit);
-        //         currentFocusedData.push({
-        //           seriesIdx: seriesIdx,
-        //           datumIdx: datumIdx,
-        //           seriesName: currentSeriesName,
-        //           date: formattedDate,
-        //           x: xValue,
-        //           y: yValue,
-        //           formattedY: formattedY,
-        //           markerColor: markerColor.toString(),
-        //         });
-        //       }
-        //     }
-        //   }
-        // }
+        const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
+        const markerColor = lineSeries.color ?? '#000';
+        // if (Array.isArray(lineSeries.data)) {
+        if (Array.isArray(data.dataset)) {
+          // for (let datumIdx = 0; datumIdx < lineSeries.data.length; datumIdx++) {
+          for (let datumIdx = 0; datumIdx < data.dataset.length; datumIdx++) {
+            const xValue = data.xAxis[datumIdx] ?? 0;
+            // const currentDatasetSource =
+            //   Array.isArray(data.dataset) && data.dataset.length > 0 ? data.dataset[0] : undefined;
+            const currentDataset = data.dataset.length > 0 ? data.dataset[seriesIdx] : undefined;
+            // console.log('data.dataset: ', data.dataset);
+            if (currentDataset !== undefined) {
+              // console.log('currentDatasetSource -> ', currentDatasetSource);
+              // let yValue: EChartsValues = '-';
+              // yValue = 0;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const currentDatasetSource: any = currentDataset.source ?? undefined;
+              if (currentDatasetSource !== undefined) {
+                const focusedTimeSeries = currentDatasetSource[datumIdx] as unknown as TimeSeriesValueTuple;
+                const yValue = focusedTimeSeries[1];
+                // console.log('focusedY: ', focusedY);
+                // console.log('yValue: ', yValue);
+                // const yValue = currentDatasetSource.source !== undefined && Array.isArray(currentDatasetSource.source) ? currentDatasetSource.source[datumIdx][1] as EChartsValues;
+                // console.log('yValue: ', yValue);
+                // const yValue = data.dataset?[seriesIdx].source[datumIdx];
+                // const yValue = currentSeries.data[datumIdx];
+                // ensure null values not displayed in tooltip
+                // if (yValue !== undefined && yValue !== null && focusedX === datumIdx) { // TODO: add back! focusedX is now a timestamp!
+                if (yValue !== undefined && yValue !== null) {
+                  // if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                  // if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                  if (focusedY <= yValue + 2 && focusedY >= yValue - 2) {
+                    // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+                    const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
+                    const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
+                    const formattedY = formatValue(yValue, unit);
+                    currentFocusedData.push({
+                      seriesIdx: seriesIdx,
+                      datumIdx: datumIdx,
+                      seriesName: currentSeriesName,
+                      date: formattedDate,
+                      x: xValue,
+                      y: yValue,
+                      formattedY: formattedY,
+                      markerColor: markerColor.toString(),
+                    });
+                    console.log('currentFocusedData: ', currentFocusedData);
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -128,8 +160,9 @@ export function getFocusedSeriesData(
   const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
-  const seriesNum = chartData.timeSeries.length;
-  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
+  // const seriesNum = chartData.timeSeries.length;
+  // const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
+  const yBuffer = yAxisInterval * 9;
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {

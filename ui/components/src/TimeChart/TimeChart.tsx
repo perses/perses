@@ -86,7 +86,7 @@ export function TimeChart({
   unit,
   grid,
   legend,
-  tooltipConfig = { hidden: true, wrapLabels: true },
+  tooltipConfig = { hidden: false, wrapLabels: true },
   onDataZoom,
   onDoubleClick,
   __experimentalEChartsOptionsOverride,
@@ -181,7 +181,7 @@ export function TimeChart({
         // show: !isOptimizedMode,
         show: true,
         trigger: 'axis',
-        // showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
+        showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
         appendToBody: true,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
