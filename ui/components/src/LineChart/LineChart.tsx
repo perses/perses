@@ -171,11 +171,13 @@ export function LineChart({
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
       },
+      // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
         type: isOptimizedMode ? 'none' : 'line',
         z: 0, // ensure point symbol shows on top of dashed line
         triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
         triggerTooltip: false,
+        snap: true,
       },
       toolbox: {
         feature: {

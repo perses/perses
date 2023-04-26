@@ -18,7 +18,7 @@ export const TOOLTIP_MAX_WIDTH = 650;
 export const TOOLTIP_MAX_HEIGHT = 400;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 
-export const TOOLTIP_MAX_ITEMS = 50;
+export const TOOLTIP_MAX_ITEMS = 30;
 
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',

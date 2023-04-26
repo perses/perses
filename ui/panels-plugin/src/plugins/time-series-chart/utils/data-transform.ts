@@ -34,6 +34,8 @@ export const EMPTY_GRAPH_DATA = {
   legendItems: [],
 };
 
+export const HIDE_DATAPOINTS_LIMIT = 70;
+
 /**
  * Given a list of running queries, calculates a common time scale for use on
  * the x axis (i.e. start/end dates and a step that is divisible into all of
@@ -55,6 +57,14 @@ export function getLineSeries(
 ): EChartsTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
+
+  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
+  if (visual.show_points === 'Always') {
+    showPoints = true;
+  }
+
   return {
     type: 'line',
     name: formattedName,
@@ -64,7 +74,8 @@ export function getLineSeries(
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
-    showSymbol: visual.show_points === 'Always' ? true : false,
+    showSymbol: showPoints,
+    showAllSymbol: true,
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
