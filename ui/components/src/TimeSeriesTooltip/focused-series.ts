@@ -15,7 +15,8 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
 import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
-export const DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER = 3.5; // adjusts how many focused series show in tooltip
+// increase multipliers to show more series in tooltip
+export const DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER = 4; // adjusts how many focused series show in tooltip
 export const NARROW_NEARBY_SERIES_RANGE_MULTIPLIER = 0.5; // used to reduce number of focused series for heavy queries
 
 export interface FocusedSeriesInfo {

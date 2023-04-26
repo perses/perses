@@ -68,12 +68,15 @@ export function getLineSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.95,
+      opacity: 0.85,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
+    // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
+      focus: 'none', // 'none', 'self', 'series'
+      blurScope: 'coordinateSystem', // 'coordinateSystem', 'series', 'global'
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1.5,

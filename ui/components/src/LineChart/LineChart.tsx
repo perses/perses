@@ -170,10 +170,12 @@ export function LineChart({
         show: !isOptimizedMode,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
-        axisPointer: {
-          type: isOptimizedMode ? 'none' : 'line',
-          z: 0, // ensure point symbol shows on top of dashed line
-        },
+      },
+      axisPointer: {
+        type: isOptimizedMode ? 'none' : 'line',
+        z: 0, // ensure point symbol shows on top of dashed line
+        triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
+        triggerTooltip: false,
       },
       toolbox: {
         feature: {
