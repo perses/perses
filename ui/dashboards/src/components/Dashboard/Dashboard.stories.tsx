@@ -456,7 +456,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       ColorPaletteAuto: {
         kind: 'Panel',
         spec: {
-          display: { name: '1000 Series (time axis)', description: 'Time series chart with Auto palette example' },
+          display: { name: '4000 Series (time axis)', description: 'Time series chart with Auto palette example' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
@@ -618,7 +618,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
-                  totalSeries: 1000,
+                  totalSeries: 4000,
                 }),
               },
             },
