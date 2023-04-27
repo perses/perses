@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
-import { Button } from '@mui/material';
+import { Alert, Button } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
@@ -22,6 +22,7 @@ import { useSnackbar } from '../../context/SnackbarProvider';
 export interface DeleteDashboardDialogProps {
   dashboard: DashboardResource;
   open: boolean;
+  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardResource>;
 }
@@ -35,7 +36,7 @@ export interface DeleteDashboardDialogProps {
  * @constructor
  */
 export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
-  const { dashboard, open, onClose, onSuccess } = props;
+  const { dashboard, open, isReadonly, onClose, onSuccess } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
 
@@ -61,9 +62,14 @@ export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
       <Dialog.Content>
         Are you sure you want to delete the dashboard {dashboardExtendedDisplayName(dashboard)}? This action cannot be
         undone.
+        {isReadonly && (
+          <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+            Dashboard managed via code only.
+          </Alert>
+        )}
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" type="submit" onClick={handleSubmit}>
+        <Button variant="contained" type="submit" disabled={isReadonly} onClick={handleSubmit}>
           Delete
         </Button>
         <Button variant="outlined" color="secondary" onClick={onClose}>

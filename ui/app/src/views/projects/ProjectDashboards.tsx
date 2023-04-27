@@ -20,6 +20,7 @@ import { DashboardSelector } from '@perses-dev/core';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
+import { useIsReadonly } from '../../model/config-client';
 
 interface ProjectDashboardsProps {
   projectName: string;
@@ -29,6 +30,7 @@ interface ProjectDashboardsProps {
 
 export function ProjectDashboards(props: ProjectDashboardsProps) {
   const navigate = useNavigate();
+  const isReadonly = useIsReadonly();
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
 
@@ -77,6 +79,7 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
       <CreateDashboardDialog
         open={openCreateDashboardDialogState}
         projectOptions={[props.projectName]}
+        isReadonly={isReadonly}
         onClose={() => setOpenCreateDashboardDialogState(false)}
         onSuccess={handleDashboardCreation}
       />

@@ -12,13 +12,24 @@
 // limitations under the License.
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField } from '@mui/material';
+import {
+  Alert,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+} from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { DashboardSelector } from '@perses-dev/core';
 
 export interface CreateDashboardProps {
   open: boolean;
   projectOptions: string[];
+  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardSelector>;
 }
@@ -33,7 +44,7 @@ export interface CreateDashboardProps {
  * @constructor
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
-  const { open, projectOptions, onClose, onSuccess } = props;
+  const { open, projectOptions, isReadonly, onClose, onSuccess } = props;
 
   const [projectName, setProjectName] = useState<string | undefined>(projectOptions[0]);
   const [projectError, setProjectError] = useState<string>();
@@ -122,9 +133,14 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
             helperText={dashboardError}
           />
         </Stack>
+        {isReadonly && (
+          <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+            Dashboard managed via code only.
+          </Alert>
+        )}
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" disabled={!!dashboardError} onClick={handleSubmit}>
+        <Button variant="contained" disabled={!!dashboardError || isReadonly} onClick={handleSubmit}>
           Add
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClose}>

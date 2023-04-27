@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
-import { Button } from '@mui/material';
+import { Alert, Button } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { useSnackbar } from '../../context/SnackbarProvider';
 import { useDeleteProjectMutation } from '../../model/project-client';
@@ -20,6 +20,7 @@ import { useDeleteProjectMutation } from '../../model/project-client';
 export interface DeleteProjectDialogProps {
   name: string;
   open: boolean;
+  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<string>;
 }
@@ -34,7 +35,7 @@ export interface DeleteProjectDialogProps {
  * @constructor
  */
 export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
-  const { name, open, onClose, onSuccess } = props;
+  const { name, open, isReadonly, onClose, onSuccess } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const mutation = useDeleteProjectMutation();
 
@@ -59,9 +60,14 @@ export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
       <Dialog.Content>
         Are you sure you want to delete the project <strong>{name}</strong>? This will delete all the dashboards within
         the project.
+        {isReadonly && (
+          <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+            Project managed via code only.
+          </Alert>
+        )}
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" type="submit" onClick={handleSubmit}>
+        <Button variant="contained" type="submit" disabled={isReadonly} onClick={handleSubmit}>
           Delete
         </Button>
         <Button variant="outlined" color="secondary" onClick={onClose}>

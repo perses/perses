@@ -20,6 +20,7 @@ import { ProjectModel, useProjectList } from '../../model/project-client';
 import { AddProjectDialog } from '../../components/AddProjectDialog/AddProjectDialog';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
+import { useIsReadonly } from '../../model/config-client';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -28,6 +29,7 @@ import { ImportantDashboards } from './ImportantDashboards';
 function HomeView() {
   // Navigate to the project page if the project has been successfully added
   const navigate = useNavigate();
+  const isReadonly = useIsReadonly();
 
   const { data } = useProjectList();
 
@@ -85,12 +87,14 @@ function HomeView() {
             </Button>
             <AddProjectDialog
               open={isAddProjectDialogOpen}
+              isReadonly={isReadonly}
               onClose={handleAddProjectDialogClose}
               onSuccess={handleAddProjectDialogSubmit}
             />
             <CreateDashboardDialog
               open={isAddDashboardDialogOpen}
               projectOptions={projectOptions}
+              isReadonly={isReadonly}
               onClose={handleAddDashboardDialogClose}
               onSuccess={handleAddDashboardDialogSubmit}
             />

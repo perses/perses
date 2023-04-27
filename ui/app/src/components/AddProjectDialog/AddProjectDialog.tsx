@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Button, TextField } from '@mui/material';
+import { Alert, Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
 import { useSnackbar } from '../../context/SnackbarProvider';
 
 export interface AddProjectDialogProps {
   open: boolean;
+  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<ProjectModel>;
 }
@@ -31,7 +32,7 @@ export interface AddProjectDialogProps {
  * @constructor
  */
 export const AddProjectDialog = (props: AddProjectDialogProps) => {
-  const { open, onClose, onSuccess } = props;
+  const { open, isReadonly, onClose, onSuccess } = props;
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
 
@@ -98,9 +99,14 @@ export const AddProjectDialog = (props: AddProjectDialogProps) => {
           error={!!error}
           helperText={error}
         />
+        {isReadonly && (
+          <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+            Project managed via code only.
+          </Alert>
+        )}
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" type="submit" disabled={!!error} onClick={handleSubmit}>
+        <Button variant="contained" type="submit" disabled={!!error || isReadonly} onClick={handleSubmit}>
           Add
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClose}>
