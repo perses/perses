@@ -16,6 +16,7 @@ import { ECharts, EChartsCoreOption, init } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import { isEqual, debounce } from 'lodash-es';
 import { EChartsTheme } from '../model';
+import { combineSx } from '../utils';
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
 export interface MouseEventsParameters<T> {
@@ -182,7 +183,18 @@ export const EChart = React.memo(function EChart<T>({
     updateSize();
   }, [sx]);
 
-  return <Box ref={containerRef} sx={sx}></Box>;
+  return (
+    <Box
+      ref={containerRef}
+      sx={combineSx(
+        {
+          width: '100%',
+          height: '100%',
+        },
+        sx
+      )}
+    ></Box>
+  );
 });
 
 // Validate event config and bind custom events
