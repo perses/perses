@@ -188,6 +188,8 @@ export const EChart = React.memo(function EChart<T>({
       ref={containerRef}
       sx={combineSx(
         {
+          // Ensures chart fills container and updates size correctly when resizing,
+          // combineSx allows this default behavior to be overriden from parent component
           width: '100%',
           height: '100%',
         },
