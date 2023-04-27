@@ -35,7 +35,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   pinTooltip,
   unit,
 }: TimeSeriesTooltipProps) {
-  // console.log('TimeSeriesTooltip -> chartData: ', chartData);
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
 

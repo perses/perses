@@ -43,8 +43,6 @@ export function getNearbySeries(
   const currentFocusedData: FocusedSeriesArray = [];
   const focusedX: number | null = pointInGrid[0] ?? null;
   const focusedY: number | null = pointInGrid[1] ?? null;
-  // console.log('focusedX: ', focusedX);
-  // console.log('focusedY: ', focusedY);
 
   if (focusedX === null || focusedY === null) {
     return currentFocusedData;
@@ -56,55 +54,40 @@ export function getNearbySeries(
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
         const lineSeries = currentSeries as LineSeriesOption;
-        // console.log('lineSeries -> ', lineSeries);
-        // TODO: pass dataset into tooltip
         const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
         const markerColor = lineSeries.color ?? '#000';
-        // if (Array.isArray(lineSeries.data)) {
         if (Array.isArray(data.dataset)) {
-          // for (let datumIdx = 0; datumIdx < lineSeries.data.length; datumIdx++) {
           for (let datumIdx = 0; datumIdx < data.dataset.length; datumIdx++) {
-            const xValue = data.xAxis[datumIdx] ?? 0;
-            // const currentDatasetSource =
-            //   Array.isArray(data.dataset) && data.dataset.length > 0 ? data.dataset[0] : undefined;
             const currentDataset = data.dataset.length > 0 ? data.dataset[seriesIdx] : undefined;
-            // console.log('data.dataset: ', data.dataset);
             if (currentDataset !== undefined) {
-              // console.log('currentDatasetSource -> ', currentDatasetSource);
-              // let yValue: EChartsValues = '-';
-              // yValue = 0;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const currentDatasetSource: any = currentDataset.source ?? undefined;
-              if (currentDatasetSource !== undefined) {
+              // skip first row in dataset source since it is for column names, ex: ['timestamp', 'value']
+              if (currentDatasetSource !== undefined && datumIdx > 0) {
                 const focusedTimeSeries = currentDatasetSource[datumIdx] as unknown as TimeSeriesValueTuple;
+                const xValueCurrent = focusedTimeSeries[0];
                 const yValue = focusedTimeSeries[1];
-                // console.log('focusedY: ', focusedY);
-                // console.log('yValue: ', yValue);
-                // const yValue = currentDatasetSource.source !== undefined && Array.isArray(currentDatasetSource.source) ? currentDatasetSource.source[datumIdx][1] as EChartsValues;
-                // console.log('yValue: ', yValue);
-                // const yValue = data.dataset?[seriesIdx].source[datumIdx];
-                // const yValue = currentSeries.data[datumIdx];
-                // ensure null values not displayed in tooltip
-                // if (yValue !== undefined && yValue !== null && focusedX === datumIdx) { // TODO: add back! focusedX is now a timestamp!
+                // TODO: ensure null values not displayed in tooltip
                 if (yValue !== undefined && yValue !== null) {
-                  // if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-                  // if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-                  if (focusedY <= yValue + 2 && focusedY >= yValue - 2) {
-                    // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-                    const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-                    const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
-                    const formattedY = formatValue(yValue, unit);
-                    currentFocusedData.push({
-                      seriesIdx: seriesIdx,
-                      datumIdx: datumIdx,
-                      seriesName: currentSeriesName,
-                      date: formattedDate,
-                      x: xValue,
-                      y: yValue,
-                      formattedY: formattedY,
-                      markerColor: markerColor.toString(),
-                    });
-                    console.log('currentFocusedData: ', currentFocusedData);
+                  if (focusedX < xValueCurrent + 120000 && focusedX > xValueCurrent - 120000) {
+                    if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                      // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+                      // const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000; // TODO: is this needed? will it always be ms?
+                      // const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
+                      const formattedDate = TOOLTIP_DATE_FORMAT.format(focusedX);
+                      const formattedY = formatValue(yValue, unit);
+                      currentFocusedData.push({
+                        seriesIdx: seriesIdx,
+                        datumIdx: datumIdx,
+                        seriesName: currentSeriesName,
+                        date: formattedDate,
+                        x: xValueCurrent,
+                        y: yValue,
+                        formattedY: formattedY,
+                        markerColor: markerColor.toString(),
+                      });
+                      break;
+                    }
                   }
                 }
               }
@@ -162,7 +145,7 @@ export function getFocusedSeriesData(
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   // const seriesNum = chartData.timeSeries.length;
   // const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
-  const yBuffer = yAxisInterval * 9;
+  const yBuffer = yAxisInterval * 2; // TODO: add back dynamic nearby range
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
