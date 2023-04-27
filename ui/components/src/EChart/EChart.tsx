@@ -117,8 +117,6 @@ export const EChart = React.memo(function EChart<T>({
   _instance,
   onChartInitialized,
 }: EChartsProps<T>) {
-  const testName = 'Test num - ' + String(Math.floor(Math.random() * 10) + ' - Render time');
-  console.time(testName);
   const initialOption = useRef<EChartsCoreOption>(option);
   const prevOption = useRef<EChartsCoreOption>(option);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -131,7 +129,6 @@ export const EChart = React.memo(function EChart<T>({
     if (chartElement.current === undefined) return;
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
-    console.timeEnd(testName);
     if (_instance !== undefined) {
       _instance.current = chartElement.current;
     }
