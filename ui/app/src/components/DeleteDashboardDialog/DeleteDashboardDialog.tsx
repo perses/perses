@@ -18,11 +18,11 @@ import { DashboardResource } from '@perses-dev/core';
 import { dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { useIsReadonly } from '../../model/config-client';
 
 export interface DeleteDashboardDialogProps {
   dashboard: DashboardResource;
   open: boolean;
-  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardResource>;
 }
@@ -36,7 +36,8 @@ export interface DeleteDashboardDialogProps {
  * @constructor
  */
 export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
-  const { dashboard, open, isReadonly, onClose, onSuccess } = props;
+  const { dashboard, open, onClose, onSuccess } = props;
+  const isReadonly = useIsReadonly();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
 

@@ -17,7 +17,6 @@ import FolderPound from 'mdi-material-ui/FolderPound';
 import { useCallback, useState } from 'react';
 import { DeleteProjectDialog } from '../../components/DeleteProjectDialog/DeleteProjectDialog';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
-import { useIsReadonly } from '../../model/config-client';
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
 import { ProjectDashboards } from './ProjectDashboards';
 
@@ -29,7 +28,6 @@ function ProjectView() {
 
   // Navigate to the home page if the project has been successfully deleted
   const navigate = useNavigate();
-  const isReadonly = useIsReadonly();
   const handleDeleteProjectDialogSuccess = useCallback(() => navigate(`/`), [navigate]);
 
   // Open/Close management for the "Delete Project" dialog
@@ -65,7 +63,6 @@ function ProjectView() {
         <DeleteProjectDialog
           name={projectName}
           open={isDeleteProjectDialogOpen}
-          isReadonly={isReadonly}
           onClose={handleDeleteProjectDialogClose}
           onSuccess={handleDeleteProjectDialogSuccess}
         />

@@ -16,10 +16,10 @@ import { Alert, Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { useIsReadonly } from '../../model/config-client';
 
 export interface AddProjectDialogProps {
   open: boolean;
-  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<ProjectModel>;
 }
@@ -32,7 +32,9 @@ export interface AddProjectDialogProps {
  * @constructor
  */
 export const AddProjectDialog = (props: AddProjectDialogProps) => {
-  const { open, isReadonly, onClose, onSuccess } = props;
+  const { open, onClose, onSuccess } = props;
+  const isReadonly = useIsReadonly();
+
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
 

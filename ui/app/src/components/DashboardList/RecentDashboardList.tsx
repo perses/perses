@@ -21,7 +21,6 @@ import { intlFormatDistance } from 'date-fns';
 import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
 import { RenameDashboardDialog } from '../RenameDashboardDialog/RenameDashboardDialog';
 import { DatedDashboards } from '../../model/dashboard-client';
-import { useIsReadonly } from '../../model/config-client';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface RecentDashboardListProperties {
@@ -32,8 +31,6 @@ export interface RecentDashboardListProperties {
 
 export function RecentDashboardList(props: RecentDashboardListProperties) {
   const { dashboardList, hideToolbar, isLoading } = props;
-
-  const isReadonly = useIsReadonly();
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -185,13 +182,11 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
           <Box>
             <RenameDashboardDialog
               open={isRenameDashboardDialogStateOpened}
-              isReadonly={isReadonly}
               onClose={() => setRenameDashboardDialogStateOpened(false)}
               dashboard={targetedDashboard}
             />
             <DeleteDashboardDialog
               open={isDeleteDashboardDialogStateOpened}
-              isReadonly={isReadonly}
               onClose={() => setDeleteDashboardDialogStateOpened(false)}
               dashboard={targetedDashboard}
             />

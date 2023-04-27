@@ -25,11 +25,11 @@ import {
 } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { DashboardSelector } from '@perses-dev/core';
+import { useIsReadonly } from '../../model/config-client';
 
 export interface CreateDashboardProps {
   open: boolean;
   projectOptions: string[];
-  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardSelector>;
 }
@@ -44,7 +44,8 @@ export interface CreateDashboardProps {
  * @constructor
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
-  const { open, projectOptions, isReadonly, onClose, onSuccess } = props;
+  const { open, projectOptions, onClose, onSuccess } = props;
+  const isReadonly = useIsReadonly();
 
   const [projectName, setProjectName] = useState<string | undefined>(projectOptions[0]);
   const [projectError, setProjectError] = useState<string>();

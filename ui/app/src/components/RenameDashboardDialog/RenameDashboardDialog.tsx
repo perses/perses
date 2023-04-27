@@ -17,11 +17,11 @@ import { Dialog } from '@perses-dev/components';
 import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
 import { useSnackbar } from '../../context/SnackbarProvider';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
+import { useIsReadonly } from '../../model/config-client';
 
 export interface RenameDashboardDialogProps {
   dashboard: DashboardResource;
   open: boolean;
-  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<string>;
 }
@@ -35,12 +35,13 @@ export interface RenameDashboardDialogProps {
  * @constructor
  */
 export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
-  const { dashboard, open, isReadonly, onClose, onSuccess } = props;
-  const [name, setName] = useState<string>();
-  const [error, setError] = useState<string>();
-
+  const { dashboard, open, onClose, onSuccess } = props;
+  const isReadonly = useIsReadonly();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
+
+  const [name, setName] = useState<string>();
+  const [error, setError] = useState<string>();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);

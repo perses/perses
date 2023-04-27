@@ -35,7 +35,6 @@ import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { DeleteProjectDialog } from '../../components/DeleteProjectDialog/DeleteProjectDialog';
-import { useIsReadonly } from '../../model/config-client';
 
 interface ProjectRow {
   project: string;
@@ -50,8 +49,6 @@ function RenderDashboardList(props: RenderDashboardListProps) {
   const { projectRows } = props;
   const [openDeleteProjectDialog, setOpenDeleteProjectDialog] = useState<boolean>(false);
   const [projectToDelete, setProjectToDelete] = useState<string>();
-
-  const isReadonly = useIsReadonly();
 
   const openDeleteProjectConfirmDialog = ($event: MouseEvent, name: string) => {
     $event.stopPropagation(); // Preventing the accordion to toggle when we click on the button
@@ -114,7 +111,6 @@ function RenderDashboardList(props: RenderDashboardListProps) {
       <DeleteProjectDialog
         name={projectToDelete || ''}
         open={openDeleteProjectDialog}
-        isReadonly={isReadonly}
         onClose={closeDeleteProjectConfirmDialog}
       />
     </>

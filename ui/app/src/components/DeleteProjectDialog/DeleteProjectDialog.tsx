@@ -16,11 +16,11 @@ import { Alert, Button } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { useSnackbar } from '../../context/SnackbarProvider';
 import { useDeleteProjectMutation } from '../../model/project-client';
+import { useIsReadonly } from '../../model/config-client';
 
 export interface DeleteProjectDialogProps {
   name: string;
   open: boolean;
-  isReadonly?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<string>;
 }
@@ -35,7 +35,8 @@ export interface DeleteProjectDialogProps {
  * @constructor
  */
 export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
-  const { name, open, isReadonly, onClose, onSuccess } = props;
+  const { name, open, onClose, onSuccess } = props;
+  const isReadonly = useIsReadonly();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const mutation = useDeleteProjectMutation();
 
