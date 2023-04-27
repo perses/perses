@@ -64,29 +64,32 @@ export function getNearbySeries(
               const currentDatasetSource: any = currentDataset.source ?? undefined;
               // skip first row in dataset source since it is for column names, ex: ['timestamp', 'value']
               if (currentDatasetSource !== undefined && datumIdx > 0) {
+                // TODO: fix types
                 const focusedTimeSeries = currentDatasetSource[datumIdx] as unknown as TimeSeriesValueTuple;
-                const xValueCurrent = focusedTimeSeries[0];
-                const yValue = focusedTimeSeries[1];
-                // TODO: ensure null values not displayed in tooltip
-                if (yValue !== undefined && yValue !== null) {
-                  if (focusedX < xValueCurrent + 120000 && focusedX > xValueCurrent - 120000) {
-                    if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-                      // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-                      // const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000; // TODO: is this needed? will it always be ms?
-                      // const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
-                      const formattedDate = TOOLTIP_DATE_FORMAT.format(focusedX);
-                      const formattedY = formatValue(yValue, unit);
-                      currentFocusedData.push({
-                        seriesIdx: seriesIdx,
-                        datumIdx: datumIdx,
-                        seriesName: currentSeriesName,
-                        date: formattedDate,
-                        x: xValueCurrent,
-                        y: yValue,
-                        formattedY: formattedY,
-                        markerColor: markerColor.toString(),
-                      });
-                      break;
+                if (focusedTimeSeries !== undefined) {
+                  const xValueCurrent = focusedTimeSeries[0];
+                  const yValue = focusedTimeSeries[1];
+                  // TODO: ensure null values not displayed in tooltip
+                  if (yValue !== undefined && yValue !== null) {
+                    if (focusedX < xValueCurrent + 120000 && focusedX > xValueCurrent - 120000) {
+                      if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                        // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+                        // const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000; // TODO: is this needed? will it always be ms?
+                        // const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
+                        const formattedDate = TOOLTIP_DATE_FORMAT.format(focusedX);
+                        const formattedY = formatValue(yValue, unit);
+                        currentFocusedData.push({
+                          seriesIdx: seriesIdx,
+                          datumIdx: datumIdx,
+                          seriesName: currentSeriesName,
+                          date: formattedDate,
+                          x: xValueCurrent,
+                          y: yValue,
+                          formattedY: formattedY,
+                          markerColor: markerColor.toString(),
+                        });
+                        break;
+                      }
                     }
                   }
                 }
