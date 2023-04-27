@@ -30,7 +30,7 @@ import {
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import { MouseEvent, useState } from 'react';
-import { useProjectQuery } from '../model/project-client';
+import { useProjectList } from '../model/project-client';
 import { useSnackbar } from '../context/SnackbarProvider';
 import { useDarkMode } from '../context/DarkMode';
 import { PersesLogo } from './PersesLogo';
@@ -40,7 +40,7 @@ const ITEM_HEIGHT = 48;
 function ProjectMenu(): JSX.Element {
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useProjectQuery({ onError: exceptionSnackbar });
+  const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {

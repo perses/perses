@@ -33,3 +33,8 @@ export interface DashboardSpec {
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
 }
+
+export interface DashboardSelector {
+  project: string;
+  dashboard: string;
+}
