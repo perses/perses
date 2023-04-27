@@ -1,4 +1,4 @@
-readonly: true
+readonly: false
 
 database:
   file:
