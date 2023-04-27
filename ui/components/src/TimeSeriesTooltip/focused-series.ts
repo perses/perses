@@ -49,6 +49,8 @@ export function getNearbySeries(
   }
 
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
+    // TODO: better way to calc xBuffer for longer time ranges
+    const xBuffer = focusedX * 0.0005;
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
@@ -71,7 +73,7 @@ export function getNearbySeries(
                   const yValue = focusedTimeSeries[1];
                   // TODO: ensure null values not displayed in tooltip
                   if (yValue !== undefined && yValue !== null) {
-                    if (focusedX < xValueCurrent + 120000 && focusedX > xValueCurrent - 120000) {
+                    if (focusedX < xValueCurrent + xBuffer && focusedX > xValueCurrent - xBuffer) {
                       if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
                         // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                         // const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000; // TODO: is this needed? will it always be ms?
