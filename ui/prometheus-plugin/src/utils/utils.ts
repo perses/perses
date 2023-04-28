@@ -74,11 +74,9 @@ export type SeriesLabels = Record<string, string>;
  */
 export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels): string {
   const resolveLabelsRegex = /\{\{\s*(.+?)\s*\}\}/g;
-  return inputFormat.replace(resolveLabelsRegex, (_match, g1) => {
-    if (seriesLabels[g1]) {
-      return seriesLabels[g1] ?? '';
-    }
-    return '';
+  return inputFormat.replace(resolveLabelsRegex, (_match, token) => {
+    const resolvedValue = seriesLabels[token] ?? '';
+    return resolvedValue.toString();
   });
 }
 
