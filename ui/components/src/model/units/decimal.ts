@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DEFAULT_DECIMAL_PLACES } from './constants';
+import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
+import { limitDecimalPlaces } from './utils';
 
 const decimalUnitKinds = ['Decimal'] as const;
 type DecimalUnitKind = (typeof decimalUnitKinds)[number];
@@ -21,9 +22,10 @@ export type DecimalUnitOptions = {
   decimal_places?: number;
   abbreviate?: boolean;
 };
-export const PERCENT_GROUP_CONFIG: UnitGroupConfig = {
-  label: 'Percent',
+export const DECIMAL_GROUP_CONFIG: UnitGroupConfig = {
+  label: 'Decimal',
   decimal_places: true,
+  abbreviate: true,
 };
 export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> = {
   Decimal: {
@@ -32,23 +34,36 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
   },
 };
 
-export function formatDecimal(value: number, { abbreviate, decimal_places }: DecimalUnitOptions): string {
-  decimal_places = decimal_places ?? DEFAULT_DECIMAL_PLACES;
+export function formatDecimal(value: number, options: DecimalUnitOptions): string {
+  const { abbreviate, decimal_places } = options;
 
-  // Avoids maximumFractionDigits value is out of range error. Possible values are 0 to 20.
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
-  if (decimal_places < 0) {
-    decimal_places = 0;
-  } else if (decimal_places > 20) {
-    decimal_places = 20;
+  const showFullNumber = abbreviate === false;
+  if (showFullNumber) {
+    return formatDecimalAsFullNumber(value, options);
   }
 
-  const showFullNumber = abbreviate == false || value < 1000;
-
-  const formatter = new Intl.NumberFormat('en-US', {
+  const formatterOptions: Intl.NumberFormatOptions = {
     style: 'decimal',
-    notation: showFullNumber ? 'standard' : 'compact',
-    maximumFractionDigits: decimal_places,
+    notation: 'compact',
+    useGrouping: true,
+  };
+
+  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
+  if (hasDecimalPlaces) {
+    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+  } else {
+    formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+  }
+
+  const formatter = Intl.NumberFormat('en-US', formatterOptions);
+  return formatter.format(value);
+}
+
+function formatDecimalAsFullNumber(value: number, { decimal_places }: DecimalUnitOptions): string {
+  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
+  const formatter = Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    maximumFractionDigits: hasDecimalPlaces ? limitDecimalPlaces(decimal_places) : undefined,
     useGrouping: true,
   });
   return formatter.format(value);

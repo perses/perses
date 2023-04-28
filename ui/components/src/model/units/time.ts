@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DEFAULT_DECIMAL_PLACES } from './constants';
+import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
+import { limitDecimalPlaces } from './utils';
 
 const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'] as const;
 type TimeUnitKind = (typeof timeUnitKinds)[number];
@@ -62,7 +63,7 @@ export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnitKind, UnitConfig>> = {
 
 // Mapping of time units to what Intl.NumberFormat formatter expects
 // https://v8.dev/features/intl-numberformat#units
-export enum TimeIntlDuration {
+export enum PersesTimeToIntlTime {
   Milliseconds = 'millisecond',
   Seconds = 'second',
   Minutes = 'minute',
@@ -74,16 +75,21 @@ export enum TimeIntlDuration {
 }
 
 export function formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
-  const decimalPlaces = decimal_places ?? DEFAULT_DECIMAL_PLACES;
-
-  const timeUnit: string = TimeIntlDuration[kind];
   const isMonthOrYear = kind === 'Months' || kind === 'Years';
 
-  const formatter = new Intl.NumberFormat('en-US', {
+  const formatterOptions: Intl.NumberFormatOptions = {
     style: 'unit',
-    unit: timeUnit,
+    unit: PersesTimeToIntlTime[kind],
     unitDisplay: isMonthOrYear ? 'long' : 'narrow',
-    maximumFractionDigits: decimalPlaces,
-  });
+  };
+
+  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
+  if (hasDecimalPlaces) {
+    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+  } else {
+    formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+  }
+
+  const formatter = Intl.NumberFormat('en-US', formatterOptions);
   return formatter.format(value);
 }

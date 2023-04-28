@@ -13,8 +13,9 @@
 
 import numbro from 'numbro';
 
-import { DEFAULT_DECIMAL_PLACES } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
+import { limitDecimalPlaces } from './utils';
+import { MAX_SIGNIFICANT_DIGITS } from './constants';
 
 const bytesUnitKinds = ['Bytes'] as const;
 type BytesUnitKind = (typeof bytesUnitKinds)[number];
@@ -37,37 +38,52 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
   },
 };
 
-export function formatBytes(bytes: number, { abbreviate, decimal_places }: BytesUnitOptions) {
-  if (bytes === 0) return '0 bytes';
+export function formatBytes(bytes: number, options: BytesUnitOptions) {
+  const { abbreviate, decimal_places } = options;
 
-  decimal_places = decimal_places ?? DEFAULT_DECIMAL_PLACES;
-  // Avoids maximumFractionDigits value is out of range error. Possible values are 0 to 20.
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
-  if (decimal_places < 0) {
-    decimal_places = 0;
-  } else if (decimal_places > 20) {
-    decimal_places = 20;
+  const showFullNumber = abbreviate === false;
+  if (showFullNumber) {
+    return formatBytesAsFullNumber(bytes, options);
   }
 
-  const showFullNumber = abbreviate == false || bytes < 1000;
-
-  if (showFullNumber) {
-    const formatter = new Intl.NumberFormat('en-US', {
+  if (bytes < 1000) {
+    const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
       unit: 'byte',
       unitDisplay: 'long',
-      maximumFractionDigits: decimal_places,
       useGrouping: true,
-    });
+    };
+
+    const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
+    if (hasDecimalPlaces) {
+      formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+    } else {
+      formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+    }
+
+    const formatter = Intl.NumberFormat('en-US', formatterOptions);
     return formatter.format(bytes);
   }
 
+  // numbro is able to add units like KB, MB, GB, etc. correctly
   return numbro(bytes).format({
     output: 'byte',
     base: 'decimal',
     spaceSeparated: true,
-    mantissa: decimal_places,
+    mantissa: decimal_places ?? 2,
     trimMantissa: true,
     optionalMantissa: true,
   });
+}
+
+function formatBytesAsFullNumber(bytes: number, { decimal_places }: BytesUnitOptions) {
+  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
+  const formatter = Intl.NumberFormat('en-US', {
+    style: 'unit',
+    unit: 'byte',
+    unitDisplay: 'long',
+    maximumFractionDigits: hasDecimalPlaces ? limitDecimalPlaces(decimal_places) : undefined,
+    useGrouping: true,
+  });
+  return formatter.format(bytes);
 }

@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
+import { limitDecimalPlaces } from './utils';
 
 const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
 type PercentUnitKind = (typeof percentUnitKinds)[number];
@@ -19,10 +21,9 @@ export type PercentUnitOptions = {
   kind: PercentUnitKind;
   decimal_places?: number;
 };
-export const DECIMAL_GROUP_CONFIG: UnitGroupConfig = {
-  label: 'Decimal',
+export const PERCENT_GROUP_CONFIG: UnitGroupConfig = {
+  label: 'Percent',
   decimal_places: true,
-  abbreviate: true,
 };
 const PERCENT_GROUP = 'Percent';
 export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> = {
@@ -43,32 +44,24 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
   },
 };
 
-const MAX_SIGNIFICANT_DIGITS = 3;
-
 export function formatPercent(value: number, { kind, decimal_places }: PercentUnitOptions): string {
   // Intl.NumberFormat translates 0 -> 0%, 0.5 -> 50%, 1 -> 100%
   if (kind === 'Percent') {
     value = value / 100;
   }
 
-  const hasDecimalPlaces = decimal_places !== undefined;
+  const formatterOptions: Intl.NumberFormatOptions = {
+    style: 'percent',
+    useGrouping: true,
+  };
 
-  let formatter;
+  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
   if (hasDecimalPlaces) {
-    // If there is a specified # of decimal places, use maximumFractionDigits
-    formatter = new Intl.NumberFormat('en-US', {
-      style: 'percent',
-      maximumFractionDigits: decimal_places,
-      useGrouping: true,
-    });
+    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
   } else {
-    // By default, use maximumSignificantDigits
-    formatter = new Intl.NumberFormat('en-US', {
-      style: 'percent',
-      maximumSignificantDigits: MAX_SIGNIFICANT_DIGITS,
-      useGrouping: true,
-    });
+    formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }
 
+  const formatter = Intl.NumberFormat('en-us', formatterOptions);
   return formatter.format(value);
 }

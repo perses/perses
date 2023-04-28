@@ -26,11 +26,11 @@ describe('UnitSelector', () => {
   };
 
   const getUnitSelector = () => {
-    return screen.getByRole('combobox', { name: 'Units' });
+    return screen.getByRole('combobox', { name: 'Unit' });
   };
 
-  const getDecimalSelector = () => {
-    return screen.getByRole('combobox', { name: 'Decimal' });
+  const getDecimalPlacesSelector = () => {
+    return screen.getByRole('spinbutton', { name: 'Decimals' });
   };
 
   const getAbbreviateSwitch = () => {
@@ -79,15 +79,13 @@ describe('UnitSelector', () => {
     const onChange = jest.fn();
     renderUnitSelector({ kind: 'Decimal', decimal_places: 0, abbreviate: true }, onChange);
 
-    userEvent.click(getDecimalSelector());
-    const decimalOption = screen.getByRole('option', {
-      name: '1',
-    });
-    userEvent.click(decimalOption);
+    const decimalPlacesSelector = getDecimalPlacesSelector();
+    userEvent.click(decimalPlacesSelector);
+    userEvent.clear(decimalPlacesSelector);
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Decimal',
-      decimal_places: 1,
+      decimal_places: undefined,
       abbreviate: true,
     });
   });
@@ -96,18 +94,11 @@ describe('UnitSelector', () => {
     const onChange = jest.fn();
     renderUnitSelector({ kind: 'Percent' }, onChange);
 
-    const decimalSelector = getDecimalSelector();
+    const decimalPlacesSelector = getDecimalPlacesSelector();
     userEvent.tab();
     userEvent.tab();
-    expect(decimalSelector).toHaveFocus();
-
-    userEvent.clear(decimalSelector);
+    expect(decimalPlacesSelector).toHaveFocus();
     userEvent.keyboard('3');
-    screen.getByRole('option', {
-      name: '3',
-    });
-
-    userEvent.keyboard('{arrowup}{enter}');
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Percent',
@@ -152,7 +143,7 @@ describe('UnitSelector', () => {
   describe('with a percent unit selected', () => {
     it('allows the user to modify the decimal places', () => {
       renderUnitSelector({ kind: 'Percent' });
-      expect(getDecimalSelector()).toBeEnabled();
+      expect(getDecimalPlacesSelector()).toBeEnabled();
     });
 
     it('does not allow the user to set abbreviate', () => {
@@ -164,7 +155,7 @@ describe('UnitSelector', () => {
   describe('with a decimal unit selected', () => {
     it('allows the user to modify the decimal places', () => {
       renderUnitSelector({ kind: 'Decimal' });
-      expect(getDecimalSelector()).toBeEnabled();
+      expect(getDecimalPlacesSelector()).toBeEnabled();
     });
 
     it('allows the user to set abbreviate', () => {
@@ -176,7 +167,7 @@ describe('UnitSelector', () => {
   describe('with a bytes unit selected', () => {
     it('allows the user to modify the decimal places', () => {
       renderUnitSelector({ kind: 'Bytes' });
-      expect(getDecimalSelector()).toBeEnabled();
+      expect(getDecimalPlacesSelector()).toBeEnabled();
     });
 
     it('allows the user to set abbreviate', () => {

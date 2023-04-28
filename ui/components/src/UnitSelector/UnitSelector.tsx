@@ -14,10 +14,11 @@ import { Box, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material
 import {
   UnitOptions,
   UNIT_CONFIG,
-  DEFAULT_DECIMAL_PLACES,
   UnitConfig,
   isUnitWithDecimalPlaces,
   isUnitWithAbbreviate,
+  DECIMAL_PLACES_MIN,
+  DECIMAL_PLACES_MAX,
 } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 
@@ -37,8 +38,6 @@ const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG)
   })
   .filter((config) => !config.disableSelectorOption);
 
-const DECIMAL_OPTIONS = [0, 1, 2, 3, 4];
-
 export function UnitSelector({ value, onChange }: UnitSelectorProps) {
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
   const hasAbbreviate = isUnitWithAbbreviate(value);
@@ -49,7 +48,7 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
     });
   };
 
-  const handleDecimalChange = (_: unknown, newValue: number) => {
+  const handleDecimalChange = (newValue?: number) => {
     if (hasDecimalPlaces) {
       onChange({
         ...value,
@@ -82,7 +81,7 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
         }
       />
       <OptionsEditorControl
-        label="Units"
+        label="Unit"
         control={
           <Autocomplete
             value={{ id: value.kind, ...kindConfig }}
@@ -105,17 +104,17 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
         }
       />
       <OptionsEditorControl
-        label="Decimal"
+        label="Decimals"
         control={
-          <Autocomplete
-            value={hasDecimalPlaces ? value.decimal_places ?? DEFAULT_DECIMAL_PLACES : 0}
-            options={DECIMAL_OPTIONS}
-            getOptionLabel={(option) => `${option}`}
-            renderInput={(params) => <TextField {...params} />}
-            onChange={handleDecimalChange}
-            disabled={!hasDecimalPlaces}
-            disableClearable
-          ></Autocomplete>
+          <TextField
+            type="number"
+            value={value.decimal_places ?? ''}
+            onChange={(e) => {
+              handleDecimalChange(e.target.value ? Number(e.target.value) : undefined);
+            }}
+            placeholder="Default"
+            inputProps={{ min: DECIMAL_PLACES_MIN, max: DECIMAL_PLACES_MAX }}
+          />
         }
       />
     </>
