@@ -180,10 +180,23 @@ describe('getFormattedPrometheusSeriesName', () => {
       instance: 'demo.do.prometheus.io:9100',
       job: 'node',
     };
-    const series_name_format = 'custom example {{env}} {{instance}} {{node}}';
+    const series_name_format = 'custom example {{env}} {{instance}} {{job}}';
     const output = {
       formattedName: 'custom example demo demo.do.prometheus.io:9100 node',
       name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+    };
+    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+  });
+
+  it('should show an empty string when no corresponding label values returned', () => {
+    const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
+    const metric = {
+      job: 'node',
+    };
+    const series_name_format = 'test{{fake}}';
+    const output = {
+      formattedName: 'test',
+      name: '{job="node"}',
     };
     expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
   });
