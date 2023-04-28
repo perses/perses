@@ -68,12 +68,18 @@ export const parseTemplateVariables = (text: string) => {
 export type SeriesLabels = Record<string, string>;
 
 /*
- * Formatter used for series name display in legends and tooltips
- * Regex replaces label {{ name }} with resolved label value
+ * Formatter used for series name display in legends and tooltips.
+ * Regex replaces label {{ name }} with resolved label value.
+ * If no resolved value, return empty string instead of the token inside double curly braces.
  */
 export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels): string {
   const resolveLabelsRegex = /\{\{\s*(.+?)\s*\}\}/g;
-  return inputFormat.replace(resolveLabelsRegex, (_, g) => (seriesLabels[g] ? seriesLabels[g] : g));
+  return inputFormat.replace(resolveLabelsRegex, (_match, g1) => {
+    if (seriesLabels[g1]) {
+      return seriesLabels[g1] ?? '';
+    }
+    return '';
+  });
 }
 
 /*
