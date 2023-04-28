@@ -87,29 +87,41 @@ function ProjectMenu(): JSX.Element {
           },
         }}
       >
-        {data.map((project, index) => {
-          return (
-            <MenuItem
-              key={index}
-              onClick={() => {
-                setAnchorEl(null);
-                navigate(`/projects/${project.metadata.name}`);
-              }}
-            >
-              <Typography
-                variant="inherit"
-                noWrap
-                sx={{
-                  '&:hover': {
-                    overflow: 'visible',
-                  },
+        {data.length ? (
+          data.map((project, index) => {
+            return (
+              <MenuItem
+                key={index}
+                onClick={() => {
+                  setAnchorEl(null);
+                  navigate(`/projects/${project.metadata.name}`);
                 }}
               >
-                {project.metadata.name}
-              </Typography>
-            </MenuItem>
-          );
-        })}
+                <Typography
+                  variant="inherit"
+                  noWrap
+                  sx={{
+                    '&:hover': {
+                      overflow: 'visible',
+                    },
+                  }}
+                >
+                  {project.metadata.name}
+                </Typography>
+              </MenuItem>
+            );
+          })
+        ) : (
+          <MenuItem key="empty">
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+              }}
+            >
+              Empty
+            </Typography>
+          </MenuItem>
+        )}
       </Menu>
     </Box>
   );
