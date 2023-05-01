@@ -27,8 +27,8 @@ describe('TooltipContent', () => {
           seriesIdx: 0,
           datumIdx: 84,
           seriesName: 'Test node demo.do.prometheus.io:9100',
-          date: 'Dec 23, 2022, 1:53:00 PM',
-          x: 1671821580000,
+          dateMs: 1671821580000,
+          x: 1671821580,
           y: 0.1,
           formattedY: '0.1',
           markerColor: 'hsla(19838016,50%,50%,0.8)',
@@ -39,7 +39,7 @@ describe('TooltipContent', () => {
     renderComponent(tooltipContent);
     expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
-    expect(screen.getByText('13:53:00')).toBeInTheDocument();
+    expect(screen.getByText('18:53:00')).toBeInTheDocument();
     expect(screen.getByText('0.1')).toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('TooltipContent', () => {
           seriesIdx: 2,
           datumIdx: 48,
           seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-          date: 'Dec 23, 2022, 1:44:00 PM',
+          dateMs: 1671821040000,
           x: 1671821040000,
           y: 84635648,
           formattedY: '84.64M',
@@ -60,7 +60,7 @@ describe('TooltipContent', () => {
           seriesIdx: 1,
           datumIdx: 48,
           seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-          date: 'Dec 23, 2022, 1:44:00 PM',
+          dateMs: 1671821040000,
           x: 1671821040000,
           y: 33771520,
           formattedY: '33.77M',
@@ -87,7 +87,7 @@ describe('TooltipContent', () => {
           seriesIdx: 2,
           datumIdx: 48,
           seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-          date: 'Dec 23, 2022, 1:44:00 PM',
+          dateMs: 1671821040000,
           x: 1671821040000,
           y: 84635648,
           formattedY: '84.64M',
@@ -97,7 +97,7 @@ describe('TooltipContent', () => {
           seriesIdx: 1,
           datumIdx: 48,
           seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-          date: 'Dec 23, 2022, 1:44:00 PM',
+          dateMs: 1671821040000,
           x: 1671821040000,
           y: 33771520,
           formattedY: '33.77M',

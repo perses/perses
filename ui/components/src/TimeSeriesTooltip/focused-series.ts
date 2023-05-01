@@ -13,13 +13,12 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
-import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
+import { CursorData, TOOLTIP_MAX_ITEMS } from './tooltip-model';
 
 export interface FocusedSeriesInfo {
   seriesIdx: number | null;
   datumIdx: number | null;
   seriesName: string;
-  date: string;
   dateMs: number;
   markerColor: string;
   x: number;
@@ -63,13 +62,11 @@ export function getNearbySeries(
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-                const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
                 const formattedY = formatValue(yValue, unit);
                 currentFocusedData.push({
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,
                   seriesName: currentSeriesName,
-                  date: formattedDate,
                   dateMs: xValueMilliSeconds,
                   x: xValue,
                   y: yValue,

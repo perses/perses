@@ -28,7 +28,7 @@ export function TooltipContent(props: TooltipContentProps) {
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].dateMs ? focusedSeries[0].dateMs : null;
 
-  const formatTimeSeriesHeader = (timeString: string) => {
+  const formatTimeSeriesHeader = (timeString: number) => {
     const date = new Date(timeString);
     const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
     const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');

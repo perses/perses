@@ -46,7 +46,7 @@ describe('getNearbySeries', () => {
 
   const focusedSeriesOutput = [
     {
-      date: 'May 31, 2022, 2:38:15 PM',
+      dateMs: 1654007895000,
       datumIdx: 2,
       markerColor: 'hsla(286664040,50%,50%,0.8)',
       seriesName: 'env="demo", instance="demo.do.prometheus", job="node", mode="test alt"',
