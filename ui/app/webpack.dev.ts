@@ -71,6 +71,9 @@ const devConfig: Configuration = {
       '/api': 'http://localhost:8080',
       '/proxy': 'http://localhost:8080',
     },
+    client: {
+      overlay: false,
+    },
   },
   cache: true,
 };
