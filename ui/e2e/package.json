@@ -21,6 +21,6 @@
     "happo-e2e": "^2.1.1",
     "happo-playwright": "^2.0.1",
     "happo-plugin-typescript": "^1.0.0",
-    "happo.io": "^8.3.1"
+    "happo.io": "^8.3.2"
   }
 }

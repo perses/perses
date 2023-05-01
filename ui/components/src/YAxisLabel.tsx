@@ -34,6 +34,7 @@ export function YAxisLabel({ name, height }: YAxisLabelProps) {
     >
       <Typography
         variant="body1"
+        aria-label="y axis label"
         sx={{
           whiteSpace: 'nowrap',
           overflow: 'hidden',

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, fetch, Metadata } from '@perses-dev/core';
+import { fetch, fetchJson, Metadata } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodPOST, HTTPMethodDELETE } from './http';
+import { HTTPHeader, HTTPMethodDELETE, HTTPMethodPOST } from './http';
+import { resource as dashboardResource } from './dashboard-client';
 
 const resource = 'projects';
 
@@ -28,7 +29,7 @@ type ProjectListOptions = Omit<UseQueryOptions<ProjectModel[], Error>, 'queryKey
 /**
  * Gets version information from the Perses server API.
  */
-export function useProjectQuery(options?: ProjectListOptions) {
+export function useProjectList(options?: ProjectListOptions) {
   return useQuery<ProjectModel[], Error>(
     [resource],
     () => {
@@ -90,8 +91,14 @@ export function useDeleteProjectMutation() {
         return name;
       });
     },
-    onSuccess: () => {
-      return queryClient.invalidateQueries([resource]);
+    onSuccess: (name) => {
+      queryClient.removeQueries([resource, name]);
+      queryClient.removeQueries([dashboardResource, name]);
+
+      return Promise.all([
+        queryClient.invalidateQueries([dashboardResource]),
+        queryClient.invalidateQueries([resource]),
+      ]);
     },
   });
 }

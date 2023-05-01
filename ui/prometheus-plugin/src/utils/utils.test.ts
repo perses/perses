@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Metric } from '../model/api-types';
 import {
   parseTemplateVariables,
   replaceTemplateVariable,
@@ -180,12 +181,38 @@ describe('getFormattedPrometheusSeriesName', () => {
       instance: 'demo.do.prometheus.io:9100',
       job: 'node',
     };
-    const series_name_format = 'custom example {{env}} {{instance}} {{node}}';
+    const series_name_format = 'custom example {{env}} {{instance}} {{job}}';
     const output = {
       formattedName: 'custom example demo demo.do.prometheus.io:9100 node',
       name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
     };
     expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+  });
+
+  it('should show an empty string when no corresponding label values returned', () => {
+    const query = 'test_query';
+    const metric = {
+      job: 'node',
+    };
+    const series_name_format = 'test{{fake}}';
+    const output = {
+      formattedName: 'test',
+      name: '{job="node"}',
+    };
+    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+  });
+
+  it('should correctly handle invalid label value case', () => {
+    const query = 'test_query';
+    const metric = {
+      job: 99,
+    };
+    const series_name_format = 'job - {{job}}';
+    const output = {
+      formattedName: 'job - 99',
+      name: '{job="99"}',
+    };
+    expect(getFormattedPrometheusSeriesName(query, metric as unknown as Metric, series_name_format)).toEqual(output);
   });
 
   it('should show correct raw series name', () => {

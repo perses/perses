@@ -39,7 +39,16 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       left: 20,
       containLabel: true,
     },
-    color: ['#8dd3c7', '#fb8072', '#80b1d3', '#bebada', '#fdb462'],
+    // Accessible categorical palette from: https://davidmathlogic.com/colorblind
+    color: [
+      '#56B4E9', // lt blue
+      '#009E73', // med green
+      '#0072B2', // dk blue
+      '#CC79A7', // lt purple
+      '#F0E442', // yellow
+      '#E69F00', // orange
+      '#D55E00', // red
+    ],
     categoryAxis: {
       show: true,
       axisLabel: {

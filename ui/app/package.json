@@ -17,6 +17,7 @@
     "@loadable/component": "^5.15.2",
     "@mui/material": "^5.10.14",
     "@mui/x-data-grid": "^6.0.3",
+    "@nexucis/kvsearch": "^0.8.1",
     "@perses-dev/components": "0.28.0",
     "@perses-dev/core": "0.28.0",
     "@perses-dev/dashboards": "0.28.0",

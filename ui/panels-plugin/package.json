@@ -32,6 +32,7 @@
     "@perses-dev/components": "0.28.0",
     "@perses-dev/core": "0.28.0",
     "@perses-dev/plugin-system": "0.28.0",
+    "color-hash": "^2.0.2",
     "date-fns": "^2.28.0",
     "dompurify": "^2.4.0",
     "echarts": "^5.4.1",
@@ -49,6 +50,7 @@
     "plugin.json"
   ],
   "devDependencies": {
+    "@types/color-hash": "^1.0.2",
     "@types/dompurify": "^2.3.4",
     "@types/marked": "^4.0.7"
   },
