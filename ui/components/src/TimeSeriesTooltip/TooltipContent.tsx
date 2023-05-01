@@ -26,7 +26,7 @@ export function TooltipContent(props: TooltipContentProps) {
   const { focusedSeries, wrapLabels } = props;
   const { formatWithUserTimeZone } = useTimeZone();
 
-  const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
+  const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].dateMs ? focusedSeries[0].dateMs : null;
 
   const formatTimeSeriesHeader = (timeString: string) => {
     const date = new Date(timeString);

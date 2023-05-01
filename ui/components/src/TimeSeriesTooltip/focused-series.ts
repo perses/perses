@@ -20,6 +20,7 @@ export interface FocusedSeriesInfo {
   datumIdx: number | null;
   seriesName: string;
   date: string;
+  dateMs: number;
   markerColor: string;
   x: number;
   y: number;
@@ -69,6 +70,7 @@ export function getNearbySeries(
                   datumIdx: datumIdx,
                   seriesName: currentSeriesName,
                   date: formattedDate,
+                  dateMs: xValueMilliSeconds,
                   x: xValue,
                   y: yValue,
                   formattedY: formattedY,
