@@ -176,8 +176,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           return { graphData };
         }
 
-        // const id = dataset.length;
-
         dataset.push({
           id: seriesIndex,
           source: [['timestamp', 'value'], ...timeSeries.values],
@@ -200,17 +198,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Used for repeating colors in Categorical palette
         seriesIndex++;
 
-        // TODO: does time axis approach still need to fill in values?
-        // const yValues = getYValues(timeSeries, timeScale);
-
-        // TODO: fix time axis label formatting
-        // - https://echarts.apache.org/examples/en/editor.html?c=area-time-axis
-        // - Luke orig PR: https://github.com/perses/perses/pull/112
-        // - https://github.com/perses/perses/blob/ac701d8a39c99663e82d92ffe10271a71378f640/ui/panels-plugin/src/plugins/line-chart/LineChart.tsx
         const lineSeries = getLineSeries(formattedSeriesName, visual, seriesIndex, seriesColor);
-        const isSelected = selectedSeriesNames.includes(timeSeries.name);
 
-        // TODO: fix legend using dataset
+        const isSelected = selectedSeriesNames.includes(timeSeries.name);
         if (!selectedSeriesNames.length || isSelected) {
           graphData.timeSeries.push(lineSeries);
         }
@@ -248,7 +238,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         };
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
         // TODO: switch back to markLine once alternate tooltip created
-        // const thresholdLineSeries = getThresholdSeries(thresholdName, stepOption, minTime, maxTime);
         const thresholdLineSeries = getThresholdSeries(thresholdName, stepOption, timeScale.startMs, timeScale.endMs);
         graphData.timeSeries.push(thresholdLineSeries);
       });
