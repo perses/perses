@@ -13,13 +13,13 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
+import { useDeepMemo, StepOptions, getXValues } from '@perses-dev/core';
 import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { EChartsOption, GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   DEFAULT_LEGEND,
-  EChartsDataFormat,
+  EChartsDatasetFormat,
   validateLegendSpec,
   Legend,
   LineChart,
@@ -41,7 +41,7 @@ import {
   getThresholdSeries,
   getCommonTimeScaleForQueries,
   EMPTY_GRAPH_DATA,
-  convertPercentThreshold,
+  // convertPercentThreshold,
   convertPanelYAxis,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
@@ -50,7 +50,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { thresholds, y_axis, mode = 'Debug' },
+    spec: { thresholds, y_axis },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
@@ -145,7 +145,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     const dataset: EChartsOption['dataset'] = [];
 
-    const graphData: EChartsDataFormat = {
+    const graphData: EChartsDatasetFormat = {
       timeSeries: [],
       dataset: dataset,
       xAxis: [],
@@ -319,28 +319,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       {y_axis && y_axis.show && y_axis.label && (
         <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
       )}
-      {mode === 'Debug' && (
-        <TimeChart
-          height={adjustedContentDimensions.height}
-          data={graphData}
-          yAxis={echartsYAxis}
-          unit={unit}
-          grid={gridOverrides}
-          tooltipConfig={{ wrapLabels: true }}
-          onDataZoom={handleDataZoom}
-        />
-      )}
-      {mode !== 'Debug' && (
-        <LineChart
-          height={adjustedContentDimensions.height}
-          data={graphData}
-          yAxis={echartsYAxis}
-          unit={unit}
-          grid={gridOverrides}
-          tooltipConfig={{ wrapLabels: true }}
-          onDataZoom={handleDataZoom}
-        />
-      )}
+      <TimeChart
+        height={adjustedContentDimensions.height}
+        data={graphData}
+        yAxis={echartsYAxis}
+        unit={unit}
+        grid={gridOverrides}
+        tooltipConfig={{ wrapLabels: true }}
+        onDataZoom={handleDataZoom}
+      />
       {legend && graphData.legendItems && (
         <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
       )}

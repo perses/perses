@@ -24,7 +24,6 @@ export interface TimeSeriesChartOptions {
   unit?: UnitOptions;
   thresholds?: ThresholdOptions;
   visual?: VisualOptions;
-  mode?: 'Debug';
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;

@@ -33,10 +33,17 @@ export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
-export type EChartsDataFormat = {
-  // timeSeries: EChartsTimeSeries[];
+export type EChartsDatasetFormat = {
   timeSeries: Array<EChartsOption['series']>;
   dataset?: EChartsOption['dataset'];
+  xAxis: number[];
+  legendItems?: LegendItem[];
+  xAxisMax?: number | string;
+  rangeMs?: number;
+};
+
+export type EChartsDataFormat = {
+  timeSeries: EChartsTimeSeries[];
   xAxis: number[];
   legendItems?: LegendItem[];
   xAxisMax?: number | string;

@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
-import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from './tooltip-model';
+import { LineSeriesOption } from 'echarts';
+import { TimeSeriesValueTuple } from '@perses-dev/core';
+import { formatValue, UnitOptions, EChartsDatasetFormat } from '../../model';
+import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from '../../TimeSeriesTooltip';
 
 export interface FocusedSeriesInfo {
   seriesIdx: number | null;
@@ -33,7 +35,7 @@ export type FocusedSeriesArray = FocusedSeriesInfo[];
  * Adjust yBuffer to increase or decrease number of series shown
  */
 export function getNearbySeries(
-  data: EChartsDataFormat,
+  data: EChartsDatasetFormat,
   pointInGrid: number[],
   yBuffer: number,
   unit?: UnitOptions
@@ -47,33 +49,52 @@ export function getNearbySeries(
   }
 
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
+    // TODO: better way to calc xBuffer for longer time ranges
+    const xBuffer = focusedX * 0.0005;
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
-        const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        const markerColor = currentSeries.color ?? '#000';
-        if (Array.isArray(currentSeries.data)) {
-          for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
-            const xValue = data.xAxis[datumIdx] ?? 0;
-            const yValue = currentSeries.data[datumIdx];
-            // ensure null values not displayed in tooltip
-            if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
-              if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
-                // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-                const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-                const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
-                const formattedY = formatValue(yValue, unit);
-                currentFocusedData.push({
-                  seriesIdx: seriesIdx,
-                  datumIdx: datumIdx,
-                  seriesName: currentSeriesName,
-                  date: formattedDate,
-                  x: xValue,
-                  y: yValue,
-                  formattedY: formattedY,
-                  markerColor: markerColor.toString(),
-                });
+        const lineSeries = currentSeries as LineSeriesOption;
+        const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
+        const markerColor = lineSeries.color ?? '#000';
+        if (Array.isArray(data.dataset)) {
+          for (let datumIdx = 0; datumIdx < data.dataset.length; datumIdx++) {
+            const currentDataset = data.dataset.length > 0 ? data.dataset[seriesIdx] : undefined;
+            if (currentDataset !== undefined) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const currentDatasetSource: any = currentDataset.source ?? undefined;
+              // skip first row in dataset source since it is for column names, ex: ['timestamp', 'value']
+              if (currentDatasetSource !== undefined && datumIdx > 0) {
+                // TODO: fix types
+                const focusedTimeSeries = currentDatasetSource[datumIdx] as unknown as TimeSeriesValueTuple;
+                if (focusedTimeSeries !== undefined) {
+                  const xValueCurrent = focusedTimeSeries[0];
+                  const yValue = focusedTimeSeries[1];
+                  // TODO: ensure null values not displayed in tooltip
+                  if (yValue !== undefined && yValue !== null) {
+                    if (focusedX < xValueCurrent + xBuffer && focusedX > xValueCurrent - xBuffer) {
+                      if (focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                        // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+                        // const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000; // TODO: is this needed? will it always be ms?
+                        // const formattedDate = TOOLTIP_DATE_FORMAT.format(xValueMilliSeconds);
+                        const formattedDate = TOOLTIP_DATE_FORMAT.format(focusedX);
+                        const formattedY = formatValue(yValue, unit);
+                        currentFocusedData.push({
+                          seriesIdx: seriesIdx,
+                          datumIdx: datumIdx,
+                          seriesName: currentSeriesName,
+                          date: formattedDate,
+                          x: xValueCurrent,
+                          y: yValue,
+                          formattedY: formattedY,
+                          markerColor: markerColor.toString(),
+                        });
+                        break;
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -90,12 +111,14 @@ export function getNearbySeries(
  */
 export function getFocusedSeriesData(
   mousePos: CursorData['coords'],
-  chartData: EChartsDataFormat,
+  chartData: EChartsDatasetFormat,
   pinnedPos: CursorData['coords'],
   chart?: EChartsInstance,
   unit?: UnitOptions
 ) {
   if (chart === undefined || mousePos === null) return [];
+
+  if (chartData.timeSeries === undefined) return [];
 
   // prevents multiple tooltips showing from adjacent charts
   let cursorTargetMatchesChart = false;
@@ -125,8 +148,9 @@ export function getFocusedSeriesData(
   const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
-  const seriesNum = chartData.timeSeries.length;
-  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
+  // const seriesNum = chartData.timeSeries.length;
+  // const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
+  const yBuffer = yAxisInterval * 2; // TODO: add back dynamic nearby range
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {

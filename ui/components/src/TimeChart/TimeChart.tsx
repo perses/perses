@@ -36,10 +36,10 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
+import { EChartsDatasetFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
+import { TimeChartTooltip } from './Tooltip/TimeChartTooltip';
 import { enableDataZoom, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
@@ -66,7 +66,7 @@ export interface TimeChartProps {
    * Height of the chart
    */
   height: number;
-  data: EChartsDataFormat;
+  data: EChartsDatasetFormat;
   yAxis?: YAXisComponentOption;
   unit?: UnitOptions;
   grid?: GridComponentOption;
@@ -149,14 +149,13 @@ export function TimeChart({
     // show symbols and axisPointer dashed line on hover
     const isOptimizedMode = data.timeSeries.length > OPTIMIZED_MODE_SERIES_LIMIT;
 
+    // TODO: is rangeMs still needed
     // const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
+    // TODO: pass timeScale.startMs and timeScale.endMs
     const startTime = data.xAxis[0];
     const endTime = data.xAxis[data.xAxis.length - 1];
 
-    // TODO: test with annotations branch:
-    // - https://github.com/perses/perses/pull/1050/files#diff-59984d6680eeff8ff57e0546febed4b939f1e55510ed3c2702ef73f823f1c1de
-    // - https://github.com/perses/perses/blob/94c8d976c32749e73a92d0372da729b505b851f6/ui/components/src/LineChart/LineChart.tsx
     const option: EChartsCoreOption = {
       dataset: data.dataset,
       series: data.timeSeries,
@@ -232,7 +231,7 @@ export function TimeChart({
       {showTooltip === true &&
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
-          <TimeSeriesTooltip
+          <TimeChartTooltip
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
