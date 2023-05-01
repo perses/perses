@@ -76,7 +76,7 @@ export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels
   const resolveLabelsRegex = /\{\{\s*(.+?)\s*\}\}/g;
   return inputFormat.replace(resolveLabelsRegex, (_match, token) => {
     const resolvedValue = seriesLabels[token] ?? '';
-    return resolvedValue.toString();
+    return resolvedValue;
   });
 }
 
