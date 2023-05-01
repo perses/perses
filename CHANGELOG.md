@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.29.0 / 2023-05-01
+
+- [FEATURE] Allow TLS configuration for mysql database (#1128)
+- [FEATURE] Landing page revamp (#1097)
+- [ENHANCEMENT] Allow echarts wrapper to default to fluid width and height (#1115)
+- [ENHANCEMENT] Add empty item in Project dropdown (#1130)
+- [ENHANCEMENT] Add help text and placeholder for series_name_format control (#1104)
+- [ENHANCEMENT] Use abbreviations for time units (#1125)
+- [ENHANCEMENT] Categorical palette as default, switch to generative based on total series (#1124)
+- [ENHANCEMENT] Auto generated color palette with contrast (#1088)
+- [ENHANCEMENT] Improve formatting for percent values (#1120)
+- [ENHANCEMENT] Center value when sparkline is undefined (#1101)
+- [ENHANCEMENT] Move time series panel reset button (#1103)
+- [BUGFIX] Series name formatter return empty string when no resolved label value (#1132)
+- [BUGFIX] Fix http method not allowed not handled (#1126)
+- [BREAKINGCHANGE] Make "TimeSeriesQuery" required in DefaultPluginKinds (#1123)
+
 ## 0.28.0 / 2023-04-17
 
 - [FEATURE] Revamp project page (#1062)

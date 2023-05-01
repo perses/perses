@@ -216,13 +216,13 @@ Libraries should ideally avoid storing state in local storage. If you run into a
 
 Libraries should not **require** storing state in the url using routes or query parameters. The url is part of the application state that should be controlled by application owners, not the library. Libraries may provide optional features that store state in the url as long as the functionality has the ability to opt out.
 
-> ⚠️ Note: this is an aspirational guideline that should impact _new_ development. There are currently a small number of use cases where library code is opinionated about using query params to manage state and does not have the ability to opt out.
+> ⚠️ Note: this is an aspirational guideline that should impact *new* development. There are currently a small number of use cases where library code is opinionated about using query params to manage state and does not have the ability to opt out.
 
 ## Testing
 
 Any new feature work or essential bug fixes should include tests. The appropriate type of test will depend on the features being built. See each of the sections below for guidance on the forms of testing we use.
 
-> ⚠️ Note: these are aspirational testing guidelines that should impact _new_ development. The project currently has limited code coverage, and we are slowly working on fixing it.
+> ⚠️ Note: these are aspirational testing guidelines that should impact *new* development. The project currently has limited code coverage, and we are slowly working on fixing it.
 
 ### Unit and integration testing for components and utilities
 
@@ -246,7 +246,7 @@ Unit and integration tests for components & utilities are written using a combin
 
 ### End-to-end and browser testing
 
-End-to-end and browser tests are written using [Playwright](https://playwright.dev/). These tests are significantly more time-consuming to run, so they account for a small portion of our test suite. They should focus on [smoke testing](<https://en.wikipedia.org/wiki/Smoke_testing_(software)>) critical user flows and testing use cases that are difficult to cover using other tools (e.g. drag and drop interactions).
+End-to-end and browser tests are written using [Playwright](https://playwright.dev/). These tests are significantly more time-consuming to run, so they account for a small portion of our test suite. They should focus on [smoke testing](https://en.wikipedia.org/wiki/Smoke_testing_(software)) critical user flows and testing use cases that are difficult to cover using other tools (e.g. drag and drop interactions).
 
 - Tests live in the `ui/e2e` directory. See the [README](./e2e) in that directory for additional guidance.
 - Each large feature should include at least one e2e test to ensure the most
@@ -265,7 +265,7 @@ Code intended for use by library consumers should include documentation using th
 - jsdoc on types and their properties, especially types that define component props.
 - Stories using storybook for components. Stories autogenerate a significant portion of their documentation using jsdoc comments, so the prior items are important for this to work well.
 
-> ⚠️ Note: this is an aspirational guideline that should impact _new_ development. There is a small amount of documentation for the current codebase, and we are slowly working on expanding it.
+> ⚠️ Note: this is an aspirational guideline that should impact *new* development. There is a small amount of documentation for the current codebase, and we are slowly working on expanding it.
 
 ## Additional best practices
 
