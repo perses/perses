@@ -17,6 +17,8 @@ import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
+  DEFAULT_POINT_RADIUS,
+  POINT_SIZE_OFFSET,
   STACK_CONFIG,
   StackOptions,
   STACK_OPTIONS,
@@ -32,9 +34,11 @@ export interface VisualOptionsEditorProps {
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
+    const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
     onChange({
       ...value,
       line_width: newValue,
+      point_radius: symbolSize,
     });
   };
 
