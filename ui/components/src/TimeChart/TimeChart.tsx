@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { MouseEvent, useMemo, useRef, useState } from 'react';
+import { MouseEvent, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -40,9 +40,7 @@ import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
-// import { useTimeZone } from '../context/TimeZoneProvider';
 import { enableDataZoom, getYAxes, restoreChart, ZoomEventData } from './utils';
-// import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -164,22 +162,15 @@ export function TimeChart({
       series: data.timeSeries,
       xAxis: {
         type: 'time',
+        // TODO: fix timezones using this approach
+        // - https://github.com/apache/echarts/issues/14453#issuecomment-800163920
         min: startTime,
         max: endTime,
-        // data: data.xAxis,
-        // max: data.xAxisMax,
-        // https://echarts.apache.org/en/option.html#xAxis.axisLabel.formatter
-        // axisLabel: {
-        //   formatter: (value: number) => {
-        //     return getFormattedDate(value, rangeMs, timeZone);
-        //   },
-        // },
       },
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
-        // show: !isOptimizedMode,
-        show: true,
+        show: !isOptimizedMode,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
         appendToBody: true,
@@ -209,7 +200,6 @@ export function TimeChart({
     }
     return option;
   }, [data, yAxis, unit, grid, legend, noDataOption, __experimentalEChartsOptionsOverride]);
-  // }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride]);
 
   return (
     <Box

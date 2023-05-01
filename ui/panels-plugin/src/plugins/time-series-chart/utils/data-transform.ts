@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption, YAXisComponentOption } from 'echarts';
+import type { EChartsOption, YAXisComponentOption, LineSeriesOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
-  // DEFAULT_CONNECT_NULLS,
+  DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
   DEFAULT_Y_AXIS,
@@ -49,7 +49,6 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
  */
 export function getLineSeries(
   formattedName: string,
-  data: EChartsTimeSeries['data'],
   visual: VisualOptions,
   seriesIndex: number,
   paletteColor?: string
@@ -60,9 +59,7 @@ export function getLineSeries(
     type: 'line',
     datasetId: seriesIndex,
     name: formattedName,
-    // data: data,
-    // connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
-    connectNulls: true,
+    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
@@ -98,13 +95,17 @@ export function getLineSeries(
  */
 export function getThresholdSeries(
   name: string,
-  data: EChartsTimeSeries['data'],
-  threshold: StepOptions
-): EChartsTimeSeries {
+  threshold: StepOptions,
+  minTime: number,
+  maxTime: number
+): LineSeriesOption {
   return {
     type: 'line',
     name: name,
-    data: data,
+    data: [
+      [minTime, threshold.value],
+      [maxTime, threshold.value],
+    ],
     color: threshold.color,
     label: {
       show: false,
@@ -125,7 +126,7 @@ export function getThresholdSeries(
  * Converts percent threshold into absolute step value
  * If max is undefined, use the max value from time series data as default
  */
-export function convertPercentThreshold(percent: number, data: EChartsTimeSeries[], max?: number, min?: number) {
+export function convertPercentThreshold(percent: number, data: LineSeriesOption[], max?: number, min?: number) {
   const percentDecimal = percent / 100;
   const adjustedMax = max ?? findMax(data);
   const adjustedMin = min ?? 0;
@@ -133,14 +134,16 @@ export function convertPercentThreshold(percent: number, data: EChartsTimeSeries
   return percentDecimal * total + adjustedMin;
 }
 
-function findMax(timeSeries: EChartsTimeSeries[]) {
+function findMax(timeSeries: LineSeriesOption[]) {
   let max = 0;
   timeSeries.forEach((series) => {
-    series.data.forEach((value: EChartsValues) => {
-      if (typeof value === 'number' && value > max) {
-        max = value;
-      }
-    });
+    if (series.data !== undefined) {
+      series.data.forEach((value) => {
+        if (typeof value === 'number' && value > max) {
+          max = value;
+        }
+      });
+    }
   });
   return max;
 }

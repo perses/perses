@@ -200,13 +200,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Used for repeating colors in Categorical palette
         seriesIndex++;
 
-        const yValues = getYValues(timeSeries, timeScale);
+        // TODO: does time axis approach still need to fill in values?
+        // const yValues = getYValues(timeSeries, timeScale);
 
         // TODO: fix time axis label formatting
         // - https://echarts.apache.org/examples/en/editor.html?c=area-time-axis
         // - Luke orig PR: https://github.com/perses/perses/pull/112
         // - https://github.com/perses/perses/blob/ac701d8a39c99663e82d92ffe10271a71378f640/ui/panels-plugin/src/plugins/line-chart/LineChart.tsx
-        const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesIndex, seriesColor);
+        const lineSeries = getLineSeries(formattedSeriesName, visual, seriesIndex, seriesColor);
         const isSelected = selectedSeriesNames.includes(timeSeries.name);
 
         // TODO: fix legend using dataset
@@ -227,30 +228,31 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     graphData.dataset = dataset;
     graphData.xAxis = xAxisData;
 
-    // TODO: fix thresholds using dataset
-    // if (thresholds && thresholds.steps) {
-    //   // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
-    //   // These are styled with predefined colors and a dashed style to look different than series from query results.
-    //   // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
-    //   const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
-    //   thresholds.steps.forEach((step: StepOptions, index: number) => {
-    //     const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
-    //     const thresholdLineColor = step.color ?? stepPaletteColor;
-    //     const stepOption: StepOptions = {
-    //       color: thresholdLineColor,
-    //       value:
-    //         // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
-    //         thresholds.mode === 'Percent'
-    //           ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
-    //           : step.value,
-    //     };
-    //     const thresholdName = step.name ?? `Threshold ${index + 1} `;
-    //     // TODO: switch back to markLine once alternate tooltip created
-    //     const thresholdData = Array(xAxisData.length).fill(stepOption.value);
-    //     const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
-    //     graphData.timeSeries.push(thresholdLineSeries);
-    //   });
-    // }
+    if (thresholds && thresholds.steps) {
+      // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
+      // These are styled with predefined colors and a dashed style to look different than series from query results.
+      // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
+      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
+      thresholds.steps.forEach((step: StepOptions, index: number) => {
+        const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
+        const thresholdLineColor = step.color ?? stepPaletteColor;
+        const stepOption: StepOptions = {
+          color: thresholdLineColor,
+          value: step.value,
+          // TODO: fix threshold percent max calc
+          // value:
+          //   // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
+          //   thresholds.mode === 'Percent'
+          //     ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
+          //     : step.value,
+        };
+        const thresholdName = step.name ?? `Threshold ${index + 1} `;
+        // TODO: switch back to markLine once alternate tooltip created
+        // const thresholdLineSeries = getThresholdSeries(thresholdName, stepOption, minTime, maxTime);
+        const thresholdLineSeries = getThresholdSeries(thresholdName, stepOption, timeScale.startMs, timeScale.endMs);
+        graphData.timeSeries.push(thresholdLineSeries);
+      });
+    }
 
     return {
       graphData,
