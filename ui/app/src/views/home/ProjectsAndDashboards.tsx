@@ -158,7 +158,7 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
     } else {
       return projectRows;
     }
-  }, [kvSearch, projectRows]);
+  }, [kvSearch, projectRows, search]);
 
   const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {
