@@ -6,7 +6,7 @@ require (
 	cuelang.org/go v0.5.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.15.0
-	github.com/go-sql-driver/mysql v1.7.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/huandu/go-sqlbuilder v1.21.0
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.10.2
