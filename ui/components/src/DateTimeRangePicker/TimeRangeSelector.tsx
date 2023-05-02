@@ -42,21 +42,21 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
     <Select
       value={formattedValue}
       onChange={onSelectChange}
-      IconComponent={(props) => {
-        // "transform: none" prevents calendar icon from flipping over when menu is open
-        return <Calendar {...props} sx={{ transform: 'none !important' }} />;
-      }}
+      IconComponent={Calendar}
       inputProps={{
         'aria-label': `Select time range. Currently set to ${formattedValue}`,
       }}
       sx={{
+        // `transform: none` prevents calendar icon from flipping over when menu is open
         '.MuiSelect-icon': {
           marginTop: '1px',
+          transform: 'none',
         },
-        // "paddingRight" creates more space for the calendar icon (it's a bigger icon)
-        '.MuiSelect-select': height
-          ? { lineHeight: height, paddingY: 0, paddingRight: '36px !important' }
-          : { paddingRight: '36px !important' },
+        // paddingRight creates more space for the calendar icon (it's a bigger icon)
+        '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': {
+          paddingRight: '36px',
+        },
+        '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
       }}
     >
       {timeOptions.map((item, idx) => (
