@@ -14,8 +14,10 @@
 import numbro from 'numbro';
 
 import { UnitGroupConfig, UnitConfig } from './types';
-import { limitDecimalPlaces } from './utils';
+import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+
+const DEFAULT_NUMBRO_MANTISSA = 2;
 
 const bytesUnitKinds = ['Bytes'] as const;
 type BytesUnitKind = (typeof bytesUnitKinds)[number];
@@ -41,12 +43,7 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
 export function formatBytes(bytes: number, options: BytesUnitOptions) {
   const { abbreviate, decimal_places } = options;
 
-  const showFullNumber = abbreviate === false;
-  if (showFullNumber) {
-    return formatBytesAsFullNumber(bytes, options);
-  }
-
-  if (bytes < 1000) {
+  if (!shouldAbbreviate(abbreviate) || bytes < 1000) {
     const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
       unit: 'byte',
@@ -54,11 +51,13 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
       useGrouping: true,
     };
 
-    const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
-    if (hasDecimalPlaces) {
+    if (hasDecimalPlaces(decimal_places)) {
       formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
     } else {
-      formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+      // This can happen if bytes < 1000
+      if (shouldAbbreviate(abbreviate)) {
+        formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+      }
     }
 
     const formatter = Intl.NumberFormat('en-US', formatterOptions);
@@ -70,20 +69,8 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
     output: 'byte',
     base: 'decimal',
     spaceSeparated: true,
-    mantissa: decimal_places ?? 2,
+    mantissa: decimal_places ?? DEFAULT_NUMBRO_MANTISSA,
     trimMantissa: true,
     optionalMantissa: true,
   });
-}
-
-function formatBytesAsFullNumber(bytes: number, { decimal_places }: BytesUnitOptions) {
-  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
-  const formatter = Intl.NumberFormat('en-US', {
-    style: 'unit',
-    unit: 'byte',
-    unitDisplay: 'long',
-    maximumFractionDigits: hasDecimalPlaces ? limitDecimalPlaces(decimal_places) : undefined,
-    useGrouping: true,
-  });
-  return formatter.format(bytes);
 }

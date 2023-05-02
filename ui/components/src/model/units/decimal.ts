@@ -13,7 +13,7 @@
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
-import { limitDecimalPlaces } from './utils';
+import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils';
 
 const decimalUnitKinds = ['Decimal'] as const;
 type DecimalUnitKind = (typeof decimalUnitKinds)[number];
@@ -37,34 +37,23 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
 export function formatDecimal(value: number, options: DecimalUnitOptions): string {
   const { abbreviate, decimal_places } = options;
 
-  const showFullNumber = abbreviate === false;
-  if (showFullNumber) {
-    return formatDecimalAsFullNumber(value, options);
-  }
-
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'decimal',
-    notation: 'compact',
     useGrouping: true,
   };
 
-  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
-  if (hasDecimalPlaces) {
+  if (shouldAbbreviate(abbreviate)) {
+    formatterOptions.notation = 'compact';
+  }
+
+  if (hasDecimalPlaces(decimal_places)) {
     formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
   } else {
-    formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+    if (shouldAbbreviate(abbreviate)) {
+      formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+    }
   }
 
   const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
-}
-
-function formatDecimalAsFullNumber(value: number, { decimal_places }: DecimalUnitOptions): string {
-  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
-  const formatter = Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    maximumFractionDigits: hasDecimalPlaces ? limitDecimalPlaces(decimal_places) : undefined,
-    useGrouping: true,
-  });
   return formatter.format(value);
 }

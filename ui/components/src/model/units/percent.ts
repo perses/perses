@@ -13,7 +13,7 @@
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
-import { limitDecimalPlaces } from './utils';
+import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
 const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
 type PercentUnitKind = (typeof percentUnitKinds)[number];
@@ -55,8 +55,7 @@ export function formatPercent(value: number, { kind, decimal_places }: PercentUn
     useGrouping: true,
   };
 
-  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
-  if (hasDecimalPlaces) {
+  if (hasDecimalPlaces(decimal_places)) {
     formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
   } else {
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;

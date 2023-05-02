@@ -13,7 +13,7 @@
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
-import { limitDecimalPlaces } from './utils';
+import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
 const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'] as const;
 type TimeUnitKind = (typeof timeUnitKinds)[number];
@@ -83,8 +83,7 @@ export function formatTime(value: number, { kind, decimal_places }: TimeUnitOpti
     unitDisplay: isMonthOrYear ? 'long' : 'narrow',
   };
 
-  const hasDecimalPlaces = decimal_places !== undefined && decimal_places !== null;
-  if (hasDecimalPlaces) {
+  if (hasDecimalPlaces(decimal_places)) {
     formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
   } else {
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;

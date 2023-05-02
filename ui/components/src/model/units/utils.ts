@@ -11,7 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Avoids maximumFractionDigits out-of-range error. Allowed values are 0 to 20.
+export function shouldAbbreviate(abbreviate?: boolean) {
+  return abbreviate !== false;
+}
+
+export function hasDecimalPlaces(decimal_places?: number) {
+  return typeof decimal_places === 'number';
+}
+
+// Avoids maximumFractionDigits out-of-range error.
+// Allowed values are 0 to 20.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#maximumfractiondigits
 export function limitDecimalPlaces(num?: number) {
   if (!num) return num;
