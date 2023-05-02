@@ -43,13 +43,13 @@ with `make upgrade-npm-deps`
 
 #### Create a release branch
 
-Create a branch that follows the naming pattern `release/v<X.Y>` and includes the changes you intend to release (usually the latest from `main`). Push it to github. You will use this branch as the base in the next step.
+Create a branch that follows the naming pattern `release/v<X.Y>` and includes the changes you intend to release (usually the latest from `main`). Push it to Github. You will use this branch as the base in the next step.
 
 > ⚠️ Release candidates and patch releases for any given major or minor release happen in the same `release/v<major>.<minor>` branch. Do not create `release/<version>` for patch or release candidate releases.
 
 #### Create a PR with the changes
 
-- Create a branch using the release branch `release/v<X.Y>` you just created in the step above (e.g. `yourname/release-v<major>.<minor>.<patch>`).
+- Create a branch based on the release branch `release/v<X.Y>` you just created in the step above. This branch should use the naming pattern `<yourname>/release-v<major>.<minor>.<patch>`.
 - Update the file `VERSION` with the new version to be created.
 - Generate `CHANGELOG.md` updates based on git history:
 
@@ -71,7 +71,7 @@ Create a branch that follows the naming pattern `release/v<X.Y>` and includes th
   ```bash
   make bump-version
   ```
-- Push the branch to github and create a pull request with the release branch as the base. This gives others the opportunity to chime in on the release,
+- Push the branch to Github and create a pull request with the release branch as the base. This gives others the opportunity to chime in on the release,
   in general, and on the addition to the changelog, in particular.
   - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
 - Address any necessary feedback.
