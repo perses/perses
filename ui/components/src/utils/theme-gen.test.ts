@@ -84,11 +84,13 @@ describe('generateChartsTheme', () => {
             },
           },
           "color": Array [
-            "#8dd3c7",
-            "#fb8072",
-            "#80b1d3",
-            "#bebada",
-            "#fdb462",
+            "#56B4E9",
+            "#009E73",
+            "#0072B2",
+            "#CC79A7",
+            "#F0E442",
+            "#E69F00",
+            "#D55E00",
           ],
           "gauge": Object {
             "detail": Object {

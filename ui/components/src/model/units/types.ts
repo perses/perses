@@ -14,6 +14,8 @@
 // Common types needed across individual unit groups and the overall combined
 // units.
 
+import { UnitOptions } from './units';
+
 export const UNIT_GROUPS = ['Time', 'Percent', 'Decimal', 'Bytes'] as const;
 export type UnitGroup = (typeof UNIT_GROUPS)[number];
 
@@ -55,3 +57,12 @@ export type UnitConfig = {
    */
   label: string;
 };
+
+/**
+ * Used in the tests for each type of unit.
+ */
+export interface UnitTestCase {
+  value: number;
+  unit: UnitOptions;
+  expected: string;
+}

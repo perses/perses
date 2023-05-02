@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { UnitGroupConfig, UnitConfig } from './types';
-import { DEFAULT_DECIMAL_PLACES } from './constants';
 
 const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
 type PercentUnitKind = (typeof percentUnitKinds)[number];
@@ -44,12 +43,32 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
   },
 };
 
-export function formatPercent(value: number, unitOptions: PercentUnitOptions): string {
-  const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
+const MAX_SIGNIFICANT_DIGITS = 3;
 
-  if (unitOptions.kind === 'PercentDecimal') {
-    value = value * 100;
+export function formatPercent(value: number, { kind, decimal_places }: PercentUnitOptions): string {
+  // Intl.NumberFormat translates 0 -> 0%, 0.5 -> 50%, 1 -> 100%
+  if (kind === 'Percent') {
+    value = value / 100;
   }
 
-  return value.toFixed(decimals) + '%';
+  const hasDecimalPlaces = decimal_places !== undefined;
+
+  let formatter;
+  if (hasDecimalPlaces) {
+    // If there is a specified # of decimal places, use maximumFractionDigits
+    formatter = new Intl.NumberFormat('en-US', {
+      style: 'percent',
+      maximumFractionDigits: decimal_places,
+      useGrouping: true,
+    });
+  } else {
+    // By default, use maximumSignificantDigits
+    formatter = new Intl.NumberFormat('en-US', {
+      style: 'percent',
+      maximumSignificantDigits: MAX_SIGNIFICANT_DIGITS,
+      useGrouping: true,
+    });
+  }
+
+  return formatter.format(value);
 }

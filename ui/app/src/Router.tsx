@@ -15,7 +15,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
-import ViewDashboardList from './views/ViewDashboardList';
+import HomeView from './views/home/HomeView';
 import ViewMigrate from './views/ViewMigrate';
 
 // Other routes are lazy-loaded for code-splitting
@@ -29,11 +29,11 @@ function Router() {
       <Suspense>
         <Routes>
           <Route path="/migrate" element={<ViewMigrate />} />
-          <Route path="/projects" element={<ViewDashboardList />} />
+          <Route path="/projects" element={<HomeView />} />
           <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
           <Route path="/projects/:projectName/dashboards/:dashboardName/:action" element={<ViewDashboard />} />
           <Route path="/projects/:projectName" element={<ViewProject />} />
-          <Route path="/" element={<ViewDashboardList />} />
+          <Route path="/" element={<HomeView />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

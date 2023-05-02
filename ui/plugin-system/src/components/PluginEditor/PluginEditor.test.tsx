@@ -110,6 +110,7 @@ describe('PluginEditor', () => {
       renderComponent({
         pluginType: 'Variable',
         defaultPluginKinds: {
+          TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
           Variable: 'ErnieVariable1',
         },
         value: { kind: '', spec: {} },
@@ -123,7 +124,7 @@ describe('PluginEditor', () => {
     it('does not use default when kind is provided', async () => {
       renderComponent({
         pluginType: 'Variable',
-        defaultPluginKinds: { Variable: 'ErnieVariable1' },
+        defaultPluginKinds: { Variable: 'ErnieVariable1', TimeSeriesQuery: 'PrometheusTimeSeriesQuery' },
         value: { kind: 'ErnieVariable2', spec: {} },
       });
 
