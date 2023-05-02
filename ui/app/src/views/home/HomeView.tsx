@@ -79,6 +79,7 @@ function HomeView() {
               size="small"
               sx={{ textTransform: 'uppercase' }}
               onClick={handleAddDashboardDialogOpen}
+              disabled={projectOptions.length === 0}
             >
               Add Dashboard
             </Button>
