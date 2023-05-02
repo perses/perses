@@ -72,7 +72,11 @@ const devConfig: Configuration = {
       '/proxy': 'http://localhost:8080',
     },
     client: {
-      overlay: false,
+      // By default, the error overlay is not shown because it can get in the
+      // way of e2e tests and can be annoying for some developer workflows.
+      // If you like the overlay, you can enable it by setting the the specified
+      // env var.
+      overlay: process.env.ERROR_OVERLAY === 'true' ?? false,
     },
   },
   cache: true,

@@ -105,8 +105,9 @@ are reflected in how the packages are organized. There is some variability from 
 
 ### All packages
 
-- Eslint enforces certain style and correctness rules, these can be ignored on a case
-  by case basis but usually are intended to help you avoid common JS pitfalls
+- Eslint enforces certain style and correctness rules to help avoid common coding pitfalls and maintain consistency.
+  - Exceptions can be made on a case-by-case basis using `eslint-disable-next-line` and a comment that communicates the reason for the exception.
+  - We prefer `error` (instead of `warn`) for eslint rules because it makes it easier to catch and enforce linting issues.
 - Typescript is used to provide a stronger guarantee of correctness across the
   application. Please avoid using escape hatches like `any`, prefer using `unknown`
   and type narrowing instead.
