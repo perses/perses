@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.29.1 / 2023-05-02
+
+- [BUGFIX] Color generation adjustment to error hue cutoff
+
 ## 0.29.0 / 2023-05-01
 
 - [FEATURE] Allow TLS configuration for mysql database (#1128)
