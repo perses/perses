@@ -30,7 +30,7 @@ describe('UnitSelector', () => {
   };
 
   const getDecimalPlacesSelector = () => {
-    return screen.getByRole('spinbutton', { name: 'Decimals' });
+    return screen.getByRole('combobox', { name: 'Decimals' });
   };
 
   const getAbbreviateSwitch = () => {
@@ -79,9 +79,11 @@ describe('UnitSelector', () => {
     const onChange = jest.fn();
     renderUnitSelector({ kind: 'Decimal', decimal_places: 0, abbreviate: true }, onChange);
 
-    const decimalPlacesSelector = getDecimalPlacesSelector();
-    userEvent.click(decimalPlacesSelector);
-    userEvent.clear(decimalPlacesSelector);
+    userEvent.click(getDecimalPlacesSelector());
+    const decimalPlacesOption = screen.getByRole('option', {
+      name: 'Default',
+    });
+    userEvent.click(decimalPlacesOption);
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Decimal',
@@ -98,7 +100,13 @@ describe('UnitSelector', () => {
     userEvent.tab();
     userEvent.tab();
     expect(decimalPlacesSelector).toHaveFocus();
+
+    userEvent.clear(decimalPlacesSelector);
     userEvent.keyboard('3');
+    screen.getByRole('option', {
+      name: '3',
+    });
+    userEvent.keyboard('{arrowup}{enter}');
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Percent',

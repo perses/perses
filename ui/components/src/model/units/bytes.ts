@@ -13,9 +13,9 @@
 
 import numbro from 'numbro';
 
+import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils';
-import { MAX_SIGNIFICANT_DIGITS } from './constants';
 
 const DEFAULT_NUMBRO_MANTISSA = 2;
 

@@ -14,6 +14,3 @@
 // Common constants needed across individual unit groups and the overall
 // combined units.
 export const MAX_SIGNIFICANT_DIGITS = 3;
-
-export const DECIMAL_PLACES_MIN = 0;
-export const DECIMAL_PLACES_MAX = 20;
