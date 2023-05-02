@@ -15,8 +15,7 @@ package staticList
 
 kind: "StaticListVariable"
 spec: close({
-	values: [...string] | [...{
-		value:  string
-		label?: string
-	}]
+	values: [...(string | {value: string
+					label?: string
+	})]
 })
