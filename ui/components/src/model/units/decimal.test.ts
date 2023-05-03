@@ -20,11 +20,10 @@ const DECIMAL_TESTS: UnitTestCase[] = [
     unit: { kind: 'Decimal' },
     expected: '-10',
   },
-  // Note: The default for decimal_places is 2. This can be changed if we want.
   {
     value: -0.123456789,
     unit: { kind: 'Decimal' },
-    expected: '-0.12',
+    expected: '-0.123',
   },
   { value: 0, unit: { kind: 'Decimal' }, expected: '0' },
   { value: 1, unit: { kind: 'Decimal' }, expected: '1' },
@@ -57,7 +56,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 10.123456,
     unit: { kind: 'Decimal' },
-    expected: '10.12',
+    expected: '10.1',
   },
   {
     value: 10.123456,
@@ -162,7 +161,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 666666,
     unit: { kind: 'Decimal' },
-    expected: '666.67K',
+    expected: '667K',
   },
   {
     value: 666666,
@@ -177,7 +176,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 666666,
     unit: { kind: 'Decimal', abbreviate: true },
-    expected: '666.67K',
+    expected: '667K',
   },
   {
     value: 666666,
@@ -212,7 +211,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 88888888,
     unit: { kind: 'Decimal' },
-    expected: '88.89M',
+    expected: '88.9M',
   },
   {
     value: 88888888,
@@ -227,7 +226,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 88888888,
     unit: { kind: 'Decimal', abbreviate: true },
-    expected: '88.89M',
+    expected: '88.9M',
   },
   {
     value: 88888888,

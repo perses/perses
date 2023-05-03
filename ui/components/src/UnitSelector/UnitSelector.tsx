@@ -11,14 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { Box, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material';
-import {
-  UnitOptions,
-  UNIT_CONFIG,
-  DEFAULT_DECIMAL_PLACES,
-  UnitConfig,
-  isUnitWithDecimalPlaces,
-  isUnitWithAbbreviate,
-} from '../model';
+import { UnitOptions, UNIT_CONFIG, UnitConfig, isUnitWithDecimalPlaces, isUnitWithAbbreviate } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 
 export interface UnitSelectorProps {
@@ -37,7 +30,18 @@ const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG)
   })
   .filter((config) => !config.disableSelectorOption);
 
-const DECIMAL_OPTIONS = [0, 1, 2, 3, 4];
+const DECIMAL_PLACES_OPTIONS = [
+  { label: 'Default', decimal_places: undefined },
+  { label: '0', decimal_places: 0 },
+  { label: '1', decimal_places: 1 },
+  { label: '2', decimal_places: 2 },
+  { label: '3', decimal_places: 3 },
+  { label: '4', decimal_places: 4 },
+];
+
+function getOptionByDecimalPlaces(decimal_places?: number) {
+  return DECIMAL_PLACES_OPTIONS.find((o) => o.decimal_places === decimal_places);
+}
 
 export function UnitSelector({ value, onChange }: UnitSelectorProps) {
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
@@ -49,11 +53,11 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
     });
   };
 
-  const handleDecimalChange = (_: unknown, newValue: number) => {
+  const handleDecimalPlacesChange = (_: unknown, { decimal_places }: { decimal_places: number | undefined }) => {
     if (hasDecimalPlaces) {
       onChange({
         ...value,
-        decimal_places: newValue,
+        decimal_places: decimal_places,
       });
     }
   };
@@ -82,7 +86,7 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
         }
       />
       <OptionsEditorControl
-        label="Units"
+        label="Unit"
         control={
           <Autocomplete
             value={{ id: value.kind, ...kindConfig }}
@@ -105,17 +109,18 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
         }
       />
       <OptionsEditorControl
-        label="Decimal"
+        label="Decimals"
         control={
           <Autocomplete
-            value={hasDecimalPlaces ? value.decimal_places ?? DEFAULT_DECIMAL_PLACES : 0}
-            options={DECIMAL_OPTIONS}
-            getOptionLabel={(option) => `${option}`}
+            value={getOptionByDecimalPlaces(value.decimal_places)}
+            options={DECIMAL_PLACES_OPTIONS}
+            getOptionLabel={(o) => o.label}
+            isOptionEqualToValue={(option, value) => option.label === value.label}
             renderInput={(params) => <TextField {...params} />}
-            onChange={handleDecimalChange}
+            onChange={handleDecimalPlacesChange}
             disabled={!hasDecimalPlaces}
             disableClearable
-          ></Autocomplete>
+          />
         }
       />
     </>

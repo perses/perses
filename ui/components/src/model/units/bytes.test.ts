@@ -43,6 +43,31 @@ const BYTES_TESTS: UnitTestCase[] = [
     expected: '10 bytes',
   },
   {
+    value: 10.1234,
+    unit: { kind: 'Bytes' },
+    expected: '10.1 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: false },
+    expected: '10.123 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: false, decimal_places: 4 },
+    expected: '10.1234 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: true },
+    expected: '10.1 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
+    expected: '10.1234 bytes',
+  },
+  {
     value: 1000,
     unit: { kind: 'Bytes' },
     expected: '1 KB',
@@ -241,6 +266,21 @@ const BYTES_TESTS: UnitTestCase[] = [
     value: 1234567890,
     unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
     expected: '1.2346 GB',
+  },
+  {
+    value: 1000000000000,
+    unit: { kind: 'Bytes' },
+    expected: '1 TB',
+  },
+  {
+    value: 1000000000000000,
+    unit: { kind: 'Bytes' },
+    expected: '1 PB',
+  },
+  {
+    value: 1000000000000000000,
+    unit: { kind: 'Bytes' },
+    expected: '1 EB',
   },
 ];
 

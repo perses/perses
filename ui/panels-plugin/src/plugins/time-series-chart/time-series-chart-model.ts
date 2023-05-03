@@ -53,7 +53,6 @@ export type VisualOptions = {
 
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
-  decimal_places: 2,
   abbreviate: true,
 };
 
