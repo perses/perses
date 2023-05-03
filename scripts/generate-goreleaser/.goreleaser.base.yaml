@@ -1,0 +1,53 @@
+builds:
+  - id: "perses"
+    main: ./cmd/perses/main.go
+    binary: "perses"
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - "{{.Env.LDFLAGS}}"
+  - id: "percli"
+    main: ./cmd/percli/main.go
+    binary: "percli"
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - "{{.Env.LDFLAGS}}"
+archives:
+  - id: "default"
+    builds:
+      - "perses"
+      - "percli"
+    format: "tar.gz"
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - schemas/
+      - cue.mod/
+      - src: "docs/examples/config.archive.yaml"
+        dst: "./config.yaml"
+release:
+  github:
+    owner: "perses"
+    name: "perses"
+  ids:
+    - "default"
+  prerelease: auto
+  name_template: "{{ .Version }} / {{ .Env.DATE }}"

@@ -69,10 +69,10 @@ function ProjectView() {
       </Box>
       <Grid container spacing={8}>
         <Grid item xs={12} lg={8}>
-          <ProjectDashboards projectName={projectName} id="main-dashboards-list" />
+          <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
         </Grid>
         <Grid item xs={12} lg={4}>
-          <RecentlyViewedDashboards projectName={projectName} id="recent-dashboards-list" />
+          <RecentlyViewedDashboards projectName={projectName} id="recent-dashboard-list" />
         </Grid>
       </Grid>
     </Stack>

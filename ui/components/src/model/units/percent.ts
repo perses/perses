@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
-import { DEFAULT_DECIMAL_PLACES } from './constants';
+import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
 const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
 type PercentUnitKind = (typeof percentUnitKinds)[number];
@@ -20,10 +21,9 @@ export type PercentUnitOptions = {
   kind: PercentUnitKind;
   decimal_places?: number;
 };
-export const DECIMAL_GROUP_CONFIG: UnitGroupConfig = {
-  label: 'Decimal',
+export const PERCENT_GROUP_CONFIG: UnitGroupConfig = {
+  label: 'Percent',
   decimal_places: true,
-  abbreviate: true,
 };
 const PERCENT_GROUP = 'Percent';
 export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> = {
@@ -44,12 +44,23 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
   },
 };
 
-export function formatPercent(value: number, unitOptions: PercentUnitOptions): string {
-  const decimals = unitOptions.decimal_places ?? DEFAULT_DECIMAL_PLACES;
-
-  if (unitOptions.kind === 'PercentDecimal') {
-    value = value * 100;
+export function formatPercent(value: number, { kind, decimal_places }: PercentUnitOptions): string {
+  // Intl.NumberFormat translates 0 -> 0%, 0.5 -> 50%, 1 -> 100%
+  if (kind === 'Percent') {
+    value = value / 100;
   }
 
-  return value.toFixed(decimals) + '%';
+  const formatterOptions: Intl.NumberFormatOptions = {
+    style: 'percent',
+    useGrouping: true,
+  };
+
+  if (hasDecimalPlaces(decimal_places)) {
+    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+  } else {
+    formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+  }
+
+  const formatter = Intl.NumberFormat('en-us', formatterOptions);
+  return formatter.format(value);
 }

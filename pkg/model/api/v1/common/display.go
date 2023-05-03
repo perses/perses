@@ -51,7 +51,7 @@ func (d *Display) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (d *Display) validate() error {
 	if len(d.Name) == 0 {
-		return fmt.Errorf("name cannot be empty")
+		return fmt.Errorf("display.name cannot be empty")
 	}
 	return nil
 }

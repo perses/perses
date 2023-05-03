@@ -53,17 +53,12 @@ export type VisualOptions = {
 
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
-  decimal_places: 2,
   abbreviate: true,
 };
 
 export const DEFAULT_LINE_WIDTH = 1.5;
 
 export const DEFAULT_AREA_OPACITY = 0;
-
-export const DEFAULT_PALETTE: PaletteOptions = {
-  kind: 'Auto',
-};
 
 export const DEFAULT_POINT_RADIUS = 4;
 
@@ -72,7 +67,6 @@ export const DEFAULT_CONNECT_NULLS = false;
 export const DEFAULT_VISUAL: VisualOptions = {
   line_width: DEFAULT_LINE_WIDTH,
   area_opacity: DEFAULT_AREA_OPACITY,
-  palette: DEFAULT_PALETTE,
   point_radius: DEFAULT_POINT_RADIUS,
   connect_nulls: DEFAULT_CONNECT_NULLS,
 };

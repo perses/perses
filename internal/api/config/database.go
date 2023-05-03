@@ -43,6 +43,8 @@ func (f *File) Verify() error {
 }
 
 type SQL struct {
+	// TLS configuration
+	TLSConfig *config.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 	// Username
 	User config.Secret `json:"user,omitempty" yaml:"user,omitempty"`
 	// Password (requires User)

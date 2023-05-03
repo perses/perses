@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { BytesUnitOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG, formatBytes } from './bytes';
-import { DecimalUnitOptions, DECIMAL_UNIT_CONFIG, formatDecimal, PERCENT_GROUP_CONFIG } from './decimal';
-import { DECIMAL_GROUP_CONFIG, formatPercent, PercentUnitOptions, PERCENT_UNIT_CONFIG } from './percent';
+import { DecimalUnitOptions, DECIMAL_UNIT_CONFIG, formatDecimal, DECIMAL_GROUP_CONFIG } from './decimal';
+import { PERCENT_GROUP_CONFIG, formatPercent, PercentUnitOptions, PERCENT_UNIT_CONFIG } from './percent';
 import { formatTime, TimeUnitOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
 import { UnitGroup, UnitGroupConfig, UnitConfig } from './types';
 

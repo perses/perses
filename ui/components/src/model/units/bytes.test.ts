@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { formatValue } from './units';
-import { UnitTestCase } from './units.test';
+import { UnitTestCase } from './types';
 
-const bytesTests: UnitTestCase[] = [
+const BYTES_TESTS: UnitTestCase[] = [
   { value: 0, unit: { kind: 'Bytes' }, expected: '0 bytes' },
   { value: 1, unit: { kind: 'Bytes' }, expected: '1 byte' },
   {
@@ -41,6 +41,31 @@ const bytesTests: UnitTestCase[] = [
     value: 10,
     unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
     expected: '10 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes' },
+    expected: '10.1 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: false },
+    expected: '10.123 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: false, decimal_places: 4 },
+    expected: '10.1234 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: true },
+    expected: '10.1 bytes',
+  },
+  {
+    value: 10.1234,
+    unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
+    expected: '10.1234 bytes',
   },
   {
     value: 1000,
@@ -242,10 +267,25 @@ const bytesTests: UnitTestCase[] = [
     unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
     expected: '1.2346 GB',
   },
+  {
+    value: 1000000000000,
+    unit: { kind: 'Bytes' },
+    expected: '1 TB',
+  },
+  {
+    value: 1000000000000000,
+    unit: { kind: 'Bytes' },
+    expected: '1 PB',
+  },
+  {
+    value: 1000000000000000000,
+    unit: { kind: 'Bytes' },
+    expected: '1 EB',
+  },
 ];
 
 describe('formatValue', () => {
-  it.each(bytesTests)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
+  it.each(BYTES_TESTS)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
     const { value, unit, expected } = args;
     expect(formatValue(value, unit)).toEqual(expected);
   });

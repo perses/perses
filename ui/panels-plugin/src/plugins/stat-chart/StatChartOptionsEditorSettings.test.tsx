@@ -37,7 +37,7 @@ describe('StatChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const unitSelector = screen.getByRole('combobox', { name: 'Units' });
+    const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     userEvent.click(unitSelector);
     const percentOption = screen.getByRole('option', {
       name: 'Percent (0-100)',
