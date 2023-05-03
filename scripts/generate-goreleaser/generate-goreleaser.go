@@ -75,6 +75,7 @@ func generateDockerConfig(c *config.Project) {
 				Goarch:     arch,
 				IDs:        binaryIDs,
 				Dockerfile: dockerfileName,
+				Use:        "buildx",
 				ImageTemplates: []string{
 					fmt.Sprintf("%s:{{ .Tag }}-%s-%s", dockerBaseImageTemplateName, templateNames[1], arch),
 				},
