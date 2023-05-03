@@ -32,6 +32,8 @@ function TimeSeriesQueryEditorWrapper(props: TimeSeriesQueryEditorProps) {
 const meta: Meta<typeof TimeSeriesQueryEditor> = {
   component: TimeSeriesQueryEditor,
   argTypes: {
+    // Disabling these props because we're managing them with `useState` in the wrapper, so it
+    // doesn't make sense to let the user modify them.
     queries: {
       table: {
         disable: true,
