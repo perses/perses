@@ -162,7 +162,7 @@ export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentO
         return 0;
       }
 
-      if (value.min < 0) {
+      if (value.min > 0) {
         return roundDown(value.min * POSITIVE_MIN_VALUE_MULTIPLIER);
       } else {
         return roundDown(value.min * NEGATIVE_MIN_VALUE_MULTIPLIER);
