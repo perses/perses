@@ -49,18 +49,14 @@ export type VariableEditorState = ReturnType<typeof getInitialState>;
 export function getVariableDefinitionFromState(state: VariableEditorState): VariableDefinition {
   const { name, title, kind } = state;
 
-  const commonSpec = {
-    name,
-    display: {
-      name: title,
-    } as Display,
-  };
+  const display: Display | undefined = title ? { name: title } : undefined;
 
   if (kind === 'TextVariable') {
     return {
       kind,
       spec: {
-        ...commonSpec,
+        name,
+        display,
         ...state.textVariableFields,
       },
     };
@@ -70,7 +66,8 @@ export function getVariableDefinitionFromState(state: VariableEditorState): Vari
     return {
       kind,
       spec: {
-        ...commonSpec,
+        name,
+        display,
         allow_multiple: state.listVariableFields.allowMultiple,
         allow_all_value: state.listVariableFields.allowAll,
         capturing_regexp: state.listVariableFields.capturing_regexp,
