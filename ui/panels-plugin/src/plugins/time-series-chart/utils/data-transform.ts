@@ -162,6 +162,8 @@ export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentO
         return 0;
       }
 
+      // Note: We can tweak the MULTIPLIER constants if we want
+      // TODO: Experiment with using a padding that is based on the difference between max value and min value
       if (value.min > 0) {
         return roundDown(value.min * POSITIVE_MIN_VALUE_MULTIPLIER);
       } else {

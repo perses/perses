@@ -43,7 +43,7 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
 export function formatBytes(bytes: number, options: BytesUnitOptions) {
   const { abbreviate, decimal_places } = options;
 
-  if (!shouldAbbreviate(abbreviate) || bytes < 1000) {
+  if (!shouldAbbreviate(abbreviate) || (bytes < 1000 && bytes > -1000)) {
     const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
       unit: 'byte',
@@ -54,7 +54,7 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
     if (hasDecimalPlaces(decimal_places)) {
       formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
     } else {
-      // This can happen if bytes < 1000
+      // This can happen if bytes is between -1000 and 1000
       if (shouldAbbreviate(abbreviate)) {
         formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
       }
