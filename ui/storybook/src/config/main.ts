@@ -30,13 +30,7 @@ type PkgConfig = {
    * Absolute path to the source directory for the package. Used to look for
    * stories and to configure a webpack alias.
    */
-  srcDir: string;
-
-  /**
-   * Absolute path to the plugin.json for packages with plugins. Used to
-   * configure a webpack alias.
-   */
-  pluginPath: string;
+  directory: string;
 
   /**
    * Title for items from that package. Will be used as the name for the folder
@@ -48,41 +42,35 @@ type PkgConfig = {
 const pkgConfig: PkgConfig[] = [
   {
     pkg: '@perses-dev/components',
+    directory: path.resolve(uiRoot, 'components/src'),
     title: 'Components',
   },
   {
     pkg: '@perses-dev/core',
+    directory: path.resolve(uiRoot, 'core/src'),
     title: 'Core',
   },
   {
     pkg: '@perses-dev/dashboards',
+    directory: path.resolve(uiRoot, 'dashboards/src'),
     title: 'Dashboards',
   },
   {
     pkg: '@perses-dev/panels-plugin',
+    directory: path.resolve(uiRoot, 'panels-plugin/src'),
     title: 'Panels Plugin',
   },
   {
     pkg: '@perses-dev/plugin-system',
+    directory: path.resolve(uiRoot, 'plugin-system/src'),
     title: 'Plugin System',
   },
   {
     pkg: '@perses-dev/prometheus-plugin',
+    directory: path.resolve(uiRoot, 'prometheus-plugin/src'),
     title: 'Prometheus Plugin',
   },
-].map((pkgConfig) => {
-  const { pkg } = pkgConfig;
-
-  // Assumes all packages have names matching the non-namespaced part of the
-  // package name.
-  const pkgDir = path.resolve(uiRoot, pkg.replace('@perses-dev/', ''));
-
-  return {
-    ...pkgConfig,
-    srcDir: path.resolve(pkgDir, 'src'),
-    pluginPath: path.resolve(pkgDir, 'plugin.json'),
-  };
-});
+];
 
 // File selector for stories.
 const BASE_STORY_SELECTOR = '*.stories.@(ts|tsx|mdx)';
@@ -102,7 +90,7 @@ const config: StorybookConfig = {
   stories: [
     // Package-specific stories that live alongside their components or in
     // the `stories` directory.
-    ...pkgConfig.map(({ srcDir: directory, title }) => {
+    ...pkgConfig.map(({ directory, title }) => {
       return {
         directory,
         titlePrefix: title,
@@ -136,7 +124,7 @@ const config: StorybookConfig = {
       // providers/context, leading to them not working properly.
       // Note that this does not work correctly for top-level items not in `src`
       // (e.g. `plugin.json` files).
-      ...pkgConfig.reduce((result, { pkg, srcDir, pluginPath }) => {
+      ...pkgConfig.reduce((result, { pkg, directory }) => {
         return {
           ...result,
 
@@ -148,8 +136,7 @@ const config: StorybookConfig = {
           // This helps us define provider/context decorators once in the
           // packages that define the context, which makes it easier to share
           // utils without hitting circular dependencies with turbo.
-          [`${pkg}$`]: srcDir,
-          [`${pkg}/plugin.json$`]: pluginPath,
+          [`${pkg}$`]: directory,
         };
       }, {}),
     };
