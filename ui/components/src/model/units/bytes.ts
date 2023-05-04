@@ -43,7 +43,7 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
 export function formatBytes(bytes: number, options: BytesUnitOptions) {
   const { abbreviate, decimal_places } = options;
 
-  if (!shouldAbbreviate(abbreviate) || (bytes < 1000 && bytes > -1000)) {
+  if (!shouldAbbreviate(abbreviate) || Math.abs(bytes) < 1000) {
     const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
       unit: 'byte',

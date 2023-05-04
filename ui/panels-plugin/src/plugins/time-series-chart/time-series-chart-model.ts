@@ -137,6 +137,9 @@ export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
 export const LEGEND_HEIGHT_SM = 40;
 export const LEGEND_HEIGHT_LG = 100;
 
+// Both of these constants help produce a value that is LESS THAN the initial value.
+// For positive values, we multiply by a number less than 1 to get this outcome.
+// For negative values, we multiply to a number greater than 1 to get this outcome.
 export const POSITIVE_MIN_VALUE_MULTIPLIER = 0.8;
 export const NEGATIVE_MIN_VALUE_MULTIPLIER = 1.2;
 

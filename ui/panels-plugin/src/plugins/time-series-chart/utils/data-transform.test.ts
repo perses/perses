@@ -60,7 +60,7 @@ describe('convertPanelYAxis', () => {
   });
 });
 
-const ROUNDING_TESTS = [
+const ROUND_DOWN_TESTS = [
   {
     value: -400305,
     expected: -500000,
@@ -104,7 +104,7 @@ const ROUNDING_TESTS = [
 ];
 
 describe('roundDown', () => {
-  it.each(ROUNDING_TESTS)('returns $expected when the input is $value', ({ value, expected }) => {
+  it.each(ROUND_DOWN_TESTS)('returns $expected when the input is $value', ({ value, expected }) => {
     expect(roundDown(value)).toEqual(expected);
   });
 });
