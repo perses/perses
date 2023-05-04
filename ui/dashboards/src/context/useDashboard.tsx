@@ -20,12 +20,12 @@ export function useDashboard() {
     panels,
     panelGroups,
     panelGroupOrder,
-    defaultTimeRange,
+    duration,
     setDashboard: setDashboardResource,
     metadata,
     display,
   } = useDashboardStore(
-    ({ panels, panelGroups, panelGroupOrder, defaultTimeRange, setDashboard, metadata, display }) => ({
+    ({ panels, panelGroups, panelGroupOrder, defaultTimeRange, setDashboard, metadata, display, duration }) => ({
       panels,
       panelGroups,
       panelGroupOrder,
@@ -33,6 +33,7 @@ export function useDashboard() {
       setDashboard,
       metadata,
       display,
+      duration,
     })
   );
   const { setVariableDefinitions } = useTemplateVariableActions();
@@ -47,11 +48,12 @@ export function useDashboard() {
       panels,
       layouts,
       variables,
-      duration: defaultTimeRange.pastDuration,
+      duration: duration,
     },
   };
 
   const setDashboard = (dashboardResource: DashboardResource) => {
+    console.log('setDashboard -> dashboardResource: ', dashboardResource);
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };
