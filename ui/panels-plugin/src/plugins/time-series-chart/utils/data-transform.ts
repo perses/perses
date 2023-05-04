@@ -175,6 +175,14 @@ export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentO
   return yAxis;
 }
 
+/**
+ * Rounds down to nearest number with one significant digit.
+ *
+ * Examples:
+ * 1. 675 --> 600
+ * 2. 0.567 --> 0.5
+ * 3. -12 --> -20
+ */
 export function roundDown(num: number) {
   const magnitude = Math.floor(Math.log10(Math.abs(num)));
   const firstDigit = Math.floor(num / Math.pow(10, magnitude));
