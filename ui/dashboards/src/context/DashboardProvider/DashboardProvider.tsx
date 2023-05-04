@@ -17,7 +17,7 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { DashboardResource, Display, ProjectMetadata, RelativeTimeRange, DurationString } from '@perses-dev/core';
+import { DashboardResource, Display, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -42,11 +42,10 @@ export interface DashboardStoreState
     EditJsonDialogSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
-  defaultTimeRange: RelativeTimeRange;
   setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
   display?: Display;
-  duration: DurationString;
+  timeRange: RelativeTimeRange;
 }
 
 export interface DashboardStoreProps {
@@ -134,20 +133,18 @@ function initStore(props: DashboardProviderProps) {
           ...createEditJsonDialogSlice(...args),
           metadata,
           display,
-          duration,
-          defaultTimeRange: { pastDuration: duration },
+          timeRange: { pastDuration: duration },
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
           setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration } }) => {
             set((state) => {
-              console.log('setDashboard -> duration: ', duration);
               state.metadata = metadata;
               state.display = display;
               state.panels = panels;
               const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
-              state.duration = duration;
+              state.timeRange = { pastDuration: duration };
             });
           },
         };
