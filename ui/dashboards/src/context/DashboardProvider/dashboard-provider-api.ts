@@ -229,6 +229,20 @@ export function useDashboardDuration() {
   return useDashboardStore(selectDashboardDuration);
 }
 
+// TODO: add save changes dialog for default template variables and time range
+const selectSaveChangesConfirmationDialog = ({
+  saveChangesConfirmationDialog,
+  openSaveChangesConfirmationDialog,
+  closeSaveChangesConfirmationDialog,
+}: DashboardStoreState) => ({
+  saveChangesConfirmationDialog,
+  openSaveChangesConfirmationDialog,
+  closeSaveChangesConfirmationDialog,
+});
+export function useSaveChangesConfirmationDialog() {
+  return useDashboardStore(selectSaveChangesConfirmationDialog);
+}
+
 const selectDiscardChangesConfirmationDialog = ({
   discardChangesConfirmationDialog,
   openDiscardChangesConfirmationDialog,

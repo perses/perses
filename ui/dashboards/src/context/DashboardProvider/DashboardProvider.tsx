@@ -26,6 +26,7 @@ import { createPanelSlice, PanelSlice } from './panel-slice';
 import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
 import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 import { createDiscardChangesDialogSlice, DiscardChangesConfirmationDialogSlice } from './discard-changes-dialog-slice';
+import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from './save-changes-dialog-slice';
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 import { createPanelDefinition } from './common';
@@ -39,7 +40,8 @@ export interface DashboardStoreState
     DeletePanelSlice,
     DiscardChangesConfirmationDialogSlice,
     DuplicatePanelSlice,
-    EditJsonDialogSlice {
+    EditJsonDialogSlice,
+    SaveChangesConfirmationDialogSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   setDashboard: (dashboard: DashboardResource) => void;
@@ -131,6 +133,7 @@ function initStore(props: DashboardProviderProps) {
           /* General */
           ...createDiscardChangesDialogSlice(...args),
           ...createEditJsonDialogSlice(...args),
+          ...createSaveChangesDialogSlice(...args),
           metadata,
           display,
           duration,

@@ -14,8 +14,9 @@
 import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
-import { useDashboard, useEditMode } from '../../context';
+import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
+import { useTimeRange } from '@perses-dev/plugin-system';
+import { useDashboard, useEditMode, useSaveChangesConfirmationDialog } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
@@ -46,8 +47,13 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     onSave,
   } = props;
 
+  const { timeRange, refresh } = useTimeRange();
+
   const dashboard = useDashboard();
   const { isEditMode, setEditMode } = useEditMode();
+
+  // Confirm whether to save new default time range and template variable selected values
+  const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
 
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
@@ -61,11 +67,30 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   );
 
   const onSaveButtonClick = () => {
+    // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
+    if (isRelativeTimeRange(timeRange) && dashboard.dashboard.spec.duration !== timeRange.pastDuration) {
+      openSaveChangesConfirmationDialog({
+        onSaveChanges: () => {
+          dashboard.dashboard.spec.duration = timeRange.pastDuration;
+          saveDashboard();
+          refresh();
+        },
+        onCancel: () => {
+          closeSaveChangesConfirmationDialog();
+        },
+      });
+    } else {
+      saveDashboard();
+    }
+  };
+
+  const saveDashboard = () => {
     if (onSave !== undefined) {
       setSavingDashboard(true);
       onSave(dashboard.dashboard)
         .then(() => {
           setSavingDashboard(false);
+          closeSaveChangesConfirmationDialog();
           setEditMode(false);
         })
         .catch(() => {
