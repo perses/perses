@@ -15,6 +15,31 @@ import { formatValue } from './units';
 import { UnitTestCase } from './types';
 
 const BYTES_TESTS: UnitTestCase[] = [
+  {
+    value: -1234,
+    unit: { kind: 'Bytes' },
+    expected: '-1.23 KB',
+  },
+  {
+    value: -1234,
+    unit: { kind: 'Bytes', abbreviate: false },
+    expected: '-1,234 bytes',
+  },
+  {
+    value: -1234,
+    unit: { kind: 'Bytes', abbreviate: false, decimal_places: 4 },
+    expected: '-1,234 bytes',
+  },
+  {
+    value: -1234,
+    unit: { kind: 'Bytes', abbreviate: true },
+    expected: '-1.23 KB',
+  },
+  {
+    value: -1234,
+    unit: { kind: 'Bytes', abbreviate: true, decimal_places: 4 },
+    expected: '-1.234 KB',
+  },
   { value: 0, unit: { kind: 'Bytes' }, expected: '0 bytes' },
   { value: 1, unit: { kind: 'Bytes' }, expected: '1 byte' },
   {
