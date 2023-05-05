@@ -24,5 +24,5 @@ spec: close({
 		name?: string
 	}
 	label_name: string
-	matchers: [...string]
+	matchers?: [...string]
 })

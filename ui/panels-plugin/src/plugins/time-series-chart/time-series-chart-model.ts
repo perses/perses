@@ -53,7 +53,6 @@ export type VisualOptions = {
 
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
-  decimal_places: 2,
   abbreviate: true,
 };
 
@@ -138,7 +137,11 @@ export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
 export const LEGEND_HEIGHT_SM = 40;
 export const LEGEND_HEIGHT_LG = 100;
 
-export const MIN_VALUE_PADDING_MULTIPLIER = 0.8;
+// Both of these constants help produce a value that is LESS THAN the initial value.
+// For positive values, we multiply by a number less than 1 to get this outcome.
+// For negative values, we multiply to a number greater than 1 to get this outcome.
+export const POSITIVE_MIN_VALUE_MULTIPLIER = 0.8;
+export const NEGATIVE_MIN_VALUE_MULTIPLIER = 1.2;
 
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.

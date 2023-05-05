@@ -15,7 +15,7 @@ import { ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal', decimal_places: 1 };
+export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal' };
 
 export const DEFAULT_MAX_PERCENT = 100;
 

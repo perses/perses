@@ -21,7 +21,8 @@ import {
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
   DEFAULT_Y_AXIS,
-  MIN_VALUE_PADDING_MULTIPLIER,
+  POSITIVE_MIN_VALUE_MULTIPLIER,
+  NEGATIVE_MIN_VALUE_MULTIPLIER,
   VisualOptions,
   YAxisOptions,
 } from '../time-series-chart-model';
@@ -152,24 +153,38 @@ export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentO
     max: inputAxis?.max,
   };
 
+  // Set the y-axis minimum relative to the data
   if (inputAxis?.min === undefined) {
-    // Sets minimum axis label relative to data instead of zero.
+    // https://echarts.apache.org/en/option.html#yAxis.min
     yAxis.min = (value) => {
-      // https://echarts.apache.org/en/option.html#yAxis.min
       if (value.min >= 0 && value.min <= 1) {
         // Helps with PercentDecimal units, or datasets that return 0 or 1 booleans
         return 0;
       }
 
+      // Note: We can tweak the MULTIPLIER constants if we want
+      // TODO: Experiment with using a padding that is based on the difference between max value and min value
       if (value.min > 0) {
-        // Allows for padding between origin and first series.
-        // Current value was chosen arbitrarily and will need to be adjusted.
-        return value.min * MIN_VALUE_PADDING_MULTIPLIER;
+        return roundDown(value.min * POSITIVE_MIN_VALUE_MULTIPLIER);
+      } else {
+        return roundDown(value.min * NEGATIVE_MIN_VALUE_MULTIPLIER);
       }
-
-      // No padding added since negative numbers for min throws it off.
-      return value.min;
     };
   }
+
   return yAxis;
+}
+
+/**
+ * Rounds down to nearest number with one significant digit.
+ *
+ * Examples:
+ * 1. 675 --> 600
+ * 2. 0.567 --> 0.5
+ * 3. -12 --> -20
+ */
+export function roundDown(num: number) {
+  const magnitude = Math.floor(Math.log10(Math.abs(num)));
+  const firstDigit = Math.floor(num / Math.pow(10, magnitude));
+  return firstDigit * Math.pow(10, magnitude);
 }
