@@ -14,6 +14,7 @@
 import { FormEvent, useState } from 'react';
 import { Alert, FormControl } from '@mui/material';
 import { Dialog, JSONEditor } from '@perses-dev/components';
+import { useTimeRange } from '@perses-dev/plugin-system';
 import { useEditJsonDialog } from '../../context/DashboardProvider';
 import { useDashboard } from '../../context/useDashboard';
 
@@ -30,12 +31,14 @@ export const EditJsonDialog = () => {
 
 const EditJsonDialogForm = () => {
   const { closeEditJsonDialog } = useEditJsonDialog();
+  const { setTimeRange } = useTimeRange();
   const { dashboard, setDashboard } = useDashboard();
   const [draftDashboard, setDraftDashboard] = useState(dashboard);
 
   const handleApply = (e: FormEvent) => {
     e.preventDefault();
     setDashboard(draftDashboard);
+    setTimeRange({ pastDuration: draftDashboard.spec.duration });
     closeEditJsonDialog();
   };
 

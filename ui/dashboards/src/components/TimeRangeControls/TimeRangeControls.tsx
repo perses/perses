@@ -17,7 +17,7 @@ import { DateTimeRangePicker, InfoTooltip, TimeOption } from '@perses-dev/compon
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isDurationString } from '@perses-dev/core';
 import { TOOLTIP_TEXT } from '../../constants';
-import { useDefaultTimeRange } from '../../context';
+import { useDashboardDuration } from '../../context';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 
 export const TIME_OPTIONS: TimeOption[] = [
@@ -45,17 +45,17 @@ interface TimeRangeControlsProps {
 export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh } = useTimeRange();
   // TODO: Remove this since it couples to the dashboard context
-  const defaultTimeRange = useDefaultTimeRange();
+  const dashboardDuration = useDashboardDuration();
 
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
   // add time shortcut if one does not match duration from dashboard JSON
-  if (!TIME_OPTIONS.some((option) => option.value.pastDuration === defaultTimeRange.pastDuration)) {
-    if (isDurationString(defaultTimeRange.pastDuration)) {
+  if (!TIME_OPTIONS.some((option) => option.value.pastDuration === dashboardDuration)) {
+    if (isDurationString(dashboardDuration)) {
       TIME_OPTIONS.push({
-        value: { pastDuration: defaultTimeRange.pastDuration },
-        display: `Last ${defaultTimeRange.pastDuration}`,
+        value: { pastDuration: dashboardDuration },
+        display: `Last ${dashboardDuration}`,
       });
     }
   }
