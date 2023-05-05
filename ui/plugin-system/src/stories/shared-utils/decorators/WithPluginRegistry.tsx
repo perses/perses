@@ -19,12 +19,8 @@ import {
   dynamicImportPluginLoader,
 } from '@perses-dev/plugin-system';
 
-// NOTE: the aliases we use for components break these top level imports, so we
-// import relatively.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const prometheusResource = require('../../../../../prometheus-plugin/plugin.json');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const panelsResource = require('../../../../../panels-plugin/plugin.json');
+import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
+import panelsResource from '@perses-dev/panels-plugin/plugin.json';
 
 const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
