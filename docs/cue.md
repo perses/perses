@@ -78,11 +78,11 @@ it should contain:
 
 A Perses plugin can optionally embed a `mig.cuepart`\* file that is basically describing in CUE language how to convert a given Grafana object into an instance of this plugin. In such case your plugin is considered as the Perses equivalent of this Grafana object type, and it will be used as part of the translation process when a Grafana dashboard is received on the `/api/migrate` endpoint.
 
-_\* this is mandatory to have it named that way. We put in place this constraint because it makes sense to have a single file containing the remapping logic, with the benefit of making the backend logic easier (no need to search for the file). It's also easier to check the migration file of the different plugins, because you know which one to look for._
+*\* this is mandatory to have it named that way. We put in place this constraint because it makes sense to have a single file containing the remapping logic, with the benefit of making the backend logic easier (no need to search for the file). It's also easier to check the migration file of the different plugins, because you know which one to look for.*
 
-_\* the .cuepart extension is a homemade one. It is used for partial CUE files, partial here meaning that they either contain unknown references (the files are part of a larger processing thus are not "standalone"), or contain some placeholders for later string replacements, that are not valid CUE syntax._
+*\* the .cuepart extension is a homemade one. It is used for partial CUE files, partial here meaning that they either contain unknown references (the files are part of a larger processing thus are not "standalone"), or contain some placeholders for later string replacements, that are not valid CUE syntax.*
 
-_:warning: If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana panel type, be aware that the first one encountered by alphabetical order will take priority._
+*:warning: If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana panel type, be aware that the first one encountered by alphabetical order will take priority.*
 
 ## Variable
 

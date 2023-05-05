@@ -13,4 +13,4 @@
 
 // Common constants needed across individual unit groups and the overall
 // combined units.
-export const DEFAULT_DECIMAL_PLACES = 2;
+export const MAX_SIGNIFICANT_DIGITS = 3;

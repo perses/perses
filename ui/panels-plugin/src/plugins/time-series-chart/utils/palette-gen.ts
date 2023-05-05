@@ -81,9 +81,9 @@ export function getCategoricalPaletteColor(palette: string[], seriesIndex: numbe
 
 // Valid hue values are 0 to 360 and can be adjusted to control the generated colors.
 // More info: https://github.com/zenozeng/color-hash#custom-hue
-// Picked min of 10 and max of 360 to exclude common threshold colors (red).
+// Picked min of 20 and max of 360 to exclude common threshold colors (red).
 // Series names with "error" in them will always be generated as red.
-const ERROR_HUE_CUTOFF = 10;
+const ERROR_HUE_CUTOFF = 20;
 const colorGenerator = new ColorHash({ hue: { min: ERROR_HUE_CUTOFF, max: 360 } });
 const redColorGenerator = new ColorHash({ hue: { min: 0, max: ERROR_HUE_CUTOFF } });
 

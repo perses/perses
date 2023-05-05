@@ -22,6 +22,8 @@ import (
 	databaseFile "github.com/perses/perses/internal/api/shared/database/file"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	databaseSQL "github.com/perses/perses/internal/api/shared/database/sql"
+	promConfig "github.com/prometheus/common/config"
+	"github.com/sirupsen/logrus"
 )
 
 func New(conf config.Database) (databaseModel.DAO, error) {
@@ -57,6 +59,21 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 			MultiStatements:          c.MultiStatements,
 			ParseTime:                c.ParseTime,
 			RejectReadOnly:           c.RejectReadOnly,
+		}
+
+		// (OPTIONAL) Configure TLS
+		if c.TLSConfig != nil {
+			tlsConfig, parseErr := promConfig.NewTLSConfig(c.TLSConfig)
+			if parseErr != nil {
+				logrus.WithError(parseErr).Error("Failed to parse TLS from configuration")
+				return nil, parseErr
+			}
+			tlsConfigName := "perses-tls"
+			if err := mysql.RegisterTLSConfig(tlsConfigName, tlsConfig); err != nil {
+				logrus.WithError(err).Error("Failed to register TLS configuration for mysql connection")
+				return nil, err
+			}
+			mysqlConfig.TLSConfig = tlsConfigName
 		}
 
 		db, err := sql.Open("mysql", mysqlConfig.FormatDSN())

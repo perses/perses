@@ -15,7 +15,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@mui/material';
 import { ViewDashboard } from '@perses-dev/dashboards';
 import { action } from '@storybook/addon-actions';
-import { WithPluginRegistry, WithQueryParams, WithQueryClient, WithDashboard } from '../../stories/decorators';
+import { WithPluginRegistry } from '@perses-dev/plugin-system/src/stories/shared-utils';
+import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+import { WithDashboard } from '../../stories/decorators';
 
 const meta: Meta<typeof ViewDashboard> = {
   component: ViewDashboard,

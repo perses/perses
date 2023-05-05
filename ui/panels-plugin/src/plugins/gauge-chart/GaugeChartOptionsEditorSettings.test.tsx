@@ -37,7 +37,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const unitSelector = screen.getByRole('combobox', { name: 'Units' });
+    const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     userEvent.click(unitSelector);
     const yearOption = screen.getByRole('option', {
       name: 'Years',

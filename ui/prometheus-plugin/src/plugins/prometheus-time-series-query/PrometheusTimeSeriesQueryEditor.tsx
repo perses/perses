@@ -57,11 +57,12 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       />
       <TextField
         fullWidth
-        label="Series Name Format"
+        label="Legend Name"
+        placeholder="Tip: Use {{label_name}}. Example: {{instance}} will be replaced with values such as 'webserver-123' and 'webserver-456'."
+        helperText="Set the name for each series in the legend and the tooltip."
         value={format ?? ''}
         onChange={(e) => handleFormatChange(e.target.value)}
         onBlur={handleFormatBlur}
-        margin="dense"
       />
       <FormControl margin="dense" fullWidth={false}>
         {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and

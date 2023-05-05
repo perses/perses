@@ -27,6 +27,7 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
       <TextField
         sx={{ mb: 1 }}
         label="Label Name"
+        required
         value={props.value.label_name}
         onChange={(e) => {
           props.onChange({ ...props.value, label_name: e.target.value });
@@ -59,6 +60,7 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
   return (
     <Stack spacing={1}>
       <TextField
+        required
         sx={{ mb: 1 }}
         label="PromQL Expression"
         value={props.value.expr}

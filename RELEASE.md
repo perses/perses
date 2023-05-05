@@ -41,58 +41,70 @@ with `make upgrade-npm-deps`
 
 ### 1. Prepare your release
 
-You should start to create a branch that follows the pattern `release/v<X.Y>`. Release candidates and patch releases
-for any given major or minor release happen in the same `release/v<major>.<minor>` branch. Do not
-create `release/<version>` for patch or release candidate releases.
+#### Create a release branch
 
-- Do this in a proper PR pointing to the release branch as this gives others the opportunity to chime in on the release
-  in general and on the addition to the changelog in particular.
+Create a branch that follows the naming pattern `release/v<X.Y>` and includes the changes you intend to release (usually the latest from `main`). Push it to Github. You will use this branch as the base in the next step.
 
+> ⚠️ Release candidates and patch releases for any given major or minor release happen in the same `release/v<major>.<minor>` branch. Do not create `release/<version>` for patch or release candidate releases.
+
+#### Create a PR with the changes
+
+- Create a branch based on the release branch `release/v<X.Y>` you just created in the step above. This branch should use the naming pattern `<yourname>/release-v<major>.<minor>.<patch>`.
 - Update the file `VERSION` with the new version to be created.
+- Generate `CHANGELOG.md` updates based on git history:
 
-- Update the file `CHANGELOG.md` :
+  ```bash
+  make generate-changelog
+  ```
+- Review the generated `CHANGELOG.md` for valid output. Things to check include:
+  - Entries in the `CHANGELOG.md` are meant to be in this order:
+    * `[FEATURE]`
+    * `[ENHANCEMENT]`
+    * `[BUGFIX]`
+    * `[BREAKINGCHANGE]`
+  - Entries that map to a pull request should include a pull request number.
+  - As we have many libraries we publish, it's better if you also put a clear indication about what library is affected by
+    these changes.
+  - Consumers understand how to handle breaking changes either through the messaging in the changelog or through the linked pull requests.
+- Update the `package.json` files for all packages with the corresponding version:
 
-```bash
-make generate-changelog
-```
+  ```bash
+  make bump-version
+  ```
+- Push the branch to Github and create a pull request with the release branch as the base. This gives others the opportunity to chime in on the release,
+  in general, and on the addition to the changelog, in particular.
+  - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
+- Address any necessary feedback.
+- Once the pull request is approved, merge the it into the release branch.
 
-Note: it will generate a first changelog version based on the git history. You should review what has been generated.
-Error can happen ;)
+### 2. Create release tag and validate release
 
-- Entries in the `CHANGELOG.md` are meant to be in this order:
+- Pull down the latest updates to the release branch on your local machine to ensure you have the updates from the previous step.
+- Tag the new release via the following commands:
 
-* `[FEATURE]`
-* `[ENHANCEMENT]`
-* `[BUGFIX]`
-* `[BREAKINGCHANGE]`
-
-As we have many libraries we publish, it's better if you also put a clear indication about what library is affected by
-these changes.
-
-- Update the different `package.json` with the corresponding version:
-
-```bash
-make bump-version
-```
-
-### 2. Draft the new release
-
-Tag the new release via the following commands:
-
-```bash
-git checkout release/v<version_to_be_replaced>
-make tag
-git push origin v<version_to_be_replaced>
-```
+  ```bash
+  git checkout release/v<version_to_be_replaced>
+  make tag
+  git push origin v<version_to_be_replaced>
+  ```
 
 Signing a tag with a GPG key is appreciated, but in case you can't add a GPG key to your Github account using the
 following [procedure](https://docs.github.com/en/authentication/managing-commit-signature-verification), you can replace
-the `-s` flag by `-a` flag of the git tag command to only annotate the tag without signing.
+the `-s` flag by `-a` flag of the git tag command to only annotate the tag without signing. If you are using a newer Mac and hit an error like "gpg failed to sign the data fatal: failed to write commit object," see [this Stack Overflow question](https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0/40066889#40066889) for assistance.
 
-Once a tag is created, the release process through the GitHub Actions will be triggered for this tag.
+Once a tag is created, an automated release process for this tag is triggered via Github Actions. This automated process includes:
+- Publishing new versions of the UI libraries to npm.
+- Building new go binaries and docker images.
+- Publishing the docker images to Docker Hub.
+- Creating a new Github release that uses the changelog as the release notes and provides tarballs with the latest go binaries.
 
-The Github releases will be created automatically by the GitHub Action triggered. Hopefully you will find the accurate
-changelog there. It won't hurt if you check quickly if it does not miss anything there.
+Please verify that the Github Actions complete successfully. Once they are completed, check that everything looks good in the new Github Release. If you realize we need to adjust something in the release notes, you can edit it directly in the Github UI.
+
+### 3. Merge the release into `main`
+
+It can be helpful to leave the release branch up for a little while in case we need to create a patch release to address bugs or minor issues with the release you just made.
+
+Once the release branch is no longer needed, you should open a new PR based on `main` to merge those changes. When this PR is approved, merge it into `main` using the "merge pull request" option (using "squash and merge" will lose the commit needed for the release tag, which can lead to problems).
 
 ## How to cut a UI snapshot release
 

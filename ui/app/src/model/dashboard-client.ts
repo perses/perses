@@ -17,8 +17,9 @@ import { useMemo } from 'react';
 import { useNavHistory } from '../context/DashboardNavHistory';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
+import { useImportantDashboardSelectors } from './config-client';
 
-const resource = 'dashboards';
+export const resource = 'dashboards';
 
 /**
  * Used to create a dashboard in the API.
@@ -70,11 +71,11 @@ export interface DatedDashboards {
  * Used to get dashboards seen recently by the user.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
-export function useRecentDashboardList(project?: string) {
-  const { data } = useDashboardList(project);
+export function useRecentDashboardList(project?: string, maxSize?: number) {
+  const { data, isLoading } = useDashboardList(project);
   const history = useNavHistory();
 
-  return useMemo(() => {
+  const result = useMemo(() => {
     // Wrapping dashboard with their last seen date from nav history context
     const result: DatedDashboards[] = [];
 
@@ -89,8 +90,38 @@ export function useRecentDashboardList(project?: string) {
       }
     });
 
+    if (maxSize) {
+      return result.slice(0, maxSize);
+    }
+
     return result;
-  }, [data, history]);
+  }, [data, history, maxSize]);
+
+  return { data: result, isLoading: isLoading };
+}
+
+/**
+ * Used to get important dashboards.
+ * Will automatically be refreshed when cache is invalidated or history modified
+ */
+export function useImportantDashboardList(project?: string) {
+  const dashboards = useDashboardList(project);
+  const importantDashboardSelectors = useImportantDashboardSelectors();
+
+  const importantDashboards = useMemo(() => {
+    const result: DashboardResource[] = [];
+    importantDashboardSelectors.data.forEach((selector) => {
+      const dashboard = (dashboards.data || []).find(
+        (dashboard) => selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name
+      );
+      if (dashboard) {
+        result.push(dashboard);
+      }
+    });
+    return result;
+  }, [dashboards.data, importantDashboardSelectors.data]);
+
+  return { data: importantDashboards, isLoading: dashboards.isLoading && importantDashboardSelectors.isLoading };
 }
 
 /**

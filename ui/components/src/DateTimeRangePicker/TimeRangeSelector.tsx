@@ -47,8 +47,14 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         'aria-label': `Select time range. Currently set to ${formattedValue}`,
       }}
       sx={{
+        // `transform: none` prevents calendar icon from flipping over when menu is open
         '.MuiSelect-icon': {
           marginTop: '1px',
+          transform: 'none',
+        },
+        // paddingRight creates more space for the calendar icon (it's a bigger icon)
+        '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': {
+          paddingRight: '36px',
         },
         '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
       }}
