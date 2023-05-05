@@ -12,12 +12,11 @@
 // limitations under the License.
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Alert, Button, TextField } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
 import { useSnackbar } from '../../context/SnackbarProvider';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
-import { useIsReadonly } from '../../model/config-client';
 
 export interface RenameDashboardDialogProps {
   dashboard: DashboardResource;
@@ -36,7 +35,6 @@ export interface RenameDashboardDialogProps {
  */
 export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { dashboard, open, onClose, onSuccess } = props;
-  const isReadonly = useIsReadonly();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
@@ -106,14 +104,9 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
           error={!!error}
           helperText={error}
         />
-        {isReadonly && (
-          <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
-            Dashboard managed via code only.
-          </Alert>
-        )}
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" disabled={!!error || isReadonly} onClick={handleSubmit}>
+        <Button variant="contained" disabled={!!error} onClick={handleSubmit}>
           Rename
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClose}>

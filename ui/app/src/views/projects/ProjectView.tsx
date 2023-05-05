@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Stack, Typography, Button, Grid } from '@mui/material';
+import { Box, Stack, Typography, Grid } from '@mui/material';
 import FolderPound from 'mdi-material-ui/FolderPound';
 import { useCallback, useState } from 'react';
 import { DeleteProjectDialog } from '../../components/DeleteProjectDialog/DeleteProjectDialog';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
 import { ProjectDashboards } from './ProjectDashboards';
 
@@ -50,15 +51,7 @@ function ProjectView() {
             <FolderPound fontSize={'large'} />
             <Typography variant="h1">{projectName}</Typography>
           </Stack>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            sx={{ textTransform: 'uppercase' }}
-            onClick={handleDeleteProjectDialogOpen}
-          >
-            Delete Project
-          </Button>
+          <CRUDButton text="Delete Project" variant="outlined" color="error" onClick={handleDeleteProjectDialogOpen} />
         </Stack>
         <DeleteProjectDialog
           name={projectName}
