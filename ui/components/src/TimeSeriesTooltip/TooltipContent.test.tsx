@@ -20,7 +20,30 @@ describe('TooltipContent', () => {
     render(<TooltipContent {...props} />);
   };
 
-  it('should display a single series name', () => {
+  it('should display a single formatted series name and date', () => {
+    const tooltipContent: TooltipContentProps = {
+      focusedSeries: [
+        {
+          seriesIdx: 0,
+          datumIdx: 84,
+          seriesName: 'Test node demo.do.prometheus.io:9100',
+          dateMs: 1671821580000,
+          x: 1671821580000,
+          y: 0.1,
+          formattedY: '0.1',
+          markerColor: 'hsla(19838016,50%,50%,0.8)',
+        },
+      ],
+      wrapLabels: true,
+    };
+    renderComponent(tooltipContent);
+    expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
+    expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
+    expect(screen.getByText('18:53:00')).toBeInTheDocument();
+    expect(screen.getByText('0.1')).toBeInTheDocument();
+  });
+
+  it('should display the correct formatted date when the input Unix epoch is in seconds', () => {
     const tooltipContent: TooltipContentProps = {
       focusedSeries: [
         {
@@ -37,10 +60,8 @@ describe('TooltipContent', () => {
       wrapLabels: true,
     };
     renderComponent(tooltipContent);
-    expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
     expect(screen.getByText('18:53:00')).toBeInTheDocument();
-    expect(screen.getByText('0.1')).toBeInTheDocument();
   });
 
   it('should display multiple series data', () => {
