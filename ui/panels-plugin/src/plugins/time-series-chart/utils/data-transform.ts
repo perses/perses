@@ -66,7 +66,7 @@ export function getLineSeries(
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: visual.show_points === 'Always' ? true : false,
-    symbolSize: pointRadius,
+    symbolSize: visual.show_points === 'Always' ? pointRadius + 1 : pointRadius, // accounts for smaller symbols on initial render than on hover
     lineStyle: {
       width: lineWidth,
     },
