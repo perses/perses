@@ -30,9 +30,9 @@
   "dependencies": {
     "@perses-dev/components": "0.29.1",
     "@perses-dev/core": "0.29.1",
-    "immer": "^9.0.15",
-    "use-immer": "^0.7.0",
-    "use-query-params": "^2.1.2"
+    "immer": "^9.0.21",
+    "use-immer": "^0.9.0",
+    "use-query-params": "^2.2.1"
   },
   "devDependencies": {
     "@perses-dev/storybook": "0.29.1"

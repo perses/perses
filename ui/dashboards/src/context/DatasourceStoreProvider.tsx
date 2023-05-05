@@ -149,6 +149,8 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     return results;
   });
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const ctxValue: DatasourceStore = useMemo(
     () => ({
       getDatasource,

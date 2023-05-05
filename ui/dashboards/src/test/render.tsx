@@ -12,8 +12,6 @@
 // limitations under the License.
 
 import { render, RenderOptions } from '@testing-library/react';
-import { unstable_HistoryRouter } from 'react-router-dom';
-import { createMemoryHistory, MemoryHistory } from 'history';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -24,27 +22,19 @@ import { MOCK_PLUGINS } from './plugin-registry';
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.
  */
-export function renderWithContext(
-  ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'queries'>,
-  history?: MemoryHistory
-) {
+export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderOptions, 'queries'>) {
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
 
   const BaseRender = () => {
-    const HistoryRouter = unstable_HistoryRouter;
-    history = history ?? createMemoryHistory();
     return (
-      <HistoryRouter history={history}>
-        <QueryClientProvider client={queryClient}>
-          <QueryParamProvider adapter={ReactRouter6Adapter}>
-            <ChartsThemeProvider chartsTheme={testChartsTheme}>
-              <PluginRegistry {...mockPluginRegistry(...MOCK_PLUGINS)}>{ui}</PluginRegistry>
-            </ChartsThemeProvider>
-          </QueryParamProvider>
-        </QueryClientProvider>
-      </HistoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+          <ChartsThemeProvider chartsTheme={testChartsTheme}>
+            <PluginRegistry {...mockPluginRegistry(...MOCK_PLUGINS)}>{ui}</PluginRegistry>
+          </ChartsThemeProvider>
+        </QueryParamProvider>
+      </QueryClientProvider>
     );
   };
 

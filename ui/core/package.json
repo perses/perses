@@ -29,7 +29,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "date-fns": "^2.28.0",
+    "date-fns": "^2.30.0",
     "lodash-es": "^4.17.21",
     "mathjs": "^10.6.4"
   },
@@ -38,7 +38,7 @@
     "react-dom": "^17.0.2 || ^18.0.0"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.6"
+    "@types/lodash-es": "^4.17.7"
   },
   "files": [
     "dist"
