@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './constants';
-export * from './WithDashboard';
+export * from './WithDataQueries';
 export * from './WithDatasourceStore';
-export * from './WithTemplateVariables';
+export * from './WithPluginRegistry';
+export * from './WithTimeRange';

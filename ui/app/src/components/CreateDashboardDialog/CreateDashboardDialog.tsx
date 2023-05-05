@@ -85,7 +85,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
       <Dialog.Header>Create Dashboard</Dialog.Header>
       <Dialog.Content>
         <Stack gap={1}>
-          {projectOptions && projectOptions.length > 1 && (
+          {projectOptions && projectOptions.length > 0 && (
             <FormControl size="small" fullWidth>
               <InputLabel id="project-name-id">Project name</InputLabel>
               <Select

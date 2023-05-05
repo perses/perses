@@ -121,14 +121,28 @@ interface SearchableDashboardsProps {
   id?: string;
 }
 
+function buildProjectRow(list: DashboardResource[]) {
+  const result: ProjectRow[] = [];
+  for (const item of list) {
+    const project = item.metadata.project;
+    const row = result.find((row) => row.project === item.metadata.project);
+    if (row) {
+      row.dashboards.push(item);
+    } else {
+      result.push({ project: project, dashboards: [item] });
+    }
+  }
+  return result;
+}
+
 export function SearchableDashboards(props: SearchableDashboardsProps) {
   const kvSearch = useMemo(
     () =>
-      new KVSearch<ProjectRow>({
+      new KVSearch<DashboardResource>({
         indexedKeys: [
-          ['project'], // Matching on the project name
-          ['dashboards', 'metadata', 'name'], // Matching on the dashboard name
-          ['dashboards', 'spec', 'display', 'name'], // Matching on the dashboard display name
+          ['metadata', 'project'], // Matching on the project name
+          ['metadata', 'name'], // Matching on the dashboard name
+          ['spec', 'display', 'name'], // Matching on the dashboard display name
         ],
       }),
     []
@@ -136,29 +150,19 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
 
   const { data, isLoading } = useDashboardList();
   const projectRows: ProjectRow[] = useMemo(() => {
-    const result: ProjectRow[] = [];
-    (data || []).forEach((dashboard) => {
-      const project = dashboard.metadata.project;
-      const row = result.find((row) => row.project === dashboard.metadata.project);
-      if (row) {
-        row.dashboards.push(dashboard);
-      } else {
-        result.push({ project: project, dashboards: [dashboard] });
-      }
-    });
-    return result;
+    return buildProjectRow(data || []);
   }, [data]);
 
   const [search, setSearch] = useState<string>('');
 
   const filteredProjectRows: ProjectRow[] = useMemo(() => {
     if (search) {
-      const result = kvSearch.filter(search, projectRows);
-      return result.map((res) => res.original);
+      const result = kvSearch.filter(search, data || []);
+      return buildProjectRow(result.map((res) => res.original));
     } else {
       return projectRows;
     }
-  }, [kvSearch, projectRows, search]);
+  }, [kvSearch, projectRows, search, data]);
 
   const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {

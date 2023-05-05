@@ -16,15 +16,9 @@ import { action } from '@storybook/addon-actions';
 import { Box } from '@mui/material';
 import { Panel } from '@perses-dev/dashboards';
 import { PanelDefinition } from '@perses-dev/core';
-import {
-  WithPluginRegistry,
-  WithDataQueries,
-  WithTimeRange,
-  WithQueryClient,
-  WithQueryParams,
-  WithTemplateVariables,
-  WithDatasourceStore,
-} from '../../stories/decorators';
+import { WithPluginRegistry, WithTimeRange, WithDataQueries } from '@perses-dev/plugin-system/src/stories/shared-utils';
+import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+import { WithTemplateVariables, WithDatasourceStore } from '../../stories/decorators';
 
 const panelDefinition: PanelDefinition = {
   kind: 'Panel',

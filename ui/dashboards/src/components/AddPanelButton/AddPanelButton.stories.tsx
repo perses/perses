@@ -13,13 +13,9 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { AddPanelButton } from '@perses-dev/dashboards';
-import {
-  WithTemplateVariables,
-  WithQueryParams,
-  WithDashboard,
-  WithPluginRegistry,
-  WithQueryClient,
-} from '../../stories/decorators';
+import { WithPluginRegistry } from '@perses-dev/plugin-system/src/stories/shared-utils';
+import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+import { WithTemplateVariables, WithDashboard } from '../../stories/decorators';
 
 const meta: Meta<typeof AddPanelButton> = {
   component: AddPanelButton,

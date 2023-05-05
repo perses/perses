@@ -32,7 +32,7 @@ describe('getSeriesColor', () => {
     '#D55E00', // red
   ];
   const testSeriesName = 'Test series name';
-  const testSeriesNameGeneratedColor = 'hsla(17.70,50%,50%,0.9)';
+  const testSeriesNameGeneratedColor = 'hsla(27.48,50%,50%,0.9)';
 
   it('should return the first color from default Categorical palette', () => {
     const props: SeriesColorProps = {
@@ -146,7 +146,7 @@ describe('getAutoPaletteColor', () => {
   const fallbackColor = '#ff0000';
   it('should auto generate a color from the series name', () => {
     const generatedColor = getAutoPaletteColor('Incoming Writes per second', fallbackColor);
-    expect(generatedColor).toEqual('hsla(243.49,65%,65%,0.9)');
+    expect(generatedColor).toEqual('hsla(246.82,65%,65%,0.9)');
   });
 
   it('should generate a unique color from the series name', () => {
@@ -154,7 +154,7 @@ describe('getAutoPaletteColor', () => {
       'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
       fallbackColor
     );
-    expect(generatedColor).toEqual('hsla(122.17,50%,35%,0.9)');
+    expect(generatedColor).toEqual('hsla(128.97,50%,35%,0.9)');
   });
 });
 
@@ -162,7 +162,7 @@ describe('getConsistentSeriesNameColor', () => {
   it('should generate a consistent custom hsla color', () => {
     const color = getConsistentSeriesNameColor('test');
     const colorAlt = getConsistentSeriesNameColor('test');
-    const firstResult = 'hsla(287.30,35%,50%,0.9)';
+    const firstResult = 'hsla(289.38,35%,50%,0.9)';
     // ensures generated color does not change on subsequent calls with same series name
     expect(color).toEqual(firstResult);
     expect(colorAlt).toEqual(firstResult);

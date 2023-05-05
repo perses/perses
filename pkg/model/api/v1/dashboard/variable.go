@@ -109,7 +109,7 @@ func (d *VariableDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 func (d *VariableDisplay) validate() error {
 	if len(d.Name) == 0 {
-		return fmt.Errorf("name cannot be empty")
+		return fmt.Errorf("variables[].display.name cannot be empty")
 	}
 	return nil
 }
