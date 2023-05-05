@@ -20,9 +20,10 @@ import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
-import { TemplateVariableList, EditVariablesButton } from '../Variables';
+import { EditVariablesButton } from '../Variables';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
+import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -106,7 +107,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList
+              <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
                 sx={{
                   backgroundColor: ({ palette }) =>
@@ -153,7 +154,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
           <Box paddingY={2}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList
+              <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
                 sx={{
                   backgroundColor: ({ palette }) =>
