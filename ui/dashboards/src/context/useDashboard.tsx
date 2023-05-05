@@ -23,15 +23,15 @@ export function useDashboard() {
     setDashboard: setDashboardResource,
     metadata,
     display,
-    timeRange,
-  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, setDashboard, metadata, display, timeRange }) => ({
+    duration,
+  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, setDashboard, metadata, display, duration }) => ({
     panels,
     panelGroups,
     panelGroupOrder,
     setDashboard,
     metadata,
     display,
-    timeRange,
+    duration,
   }));
   const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
@@ -45,7 +45,7 @@ export function useDashboard() {
       panels,
       layouts,
       variables,
-      duration: timeRange.pastDuration,
+      duration,
     },
   };
 

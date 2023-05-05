@@ -17,7 +17,7 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { DashboardResource, Display, ProjectMetadata, RelativeTimeRange } from '@perses-dev/core';
+import { DashboardResource, Display, ProjectMetadata, DurationString } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -44,8 +44,8 @@ export interface DashboardStoreState
   setEditMode: (isEditMode: boolean) => void;
   setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
+  duration: DurationString;
   display?: Display;
-  timeRange: RelativeTimeRange;
 }
 
 export interface DashboardStoreProps {
@@ -133,7 +133,7 @@ function initStore(props: DashboardProviderProps) {
           ...createEditJsonDialogSlice(...args),
           metadata,
           display,
-          timeRange: { pastDuration: duration },
+          duration,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
           setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration } }) => {
@@ -144,7 +144,7 @@ function initStore(props: DashboardProviderProps) {
               const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
-              state.timeRange = { pastDuration: duration };
+              state.duration = duration;
             });
           },
         };

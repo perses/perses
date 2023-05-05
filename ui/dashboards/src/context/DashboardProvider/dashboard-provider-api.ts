@@ -224,9 +224,9 @@ export function useDeletePanelDialog() {
   return useDashboardStore(selectDeletePanelDialog);
 }
 
-const selectDefaultTimeRange = (state: DashboardStoreState) => state.timeRange;
-export function useDefaultTimeRange() {
-  return useDashboardStore(selectDefaultTimeRange);
+const selectDashboardDuration = (state: DashboardStoreState) => state.duration;
+export function useDashboardDuration() {
+  return useDashboardStore(selectDashboardDuration);
 }
 
 const selectDiscardChangesConfirmationDialog = ({
