@@ -119,7 +119,9 @@ export function StatChart(props: StatChartProps) {
         sx={(theme) => ({
           color: color ?? theme.palette.text.primary,
           fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
-          padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
+          padding: sparkline
+            ? `${containerPadding} ${containerPadding} 0 ${containerPadding}`
+            : ` 0 ${containerPadding}`,
         })}
       >
         {formattedValue}
