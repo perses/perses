@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Autocomplete, Slider, Switch, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Autocomplete, Slider, Switch, TextField } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
@@ -103,27 +103,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             max={VISUAL_CONFIG.area_opacity.max}
             onChange={handleAreaOpacityChange}
           />
-        }
-      />
-      <OptionsEditorControl
-        label={'Palette'}
-        control={
-          <ToggleButtonGroup
-            color="primary"
-            exclusive
-            value={value.palette?.kind ?? 'Auto'}
-            onChange={(__, newValue) => {
-              const palette: VisualOptions['palette'] =
-                newValue === 'Categorical' ? { kind: 'Categorical' } : undefined;
-              onChange({
-                ...value,
-                palette,
-              });
-            }}
-          >
-            <ToggleButton value="Auto">Auto</ToggleButton>
-            <ToggleButton value="Categorical">Categorical</ToggleButton>
-          </ToggleButtonGroup>
         }
       />
       <OptionsEditorControl
