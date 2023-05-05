@@ -87,11 +87,9 @@ export function getLineSeries(
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
-      focus: 'none', // 'none', 'self', 'series'
-      blurScope: 'coordinateSystem', // 'coordinateSystem', 'series', 'global'
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 1.5,
+        width: lineWidth + 1,
         opacity: 1,
       },
     },
