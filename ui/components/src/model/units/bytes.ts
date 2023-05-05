@@ -33,7 +33,7 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
   // These units are powers of 1000.
-  // In other words, 1KB = 1000 bytes.
+  // In other words, 1 KB = 1000 bytes.
   Bytes: {
     group: 'Bytes',
     label: 'Bytes',
