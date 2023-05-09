@@ -90,6 +90,7 @@ export function useTemplateVariableActions() {
       setVariableLoading: s.setVariableLoading,
       setVariableOptions: s.setVariableOptions,
       setVariableDefinitions: s.setVariableDefinitions,
+      setVariableDefaultValue: s.setVariableDefaultValue,
     };
   });
 }
@@ -139,52 +140,68 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
         variableState: hydrateTemplateVariableStates(initialVariableDefinitions, initialParams),
         variableDefinitions: initialVariableDefinitions,
         setVariableDefinitions(definitions: VariableDefinition[]) {
-          set((state) => {
-            state.variableDefinitions = definitions;
-            state.variableState = hydrateTemplateVariableStates(definitions, initialParams);
-          });
+          set(
+            (state) => {
+              state.variableDefinitions = definitions;
+              state.variableState = hydrateTemplateVariableStates(definitions, initialParams);
+            },
+            false,
+            'setVariableDefinitions'
+          );
         },
         setVariableOptions(name, options) {
-          set((state) => {
-            const varState = state.variableState[name];
-            if (!varState) {
-              return;
-            }
-            varState.options = options;
-          });
+          set(
+            (state) => {
+              const varState = state.variableState[name];
+              if (!varState) {
+                return;
+              }
+              varState.options = options;
+            },
+            false,
+            'setVariableOptions'
+          );
         },
         setVariableLoading(name, loading) {
-          set((state) => {
-            const varState = state.variableState[name];
-            if (!varState) {
-              return;
-            }
-            varState.loading = loading;
-          });
+          set(
+            (state) => {
+              const varState = state.variableState[name];
+              if (!varState) {
+                return;
+              }
+              varState.loading = loading;
+            },
+            false,
+            'setVariableLoading'
+          );
         },
 
         setVariableValue: (name, value) =>
-          set((state) => {
-            let val = value;
-            const varState = state.variableState[name];
-            if (!varState) {
-              return;
-            }
-
-            // Make sure there is only one all value
-            if (Array.isArray(val) && val.includes(ALL_VALUE)) {
-              if (val.at(-1) === ALL_VALUE) {
-                val = ALL_VALUE;
-              } else {
-                val = val.filter((v) => v !== ALL_VALUE);
+          set(
+            (state) => {
+              let val = value;
+              const varState = state.variableState[name];
+              if (!varState) {
+                return;
               }
-            }
-            if (queryParams) {
-              const setQueryParams = queryParams[1];
-              setQueryParams({ [getURLQueryParamName(name)]: val });
-            }
-            varState.value = val;
-          }),
+
+              // Make sure there is only one all value
+              if (Array.isArray(val) && val.includes(ALL_VALUE)) {
+                if (val.at(-1) === ALL_VALUE) {
+                  val = ALL_VALUE;
+                } else {
+                  val = val.filter((v) => v !== ALL_VALUE);
+                }
+              }
+              if (queryParams) {
+                const setQueryParams = queryParams[1];
+                setQueryParams({ [getURLQueryParamName(name)]: val });
+              }
+              varState.value = val;
+            },
+            false,
+            'setVariableValue'
+          ),
       }))
     )
   );
