@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardResource, ListVariableDefinition, VariableDefinition, isRelativeTimeRange } from '@perses-dev/core';
+import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import {
   useDashboard,
@@ -32,6 +32,7 @@ import { EditVariablesButton } from '../Variables';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
+import { updateVariableDefaultValues } from '../../utils';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -55,12 +56,9 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   } = props;
 
   const { dashboard } = useDashboard();
-
   const variableValues = useTemplateVariableValues();
-
   const { setVariableDefinitions } = useTemplateVariableActions();
-
-  const variables = useTemplateVariableDefinitions(); // stored variables, aka always the same as dashboard.spec.variables
+  const savedVariables = useTemplateVariableDefinitions();
 
   const { timeRange, refresh } = useTimeRange();
 
@@ -81,21 +79,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   );
 
   const onSaveButtonClick = () => {
-    let isSelectedVariablesUpdated = false;
-    const newVariables: VariableDefinition[] = [...variables];
-    variables.forEach((variable, index) => {
-      if (variable.kind === 'ListVariable') {
-        const currentVariable = variableValues[variable.spec.name];
-        if (currentVariable?.default_value !== undefined) {
-          const newVariable: ListVariableDefinition = {
-            kind: 'ListVariable',
-            spec: { ...variable.spec, default_value: currentVariable.default_value },
-          };
-          newVariables.splice(index, 1, newVariable);
-          isSelectedVariablesUpdated = true;
-        }
-      }
-    });
+    const { newVariables, isSelectedVariablesUpdated } = updateVariableDefaultValues(savedVariables, variableValues);
     setVariableDefinitions(newVariables);
 
     const isTimeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
