@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import {
   IconButton,
   Dialog,
@@ -27,14 +28,11 @@ import CloseIcon from 'mdi-material-ui/Close';
 import { useSaveChangesConfirmationDialog } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
-  // const { discardChangesConfirmationDialog: dialog } = useDiscardChangesConfirmationDialog();
+  const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(true);
+  const [saveDefaultVariables, setSaveDefaultVariables] = useState(true);
 
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isOpen = dialog !== undefined;
-
-  // closeSaveChangesConfirmationDialog () { set((state)=> {…}
-  // openSaveChangesConfirmationDialog (dialog) { set((state)=> {…}
-  // saveChangesConfirmationDialog
 
   return (
     <Dialog open={isOpen}>
@@ -60,17 +58,32 @@ export const SaveChangesConfirmationDialog = () => {
 
             <FormGroup>
               <FormControlLabel
-                control={<Checkbox defaultChecked />}
+                control={
+                  <Checkbox
+                    checked={saveDefaultTimeRange}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeRange(e.target.checked)}
+                  />
+                }
                 label="Save current time period as new default (Absolute time ranges can not be saved)"
               />
               <FormControlLabel
-                control={<Checkbox defaultChecked />}
+                control={
+                  <Checkbox
+                    checked={saveDefaultVariables}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultVariables(e.target.checked)}
+                  />
+                }
                 label="Save current variables values as new default"
               />
             </FormGroup>
           </DialogContent>
           <DialogActions>
-            <Button variant="contained" onClick={dialog.onSaveChanges}>
+            <Button
+              variant="contained"
+              onClick={() => {
+                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultVariables);
+              }}
+            >
               Save Changes
             </Button>
             <Button variant="outlined" color="secondary" onClick={dialog.onCancel}>

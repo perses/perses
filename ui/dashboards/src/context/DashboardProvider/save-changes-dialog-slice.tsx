@@ -21,7 +21,7 @@ export interface SaveChangesConfirmationDialogSlice {
 }
 
 export interface SaveChangesConfirmationDialogState {
-  onSaveChanges: () => void;
+  onSaveChanges: (saveDefaultTimeRange: boolean, saveDefaultVariables: boolean) => void;
   onCancel: () => void;
   description?: string;
 }
@@ -35,14 +35,22 @@ export const createSaveChangesDialogSlice: StateCreator<
   isOpen: false,
 
   openSaveChangesConfirmationDialog(dialog) {
-    set((state) => {
-      state.saveChangesConfirmationDialog = dialog;
-    });
+    set(
+      (state) => {
+        state.saveChangesConfirmationDialog = dialog;
+      },
+      false,
+      'openSaveChangesConfirmationDialog'
+    );
   },
 
   closeSaveChangesConfirmationDialog() {
-    set((state) => {
-      state.saveChangesConfirmationDialog = undefined;
-    });
+    set(
+      (state) => {
+        state.saveChangesConfirmationDialog = undefined;
+      },
+      false,
+      'closeSaveChangesConfirmationDialog'
+    );
   },
 });

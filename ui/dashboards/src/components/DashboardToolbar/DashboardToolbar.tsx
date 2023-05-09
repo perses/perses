@@ -86,7 +86,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     variables.forEach((variable, index) => {
       if (variable.kind === 'ListVariable') {
         const currentVariable = variableValues[variable.spec.name];
-        if (currentVariable.default_value !== undefined) {
+        if (currentVariable?.default_value !== undefined) {
           const newVariable: ListVariableDefinition = {
             kind: 'ListVariable',
             spec: { ...variable.spec, default_value: currentVariable.default_value },
@@ -103,9 +103,13 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
     if (isTimeRangeUpdated || isSelectedVariablesUpdated) {
       openSaveChangesConfirmationDialog({
-        onSaveChanges: () => {
-          dashboard.spec.duration = timeRange.pastDuration;
-          dashboard.spec.variables = newVariables;
+        onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {
+          if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
+            dashboard.spec.duration = timeRange.pastDuration;
+          }
+          if (saveDefaultVariables === true) {
+            dashboard.spec.variables = newVariables;
+          }
           saveDashboard();
           refresh();
         },

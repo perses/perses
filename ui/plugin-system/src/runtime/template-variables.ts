@@ -22,6 +22,7 @@ export type VariableState = {
   options?: VariableOption[];
   loading: boolean;
   error?: Error;
+  default_value?: VariableValue;
 };
 
 export type VariableStateMap = Record<VariableName, VariableState>;
