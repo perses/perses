@@ -12,7 +12,13 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { Table } from '@perses-dev/components';
+import { Table, TableProps } from '@perses-dev/components';
+
+type MockTableData = {
+  name: string;
+  value: number;
+  color: string;
+};
 
 const meta: Meta<typeof Table> = {
   component: Table,
@@ -24,6 +30,35 @@ export default meta;
 
 type Story = StoryObj<typeof Table>;
 
+import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
+
+const COLOR_SHADES = ['400', '800'] as const;
+const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
+const MOCK_COLORS = COLOR_SHADES.reduce((results, colorShade) => {
+  COLOR_NAMES.map((colorName) => {
+    if (colorShade in colorName) {
+      results.push(colorName[colorShade]);
+    }
+  });
+  return results;
+}, [] as string[]);
+
+function generateMockTableData(count: number): MockTableData[] {
+  const data: MockTableData[] = [];
+  for (let i = 0; i < count; i++) {
+    data.push({
+      name: `my column name has a name ${i}`,
+      value: i,
+      color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
+    });
+  }
+  return data;
+}
+
 export const Primary: Story = {
-  args: {},
+  args: {
+    height: 400,
+    width: 800,
+    data: generateMockTableData(1000),
+  },
 };
