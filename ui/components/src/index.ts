@@ -26,6 +26,7 @@ export * from './LegendOptionsEditor';
 export * from './LineChart';
 export * from './OptionsEditorLayout';
 export * from './StatChart';
+export * from './Table';
 export * from './ThresholdsEditor';
 export * from './TimeSeriesTooltip';
 export * from './UnitSelector';

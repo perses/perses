@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { LegendOptions, LegendItem } from '../model';
+import { LegendOptions, LegendItem, getLegendMode } from '../model';
 import { ListLegend, ListLegendProps } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
+import { TableLegend } from './TableLegend';
 
 export interface LegendProps {
   width: number;
@@ -40,6 +41,12 @@ export interface LegendProps {
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
 export function Legend({ width, height, options, data, listProps }: LegendProps) {
+  const mode = getLegendMode(options.mode);
+
+  if (mode === 'Table') {
+    return <TableLegend />;
+  }
+
   if (options.position === 'Right') {
     return (
       <Box

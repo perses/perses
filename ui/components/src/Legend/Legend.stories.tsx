@@ -93,6 +93,15 @@ export default meta;
 
 type Story = StoryObj<typeof Legend>;
 
+export const Table: Story = {
+  args: {
+    options: {
+      position: 'Bottom',
+      mode: 'Table',
+    },
+  },
+};
+
 export const Bottom: Story = {
   args: {
     options: {

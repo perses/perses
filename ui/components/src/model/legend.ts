@@ -14,11 +14,14 @@
 import { MouseEventHandler } from 'react';
 
 export const legendPositions = ['Bottom', 'Right'] as const;
+export const legendModes = ['List', 'Table'] as const;
 
 export type LegendPositions = (typeof legendPositions)[number];
+export type LegendMode = (typeof legendModes)[number];
 
 export interface LegendOptions {
   position: LegendPositions;
+  mode?: LegendMode;
 }
 
 export interface LegendItem {
@@ -38,8 +41,9 @@ export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendPos
   Right: { label: 'Right' },
 };
 
-export const DEFAULT_LEGEND: LegendOptions = {
+export const DEFAULT_LEGEND: Required<LegendOptions> = {
   position: 'Bottom',
+  mode: 'List',
 };
 
 export function getLegendPosition(position?: LegendPositions) {
@@ -54,6 +58,18 @@ export function getLegendPosition(position?: LegendPositions) {
 
 export function isValidLegendPosition(position: LegendPositions) {
   return (legendPositions as readonly string[]).includes(position);
+}
+
+export function isValidLegendMode(mode: LegendMode) {
+  return (legendModes as readonly string[]).includes(mode);
+}
+
+export function getLegendMode(mode?: LegendMode) {
+  if (!mode || !isValidLegendMode(mode)) {
+    return DEFAULT_LEGEND.mode;
+  }
+
+  return mode;
 }
 
 export function validateLegendSpec(legend?: LegendOptions) {
