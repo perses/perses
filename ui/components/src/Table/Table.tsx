@@ -1,7 +1,11 @@
-interface TableProps {
-  data: unknown;
+import { VirtualizedTable } from './VirtualizedTable';
+
+export interface TableProps {
+  height: number;
+  width: number;
+  data?: unknown;
 }
 
 export function Table(props: TableProps) {
-  return <div>table time!</div>;
+  return <VirtualizedTable {...props} />;
 }

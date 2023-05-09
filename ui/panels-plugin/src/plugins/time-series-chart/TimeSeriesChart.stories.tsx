@@ -84,6 +84,7 @@ export const Primary: Story = {
     spec: {
       legend: {
         position: 'Bottom',
+        mode: 'Table',
       },
     },
   },

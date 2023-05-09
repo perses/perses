@@ -1,5 +1,10 @@
 import { Table } from '../Table';
 
-export function TableLegend() {
-  return <Table data={[]} />;
+export interface TableLegendProps {
+  height: number;
+  width: number;
+}
+
+export function TableLegend(props: TableLegendProps) {
+  return <Table {...props} />;
 }
