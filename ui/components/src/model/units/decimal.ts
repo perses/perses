@@ -47,6 +47,7 @@ export function formatDecimal(value: number, options: DecimalUnitOptions): strin
   }
 
   if (hasDecimalPlaces(decimal_places)) {
+    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
     formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
   } else {
     if (shouldAbbreviate(abbreviate)) {
@@ -54,6 +55,5 @@ export function formatDecimal(value: number, options: DecimalUnitOptions): strin
     }
   }
 
-  const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
+  return Intl.NumberFormat('en-US', formatterOptions).format(value);
 }

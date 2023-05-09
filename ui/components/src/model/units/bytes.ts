@@ -32,8 +32,8 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   abbreviate: true,
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
-  // This uses units that are powers of 1000.
-  // In other words, 1KB = 1000 bytes.
+  // These units are powers of 1000.
+  // In other words, 1 KB = 1000 bytes.
   Bytes: {
     group: 'Bytes',
     label: 'Bytes',
@@ -52,6 +52,7 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
     };
 
     if (hasDecimalPlaces(decimal_places)) {
+      formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
       formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
     } else {
       // This can happen if bytes is between -1000 and 1000
@@ -60,8 +61,7 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
       }
     }
 
-    const formatter = Intl.NumberFormat('en-US', formatterOptions);
-    return formatter.format(bytes);
+    return Intl.NumberFormat('en-US', formatterOptions).format(bytes);
   }
 
   // numbro is able to add units like KB, MB, GB, etc. correctly
@@ -69,8 +69,10 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
     output: 'byte',
     base: 'decimal',
     spaceSeparated: true,
-    mantissa: decimal_places ?? DEFAULT_NUMBRO_MANTISSA,
-    trimMantissa: true,
-    optionalMantissa: true,
+    mantissa: hasDecimalPlaces(decimal_places) ? decimal_places : DEFAULT_NUMBRO_MANTISSA,
+    // trimMantissa trims trailing 0s
+    trimMantissa: !hasDecimalPlaces(decimal_places),
+    // optionalMantissa excludes all the decimal places if they're all zeros
+    optionalMantissa: !hasDecimalPlaces(decimal_places),
   });
 }

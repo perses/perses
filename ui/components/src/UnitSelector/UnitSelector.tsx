@@ -12,6 +12,7 @@
 // limitations under the License.
 import { Box, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material';
 import { UnitOptions, UNIT_CONFIG, UnitConfig, isUnitWithDecimalPlaces, isUnitWithAbbreviate } from '../model';
+import { shouldAbbreviate } from '../model/units/utils';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 
 export interface UnitSelectorProps {
@@ -79,7 +80,7 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
         label="Abbreviate"
         control={
           <Switch
-            checked={hasAbbreviate ? !!value.abbreviate : false}
+            checked={hasAbbreviate ? shouldAbbreviate(value.abbreviate) : false}
             onChange={handleAbbreviateChange}
             disabled={!hasAbbreviate}
           />
