@@ -14,9 +14,16 @@
 import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
+import { DashboardResource, ListVariableDefinition, VariableDefinition, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useDashboard, useEditMode, useSaveChangesConfirmationDialog } from '../../context';
+import {
+  useDashboard,
+  useEditMode,
+  useSaveChangesConfirmationDialog,
+  useTemplateVariableDefinitions,
+  useTemplateVariableValues,
+  useTemplateVariableActions,
+} from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
@@ -47,9 +54,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     onSave,
   } = props;
 
+  const { dashboard } = useDashboard();
+
+  const variableValues = useTemplateVariableValues();
+
+  const { setVariableDefinitions } = useTemplateVariableActions();
+
+  const variables = useTemplateVariableDefinitions(); // stored variables, aka always the same as dashboard.spec.variables
+
   const { timeRange, refresh } = useTimeRange();
 
-  const dashboard = useDashboard();
   const { isEditMode, setEditMode } = useEditMode();
 
   // Confirm whether to save new default time range and template variable selected values
@@ -67,11 +81,31 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   );
 
   const onSaveButtonClick = () => {
+    let isSelectedVariablesUpdated = false;
+    const newVariables: VariableDefinition[] = [...variables];
+    variables.forEach((variable, index) => {
+      if (variable.kind === 'ListVariable') {
+        const currentVariable = variableValues[variable.spec.name];
+        if (currentVariable.default_value !== undefined) {
+          const newVariable: ListVariableDefinition = {
+            kind: 'ListVariable',
+            spec: { ...variable.spec, default_value: currentVariable.default_value },
+          };
+          newVariables.splice(index, 1, newVariable);
+          isSelectedVariablesUpdated = true;
+        }
+      }
+    });
+    setVariableDefinitions(newVariables);
+
+    const isTimeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
+
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
-    if (isRelativeTimeRange(timeRange) && dashboard.dashboard.spec.duration !== timeRange.pastDuration) {
+    if (isTimeRangeUpdated || isSelectedVariablesUpdated) {
       openSaveChangesConfirmationDialog({
         onSaveChanges: () => {
-          dashboard.dashboard.spec.duration = timeRange.pastDuration;
+          dashboard.spec.duration = timeRange.pastDuration;
+          dashboard.spec.variables = newVariables;
           saveDashboard();
           refresh();
         },
@@ -87,7 +121,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const saveDashboard = () => {
     if (onSave !== undefined) {
       setSavingDashboard(true);
-      onSave(dashboard.dashboard)
+      onSave(dashboard)
         .then(() => {
           setSavingDashboard(false);
           closeSaveChangesConfirmationDialog();

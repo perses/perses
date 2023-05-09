@@ -26,7 +26,7 @@ function hydrateTemplateVariableState(variable: VariableDefinition, initialValue
     case 'ListVariable':
       varState.options = [];
       varState.value = initialValue ?? variable.spec.default_value ?? null;
-
+      // TODO: smarter fallbacks for default_value when allow_all_value is true
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {
@@ -42,6 +42,7 @@ function hydrateTemplateVariableState(variable: VariableDefinition, initialValue
       if (Array.isArray(varState.value) && varState.value.length === 1 && varState.value[0] === DEFAULT_ALL_VALUE) {
         varState.value = DEFAULT_ALL_VALUE;
       }
+
       break;
     default:
       break;

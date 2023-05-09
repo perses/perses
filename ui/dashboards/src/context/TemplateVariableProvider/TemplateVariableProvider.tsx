@@ -34,6 +34,7 @@ type TemplateVariableStore = {
   setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
   setVariableLoading: (name: VariableName, loading: boolean) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
+  setVariableDefaultValue: (variableName: VariableName, value: VariableValue) => void;
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -201,6 +202,19 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
             },
             false,
             'setVariableValue'
+          ),
+
+        setVariableDefaultValue: (name, value) =>
+          set(
+            (state) => {
+              const varState = state.variableState[name];
+              if (!varState) {
+                return;
+              }
+              varState.default_value = value;
+            },
+            false,
+            'setVariableDefaultValue'
           ),
       }))
     )
