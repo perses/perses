@@ -22,7 +22,6 @@ import {
   useSaveChangesConfirmationDialog,
   useTemplateVariableDefinitions,
   useTemplateVariableValues,
-  useTemplateVariableActions,
 } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
@@ -56,7 +55,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   const { dashboard } = useDashboard();
   const variableValues = useTemplateVariableValues();
-  const { setVariableDefinitions } = useTemplateVariableActions();
   const savedVariables = useTemplateVariableDefinitions();
 
   const { timeRange, refresh } = useTimeRange();
@@ -79,7 +77,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   const onSaveButtonClick = () => {
     const { newVariables, isSelectedVariablesUpdated } = updateVariableDefaultValues(savedVariables, variableValues);
-    setVariableDefinitions(newVariables);
 
     const isTimeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
