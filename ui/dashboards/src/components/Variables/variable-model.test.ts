@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableOption } from '@perses-dev/plugin-system';
-import { filterVariableList } from './variable-model';
+import { VariableOption, VariableState } from '@perses-dev/plugin-system';
+import { VariableDefinition } from '@perses-dev/core';
+import { filterVariableList, updateVariableDefaultValues } from './variable-model';
 
 describe('filterVariableList', () => {
   const testSuite = [
@@ -53,5 +54,157 @@ describe('filterVariableList', () => {
     it(title, () => {
       expect(filterVariableList(originalValues, capturing_regexp)).toEqual(result);
     });
+  });
+});
+
+describe('updateVariableDefaultValues', () => {
+  it('should return new variable definitions if they are out of date with current default values state', () => {
+    const savedVariables: VariableDefinition[] = [
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'interval',
+          default_value: '1m',
+          allow_all_value: false,
+          allow_multiple: false,
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['1m', '5m'],
+            },
+          },
+        },
+      },
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'NewListVariable',
+          display: {
+            name: 'Test display label',
+            hidden: false,
+          },
+          default_value: 'another list value',
+          allow_all_value: true,
+          allow_multiple: false,
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: [
+                {
+                  label: 'test list value',
+                  value: 'test list value',
+                },
+                {
+                  label: 'another list value',
+                  value: 'another list value',
+                },
+                {
+                  label: 'need more value',
+                  value: 'need more value',
+                },
+                {
+                  label: 'here',
+                  value: 'here',
+                },
+              ],
+            },
+          },
+        },
+      },
+    ];
+    const variableState: VariableState = {
+      interval: {
+        value: '5m',
+        loading: false,
+        options: [
+          {
+            label: '1m',
+            value: '1m',
+          },
+          {
+            label: '5m',
+            value: '5m',
+          },
+        ],
+        default_value: '5m',
+      },
+      NewListVariable: {
+        value: 'test list value',
+        loading: false,
+        options: [
+          {
+            label: 'test list value',
+            value: 'test list value',
+          },
+          {
+            label: 'another list value',
+            value: 'another list value',
+          },
+          {
+            label: 'need more value',
+            value: 'need more value',
+          },
+          {
+            label: 'here',
+            value: 'here',
+          },
+        ],
+        default_value: 'test list value',
+      },
+    };
+    const newVariables = updateVariableDefaultValues(savedVariables, variableState);
+    expect(newVariables).toEqual({
+      isSelectedVariablesUpdated: true,
+      newVariables: [
+        {
+          kind: 'ListVariable',
+          spec: {
+            allow_all_value: false,
+            allow_multiple: false,
+            default_value: '5m',
+            name: 'interval',
+            plugin: { kind: 'StaticListVariable', spec: { values: ['1m', '5m'] } },
+          },
+        },
+        {
+          kind: 'ListVariable',
+          spec: {
+            allow_all_value: true,
+            allow_multiple: false,
+            default_value: 'test list value',
+            display: { hidden: false, name: 'Test display label' },
+            name: 'NewListVariable',
+            plugin: {
+              kind: 'StaticListVariable',
+              spec: {
+                values: [
+                  { label: 'test list value', value: 'test list value' },
+                  { label: 'another list value', value: 'another list value' },
+                  { label: 'need more value', value: 'need more value' },
+                  { label: 'here', value: 'here' },
+                ],
+              },
+            },
+          },
+        },
+      ],
+    });
+    // const newLayout: UnpositionedPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
+    // const referenceLayout: PanelGroupItemLayout = {
+    //   i: 'one',
+    //   x: 0,
+    //   y: 0,
+    //   w: 6,
+    //   h: 6,
+    // };
+    // const layouts: PanelGroupItemLayout[] = [referenceLayout];
+    // expect(insertPanelInLayout(newLayout, referenceLayout, layouts)).toEqual([
+    //   referenceLayout,
+    //   {
+    //     x: 6,
+    //     y: 0,
+    //     ...newLayout,
+    //   },
+    // ]);
   });
 });

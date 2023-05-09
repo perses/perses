@@ -28,11 +28,10 @@ import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
-import { EditVariablesButton } from '../Variables';
+import { EditVariablesButton, updateVariableDefaultValues } from '../Variables';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
-import { updateVariableDefaultValues } from '../../utils';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
