@@ -31,20 +31,35 @@ export function CRUDButton(props: CRUDButtonProps) {
   const { text, variant, color, disabled, onClick } = props;
   const isReadonly = useIsReadonly();
 
+  if (isReadonly) {
+    return (
+      <Tooltip title="Resource managed via code only" placement="top">
+        <span>
+          <Button
+            variant={variant}
+            color={color}
+            size="small"
+            sx={{ textTransform: 'uppercase' }}
+            onClick={onClick}
+            disabled={disabled || isReadonly}
+          >
+            {text}
+          </Button>
+        </span>
+      </Tooltip>
+    );
+  }
+
   return (
-    <Tooltip title="Resource managed via code only" placement="top">
-      <span>
-        <Button
-          variant={variant}
-          color={color}
-          size="small"
-          sx={{ textTransform: 'uppercase' }}
-          onClick={onClick}
-          disabled={disabled || isReadonly}
-        >
-          {text}
-        </Button>
-      </span>
-    </Tooltip>
+    <Button
+      variant={variant}
+      color={color}
+      size="small"
+      sx={{ textTransform: 'uppercase' }}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {text}
+    </Button>
   );
 }

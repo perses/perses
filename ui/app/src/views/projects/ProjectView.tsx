@@ -45,29 +45,29 @@ function ProjectView() {
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
       <DashboardBreadcrumbs dashboardProject={projectName} />
-      <Box sx={{ width: '100%' }}>
+      <Box>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
             <FolderPound fontSize={'large'} />
             <Typography variant="h1">{projectName}</Typography>
           </Stack>
           <CRUDButton text="Delete Project" variant="outlined" color="error" onClick={handleDeleteProjectDialogOpen} />
+          <DeleteProjectDialog
+            name={projectName}
+            open={isDeleteProjectDialogOpen}
+            onClose={handleDeleteProjectDialogClose}
+            onSuccess={handleDeleteProjectDialogSuccess}
+          />
         </Stack>
-        <DeleteProjectDialog
-          name={projectName}
-          open={isDeleteProjectDialogOpen}
-          onClose={handleDeleteProjectDialogClose}
-          onSuccess={handleDeleteProjectDialogSuccess}
-        />
+        <Grid container columnSpacing={8}>
+          <Grid item xs={12} lg={8}>
+            <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
+          </Grid>
+          <Grid item xs={12} lg={4}>
+            <RecentlyViewedDashboards projectName={projectName} id="recent-dashboard-list" />
+          </Grid>
+        </Grid>
       </Box>
-      <Grid container spacing={8}>
-        <Grid item xs={12} lg={8}>
-          <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
-        </Grid>
-        <Grid item xs={12} lg={4}>
-          <RecentlyViewedDashboards projectName={projectName} id="recent-dashboard-list" />
-        </Grid>
-      </Grid>
     </Stack>
   );
 }
