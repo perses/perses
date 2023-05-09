@@ -70,7 +70,9 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
     base: 'decimal',
     spaceSeparated: true,
     mantissa: hasDecimalPlaces(decimal_places) ? decimal_places : DEFAULT_NUMBRO_MANTISSA,
+    // trimMantissa trims trailing 0s
     trimMantissa: !hasDecimalPlaces(decimal_places),
+    // optionalMantissa excludes all the decimal places if they're all zeros
     optionalMantissa: !hasDecimalPlaces(decimal_places),
   });
 }
