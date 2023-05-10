@@ -44,7 +44,7 @@ const meta: Meta<typeof Table> = {
 
 export default meta;
 
-type Story = StoryObj<typeof Table>;
+type Story = StoryObj<typeof Table<MockTableData>>;
 
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
 

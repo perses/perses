@@ -5,6 +5,6 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({}));
 
 type TableCellProps = MuiTableCellProps;
 
-export function TableCell(props) {
+export function TableCell(props: TableCellProps) {
   return <StyledMuiTableCell {...props} />;
 }
