@@ -16,23 +16,13 @@ export interface TableProps<TableData> {
   height: number;
   width: number;
   data: TableData[];
+  columns: Array<ColumnDef<TableData>>;
 }
 
-export function Table<TableData>({ data, ...otherProps }: TableProps<TableData>) {
-  const DEFAULT_COLUMNS: Array<ColumnDef<TableData>> = [
-    {
-      accessorKey: 'label',
-      header: 'Label',
-      size: 200,
-    },
-    {
-      accessorKey: 'value',
-      header: 'Value',
-    },
-  ];
+export function Table<TableData>({ data, columns, ...otherProps }: TableProps<TableData>) {
   const table = useReactTable({
     data,
-    columns: DEFAULT_COLUMNS,
+    columns: columns,
     getCoreRowModel: getCoreRowModel(),
   });
 

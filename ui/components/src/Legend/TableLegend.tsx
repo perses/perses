@@ -1,4 +1,4 @@
-import { Table } from '../Table';
+import { Table, TableProps } from '../Table';
 import { LegendItem } from '../model';
 
 export interface TableLegendProps {
@@ -7,6 +7,13 @@ export interface TableLegendProps {
   width: number;
 }
 
+const COLUMNS: TableProps<LegendItem>['columns'] = [
+  {
+    accessorKey: 'label',
+    header: 'Name',
+  },
+];
+
 export function TableLegend({ items, ...otherProps }: TableLegendProps) {
-  return <Table {...otherProps} data={items} />;
+  return <Table {...otherProps} data={items} columns={COLUMNS} />;
 }

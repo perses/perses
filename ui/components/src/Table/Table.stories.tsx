@@ -20,6 +20,22 @@ type MockTableData = {
   color: string;
 };
 
+const COLUMNS: TableProps<MockTableData>['columns'] = [
+  {
+    accessorKey: 'label',
+    header: 'Label',
+    size: 200,
+  },
+  {
+    accessorKey: 'value',
+    header: 'Value',
+  },
+  {
+    accessorKey: 'color',
+    header: 'Color',
+  },
+];
+
 const meta: Meta<typeof Table> = {
   component: Table,
   argTypes: {},
@@ -60,5 +76,6 @@ export const Primary: Story = {
     height: 400,
     width: 800,
     data: generateMockTableData(1000),
+    columns: COLUMNS,
   },
 };
