@@ -95,10 +95,42 @@ type Story = StoryObj<typeof Legend>;
 
 export const Table: Story = {
   args: {
-    options: {
-      position: 'Bottom',
-      mode: 'Table',
+    data: generateMockLegendData(100),
+  },
+  argTypes: {
+    width: {
+      table: {
+        disable: true,
+      },
     },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    options: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            Right
+          </Typography>
+          <LegendWrapper {...args} options={{ mode: 'Table', position: 'Right' }} width={400} height={200} />
+        </div>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            Bottom
+          </Typography>
+          <LegendWrapper {...args} options={{ mode: 'Table', position: 'Bottom' }} width={500} height={100} />
+        </div>
+      </Stack>
+    );
   },
 };
 

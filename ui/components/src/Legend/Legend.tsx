@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { ReactNode } from 'react';
 import { LegendOptions, LegendItem, getLegendMode } from '../model';
 import { ListLegend, ListLegendProps } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
@@ -43,8 +44,19 @@ const NEED_VIRTUALIZATION_LIMIT = 500;
 export function Legend({ width, height, options, data, listProps }: LegendProps) {
   const mode = getLegendMode(options.mode);
 
+  // The bottom legend is displayed as a list when the number of items is too
+  // large and requires virtualization. Otherwise, it is rendered more compactly.
+  // We do not need this check for the right-side legend because it is always
+  // a virtualized list.
+  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
+
+  let legendContent: ReactNode;
   if (mode === 'Table') {
-    return <TableLegend width={width} height={height} items={data} />;
+    legendContent = <TableLegend width={width} height={height} items={data} />;
+  } else if (options.position === 'Right' || needsVirtualization) {
+    legendContent = <ListLegend items={data} width={width} height={height} {...listProps} />;
+  } else {
+    legendContent = <CompactLegend items={data} height={height} />;
   }
 
   if (options.position === 'Right') {
@@ -58,16 +70,12 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
           right: 0,
         }}
       >
-        <ListLegend items={data} width={width} height={height} {...listProps} />
+        {legendContent}
       </Box>
     );
   }
 
-  // The bottom legend is displayed as a list when the number of items is too
-  // large and requires virtualization. Otherwise, it is rendered more compactly.
-  // We do not need this check for the right-side legend because it is always
-  // a virtualized list.
-  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
+  // Bottom position
   return (
     <Box
       sx={{
@@ -77,11 +85,7 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
         bottom: 0,
       }}
     >
-      {needsVirtualization ? (
-        <ListLegend items={data} width={width} height={height} {...listProps} />
-      ) : (
-        <CompactLegend items={data} height={height} />
-      )}
+      {legendContent}
     </Box>
   );
 }
