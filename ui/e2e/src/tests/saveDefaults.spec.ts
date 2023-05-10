@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { test, expect } from '../fixtures/dashboardTest';
 
 test.use({
@@ -19,32 +20,36 @@ test.use({
 });
 
 test.describe('Dashboard: Defaults', () => {
-  test('can update saved dashboard duration', async ({ page, dashboardPage }) => {
+  test('can update default dashboard duration', async ({ page, dashboardPage }) => {
+    // Default to stored duration
     await expect(dashboardPage.timePicker).toContainText('Last 1 hour');
     await expect(page.url()).toContain('start=1h');
 
+    // Change selected relative time range
     await dashboardPage.timePicker.click();
     await page.getByRole('option', { name: 'Last 6 hours' }).click();
     await expect(page.url()).toContain('start=6h');
 
+    // Switch to edit mode and click save
     await dashboardPage.startEditing();
-    // await dashboardPage.saveChanges(); // TODO: can standard dashboardPage saveChanges helper be used?
     const toolbarSaveButton = dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
 
-    // TODO: share with dialog, move type to core
-    const dialogInfoText =
-      'It seems like you have made some changes to the dashboard, including the time period or variable values. Would you like to save these?';
-    const dialogText = dashboardPage.page.getByText(dialogInfoText);
+    // Save defaults confirmation dialog should open, click btn to save
+    const dialogText = dashboardPage.page.getByText(SAVE_DEFAULTS_DIALOG_TEXT);
     await expect(dialogText).toBeVisible();
-
     const dialogSaveButton = dashboardPage.page.getByRole('button', { name: 'Save Changes' });
     await dialogSaveButton.click();
-    console.log(dialogSaveButton);
 
-    // confirm new duration is persisted
+    // Confirm new duration is persisted
     await page.reload();
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
   });
+
+  // test('change duration from JSON editor', async ({ page, dashboardPage }) => {
+  //   // TODO: change duration from JSON editor
+  //   // TODO: change variables and check if default is persisted
+  //   // TODO: change variables from JSON editor
+  // });
 });

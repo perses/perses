@@ -11,6 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './constants';
-export * from './model';
-export * from './utils';
+export const SAVE_DEFAULTS_DIALOG_TEXT =
+  'It seems like you have made some changes to the dashboard, including the time period or variable values. Would you like to save these?';

@@ -13,6 +13,9 @@
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix"
   },
+  "dependencies": {
+    "@perses-dev/core": "^0.29.1"
+  },
   "devDependencies": {
     "@perses-dev/internal-utils": "0.29.1",
     "@playwright/test": "^1.29.1",
