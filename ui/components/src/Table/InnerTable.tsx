@@ -8,7 +8,6 @@ const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
 
 type InnerTableProps = MuiTableProps;
 
-// TODO: check on type for tbody
 export const InnerTable = forwardRef<HTMLTableElement, InnerTableProps>(function InnerTable(props, ref) {
-  return <StyledMuiTable {...props} ref={ref} />;
+  return <StyledMuiTable {...props} size="small" ref={ref} />;
 });
