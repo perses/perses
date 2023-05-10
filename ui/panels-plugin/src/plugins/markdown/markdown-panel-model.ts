@@ -11,6 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export interface MarkdownPanel {
+  kind: 'MarkdownPanel';
+  spec: MarkdownPanelOptions;
+}
+
 export interface MarkdownPanelOptions {
   text: string;
 }

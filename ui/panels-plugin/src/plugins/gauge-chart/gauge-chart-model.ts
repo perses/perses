@@ -16,12 +16,13 @@ import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal' };
-
 export const DEFAULT_MAX_PERCENT = 100;
-
 export const DEFAULT_MAX_PERCENT_DECIMAL = 1;
 
-export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
+export interface GaugeChart {
+  kind: 'GaugeChart';
+  spec: GaugeChartOptions;
+}
 
 /**
  * The Options object type supported by the GaugeChart panel plugin.
@@ -32,6 +33,8 @@ export interface GaugeChartOptions {
   thresholds?: ThresholdOptions;
   max?: number;
 }
+
+export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;
 
 /**
  * Creates the initial/empty options for a GaugeChart panel.

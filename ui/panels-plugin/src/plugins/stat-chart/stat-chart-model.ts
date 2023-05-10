@@ -15,12 +15,10 @@ import { ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export interface SparklineOptions {
-  color?: string;
-  width?: number;
-}
-
-export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
+export type StatChart = {
+  kind: 'StatChart';
+  spec: StatChartOptions;
+};
 
 export interface StatChartOptions {
   calculation: CalculationType;
@@ -28,6 +26,13 @@ export interface StatChartOptions {
   thresholds?: ThresholdOptions;
   sparkline?: SparklineOptions;
 }
+
+export interface SparklineOptions {
+  color?: string;
+  width?: number;
+}
+
+export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
 export function createInitialStatChartOptions(): StatChartOptions {
   return {
