@@ -23,6 +23,7 @@ export function Table<TableData>({ data, ...otherProps }: TableProps<TableData>)
     {
       accessorKey: 'name',
       header: 'Name',
+      size: 200,
     },
     {
       accessorKey: 'value',

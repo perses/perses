@@ -1,7 +1,9 @@
 import { Table as MuiTable, styled, TableProps as MuiTableProps } from '@mui/material';
 import { forwardRef } from 'react';
 
-const StyledMuiTable = styled(MuiTable)(({ theme }) => ({}));
+const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
+  tableLayout: 'fixed',
+}));
 
 type InnerTableProps = MuiTableProps;
 

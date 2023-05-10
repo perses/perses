@@ -1,23 +1,13 @@
 import { Table as TSTable, flexRender } from '@tanstack/react-table';
-import {
-  Table as MuiTable,
-  TableRow as MuiTableRow,
-  TableCell as MuiTableCell,
-  TableSortLabel,
-  Paper,
-  Checkbox,
-  Box,
-  Typography,
-  TextField,
-  styled,
-} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
-import { forwardRef } from 'react';
 import { TableProps } from './Table';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
 import { TableHead } from './TableHead';
+import { TableHeaderCell } from './TableHeaderCell';
+import { TableCell } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 
 export interface VirtualizedTableProps<TableData> {
@@ -25,9 +15,6 @@ export interface VirtualizedTableProps<TableData> {
   width: number;
   table: TSTable<TableData>;
 }
-
-const StyledMuiTableRow = styled(MuiTableRow)(({ theme }) => ({}));
-export const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({}));
 
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
@@ -58,17 +45,17 @@ export function VirtualizedTable<TableData>({ width, height, table }: Virtualize
             <>
               {table.getHeaderGroups().map((headerGroup) => {
                 return (
-                  <StyledMuiTableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       const column = header.column;
 
                       return (
-                        <StyledMuiTableCell key={header.id} sx={{ width: column.getSize() }}>
-                          <Typography noWrap>{flexRender(column.columnDef.header, header.getContext())}</Typography>
-                        </StyledMuiTableCell>
+                        <TableHeaderCell key={header.id} sx={{ width: column.getSize() }}>
+                          {flexRender(column.columnDef.header, header.getContext())}
+                        </TableHeaderCell>
                       );
                     })}
-                  </StyledMuiTableRow>
+                  </TableRow>
                 );
               })}
             </>
@@ -84,9 +71,9 @@ export function VirtualizedTable<TableData>({ width, height, table }: Virtualize
             <>
               {row.getVisibleCells().map((cell) => {
                 return (
-                  <StyledMuiTableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
+                  <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
                     <Typography noWrap>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Typography>
-                  </StyledMuiTableCell>
+                  </TableCell>
                 );
               })}
             </>
