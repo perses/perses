@@ -31,7 +31,7 @@ function isWithDatastoreStoreParameter(
 export const WithDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>) => {
   const { getPlugin } = usePluginRegistry();
 
-  const initParameter = context.parameters.WithDataQueries;
+  const initParameter = context.parameters.WithDatasourceStore;
 
   // This currently provides a very simplified default to enable use in some
   // basic stories. It likely will need expanding in the future.
