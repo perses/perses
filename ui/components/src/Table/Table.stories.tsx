@@ -15,7 +15,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Table, TableProps } from '@perses-dev/components';
 
 type MockTableData = {
-  name: string;
+  label: string;
   value: number;
   color: string;
 };
@@ -47,7 +47,7 @@ function generateMockTableData(count: number): MockTableData[] {
   const data: MockTableData[] = [];
   for (let i = 0; i < count; i++) {
     data.push({
-      name: `my column name has a name ${i}`,
+      label: `my column name has a label ${i}`,
       value: i,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
     });

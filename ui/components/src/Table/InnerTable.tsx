@@ -2,6 +2,7 @@ import { Table as MuiTable, styled, TableProps as MuiTableProps } from '@mui/mat
 import { forwardRef } from 'react';
 
 const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
+  // This value is needed to have a consistent table layout when scrolling.
   tableLayout: 'fixed',
 }));
 

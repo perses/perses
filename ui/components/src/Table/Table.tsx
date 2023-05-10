@@ -21,8 +21,8 @@ export interface TableProps<TableData> {
 export function Table<TableData>({ data, ...otherProps }: TableProps<TableData>) {
   const DEFAULT_COLUMNS: Array<ColumnDef<TableData>> = [
     {
-      accessorKey: 'name',
-      header: 'Name',
+      accessorKey: 'label',
+      header: 'Label',
       size: 200,
     },
     {

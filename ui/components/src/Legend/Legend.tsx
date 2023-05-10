@@ -44,7 +44,7 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
   const mode = getLegendMode(options.mode);
 
   if (mode === 'Table') {
-    return <TableLegend width={width} height={height} />;
+    return <TableLegend width={width} height={height} items={data} />;
   }
 
   if (options.position === 'Right') {
