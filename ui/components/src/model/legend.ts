@@ -41,6 +41,14 @@ export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendPos
   Right: { label: 'Right' },
 };
 
+export type LegendModeConfig = {
+  label: string;
+};
+export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendModeConfig>> = {
+  List: { label: 'List' },
+  Table: { label: 'Table' },
+};
+
 export const DEFAULT_LEGEND: Required<LegendOptions> = {
   position: 'Bottom',
   mode: 'List',
