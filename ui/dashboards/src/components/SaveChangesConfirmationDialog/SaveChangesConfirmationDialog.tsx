@@ -25,6 +25,8 @@ import {
   Typography,
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
+import { useTimeRange } from '@perses-dev/plugin-system';
+import { isRelativeTimeRange } from '@perses-dev/core';
 import { useSaveChangesConfirmationDialog } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
@@ -33,6 +35,13 @@ export const SaveChangesConfirmationDialog = () => {
 
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isOpen = dialog !== undefined;
+
+  const { timeRange } = useTimeRange();
+  const currentTimeRangeText = isRelativeTimeRange(timeRange)
+    ? `(${timeRange.pastDuration})`
+    : '(Absolute time ranges can not be saved)';
+
+  const timeRangeInfoText = `Save current time period as new default ${currentTimeRangeText}`;
 
   return (
     <Dialog open={isOpen}>
@@ -60,11 +69,12 @@ export const SaveChangesConfirmationDialog = () => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={saveDefaultTimeRange}
+                    disabled={!isRelativeTimeRange(timeRange)}
+                    checked={saveDefaultTimeRange && isRelativeTimeRange(timeRange)}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeRange(e.target.checked)}
                   />
                 }
-                label="Save current time period as new default (Absolute time ranges can not be saved)"
+                label={timeRangeInfoText}
               />
               <FormControlLabel
                 control={
