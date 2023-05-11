@@ -52,7 +52,20 @@ export function ListLegend({ items, height, width }: ListLegendProps) {
       style={{ height, width }}
       data={items}
       itemContent={(index, item) => {
-        return <ListLegendItem key={item.id} item={item} truncateLabel={truncateLabels} sx={{ paddingRight: 1 }} />;
+        return (
+          <ListLegendItem
+            key={item.id}
+            item={item}
+            truncateLabel={truncateLabels}
+            sx={{
+              // Having an explicit width is important for the ellipsizing to
+              // work correctly. Subtract padding to simulate padding.
+              width: width - LIST_PADDING,
+              wordBreak: 'break-word',
+              overflow: 'hidden',
+            }}
+          />
+        );
       }}
       role="list"
       components={{
