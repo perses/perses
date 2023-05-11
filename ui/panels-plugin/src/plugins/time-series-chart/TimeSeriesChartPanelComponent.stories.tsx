@@ -38,8 +38,12 @@ function TimeSeriesChartWrapper({ height, width, ...otherProps }: TimeSeriesChar
   );
 }
 
-const TIMESERIES_EXAMPLE_MOCK_NOW = 1673805600000;
-const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000;
+// Mock time range values used for mocking the time range in the system and
+// mock data responses to ensure consistent results when viewing and taking
+// visual testing snapshots of stories.
+// Currenting has a 6 hour time range.
+const TIMESERIES_EXAMPLE_MOCK_END = 1673805600000;
+const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_END - 6 * 60 * 60 * 1000;
 
 /**
  * The panel component for the `TimeSeriesChart` panel plugin.
@@ -67,7 +71,7 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
       props: {
         initialTimeRange: {
           start: TIMESERIES_EXAMPLE_MOCK_START,
-          end: TIMESERIES_EXAMPLE_MOCK_NOW,
+          end: TIMESERIES_EXAMPLE_MOCK_END,
         },
       },
     },
@@ -97,7 +101,7 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
                     },
                   ],
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
-                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                   totalDatapoints: 10000,
                 }),
               },
