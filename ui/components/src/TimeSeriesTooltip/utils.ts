@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH } from './tooltip-model';
+import {
+  CursorCoordinates,
+  CursorData,
+  TOOLTIP_MAX_HEIGHT,
+  TOOLTIP_MAX_ITEMS,
+  TOOLTIP_MAX_WIDTH,
+} from './tooltip-model';
 
 /**
  * Determine position of tooltip depending on chart dimensions and the number of focused series
@@ -20,7 +26,6 @@ export function assembleTransform(
   mousePos: CursorData['coords'],
   seriesNum: number,
   chartWidth: number,
-  chartHeight: number,
   pinnedPos: CursorCoordinates | null
 ) {
   if (mousePos === null) {
@@ -40,17 +45,12 @@ export function assembleTransform(
   const x = mousePos.page.x;
   let y = mousePos.page.y + cursorPaddingY;
 
-  const isCloseToBottom = mousePos.page.y > window.innerHeight * 0.8;
-  const yPosAdjustThreshold = chartHeight * 0.75;
-  // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
-  if (isCloseToBottom === true) {
-    if (seriesNum > 6) {
-      y = mousePos.page.y * 0.75;
-    } else {
-      y = mousePos.page.y * 0.9;
-    }
-  } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
-    y = mousePos.page.y * 0.95;
+  // approximate tootlip height based on number of series
+  const tooltipHeight = Math.min(Math.min(seriesNum, TOOLTIP_MAX_ITEMS) * 24, TOOLTIP_MAX_HEIGHT);
+
+  // adjust so tooltip does not get cut off at bottom of chart
+  if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
+    y = mousePos.page.y - tooltipHeight;
   }
 
   // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
