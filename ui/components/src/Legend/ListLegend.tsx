@@ -20,13 +20,6 @@ export interface ListLegendProps {
   items: LegendItem[];
   height: number;
   width: number;
-
-  /**
-   * The height used when initially laying out items in the list. Once items
-   * render, the height is determined based on the content. This is needed
-   * because the list is virtualized.
-   */
-  initialRowHeight?: number;
 }
 
 /**
