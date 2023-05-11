@@ -50,7 +50,7 @@ const PanelOptionsEditorWrapper = ({ initialPanelDefinition }: PanelOptionsEdito
 };
 
 /**
- * The panel options editor for the `TimeSeriesChart` plugin.
+ * The panel options editor for the `TimeSeriesChart` panel plugin.
  *
  * This component is not intended to be used directly. It is documented in storybook
  * to provide an example of what the plugin settings look like.

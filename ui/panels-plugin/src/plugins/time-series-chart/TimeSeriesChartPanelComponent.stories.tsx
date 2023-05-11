@@ -42,7 +42,7 @@ const TIMESERIES_EXAMPLE_MOCK_NOW = 1673805600000;
 const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000;
 
 /**
- * The panel component for the `TimeSeriesChart` plugin.
+ * The panel component for the `TimeSeriesChart` panel plugin.
  *
  * This component is not intended to be used directly. It is documented in storybook
  * to provide an example of what the plugin panel component looks like.
