@@ -126,7 +126,17 @@ export function StatChart(props: StatChartProps) {
       >
         {formattedValue}
       </Typography>
-      {sparkline !== undefined && <EChart option={option} theme={chartsTheme.echartsTheme} renderer="svg" />}
+      {sparkline !== undefined && (
+        <EChart
+          sx={{
+            width: '100%',
+            height: '100%',
+          }}
+          option={option}
+          theme={chartsTheme.echartsTheme}
+          renderer="svg"
+        />
+      )}
     </Box>
   );
 }

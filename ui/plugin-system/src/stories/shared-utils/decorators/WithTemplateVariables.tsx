@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This decorator is used for non-dashboards package template variable needs.
-// Use the more specific decorator in the dashboards package when working with
-// dashboards.
-
 import { StoryFn, StoryContext } from '@storybook/react';
 import { TemplateVariableContext, TemplateVariableSrv } from '../../../runtime';
 
@@ -29,6 +25,9 @@ function isWithTemplateVariableParameter(
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
+// This decorator is used for non-dashboards package template variable needs.
+// Use the more specific decorator in the dashboards package when working with
+// dashboards.
 export const WithTemplateVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
   const initParameter = context.parameters.withTemplateVariables;
   const defaultValue: TemplateVariableSrv = {
