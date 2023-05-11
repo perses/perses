@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
+import updatedDefaultsDashboard from '../data/updatedDefaultsDashboard.json';
 import { test, expect } from '../fixtures/dashboardTest';
 
 test.use({
@@ -32,6 +33,7 @@ test.describe('Dashboard: Defaults', () => {
 
     // Switch to edit mode and click save
     await dashboardPage.startEditing();
+    // await dashboardPage.saveChanges(); // TODO: Can saveChanges be used instead? Throws 409 error currently
     const toolbarSaveButton = dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
 
@@ -47,9 +49,15 @@ test.describe('Dashboard: Defaults', () => {
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
   });
 
-  // test('change duration from JSON editor', async ({ page, dashboardPage }) => {
-  //   // TODO: change duration from JSON editor
-  //   // TODO: change variables and check if default is persisted
-  //   // TODO: change variables from JSON editor
-  // });
+  test('can save new default duration from JSON editor', async ({ page, dashboardPage }) => {
+    await dashboardPage.startEditing();
+    await page.getByRole('button', { name: 'Edit JSON' }).click(); // TODO: move TOOLTIP_TEXT.editJson to @perses-dev/core and share constant here
+    const jsonInput = dashboardPage.page.getByRole('textbox');
+    await jsonInput.clear();
+    await jsonInput.fill(JSON.stringify(updatedDefaultsDashboard));
+    await dashboardPage.page.getByRole('button', { name: 'Apply', exact: true }).click();
+    await dashboardPage.saveChanges();
+    await expect(page.url()).toContain('start=5m');
+    await expect(dashboardPage.timePicker).toContainText('Last 5 minutes');
+  });
 });
