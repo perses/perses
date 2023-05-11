@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
 import { LegendItem } from '../model';
 import { combineSx } from '../utils';
@@ -27,16 +27,10 @@ interface ListLegendItemProps extends ListItemProps<'div'> {
    * When `false` or unset, will show the full label.
    */
   truncateLabel?: boolean;
-
-  /**
-   * Called when the layout of the legend item changes as a result of the hover
-   * behavior when `truncateLabel` is `true`.
-   */
-  onLayoutChange?: () => void;
 }
 
 const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
-  { item, sx, truncateLabel, onLayoutChange, ...others },
+  { item, sx, truncateLabel, ...others },
   ref
 ) {
   const [noWrap, setNoWrap] = useState(truncateLabel);
@@ -52,12 +46,6 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
       setNoWrap(true);
     }
   }
-
-  useEffect(() => {
-    // When `noWrap` changes, so does the layout of the component. Notifies the
-    // parent, so it can handle those changes.
-    onLayoutChange?.();
-  }, [noWrap, onLayoutChange]);
 
   return (
     <ListItem
