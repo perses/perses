@@ -31,6 +31,15 @@ test.describe('Dashboard: Defaults', () => {
     await page.getByRole('option', { name: 'Last 6 hours' }).click();
     await expect(page.url()).toContain('start=6h');
 
+    // Changed selected interval variable
+    await expect(dashboardPage.variableListItems).toContainText(['1m']);
+    await dashboardPage.page
+      .getByRole('button', {
+        name: 'interval',
+      })
+      .click();
+    await dashboardPage.page.getByRole('option', { name: '5m' }).click();
+
     // Switch to edit mode and click save
     await dashboardPage.startEditing();
     // await dashboardPage.saveChanges(); // TODO: Can saveChanges be used instead? Throws 409 error currently
@@ -43,10 +52,11 @@ test.describe('Dashboard: Defaults', () => {
     const dialogSaveButton = dashboardPage.page.getByRole('button', { name: 'Save Changes' });
     await dialogSaveButton.click();
 
-    // Confirm new duration is persisted
+    // Confirm correct default duration and interval variable are persisted
     await page.reload();
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
+    await expect(dashboardPage.variableListItems).toContainText(['5m']);
   });
 
   test('can save new default duration from JSON editor', async ({ page, dashboardPage }) => {
