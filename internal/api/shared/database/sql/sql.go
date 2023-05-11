@@ -28,10 +28,12 @@ import (
 
 const (
 	tableGlobalDatasource = "globaldatasource"
+	tableGlobalVariable   = "globalvariable"
 	tableProject          = "project"
 	tableDashboard        = "dashboard"
 	tableFolder           = "folder"
 	tableDatasource       = "datasource"
+	tableVariable         = "variable"
 
 	colID      = "id"
 	colDoc     = "doc"
@@ -49,8 +51,12 @@ func getTableName(kind modelV1.Kind) (string, error) {
 		return tableFolder, nil
 	case modelV1.KindGlobalDatasource:
 		return tableGlobalDatasource, nil
+	case modelV1.KindGlobalVariable:
+		return tableGlobalVariable, nil
 	case modelV1.KindProject:
 		return tableProject, nil
+	case modelV1.KindVariable:
+		return tableVariable, nil
 	default:
 		return "", fmt.Errorf("%q has no associated table", kind)
 	}
@@ -73,26 +79,23 @@ type DAO struct {
 }
 
 func (d *DAO) Init() error {
-	globalDatasource := d.createResourceTable(tableGlobalDatasource)
-	project := d.createResourceTable(tableProject)
+	tables := []string{
+		d.createResourceTable(tableGlobalDatasource),
+		d.createResourceTable(tableGlobalVariable),
+		d.createResourceTable(tableProject),
 
-	dashboard := d.createProjectResourceTable(tableDashboard)
-	folder := d.createProjectResourceTable(tableFolder)
-	datasource := d.createProjectResourceTable(tableDatasource)
+		d.createProjectResourceTable(tableDashboard),
+		d.createProjectResourceTable(tableFolder),
+		d.createProjectResourceTable(tableDatasource),
+		d.createProjectResourceTable(tableVariable),
+	}
 
-	if err := d.createTable(globalDatasource); err != nil {
-		return err
+	for _, table := range tables {
+		if err := d.createTable(table); err != nil {
+			return err
+		}
 	}
-	if err := d.createTable(project); err != nil {
-		return err
-	}
-	if err := d.createTable(dashboard); err != nil {
-		return err
-	}
-	if err := d.createTable(folder); err != nil {
-		return err
-	}
-	return d.createTable(datasource)
+	return nil
 }
 
 func (d *DAO) createResourceTable(tableName string) string {
