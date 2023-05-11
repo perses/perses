@@ -38,10 +38,10 @@ export const SaveChangesConfirmationDialog = () => {
 
   const { timeRange } = useTimeRange();
   const currentTimeRangeText = isRelativeTimeRange(timeRange)
-    ? `(${timeRange.pastDuration})`
+    ? `(Last ${timeRange.pastDuration})`
     : '(Absolute time ranges can not be saved)';
 
-  const timeRangeInfoText = `Save current time period as new default ${currentTimeRangeText}`;
+  const timeRangeInfoText = `Save current time range as new default ${currentTimeRangeText}`;
 
   return (
     <Dialog open={isOpen}>

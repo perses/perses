@@ -147,7 +147,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
               state.variableState = hydrateTemplateVariableStates(definitions, initialParams);
             },
             false,
-            'setVariableDefinitions'
+            '[Variables] setVariableDefinitions' // Used for action name in Redux devtools
           );
         },
         setVariableOptions(name, options) {
@@ -160,7 +160,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
               varState.options = options;
             },
             false,
-            'setVariableOptions'
+            '[Variables] setVariableOptions'
           );
         },
         setVariableLoading(name, loading) {
@@ -173,7 +173,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
               varState.loading = loading;
             },
             false,
-            'setVariableLoading'
+            '[Variables] setVariableLoading'
           );
         },
 
@@ -201,7 +201,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
               varState.value = val;
             },
             false,
-            'setVariableValue'
+            '[Variables] setVariableValue'
           ),
 
         setVariableDefaultValue: (name, value) =>
@@ -214,7 +214,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
               varState.default_value = value;
             },
             false,
-            'setVariableDefaultValue'
+            '[Variables] setVariableDefaultValue'
           ),
       }))
     )

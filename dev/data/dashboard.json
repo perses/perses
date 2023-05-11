@@ -11,19 +11,31 @@
     "spec": {
       "duration": "5m",
       "variables": [
-        { "kind": "TextVariable", "spec": { "name": "job", "value": "node" } },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "job",
+            "allow_multiple": false,
+            "allow_all_value": false,
+            "plugin": {
+              "kind": "PrometheusLabelValuesVariable",
+              "spec": {
+                "label_name": "job"
+              }
+            }
+          }
+        },
         {
           "kind": "ListVariable",
           "spec": {
             "name": "instance",
+            "allow_multiple": false,
+            "allow_all_value": false,
             "plugin": {
-              "kind": "StaticListVariable",
+              "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "values": [
-                  "demo.do.prometheus.io:9100",
-                  "demo.do.prometheus.io:3000",
-                  "demo.promlabs.com:9100"
-                ]
+                "label_name": "instance",
+                "matchers": ["up{job=~\"$job\"}"]
               }
             }
           }
@@ -37,7 +49,8 @@
               "spec": { "values": ["1m", "5m"] }
             }
           }
-        }
+        },
+        { "kind": "TextVariable", "spec": { "name": "text", "value": "test" } }
       ],
       "panels": {
         "defaultTimeSeriesChart": {

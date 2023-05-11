@@ -42,7 +42,6 @@ test.describe('Dashboard: Defaults', () => {
 
     // Switch to edit mode and click save
     await dashboardPage.startEditing();
-    // await dashboardPage.saveChanges(); // TODO: Can saveChanges be used instead? Throws 409 error currently
     const toolbarSaveButton = dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
 

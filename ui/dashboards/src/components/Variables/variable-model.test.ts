@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableOption, VariableState } from '@perses-dev/plugin-system';
+import { VariableOption } from '@perses-dev/plugin-system';
 import { VariableDefinition } from '@perses-dev/core';
 import { filterVariableList, updateVariableDefaultValues } from './variable-model';
 
@@ -112,7 +112,7 @@ describe('updateVariableDefaultValues', () => {
         },
       },
     ];
-    const variableState: VariableState = {
+    const variableState = {
       interval: {
         value: '5m',
         loading: false,
@@ -189,22 +189,5 @@ describe('updateVariableDefaultValues', () => {
         },
       ],
     });
-    // const newLayout: UnpositionedPanelGroupItemLayout = { i: 'abc', w: 10, h: 8 };
-    // const referenceLayout: PanelGroupItemLayout = {
-    //   i: 'one',
-    //   x: 0,
-    //   y: 0,
-    //   w: 6,
-    //   h: 6,
-    // };
-    // const layouts: PanelGroupItemLayout[] = [referenceLayout];
-    // expect(insertPanelInLayout(newLayout, referenceLayout, layouts)).toEqual([
-    //   referenceLayout,
-    //   {
-    //     x: 6,
-    //     y: 0,
-    //     ...newLayout,
-    //   },
-    // ]);
   });
 });
