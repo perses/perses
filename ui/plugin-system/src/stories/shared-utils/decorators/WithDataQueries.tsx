@@ -15,6 +15,12 @@ import { Definition, UnknownSpec } from '@perses-dev/core';
 import { DataQueriesProvider, DataQueriesProviderProps } from '@perses-dev/plugin-system';
 import { StoryFn, StoryContext } from '@storybook/react';
 
+declare module '@storybook/react' {
+  interface Parameters {
+    withDataQueries?: WithDataQueriesProvideParameter;
+  }
+}
+
 export type WithDataQueriesProvideParameter = {
   props: DataQueriesProviderProps;
 };
@@ -27,7 +33,7 @@ function isWithDataQueriesParameter(
 }
 
 export const WithDataQueries = (Story: StoryFn, context: StoryContext<unknown>) => {
-  const initParameter = context.parameters.WithDataQueries;
+  const initParameter = context.parameters.withDataQueries;
   const parameter = isWithDataQueriesParameter(initParameter)
     ? initParameter
     : { props: { definitions: [] as Array<Definition<UnknownSpec>> } };

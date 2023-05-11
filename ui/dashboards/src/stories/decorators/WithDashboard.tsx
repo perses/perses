@@ -15,6 +15,12 @@ import { StoryFn, StoryContext } from '@storybook/react';
 import { DashboardProvider, DashboardProviderProps } from '@perses-dev/dashboards';
 import { EMPTY_DASHBOARD_RESOURCE } from './constants';
 
+declare module '@storybook/react' {
+  interface Parameters {
+    withDashboard?: WithDashboardParameter;
+  }
+}
+
 export type WithDashboardParameter = {
   props: Partial<DashboardProviderProps>;
 };

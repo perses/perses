@@ -15,7 +15,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { WithQueryClient } from '@perses-dev/storybook';
 import { action } from '@storybook/addon-actions';
-import { WithPluginRegistry, WithDatasourceStore } from '../../stories/shared-utils';
+import { WithPluginRegistry, WithPluginSystemDatasourceStore } from '../../stories/shared-utils';
 import { TimeSeriesQueryEditor, TimeSeriesQueryEditorProps } from './TimeSeriesQueryEditor';
 
 function TimeSeriesQueryEditorWrapper(props: TimeSeriesQueryEditorProps) {
@@ -45,7 +45,7 @@ const meta: Meta<typeof TimeSeriesQueryEditor> = {
       },
     },
   },
-  decorators: [WithDatasourceStore, WithPluginRegistry, WithQueryClient],
+  decorators: [WithPluginSystemDatasourceStore, WithPluginRegistry, WithQueryClient],
   render: (args) => {
     return <TimeSeriesQueryEditorWrapper {...args} />;
   },
