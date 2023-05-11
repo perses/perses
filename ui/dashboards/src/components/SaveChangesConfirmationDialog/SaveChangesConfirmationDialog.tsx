@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { isRelativeTimeRange } from '@perses-dev/core';
+import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { useSaveChangesConfirmationDialog } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
@@ -47,7 +47,7 @@ export const SaveChangesConfirmationDialog = () => {
     <Dialog open={isOpen}>
       {dialog !== undefined && (
         <>
-          <DialogTitle>Save Changes</DialogTitle>
+          <DialogTitle>Save Dashboard</DialogTitle>
           <IconButton
             aria-label="Close"
             onClick={dialog.onCancel}
@@ -60,10 +60,7 @@ export const SaveChangesConfirmationDialog = () => {
             <CloseIcon />
           </IconButton>
           <DialogContent dividers sx={{ width: '500px' }}>
-            <Typography marginBottom={2}>
-              {dialog.description ||
-                'It seems like you have made some changes to the dashboard, including the time period or variable values. Would you like to save these?'}
-            </Typography>
+            <Typography marginBottom={2}>{dialog.description || SAVE_DEFAULTS_DIALOG_TEXT}</Typography>
 
             <FormGroup>
               <FormControlLabel
