@@ -19,8 +19,8 @@ import { CompactLegend } from './CompactLegend';
 import { TableLegend } from './TableLegend';
 
 export interface LegendProps {
-  width: number | string;
-  height: number | string;
+  width: number;
+  height: number;
   data: LegendItem[];
   options: LegendOptions;
 
