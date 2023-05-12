@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Grid, Stack, Typography } from '@mui/material';
+import { Box, Grid, Stack, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,7 @@ import { ProjectModel, useProjectList } from '../../model/project-client';
 import { AddProjectDialog } from '../../components/AddProjectDialog/AddProjectDialog';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -66,23 +67,13 @@ function HomeView() {
             <Typography variant="h1">Home</Typography>
           </Stack>
           <Stack direction="row" gap={2}>
-            <Button
+            <CRUDButton text="Add Project" variant="contained" onClick={handleAddProjectDialogOpen} />
+            <CRUDButton
+              text="Add Dashboard"
               variant="contained"
-              size="small"
-              sx={{ textTransform: 'uppercase' }}
-              onClick={handleAddProjectDialogOpen}
-            >
-              Add Project
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              sx={{ textTransform: 'uppercase' }}
               onClick={handleAddDashboardDialogOpen}
               disabled={projectOptions.length === 0}
-            >
-              Add Dashboard
-            </Button>
+            />
             <AddProjectDialog
               open={isAddProjectDialogOpen}
               onClose={handleAddProjectDialogClose}
@@ -97,7 +88,7 @@ function HomeView() {
           </Stack>
         </Stack>
       </Box>
-      <Grid container spacing={8}>
+      <Grid container columnSpacing={8}>
         <Grid item xs={12} lg={8}>
           <RecentDashboards />
           <ProjectsAndDashboards />

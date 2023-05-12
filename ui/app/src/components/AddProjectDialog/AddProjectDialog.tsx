@@ -32,6 +32,7 @@ export interface AddProjectDialogProps {
  */
 export const AddProjectDialog = (props: AddProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
+
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
 

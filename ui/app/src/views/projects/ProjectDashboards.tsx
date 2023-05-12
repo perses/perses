@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useNavigate } from 'react-router-dom';
-import { Box, Stack, Typography, Button, Card } from '@mui/material';
+import { Box, Stack, Typography, Card } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import ViewDashboard from 'mdi-material-ui/ViewDashboard';
 import { useCallback, useState } from 'react';
@@ -20,6 +20,7 @@ import { DashboardSelector } from '@perses-dev/core';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 
 interface ProjectDashboardsProps {
   projectName: string;
@@ -47,14 +48,7 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
           <ViewDashboard />
           <Typography variant="h3">Dashboards</Typography>
         </Stack>
-        <Button
-          variant="contained"
-          size="small"
-          sx={{ textTransform: 'uppercase' }}
-          onClick={() => setOpenCreateDashboardDialogState(true)}
-        >
-          Add Dashboard
-        </Button>
+        <CRUDButton text="Add Dashboard" variant="contained" onClick={() => setOpenCreateDashboardDialogState(true)} />
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <Card>
