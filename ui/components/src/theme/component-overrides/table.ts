@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Components, Theme, alertClasses, linkClasses } from '@mui/material';
+import { Components, Theme } from '@mui/material';
 
 export const MuiTable: Components<Theme>['MuiTable'] = {
   styleOverrides: {},
@@ -24,7 +24,7 @@ export const MuiTableCell: Components<Theme>['MuiTableCell'] = {
         fontSize: theme.typography.body1.fontSize,
       };
     },
-    sizeSmall: ({ theme, ownerState }) => {
+    sizeSmall: ({ theme }) => {
       return {
         fontSize: theme.typography.body2.fontSize,
         borderWidth: 0,
