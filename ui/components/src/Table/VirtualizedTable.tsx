@@ -51,7 +51,7 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
                       const column = header.column;
 
                       return (
-                        <TableHeaderCell key={header.id} sx={{ width: column.getSize() }}>
+                        <TableHeaderCell key={header.id} sx={{ width: column.getSize() }} density={density}>
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableHeaderCell>
                       );
@@ -72,7 +72,7 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
             <>
               {row.getVisibleCells().map((cell) => {
                 return (
-                  <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
+                  <TableCell key={cell.id} sx={{ width: cell.column.getSize() }} density={density}>
                     <Typography noWrap sx={{ fontSize: 'inherit' }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </Typography>

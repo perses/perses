@@ -27,10 +27,7 @@ export const MuiTableCell: Components<Theme>['MuiTableCell'] = {
     sizeSmall: ({ theme, ownerState }) => {
       return {
         fontSize: theme.typography.body2.fontSize,
-        padding: theme.spacing(0.25, 0.5),
-
-        // TODO: figure out bottom border on scroll
-        borderWidth: ownerState.variant === 'head' ? 1 : 0,
+        borderWidth: 0,
       };
     },
   },
