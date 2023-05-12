@@ -2912,6 +2912,17 @@
               }
             }
           }
+        },
+        {
+          "kind": "TextVariable",
+          "spec": {
+            "name": "NewTextVariable",
+            "display": {
+              "name": "Text variable",
+              "hidden": false
+            },
+            "value": "initial value"
+          }
         }
       ],
       "panels": {

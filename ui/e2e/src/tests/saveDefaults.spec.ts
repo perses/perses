@@ -15,6 +15,8 @@ import { SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import updatedDefaultsDashboard from '../data/updatedDefaultsDashboard.json';
 import { test, expect } from '../fixtures/dashboardTest';
 
+const TEXT_VARIABLE_UPDATED_VALUE = 'new';
+
 test.use({
   dashboardName: 'Defaults',
   modifiesDashboard: true,
@@ -40,20 +42,26 @@ test.describe('Dashboard: Defaults', () => {
       .click();
     await dashboardPage.page.getByRole('option', { name: '5m' }).click();
 
+    // Change text variable
+    const textVariableInput = await dashboardPage.page.getByRole('textbox', { name: 'Text variable' });
+    await textVariableInput.clear();
+    await textVariableInput.type(TEXT_VARIABLE_UPDATED_VALUE, { delay: 100 });
+
     // Switch to edit mode and click save
     await dashboardPage.startEditing();
     const toolbarSaveButton = dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
 
     // Save defaults confirmation dialog should open, click btn to save
-    const dialogText = dashboardPage.page.getByText(SAVE_DEFAULTS_DIALOG_TEXT);
+    const dialogText = await dashboardPage.page.getByText(SAVE_DEFAULTS_DIALOG_TEXT);
     await expect(dialogText).toBeVisible();
     const dialogSaveButton = dashboardPage.page.getByRole('button', { name: 'Save Changes' });
     await dialogSaveButton.click();
 
-    // Confirm correct default duration and interval variable are persisted
+    // Confirm correct default list and text variables are persisted
     await page.reload();
     await expect(page.url()).toContain('start=6h');
+    await expect(page.url()).toContain(TEXT_VARIABLE_UPDATED_VALUE);
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
     await expect(dashboardPage.variableListItems).toContainText(['5m']);
   });

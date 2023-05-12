@@ -111,6 +111,17 @@ describe('updateVariableDefaultValues', () => {
           },
         },
       },
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'NewTextVariable',
+          display: {
+            name: 'Text display',
+            hidden: false,
+          },
+          value: 'Example alt',
+        },
+      },
     ];
     const variableState = {
       interval: {
@@ -151,6 +162,10 @@ describe('updateVariableDefaultValues', () => {
         ],
         default_value: 'test list value',
       },
+      NewTextVariable: {
+        value: 'Example',
+        loading: false,
+      },
     };
     const newVariables = updateVariableDefaultValues(savedVariables, variableState);
     expect(newVariables).toEqual({
@@ -185,6 +200,17 @@ describe('updateVariableDefaultValues', () => {
                 ],
               },
             },
+          },
+        },
+        {
+          kind: 'TextVariable',
+          spec: {
+            name: 'NewTextVariable',
+            display: {
+              name: 'Text display',
+              hidden: false,
+            },
+            value: 'Example',
           },
         },
       ],

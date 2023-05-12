@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import produce from 'immer';
+import { ListVariableDefinition, TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
 import {
   useDatasourceStore,
   usePlugin,
@@ -110,19 +111,33 @@ export function updateVariableDefaultValues(
   currentVariableState: VariableStateMap
 ) {
   let isSelectedVariablesUpdated = false;
-  const newVariables: VariableDefinition[] = [...savedVariables];
-  savedVariables.forEach((variable, index) => {
-    if (variable.kind === 'ListVariable') {
-      const currentVariable = currentVariableState[variable.spec.name];
-      if (currentVariable?.default_value !== undefined) {
-        const newVariable: ListVariableDefinition = {
-          kind: 'ListVariable',
-          spec: { ...variable.spec, default_value: currentVariable.default_value },
-        };
-        newVariables.splice(index, 1, newVariable);
-        isSelectedVariablesUpdated = true;
+  const newVariables = produce(savedVariables, (draft) => {
+    draft.forEach((variable, index) => {
+      if (variable.kind === 'ListVariable') {
+        const currentVariable = currentVariableState[variable.spec.name];
+        if (currentVariable?.default_value !== undefined) {
+          draft[index] = {
+            kind: 'ListVariable',
+            spec: produce(variable.spec, (specDraft) => {
+              specDraft.default_value = currentVariable.default_value;
+            }),
+          };
+          isSelectedVariablesUpdated = true;
+        }
+      } else if (variable.kind === 'TextVariable') {
+        const currentVariable = currentVariableState[variable.spec.name];
+        const currentVariableValue = typeof currentVariable?.value === 'string' ? currentVariable.value : '';
+        if (currentVariable?.value !== undefined) {
+          draft[index] = {
+            kind: 'TextVariable',
+            spec: produce(variable.spec, (specDraft) => {
+              specDraft.value = currentVariableValue;
+            }),
+          };
+          isSelectedVariablesUpdated = true;
+        }
       }
-    }
+    });
   });
   return { newVariables, isSelectedVariablesUpdated };
 }
