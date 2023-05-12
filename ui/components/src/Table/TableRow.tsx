@@ -1,13 +1,11 @@
-import { TableRow as MuiTableRow, styled, TableRowProps as MuiTableRowProps } from '@mui/material';
+import { TableRow as MuiTableRow, TableRowProps as MuiTableRowProps } from '@mui/material';
 import { forwardRef } from 'react';
 
-const StyledMuiTableRow = styled(MuiTableRow)(({ theme }) => ({}));
-
-type TableRowProps = MuiTableRowProps;
+type TableRowProps = MuiTableRowProps<'div'>;
 
 export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function TableRow(props, ref) {
   return (
-    <StyledMuiTableRow
+    <MuiTableRow
       {...props}
       ref={ref}
       sx={{

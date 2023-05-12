@@ -7,7 +7,7 @@ const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
   tableLayout: 'fixed',
 }));
 
-type InnerTableProps = MuiTableProps & {
+type InnerTableProps = Omit<MuiTableProps, 'size'> & {
   density: TableDensity;
 };
 

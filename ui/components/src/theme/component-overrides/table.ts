@@ -27,6 +27,7 @@ export const MuiTableCell: Components<Theme>['MuiTableCell'] = {
     sizeSmall: ({ theme }) => {
       return {
         fontSize: theme.typography.body2.fontSize,
+        padding: theme.spacing(0.25, 0.5),
       };
     },
   },
