@@ -11,6 +11,7 @@
 - [ENHANCEMENT] Improve algorithm for picking y-axis minimum value (#1146)
 - [ENHANCEMENT] Make it possible to set decimal_places as undefined in UI (#1131)
 - [ENHANCEMENT] improve search in the home page (#1127)
+- [BUGFIX] fix time series tooltip vertical positioning (#1161)
 - [BUGFIX] Revert echarts wrapper defaults to fluid width and height (#1164)
 - [BUGFIX] fix date handling in tooltip (#1163)
 - [BUGFIX] Remove palette edit buttons after merge issue (#1150)
