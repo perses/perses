@@ -1,3 +1,4 @@
+import { createColumnHelper, ColumnDef, CellContext } from '@tanstack/react-table';
 import { Table, TableProps } from '../Table';
 import { LegendItem } from '../model';
 
@@ -7,13 +8,21 @@ export interface TableLegendProps {
   width: number;
 }
 
-const COLUMNS: TableProps<LegendItem>['columns'] = [
+// Any needed to work around some typing issues with tanstack query.
+// https://github.com/TanStack/table/issues/4241
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const COLUMNS: Array<ColumnDef<LegendItem, any>> = [
   {
     accessorKey: 'label',
     header: 'Name',
+
+    // Stating with `title` attr instead of a tooltip because it is easier to
+    // implement. We should try adding a tooltip in the future, but we'll need
+    // to be very careful about performance when doing so with large tables.
+    cell: ({ getValue }: CellContext<LegendItem, LegendItem['label']>) => <span title={getValue()}>{getValue()}</span>,
   },
 ];
 
 export function TableLegend({ items, ...otherProps }: TableLegendProps) {
-  return <Table {...otherProps} data={items} columns={COLUMNS} />;
+  return <Table {...otherProps} data={items} columns={COLUMNS} density="compact" />;
 }
