@@ -12,7 +12,7 @@
 // limitations under the License.
 
 export interface Metadata {
-  name?: string;
+  name: string;
   created_at?: string;
   updated_at?: string;
   version?: number;
