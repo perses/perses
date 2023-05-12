@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  CursorCoordinates,
-  CursorData,
-  TOOLTIP_MAX_HEIGHT,
-  TOOLTIP_MAX_ITEMS,
-  TOOLTIP_MAX_WIDTH,
-} from './tooltip-model';
+import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 
 /**
  * Determine position of tooltip depending on chart dimensions and the number of focused series
@@ -26,7 +20,9 @@ export function assembleTransform(
   mousePos: CursorData['coords'],
   seriesNum: number,
   chartWidth: number,
-  pinnedPos: CursorCoordinates | null
+  pinnedPos: CursorCoordinates | null,
+  tooltipHeight: number,
+  tooltipWidth: number
 ) {
   if (mousePos === null) {
     return 'translate3d(0, 0)';
@@ -45,16 +41,12 @@ export function assembleTransform(
   const x = mousePos.page.x;
   let y = mousePos.page.y + cursorPaddingY;
 
-  // approximate tootlip height based on number of series
-  const tooltipHeight = Math.min(Math.min(seriesNum, TOOLTIP_MAX_ITEMS) * 24, TOOLTIP_MAX_HEIGHT);
-
   // adjust so tooltip does not get cut off at bottom of chart
   if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
     y = mousePos.page.y - tooltipHeight;
   }
 
-  // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
-  const tooltipWidth = seriesNum > 1 ? TOOLTIP_MAX_WIDTH : TOOLTIP_MAX_WIDTH / 2;
+  // use tooltip width to determine when to repos from right to left
   const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;
 
   // reposition so tooltip is never too close to right side of chart or left side of browser window
