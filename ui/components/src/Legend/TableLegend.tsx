@@ -2,7 +2,7 @@ import { createColumnHelper, ColumnDef, CellContext } from '@tanstack/react-tabl
 import { Table, TableProps } from '../Table';
 import { LegendItem } from '../model';
 
-export interface TableLegendProps {
+export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSelectionChange'> {
   items: LegendItem[];
   height: number;
   width: number;
@@ -23,6 +23,19 @@ const COLUMNS: Array<ColumnDef<LegendItem, any>> = [
   },
 ];
 
-export function TableLegend({ items, ...otherProps }: TableLegendProps) {
-  return <Table {...otherProps} data={items} columns={COLUMNS} density="compact" />;
+export function TableLegend({ items, ...tableProps }: TableLegendProps) {
+  return (
+    <Table
+      {...tableProps}
+      data={items}
+      columns={COLUMNS}
+      density="compact"
+      getRowId={(data) => {
+        // TODO: figure out switching this and other selection handling to id
+        // to be safer.
+        return data.label;
+      }}
+      checkboxSelection
+    />
+  );
 }

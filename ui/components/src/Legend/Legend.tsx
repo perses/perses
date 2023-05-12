@@ -16,7 +16,7 @@ import { ReactNode } from 'react';
 import { LegendOptions, LegendItem, getLegendMode } from '../model';
 import { ListLegend, ListLegendProps } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
-import { TableLegend } from './TableLegend';
+import { TableLegend, TableLegendProps } from './TableLegend';
 
 export interface LegendProps {
   width: number;
@@ -32,6 +32,12 @@ export interface LegendProps {
    *   to render performantly.
    */
   listProps?: Pick<ListLegendProps, 'initialRowHeight'>;
+
+  /**
+   * Additional props that will be passed to the table variation of the legend
+   * that is used when `options.mode` is set to `table`.
+   */
+  tableProps?: Pick<TableLegendProps, 'onRowSelectionChange'>;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -41,7 +47,7 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, listProps }: LegendProps) {
+export function Legend({ width, height, options, data, listProps, tableProps }: LegendProps) {
   const mode = getLegendMode(options.mode);
 
   // The bottom legend is displayed as a list when the number of items is too
@@ -52,7 +58,7 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
 
   let legendContent: ReactNode;
   if (mode === 'Table') {
-    legendContent = <TableLegend width={width} height={height} items={data} />;
+    legendContent = <TableLegend {...tableProps} width={width} height={height} items={data} />;
   } else if (options.position === 'Right' || needsVirtualization) {
     legendContent = <ListLegend items={data} width={width} height={height} {...listProps} />;
   } else {

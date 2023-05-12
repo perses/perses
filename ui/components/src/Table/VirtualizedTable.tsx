@@ -10,17 +10,25 @@ import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 
+// TODO: extract and reuse props
 export interface VirtualizedTableProps<TableData> {
   height: number;
   width: number;
   table: TSTable<TableData>;
   density: TableDensity;
+  checkboxSelection?: boolean;
 }
 
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
-export function VirtualizedTable<TableData>({ width, height, table, density }: VirtualizedTableProps<TableData>) {
+export function VirtualizedTable<TableData>({
+  width,
+  height,
+  table,
+  density,
+  checkboxSelection,
+}: VirtualizedTableProps<TableData>) {
   const rows = table.getRowModel().rows;
 
   const VirtuosoTableComponents: TableComponents<TableData> = {
