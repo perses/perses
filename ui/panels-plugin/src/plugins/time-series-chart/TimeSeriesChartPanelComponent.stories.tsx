@@ -139,7 +139,7 @@ export const Primary: Story = {
     },
     spec: {
       legend: {
-        position: 'Bottom',
+        position: 'Right',
       },
     },
   },

@@ -34,6 +34,8 @@ import {
   PANEL_HEIGHT_LG_BREAKPOINT,
   LEGEND_HEIGHT_SM,
   LEGEND_HEIGHT_LG,
+  LEGEND_SIZE,
+  MIN_CHART_SIZE,
 } from './time-series-chart-model';
 import {
   getLineSeries,
@@ -44,14 +46,13 @@ import {
   convertPanelYAxis,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
+import { getTimeSeriesLayout } from './utils/layout-utils';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
-  const {
-    spec: { thresholds, y_axis },
-    contentDimensions,
-  } = props;
+  const { spec, contentDimensions } = props;
+  const { thresholds, y_axis } = spec;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
 
@@ -69,12 +70,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // This may also want to include moving some of this logic down to the shared,
   // embeddable components.
   const contentPadding = chartsTheme.container.padding.default;
-  const adjustedContentDimensions: typeof contentDimensions = contentDimensions
-    ? {
-        width: contentDimensions.width - contentPadding * 2,
-        height: contentDimensions.height - contentPadding * 2,
-      }
-    : undefined;
+  // const adjustedContentDimensions: typeof contentDimensions = contentDimensions
+  //   ? {
+  //       width: contentDimensions.width - contentPadding * 2,
+  //       height: contentDimensions.height - contentPadding * 2,
+  //     }
+  //   : undefined;
 
   const { thresholds: thresholdsColors } = useChartsTheme();
 
@@ -93,6 +94,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = convertPanelYAxis(y_axis);
+
+  const layout = getTimeSeriesLayout({
+    contentPadding,
+    contentDimensions,
+    spec,
+    showYAxis: !!echartsYAxis.show,
+  });
 
   const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
 
@@ -238,7 +246,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
   }, [queryResults, thresholds, selectedSeriesNames, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
-  if (adjustedContentDimensions === undefined) {
+  if (layout === undefined) {
     return null;
   }
 
@@ -246,13 +254,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={adjustedContentDimensions.width}
-        height={adjustedContentDimensions.height}
+        width={layout.content.width}
+        height={layout.content.height}
       >
         <Skeleton
           variant="text"
-          width={adjustedContentDimensions.width - 20}
-          height={adjustedContentDimensions.height / 2}
+          width={layout.content.width - 20}
+          height={layout.content.height / 2}
           aria-label="Loading..."
         />
       </Box>
@@ -270,45 +278,30 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
-
-  // TODO: account for number of time series returned when adjusting legend spacing
-  let legendHeight = LEGEND_HEIGHT_SM;
-  if (legend && legend.position === 'Right') {
-    legendHeight = contentDimensions?.height || adjustedContentDimensions.height;
-  } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
-    legendHeight = LEGEND_HEIGHT_LG;
-  }
-
-  // override default spacing, see: https://echarts.apache.org/en/option.html#grid
-  const gridLeft = y_axis && y_axis.label ? 30 : 20;
-  const gridOverrides: GridComponentOption = {
-    left: !echartsYAxis.show ? 0 : gridLeft,
-    right: legend && legend.position === 'Right' ? legendWidth : 20,
-    bottom: legend && legend.position === 'Bottom' ? legendHeight : 0,
-  };
-
   const handleDataZoom = (event: ZoomEventData) => {
     // TODO: add ECharts transition animation on zoom
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
 
   return (
-    <Box sx={{ padding: `${contentPadding}px`, position: 'relative' }}>
-      {y_axis && y_axis.show && y_axis.label && (
-        <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
-      )}
+    <Box sx={{ padding: `${layout.padding}px`, position: 'relative' }}>
+      {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={layout.content.height} />}
       <LineChart
-        height={adjustedContentDimensions.height}
+        height={layout.content.height}
         data={graphData}
         yAxis={echartsYAxis}
         unit={unit}
-        grid={gridOverrides}
+        grid={layout.chart.grid}
         tooltipConfig={{ wrapLabels: true }}
         onDataZoom={handleDataZoom}
       />
-      {legend && graphData.legendItems && (
-        <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
+      {legend && layout.legend.show && graphData.legendItems && (
+        <Legend
+          width={layout.legend.width}
+          height={layout.legend.height}
+          options={legend}
+          data={graphData.legendItems}
+        />
       )}
     </Box>
   );

@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getTimeSeriesLayout handles simple chart 1`] = `
+Object {
+  "chart": Object {
+    "grid": Object {
+      "bottom": 0,
+      "left": 0,
+      "right": 20,
+    },
+  },
+  "content": Object {
+    "height": 360,
+    "width": 360,
+  },
+  "legend": Object {
+    "height": 400,
+    "show": false,
+    "width": 360,
+  },
+  "padding": 20,
+}
+`;

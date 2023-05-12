@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnitOptions, LegendOptions } from '@perses-dev/components';
+import { UnitOptions, LegendOptions, LegendPositions } from '@perses-dev/components';
 import { ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
@@ -136,6 +136,16 @@ export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => 
 export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
 export const LEGEND_HEIGHT_SM = 40;
 export const LEGEND_HEIGHT_LG = 100;
+
+type LegendSizeConfig = Record<LegendPositions, number>;
+
+// TODO: move this constant to the legend component.
+export const LEGEND_ROW_HEIGHT = 20;
+export const LEGEND_SIZE: LegendSizeConfig = {
+  Bottom: 5 * LEGEND_ROW_HEIGHT,
+  Right: 250,
+};
+export const MIN_CHART_SIZE = 250;
 
 // Both of these constants help produce a value that is LESS THAN the initial value.
 // For positive values, we multiply by a number less than 1 to get this outcome.
