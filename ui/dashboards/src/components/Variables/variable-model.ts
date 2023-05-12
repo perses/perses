@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import produce from 'immer';
-import { ListVariableDefinition, TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import { ListVariableDefinition, VariableDefinition } from '@perses-dev/core';
 import {
   useDatasourceStore,
   usePlugin,
