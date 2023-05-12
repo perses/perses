@@ -13,8 +13,9 @@ import {
   CoreOptions,
 } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
-import { Checkbox } from '@mui/material';
+import { Checkbox, useTheme } from '@mui/material';
 import { VirtualizedTable } from './VirtualizedTable';
+import { TableCheckbox } from './TableCheckbox';
 
 export type TableDensity = 'compact' | 'standard';
 
@@ -27,6 +28,7 @@ export interface TableProps<TableData> {
   checkboxSelection?: boolean;
   onRowSelectionChange?: (rowSelection: RowSelectionState) => void;
   getRowId?: CoreOptions<TableData>['getRowId'];
+  getCheckboxColor?: (data: TableData) => string;
 }
 
 export function Table<TableData>({
@@ -35,9 +37,11 @@ export function Table<TableData>({
   density = 'standard',
   checkboxSelection,
   onRowSelectionChange,
+  getCheckboxColor,
   getRowId,
   ...otherProps
 }: TableProps<TableData>) {
+  const theme = useTheme();
   const DEFAULT_GET_ROW_ID: CoreOptions<TableData>['getRowId'] = (data, index) => {
     return `${index}`;
   };
@@ -65,11 +69,11 @@ export function Table<TableData>({
     size: 32,
     header: ({ table }) => {
       return (
-        <Checkbox
+        <TableCheckbox
           checked={table.getIsAllRowsSelected()}
           indeterminate={table.getIsSomeRowsSelected()}
           onChange={table.getToggleAllRowsSelectedHandler()}
-          size="small"
+          color={theme.palette.text.primary}
         />
       );
     },
@@ -77,11 +81,11 @@ export function Table<TableData>({
       // const color = row.original.color;
 
       return (
-        <Checkbox
-          size="small"
+        <TableCheckbox
           checked={row.getIsSelected()}
           indeterminate={row.getIsSomeSelected()}
           onChange={row.getToggleSelectedHandler()}
+          color={getCheckboxColor?.(row.original)}
           // color={row.original.color}
           // sx={{
           //   color: color,

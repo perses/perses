@@ -35,6 +35,9 @@ export function TableLegend({ items, ...tableProps }: TableLegendProps) {
         // to be safer.
         return data.label;
       }}
+      getCheckboxColor={(data) => {
+        return data.color;
+      }}
       checkboxSelection
     />
   );
