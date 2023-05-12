@@ -6,6 +6,7 @@
 - [FEATURE] Support ARM arch for binaries and docker (#1144)
 - [ENHANCEMENT] Adjust padding on stat chart so it is centered (#1154)
 - [ENHANCEMENT] Update formatting to use exact decimal places (#1152)
+- [ENHANCEMENT] Allow saving `duration` from JSON editor (#1149)
 - [ENHANCEMENT] Add timerange and refresh buttons on the sticky toolbar (#1145)
 - [ENHANCEMENT] Improve algorithm for picking y-axis minimum value (#1146)
 - [ENHANCEMENT] Make it possible to set decimal_places as undefined in UI (#1131)
@@ -17,7 +18,7 @@
 - [BUGFIX] Fix empty label value and static list cue schema (#1139)
 - [BUGFIX] Prevent calendar icon from flipping over (#1142)
 - [BUGFIX] Fix dashboard creation dialog when there is one or less dashboards (#1140)
-- [BREAKINGCHANGE] Allow saving `duration` from JSON editor, useDefaultTimeRange renamed to useDashboardDuration (#1149)
+- [BREAKINGCHANGE] useDefaultTimeRange hook renamed to useDashboardDuration (#1149)
 
 ## 0.29.1 / 2023-05-02
 
