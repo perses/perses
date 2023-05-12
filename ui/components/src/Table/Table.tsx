@@ -31,6 +31,8 @@ export interface TableProps<TableData> {
   getCheckboxColor?: (data: TableData) => string;
 }
 
+// TODO: perf tuning
+
 export function Table<TableData>({
   data,
   columns,
@@ -38,16 +40,16 @@ export function Table<TableData>({
   checkboxSelection,
   onRowSelectionChange,
   getCheckboxColor,
-  getRowId,
+  getRowId: initGetRowId,
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
   const DEFAULT_GET_ROW_ID: CoreOptions<TableData>['getRowId'] = (data, index) => {
     return `${index}`;
   };
-  const normalizedGetRowId = getRowId ?? DEFAULT_GET_ROW_ID;
+  const getRowId = initGetRowId ?? DEFAULT_GET_ROW_ID;
   const initRowSelection: RowSelectionState = data.reduce((rowSelectionResult, row, index) => {
-    rowSelectionResult[normalizedGetRowId(row, index)] = true;
+    rowSelectionResult[getRowId(row, index)] = true;
     return rowSelectionResult;
   }, {} as RowSelectionState);
 
@@ -78,21 +80,12 @@ export function Table<TableData>({
       );
     },
     cell: ({ row }) => {
-      // const color = row.original.color;
-
       return (
         <TableCheckbox
           checked={row.getIsSelected()}
           indeterminate={row.getIsSomeSelected()}
           onChange={row.getToggleSelectedHandler()}
           color={getCheckboxColor?.(row.original)}
-          // color={row.original.color}
-          // sx={{
-          //   color: color,
-          //   '&.Mui-checked': {
-          //     color: color,
-          //   },
-          // }}
         />
       );
     },
@@ -113,10 +106,6 @@ export function Table<TableData>({
       rowSelection,
     },
   });
-
-  // useEffect(() => {
-  //   table.toggleAllRowsSelected(true);
-  // }, []);
 
   return <VirtualizedTable {...otherProps} table={table} density={density} checkboxSelection={checkboxSelection} />;
 }
