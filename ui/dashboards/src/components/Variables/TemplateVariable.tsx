@@ -109,7 +109,6 @@ function ListVariable({ name }: TemplateVariableProps) {
           value={selectValue}
           onChange={(e) => {
             setVariableDefaultValue(name, e.target.value);
-
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {
               if (allowAllValue) {

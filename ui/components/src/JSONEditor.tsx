@@ -36,7 +36,6 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
   return (
     <CodeMirror
       {...props}
-      aria-label="enter JSON"
       style={{ border: `1px solid ${theme.palette.divider}` }}
       theme={isDarkMode ? 'dark' : 'light'}
       extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
