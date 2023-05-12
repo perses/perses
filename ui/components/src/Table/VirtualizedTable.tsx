@@ -1,7 +1,7 @@
 import { Table as TSTable, flexRender } from '@tanstack/react-table';
 import { Box, Typography } from '@mui/material';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
-import { TableProps } from './Table';
+import { TableDensity, TableProps } from './Table';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -14,18 +14,19 @@ export interface VirtualizedTableProps<TableData> {
   height: number;
   width: number;
   table: TSTable<TableData>;
+  density: TableDensity;
 }
 
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
-export function VirtualizedTable<TableData>({ width, height, table }: VirtualizedTableProps<TableData>) {
+export function VirtualizedTable<TableData>({ width, height, table, density }: VirtualizedTableProps<TableData>) {
   const rows = table.getRowModel().rows;
 
   const VirtuosoTableComponents: TableComponents<TableData> = {
     Scroller: VirtualizedTableContainer,
     Table: (props) => {
-      return <InnerTable {...props} width={table.getCenterTotalSize()} />;
+      return <InnerTable {...props} width={table.getCenterTotalSize()} density={density} />;
     },
     TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -72,7 +73,9 @@ export function VirtualizedTable<TableData>({ width, height, table }: Virtualize
               {row.getVisibleCells().map((cell) => {
                 return (
                   <TableCell key={cell.id} sx={{ width: cell.column.getSize() }}>
-                    <Typography noWrap>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Typography>
+                    <Typography noWrap sx={{ fontSize: 'inherit' }}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </Typography>
                   </TableCell>
                 );
               })}

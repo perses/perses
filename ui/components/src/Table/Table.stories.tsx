@@ -79,3 +79,13 @@ export const Primary: Story = {
     columns: COLUMNS,
   },
 };
+
+export const Compact: Story = {
+  args: {
+    height: 400,
+    width: 800,
+    data: generateMockTableData(1000),
+    columns: COLUMNS,
+    density: 'compact',
+  },
+};
