@@ -15,6 +15,9 @@ import { Definition, ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
+/**
+ * The schema for a StatChart panel.
+ */
 export interface StatChartDefinition extends Definition<StatChartOptions> {
   kind: 'StatChart';
 }

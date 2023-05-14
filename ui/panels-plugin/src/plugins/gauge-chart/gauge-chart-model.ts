@@ -19,6 +19,9 @@ export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal' };
 export const DEFAULT_MAX_PERCENT = 100;
 export const DEFAULT_MAX_PERCENT_DECIMAL = 1;
 
+/**
+ * The schema for a GaugeChart panel.
+ */
 export interface GaugeChartDefinition extends Definition<GaugeChartOptions> {
   kind: 'GaugeChart';
 }

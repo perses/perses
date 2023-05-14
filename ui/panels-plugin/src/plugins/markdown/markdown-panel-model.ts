@@ -13,8 +13,11 @@
 
 import { Definition } from '@perses-dev/core';
 
+/**
+ * The schema for a Markdown panel.
+ */
 export interface MarkdownPanelDefinition extends Definition<MarkdownPanelOptions> {
-  kind: 'MarkdownPanel';
+  kind: 'Markdown';
 }
 
 export interface MarkdownPanelOptions {

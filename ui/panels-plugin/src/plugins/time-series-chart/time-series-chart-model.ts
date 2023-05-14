@@ -15,6 +15,9 @@ import { Definition, ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
+/**
+ * The schema for a TimeSeriesChart panel.
+ */
 export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOptions> {
   kind: 'TimeSeriesChart';
 }
