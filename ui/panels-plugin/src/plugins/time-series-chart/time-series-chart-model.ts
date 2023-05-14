@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Definition, ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export interface TimeSeriesChart {
+export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOptions> {
   kind: 'TimeSeriesChart';
-  spec: TimeSeriesChartOptions;
 }
 
 /**

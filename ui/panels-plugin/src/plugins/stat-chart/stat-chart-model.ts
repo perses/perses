@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ThresholdOptions } from '@perses-dev/core';
+import { Definition, ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export type StatChart = {
+export interface StatChartDefinition extends Definition<StatChartOptions> {
   kind: 'StatChart';
-  spec: StatChartOptions;
-};
+}
 
 export interface StatChartOptions {
   calculation: CalculationType;

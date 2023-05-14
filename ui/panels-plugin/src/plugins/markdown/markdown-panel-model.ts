@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface MarkdownPanel {
+import { Definition } from '@perses-dev/core';
+
+export interface MarkdownPanelDefinition extends Definition<MarkdownPanelOptions> {
   kind: 'MarkdownPanel';
-  spec: MarkdownPanelOptions;
 }
 
 export interface MarkdownPanelOptions {
