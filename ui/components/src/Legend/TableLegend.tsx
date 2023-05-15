@@ -1,5 +1,5 @@
-import { createColumnHelper, ColumnDef, CellContext } from '@tanstack/react-table';
-import { Table, TableProps } from '../Table';
+import { ColumnDef, CellContext } from '@tanstack/react-table';
+import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from '../model';
 
 export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSelectionChange'> {
@@ -11,16 +11,17 @@ export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSel
 // Any needed to work around some typing issues with tanstack query.
 // https://github.com/TanStack/table/issues/4241
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const COLUMNS: Array<ColumnDef<LegendItem, any>> = [
+const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
   {
     accessorKey: 'label',
     header: 'Name',
-    // meta: {
-    //   autoSize: true,
-    // },
-    size: 0,
-    minSize: 0,
-    maxSize: 0,
+    size: 'auto',
+    // // meta: {
+    // //   autoSize: true,
+    // // },
+    // size: 0,
+    // minSize: 0,
+    // maxSize: 0,
 
     // Stating with `title` attr instead of a tooltip because it is easier to
     // implement. We should try adding a tooltip in the future, but we'll need

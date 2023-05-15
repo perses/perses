@@ -11,6 +11,8 @@ import {
   getFilteredRowModel,
   OnChangeFn,
   CoreOptions,
+  AccessorColumnDef,
+  AccessorKeyColumnDef,
 } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { Checkbox, useTheme } from '@mui/material';
@@ -18,11 +20,23 @@ import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
 import { TableDensity } from './layoutUtils';
 
+// Only exposing a very simplified version of the very extensive column definitions
+// possible with tanstack table to make it easier for us to control rendering
+// and functionality.
+export interface TableColumnConfig<TableData> extends Pick<AccessorKeyColumnDef<TableData>, 'accessorKey' | 'cell'> {
+  header: string;
+
+  // Tanstack Table does not support an "auto" value to naturally size to fit
+  // the space in a table. Adding a custom setting to manage this ourselves.
+  size?: number | 'auto';
+}
+
 export interface TableProps<TableData> {
   height: number;
   width: number;
   data: TableData[];
-  columns: Array<ColumnDef<TableData>>;
+  columns: Array<TableColumnConfig<TableData>>;
+  // columns: Array<ColumnDef<TableData>>;
   density?: TableDensity;
   checkboxSelection?: boolean;
   onRowSelectionChange?: (rowSelection: RowSelectionState) => void;
@@ -89,7 +103,30 @@ export function Table<TableData>({
       );
     },
   };
-  const tableColumns = [...columns];
+  const tableColumns: Array<ColumnDef<TableData>> = [...columns].map(({ size, ...otherProps }) => {
+    // Tanstack Table does not support an "auto" value to naturally size to fit
+    // the space in a table. We translate our custom "auto" setting to 0 size
+    // for these columns, so it is easy to fall back to auto when rendering.
+    // Taking from a recommendation in this github discussion:
+    // https://github.com/TanStack/table/discussions/4179#discussioncomment-3631326
+    const sizeProps =
+      size === 'auto'
+        ? {
+            size: 0,
+            minSize: 0,
+            maxSize: 0,
+          }
+        : {
+            size,
+          };
+
+    const result = {
+      ...otherProps,
+      ...sizeProps,
+    };
+
+    return result;
+  });
   if (checkboxSelection) {
     tableColumns.unshift(checkboxColumn);
   }
