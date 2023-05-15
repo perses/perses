@@ -1,6 +1,6 @@
 import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
 import { forwardRef } from 'react';
-import { TableDensity, getCellPadding, getCellLayoutProps } from './layoutUtils';
+import { TableDensity, getCellLayoutProps } from './layoutUtils';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -24,9 +24,6 @@ export function TableHeaderCell({ children, density, ...otherProps }: TableHeade
           // Putting a border on the `th` does not work when scrolling because
           // of border collapse combined with the `td`s not having borders.
           borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
-
-          // // TODO: modify padding by density -- add a util
-          // padding: getCellPadding(theme, density),
         }}
       >
         {children}

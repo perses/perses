@@ -38,7 +38,7 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, listProps, tableProps }: LegendProps) {
+export function Legend({ width, height, options, data, tableProps }: LegendProps) {
   const mode = getLegendMode(options.mode);
 
   // The bottom legend is displayed as a list when the number of items is too
@@ -51,7 +51,7 @@ export function Legend({ width, height, options, data, listProps, tableProps }: 
   if (mode === 'Table') {
     legendContent = <TableLegend {...tableProps} width={width} height={height} items={data} />;
   } else if (options.position === 'Right' || needsVirtualization) {
-    legendContent = <ListLegend items={data} width={width} height={height} {...listProps} />;
+    legendContent = <ListLegend items={data} width={width} height={height} />;
   } else {
     legendContent = <CompactLegend items={data} height={height} />;
   }
