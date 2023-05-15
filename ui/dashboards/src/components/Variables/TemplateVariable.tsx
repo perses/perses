@@ -38,8 +38,7 @@ function ListVariable({ name }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name);
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
-  const { setVariableValue, setVariableLoading, setVariableOptions, setVariableDefaultValue } =
-    useTemplateVariableActions();
+  const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
 
   const allowMultiple = definition?.spec.allow_multiple === true;
   const allowAllValue = definition?.spec.allow_all_value === true;
@@ -108,8 +107,6 @@ function ListVariable({ name }: TemplateVariableProps) {
           label={title}
           value={selectValue}
           onChange={(e) => {
-            // TODO (sjcobb): remove after refactoring updateVariableDefaultValues in variable store
-            setVariableDefaultValue(name, e.target.value);
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {
               if (allowAllValue) {

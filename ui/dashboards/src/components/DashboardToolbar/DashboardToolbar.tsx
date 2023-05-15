@@ -49,7 +49,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   const { dashboard } = useDashboard();
 
-  const { updateVariableDefaultValues } = useTemplateVariableActions();
+  const { setVariableDefaultValues } = useTemplateVariableActions();
 
   const { timeRange } = useTimeRange();
 
@@ -71,8 +71,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   const onSaveButtonClick = () => {
     const isSelectedVariablesUpdated = true;
-    // const { newVariables, isSelectedVariablesUpdated } = updateVariableDefaultValues(savedVariables, variableValues);
-    updateVariableDefaultValues();
+    setVariableDefaultValues();
 
     const isTimeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 

@@ -24,13 +24,7 @@ import {
   VariableOption,
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/plugin-system';
-import {
-  VariableName,
-  VariableValue,
-  VariableDefinition,
-  ListVariableDefinition,
-  TextVariableDefinition,
-} from '@perses-dev/core';
+import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQueryParamName } from './query-params';
 
@@ -41,8 +35,7 @@ type TemplateVariableStore = {
   setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
   setVariableLoading: (name: VariableName, loading: boolean) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
-  setVariableDefaultValue: (variableName: VariableName, value: VariableValue) => void;
-  updateVariableDefaultValues: () => void;
+  setVariableDefaultValues: () => void;
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -99,8 +92,7 @@ export function useTemplateVariableActions() {
       setVariableLoading: s.setVariableLoading,
       setVariableOptions: s.setVariableOptions,
       setVariableDefinitions: s.setVariableDefinitions,
-      setVariableDefaultValue: s.setVariableDefaultValue,
-      updateVariableDefaultValues: s.updateVariableDefaultValues,
+      setVariableDefaultValues: s.setVariableDefaultValues,
     };
   });
 }
@@ -213,20 +205,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
             '[Variables] setVariableValue'
           ),
 
-        setVariableDefaultValue: (name, value) =>
-          set(
-            (state) => {
-              const varState = state.variableState[name];
-              if (!varState) {
-                return;
-              }
-              varState.default_value = value;
-            },
-            false,
-            '[Variables] setVariableDefaultValue'
-          ),
-
-        updateVariableDefaultValues: () =>
+        setVariableDefaultValues: () =>
           set(
             (state) => {
               const { variableDefinitions, variableState } = state;
@@ -234,11 +213,11 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
                 draft.forEach((variable, index) => {
                   if (variable.kind === 'ListVariable') {
                     const currentVariable = variableState[variable.spec.name];
-                    if (currentVariable?.default_value !== undefined) {
+                    if (currentVariable?.value !== undefined) {
                       draft[index] = {
                         kind: 'ListVariable',
                         spec: produce(variable.spec, (specDraft) => {
-                          specDraft.default_value = currentVariable.default_value;
+                          specDraft.default_value = currentVariable.value;
                         }),
                       };
                     }
@@ -260,7 +239,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
               state.variableDefinitions = updatedVariables;
             },
             false,
-            '[Variables] updateVariableDefaultValues'
+            '[Variables] setVariableDefaultValues'
           ),
       }))
     )

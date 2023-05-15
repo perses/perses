@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import produce from 'immer';
-import { ListVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import { ListVariableDefinition } from '@perses-dev/core';
 import {
   useDatasourceStore,
   usePlugin,
@@ -102,42 +101,3 @@ export const VARIABLE_TYPES = [
   { label: 'List', kind: 'ListVariable' },
   { label: 'Text', kind: 'TextVariable' },
 ] as const;
-
-/*
- * Check whether saved variable definitions are out of date with current default list values in Zustand store
- */
-export function updateVariableDefaultValues(
-  savedVariables: VariableDefinition[],
-  currentVariableState: VariableStateMap
-) {
-  let isSelectedVariablesUpdated = false;
-  const newVariables = produce(savedVariables, (draft) => {
-    draft.forEach((variable, index) => {
-      if (variable.kind === 'ListVariable') {
-        const currentVariable = currentVariableState[variable.spec.name];
-        if (currentVariable?.default_value !== undefined) {
-          draft[index] = {
-            kind: 'ListVariable',
-            spec: produce(variable.spec, (specDraft) => {
-              specDraft.default_value = currentVariable.default_value;
-            }),
-          };
-          isSelectedVariablesUpdated = true;
-        }
-      } else if (variable.kind === 'TextVariable') {
-        const currentVariable = currentVariableState[variable.spec.name];
-        const currentVariableValue = typeof currentVariable?.value === 'string' ? currentVariable.value : '';
-        if (currentVariable?.value !== undefined) {
-          draft[index] = {
-            kind: 'TextVariable',
-            spec: produce(variable.spec, (specDraft) => {
-              specDraft.value = currentVariableValue;
-            }),
-          };
-          isSelectedVariablesUpdated = true;
-        }
-      }
-    });
-  });
-  return { newVariables, isSelectedVariablesUpdated };
-}
