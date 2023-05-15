@@ -23,6 +23,7 @@ import {
   mockPluginRegistry,
   MockPlugin,
 } from '@perses-dev/plugin-system';
+import { VirtuosoMockContext } from 'react-virtuoso';
 import { MOCK_TIME_SERIES_QUERY_RESULT, MOCK_TIME_SERIES_DATA } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
@@ -97,13 +98,15 @@ describe('TimeSeriesChartPanel', () => {
     };
 
     render(
-      <PluginRegistry {...mockPluginRegistry(MOCK_PROM_QUERY_PLUGIN)}>
-        <ChartsThemeProvider chartsTheme={testChartsTheme}>
-          <TimeRangeContext.Provider value={mockTimeRangeContext}>
-            <TimeSeriesChartPanel {...TEST_TIME_SERIES_PANEL} />
-          </TimeRangeContext.Provider>
-        </ChartsThemeProvider>
-      </PluginRegistry>
+      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+        <PluginRegistry {...mockPluginRegistry(MOCK_PROM_QUERY_PLUGIN)}>
+          <ChartsThemeProvider chartsTheme={testChartsTheme}>
+            <TimeRangeContext.Provider value={mockTimeRangeContext}>
+              <TimeSeriesChartPanel {...TEST_TIME_SERIES_PANEL} />
+            </TimeRangeContext.Provider>
+          </ChartsThemeProvider>
+        </PluginRegistry>
+      </VirtuosoMockContext.Provider>
     );
   };
 
