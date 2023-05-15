@@ -23,7 +23,11 @@ import { TableDensity } from './layoutUtils';
 // Only exposing a very simplified version of the very extensive column definitions
 // possible with tanstack table to make it easier for us to control rendering
 // and functionality.
-export interface TableColumnConfig<TableData> extends Pick<AccessorKeyColumnDef<TableData>, 'accessorKey' | 'cell'> {
+// Any needed to work around some typing issues with tanstack query.
+// https://github.com/TanStack/table/issues/4241
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface TableColumnConfig<TableData>
+  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell'> {
   header: string;
 
   // Tanstack Table does not support an "auto" value to naturally size to fit
