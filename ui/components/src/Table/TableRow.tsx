@@ -1,7 +1,10 @@
 import { TableRow as MuiTableRow, TableRowProps as MuiTableRowProps } from '@mui/material';
 import { forwardRef } from 'react';
+import { TableDensity } from './layoutUtils';
 
-type TableRowProps = MuiTableRowProps<'div'>;
+interface TableRowProps extends MuiTableRowProps<'div'> {
+  density: TableDensity;
+}
 
 export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function TableRow(props, ref) {
   return (

@@ -1,21 +1,24 @@
-import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box } from '@mui/material';
+import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
 import { forwardRef } from 'react';
-import { TableDensity } from './Table';
+import { TableDensity, getCellPadding, getCellLayoutProps } from './layoutUtils';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   padding: 0,
 }));
 
-type TableCellProps = MuiTableCellProps & {
+export interface TableCellProps extends MuiTableCellProps {
   density: TableDensity;
-};
+}
 
-export function TableCell({ children, ...otherProps }: TableCellProps) {
+export function TableCell({ children, density, ...otherProps }: TableCellProps) {
+  const theme = useTheme();
+
   return (
     <StyledMuiTableCell {...otherProps}>
       <Box
         sx={{
-          padding: (theme) => theme.spacing(0.25, 0.5),
+          ...getCellLayoutProps(theme, density),
+          // padding: (theme) => getCellPadding(theme, density),
         }}
       >
         {children}

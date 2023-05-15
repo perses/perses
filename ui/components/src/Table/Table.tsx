@@ -16,8 +16,7 @@ import { useEffect, useState } from 'react';
 import { Checkbox, useTheme } from '@mui/material';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
-
-export type TableDensity = 'compact' | 'standard';
+import { TableDensity } from './layoutUtils';
 
 export interface TableProps<TableData> {
   height: number;

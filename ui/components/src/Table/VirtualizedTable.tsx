@@ -1,7 +1,7 @@
 import { Table as TSTable, flexRender } from '@tanstack/react-table';
 import { Box, Typography } from '@mui/material';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
-import { TableDensity, TableProps } from './Table';
+import { TableProps } from './Table';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -9,6 +9,7 @@ import { TableHead } from './TableHead';
 import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
+import { TableDensity } from './layoutUtils';
 
 // TODO: extract and reuse props
 export interface VirtualizedTableProps<TableData> {
@@ -39,7 +40,7 @@ export function VirtualizedTable<TableData>({
     TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     TableRow: ({ item, ...props }) => {
-      return <TableRow {...props} />;
+      return <TableRow {...props} density={density} />;
     },
     TableBody,
   };
@@ -54,7 +55,7 @@ export function VirtualizedTable<TableData>({
             <>
               {table.getHeaderGroups().map((headerGroup) => {
                 return (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} density={density}>
                     {headerGroup.headers.map((header) => {
                       const column = header.column;
 
@@ -81,9 +82,7 @@ export function VirtualizedTable<TableData>({
               {row.getVisibleCells().map((cell) => {
                 return (
                   <TableCell key={cell.id} sx={{ width: cell.column.getSize() }} density={density}>
-                    <Typography noWrap sx={{ fontSize: 'inherit' }}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </Typography>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 );
               })}

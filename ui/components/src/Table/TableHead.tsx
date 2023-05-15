@@ -1,5 +1,6 @@
 import { TableHead as MuiTableHead, styled, TableHeadProps as MuiTableHeadProps } from '@mui/material';
 import { forwardRef } from 'react';
+import { TableDensity } from './layoutUtils';
 
 type TableHeadProps = MuiTableHeadProps;
 
