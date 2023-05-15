@@ -14,7 +14,6 @@
 import { useState } from 'react';
 import {
   IconButton,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -27,6 +26,7 @@ import {
 import CloseIcon from 'mdi-material-ui/Close';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
+import { Dialog } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useTemplateVariableDefinitions } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
@@ -45,26 +45,14 @@ export const SaveChangesConfirmationDialog = () => {
 
   const timeRangeInfoText = `Save current time range as new default ${currentTimeRangeText}`;
 
-  // TODO (sjcobb): refactor to use reusable Dialog component
   return (
     <Dialog open={isOpen}>
       {dialog !== undefined && (
         <>
-          <DialogTitle>Save Dashboard</DialogTitle>
-          <IconButton
-            aria-label="Close"
-            onClick={dialog.onCancel}
-            sx={(theme) => ({
-              position: 'absolute',
-              top: theme.spacing(0.5),
-              right: theme.spacing(0.5),
-            })}
-          >
-            <CloseIcon />
-          </IconButton>
-          <DialogContent dividers sx={{ width: '500px' }}>
-            <Typography marginBottom={2}>{dialog.description || SAVE_DEFAULTS_DIALOG_TEXT}</Typography>
+          <Dialog.Header onClose={() => dialog.onCancel()}>Save Dashboard</Dialog.Header>
 
+          <Dialog.Content>
+            <Typography marginBottom={2}>{dialog.description || SAVE_DEFAULTS_DIALOG_TEXT}</Typography>
             <FormGroup>
               <FormControlLabel
                 control={
@@ -86,20 +74,18 @@ export const SaveChangesConfirmationDialog = () => {
                 label="Save current variables values as new default"
               />
             </FormGroup>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              variant="contained"
+          </Dialog.Content>
+
+          <Dialog.Actions>
+            <Dialog.PrimaryButton
               onClick={() => {
                 return dialog.onSaveChanges(variableDefinitions, saveDefaultTimeRange, saveDefaultVariables);
               }}
             >
               Save Changes
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={dialog.onCancel}>
-              Cancel
-            </Button>
-          </DialogActions>
+            </Dialog.PrimaryButton>
+            <Dialog.SecondaryButton onClick={() => dialog.onCancel()}>Cancel</Dialog.SecondaryButton>
+          </Dialog.Actions>
         </>
       )}
     </Dialog>
