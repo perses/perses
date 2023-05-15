@@ -108,6 +108,7 @@ function ListVariable({ name }: TemplateVariableProps) {
           label={title}
           value={selectValue}
           onChange={(e) => {
+            // TODO (sjcobb): remove after refactoring updateVariableDefaultValues in variable store
             setVariableDefaultValue(name, e.target.value);
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {

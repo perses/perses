@@ -16,18 +16,12 @@ import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import {
-  useDashboard,
-  useEditMode,
-  useSaveChangesConfirmationDialog,
-  useTemplateVariableDefinitions,
-  useTemplateVariableValues,
-} from '../../context';
+import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
-import { EditVariablesButton, updateVariableDefaultValues } from '../Variables';
+import { EditVariablesButton } from '../Variables';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
@@ -54,10 +48,10 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   } = props;
 
   const { dashboard } = useDashboard();
-  const variableValues = useTemplateVariableValues();
-  const savedVariables = useTemplateVariableDefinitions();
 
-  const { timeRange, refresh } = useTimeRange();
+  const { updateVariableDefaultValues } = useTemplateVariableActions();
+
+  const { timeRange } = useTimeRange();
 
   const { isEditMode, setEditMode } = useEditMode();
 
@@ -76,22 +70,23 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   );
 
   const onSaveButtonClick = () => {
-    const { newVariables, isSelectedVariablesUpdated } = updateVariableDefaultValues(savedVariables, variableValues);
+    const isSelectedVariablesUpdated = true;
+    // const { newVariables, isSelectedVariablesUpdated } = updateVariableDefaultValues(savedVariables, variableValues);
+    updateVariableDefaultValues();
 
     const isTimeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
     if (isTimeRangeUpdated || isSelectedVariablesUpdated) {
       openSaveChangesConfirmationDialog({
-        onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {
+        onSaveChanges: (variableDefinitions, saveDefaultTimeRange, saveDefaultVariables) => {
           if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
             dashboard.spec.duration = timeRange.pastDuration;
           }
           if (saveDefaultVariables === true) {
-            dashboard.spec.variables = newVariables;
+            dashboard.spec.variables = variableDefinitions;
           }
           saveDashboard();
-          refresh();
         },
         onCancel: () => {
           closeSaveChangesConfirmationDialog();

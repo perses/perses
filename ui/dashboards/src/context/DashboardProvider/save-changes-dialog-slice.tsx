@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
+import { VariableDefinition } from '@perses-dev/core';
 import { Middleware } from './common';
 
 export interface SaveChangesConfirmationDialogSlice {
@@ -21,7 +22,11 @@ export interface SaveChangesConfirmationDialogSlice {
 }
 
 export interface SaveChangesConfirmationDialogState {
-  onSaveChanges: (saveDefaultTimeRange: boolean, saveDefaultVariables: boolean) => void;
+  onSaveChanges: (
+    variableDefinitions: VariableDefinition[],
+    saveDefaultTimeRange: boolean,
+    saveDefaultVariables: boolean
+  ) => void;
   onCancel: () => void;
   description?: string;
 }

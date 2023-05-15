@@ -15,6 +15,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
+import produce from 'immer';
 
 import {
   TemplateVariableContext,
@@ -23,7 +24,13 @@ import {
   VariableOption,
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/plugin-system';
-import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
+import {
+  VariableName,
+  VariableValue,
+  VariableDefinition,
+  ListVariableDefinition,
+  TextVariableDefinition,
+} from '@perses-dev/core';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQueryParamName } from './query-params';
 
@@ -35,6 +42,7 @@ type TemplateVariableStore = {
   setVariableLoading: (name: VariableName, loading: boolean) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
   setVariableDefaultValue: (variableName: VariableName, value: VariableValue) => void;
+  updateVariableDefaultValues: () => void;
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -92,6 +100,7 @@ export function useTemplateVariableActions() {
       setVariableOptions: s.setVariableOptions,
       setVariableDefinitions: s.setVariableDefinitions,
       setVariableDefaultValue: s.setVariableDefaultValue,
+      updateVariableDefaultValues: s.updateVariableDefaultValues,
     };
   });
 }
@@ -215,6 +224,43 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
             },
             false,
             '[Variables] setVariableDefaultValue'
+          ),
+
+        updateVariableDefaultValues: () =>
+          set(
+            (state) => {
+              const { variableDefinitions, variableState } = state;
+              const updatedVariables = produce(variableDefinitions, (draft) => {
+                draft.forEach((variable, index) => {
+                  if (variable.kind === 'ListVariable') {
+                    const currentVariable = variableState[variable.spec.name];
+                    if (currentVariable?.default_value !== undefined) {
+                      draft[index] = {
+                        kind: 'ListVariable',
+                        spec: produce(variable.spec, (specDraft) => {
+                          specDraft.default_value = currentVariable.default_value;
+                        }),
+                      };
+                    }
+                  } else if (variable.kind === 'TextVariable') {
+                    const currentVariable = variableState[variable.spec.name];
+                    const currentVariableValue =
+                      typeof currentVariable?.value === 'string' ? currentVariable.value : '';
+                    if (currentVariable?.value !== undefined) {
+                      draft[index] = {
+                        kind: 'TextVariable',
+                        spec: produce(variable.spec, (specDraft) => {
+                          specDraft.value = currentVariableValue;
+                        }),
+                      };
+                    }
+                  }
+                });
+              });
+              state.variableDefinitions = updatedVariables;
+            },
+            false,
+            '[Variables] updateVariableDefaultValues'
           ),
       }))
     )

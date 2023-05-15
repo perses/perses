@@ -27,11 +27,13 @@ import {
 import CloseIcon from 'mdi-material-ui/Close';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
-import { useSaveChangesConfirmationDialog } from '../../context';
+import { useSaveChangesConfirmationDialog, useTemplateVariableDefinitions } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
   const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(true);
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(true);
+
+  const variableDefinitions = useTemplateVariableDefinitions();
 
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isOpen = dialog !== undefined;
@@ -43,6 +45,7 @@ export const SaveChangesConfirmationDialog = () => {
 
   const timeRangeInfoText = `Save current time range as new default ${currentTimeRangeText}`;
 
+  // TODO (sjcobb): refactor to use reusable Dialog component
   return (
     <Dialog open={isOpen}>
       {dialog !== undefined && (
@@ -88,7 +91,7 @@ export const SaveChangesConfirmationDialog = () => {
             <Button
               variant="contained"
               onClick={() => {
-                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultVariables);
+                return dialog.onSaveChanges(variableDefinitions, saveDefaultTimeRange, saveDefaultVariables);
               }}
             >
               Save Changes
