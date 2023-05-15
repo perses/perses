@@ -23,15 +23,24 @@ import { TableDensity } from './layoutUtils';
 // Only exposing a very simplified version of the very extensive column definitions
 // possible with tanstack table to make it easier for us to control rendering
 // and functionality.
-// Any needed to work around some typing issues with tanstack query.
-// https://github.com/TanStack/table/issues/4241
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TableColumnConfig<TableData>
+  // Any needed to work around some typing issues with tanstack query.
+  // https://github.com/TanStack/table/issues/4241
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell'> {
+  /**
+   * Text to display in the header for the column.
+   */
   header: string;
 
   // Tanstack Table does not support an "auto" value to naturally size to fit
   // the space in a table. Adding a custom setting to manage this ourselves.
+  /**
+   * Width of the column when rendered in a table. It should be a number in pixels
+   * or "auto" to allow the table to automatically adjust the width to fill
+   * space.
+   * @default 'auto'
+   */
   size?: number | 'auto';
 }
 
@@ -40,7 +49,6 @@ export interface TableProps<TableData> {
   width: number;
   data: TableData[];
   columns: Array<TableColumnConfig<TableData>>;
-  // columns: Array<ColumnDef<TableData>>;
   density?: TableDensity;
   checkboxSelection?: boolean;
   onRowSelectionChange?: (rowSelection: RowSelectionState) => void;
@@ -114,7 +122,7 @@ export function Table<TableData>({
     // Taking from a recommendation in this github discussion:
     // https://github.com/TanStack/table/discussions/4179#discussioncomment-3631326
     const sizeProps =
-      size === 'auto'
+      size === 'auto' || size === undefined
         ? {
             size: 0,
             minSize: 0,
@@ -131,6 +139,7 @@ export function Table<TableData>({
 
     return result;
   });
+
   if (checkboxSelection) {
     tableColumns.unshift(checkboxColumn);
   }
