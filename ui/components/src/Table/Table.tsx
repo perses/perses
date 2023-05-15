@@ -106,5 +106,7 @@ export function Table<TableData>({
     },
   });
 
+  console.log(`size: ${table.getTotalSize()}`);
+
   return <VirtualizedTable {...otherProps} table={table} density={density} checkboxSelection={checkboxSelection} />;
 }

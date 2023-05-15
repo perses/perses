@@ -6,7 +6,6 @@ import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
 import { TableHead } from './TableHead';
-import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableDensity } from './layoutUtils';
@@ -35,7 +34,7 @@ export function VirtualizedTable<TableData>({
   const VirtuosoTableComponents: TableComponents<TableData> = {
     Scroller: VirtualizedTableContainer,
     Table: (props) => {
-      return <InnerTable {...props} width={table.getCenterTotalSize()} density={density} />;
+      return <InnerTable {...props} width={width} density={density} />;
     },
     TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -60,9 +59,9 @@ export function VirtualizedTable<TableData>({
                       const column = header.column;
 
                       return (
-                        <TableHeaderCell key={header.id} sx={{ width: column.getSize() }} density={density}>
+                        <TableCell key={header.id} sx={{ width: column.getSize() }} variant="head" density={density}>
                           {flexRender(column.columnDef.header, header.getContext())}
-                        </TableHeaderCell>
+                        </TableCell>
                       );
                     })}
                   </TableRow>

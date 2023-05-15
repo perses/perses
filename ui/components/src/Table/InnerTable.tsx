@@ -17,8 +17,17 @@ const TABLE_DENSITY_CONFIG: Record<TableDensity, MuiTableProps['size']> = {
 };
 
 export const InnerTable = forwardRef<HTMLTableElement, InnerTableProps>(function InnerTable(
-  { density, ...otherProps },
+  { density, width, ...otherProps },
   ref
 ) {
-  return <StyledMuiTable {...otherProps} size={TABLE_DENSITY_CONFIG[density]} ref={ref} />;
+  return (
+    <StyledMuiTable
+      {...otherProps}
+      size={TABLE_DENSITY_CONFIG[density]}
+      ref={ref}
+      sx={{
+        width: width,
+      }}
+    />
+  );
 });
