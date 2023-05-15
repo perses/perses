@@ -14,7 +14,7 @@
 import { Box } from '@mui/material';
 import { ReactNode } from 'react';
 import { LegendOptions, LegendItem, getLegendMode } from '../model';
-import { ListLegend, ListLegendProps } from './ListLegend';
+import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 import { TableLegend, TableLegendProps } from './TableLegend';
 
@@ -23,15 +23,6 @@ export interface LegendProps {
   height: number;
   data: LegendItem[];
   options: LegendOptions;
-
-  /**
-   * Additional props that will be passed to the list variation of the legend
-   * that is used when:
-   * - The legend is positioned on the right.
-   * - The legend has a large number of items to display and requires virtualization
-   *   to render performantly.
-   */
-  listProps?: Pick<ListLegendProps, 'initialRowHeight'>;
 
   /**
    * Additional props that will be passed to the table variation of the legend
