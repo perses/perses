@@ -134,14 +134,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     });
   };
 
-  console.log(selectedSeriesNames);
-
   const handleOnRowSelectionChange: Required<LegendProps>['tableProps']['onRowSelectionChange'] = (newRowSelection) => {
-    console.log('new row selection');
-    // console.log(selectedSeriesNames);
-    // console.log(newRowSelection);
     const newSelectedSeriesNames = Object.keys(newRowSelection).filter((key) => newRowSelection[key]);
-    console.log(newSelectedSeriesNames);
     setSelectedSeriesNames(newSelectedSeriesNames);
   };
 
