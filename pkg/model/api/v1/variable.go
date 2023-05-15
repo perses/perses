@@ -14,14 +14,62 @@
 package v1
 
 import (
+	"encoding/json"
+	"fmt"
+
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"gopkg.in/yaml.v2"
 )
 
+type VariableSpec struct {
+	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
+	Kind variable.Kind `json:"kind" yaml:"kind"`
+	Spec interface{}   `json:"spec" yaml:"spec"`
+}
+
+func (v *VariableSpec) UnmarshalJSON(data []byte) error {
+	jsonUnmarshalFunc := func(variable interface{}) error {
+		return json.Unmarshal(data, variable)
+	}
+	return v.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
+}
+
+func (v *VariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return v.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
+}
+
+func (v *VariableSpec) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+	var tmp VariableSpec
+	type plain VariableSpec
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	rawSpec, err := staticMarshal(tmp.Spec)
+	if err != nil {
+		return err
+	}
+	var spec interface{}
+	switch tmp.Kind {
+	case variable.KindList:
+		spec = &variable.ListSpec{}
+	case variable.KindText:
+		spec = &variable.TextSpec{}
+	default:
+		return fmt.Errorf("unknown variable.kind %q used", tmp.Kind)
+	}
+	if unMarshalErr := staticUnmarshal(rawSpec, spec); unMarshalErr != nil {
+		return unMarshalErr
+	}
+	v.Kind = tmp.Kind
+	v.Spec = spec
+	return nil
+}
+
 type GlobalVariable struct {
-	Kind     Kind               `json:"kind" yaml:"kind"`
-	Metadata Metadata           `json:"metadata" yaml:"metadata"`
-	Spec     dashboard.Variable `json:"spec" yaml:"spec"`
+	Kind     Kind         `json:"kind" yaml:"kind"`
+	Metadata Metadata     `json:"metadata" yaml:"metadata"`
+	Spec     VariableSpec `json:"spec" yaml:"spec"`
 }
 
 func (v *GlobalVariable) GetMetadata() modelAPI.Metadata {
@@ -37,9 +85,9 @@ func (v *GlobalVariable) GetSpec() interface{} {
 }
 
 type Variable struct {
-	Kind     Kind               `json:"kind" yaml:"kind"`
-	Metadata ProjectMetadata    `json:"metadata" yaml:"metadata"`
-	Spec     dashboard.Variable `json:"spec" yaml:"spec"`
+	Kind     Kind            `json:"kind" yaml:"kind"`
+	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
+	Spec     VariableSpec    `json:"spec" yaml:"spec"`
 }
 
 func (v *Variable) GetMetadata() modelAPI.Metadata {

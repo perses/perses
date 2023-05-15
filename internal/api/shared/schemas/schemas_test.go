@@ -23,6 +23,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -246,35 +247,35 @@ func TestValidateVariables(t *testing.T) {
 					Duration: model.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
-							Kind: "ListVariable",
+							Kind: variable.KindList,
 							Spec: &dashboard.ListVariableSpec{
-								CommonVariableSpec: dashboard.CommonVariableSpec{
-									Name: "my1rstVar",
-									Display: &dashboard.VariableDisplay{
+								ListSpec: variable.ListSpec{
+									Display: &variable.Display{
 										Name:        "My First Variable",
 										Description: "A simple variable of type FirstVariable",
 										Hidden:      false,
 									},
+									AllowAllValue: true,
+									AllowMultiple: false,
+									Plugin:        validFirstVariable,
 								},
-								AllowAllValue: true,
-								AllowMultiple: false,
-								Plugin:        validFirstVariable,
+								Name: "my1rstVar",
 							},
 						},
 						{
-							Kind: "ListVariable",
+							Kind: variable.KindList,
 							Spec: &dashboard.ListVariableSpec{
-								CommonVariableSpec: dashboard.CommonVariableSpec{
-									Name: "my2ndVar",
-									Display: &dashboard.VariableDisplay{
+								ListSpec: variable.ListSpec{
+									Display: &variable.Display{
 										Name:        "My Second Variable",
 										Description: "A simple variable of type SecondVariable",
 										Hidden:      false,
 									},
+									AllowAllValue: true,
+									AllowMultiple: false,
+									Plugin:        validSecondVariable,
 								},
-								AllowAllValue: true,
-								AllowMultiple: false,
-								Plugin:        validSecondVariable,
+								Name: "my2ndVar",
 							},
 						},
 					},
@@ -295,17 +296,17 @@ func TestValidateVariables(t *testing.T) {
 						{
 							Kind: "ListVariable",
 							Spec: &dashboard.ListVariableSpec{
-								CommonVariableSpec: dashboard.CommonVariableSpec{
-									Name: "myUnknownVar",
-									Display: &dashboard.VariableDisplay{
+								ListSpec: variable.ListSpec{
+									Display: &variable.Display{
 										Name:        "My Unknown Variable",
 										Description: "A simple variable of type UnknownVariable",
 										Hidden:      false,
 									},
+									AllowAllValue: false,
+									AllowMultiple: true,
+									Plugin:        invalidUnknownVariable,
 								},
-								AllowAllValue: false,
-								AllowMultiple: true,
-								Plugin:        invalidUnknownVariable,
+								Name: "myUnknownVar",
 							},
 						},
 					},

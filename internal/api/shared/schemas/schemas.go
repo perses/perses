@@ -25,6 +25,7 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/sirupsen/logrus"
 )
 
@@ -187,13 +188,13 @@ func (s *sch) ValidateVariables(variables []dashboard.Variable) error {
 	}
 	// go through the variables list
 	// the processing stops as soon as it detects an invalid variable  -> TODO: improve this to return a list of all the errors encountered ?
-	for _, variable := range variables {
+	for _, v := range variables {
 		// skip if this is not a ListVariable (no validation needed in this case)
-		if variable.Kind != dashboard.ListVariable {
+		if v.Kind != variable.KindList {
 			continue
 		}
 		// convert the variable's spec to ListVariableSpec
-		listVariableSpec, ok := variable.Spec.(*dashboard.ListVariableSpec)
+		listVariableSpec, ok := v.Spec.(*dashboard.ListVariableSpec)
 		if !ok {
 			return errors.New("Error converting Variable to ListVariable")
 		}
