@@ -15,9 +15,12 @@ const COLUMNS: Array<ColumnDef<LegendItem, any>> = [
   {
     accessorKey: 'label',
     header: 'Name',
-    meta: {
-      autoSize: true,
-    },
+    // meta: {
+    //   autoSize: true,
+    // },
+    size: 0,
+    minSize: 0,
+    maxSize: 0,
 
     // Stating with `title` attr instead of a tooltip because it is easier to
     // implement. We should try adding a tooltip in the future, but we'll need
