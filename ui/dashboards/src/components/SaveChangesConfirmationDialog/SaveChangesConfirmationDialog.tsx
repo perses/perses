@@ -12,18 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import {
-  IconButton,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
-  Typography,
-} from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
