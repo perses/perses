@@ -21,6 +21,7 @@ import { intlFormatDistance } from 'date-fns';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
 import { RenameDashboardDialog } from '../RenameDashboardDialog/RenameDashboardDialog';
+import { useIsReadonly } from '../../model/config-client';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface DashboardListProperties {
@@ -39,6 +40,8 @@ export interface DashboardListProperties {
  */
 export function DashboardList(props: DashboardListProperties) {
   const { dashboardList, hideToolbar, isLoading, initialState } = props;
+
+  const isReadonly = useIsReadonly();
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -133,18 +136,20 @@ export function DashboardList(props: DashboardListProperties) {
             key={params.id + '-edit'}
             icon={<PencilIcon />}
             label="Rename"
+            disabled={isReadonly}
             onClick={onRenameButtonClick(params.row.project, params.row.name)}
           />,
           <GridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
+            disabled={isReadonly}
             onClick={onDeleteButtonClick(params.row.project, params.row.name)}
           />,
         ],
       },
     ],
-    [onRenameButtonClick, onDeleteButtonClick]
+    [isReadonly, onRenameButtonClick, onDeleteButtonClick]
   );
 
   return (
