@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
-import { useTimeRange } from '@perses-dev/plugin-system';
-import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
+import { DashboardResource } from '@perses-dev/core';
+import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
@@ -24,6 +22,7 @@ import { TimeRangeControls } from '../TimeRangeControls';
 import { EditVariablesButton } from '../Variables';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
+import { SaveDashboardButton } from '../SaveDashboardButton';
 import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
 
 export interface DashboardToolbarProps {
@@ -47,71 +46,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     onSave,
   } = props;
 
-  const { dashboard } = useDashboard();
-
-  const { setVariableDefaultValues } = useTemplateVariableActions();
-
-  const { timeRange } = useTimeRange();
-
-  const { isEditMode, setEditMode } = useEditMode();
-
-  // Confirm whether to save new default time range and template variable selected values
-  const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
+  const { isEditMode } = useEditMode();
 
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
-
-  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
 
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
   ) : (
     <Typography variant="h2">{dashboardName}</Typography>
   );
-
-  const onSaveButtonClick = () => {
-    const isSelectedVariablesUpdated = true;
-    setVariableDefaultValues();
-
-    const isTimeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
-
-    // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
-    if (isTimeRangeUpdated || isSelectedVariablesUpdated) {
-      openSaveChangesConfirmationDialog({
-        onSaveChanges: (variableDefinitions, saveDefaultTimeRange, saveDefaultVariables) => {
-          if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
-            dashboard.spec.duration = timeRange.pastDuration;
-          }
-          if (saveDefaultVariables === true) {
-            dashboard.spec.variables = variableDefinitions;
-          }
-          saveDashboard();
-        },
-        onCancel: () => {
-          closeSaveChangesConfirmationDialog();
-        },
-      });
-    } else {
-      saveDashboard();
-    }
-  };
-
-  const saveDashboard = () => {
-    if (onSave !== undefined) {
-      setSavingDashboard(true);
-      onSave(dashboard)
-        .then(() => {
-          setSavingDashboard(false);
-          closeSaveChangesConfirmationDialog();
-          setEditMode(false);
-        })
-        .catch(() => {
-          setSavingDashboard(false);
-        });
-    } else {
-      setEditMode(false);
-    }
-  };
 
   const testId = 'dashboard-toolbar';
 
@@ -127,9 +71,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <Button variant="contained" onClick={onSaveButtonClick} disabled={isReadonly || isSavingDashboard}>
-                Save
-              </Button>
+              <SaveDashboardButton onSave={onSave} isReadonly={isReadonly} />
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
