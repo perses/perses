@@ -31,6 +31,7 @@ import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQuery
 type TemplateVariableStore = {
   variableDefinitions: VariableDefinition[];
   variableState: VariableStateMap;
+  variableDefaultValuesUpdated?: boolean;
   setVariableValue: (variableName: VariableName, value: VariableValue) => void;
   setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
   setVariableLoading: (name: VariableName, loading: boolean) => void;
@@ -220,6 +221,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
                           specDraft.default_value = currentVariable.value;
                         }),
                       };
+                      state.variableDefaultValuesUpdated = true;
                     }
                   } else if (variable.kind === 'TextVariable') {
                     const currentVariable = variableState[variable.spec.name];
@@ -232,6 +234,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
                           specDraft.value = currentVariableValue;
                         }),
                       };
+                      state.variableDefaultValuesUpdated = true;
                     }
                   }
                 });

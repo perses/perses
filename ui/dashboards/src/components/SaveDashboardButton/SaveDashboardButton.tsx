@@ -15,7 +15,13 @@ import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
+import {
+  useDashboard,
+  useEditMode,
+  useSaveChangesConfirmationDialog,
+  useTemplateVariableActions,
+  useTemplateVariableStore,
+} from '../../context';
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
@@ -26,19 +32,18 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
+  const { variableDefaultValuesUpdated } = useTemplateVariableStore();
   const { setVariableDefaultValues } = useTemplateVariableActions();
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
 
   const onSaveButtonClick = () => {
-    const isSelectedVariablesUpdated = true;
     setVariableDefaultValues();
-
-    const isTimeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
+    const timeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
-    if (isTimeRangeUpdated || isSelectedVariablesUpdated) {
+    if (timeRangeUpdated || variableDefaultValuesUpdated) {
       openSaveChangesConfirmationDialog({
         onSaveChanges: (variableDefinitions, saveDefaultTimeRange, saveDefaultVariables) => {
           if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
