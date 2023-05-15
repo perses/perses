@@ -221,7 +221,7 @@ func TestValidatePanels(t *testing.T) {
 	}
 }
 
-func TestValidateVariables(t *testing.T) {
+func TestValidateDashboardVariables(t *testing.T) {
 	validFirstVariable := loadPlugin("testdata/samples/variables/valid_first_variable.json", t)
 	validSecondVariable := loadPlugin("testdata/samples/variables/valid_second_variable.json", t)
 	invalidUnknownVariable := loadPlugin("testdata/samples/variables/invalid_unknown_variable.json", t)
@@ -325,7 +325,7 @@ func TestValidateVariables(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = schema.ValidateVariables(test.dashboard.Spec.Variables)
+			err = schema.ValidateDashboardVariables(test.dashboard.Spec.Variables)
 			errString := ""
 			if err != nil {
 				errString = err.Error()

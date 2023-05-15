@@ -66,7 +66,7 @@ type Schemas interface {
 	ValidateDatasource(plugin common.Plugin) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
-	ValidateVariables([]dashboard.Variable) error
+	ValidateDashboardVariables([]dashboard.Variable) error
 	ValidateVariable(plugin common.Plugin, varName string) error
 	GetLoaders() []Loader
 }
@@ -177,11 +177,11 @@ func (s *sch) ValidateQuery(plugin common.Plugin) error {
 	return s.validatePlugin(plugin, "query", "", s.queries)
 }
 
-// ValidateVariables verify a list of variables.
+// ValidateDashboardVariables verify a list of variables defines in a dashboard.
 // The variables are matched against the known list of CUE definitions (schemas)
 // This applies to the ListVariable type only (TextVariable is skipped)
 // If no schema matches for at least 1 variable, the validation fails.
-func (s *sch) ValidateVariables(variables []dashboard.Variable) error {
+func (s *sch) ValidateDashboardVariables(variables []dashboard.Variable) error {
 	if s.vars == nil {
 		logrus.Warning("variable schemas are not loaded")
 		return nil
