@@ -35,11 +35,11 @@ export interface RenameDashboardDialogProps {
  */
 export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { dashboard, open, onClose, onSuccess } = props;
-  const [name, setName] = useState<string>();
-  const [error, setError] = useState<string>();
-
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
+
+  const [name, setName] = useState<string>();
+  const [error, setError] = useState<string>();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
