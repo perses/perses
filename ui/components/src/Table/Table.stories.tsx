@@ -41,6 +41,9 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
 
 const meta: Meta<typeof Table> = {
   component: Table,
+  args: {
+    density: 'standard',
+  },
   argTypes: {
     data: {
       // Hide table for data because we are going to set it to mock data in
@@ -48,6 +51,10 @@ const meta: Meta<typeof Table> = {
       table: {
         disable: true,
       },
+    },
+    density: {
+      control: 'radio',
+      options: ['compact', 'standard'],
     },
   },
   parameters: {},
@@ -123,5 +130,16 @@ export const Density: Story = {
         </div>
       </Stack>
     );
+  },
+};
+
+export const CheckboxSelection: Story = {
+  args: {
+    height: 400,
+    width: 600,
+    data: generateMockTableData(500),
+    columns: COLUMNS,
+    checkboxSelection: true,
+    getCheckboxColor: (data) => data.color,
   },
 };

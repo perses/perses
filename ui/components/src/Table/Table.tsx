@@ -109,6 +109,7 @@ export function Table<TableData>({
           indeterminate={table.getIsSomeRowsSelected()}
           onChange={table.getToggleAllRowsSelectedHandler()}
           color={theme.palette.text.primary}
+          density={density}
         />
       );
     },
@@ -119,6 +120,7 @@ export function Table<TableData>({
           indeterminate={row.getIsSomeSelected()}
           onChange={row.getToggleSelectedHandler()}
           color={getCheckboxColor?.(row.original)}
+          density={density}
         />
       );
     },

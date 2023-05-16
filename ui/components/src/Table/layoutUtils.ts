@@ -37,7 +37,7 @@ export function getCellLayoutProps(theme: Theme, density: TableDensity): React.C
   return {
     padding: `${paddingY} ${paddingX}`,
     height: calculateCellHeight(lineHeight, paddingY),
-    fontSize: theme.typography.body2.fontSize,
+    fontSize: theme.typography.body1.fontSize,
     lineHeight: lineHeight,
   };
 }

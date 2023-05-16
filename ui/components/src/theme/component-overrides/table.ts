@@ -19,15 +19,15 @@ export const MuiTable: Components<Theme>['MuiTable'] = {
 
 export const MuiTableCell: Components<Theme>['MuiTableCell'] = {
   styleOverrides: {
-    sizeMedium: ({ theme }) => {
-      return {
-        fontSize: theme.typography.body1.fontSize,
-      };
-    },
-    sizeSmall: ({ theme }) => {
-      return {
-        fontSize: theme.typography.body2.fontSize,
-      };
-    },
+    // sizeMedium: ({ theme }) => {
+    //   return {
+    //     fontSize: theme.typography.body1.fontSize,
+    //   };
+    // },
+    // sizeSmall: ({ theme }) => {
+    //   return {
+    //     fontSize: theme.typography.body2.fontSize,
+    //   };
+    // },
   },
 };

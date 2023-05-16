@@ -1,22 +1,26 @@
 import { Checkbox, CheckboxProps, styled } from '@mui/material';
+import { TableDensity } from './layoutUtils';
 
 const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
-  padding: theme.spacing(0.25),
   verticalAlign: 'bottom',
-  '& .MuiSvgIcon-root': { fontSize: 14 },
 }));
 
 export interface TableCheckboxProps extends Pick<CheckboxProps, 'checked' | 'indeterminate' | 'onChange'> {
   color?: string;
+  density: TableDensity;
 }
 
-export function TableCheckbox({ color, ...otherProps }: TableCheckboxProps) {
+export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxProps) {
+  const isCompact = density === 'compact';
+
   return (
     <StyledCheckbox
-      size="small"
+      size={isCompact ? 'small' : 'medium'}
       {...otherProps}
       sx={{
         color: color,
+
+        padding: (theme) => theme.spacing(isCompact ? 0.25 : 0.5),
 
         // Centering.
         position: 'absolute',
@@ -27,6 +31,8 @@ export function TableCheckbox({ color, ...otherProps }: TableCheckboxProps) {
         '&.Mui-checked': {
           color: color,
         },
+
+        '& .MuiSvgIcon-root': { fontSize: isCompact ? 14 : 16 },
       }}
     />
   );
