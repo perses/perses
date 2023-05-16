@@ -14,8 +14,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Table, TableProps } from '@perses-dev/components';
 import { Stack, Typography } from '@mui/material';
+import { useState } from 'react';
+import { action } from '@storybook/addon-actions';
 
 type MockTableData = {
+  id: string;
   label: string;
   value: number;
   color: string;
@@ -43,6 +46,7 @@ const meta: Meta<typeof Table> = {
   component: Table,
   args: {
     density: 'standard',
+    getRowId: (originalRow) => (originalRow as MockTableData).id,
   },
   argTypes: {
     data: {
@@ -81,6 +85,7 @@ function generateMockTableData(count: number): MockTableData[] {
   const data: MockTableData[] = [];
   for (let i = 0; i < count; i++) {
     data.push({
+      id: `row${i}`,
       label: `my column has a label ${i} that may be ellipsized when it does not fit within the column`,
       value: i,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
@@ -141,5 +146,29 @@ export const CheckboxSelection: Story = {
     columns: COLUMNS,
     checkboxSelection: true,
     getCheckboxColor: (data) => data.color,
+  },
+  argTypes: {
+    // Disabling values managed within the render below.
+    onRowSelectionChange: {
+      table: {
+        disable: true,
+      },
+    },
+    rowSelection: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [rowSelection, setRowSelection] = useState<TableProps<MockTableData>['rowSelection']>({});
+
+    const handleRowSelectionChange: TableProps<MockTableData>['onRowSelectionChange'] = (newRowSelection) => {
+      action('onRowSelectionChange')(newRowSelection);
+      setRowSelection(newRowSelection);
+    };
+
+    return <Table {...args} onRowSelectionChange={handleRowSelectionChange} rowSelection={rowSelection} />;
   },
 };

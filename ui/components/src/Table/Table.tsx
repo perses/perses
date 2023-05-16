@@ -54,6 +54,7 @@ export interface TableProps<TableData> {
   onRowSelectionChange?: (rowSelection: RowSelectionState) => void;
   getRowId?: CoreOptions<TableData>['getRowId'];
   getCheckboxColor?: (data: TableData) => string;
+  rowSelection?: RowSelectionState;
 }
 
 // TODO: perf tuning
@@ -72,6 +73,7 @@ export function Table<TableData>({
   onRowSelectionChange,
   getCheckboxColor,
   getRowId: initGetRowId,
+  rowSelection = {},
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
@@ -81,22 +83,17 @@ export function Table<TableData>({
   const getRowId = initGetRowId ?? DEFAULT_GET_ROW_ID;
 
   // TODO: consider making this controlled instead of internal.
-  const initRowSelection: RowSelectionState = data.reduce((rowSelectionResult, row, index) => {
-    rowSelectionResult[getRowId(row, index)] = true;
-    return rowSelectionResult;
-  }, {} as RowSelectionState);
+  // const initRowSelection: RowSelectionState = data.reduce((rowSelectionResult, row, index) => {
+  //   rowSelectionResult[getRowId(row, index)] = true;
+  //   return rowSelectionResult;
+  // }, {} as RowSelectionState);
 
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>(initRowSelection);
+  // const [rowSelection, setRowSelection] = useState<RowSelectionState>(initRowSelection);
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
-    setRowSelection((oldRowSelection) => {
-      const newRowSelection =
-        typeof rowSelectionUpdater === 'function' ? rowSelectionUpdater(oldRowSelection) : rowSelectionUpdater;
-
-      onRowSelectionChange?.(newRowSelection);
-
-      return newRowSelection;
-    });
+    const newRowSelection =
+      typeof rowSelectionUpdater === 'function' ? rowSelectionUpdater(rowSelection) : rowSelectionUpdater;
+    onRowSelectionChange?.(newRowSelection);
   };
 
   const checkboxColumn: ColumnDef<TableData> = {

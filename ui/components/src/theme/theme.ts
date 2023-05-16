@@ -13,7 +13,6 @@
 
 import { createTheme, PaletteMode, ThemeOptions, Theme } from '@mui/material';
 import { MuiAlert } from './component-overrides/alert';
-import { MuiTable, MuiTableCell } from './component-overrides/table';
 import { getPaletteOptions } from './palette/palette-options';
 import { typography } from './typography';
 
@@ -78,6 +77,4 @@ const components: ThemeOptions['components'] = {
       paper: getModalBackgroundStyle,
     },
   },
-  MuiTable,
-  MuiTableCell,
 };

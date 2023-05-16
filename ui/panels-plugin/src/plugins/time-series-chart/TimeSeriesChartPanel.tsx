@@ -308,6 +308,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           options={legend}
           data={graphData.legendItems}
           tableProps={{
+            rowSelection: selectedSeriesNames.reduce((result, series) => {
+              result[series] = true;
+              return result;
+            }, {} as Record<string, boolean>),
             onRowSelectionChange: handleOnRowSelectionChange,
           }}
         />

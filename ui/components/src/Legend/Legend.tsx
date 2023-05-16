@@ -28,7 +28,7 @@ export interface LegendProps {
    * Additional props that will be passed to the table variation of the legend
    * that is used when `options.mode` is set to `table`.
    */
-  tableProps?: Pick<TableLegendProps, 'onRowSelectionChange'>;
+  tableProps?: Pick<TableLegendProps, 'onRowSelectionChange' | 'rowSelection'>;
 }
 
 // When the number of items to display is above this number, it is likely to

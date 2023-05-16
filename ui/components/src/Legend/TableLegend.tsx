@@ -2,7 +2,7 @@ import { ColumnDef, CellContext } from '@tanstack/react-table';
 import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from '../model';
 
-export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSelectionChange'> {
+export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSelectionChange' | 'rowSelection'> {
   items: LegendItem[];
   height: number;
   width: number;
