@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './GaugeChart';
+export type { GaugeChartDefinition } from './gauge-chart-model';

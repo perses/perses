@@ -58,9 +58,11 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
     height: 500,
   },
   spec: {
-    unit: { kind: 'Decimal', decimal_places: 2 },
     legend: {
       position: 'Right',
+    },
+    y_axis: {
+      unit: { kind: 'Decimal', decimal_places: 2 },
     },
   },
 };
