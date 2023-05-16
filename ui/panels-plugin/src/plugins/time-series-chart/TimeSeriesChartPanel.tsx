@@ -337,7 +337,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           options={legend}
           data={graphData.legendItems}
           tableProps={{
-            rowSelection: typeof selectedSeries === 'string' ? {} : selectedSeries,
+            rowSelection: selectedSeries,
             onRowSelectionChange: handleOnRowSelectionChange,
           }}
         />

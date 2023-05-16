@@ -1,11 +1,13 @@
 import { ColumnDef, CellContext } from '@tanstack/react-table';
+import { useMemo } from 'react';
 import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from '../model';
 
-export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSelectionChange' | 'rowSelection'> {
+export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSelectionChange'> {
   items: LegendItem[];
   height: number;
   width: number;
+  rowSelection: TableProps<LegendItem>['rowSelection'] | 'ALL';
 }
 
 const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
@@ -20,10 +22,22 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
   },
 ];
 
-export function TableLegend({ items, ...tableProps }: TableLegendProps) {
+export function TableLegend({ items, rowSelection: initRowSelection, ...tableProps }: TableLegendProps) {
+  const rowSelection =
+    typeof initRowSelection !== 'string'
+      ? initRowSelection
+      : // Turn "ALL" state into a table component friendly map of all of the selected
+        // items for checkboxes.
+        // TODO: clean this up if we switch to also using checkboxes in list legend.
+        items.reduce((allRowSelection, item) => {
+          allRowSelection[item.id] = true;
+          return allRowSelection;
+        }, {} as Record<string, boolean>);
+
   return (
     <Table
       {...tableProps}
+      rowSelection={rowSelection}
       data={items}
       columns={COLUMNS}
       density="compact"
