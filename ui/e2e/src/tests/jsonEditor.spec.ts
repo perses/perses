@@ -15,11 +15,11 @@ import updatedDefaultsDashboard from '../data/updatedDefaultsDashboard.json';
 import { test, expect } from '../fixtures/dashboardTest';
 
 test.use({
-  dashboardName: 'Defaults',
+  dashboardName: 'EditJson',
   modifiesDashboard: true,
 });
 
-test.describe('Dashboard: Defaults', () => {
+test.describe('Dashboard: EditJson', () => {
   test('can save new default values from JSON editor', async ({ page, dashboardPage }) => {
     await dashboardPage.startEditing();
     await page.getByRole('button', { name: 'Edit JSON' }).click(); // TODO: move TOOLTIP_TEXT.editJson to @perses-dev/core and share constant here
