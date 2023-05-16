@@ -66,7 +66,7 @@ test.describe('Dashboard: Defaults', () => {
     await expect(dashboardPage.variableListItems).toContainText(['5m']);
   });
 
-  test('can save new default duration from JSON editor', async ({ page, dashboardPage }) => {
+  test('can save new default duration and list variable default from JSON editor', async ({ page, dashboardPage }) => {
     await dashboardPage.startEditing();
     await page.getByRole('button', { name: 'Edit JSON' }).click(); // TODO: move TOOLTIP_TEXT.editJson to @perses-dev/core and share constant here
     const jsonInput = dashboardPage.page.getByRole('textbox');
@@ -76,5 +76,6 @@ test.describe('Dashboard: Defaults', () => {
     await dashboardPage.saveChanges();
     await expect(page.url()).toContain('start=5m');
     await expect(dashboardPage.timePicker).toContainText('Last 5 minutes');
+    await expect(dashboardPage.page.getByRole('button', { name: 'interval' })).toContainText('5m');
   });
 });

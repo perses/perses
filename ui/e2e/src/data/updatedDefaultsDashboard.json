@@ -54,6 +54,7 @@
         "kind": "ListVariable",
         "spec": {
           "name": "interval",
+          "default_value": "5m",
           "allow_all_value": false,
           "allow_multiple": false,
           "plugin": {
@@ -107,6 +108,17 @@
               ]
             }
           }
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "NewTextVariable",
+          "display": {
+            "name": "Text variable",
+            "hidden": false
+          },
+          "value": "initial value"
         }
       }
     ],
