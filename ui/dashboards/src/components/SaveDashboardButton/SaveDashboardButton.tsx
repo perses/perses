@@ -33,7 +33,6 @@ export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' 
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
 
   const onSaveButtonClick = () => {
-    setVariableDefaultValues();
     const isSavedDurationOutdated =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
