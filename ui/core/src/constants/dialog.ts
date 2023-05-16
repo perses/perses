@@ -12,4 +12,4 @@
 // limitations under the License.
 
 export const SAVE_DEFAULTS_DIALOG_TEXT =
-  'You have made changes to the dashboard, including the time range or variable values. Would you like to save these?';
+  'You have made changes to the time range or the variables values. Would you like to save these as defaults?';
