@@ -105,14 +105,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = convertPanelYAxis(y_axis);
 
-  const [selectedSeriesNames, setSelectedSeriesNames] = useState<SelectedSeriesState>('ALL');
+  const [selectedSeries, setSelectedSeries] = useState<SelectedSeriesState>('ALL');
 
   const { setTimeRange } = useTimeRange();
 
   const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
-    setSelectedSeriesNames((current) => {
+    setSelectedSeries((current) => {
       return produce(current, (draft) => {
         if (draft === 'ALL') {
           return {
@@ -217,8 +217,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
-        const isSelectAll = selectedSeriesNames === 'ALL';
-        const isSelected = !isSelectAll && !!selectedSeriesNames[seriesId];
+        const isSelectAll = selectedSeries === 'ALL';
+        const isSelected = !isSelectAll && !!selectedSeries[seriesId];
         const showTimeSeries = isSelected || isSelectAll;
 
         if (showTimeSeries) {
@@ -264,7 +264,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
+  }, [queryResults, thresholds, selectedSeries, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
