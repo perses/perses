@@ -147,6 +147,9 @@ export function LineChart({
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
+
+    // The "chart" `noDataVariant` is only used when the `timeSeries` is an
+    // empty array because a `null` value will throw an error.
     if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
 
     // show symbols and axisPointer dashed line on hover
