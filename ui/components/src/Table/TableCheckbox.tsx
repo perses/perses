@@ -1,5 +1,5 @@
 import { Checkbox, CheckboxProps, styled } from '@mui/material';
-import { TableDensity } from './layoutUtils';
+import { TableDensity } from './table-model';
 
 const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
   verticalAlign: 'bottom',

@@ -9,7 +9,7 @@ import { InnerTable } from './InnerTable';
 import { TableHead } from './TableHead';
 import { TableCell } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
-import { TableDensity } from './layoutUtils';
+import { TableDensity } from './table-model';
 
 // TODO: extract and reuse props
 export interface VirtualizedTableProps<TableData> {

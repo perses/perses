@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 import { Checkbox, useTheme } from '@mui/material';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
-import { TableDensity } from './layoutUtils';
+import { TableDensity } from './table-model';
 
 // Only exposing a very simplified version of the very extensive column definitions
 // possible with tanstack table to make it easier for us to control rendering

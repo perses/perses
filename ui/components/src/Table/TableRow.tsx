@@ -1,6 +1,6 @@
 import { TableRow as MuiTableRow, TableRowProps as MuiTableRowProps } from '@mui/material';
 import { forwardRef } from 'react';
-import { TableDensity } from './layoutUtils';
+import { TableDensity } from './table-model';
 
 interface TableRowProps extends MuiTableRowProps<'div'> {
   density: TableDensity;

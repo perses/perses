@@ -1,6 +1,6 @@
 import { Table as MuiTable, styled, TableProps as MuiTableProps } from '@mui/material';
 import { forwardRef } from 'react';
-import { TableDensity } from './layoutUtils';
+import { TableDensity } from './table-model';
 
 const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
   // This value is needed to have a consistent table layout when scrolling.
