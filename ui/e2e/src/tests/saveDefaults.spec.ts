@@ -22,11 +22,12 @@ test.use({
 });
 
 test.describe('Dashboard: Defaults', () => {
-  test('can update default dashboard duration', async ({ page, dashboardPage }) => {
-    // Default to stored duration
+  test('can default to stored duration', async ({ page, dashboardPage }) => {
     await expect(dashboardPage.timePicker).toContainText('Last 1 hour');
     await expect(page.url()).toContain('start=1h');
+  });
 
+  test('can update default dashboard duration', async ({ page, dashboardPage }) => {
     // Change selected relative time range
     await dashboardPage.timePicker.click();
     await page.getByRole('option', { name: 'Last 6 hours' }).click();
