@@ -16,13 +16,11 @@ import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
-import { useSaveChangesConfirmationDialog, useTemplateVariableDefinitions } from '../../context';
+import { useSaveChangesConfirmationDialog } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
   const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(true);
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(true);
-
-  const variableDefinitions = useTemplateVariableDefinitions();
 
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isOpen = dialog !== undefined;
@@ -68,7 +66,7 @@ export const SaveChangesConfirmationDialog = () => {
           <Dialog.Actions>
             <Dialog.PrimaryButton
               onClick={() => {
-                return dialog.onSaveChanges(variableDefinitions, saveDefaultTimeRange, saveDefaultVariables);
+                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultVariables);
               }}
             >
               Save Changes

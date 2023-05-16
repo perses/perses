@@ -36,7 +36,7 @@ type TemplateVariableStore = {
   setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
   setVariableLoading: (name: VariableName, loading: boolean) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
-  setVariableDefaultValues: () => void;
+  setVariableDefaultValues: () => VariableDefinition[];
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -139,7 +139,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
   const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
   const store = createStore<TemplateVariableStore>()(
     devtools(
-      immer((set) => ({
+      immer((set, get) => ({
         variableState: hydrateTemplateVariableStates(initialVariableDefinitions, initialParams),
         variableDefinitions: initialVariableDefinitions,
         setVariableDefinitions(definitions: VariableDefinition[]) {
@@ -205,45 +205,45 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
             false,
             '[Variables] setVariableValue'
           ),
-
-        setVariableDefaultValues: () =>
+        setVariableDefaultValues: () => {
+          const variableDefinitions = get().variableDefinitions;
+          const variableState = get().variableState;
+          const updatedVariables = produce(variableDefinitions, (draft) => {
+            draft.forEach((variable, index) => {
+              if (variable.kind === 'ListVariable') {
+                const currentVariable = variableState[variable.spec.name];
+                if (currentVariable?.value !== undefined) {
+                  draft[index] = {
+                    kind: 'ListVariable',
+                    spec: produce(variable.spec, (specDraft) => {
+                      specDraft.default_value = currentVariable.value;
+                    }),
+                  };
+                }
+              } else if (variable.kind === 'TextVariable') {
+                const currentVariable = variableState[variable.spec.name];
+                const currentVariableValue = typeof currentVariable?.value === 'string' ? currentVariable.value : '';
+                if (currentVariable?.value !== undefined) {
+                  draft[index] = {
+                    kind: 'TextVariable',
+                    spec: produce(variable.spec, (specDraft) => {
+                      specDraft.value = currentVariableValue;
+                    }),
+                  };
+                }
+              }
+            });
+          });
           set(
             (state) => {
-              const { variableDefinitions, variableState } = state;
-              const updatedVariables = produce(variableDefinitions, (draft) => {
-                draft.forEach((variable, index) => {
-                  if (variable.kind === 'ListVariable') {
-                    const currentVariable = variableState[variable.spec.name];
-                    if (currentVariable?.value !== undefined) {
-                      draft[index] = {
-                        kind: 'ListVariable',
-                        spec: produce(variable.spec, (specDraft) => {
-                          specDraft.default_value = currentVariable.value;
-                        }),
-                      };
-                      state.variableDefaultValuesUpdated = true;
-                    }
-                  } else if (variable.kind === 'TextVariable') {
-                    const currentVariable = variableState[variable.spec.name];
-                    const currentVariableValue =
-                      typeof currentVariable?.value === 'string' ? currentVariable.value : '';
-                    if (currentVariable?.value !== undefined) {
-                      draft[index] = {
-                        kind: 'TextVariable',
-                        spec: produce(variable.spec, (specDraft) => {
-                          specDraft.value = currentVariableValue;
-                        }),
-                      };
-                      state.variableDefaultValuesUpdated = true;
-                    }
-                  }
-                });
-              });
               state.variableDefinitions = updatedVariables;
+              state.variableDefaultValuesUpdated = true;
             },
             false,
             '[Variables] setVariableDefaultValues'
-          ),
+          );
+          return updatedVariables;
+        },
       }))
     )
   );

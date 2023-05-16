@@ -42,15 +42,17 @@ export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' 
     setVariableDefaultValues();
     const timeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
+    // TODO (sjcobb): add back variableDefaultValuesUpdated as separate util
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
     if (timeRangeUpdated || variableDefaultValuesUpdated) {
       openSaveChangesConfirmationDialog({
-        onSaveChanges: (variableDefinitions, saveDefaultTimeRange, saveDefaultVariables) => {
+        onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {
           if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
             dashboard.spec.duration = timeRange.pastDuration;
           }
           if (saveDefaultVariables === true) {
-            dashboard.spec.variables = variableDefinitions;
+            const variables = setVariableDefaultValues();
+            dashboard.spec.variables = variables;
           }
           saveDashboard();
         },
