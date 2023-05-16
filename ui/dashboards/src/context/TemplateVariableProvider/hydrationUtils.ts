@@ -14,6 +14,7 @@
 import { VariableValue, VariableDefinition } from '@perses-dev/core';
 import { VariableStateMap, VariableState, DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
 
+// TODO: move to TemplateVariableProvider/utils.ts
 function hydrateTemplateVariableState(variable: VariableDefinition, initialValue?: VariableValue) {
   const varState: VariableState = {
     value: null,

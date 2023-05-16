@@ -15,13 +15,7 @@ import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import {
-  useDashboard,
-  useEditMode,
-  useSaveChangesConfirmationDialog,
-  useTemplateVariableActions,
-  useTemplateVariableStore,
-} from '../../context';
+import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
@@ -32,9 +26,8 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
-  // const { isSavedVariablesOutdated } = useTemplateVariableStore();
-  const isSavedVariablesOutdated = true;
-  const { setVariableDefaultValues } = useTemplateVariableActions();
+  const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
+  const isSavedVariablesOutdated = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
@@ -44,7 +37,6 @@ export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' 
     const isSavedDurationOutdated =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
-    // TODO (sjcobb): add back variableDefaultValuesUpdated as separate util
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
     if (isSavedDurationOutdated || isSavedVariablesOutdated) {
       openSaveChangesConfirmationDialog({
