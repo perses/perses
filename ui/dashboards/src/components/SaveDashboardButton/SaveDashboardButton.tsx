@@ -32,7 +32,8 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
-  const { variableDefaultValuesUpdated } = useTemplateVariableStore();
+  // const { isSavedVariablesOutdated } = useTemplateVariableStore();
+  const isSavedVariablesOutdated = true;
   const { setVariableDefaultValues } = useTemplateVariableActions();
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
@@ -40,11 +41,12 @@ export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' 
 
   const onSaveButtonClick = () => {
     setVariableDefaultValues();
-    const timeRangeUpdated = isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
+    const isSavedDurationOutdated =
+      isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
     // TODO (sjcobb): add back variableDefaultValuesUpdated as separate util
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
-    if (timeRangeUpdated || variableDefaultValuesUpdated) {
+    if (isSavedDurationOutdated || isSavedVariablesOutdated) {
       openSaveChangesConfirmationDialog({
         onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {
           if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {

@@ -25,13 +25,14 @@ import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/plugin-system';
 import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
+// import { checkSavedVariablesStatus } from '../../components/Variables';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQueryParamName } from './query-params';
 
 type TemplateVariableStore = {
   variableDefinitions: VariableDefinition[];
   variableState: VariableStateMap;
-  variableDefaultValuesUpdated?: boolean;
+  isSavedVariablesOutdated?: boolean;
   setVariableValue: (variableName: VariableName, value: VariableValue) => void;
   setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
   setVariableLoading: (name: VariableName, loading: boolean) => void;
@@ -178,7 +179,6 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
             '[Variables] setVariableLoading'
           );
         },
-
         setVariableValue: (name, value) =>
           set(
             (state) => {
@@ -237,13 +237,14 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
           set(
             (state) => {
               state.variableDefinitions = updatedVariables;
-              state.variableDefaultValuesUpdated = true;
+              state.isSavedVariablesOutdated = false;
             },
             false,
             '[Variables] setVariableDefaultValues'
           );
           return updatedVariables;
         },
+        // isSavedVariablesOutdated: checkSavedVariablesStatus(get().variableDefinitions, get().variableState),
       }))
     )
   );

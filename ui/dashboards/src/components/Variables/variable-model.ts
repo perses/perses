@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListVariableDefinition } from '@perses-dev/core';
+import { ListVariableDefinition, VariableDefinition } from '@perses-dev/core';
 import {
   useDatasourceStore,
   usePlugin,
@@ -101,3 +101,25 @@ export const VARIABLE_TYPES = [
   { label: 'List', kind: 'ListVariable' },
   { label: 'Text', kind: 'TextVariable' },
 ] as const;
+
+/*
+ * Check whether saved variable definitions are out of date with current default list values in Zustand store
+ */
+export function checkSavedVariablesStatus(definitions: VariableDefinition[], varState: VariableStateMap) {
+  let isSavedVariablesOutdated = false;
+  definitions.forEach((saveVariable) => {
+    if (saveVariable.kind === 'ListVariable') {
+      const currentVariable = varState[saveVariable.spec.name];
+      if (saveVariable.spec.default_value !== currentVariable?.value) {
+        isSavedVariablesOutdated = true;
+      }
+    } else if (saveVariable.kind === 'TextVariable') {
+      const currentVariable = varState[saveVariable.spec.name];
+      const currentVariableValue = typeof currentVariable?.value === 'string' ? currentVariable.value : '';
+      if (saveVariable.spec.value !== currentVariableValue) {
+        isSavedVariablesOutdated = true;
+      }
+    }
+  });
+  return isSavedVariablesOutdated;
+}
