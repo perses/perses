@@ -805,8 +805,8 @@
       {
         "current": {
           "selected": false,
-          "text": "{AS=\"001_APA\",app_name=\"APA\",app_part_of=\"APA\",application=\"APA\",applicationdetailed=\"Amadeus Protocol Adapter\",componentmodel=\"Amadeus OTF OLTP v0\",componentname=\"APA\",discoverytype=\"OBELike\",firecell=\"A1\",hostname=\"apavp001.muc.amadeus.net\",instance=\"apavp001.muc.amadeus.net:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"apavp001\",osname=\"SuSE Linux\",owner=\"PSV-IAP-AAA-SRE\",partition=\"UNDEFINED\",phase=\"PRD\",physicalhost=\"hfe10241pb01\",prometheus=\"system\",prometheus_instance=\"obe\",prometheus_namespace=\"argos-external\",region=\"ERD\",role=\"sync\",serversite=\"ADP\",stack=\"erd4\",type=\"OBE\",virtual=\"Yes\"} 1 1680018176000",
-          "value": "{AS=\"001_APA\",app_name=\"APA\",app_part_of=\"APA\",application=\"APA\",applicationdetailed=\"Amadeus Protocol Adapter\",componentmodel=\"Amadeus OTF OLTP v0\",componentname=\"APA\",discoverytype=\"OBELike\",firecell=\"A1\",hostname=\"apavp001.muc.amadeus.net\",instance=\"apavp001.muc.amadeus.net:50700\",job=\"cmdbrtu-custom-sd\",nodename=\"apavp001\",osname=\"SuSE Linux\",owner=\"PSV-IAP-AAA-SRE\",partition=\"UNDEFINED\",phase=\"PRD\",physicalhost=\"hfe10241pb01\",prometheus=\"system\",prometheus_instance=\"obe\",prometheus_namespace=\"argos-external\",region=\"ERD\",role=\"sync\",serversite=\"ADP\",stack=\"erd4\",type=\"OBE\",virtual=\"Yes\"} 1 1680018176000"
+          "text": "cmdbrtu-custom-sd",
+          "value": "cmdbrtu-custom-sd"
         },
         "datasource": {
           "type": "prometheus",
@@ -824,7 +824,7 @@
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "^.*job=\"([a-z-]+)\".*$",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
