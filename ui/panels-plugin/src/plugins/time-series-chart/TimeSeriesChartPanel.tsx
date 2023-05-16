@@ -217,9 +217,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
-        const isInitAll = selectedSeriesNames === 'ALL';
-        const isSelected = !isInitAll && !!selectedSeriesNames[seriesId];
-        const showTimeSeries = isSelected || isInitAll;
+        const isSelectAll = selectedSeriesNames === 'ALL';
+        const isSelected = !isSelectAll && !!selectedSeriesNames[seriesId];
+        const showTimeSeries = isSelected || isSelectAll;
 
         if (showTimeSeries) {
           graphData.timeSeries.push(lineSeries);
