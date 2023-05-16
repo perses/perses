@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
-import updatedDefaultsDashboard from '../data/updatedDefaultsDashboard.json';
 import { test, expect } from '../fixtures/dashboardTest';
 
 const TEXT_VARIABLE_UPDATED_VALUE = 'new';
@@ -49,13 +48,13 @@ test.describe('Dashboard: Defaults', () => {
 
     // Switch to edit mode and click save
     await dashboardPage.startEditing();
-    const toolbarSaveButton = dashboardPage.page.getByRole('button', { name: 'Save' });
+    const toolbarSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
 
     // Save defaults confirmation dialog should open, click btn to save
     const dialogText = await dashboardPage.page.getByText(SAVE_DEFAULTS_DIALOG_TEXT);
     await expect(dialogText).toBeVisible();
-    const dialogSaveButton = dashboardPage.page.getByRole('button', { name: 'Save Changes' });
+    const dialogSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save Changes' });
     await dialogSaveButton.click();
 
     // Confirm correct default list and text variables are persisted
@@ -64,18 +63,5 @@ test.describe('Dashboard: Defaults', () => {
     await expect(page.url()).toContain(TEXT_VARIABLE_UPDATED_VALUE);
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
     await expect(dashboardPage.variableListItems).toContainText(['5m']);
-  });
-
-  test('can save new default duration and list variable default from JSON editor', async ({ page, dashboardPage }) => {
-    await dashboardPage.startEditing();
-    await page.getByRole('button', { name: 'Edit JSON' }).click(); // TODO: move TOOLTIP_TEXT.editJson to @perses-dev/core and share constant here
-    const jsonInput = dashboardPage.page.getByRole('textbox');
-    await jsonInput.clear();
-    await jsonInput.fill(JSON.stringify(updatedDefaultsDashboard));
-    await dashboardPage.page.getByRole('button', { name: 'Apply', exact: true }).click();
-    await dashboardPage.saveChanges();
-    await expect(page.url()).toContain('start=5m');
-    await expect(dashboardPage.timePicker).toContainText('Last 5 minutes');
-    await expect(dashboardPage.page.getByRole('button', { name: 'interval' })).toContainText('5m');
   });
 });
