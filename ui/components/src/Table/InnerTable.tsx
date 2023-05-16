@@ -5,6 +5,8 @@ import { TableDensity } from './layoutUtils';
 const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
   // This value is needed to have a consistent table layout when scrolling.
   tableLayout: 'fixed',
+  borderCollapse: 'separate',
+  backgroundColor: theme.palette.background.paper,
 }));
 
 type InnerTableProps = Omit<MuiTableProps, 'size'> & {

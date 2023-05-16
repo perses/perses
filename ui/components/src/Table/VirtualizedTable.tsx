@@ -60,12 +60,7 @@ export function VirtualizedTable<TableData>({
                       const column = header.column;
 
                       return (
-                        <TableCell
-                          key={header.id}
-                          sx={{ width: column.getSize() || 'auto' }}
-                          variant="head"
-                          density={density}
-                        >
+                        <TableCell key={header.id} width={column.getSize() || 'auto'} variant="head" density={density}>
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableCell>
                       );
