@@ -49,6 +49,8 @@ const LegendWrapper = (props: LegendProps) => {
     options: { position },
   } = props;
 
+  const borderWidth = 1;
+
   // The legend does not look very interesting by itself in stories, especially
   // when considering the positioning. This wrapper puts a box with a border
   // and some additional height/width (depending on the positioning of the
@@ -57,15 +59,10 @@ const LegendWrapper = (props: LegendProps) => {
   return (
     <Box
       sx={{
-        border: (theme) => `solid 1px ${theme.palette.divider}`,
+        border: (theme) => `solid ${borderWidth}px ${theme.palette.divider}`,
         position: 'relative',
-        width: position === 'Right' ? props.width + 100 : props.width,
-        height: position === 'Right' ? props.height : props.height + 100,
-
-        // This is a rare case where content-box is helpful because we want to
-        // have the border be additive, so we don't have to do any special
-        // math with the height/width or end up with an off-by-2px issue.
-        boxSizing: 'content-box',
+        width: (position === 'Right' ? props.width + 100 : props.width) + borderWidth * 2,
+        height: (position === 'Right' ? props.height : props.height + 100) + borderWidth * 2,
       }}
     >
       <Legend {...props} />
