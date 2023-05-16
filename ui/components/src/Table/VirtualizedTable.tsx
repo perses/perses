@@ -17,19 +17,12 @@ export interface VirtualizedTableProps<TableData> {
   width: number;
   table: TSTable<TableData>;
   density: TableDensity;
-  checkboxSelection?: boolean;
 }
 
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
-export function VirtualizedTable<TableData>({
-  width,
-  height,
-  table,
-  density,
-  checkboxSelection,
-}: VirtualizedTableProps<TableData>) {
+export function VirtualizedTable<TableData>({ width, height, table, density }: VirtualizedTableProps<TableData>) {
   const rows = table.getRowModel().rows;
 
   const VirtuosoTableComponents: TableComponents<TableData> = {

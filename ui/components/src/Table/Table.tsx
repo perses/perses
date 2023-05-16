@@ -163,5 +163,5 @@ export function Table<TableData>({
     },
   });
 
-  return <VirtualizedTable {...otherProps} table={table} density={density} checkboxSelection={checkboxSelection} />;
+  return <VirtualizedTable {...otherProps} table={table} density={density} />;
 }
