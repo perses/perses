@@ -27,6 +27,7 @@ import {
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
+  LineChartProps,
 } from '@perses-dev/components';
 import produce from 'immer';
 import {
@@ -329,6 +330,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         grid={layout.chart.grid}
         tooltipConfig={{ wrapLabels: true }}
         onDataZoom={handleDataZoom}
+        // Show "no data" message when there is really no data. Show an empty
+        // chart when there is no data because the user unselected all items in
+        // the legend.
+        noDataVariant={!graphData.timeSeries.length ? 'message' : 'chart'}
       />
       {legend && layout.legend.show && graphData.legendItems && (
         <Legend
