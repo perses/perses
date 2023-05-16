@@ -13,7 +13,7 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo, StepOptions, getXValues, getYValues } from '@perses-dev/core';
+import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries } from '@perses-dev/core';
 import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
@@ -27,6 +27,7 @@ import {
   ZoomEventData,
   useChartsTheme,
 } from '@perses-dev/components';
+import produce from 'immer';
 import {
   TimeSeriesChartOptions,
   DEFAULT_UNIT,
@@ -46,6 +47,16 @@ import {
 import { getSeriesColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
+
+// Using an "ALL" value to handle the case on first loading the chart where we
+// want to select all, but do not want all of the legend items to be visually highlighted.
+// This helps us differentiate those cases more clearly instead of inferring it
+// based on the state of the data. This also helps us avoid some coding
+// complexity around initializing a full record for the initial load that would
+// currently require significantly more refactoring of this component.
+// TODO: simplify this if we switch the list-based legend UI to use checkboxes,
+// where we *would* want to visually select all items in this case.
+type SelectedSeriesState = Record<string, boolean> | 'ALL';
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
@@ -94,34 +105,44 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = convertPanelYAxis(y_axis);
 
-  const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
+  const [selectedSeriesNames, setSelectedSeriesNames] = useState<SelectedSeriesState>('ALL');
 
   const { setTimeRange } = useTimeRange();
 
-  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesName: string) => {
+  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
     setSelectedSeriesNames((current) => {
-      const isSelected = current.includes(seriesName);
-
-      // Clicks with modifier key can select multiple items.
-      if (isModifiedClick) {
-        if (isSelected) {
-          // Modified click on already selected item. Remove that item.
-          return current.filter((name) => name !== seriesName);
+      return produce(current, (draft) => {
+        if (draft === 'ALL') {
+          return {
+            [seriesId]: true,
+          };
         }
 
-        // Modified click on not-selected item. Add it.
-        return [...current, seriesName];
-      }
+        const isSelected = !!draft[seriesId];
 
-      if (isSelected) {
-        // Clicked item was already selected. Unselect it.
-        return [];
-      }
+        // Clicks with modifier key can select multiple items.
+        if (isModifiedClick) {
+          if (isSelected) {
+            // Modified click on already selected item. Remove that item.
+            delete draft[seriesId];
+          } else {
+            // Modified click on not-selected item. Add it.
+            draft[seriesId] = true;
+          }
+          return draft;
+        }
 
-      // Select clicked item.
-      return [seriesName];
+        if (isSelected) {
+          // Clicked item was already selected. Unselect it and return to
+          // ALL state.
+          return 'ALL' as const;
+        }
+
+        // Select clicked item.
+        return { [seriesId]: true };
+      });
     });
   };
 
@@ -167,7 +188,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
       for (let i = 0; i < result.data.series.length; i++) {
-        const timeSeries = result.data.series[i];
+        const timeSeries: TimeSeries | undefined = result.data.series[i];
         if (timeSeries === undefined) {
           return { graphData };
         }
@@ -189,20 +210,27 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Used for repeating colors in Categorical palette
         seriesIndex++;
 
+        const seriesId = timeSeries.name + seriesIndex;
+
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
-        const isSelected = selectedSeriesNames.includes(timeSeries.name);
 
-        if (!selectedSeriesNames.length || isSelected) {
+        // When we initially load the chart, we want to show all series, but
+        // DO NOT want to visualy highlight all the items in the legend.
+        const isInitAll = selectedSeriesNames === 'ALL';
+        const isSelected = !isInitAll && !!selectedSeriesNames[seriesId];
+        const showTimeSeries = isSelected || isInitAll;
+
+        if (showTimeSeries) {
           graphData.timeSeries.push(lineSeries);
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name + seriesIndex, // Avoids duplicate key console errors when there are duplicate series names
+            id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
             isSelected,
             color: seriesColor,
-            onClick: (e) => onLegendItemClick(e, timeSeries.name),
+            onClick: (e) => onLegendItemClick(e, seriesId),
           });
         }
       }
