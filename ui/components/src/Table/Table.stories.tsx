@@ -13,6 +13,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { Table, TableProps } from '@perses-dev/components';
+import { Stack, Typography } from '@mui/material';
 
 type MockTableData = {
   label: string;
@@ -24,21 +25,31 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
   {
     accessorKey: 'label',
     header: 'Label',
-    size: 200,
+    cell: ({ getValue }) => <span title={getValue()}>{getValue()}</span>,
   },
   {
     accessorKey: 'value',
     header: 'Value',
+    size: 100,
   },
   {
     accessorKey: 'color',
     header: 'Color',
+    size: 100,
   },
 ];
 
 const meta: Meta<typeof Table> = {
   component: Table,
-  argTypes: {},
+  argTypes: {
+    data: {
+      // Hide table for data because we are going to set it to mock data in
+      // our stories and large data takes up a lot of space in the args table.
+      table: {
+        disable: true,
+      },
+    },
+  },
   parameters: {},
 };
 
@@ -63,7 +74,7 @@ function generateMockTableData(count: number): MockTableData[] {
   const data: MockTableData[] = [];
   for (let i = 0; i < count; i++) {
     data.push({
-      label: `my column name has a label ${i}`,
+      label: `my column has a label ${i} that may be ellipsized when it does not fit within the column`,
       value: i,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
     });
@@ -74,18 +85,43 @@ function generateMockTableData(count: number): MockTableData[] {
 export const Primary: Story = {
   args: {
     height: 400,
-    width: 800,
+    width: 600,
     data: generateMockTableData(1000),
     columns: COLUMNS,
   },
 };
 
-export const Compact: Story = {
+export const Density: Story = {
   args: {
-    height: 400,
-    width: 800,
-    data: generateMockTableData(1000),
+    height: 300,
+    width: 400,
+    data: generateMockTableData(100),
     columns: COLUMNS,
-    density: 'compact',
+  },
+  argTypes: {
+    data: {
+      // Hide configuration because we are setting these values in this story.
+      density: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            standard
+          </Typography>
+          <Table {...args} density="standard" />
+        </div>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            compact
+          </Typography>
+          <Table {...args} density="compact" />
+        </div>
+      </Stack>
+    );
   },
 };

@@ -16,7 +16,7 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
     // Stating with `title` attr instead of a tooltip because it is easier to
     // implement. We should try adding a tooltip in the future, but we'll need
     // to be very careful about performance when doing so with large tables.
-    cell: ({ getValue }: CellContext<LegendItem, LegendItem['label']>) => <span title={getValue()}>{getValue()}</span>,
+    cell: ({ getValue }) => <span title={getValue()}>{getValue()}</span>,
   },
 ];
 
