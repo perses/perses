@@ -28,9 +28,7 @@ export function TableLegend({ items, ...tableProps }: TableLegendProps) {
       columns={COLUMNS}
       density="compact"
       getRowId={(data) => {
-        // TODO: figure out switching this and other selection handling to id
-        // to be safer.
-        return data.label;
+        return data.id;
       }}
       getCheckboxColor={(data) => {
         return data.color;
