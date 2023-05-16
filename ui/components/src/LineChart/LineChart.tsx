@@ -73,6 +73,7 @@ export interface LineChartProps {
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
+  noDataVariant?: 'chart' | 'message';
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -86,6 +87,7 @@ export function LineChart({
   grid,
   legend,
   tooltipConfig = { wrapLabels: true },
+  noDataVariant = 'message',
   onDataZoom,
   onDoubleClick,
   __experimentalEChartsOptionsOverride,
@@ -145,7 +147,7 @@ export function LineChart({
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
-    if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
+    if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
 
     // show symbols and axisPointer dashed line on hover
     const isOptimizedMode = data.timeSeries.length > OPTIMIZED_MODE_SERIES_LIMIT;
