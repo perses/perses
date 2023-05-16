@@ -19,7 +19,6 @@ export function getCellLayoutProps(theme: Theme, density: TableDensity): React.C
     const height = lineHeightNum + verticalPaddingNum * 2;
 
     return {
-      overflow: 'hidden',
       padding: `${paddingY} ${paddingX}`,
       height: height,
       fontSize: theme.typography.body2.fontSize,

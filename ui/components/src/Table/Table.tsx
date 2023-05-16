@@ -42,6 +42,8 @@ export interface TableColumnConfig<TableData>
    * @default 'auto'
    */
   size?: number | 'auto';
+
+  align?: 'left' | 'right' | 'center';
 }
 
 export interface TableProps<TableData> {
@@ -73,6 +75,8 @@ export function Table<TableData>({
     return `${index}`;
   };
   const getRowId = initGetRowId ?? DEFAULT_GET_ROW_ID;
+
+  // TODO: consider making this controlled instead of internal.
   const initRowSelection: RowSelectionState = data.reduce((rowSelectionResult, row, index) => {
     rowSelectionResult[getRowId(row, index)] = true;
     return rowSelectionResult;

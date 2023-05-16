@@ -1,7 +1,8 @@
 import { Checkbox, CheckboxProps, styled } from '@mui/material';
 
 const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
-  padding: theme.spacing(0.5),
+  padding: theme.spacing(0.25),
+  verticalAlign: 'bottom',
   '& .MuiSvgIcon-root': { fontSize: 14 },
 }));
 
@@ -16,6 +17,13 @@ export function TableCheckbox({ color, ...otherProps }: TableCheckboxProps) {
       {...otherProps}
       sx={{
         color: color,
+
+        // Centering.
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+
         '&.Mui-checked': {
           color: color,
         },

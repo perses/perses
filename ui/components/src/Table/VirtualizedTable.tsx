@@ -1,6 +1,7 @@
 import { Table as TSTable, flexRender } from '@tanstack/react-table';
 import { Box, Typography } from '@mui/material';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
+import { combineSx } from '../utils';
 import { TableProps } from './Table';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';

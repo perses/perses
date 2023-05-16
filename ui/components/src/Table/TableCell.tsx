@@ -24,17 +24,18 @@ export function TableCell({ children, density, variant, ...otherProps }: TableCe
       <Box
         sx={{
           ...getCellLayoutProps(theme, density),
+          position: 'relative',
+
+          // We put the border on a div inside the `th` instead of directly on
+          // the `th` to ensure it is not lost on scroll caused by the combo of
+          // border-collapse and not having borders on the non-header rows.
+          borderBottom: isHeader ? (theme) => `solid 1px ${theme.palette.divider}` : undefined,
 
           // Text truncation. Currently enforced on all cells. We may control
           // this with a prop in the future.
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-
-          // We put the border on a div inside the `th` instead of directly on
-          // the `th` to ensure it is not lost on scroll caused by the combo of
-          // border-collapse and not having borders on the non-header rows.
-          borderBottom: isHeader ? (theme) => `solid 1px ${theme.palette.divider}` : undefined,
         }}
       >
         {children}
