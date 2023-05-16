@@ -59,7 +59,12 @@ test.describe('Dashboard: Variables', () => {
     await expect(variableEditor.tableRowHeadings).toContainText(['list_var']);
 
     await variableEditor.applyChanges();
-    await dashboardPage.saveChanges();
+
+    // TODO: add helper for save defaults dialog flow
+    const toolbarSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save' });
+    await toolbarSaveButton.click();
+    const dialogSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save Changes' });
+    await dialogSaveButton.click();
 
     await expect(dashboardPage.variableListItems).toHaveCount(1);
     await expect(dashboardPage.variableListItems).toContainText([/List Var/]);
