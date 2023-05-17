@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Icon, IconButton, Stack, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronDown';
 import CollapsedIcon from 'mdi-material-ui/ChevronRight';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
@@ -60,33 +60,42 @@ export function GridTitle(props: GridTitleProps) {
           palette.mode === 'dark' ? palette.background.paper : palette.background.default,
       }}
       data-testid="panel-group-header"
+      onClick={collapse !== undefined ? collapse.onToggleOpen : undefined }
+      style={{ cursor: 'pointer' }}
     >
       {collapse ? (
         <>
-          <IconButton
-            onClick={collapse.onToggleOpen}
-            aria-label={`${collapse.isOpen ? 'collapse' : 'expand'} group ${title}`}
-          >
-            {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
-          </IconButton>
+          {collapse.isOpen ? <ExpandedIcon style={{ margin: '8px' }}/> : <CollapsedIcon style={{ margin: '8px' }}/>}
           {text}
           {isEditMode && (
             <Stack direction="row" marginLeft="auto">
               <InfoTooltip description={TOOLTIP_TEXT.addPanelToGroup}>
-                <IconButton aria-label={ARIA_LABEL_TEXT.addPanelToGroup(title)} onClick={openAddPanel}>
+                <IconButton 
+                  aria-label={ARIA_LABEL_TEXT.addPanelToGroup(title)}
+                  onClick={(e) => {
+                    {if (collapse.isOpen) e.stopPropagation()}; // set as expanded if not already
+                    openAddPanel();
+                  }}>
                   <AddPanelIcon />
                 </IconButton>
               </InfoTooltip>
               <InfoTooltip description={TOOLTIP_TEXT.editGroup}>
-                <IconButton aria-label={ARIA_LABEL_TEXT.editGroup(title)} onClick={openEditPanelGroup}>
+                <IconButton
+                  aria-label={ARIA_LABEL_TEXT.editGroup(title)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // to not trigger expand/collapse
+                    openEditPanelGroup();
+                  }}>
                   <PencilIcon />
                 </IconButton>
               </InfoTooltip>
               <InfoTooltip description={TOOLTIP_TEXT.deleteGroup}>
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.deleteGroup(title)}
-                  onClick={() => openDeletePanelGroupDialog(panelGroupId)}
-                >
+                  onClick={(e) => {
+                    e.stopPropagation(); // to not trigger expand/collapse
+                    openDeletePanelGroupDialog(panelGroupId);
+                  }}>
                   <DeleteIcon />
                 </IconButton>
               </InfoTooltip>
@@ -94,8 +103,10 @@ export function GridTitle(props: GridTitleProps) {
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.moveGroupDown(title)}
                   disabled={moveDown === undefined}
-                  onClick={moveDown}
-                >
+                  onClick={(e) => {
+                    e.stopPropagation(); // to not trigger expand/collapse
+                    {moveDown !== undefined ? moveDown() : undefined };
+                  }}>
                   <ArrowDownIcon />
                 </IconButton>
               </InfoTooltip>
@@ -103,8 +114,10 @@ export function GridTitle(props: GridTitleProps) {
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.moveGroupUp(title)}
                   disabled={moveUp === undefined}
-                  onClick={moveUp}
-                >
+                  onClick={(e) => {
+                    e.stopPropagation(); // to not trigger expand/collapse
+                    {moveUp !== undefined ? moveUp() : undefined };
+                  }}>
                   <ArrowUpIcon />
                 </IconButton>
               </InfoTooltip>
