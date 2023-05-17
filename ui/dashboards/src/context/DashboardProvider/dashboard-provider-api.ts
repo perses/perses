@@ -229,6 +229,19 @@ export function useDashboardDuration() {
   return useDashboardStore(selectDashboardDuration);
 }
 
+const selectSaveChangesConfirmationDialog = ({
+  saveChangesConfirmationDialog,
+  openSaveChangesConfirmationDialog,
+  closeSaveChangesConfirmationDialog,
+}: DashboardStoreState) => ({
+  saveChangesConfirmationDialog,
+  openSaveChangesConfirmationDialog,
+  closeSaveChangesConfirmationDialog,
+});
+export function useSaveChangesConfirmationDialog() {
+  return useDashboardStore(selectSaveChangesConfirmationDialog);
+}
+
 const selectDiscardChangesConfirmationDialog = ({
   discardChangesConfirmationDialog,
   openDiscardChangesConfirmationDialog,

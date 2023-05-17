@@ -14,22 +14,30 @@
 import { StoryFn, StoryContext } from '@storybook/react';
 import { TemplateVariableContext, TemplateVariableSrv } from '../../../runtime';
 
-export type WithTemplateVariableParameter = {
+declare module '@storybook/react' {
+  interface Parameters {
+    withPluginSystemTemplateVariables?: WithPluginSystemTemplateVariableParameter;
+  }
+}
+
+export type WithPluginSystemTemplateVariableParameter = {
   props: TemplateVariableSrv;
 };
 
 // Type guard because storybook types parameters as `any`
 function isWithTemplateVariableParameter(
-  parameter: unknown | WithTemplateVariableParameter
-): parameter is WithTemplateVariableParameter {
+  parameter: unknown | WithPluginSystemTemplateVariableParameter
+): parameter is WithPluginSystemTemplateVariableParameter {
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
 // This decorator is used for non-dashboards package template variable needs.
 // Use the more specific decorator in the dashboards package when working with
 // dashboards.
-export const WithTemplateVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
-  const initParameter = context.parameters.withTemplateVariables;
+// This decorator includes "PluginSystem" in the name to differentiate it from
+// the datasource store decorator in the `dashboards` package.
+export const WithPluginSystemTemplateVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
+  const initParameter = context.parameters.withPluginSystemTemplateVariables;
   const defaultValue: TemplateVariableSrv = {
     state: {},
   };

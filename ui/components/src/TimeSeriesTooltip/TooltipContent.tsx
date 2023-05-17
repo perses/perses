@@ -15,6 +15,7 @@ import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { FocusedSeriesArray } from './focused-series';
+import { TOOLTIP_MAX_ITEMS } from './tooltip-model';
 import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
@@ -55,6 +56,7 @@ export function TooltipContent(props: TooltipContentProps) {
     return focusedSeries.sort((a, b) => (a.y > b.y ? -1 : 1));
   }, [focusedSeries]);
 
+  // TODO: use react-virtuoso to improve performance
   if (sortedFocusedSeries !== null && seriesTime !== null) {
     return (
       <Stack py={1} px={1.5} spacing={0.5}>
@@ -69,7 +71,10 @@ export function TooltipContent(props: TooltipContentProps) {
             display: 'table',
           }}
         >
-          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor }) => {
+          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor }, index) => {
+            if (index > TOOLTIP_MAX_ITEMS) {
+              return null;
+            }
             if (datumIdx === null || seriesIdx === null) return null;
             const key = seriesIdx.toString() + datumIdx.toString();
 

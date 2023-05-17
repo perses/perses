@@ -11,9 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './EditVariablesButton';
-export * from './TemplateVariable';
-export * from './VariableEditor';
-export * from './VariableEditorForm';
-export * from './VariableList';
-export * from './variable-model';
+export * from './SaveChangesConfirmationDialog';

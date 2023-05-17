@@ -17,8 +17,8 @@ import {
   WithDataQueries,
   WithPluginRegistry,
   WithTimeRange,
-  WithTemplateVariables,
-  WithDatasourceStore,
+  WithPluginSystemTemplateVariables,
+  WithPluginSystemDatasourceStore,
 } from '@perses-dev/plugin-system/src/stories/shared-utils';
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
 import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
@@ -55,7 +55,7 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
   component: TimeSeriesChart.PanelComponent,
   argTypes: {},
   parameters: {
-    WithDataQueries: {
+    withDataQueries: {
       props: {
         definitions: [
           {
@@ -70,8 +70,8 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
     withTimeRange: {
       props: {
         initialTimeRange: {
-          start: TIMESERIES_EXAMPLE_MOCK_START,
-          end: TIMESERIES_EXAMPLE_MOCK_END,
+          start: new Date(TIMESERIES_EXAMPLE_MOCK_START),
+          end: new Date(TIMESERIES_EXAMPLE_MOCK_END),
         },
       },
     },
@@ -113,8 +113,8 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
   },
   decorators: [
     WithDataQueries,
-    WithTemplateVariables,
-    WithDatasourceStore,
+    WithPluginSystemTemplateVariables,
+    WithPluginSystemDatasourceStore,
     WithPluginRegistry,
     WithTimeRange,
     WithQueryClient,
