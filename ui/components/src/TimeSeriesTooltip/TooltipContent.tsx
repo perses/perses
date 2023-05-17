@@ -13,6 +13,7 @@
 
 import { useMemo } from 'react';
 import { Box, Divider, Stack, Typography } from '@mui/material';
+import { Virtuoso } from 'react-virtuoso';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
@@ -56,6 +57,8 @@ export function TooltipContent(props: TooltipContentProps) {
   }, [focusedSeries]);
 
   if (sortedFocusedSeries !== null && seriesTime !== null) {
+    const width = 350;
+    const height = 300;
     return (
       <Stack py={1} px={1.5} spacing={0.5}>
         <Typography variant="caption">{formatTimeSeriesHeader(seriesTime)}</Typography>
@@ -64,15 +67,30 @@ export function TooltipContent(props: TooltipContentProps) {
             borderColor: theme.palette.grey['500'],
           })}
         />
-        <Box
-          sx={{
-            display: 'table',
-          }}
-        >
-          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor }) => {
+        <Virtuoso
+          style={{ width, height }}
+          data={sortedFocusedSeries}
+          // itemContent={(index, item) => {
+          //   return (
+          //     <ListLegendItem
+          //       key={item.id}
+          //       item={item}
+          //       truncateLabel={truncateLabels}
+          //       sx={{
+          //         // Having an explicit width is important for the ellipsizing to
+          //         // work correctly. Subtract padding to simulate padding.
+          //         width: width - LIST_PADDING,
+          //         wordBreak: 'break-word',
+          //         overflow: 'hidden',
+          //       }}
+          //     />
+          //   );
+          // }}
+          role="list"
+          itemContent={(index, item) => {
+            const { datumIdx, seriesIdx, seriesName, y, formattedY, markerColor } = item;
             if (datumIdx === null || seriesIdx === null) return null;
             const key = seriesIdx.toString() + datumIdx.toString();
-
             return (
               <SeriesInfo
                 key={key}
@@ -84,8 +102,8 @@ export function TooltipContent(props: TooltipContentProps) {
                 wrapLabels={wrapLabels}
               />
             );
-          })}
-        </Box>
+          }}
+        />
       </Stack>
     );
   } else {

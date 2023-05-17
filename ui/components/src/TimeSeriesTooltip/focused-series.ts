@@ -63,6 +63,7 @@ export function getNearbySeries(
           seriesIndex: seriesIdx,
         });
       }
+      console.log(currentFocusedData.length);
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
@@ -74,6 +75,7 @@ export function getNearbySeries(
             // ensure null values not displayed in tooltip
             if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
                 const formattedY = formatValue(yValue, unit);
@@ -103,6 +105,7 @@ export function getNearbySeries(
       }
     }
   }
+  console.log(currentFocusedData);
   return currentFocusedData;
 }
 

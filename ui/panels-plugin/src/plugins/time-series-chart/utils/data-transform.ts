@@ -79,8 +79,8 @@ export function getLineSeries(
     showAllSymbol: true,
     symbolSize: pointRadius,
     lineStyle: {
-      width: lineWidth,
-      opacity: 0.75,
+      width: 0,
+      opacity: 0.1,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,

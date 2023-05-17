@@ -18,7 +18,9 @@ export const TOOLTIP_MAX_WIDTH = 650;
 export const TOOLTIP_MAX_HEIGHT = 400;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 
-export const TOOLTIP_MAX_ITEMS = 30;
+// WARNING: Be careful when lowering this value, if it gets out of sync with yBuffer multiplier
+// it can lead to inaccurate highlighting, where series in tooltip to not match emphasized lines.
+export const TOOLTIP_MAX_ITEMS = 2000;
 
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
