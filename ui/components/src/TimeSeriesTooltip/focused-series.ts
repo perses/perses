@@ -56,10 +56,10 @@ export function getNearbySeries(
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
       // TODO: look into using batch or excludeSeriesId within downplay action to fix flicker
-      // clear emphasis state of lines that are not focused
       if (chart?.dispatchAction !== undefined) {
+        // clears emphasis state of lines that are not focused
         chart.dispatchAction({
-          type: 'downplay', // TODO: make sure this downplay gets into PR 1112 - sjcobb/echarts-dispatch-highlight
+          type: 'downplay',
           seriesIndex: seriesIdx,
         });
       }
