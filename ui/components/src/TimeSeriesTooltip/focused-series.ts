@@ -55,6 +55,14 @@ export function getNearbySeries(
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
+      // TODO: look into using batch or excludeSeriesId within downplay action to fix flicker
+      // clear emphasis state of lines that are not focused
+      if (chart?.dispatchAction !== undefined) {
+        chart.dispatchAction({
+          type: 'downplay', // TODO: make sure this downplay gets into PR 1112 - sjcobb/echarts-dispatch-highlight
+          seriesIndex: seriesIdx,
+        });
+      }
       if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
@@ -75,6 +83,7 @@ export function getNearbySeries(
                   chart.dispatchAction({
                     type: 'highlight',
                     seriesIndex: seriesIdx,
+                    // notBlur: true,
                   });
                 }
                 currentFocusedData.push({
@@ -87,14 +96,6 @@ export function getNearbySeries(
                   formattedY: formattedY,
                   markerColor: markerColor.toString(),
                 });
-              } else {
-                // clear emphasis state of lines that are not focused
-                if (chart?.dispatchAction !== undefined) {
-                  chart.dispatchAction({
-                    type: 'downplay',
-                    seriesIndex: seriesIdx,
-                  });
-                }
               }
             }
           }
