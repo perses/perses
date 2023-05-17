@@ -13,7 +13,7 @@
 
 import { Box } from '@mui/material';
 import { LegendOptions, LegendItem } from '../model';
-import { ListLegend, ListLegendProps } from './ListLegend';
+import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 
 export interface LegendProps {
@@ -21,15 +21,6 @@ export interface LegendProps {
   height: number;
   data: LegendItem[];
   options: LegendOptions;
-
-  /**
-   * Additional props that will be passed to the list variation of the legend
-   * that is used when:
-   * - The legend is positioned on the right.
-   * - The legend has a large number of items to display and requires virtualization
-   *   to render performantly.
-   */
-  listProps?: Pick<ListLegendProps, 'initialRowHeight'>;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -39,7 +30,7 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, listProps }: LegendProps) {
+export function Legend({ width, height, options, data }: LegendProps) {
   if (options.position === 'Right') {
     return (
       <Box
@@ -51,7 +42,7 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
           right: 0,
         }}
       >
-        <ListLegend items={data} width={width} height={height} {...listProps} />
+        <ListLegend items={data} width={width} height={height} />
       </Box>
     );
   }
@@ -71,7 +62,7 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
       }}
     >
       {needsVirtualization ? (
-        <ListLegend items={data} width={width} height={height} {...listProps} />
+        <ListLegend items={data} width={width} height={height} />
       ) : (
         <CompactLegend items={data} height={height} />
       )}

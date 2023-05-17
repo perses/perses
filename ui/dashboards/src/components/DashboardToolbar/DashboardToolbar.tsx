@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { useDashboard, useEditMode } from '../../context';
+import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
@@ -23,6 +22,7 @@ import { TimeRangeControls } from '../TimeRangeControls';
 import { EditVariablesButton } from '../Variables';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
+import { SaveDashboardButton } from '../SaveDashboardButton';
 import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
 
 export interface DashboardToolbarProps {
@@ -46,35 +46,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     onSave,
   } = props;
 
-  const dashboard = useDashboard();
-  const { isEditMode, setEditMode } = useEditMode();
+  const { isEditMode } = useEditMode();
 
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
-
-  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
 
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
   ) : (
     <Typography variant="h2">{dashboardName}</Typography>
   );
-
-  const onSaveButtonClick = () => {
-    if (onSave !== undefined) {
-      setSavingDashboard(true);
-      onSave(dashboard.dashboard)
-        .then(() => {
-          setSavingDashboard(false);
-          setEditMode(false);
-        })
-        .catch(() => {
-          setSavingDashboard(false);
-        });
-    } else {
-      setEditMode(false);
-    }
-  };
 
   const testId = 'dashboard-toolbar';
 
@@ -90,9 +71,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <Button variant="contained" onClick={onSaveButtonClick} disabled={isReadonly || isSavingDashboard}>
-                Save
-              </Button>
+              <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>

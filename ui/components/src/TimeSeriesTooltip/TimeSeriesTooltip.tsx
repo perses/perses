@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState } from 'react';
 import { Box, Portal } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
+import React, { useState } from 'react';
+import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
+import { TooltipContent } from './TooltipContent';
 import { getFocusedSeriesData } from './focused-series';
 import { CursorCoordinates, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH, useMousePosition } from './tooltip-model';
-import { TooltipContent } from './TooltipContent';
 import { assembleTransform } from './utils';
 
 interface TimeSeriesTooltipProps {
@@ -37,6 +38,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
 }: TimeSeriesTooltipProps) {
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
+  const { height, width, ref: tooltipRef } = useResizeObserver();
 
   if (mousePos === null || mousePos.target === null) return null;
 
@@ -46,8 +48,14 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   const chart = chartRef.current;
   const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart, unit);
   const chartWidth = chart?.getWidth() ?? 750;
-  const chartHeight = chart?.getHeight() ?? 230;
-  const cursorTransform = assembleTransform(mousePos, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
+  const cursorTransform = assembleTransform(
+    mousePos,
+    focusedSeries.length,
+    chartWidth,
+    pinnedPos,
+    height ?? 0,
+    width ?? 0
+  );
 
   if (focusedSeries.length === 0) {
     return null;
@@ -60,6 +68,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   return (
     <Portal>
       <Box
+        ref={tooltipRef}
         sx={(theme) => ({
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,

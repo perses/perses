@@ -11,9 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Definition, ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+
+/**
+ * The schema for a TimeSeriesChart panel.
+ */
+export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOptions> {
+  kind: 'TimeSeriesChart';
+}
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.
@@ -21,7 +28,6 @@ import { OptionsEditorProps } from '@perses-dev/plugin-system';
 export interface TimeSeriesChartOptions {
   legend?: LegendOptions;
   y_axis?: YAxisOptions;
-  unit?: UnitOptions;
   thresholds?: ThresholdOptions;
   visual?: VisualOptions;
 }
@@ -56,12 +62,25 @@ export const DEFAULT_UNIT: UnitOptions = {
   abbreviate: true,
 };
 
+export const DEFAULT_Y_AXIS: YAxisOptions = {
+  show: true,
+  label: '',
+  unit: DEFAULT_UNIT,
+  min: undefined,
+  max: undefined,
+};
+
+export const Y_AXIS_CONFIG = {
+  show: { label: 'Show' },
+  label: { label: 'Label' },
+  unit: { label: 'Unit' },
+  min: { label: 'Min' },
+  max: { label: 'Max' },
+};
+
 export const DEFAULT_LINE_WIDTH = 1.5;
-
 export const DEFAULT_AREA_OPACITY = 0;
-
 export const DEFAULT_POINT_RADIUS = 4;
-
 export const DEFAULT_CONNECT_NULLS = false;
 
 export const DEFAULT_VISUAL: VisualOptions = {
@@ -99,22 +118,6 @@ export const VISUAL_CONFIG = {
   connect_nulls: {
     label: 'Connect Nulls',
   },
-};
-
-export const DEFAULT_Y_AXIS: YAxisOptions = {
-  show: true,
-  label: '',
-  unit: DEFAULT_UNIT,
-  min: undefined,
-  max: undefined,
-};
-
-export const Y_AXIS_CONFIG = {
-  show: { label: 'Show' },
-  label: { label: 'Label' },
-  unit: { label: 'Unit' },
-  min: { label: 'Min' },
-  max: { label: 'Max' },
 };
 
 // None is equivalent to undefined since stack is optional

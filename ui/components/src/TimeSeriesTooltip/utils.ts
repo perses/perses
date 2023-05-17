@@ -20,8 +20,9 @@ export function assembleTransform(
   mousePos: CursorData['coords'],
   seriesNum: number,
   chartWidth: number,
-  chartHeight: number,
-  pinnedPos: CursorCoordinates | null
+  pinnedPos: CursorCoordinates | null,
+  tooltipHeight: number,
+  tooltipWidth: number
 ) {
   if (mousePos === null) {
     return 'translate3d(0, 0)';
@@ -40,21 +41,12 @@ export function assembleTransform(
   const x = mousePos.page.x;
   let y = mousePos.page.y + cursorPaddingY;
 
-  const isCloseToBottom = mousePos.page.y > window.innerHeight * 0.8;
-  const yPosAdjustThreshold = chartHeight * 0.75;
-  // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
-  if (isCloseToBottom === true) {
-    if (seriesNum > 6) {
-      y = mousePos.page.y * 0.75;
-    } else {
-      y = mousePos.page.y * 0.9;
-    }
-  } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
-    y = mousePos.page.y * 0.95;
+  // adjust so tooltip does not get cut off at bottom of chart
+  if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
+    y = mousePos.page.y - tooltipHeight;
   }
 
-  // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
-  const tooltipWidth = seriesNum > 1 ? TOOLTIP_MAX_WIDTH : TOOLTIP_MAX_WIDTH / 2;
+  // use tooltip width to determine when to repos from right to left
   const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;
 
   // reposition so tooltip is never too close to right side of chart or left side of browser window
