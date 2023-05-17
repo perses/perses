@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Icon, IconButton, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import ExpandedIcon from 'mdi-material-ui/ChevronDown';
 import CollapsedIcon from 'mdi-material-ui/ChevronRight';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
@@ -43,39 +43,39 @@ export function GridTitle(props: GridTitleProps) {
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
   const { isEditMode } = useEditMode();
 
-  const text = (
-    <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
-      {title}
-    </Typography>
-  );
+  const text = <Typography variant="h2">{title}</Typography>;
 
   return (
     <Box
+      onClick={collapse ? collapse.onToggleOpen : undefined}
       sx={{
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
         padding: (theme) => theme.spacing(1),
+        cursor: collapse ? 'pointer' : 'auto',
         backgroundColor: ({ palette }) =>
           palette.mode === 'dark' ? palette.background.paper : palette.background.default,
       }}
       data-testid="panel-group-header"
-      onClick={collapse !== undefined ? collapse.onToggleOpen : undefined }
-      style={{ cursor: 'pointer' }}
     >
       {collapse ? (
         <>
-          {collapse.isOpen ? <ExpandedIcon style={{ margin: '8px' }}/> : <CollapsedIcon style={{ margin: '8px' }}/>}
+          <IconButton sx={{ marginRight: 1 }} aria-label={`${collapse.isOpen ? 'collapse' : 'expand'} group ${title}`}>
+            {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
+          </IconButton>
           {text}
           {isEditMode && (
             <Stack direction="row" marginLeft="auto">
               <InfoTooltip description={TOOLTIP_TEXT.addPanelToGroup}>
-                <IconButton 
+                <IconButton
                   aria-label={ARIA_LABEL_TEXT.addPanelToGroup(title)}
                   onClick={(e) => {
-                    {if (collapse.isOpen) e.stopPropagation()}; // set as expanded if not already
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
                     openAddPanel();
-                  }}>
+                  }}
+                >
                   <AddPanelIcon />
                 </IconButton>
               </InfoTooltip>
@@ -83,9 +83,11 @@ export function GridTitle(props: GridTitleProps) {
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.editGroup(title)}
                   onClick={(e) => {
-                    e.stopPropagation(); // to not trigger expand/collapse
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
                     openEditPanelGroup();
-                  }}>
+                  }}
+                >
                   <PencilIcon />
                 </IconButton>
               </InfoTooltip>
@@ -93,9 +95,11 @@ export function GridTitle(props: GridTitleProps) {
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.deleteGroup(title)}
                   onClick={(e) => {
-                    e.stopPropagation(); // to not trigger expand/collapse
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
                     openDeletePanelGroupDialog(panelGroupId);
-                  }}>
+                  }}
+                >
                   <DeleteIcon />
                 </IconButton>
               </InfoTooltip>
@@ -104,9 +108,11 @@ export function GridTitle(props: GridTitleProps) {
                   aria-label={ARIA_LABEL_TEXT.moveGroupDown(title)}
                   disabled={moveDown === undefined}
                   onClick={(e) => {
-                    e.stopPropagation(); // to not trigger expand/collapse
-                    {moveDown !== undefined ? moveDown() : undefined };
-                  }}>
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
+                    if (moveDown) moveDown();
+                  }}
+                >
                   <ArrowDownIcon />
                 </IconButton>
               </InfoTooltip>
@@ -115,9 +121,11 @@ export function GridTitle(props: GridTitleProps) {
                   aria-label={ARIA_LABEL_TEXT.moveGroupUp(title)}
                   disabled={moveUp === undefined}
                   onClick={(e) => {
-                    e.stopPropagation(); // to not trigger expand/collapse
-                    {moveUp !== undefined ? moveUp() : undefined };
-                  }}>
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
+                    if (moveUp) moveUp();
+                  }}
+                >
                   <ArrowUpIcon />
                 </IconButton>
               </InfoTooltip>
