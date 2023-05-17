@@ -318,7 +318,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // TODO: add ECharts transition animation on zoom
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
-  console.log(graphData);
 
   return (
     <Box sx={{ padding: `${layout.padding}px`, position: 'relative' }}>
