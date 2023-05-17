@@ -57,6 +57,9 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
             hideToolbar={props.hideToolbar}
             isLoading={isLoading}
             initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25, page: 0 },
+              },
               columns: {
                 columnVisibilityModel: {
                   id: false,
