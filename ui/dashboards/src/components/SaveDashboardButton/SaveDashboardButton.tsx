@@ -19,11 +19,11 @@ import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplat
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
-  isReadonly: boolean;
+  isDisabled: boolean;
   variant?: 'contained' | 'text' | 'outlined';
 }
 
-export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' }: SaveDashboardButtonProps) => {
+export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
@@ -76,7 +76,7 @@ export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' 
   };
 
   return (
-    <Button variant={variant} onClick={onSaveButtonClick} disabled={isReadonly || isSavingDashboard}>
+    <Button variant={variant} onClick={onSaveButtonClick} disabled={isDisabled || isSavingDashboard}>
       Save
     </Button>
   );
