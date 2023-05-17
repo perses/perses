@@ -14,6 +14,7 @@
 import { StoryObj, Meta } from '@storybook/react';
 import { LineChart } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
+import { Stack, Typography } from '@mui/material';
 
 const meta: Meta<typeof LineChart> = {
   component: LineChart,
@@ -65,3 +66,45 @@ export default meta;
 type Story = StoryObj<typeof LineChart>;
 
 export const Primary: Story = {};
+
+export const NoData: Story = {
+  args: {
+    data: {
+      timeSeries: [],
+      xAxis: [1673784000000, 1673784060000, 1673784120000],
+      legendItems: [],
+      rangeMs: 21600000,
+    },
+  },
+  argTypes: {
+    // Remove from table because these values are managed in render.
+    data: {
+      table: {
+        disable: true,
+      },
+    },
+    noDataVariant: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => {
+    return (
+      <Stack>
+        <div>
+          <Typography variant="h3" gutterBottom align="center">
+            message
+          </Typography>
+          <LineChart {...args} noDataVariant="message" />
+        </div>
+        <div>
+          <Typography variant="h3" gutterBottom align="center">
+            chart
+          </Typography>
+          <LineChart {...args} noDataVariant="chart" />
+        </div>
+      </Stack>
+    );
+  },
+};
