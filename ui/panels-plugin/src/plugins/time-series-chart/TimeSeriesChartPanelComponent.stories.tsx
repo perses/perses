@@ -144,3 +144,18 @@ export const Primary: Story = {
     },
   },
 };
+
+export const TableLegend: Story = {
+  args: {
+    contentDimensions: {
+      width: 600,
+      height: 400,
+    },
+    spec: {
+      legend: {
+        position: 'Right',
+        mode: 'Table',
+      },
+    },
+  },
+};
