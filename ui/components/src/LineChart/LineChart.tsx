@@ -73,6 +73,7 @@ export interface LineChartProps {
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
+  noDataVariant?: 'chart' | 'message';
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -86,6 +87,7 @@ export function LineChart({
   grid,
   legend,
   tooltipConfig = { wrapLabels: true },
+  noDataVariant = 'message',
   onDataZoom,
   onDoubleClick,
   __experimentalEChartsOptionsOverride,
@@ -145,7 +147,10 @@ export function LineChart({
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
-    if (data.timeSeries === null || data.timeSeries.length === 0) return noDataOption;
+
+    // The "chart" `noDataVariant` is only used when the `timeSeries` is an
+    // empty array because a `null` value will throw an error.
+    if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -192,7 +197,7 @@ export function LineChart({
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride]);
+  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
 
   return (
     <Box
