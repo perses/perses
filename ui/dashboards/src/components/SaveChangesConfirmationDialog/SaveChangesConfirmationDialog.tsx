@@ -58,7 +58,7 @@ export const SaveChangesConfirmationDialog = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultVariables(e.target.checked)}
                   />
                 }
-                label="Save current variables values as new default"
+                label="Save current variable values as new default."
               />
             </FormGroup>
           </Dialog.Content>
