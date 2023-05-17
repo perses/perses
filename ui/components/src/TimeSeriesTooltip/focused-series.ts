@@ -16,8 +16,8 @@ import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMI
 import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
-export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip
-export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 2; // used to reduce number of focused series for heavy queries
+export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
+export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 1.75; // used to reduce number of focused series for heavy queries
 export const SHOW_MORE_NEARBY_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
