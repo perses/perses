@@ -25,6 +25,7 @@ export const InnerTable = forwardRef<HTMLTableElement, InnerTableProps>(function
   return (
     <StyledMuiTable
       {...otherProps}
+      tabIndex={-1}
       size={TABLE_DENSITY_CONFIG[density]}
       ref={ref}
       sx={{

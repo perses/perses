@@ -6,7 +6,7 @@ import {
   useTheme,
   Theme,
 } from '@mui/material';
-import { CSSProperties, forwardRef } from 'react';
+import { CSSProperties, forwardRef, useEffect, useRef } from 'react';
 import { combineSx } from '../utils';
 import { TableDensity } from './table-model';
 
@@ -18,10 +18,16 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme, variant }) => ({
     // Important to avoid scrolling behind the header showing through.
     backgroundColor: theme.palette.background.paper,
   },
+  '&:focus-visible': {
+    outline: `solid 1px ${theme.palette.primary.main}`,
+    outlineOffset: '-1px',
+    borderRadius: 0,
+  },
 }));
 
-export interface TableCellProps extends MuiTableCellProps {
+export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex'> {
   density: TableDensity;
+  isActive?: boolean;
 }
 
 function calculateCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string) {
@@ -63,19 +69,33 @@ function getCellLayoutProps(theme: Theme, density: TableDensity): React.CSSPrope
   };
 }
 
-export function TableCell({ children, density, variant, width, ...otherProps }: TableCellProps) {
+export function TableCell({ children, density, variant, width, isActive, ...otherProps }: TableCellProps) {
   const theme = useTheme();
+
+  const elRef = useRef<HTMLTableCellElement>();
 
   const isHeader = variant === 'head';
   const isCompact = density === 'compact';
 
+  useEffect(() => {
+    if (isActive) {
+      console.log(`isActive: ${isActive}`);
+      console.log(elRef.current);
+    }
+    if (isActive && elRef.current) {
+      elRef.current.focus();
+    }
+  }, [isActive]);
+
   return (
     <StyledMuiTableCell
       {...otherProps}
+      tabIndex={isActive ? 0 : -1}
       sx={{
         width: width,
         borderBottom: isHeader || !isCompact ? (theme) => `solid 1px ${theme.palette.divider}` : 'none',
       }}
+      ref={elRef}
     >
       <Box
         sx={{

@@ -16,6 +16,7 @@ export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxPr
   return (
     <StyledCheckbox
       size={isCompact ? 'small' : 'medium'}
+      tabIndex={-1}
       {...otherProps}
       sx={{
         color: color,
