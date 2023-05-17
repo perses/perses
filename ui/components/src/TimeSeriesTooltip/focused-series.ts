@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
-import { CursorData, TOOLTIP_MAX_ITEMS } from './tooltip-model';
+import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const DEFAULT_NEARBY_SERIES_RANGE_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip
@@ -63,7 +63,7 @@ export function getNearbySeries(
           seriesIndex: seriesIdx,
         });
       }
-      if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
+      if (currentFocusedData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
         const markerColor = currentSeries.color ?? '#000';
@@ -83,7 +83,6 @@ export function getNearbySeries(
                   chart.dispatchAction({
                     type: 'highlight',
                     seriesIndex: seriesIdx,
-                    // notBlur: true,
                   });
                 }
                 currentFocusedData.push({
