@@ -53,12 +53,14 @@ test.describe('Dashboard: Defaults', () => {
     await toolbarSaveButton.click();
 
     // Save defaults confirmation dialog should open, click btn to save
-    const dialogText = await dashboardPage.page.getByText(SAVE_DEFAULTS_DIALOG_TEXT);
+    const saveChangesConfirmationDialog = dashboardPage.getDialog('Save Dashboard');
+    await expect(saveChangesConfirmationDialog).toBeVisible();
+    const dialogText = await saveChangesConfirmationDialog.getByText(SAVE_DEFAULTS_DIALOG_TEXT);
     await expect(dialogText).toBeVisible();
-    const dialogSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save Changes' });
+    const dialogSaveButton = await saveChangesConfirmationDialog.getByRole('button', { name: 'Save Changes' });
     await dialogSaveButton.click();
 
-    // Confirm correct default list and text variables are persisted
+    // Confirm correct duration and default list variable value are persisted
     await page.evaluate(() => {
       window.location.search = '';
     });
@@ -66,5 +68,10 @@ test.describe('Dashboard: Defaults', () => {
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
     await expect(dashboardPage.variableListItems).toContainText(['5m']);
+
+    // Confirm text variable value is persisted
+    const newTextVariableInput = await dashboardPage.page.getByRole('textbox', { name: 'Text variable' });
+    const inputValue = await newTextVariableInput.inputValue();
+    await expect(inputValue).toContain(TEXT_VARIABLE_UPDATED_VALUE);
   });
 });
