@@ -40,6 +40,7 @@ The current team members are:
 | Augustin Husson | [nexucis](https://github.com/Nexucis)               | Amadeus IT Group |
 | Antoine Thebaud | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus IT Group |
 | Eunice Wong     | [eunicorn](https://github.com/eunicorn)             | Chronosphere     |
+| Julie Pagano    | [juliepagano](https://github.com/juliepagano)       | Chronosphere     |
 | Luke Tillman    | [luketillman](https://github.com/LukeTillman)       | Chronosphere     |
 | Steven Cobb     | [sjcobb](https://github.com/sjcobb)                 | Chronosphere     |
 

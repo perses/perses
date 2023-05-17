@@ -26,6 +26,7 @@ Below is a list of notable tooling that is used throughout the Perses UI.
   - Icons: [mdi-material-ui](https://github.com/TeamWertarbyte/mdi-material-ui) (see [Material Design icons for a view of available icons](https://pictogrammers.com/library/mdi/))
   - Charts: [echarts](https://echarts.apache.org/)
   - Grid layout: [react-grid-layout](https://github.com/react-grid-layout/react-grid-layout)
+  - Virtualization: [react-virtuoso](https://virtuoso.dev/)
 - Utilities
   - State management: [zustand](https://github.com/pmndrs/zustand), [immer](https://immerjs.github.io/immer/)
   - Data fetching: [react-query](https://tanstack.com/query)

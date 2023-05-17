@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Stack, Typography, Button, Grid } from '@mui/material';
+import { Box, Stack, Typography, Grid } from '@mui/material';
 import FolderPound from 'mdi-material-ui/FolderPound';
 import { useCallback, useState } from 'react';
 import { DeleteProjectDialog } from '../../components/DeleteProjectDialog/DeleteProjectDialog';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
 import { ProjectDashboards } from './ProjectDashboards';
 
@@ -44,30 +45,22 @@ function ProjectView() {
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
       <DashboardBreadcrumbs dashboardProject={projectName} />
-      <Box sx={{ width: '100%' }}>
+      <Box>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
             <FolderPound fontSize={'large'} />
             <Typography variant="h1">{projectName}</Typography>
           </Stack>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            sx={{ textTransform: 'uppercase' }}
-            onClick={handleDeleteProjectDialogOpen}
-          >
-            Delete Project
-          </Button>
+          <CRUDButton text="Delete Project" variant="outlined" color="error" onClick={handleDeleteProjectDialogOpen} />
+          <DeleteProjectDialog
+            name={projectName}
+            open={isDeleteProjectDialogOpen}
+            onClose={handleDeleteProjectDialogClose}
+            onSuccess={handleDeleteProjectDialogSuccess}
+          />
         </Stack>
-        <DeleteProjectDialog
-          name={projectName}
-          open={isDeleteProjectDialogOpen}
-          onClose={handleDeleteProjectDialogClose}
-          onSuccess={handleDeleteProjectDialogSuccess}
-        />
       </Box>
-      <Grid container spacing={8}>
+      <Grid container columnSpacing={8}>
         <Grid item xs={12} lg={8}>
           <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
         </Grid>

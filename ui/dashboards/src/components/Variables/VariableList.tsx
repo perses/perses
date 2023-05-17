@@ -11,10 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { AppBar, Box, IconButton, SxProps, Theme, useScrollTrigger } from '@mui/material';
-import PinOutline from 'mdi-material-ui/PinOutline';
-import PinOffOutline from 'mdi-material-ui/PinOffOutline';
+import { Box } from '@mui/material';
 import { VariableDefinition } from '@perses-dev/core';
 import { useTemplateVariableDefinitions } from '../../context';
 import { TemplateVariable } from './TemplateVariable';
@@ -22,47 +19,24 @@ import { TemplateVariable } from './TemplateVariable';
 const VARIABLE_INPUT_MIN_WIDTH = '120px';
 const VARIABLE_INPUT_MAX_WIDTH = '240px';
 
-interface TemplateVariableListProps {
-  initialVariableIsSticky?: boolean;
-  sx?: SxProps<Theme>;
-}
-
-export function TemplateVariableList(props: TemplateVariableListProps) {
-  const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
+export function TemplateVariableList() {
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
 
-  const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
-  const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
-
   return (
-    // marginBottom={-1} counteracts the marginBottom={1} on every variable input.
-    // The margin on the inputs is for spacing between inputs, but is not meant to add space to bottom of the container.
-    <Box marginBottom={-1} data-testid="variable-list">
-      <AppBar
-        color="inherit"
-        position={isSticky ? 'fixed' : 'static'}
-        elevation={isSticky ? 4 : 0}
-        sx={{ backgroundColor: 'inherit', ...props.sx }}
-      >
-        <Box display="flex" flexWrap="wrap" alignItems="start" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
-          {variableDefinitions.map((v) => (
-            <Box
-              key={v.spec.name}
-              display={v.spec.display?.hidden ? 'none' : undefined}
-              minWidth={VARIABLE_INPUT_MIN_WIDTH}
-              maxWidth={VARIABLE_INPUT_MAX_WIDTH}
-              marginBottom={1}
-              marginRight={1}
-              data-testid="template-variable"
-            >
-              <TemplateVariable key={v.spec.name} name={v.spec.name} />
-            </Box>
-          ))}
-          {props.initialVariableIsSticky && (
-            <IconButton onClick={() => setIsPin(!isPin)}>{isPin ? <PinOutline /> : <PinOffOutline />}</IconButton>
-          )}
+    <>
+      {variableDefinitions.map((v) => (
+        <Box
+          key={v.spec.name}
+          display={v.spec.display?.hidden ? 'none' : undefined}
+          minWidth={VARIABLE_INPUT_MIN_WIDTH}
+          maxWidth={VARIABLE_INPUT_MAX_WIDTH}
+          marginBottom={1}
+          marginRight={1}
+          data-testid="template-variable"
+        >
+          <TemplateVariable key={v.spec.name} name={v.spec.name} />
         </Box>
-      </AppBar>
-    </Box>
+      ))}
+    </>
   );
 }

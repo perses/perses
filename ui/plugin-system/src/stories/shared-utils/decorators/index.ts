@@ -14,4 +14,5 @@
 export * from './WithDataQueries';
 export * from './WithDatasourceStore';
 export * from './WithPluginRegistry';
+export * from './WithTemplateVariables';
 export * from './WithTimeRange';

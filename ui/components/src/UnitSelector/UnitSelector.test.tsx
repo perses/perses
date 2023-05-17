@@ -137,7 +137,7 @@ describe('UnitSelector', () => {
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Decimal',
       decimal_places: 0,
-      abbreviate: true,
+      abbreviate: false,
     });
   });
 

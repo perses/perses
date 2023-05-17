@@ -236,7 +236,16 @@ export function LineChart({
             unit={unit}
           />
         )}
-      <EChart option={option} theme={chartsTheme.echartsTheme} onEvents={handleEvents} _instance={chartRef} />
+      <EChart
+        sx={{
+          width: '100%',
+          height: '100%',
+        }}
+        option={option}
+        theme={chartsTheme.echartsTheme}
+        onEvents={handleEvents}
+        _instance={chartRef}
+      />
     </Box>
   );
 }
