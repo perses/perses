@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { VariableOption } from '@perses-dev/plugin-system';
-import { VariableDefinition } from '@perses-dev/core';
 import { filterVariableList } from './variable-model';
 
 describe('filterVariableList', () => {
