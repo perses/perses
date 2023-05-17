@@ -96,7 +96,7 @@ function ViewDashboard() {
           layouts: [],
           panels: {},
         },
-      } as unknown as DashboardResource;
+      };
       isEditing = true;
     }
   }

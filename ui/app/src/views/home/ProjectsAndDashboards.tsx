@@ -89,6 +89,9 @@ function RenderDashboardList(props: RenderDashboardListProps) {
               dashboardList={row.dashboards}
               hideToolbar={true}
               initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 25, page: 0 },
+                },
                 columns: {
                   columnVisibilityModel: {
                     id: false,

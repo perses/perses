@@ -23,13 +23,14 @@ Tests are run during local development using the configuration in `local.playwri
 - Start the backend server from the project root: `./scripts/api_backend_dev.sh`
 - Change to the `ui` directory.
 - Start the UI server: `npm start`
+  - Important to ensure libraries are built since e2e imports from other Perses packages
 - Run the end-to-end tests from the command line: `npm run e2e`
 - (Optional) Run the end-to-end tests in debug mode to walk through a test step by step to debug issues: `npm run e2e:debug`.
 - (Optional) Install [Playwright VS Code extension](https://playwright.dev/docs/getting-started-vscode). This extension has a lot of helpful tools for running tests, debugging, and creating selectors. Select `local.playwright.config.ts` as the profile to use when running locally.
 
 ### Locally with screenshots (maintainers only)
 
-*This option is limited to maintainers because it requires access to secrets in the Happo account.*
+_This option is limited to maintainers because it requires access to secrets in the Happo account._
 
 Occasionally, you may want to generate screenshots locally to debug an issue with visual tests.
 

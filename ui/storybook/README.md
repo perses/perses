@@ -90,6 +90,13 @@ We primarily use first party addons maintained by Storybook to avoid pain with u
 
 [Decorators](https://storybook.js.org/docs/react/writing-stories/decorators) provide a way to wrap a story in extra "rendering" functionality.
 
+### General guidelines
+
+- Decorators should have unique names across the project to avoid type conflicts and reduce confusion about the code.
+- Decorator components should start with the word "With" and be named using `UpperCamelCase` (e.g. `WithDashboard`). This provides consistency with Storybook's addons.
+- Parameters used to configured a decorator should be named the same as the component but using `lowerCamelCase` (e.g. `withDashboard`). This provides consistency with Storybook's addons.
+- Recommend extending the `Parameters` interface in the `@storybook/react` module in TypeScript for decorators configurable with parameters to assist with typing in story configuration.
+
 ### Global decorators
 
 Global decorators are specified in the [Storybook configuration](#configuring-storybook) and are applied to all stories. These decorators live in the `storybook` package in `src/config/decorators` and are primarily related to global storybook behavior (e.g. theming, time zones).

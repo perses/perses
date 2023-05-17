@@ -12,7 +12,7 @@
 // limitations under the License.
 
 export * from './WithDataQueries';
-export * from './WithDatasourceStore';
 export * from './WithPluginRegistry';
-export * from './WithTemplateVariables';
+export * from './WithPluginSystemDatasourceStore';
+export * from './WithPluginSystemTemplateVariables';
 export * from './WithTimeRange';
