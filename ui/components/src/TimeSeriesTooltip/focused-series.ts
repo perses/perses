@@ -18,7 +18,7 @@ import { CursorData } from './tooltip-model';
 // increase multipliers to show more series in tooltip
 export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
 export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 1.75; // used to reduce number of focused series for heavy queries
-export const SHOW_MORE_NEARBY_SERIES_LIMIT = 5;
+export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
   seriesIdx: number | null;
@@ -149,7 +149,7 @@ export function getFocusedSeriesData(
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const yBuffer =
-    seriesNum > SHOW_MORE_NEARBY_SERIES_LIMIT
+    seriesNum > SHOW_FEWER_SERIES_LIMIT
       ? yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
 
