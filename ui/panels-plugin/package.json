@@ -35,7 +35,7 @@
     "color-hash": "^2.0.2",
     "date-fns": "^2.28.0",
     "dompurify": "^2.4.0",
-    "echarts": "npm:echarts-nightly@5.5.0-dev.20230505",
+    "echarts": "npm:echarts-nightly@5.5.0-dev.20230517",
     "immer": "^9.0.15",
     "lodash-es": "^4.17.21",
     "marked": "^4.2.12"
