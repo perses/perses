@@ -11,9 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './EditVariablesButton';
-export * from './TemplateVariable';
-export * from './VariableEditor';
-export * from './VariableEditorForm';
-export * from './VariableList';
-export * from './variable-model';
+export const SAVE_DEFAULTS_DIALOG_TEXT =
+  'You have made changes to the time range or the variables values. Would you like to save these as defaults?';
