@@ -223,7 +223,9 @@ function formatProviderParameters(dashboardState: DashboardResource) {
     },
     withTimeRange: {
       props: {
-        dashboardDuration: dashboardState.spec.duration,
+        initialTimeRange: {
+          pastDuration: dashboardState.spec.duration,
+        },
       },
     },
   };
@@ -532,16 +534,16 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
   },
 };
 
-const TIMESERIES_EXAMPLE_MOCK_NOW = 1673805600000;
-const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_NOW - 6 * 60 * 60 * 1000;
+const TIMESERIES_EXAMPLE_MOCK_END = 1673805600000;
+const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_END - 6 * 60 * 60 * 1000;
 export const ExampleWithTimeSeriesPanels: Story = {
   parameters: {
     ...formatProviderParameters(TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE),
     withTimeRange: {
       props: {
         initialTimeRange: {
-          start: TIMESERIES_EXAMPLE_MOCK_START,
-          end: TIMESERIES_EXAMPLE_MOCK_NOW,
+          start: new Date(TIMESERIES_EXAMPLE_MOCK_START),
+          end: new Date(TIMESERIES_EXAMPLE_MOCK_END),
         },
       },
     },
@@ -571,7 +573,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
                     },
                   ],
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
-                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                 }),
               },
             },
@@ -580,7 +582,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
               response: {
                 body: mockTimeSeriesResponseWithNullValues({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
-                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                 }),
               },
             },
@@ -589,7 +591,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
               response: {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
-                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                   totalSeries: 7,
                 }),
               },
@@ -599,7 +601,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
               response: {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
-                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_NOW,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                   totalSeries: 20,
                 }),
               },

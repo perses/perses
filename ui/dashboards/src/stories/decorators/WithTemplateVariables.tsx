@@ -14,6 +14,12 @@
 import { StoryFn, StoryContext } from '@storybook/react';
 import { TemplateVariableProvider, TemplateVariableProviderProps } from '@perses-dev/dashboards';
 
+declare module '@storybook/react' {
+  interface Parameters {
+    withTemplateVariables?: WithTemplateVariableParameter;
+  }
+}
+
 export type WithTemplateVariableParameter = {
   props: Partial<TemplateVariableProviderProps>;
 };

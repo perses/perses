@@ -15,7 +15,13 @@ import { DatasourceSelector } from '@perses-dev/core';
 import { DatasourceStoreContext, DatasourceStore, usePluginRegistry } from '@perses-dev/plugin-system';
 import { StoryFn, StoryContext } from '@storybook/react';
 
-export type WithDatasourceStoreParameter = {
+declare module '@storybook/react' {
+  interface Parameters {
+    withPluginSystemDatasourceStore?: WithPluginSystemDatasourceStoreParameter;
+  }
+}
+
+export type WithPluginSystemDatasourceStoreParameter = {
   props: DatasourceStore;
 };
 
@@ -23,15 +29,17 @@ const prometheusDemoUrl = 'https://prometheus.demo.do.prometheus.io';
 
 // Type guard because storybook types parameters as `any`
 function isWithDatastoreStoreParameter(
-  parameter: unknown | WithDatasourceStoreParameter
-): parameter is WithDatasourceStoreParameter {
+  parameter: unknown | WithPluginSystemDatasourceStoreParameter
+): parameter is WithPluginSystemDatasourceStoreParameter {
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>) => {
+// This decorator includes "PluginSystem" in the name to differentiate it from
+// the datasource store decorator in the `dashboards` package.
+export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>) => {
   const { getPlugin } = usePluginRegistry();
 
-  const initParameter = context.parameters.WithDatasourceStore;
+  const initParameter = context.parameters.withPluginSystemDatasourceStore;
 
   // This currently provides a very simplified default to enable use in some
   // basic stories. It likely will need expanding in the future.
