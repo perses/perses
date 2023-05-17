@@ -40,16 +40,16 @@ test.describe('Dashboard: Defaults', () => {
         name: 'interval',
       })
       .click();
-    await dashboardPage.page.getByRole('option', { name: '5m' }).click();
+    await page.getByRole('option', { name: '5m' }).click();
 
     // Change text variable
-    const textVariableInput = await dashboardPage.page.getByRole('textbox', { name: 'Text variable' });
+    const textVariableInput = await page.getByRole('textbox', { name: 'Text variable' });
     await textVariableInput.clear();
     await textVariableInput.type(TEXT_VARIABLE_UPDATED_VALUE, { delay: 100 });
 
     // Switch to edit mode and click save
     await dashboardPage.startEditing();
-    const toolbarSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save' });
+    const toolbarSaveButton = await page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
 
     // Save defaults confirmation dialog should open, click btn to save
@@ -64,13 +64,13 @@ test.describe('Dashboard: Defaults', () => {
     await page.evaluate(() => {
       window.location.search = '';
     });
-    await dashboardPage.page.getByRole('button', { name: 'Refresh dashboard' }).click();
+    await page.getByRole('button', { name: 'Refresh dashboard' }).click();
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
     await expect(dashboardPage.variableListItems).toContainText(['5m']);
 
     // Confirm text variable value is persisted
-    const newTextVariableInput = await dashboardPage.page.getByRole('textbox', { name: 'Text variable' });
+    const newTextVariableInput = await page.getByRole('textbox', { name: 'Text variable' });
     const inputValue = await newTextVariableInput.inputValue();
     await expect(inputValue).toContain(TEXT_VARIABLE_UPDATED_VALUE);
   });
