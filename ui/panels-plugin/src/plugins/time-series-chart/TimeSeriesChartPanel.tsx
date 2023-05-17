@@ -318,6 +318,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // TODO: add ECharts transition animation on zoom
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
+  console.log(graphData);
 
   return (
     <Box sx={{ padding: `${layout.padding}px`, position: 'relative' }}>
@@ -330,10 +331,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         grid={layout.chart.grid}
         tooltipConfig={{ wrapLabels: true }}
         onDataZoom={handleDataZoom}
-        // Show "no data" message when there is really no data. Show an empty
-        // chart when there is no data because the user unselected all items in
-        // the legend.
-        noDataVariant={!graphData.timeSeries.length ? 'message' : 'chart'}
+        //  Show an empty chart when there is no data because the user unselected all items in
+        // the legend. Otherwise, show a "no data" message.
+        noDataVariant={
+          !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0
+            ? 'chart'
+            : 'message'
+        }
       />
       {legend && layout.legend.show && graphData.legendItems && (
         <Legend
