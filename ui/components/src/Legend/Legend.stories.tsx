@@ -16,6 +16,7 @@ import { Legend, LegendProps } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { Box, Stack, Typography } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
+import { useState } from 'react';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -70,6 +71,26 @@ const LegendWrapper = (props: LegendProps) => {
   );
 };
 
+// Wrapper that manages selected state for table legends.
+const TableLegendWrapper = (props: LegendProps) => {
+  const [rowSelection, setRowSelection] = useState<LegendProps['tableProps']['rowSelection']>('ALL');
+
+  const handleRowSelectionChange: LegendProps['tableProps']['onRowSelectionChange'] = (newRowSelection) => {
+    action('onRowSelectionChange')(newRowSelection);
+    setRowSelection(newRowSelection);
+  };
+
+  return (
+    <LegendWrapper
+      {...props}
+      tableProps={{
+        rowSelection,
+        onRowSelectionChange: handleRowSelectionChange,
+      }}
+    />
+  );
+};
+
 const meta: Meta<typeof Legend> = {
   component: Legend,
   argTypes: {},
@@ -118,13 +139,13 @@ export const Table: Story = {
           <Typography variant="h3" gutterBottom>
             Right
           </Typography>
-          <LegendWrapper {...args} options={{ mode: 'Table', position: 'Right' }} width={400} height={200} />
+          <TableLegendWrapper {...args} options={{ mode: 'Table', position: 'Right' }} width={400} height={200} />
         </div>
         <div>
           <Typography variant="h3" gutterBottom>
             Bottom
           </Typography>
-          <LegendWrapper {...args} options={{ mode: 'Table', position: 'Bottom' }} width={500} height={100} />
+          <TableLegendWrapper {...args} options={{ mode: 'Table', position: 'Bottom' }} width={500} height={100} />
         </div>
       </Stack>
     );
