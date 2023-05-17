@@ -117,4 +117,84 @@ describe('isSavedVariableModified', () => {
     };
     expect(isSavedVariableModified(savedVariables, variableState)).toBe(true);
   });
+
+  it('should confirm list variable default value was not modified', () => {
+    const savedVariables: VariableDefinition[] = [
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'interval',
+          default_value: '5m',
+          allow_all_value: false,
+          allow_multiple: false,
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['1m', '5m'],
+            },
+          },
+        },
+      },
+    ];
+    const variableState = {
+      interval: {
+        value: '5m',
+        default_value: '5m',
+        loading: false,
+        options: [
+          {
+            label: '1m',
+            value: '1m',
+          },
+          {
+            label: '5m',
+            value: '5m',
+          },
+        ],
+      },
+    };
+    expect(isSavedVariableModified(savedVariables, variableState)).toBe(false);
+  });
+
+  it('should confirm text variable value was not modified', () => {
+    const savedVariables: VariableDefinition[] = [
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'NewTextVariable',
+          display: {
+            name: 'Text display',
+            hidden: false,
+          },
+          value: 'first text value',
+        },
+      },
+    ];
+    const variableState = {
+      NewTextVariable: {
+        value: 'first text value',
+        loading: false,
+      },
+    };
+    expect(isSavedVariableModified(savedVariables, variableState)).toBe(false);
+  });
+
+  it('should confirm text variable value was modified', () => {
+    const savedVariables: VariableDefinition[] = [
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'NewTextVariable',
+          value: 'Lorem ipsum',
+        },
+      },
+    ];
+    const variableState = {
+      NewTextVariable: {
+        value: 'updated text value',
+        loading: false,
+      },
+    };
+    expect(isSavedVariableModified(savedVariables, variableState)).toBe(true);
+  });
 });

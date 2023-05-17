@@ -18,19 +18,19 @@ import { VariableStateMap } from '@perses-dev/plugin-system';
  * Check whether saved variable definitions are out of date with current default list values in Zustand store
  */
 export function isSavedVariableModified(definitions: VariableDefinition[], varState: VariableStateMap) {
-  definitions.forEach((saveVariable) => {
-    if (saveVariable.kind === 'ListVariable') {
-      const currentVariable = varState[saveVariable.spec.name];
-      if (saveVariable.spec.default_value !== currentVariable?.value) {
+  for (const savedVariable of definitions) {
+    if (savedVariable.kind === 'ListVariable') {
+      const currentVariable = varState[savedVariable.spec.name];
+      if (savedVariable.spec.default_value !== currentVariable?.value) {
         return true;
       }
-    } else if (saveVariable.kind === 'TextVariable') {
-      const currentVariable = varState[saveVariable.spec.name];
+    } else if (savedVariable.kind === 'TextVariable') {
+      const currentVariable = varState[savedVariable.spec.name];
       const currentVariableValue = typeof currentVariable?.value === 'string' ? currentVariable.value : '';
-      if (saveVariable.spec.value !== currentVariableValue) {
+      if (savedVariable.spec.value !== currentVariableValue) {
         return true;
       }
     }
-  });
+  }
   return false;
 }
