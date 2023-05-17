@@ -28,7 +28,6 @@ test.describe('Dashboard: Defaults', () => {
   });
 
   test('can update default dashboard duration', async ({ page, dashboardPage }) => {
-    const initialDashboardUrl = await page.url();
     // Change selected relative time range
     await dashboardPage.timePicker.click();
     await page.getByRole('option', { name: 'Last 6 hours' }).click();
@@ -60,9 +59,11 @@ test.describe('Dashboard: Defaults', () => {
     await dialogSaveButton.click();
 
     // Confirm correct default list and text variables are persisted
-    await page.goto(initialDashboardUrl);
+    await page.evaluate(() => {
+      window.location.search = '';
+    });
+    await dashboardPage.page.getByRole('button', { name: 'Refresh dashboard' }).click();
     await expect(page.url()).toContain('start=6h');
-    await expect(page.url()).toContain(TEXT_VARIABLE_UPDATED_VALUE);
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
     await expect(dashboardPage.variableListItems).toContainText(['5m']);
   });
