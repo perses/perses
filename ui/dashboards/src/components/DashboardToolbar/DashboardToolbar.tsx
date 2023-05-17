@@ -71,7 +71,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <SaveDashboardButton onSave={onSave} isReadonly={isReadonly} />
+              <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
