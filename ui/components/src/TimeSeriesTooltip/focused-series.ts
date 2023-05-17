@@ -12,8 +12,13 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions, EChartsDataFormat } from '../model';
-import { CursorData, TOOLTIP_MAX_ITEMS } from './tooltip-model';
+import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { CursorData } from './tooltip-model';
+
+// increase multipliers to show more series in tooltip
+export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
+export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 1.75; // used to reduce number of focused series for heavy queries
+export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
   seriesIdx: number | null;
@@ -36,6 +41,7 @@ export function getNearbySeries(
   data: EChartsDataFormat,
   pointInGrid: number[],
   yBuffer: number,
+  chart?: EChartsInstance,
   unit?: UnitOptions
 ): FocusedSeriesArray {
   const currentFocusedData: FocusedSeriesArray = [];
@@ -49,7 +55,15 @@ export function getNearbySeries(
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
-      if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
+      // TODO: look into using batch or excludeSeriesId within downplay action to fix flicker
+      if (chart?.dispatchAction !== undefined) {
+        // clears emphasis state of lines that are not focused
+        chart.dispatchAction({
+          type: 'downplay',
+          seriesIndex: seriesIdx,
+        });
+      }
+      if (currentFocusedData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
         const markerColor = currentSeries.color ?? '#000';
@@ -63,6 +77,14 @@ export function getNearbySeries(
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
                 const formattedY = formatValue(yValue, unit);
+                // trigger emphasis state of nearby series so tooltip matches highlighted lines
+                // https://echarts.apache.org/en/api.html#action.highlight
+                if (chart?.dispatchAction !== undefined) {
+                  chart.dispatchAction({
+                    type: 'highlight',
+                    seriesIndex: seriesIdx,
+                  });
+                }
                 currentFocusedData.push({
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,
@@ -123,15 +145,30 @@ export function getFocusedSeriesData(
   const chartModel = chart['_model'];
   const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
 
-  // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const seriesNum = chartData.timeSeries.length;
-  const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
+
+  // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
+  const yBuffer =
+    seriesNum > SHOW_FEWER_SERIES_LIMIT
+      ? yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER
+      : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return getNearbySeries(chartData, pointInGrid, yBuffer, unit);
+      return getNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
+    }
+  }
+
+  // clear all highlighted series when cursor exits canvas
+  // https://echarts.apache.org/en/api.html#action.downplay
+  for (let i = 0; i < seriesNum; i++) {
+    if (chart?.dispatchAction !== undefined) {
+      chart.dispatchAction({
+        type: 'downplay',
+        seriesIndex: i,
+      });
     }
   }
   return [];
