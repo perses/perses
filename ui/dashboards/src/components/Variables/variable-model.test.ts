@@ -13,7 +13,7 @@
 
 import { VariableOption } from '@perses-dev/plugin-system';
 import { VariableDefinition } from '@perses-dev/core';
-import { filterVariableList, checkSavedVariablesStatus } from './variable-model';
+import { filterVariableList } from './variable-model';
 
 describe('filterVariableList', () => {
   const testSuite = [
@@ -54,111 +54,5 @@ describe('filterVariableList', () => {
     it(title, () => {
       expect(filterVariableList(originalValues, capturing_regexp)).toEqual(result);
     });
-  });
-});
-
-describe('checkSavedVariablesStatus', () => {
-  it('should check whether saved variable definitions are out of date with current default values state', () => {
-    const savedVariables: VariableDefinition[] = [
-      {
-        kind: 'ListVariable',
-        spec: {
-          name: 'interval',
-          default_value: '1m',
-          allow_all_value: false,
-          allow_multiple: false,
-          plugin: {
-            kind: 'StaticListVariable',
-            spec: {
-              values: ['1m', '5m'],
-            },
-          },
-        },
-      },
-      {
-        kind: 'ListVariable',
-        spec: {
-          name: 'NewListVariable',
-          display: {
-            name: 'Test display label',
-            hidden: false,
-          },
-          default_value: 'second list value',
-          allow_all_value: true,
-          allow_multiple: false,
-          plugin: {
-            kind: 'StaticListVariable',
-            spec: {
-              values: [
-                {
-                  label: 'test list value',
-                  value: 'test list value',
-                },
-                {
-                  label: 'second list value',
-                  value: 'second list value',
-                },
-                {
-                  label: 'another list value',
-                  value: 'another list value',
-                },
-              ],
-            },
-          },
-        },
-      },
-      {
-        kind: 'TextVariable',
-        spec: {
-          name: 'NewTextVariable',
-          display: {
-            name: 'Text display',
-            hidden: false,
-          },
-          value: 'first text value',
-        },
-      },
-    ];
-    const variableState = {
-      interval: {
-        value: '5m',
-        loading: false,
-        options: [
-          {
-            label: '1m',
-            value: '1m',
-          },
-          {
-            label: '5m',
-            value: '5m',
-          },
-        ],
-      },
-      NewListVariable: {
-        value: 'last list value',
-        loading: false,
-        options: [
-          {
-            label: 'test list value',
-            value: 'test list value',
-          },
-          {
-            label: 'second list value',
-            value: 'second list value',
-          },
-          {
-            label: 'last list value',
-            value: 'last list value',
-          },
-        ],
-        default_value: 'test list value',
-      },
-      NewTextVariable: {
-        value: 'New text value',
-        loading: false,
-      },
-    };
-    const isSavedVariablesOutdated = checkSavedVariablesStatus(savedVariables, variableState);
-    expect(isSavedVariablesOutdated).toBe(true);
   });
 });

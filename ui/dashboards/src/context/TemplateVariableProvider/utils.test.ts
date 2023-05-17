@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { VariableDefinition } from '@perses-dev/core';
-import { checkSavedVariablesStatus } from './utils';
+import { isSavedVariableModified } from './utils';
 
-describe('checkSavedVariablesStatus', () => {
+describe('isSavedVariableModified', () => {
   it('should check whether saved variable definitions are out of date with current default values state', () => {
     const savedVariables: VariableDefinition[] = [
       {
@@ -115,7 +115,6 @@ describe('checkSavedVariablesStatus', () => {
         loading: false,
       },
     };
-    const isSavedVariablesOutdated = checkSavedVariablesStatus(savedVariables, variableState);
-    expect(isSavedVariablesOutdated).toBe(true);
+    expect(isSavedVariableModified(savedVariables, variableState)).toBe(true);
   });
 });

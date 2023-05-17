@@ -27,17 +27,17 @@ export const SaveDashboardButton = ({ onSave, isReadonly, variant = 'contained' 
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
-  const isSavedVariablesOutdated = getSavedVariablesStatus();
+  const isSavedVariableModified = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
 
   const onSaveButtonClick = () => {
-    const isSavedDurationOutdated =
+    const isSavedDurationModified =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
     // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
-    if (isSavedDurationOutdated || isSavedVariablesOutdated) {
+    if (isSavedDurationModified || isSavedVariableModified) {
       openSaveChangesConfirmationDialog({
         onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {
           if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
