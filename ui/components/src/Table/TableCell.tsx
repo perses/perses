@@ -98,7 +98,7 @@ export function TableCell({
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     // TODO: dig int if this can be cleaned up a bit.
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
-      'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+      'a[href], button, input, textarea, select, details'
     );
     if (nestedFocusTarget) {
       // If the cell has a focusable child, focus it instead.
@@ -108,6 +108,9 @@ export function TableCell({
 
   // Fix typing
   const handleInteractionFocusTrigger = (e: any) => {
+    // console.log(e);
+    // console.log(e.target);
+    // console.log(e.currentTarget);
     // Causing issues with checkbox. Debug tomorrow.
     onFocus?.(e);
   };
@@ -118,7 +121,7 @@ export function TableCell({
       tabIndex={focusState !== 'none' ? 0 : -1}
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
-      onKeyDown={handleInteractionFocusTrigger}
+      onKeyUp={handleInteractionFocusTrigger}
       sx={{
         width: width,
         borderBottom: isHeader

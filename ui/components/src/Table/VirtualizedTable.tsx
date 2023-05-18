@@ -27,8 +27,8 @@ export interface VirtualizedTableProps<TableData> {
 }
 
 const DEFAULT_ACTIVE_CELL: TableCellPosition = {
-  row: -1,
-  column: -1,
+  row: 0,
+  column: 0,
 };
 
 const ARROW_KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
@@ -50,6 +50,7 @@ export function VirtualizedTable<TableData>({
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   const [activeCell, setActiveCell] = useState<TableCellPosition>(DEFAULT_ACTIVE_CELL);
+  const [isActive, setIsActive] = useState(false);
   const [visibleRange, setVisibleRange] = useState({
     startIndex: 0,
     endIndex: 0,
@@ -59,11 +60,8 @@ export function VirtualizedTable<TableData>({
   const columns = table.getAllFlatColumns();
 
   const getFocusState = (cellPosition: TableCellPosition): TableCellProps['focusState'] => {
-    if (cellPosition.row === 0 && activeCell.row === -1 && cellPosition.column === 0 && activeCell.row === -1) {
-      return 'focus-next';
-    }
     if (cellPosition.row === activeCell.row && cellPosition.column === activeCell.column) {
-      return 'trigger-focus';
+      return isActive ? 'trigger-focus' : 'focus-next';
     }
 
     return 'none';
@@ -71,9 +69,12 @@ export function VirtualizedTable<TableData>({
 
   // TODO: figure out correct naming
   const handleCellOnClick = (cellPosition: TableCellPosition) => {
-    if (cellPosition.column === activeCell.column && cellPosition.row === activeCell.row) {
+    // console.log('handle cell', isActive);
+    if (cellPosition.column === activeCell.column && cellPosition.row === activeCell.row && isActive) {
       return;
     }
+    // setIsActive(true);
+    // console.log('handle cell on click');
     setActiveCell(cellPosition);
   };
 
@@ -121,9 +122,17 @@ export function VirtualizedTable<TableData>({
         } else if (key === 'Home') {
           nextRow = 0;
           nextColumn = 0;
+          virtuosoRef.current?.scrollToIndex({
+            index: nextRow - 1,
+            align: 'start',
+          });
         } else if (key === 'End') {
           nextRow = MAX_ROWS - 1;
           nextColumn = MAX_COLUMNS - 1;
+          virtuosoRef.current?.scrollToIndex({
+            index: nextRow - 1,
+            align: 'end',
+          });
         } else if (key === 'PageDown') {
           e.preventDefault();
           // Add 1 to account for header
@@ -156,7 +165,22 @@ export function VirtualizedTable<TableData>({
   const VirtuosoTableComponents: TableComponents<TableData> = {
     Scroller: VirtualizedTableContainer,
     Table: (props) => {
-      return <InnerTable {...props} width={width} density={density} onKeyDown={handleKeyDown} />;
+      return (
+        <InnerTable
+          {...props}
+          width={width}
+          density={density}
+          onKeyDown={handleKeyDown}
+          onFocus={() => {
+            console.log('focus table');
+            setIsActive(true);
+          }}
+          onBlur={() => {
+            console.log('blur table');
+            setIsActive(false);
+          }}
+        />
+      );
     },
     TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -171,6 +195,7 @@ export function VirtualizedTable<TableData>({
     },
     TableBody,
   };
+  console.log(activeCell, isActive);
 
   return (
     <Box sx={{ width, height }}>
