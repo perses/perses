@@ -16,6 +16,7 @@ import { Legend, LegendProps } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { Box, Stack, Typography } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
+import { useState } from 'react';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -34,7 +35,6 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
     data.push({
       id: `${i}`,
       label: `${labelPrefix} ${i}`,
-      isSelected: false,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
       onClick: action(`onClick legendItem ${i}`),
     });
@@ -45,9 +45,16 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
 // Simple wrapper to try to help visualize that the legend is positioned absolutely
 // inside a relative ancestor.
 const LegendWrapper = (props: LegendProps) => {
+  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>('ALL');
+
   const {
     options: { position },
   } = props;
+
+  const handleSelectedItemsChange: LegendProps['onSelectedItemsChange'] = (newSelectedItems) => {
+    action('onSelectedItemsChange')(newSelectedItems);
+    setSelectedItems(newSelectedItems);
+  };
 
   // The legend does not look very interesting by itself in stories, especially
   // when considering the positioning. This wrapper puts a box with a border
@@ -68,14 +75,23 @@ const LegendWrapper = (props: LegendProps) => {
         boxSizing: 'content-box',
       }}
     >
-      <Legend {...props} />
+      <Legend {...props} selectedItems={selectedItems} onSelectedItemsChange={handleSelectedItemsChange} />
     </Box>
   );
 };
 
 const meta: Meta<typeof Legend> = {
   component: Legend,
-  argTypes: {},
+  argTypes: {
+    // Disabling the controls for these types because they are managed inside
+    // LegendWrapper for the purpose of stories.
+    selectedItems: {
+      control: false,
+    },
+    onSelectedItemsChange: {
+      control: false,
+    },
+  },
   args: {
     width: 400,
     height: 100,
