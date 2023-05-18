@@ -294,6 +294,16 @@ export const SelectedItems: StoryObj<LegendProps> = {
         disable: true,
       },
     },
+    selectedItems: {
+      table: {
+        disable: true,
+      },
+    },
+    onSelectedItemsChange: {
+      table: {
+        disable: true,
+      },
+    },
   },
   args: {},
   parameters: {
