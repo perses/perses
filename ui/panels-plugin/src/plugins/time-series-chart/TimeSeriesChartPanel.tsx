@@ -56,7 +56,6 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 // currently require significantly more refactoring of this component.
 // TODO: simplify this if we switch the list-based legend UI to use checkboxes,
 // where we *would* want to visually select all items in this case.
-// type SelectedSeriesState = Record<string, boolean> | 'ALL';
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
@@ -191,9 +190,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           graphData.legendItems.push({
             id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
-            // isSelected,
             color: seriesColor,
-            // onClick: (e) => onLegendItemClick(e, seriesId),
           });
         }
       }
