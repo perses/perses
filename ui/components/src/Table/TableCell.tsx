@@ -71,7 +71,15 @@ function getCellLayoutProps(theme: Theme, density: TableDensity): React.CSSPrope
   };
 }
 
-export function TableCell({ children, density, variant, width, focusState = 'none', ...otherProps }: TableCellProps) {
+export function TableCell({
+  children,
+  density,
+  variant,
+  width,
+  focusState = 'none',
+  onFocus,
+  ...otherProps
+}: TableCellProps) {
   const theme = useTheme();
 
   const elRef = useRef<HTMLTableCellElement>();
@@ -85,10 +93,25 @@ export function TableCell({ children, density, variant, width, focusState = 'non
     }
   }, [focusState]);
 
+  const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
+    onFocus?.(e);
+
+    // From https://zellwk.com/blog/keyboard-focusable-elements/
+    // TODO: dig int if this can be cleaned up a bit.
+    const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
+      'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+    );
+    if (nestedFocusTarget) {
+      // If the cell has a focusable child, focus it instead.
+      nestedFocusTarget.focus();
+    }
+  };
+
   return (
     <StyledMuiTableCell
       {...otherProps}
       tabIndex={focusState !== 'none' ? 0 : -1}
+      onFocus={handleFocus}
       sx={{
         width: width,
         borderBottom: isHeader || !isCompact ? (theme) => `solid 1px ${theme.palette.divider}` : 'none',
