@@ -91,7 +91,6 @@ export function Table<TableData>({
   // const [rowSelection, setRowSelection] = useState<RowSelectionState>(initRowSelection);
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
-    console.log('row selection change');
     const newRowSelection =
       typeof rowSelectionUpdater === 'function' ? rowSelectionUpdater(rowSelection) : rowSelectionUpdater;
     onRowSelectionChange?.(newRowSelection);
@@ -117,8 +116,6 @@ export function Table<TableData>({
           checked={row.getIsSelected()}
           indeterminate={row.getIsSomeSelected()}
           onChange={(e) => {
-            console.log('on change');
-            console.log(e);
             row.getToggleSelectedHandler()(e);
           }}
           color={getCheckboxColor?.(row.original)}
@@ -127,6 +124,7 @@ export function Table<TableData>({
       );
     },
   };
+
   const tableColumns: Array<ColumnDef<TableData>> = [...columns].map(({ size, ...otherProps }) => {
     // Tanstack Table does not support an "auto" value to naturally size to fit
     // the space in a table. We translate our custom "auto" setting to 0 size
@@ -156,6 +154,10 @@ export function Table<TableData>({
     tableColumns.unshift(checkboxColumn);
   }
 
+  const handleRowClick = (rowId: string) => {
+    table.getRow(rowId).toggleSelected();
+  };
+
   const table = useReactTable({
     data,
     columns: tableColumns,
@@ -168,5 +170,5 @@ export function Table<TableData>({
     },
   });
 
-  return <VirtualizedTable {...otherProps} table={table} density={density} />;
+  return <VirtualizedTable {...otherProps} table={table} density={density} onRowClick={handleRowClick} />;
 }

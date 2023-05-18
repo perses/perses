@@ -23,6 +23,7 @@ export interface VirtualizedTableProps<TableData> {
   width: number;
   table: TSTable<TableData>;
   density: TableDensity;
+  onRowClick: (id: rowId) => void;
 }
 
 const DEFAULT_ACTIVE_CELL: TableCellPosition = {
@@ -39,7 +40,13 @@ function isArrowKey(key: string) {
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
-export function VirtualizedTable<TableData>({ width, height, table, density }: VirtualizedTableProps<TableData>) {
+export function VirtualizedTable<TableData>({
+  width,
+  height,
+  table,
+  density,
+  onRowClick,
+}: VirtualizedTableProps<TableData>) {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   const [activeCell, setActiveCell] = useState<TableCellPosition>(DEFAULT_ACTIVE_CELL);
@@ -47,7 +54,6 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
     startIndex: 0,
     endIndex: 0,
   });
-  // console.log(visibleRange);
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllFlatColumns();
@@ -155,7 +161,13 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
     TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     TableRow: ({ item, ...props }) => {
-      return <TableRow {...props} density={density} />;
+      const index = props['data-index'];
+      const row = rows[index];
+      if (!row) {
+        return null;
+      }
+
+      return <TableRow {...props} onClick={() => onRowClick(row.id)} density={density} />;
     },
     TableBody,
   };

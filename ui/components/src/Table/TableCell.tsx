@@ -80,8 +80,6 @@ export function TableCell({
   onFocus,
   ...otherProps
 }: TableCellProps) {
-  console.log('render');
-
   const theme = useTheme();
 
   const elRef = useRef<HTMLTableCellElement>();
@@ -123,7 +121,9 @@ export function TableCell({
       onKeyDown={handleInteractionFocusTrigger}
       sx={{
         width: width,
-        borderBottom: isHeader || !isCompact ? (theme) => `solid 1px ${theme.palette.divider}` : 'none',
+        borderBottom: isHeader
+          ? (theme) => `solid 1px ${theme.palette.grey[100]}`
+          : `solid 1px ${theme.palette.grey[50]}`,
       }}
       ref={elRef}
     >

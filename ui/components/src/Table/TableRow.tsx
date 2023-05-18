@@ -14,7 +14,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function 
       sx={{
         backgroundColor: (theme) => theme.palette.background.paper,
         '&:hover': {
-          backgroundColor: (theme) => theme.palette.background.default,
+          backgroundColor: (theme) => theme.palette.primary.light,
         },
       }}
     />

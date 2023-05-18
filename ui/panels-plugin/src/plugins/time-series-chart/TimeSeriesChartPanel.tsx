@@ -157,7 +157,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   const handleOnRowSelectionChange: Required<LegendProps>['tableProps']['onRowSelectionChange'] = (newRowSelection) => {
-    console.log(newRowSelection);
     // const newSelectedSeriesNames = Object.keys(newRowSelection).filter((key) => newRowSelection[key]);
     setSelectedSeries(newRowSelection);
   };
