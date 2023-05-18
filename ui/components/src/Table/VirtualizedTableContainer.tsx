@@ -12,6 +12,6 @@ type VirtualizedTableContainerProps = MuiTableContainerProps;
 // TODO: check on type for tbody
 export const VirtualizedTableContainer = forwardRef<HTMLDivElement, VirtualizedTableContainerProps>(
   function VirtualizedTableContainer(props, ref) {
-    return <StyledMuiTablContainer {...props} ref={ref} />;
+    return <StyledMuiTablContainer {...props} tabIndex={-1} ref={ref} />;
   }
 );

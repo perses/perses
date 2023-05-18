@@ -80,6 +80,8 @@ export function TableCell({
   onFocus,
   ...otherProps
 }: TableCellProps) {
+  console.log('render');
+
   const theme = useTheme();
 
   const elRef = useRef<HTMLTableCellElement>();
@@ -87,6 +89,7 @@ export function TableCell({
   const isHeader = variant === 'head';
   const isCompact = density === 'compact';
 
+  // TODO: see if this should be a uselayouteffect.
   useEffect(() => {
     if (focusState === 'trigger-focus' && elRef.current) {
       elRef.current.focus();
@@ -94,8 +97,6 @@ export function TableCell({
   }, [focusState]);
 
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
-    onFocus?.(e);
-
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     // TODO: dig int if this can be cleaned up a bit.
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
@@ -107,11 +108,19 @@ export function TableCell({
     }
   };
 
+  // Fix typing
+  const handleInteractionFocusTrigger = (e: any) => {
+    // Causing issues with checkbox. Debug tomorrow.
+    onFocus?.(e);
+  };
+
   return (
     <StyledMuiTableCell
       {...otherProps}
       tabIndex={focusState !== 'none' ? 0 : -1}
       onFocus={handleFocus}
+      onClick={handleInteractionFocusTrigger}
+      onKeyDown={handleInteractionFocusTrigger}
       sx={{
         width: width,
         borderBottom: isHeader || !isCompact ? (theme) => `solid 1px ${theme.palette.divider}` : 'none',

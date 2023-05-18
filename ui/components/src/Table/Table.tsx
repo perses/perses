@@ -91,6 +91,7 @@ export function Table<TableData>({
   // const [rowSelection, setRowSelection] = useState<RowSelectionState>(initRowSelection);
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
+    console.log('row selection change');
     const newRowSelection =
       typeof rowSelectionUpdater === 'function' ? rowSelectionUpdater(rowSelection) : rowSelectionUpdater;
     onRowSelectionChange?.(newRowSelection);
@@ -115,7 +116,11 @@ export function Table<TableData>({
         <TableCheckbox
           checked={row.getIsSelected()}
           indeterminate={row.getIsSomeSelected()}
-          onChange={row.getToggleSelectedHandler()}
+          onChange={(e) => {
+            console.log('on change');
+            console.log(e);
+            row.getToggleSelectedHandler()(e);
+          }}
           color={getCheckboxColor?.(row.original)}
           density={density}
         />

@@ -63,6 +63,7 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
     return 'none';
   };
 
+  // TODO: figure out correct naming
   const handleCellOnClick = (cellPosition: TableCellPosition) => {
     if (cellPosition.column === activeCell.column && cellPosition.row === activeCell.row) {
       return;
@@ -121,7 +122,6 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
           e.preventDefault();
           // Add 1 to account for header
           nextRow = Math.min(MAX_ROWS - 1, visibleRange.endIndex + 1);
-          console.log(`nextrow: ${nextRow}`);
           virtuosoRef.current?.scrollToIndex({
             index: nextRow - 1,
             align: 'start',
@@ -146,8 +146,6 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
       });
     }
   };
-
-  console.log(activeCell);
 
   const VirtuosoTableComponents: TableComponents<TableData> = {
     Scroller: VirtualizedTableContainer,
