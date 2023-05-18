@@ -8,7 +8,7 @@ import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
 import { TableHead } from './TableHead';
-import { TableCell } from './TableCell';
+import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableDensity } from './table-model';
 
@@ -26,8 +26,8 @@ export interface VirtualizedTableProps<TableData> {
 }
 
 const DEFAULT_ACTIVE_CELL: TableCellPosition = {
-  row: 0,
-  column: 0,
+  row: -1,
+  column: -1,
 };
 
 const ARROW_KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
@@ -47,10 +47,16 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
   const rows = table.getRowModel().rows;
   const columns = table.getAllFlatColumns();
 
-  function isActiveCell(cellPosition: TableCellPosition) {
-    // console.log(`isActive: ${rowIndex}, ${columnIndex}`);
-    return cellPosition.row === activeCell.row && cellPosition.column === activeCell.column;
-  }
+  const getFocusState = (cellPosition: TableCellPosition): TableCellProps['focusState'] => {
+    if (cellPosition.row === 0 && activeCell.row === -1 && cellPosition.column === 0 && activeCell.row === -1) {
+      return 'focus-next';
+    }
+    if (cellPosition.row === activeCell.row && cellPosition.column === activeCell.column) {
+      return 'trigger-focus';
+    }
+
+    return 'none';
+  };
 
   const handleCellOnClick = (cellPosition: TableCellPosition) => {
     if (cellPosition.column === activeCell.column && cellPosition.row === activeCell.row) {
@@ -111,6 +117,7 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
       });
     }
   };
+
   console.log(activeCell);
 
   const VirtuosoTableComponents: TableComponents<TableData> = {
@@ -140,6 +147,10 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
                   <TableRow key={headerGroup.id} density={density}>
                     {headerGroup.headers.map((header, i) => {
                       const column = header.column;
+                      const position: TableCellPosition = {
+                        row: 0,
+                        column: i,
+                      };
 
                       return (
                         <TableCell
@@ -147,8 +158,8 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
                           width={column.getSize() || 'auto'}
                           variant="head"
                           density={density}
-                          isActive={isActiveCell({ row: 0, column: i })}
-                          onClick={() => handleCellOnClick({ row: 0, column: i })}
+                          focusState={getFocusState(position)}
+                          onFocus={() => handleCellOnClick(position)}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableCell>
@@ -169,14 +180,19 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
           return (
             <>
               {row.getVisibleCells().map((cell, i) => {
+                const position: TableCellPosition = {
+                  row: index + 1,
+                  column: i,
+                };
+
                 return (
                   <TableCell
                     key={cell.id}
                     sx={{ width: cell.column.getSize() || 'auto' }}
                     density={density}
                     // Add 1 to the row index because the header is row 0
-                    isActive={isActiveCell({ row: index + 1, column: i })}
-                    onFocus={() => handleCellOnClick({ row: index + 1, column: i })}
+                    focusState={getFocusState(position)}
+                    onFocus={() => handleCellOnClick(position)}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

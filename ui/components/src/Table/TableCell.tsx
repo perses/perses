@@ -29,7 +29,7 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme, variant }) => ({
 
 export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex'> {
   density: TableDensity;
-  isActive?: boolean;
+  focusState?: 'trigger-focus' | 'focus-next' | 'none';
 }
 
 function calculateCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string) {
@@ -71,7 +71,7 @@ function getCellLayoutProps(theme: Theme, density: TableDensity): React.CSSPrope
   };
 }
 
-export function TableCell({ children, density, variant, width, isActive, ...otherProps }: TableCellProps) {
+export function TableCell({ children, density, variant, width, focusState = 'none', ...otherProps }: TableCellProps) {
   const theme = useTheme();
 
   const elRef = useRef<HTMLTableCellElement>();
@@ -80,19 +80,15 @@ export function TableCell({ children, density, variant, width, isActive, ...othe
   const isCompact = density === 'compact';
 
   useEffect(() => {
-    if (isActive) {
-      console.log(`isActive: ${isActive}`);
-      console.log(elRef.current);
-    }
-    if (isActive && elRef.current) {
+    if (focusState === 'trigger-focus' && elRef.current) {
       elRef.current.focus();
     }
-  }, [isActive]);
+  }, [focusState]);
 
   return (
     <StyledMuiTableCell
       {...otherProps}
-      tabIndex={isActive ? 0 : -1}
+      tabIndex={focusState !== 'none' ? 0 : -1}
       sx={{
         width: width,
         borderBottom: isHeader || !isCompact ? (theme) => `solid 1px ${theme.palette.divider}` : 'none',
