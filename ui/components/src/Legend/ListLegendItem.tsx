@@ -17,8 +17,15 @@ import { LegendItem } from '../model';
 import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
 
-interface ListLegendItemProps extends ListItemProps<'div'> {
+export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick'> {
   item: LegendItem;
+
+  /**
+   * When true, the item is visually highlighted to communicate it is selected.
+   */
+  isHighlighted?: boolean;
+
+  onClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => void;
 
   /**
    * When `true`, will keep labels to a single line with overflow ellipsized. The
@@ -30,7 +37,7 @@ interface ListLegendItemProps extends ListItemProps<'div'> {
 }
 
 const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
-  { item, sx, truncateLabel, ...others },
+  { item, sx, truncateLabel, onClick, isHighlighted, ...others },
   ref
 ) {
   const [noWrap, setNoWrap] = useState(truncateLabel);
@@ -47,6 +54,11 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
     }
   }
 
+  const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    onClick(e, item.id);
+    item.onClick?.(e);
+  };
+
   return (
     <ListItem
       {...others}
@@ -61,8 +73,8 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
       )}
       dense={true}
       key={item.id}
-      onClick={item.onClick}
-      selected={item.isSelected}
+      onClick={handleClick}
+      selected={isHighlighted}
       ref={ref}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>

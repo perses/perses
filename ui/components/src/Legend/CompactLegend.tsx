@@ -12,12 +12,14 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { LegendItem } from '../model';
-import { ListLegendItem } from './ListLegendItem';
+import { LegendItem, SelectedLegendItemState, isLegendItemHighlighted } from '../model';
+import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 
-interface CompactLegendProps {
+export interface CompactLegendProps {
   height: number;
   items: LegendItem[];
+  selectedItems: SelectedLegendItemState;
+  onLegendItemClick: ListLegendItemProps['onClick'];
 }
 
 /**
@@ -26,13 +28,15 @@ interface CompactLegendProps {
  * number of items. The `ListLegend` is used for cases with large numbers of items
  * because it is virtualized.
  */
-export function CompactLegend({ height, items }: CompactLegendProps) {
+export function CompactLegend({ height, items, selectedItems, onLegendItemClick }: CompactLegendProps) {
   return (
     <Box component="ul" sx={{ width: '100%', height, padding: [0, 1, 0, 0], overflowY: 'scroll', margin: 0 }}>
       {items.map((item) => (
         <ListLegendItem
           key={item.id}
           item={item}
+          isHighlighted={isLegendItemHighlighted(item, selectedItems)}
+          onClick={onLegendItemClick}
           sx={{
             width: 'auto',
             float: 'left',

@@ -13,13 +13,15 @@
 
 import { useTheme, Box } from '@mui/material';
 import { Virtuoso } from 'react-virtuoso';
-import { LegendItem } from '../model';
-import { ListLegendItem } from './ListLegendItem';
+import { LegendItem, SelectedLegendItemState, isLegendItemHighlighted } from '../model';
+import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 
 export interface ListLegendProps {
   items: LegendItem[];
   height: number;
   width: number;
+  selectedItems: SelectedLegendItemState;
+  onLegendItemClick: ListLegendItemProps['onClick'];
 }
 
 /**
@@ -28,7 +30,7 @@ export interface ListLegendProps {
  * large number of items because it is virtualized and easier to visually scan
  * large numbers of items when there is a single item per row.
  */
-export function ListLegend({ items, height, width }: ListLegendProps) {
+export function ListLegend({ items, height, width, selectedItems, onLegendItemClick }: ListLegendProps) {
   const theme = useTheme();
   // Padding value used in the react virtuoso header/footer components to
   // simulate top/bottom padding based on recommendation in this
@@ -50,6 +52,8 @@ export function ListLegend({ items, height, width }: ListLegendProps) {
             key={item.id}
             item={item}
             truncateLabel={truncateLabels}
+            isHighlighted={isLegendItemHighlighted(item, selectedItems)}
+            onClick={onLegendItemClick}
             sx={{
               // Having an explicit width is important for the ellipsizing to
               // work correctly. Subtract padding to simulate padding.

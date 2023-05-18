@@ -26,8 +26,8 @@ import {
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
+  SelectedLegendItemState,
 } from '@perses-dev/components';
-import produce from 'immer';
 import {
   TimeSeriesChartOptions,
   DEFAULT_UNIT,
@@ -56,7 +56,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 // currently require significantly more refactoring of this component.
 // TODO: simplify this if we switch the list-based legend UI to use checkboxes,
 // where we *would* want to visually select all items in this case.
-type SelectedSeriesState = Record<string, boolean> | 'ALL';
+// type SelectedSeriesState = Record<string, boolean> | 'ALL';
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
@@ -105,46 +105,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = convertPanelYAxis(y_axis);
 
-  const [selectedSeries, setSelectedSeries] = useState<SelectedSeriesState>('ALL');
+  const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
 
   const { setTimeRange } = useTimeRange();
-
-  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
-    const isModifiedClick = e.metaKey || e.shiftKey;
-
-    setSelectedSeries((current) => {
-      return produce(current, (draft) => {
-        if (draft === 'ALL') {
-          return {
-            [seriesId]: true,
-          };
-        }
-
-        const isSelected = !!draft[seriesId];
-
-        // Clicks with modifier key can select multiple items.
-        if (isModifiedClick) {
-          if (isSelected) {
-            // Modified click on already selected item. Remove that item.
-            delete draft[seriesId];
-          } else {
-            // Modified click on not-selected item. Add it.
-            draft[seriesId] = true;
-          }
-          return draft;
-        }
-
-        if (isSelected) {
-          // Clicked item was already selected. Unselect it and return to
-          // ALL state.
-          return 'ALL' as const;
-        }
-
-        // Select clicked item.
-        return { [seriesId]: true };
-      });
-    });
-  };
 
   // Populate series data based on query results
   const { graphData } = useDeepMemo(() => {
@@ -217,8 +180,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
-        const isSelectAll = selectedSeries === 'ALL';
-        const isSelected = !isSelectAll && !!selectedSeries[seriesId];
+        const isSelectAll = selectedLegendItems === 'ALL';
+        const isSelected = !isSelectAll && !!selectedLegendItems[seriesId];
         const showTimeSeries = isSelected || isSelectAll;
 
         if (showTimeSeries) {
@@ -228,9 +191,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           graphData.legendItems.push({
             id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
-            isSelected,
+            // isSelected,
             color: seriesColor,
-            onClick: (e) => onLegendItemClick(e, seriesId),
+            // onClick: (e) => onLegendItemClick(e, seriesId),
           });
         }
       }
@@ -264,7 +227,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeries, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
+  }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
@@ -336,7 +299,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         onDataZoom={handleDataZoom}
       />
       {legend && graphData.legendItems && (
-        <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
+        <Legend
+          width={legendWidth}
+          height={legendHeight}
+          options={legend}
+          data={graphData.legendItems}
+          selectedItems={selectedLegendItems}
+          onSelectedItemsChange={setSelectedLegendItems}
+        />
       )}
     </Box>
   );
