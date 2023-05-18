@@ -20,6 +20,8 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme, variant }) => ({
   },
   '&:focus-visible': {
     outline: `solid 1px ${theme.palette.primary.main}`,
+    // Move inward a little to avoid getting cut off when focusing on items
+    // at the edge of the table.
     outlineOffset: '-1px',
     borderRadius: 0,
   },

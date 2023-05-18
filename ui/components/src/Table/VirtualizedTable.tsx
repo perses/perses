@@ -30,6 +30,12 @@ const DEFAULT_ACTIVE_CELL: TableCellPosition = {
   column: 0,
 };
 
+const ARROW_KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
+
+function isArrowKey(key: string) {
+  return ARROW_KEYS.includes(key);
+}
+
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
@@ -53,36 +59,57 @@ export function VirtualizedTable<TableData>({ width, height, table, density }: V
     setActiveCell(cellPosition);
   };
 
+  // We add 1 here for the header.
+  const MAX_ROWS = rows.length + 1;
+  const MAX_COLUMNS = columns.length;
+
   const handleKeyDown: React.KeyboardEventHandler<HTMLTableElement> = (e) => {
+    // Following recommended a11y keyboard interaction patterns from:
+    // https://www.w3.org/WAI/ARIA/apg/patterns/grid/
+    console.log(e);
+
     const key = e.key;
-    console.log(key);
 
-    setActiveCell((curActiveCell) => {
-      let nextRow: number = curActiveCell.row;
-      let nextColumn: number = curActiveCell.column;
-
-      if (key === 'ArrowRight' && nextColumn < columns.length - 1) {
-        nextColumn += 1;
-      } else if (key === 'ArrowLeft' && nextColumn > 0) {
-        nextColumn -= 1;
-      } else if (key === 'ArrowDown' && nextRow < rows.length - 1) {
-        e.preventDefault();
-        nextRow += 1;
-        virtuosoRef.current?.scrollToIndex({
-          index: nextRow - 1,
-          align: 'end',
-        });
-      } else if (key === 'ArrowUp' && nextRow > 0) {
-        e.preventDefault();
-        nextRow -= 1;
-        virtuosoRef.current?.scrollToIndex({
-          index: nextRow - 1,
-          align: 'end',
-        });
+    if (e.shiftKey) {
+      if (e.code === 'Space') {
+        console.log('toggle select row');
       }
+    }
 
-      return { column: nextColumn, row: nextRow };
-    });
+    if (isArrowKey(key) || key === 'Home' || key === 'End') {
+      setActiveCell((curActiveCell) => {
+        let nextRow: number = curActiveCell.row;
+        let nextColumn: number = curActiveCell.column;
+
+        if (key === 'ArrowRight' && nextColumn < MAX_COLUMNS - 1) {
+          nextColumn += 1;
+        } else if (key === 'ArrowLeft' && nextColumn > 0) {
+          nextColumn -= 1;
+        } else if (key === 'ArrowDown' && nextRow < MAX_ROWS - 1) {
+          e.preventDefault();
+          nextRow += 1;
+          virtuosoRef.current?.scrollToIndex({
+            index: nextRow - 1,
+            align: 'end',
+          });
+        } else if (key === 'ArrowUp' && nextRow > 0) {
+          e.preventDefault();
+          nextRow -= 1;
+          virtuosoRef.current?.scrollToIndex({
+            index: nextRow - 1,
+            align: 'end',
+          });
+        } else if (key === 'Home') {
+          nextRow = 0;
+          nextColumn = 0;
+        } else if (key === 'End') {
+          nextRow = MAX_ROWS - 1;
+          nextColumn = MAX_COLUMNS - 1;
+        }
+
+        return { column: nextColumn, row: nextRow };
+      });
+    }
   };
   console.log(activeCell);
 
