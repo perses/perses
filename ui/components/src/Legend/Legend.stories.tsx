@@ -306,9 +306,6 @@ export const SelectedItems: StoryObj<LegendProps> = {
     },
   },
   args: {},
-  parameters: {
-    happo: false,
-  },
   render: (args) => {
     return (
       <Stack spacing={3}>
