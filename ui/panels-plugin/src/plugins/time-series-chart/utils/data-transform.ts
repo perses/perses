@@ -13,7 +13,12 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
+import {
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  EChartsTimeSeries,
+  EChartsValues,
+  EChartsDataFormat,
+} from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
@@ -29,7 +34,7 @@ import {
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
 
-export const EMPTY_GRAPH_DATA = {
+export const EMPTY_GRAPH_DATA: EChartsDataFormat = {
   timeSeries: [],
   xAxis: [],
   legendItems: [],
