@@ -69,12 +69,12 @@ export function VirtualizedTable<TableData>({
 
   // TODO: figure out correct naming
   const handleCellOnClick = (cellPosition: TableCellPosition) => {
-    // console.log('handle cell', isActive);
+    console.log('handle cell', isActive);
     if (cellPosition.column === activeCell.column && cellPosition.row === activeCell.row && isActive) {
       return;
     }
-    // setIsActive(true);
-    // console.log('handle cell on click');
+    setIsActive(true);
+    console.log('handle cell on click');
     setActiveCell(cellPosition);
   };
 
@@ -131,7 +131,7 @@ export function VirtualizedTable<TableData>({
           nextColumn = MAX_COLUMNS - 1;
           virtuosoRef.current?.scrollToIndex({
             index: nextRow - 1,
-            align: 'end',
+            align: 'start',
           });
         } else if (key === 'PageDown') {
           e.preventDefault();
@@ -165,22 +165,7 @@ export function VirtualizedTable<TableData>({
   const VirtuosoTableComponents: TableComponents<TableData> = {
     Scroller: VirtualizedTableContainer,
     Table: (props) => {
-      return (
-        <InnerTable
-          {...props}
-          width={width}
-          density={density}
-          onKeyDown={handleKeyDown}
-          onFocus={() => {
-            console.log('focus table');
-            setIsActive(true);
-          }}
-          onBlur={() => {
-            console.log('blur table');
-            setIsActive(false);
-          }}
-        />
-      );
+      return <InnerTable {...props} width={width} density={density} onKeyDown={handleKeyDown} />;
     },
     TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
