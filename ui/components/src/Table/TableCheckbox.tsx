@@ -1,4 +1,4 @@
-import { Checkbox, CheckboxProps, styled } from '@mui/material';
+import { Checkbox, CheckboxProps, styled, alpha } from '@mui/material';
 import { TableDensity } from './table-model';
 
 const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
@@ -17,6 +17,7 @@ export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxPr
     <StyledCheckbox
       size={isCompact ? 'small' : 'medium'}
       {...otherProps}
+      focusRipple={false}
       tabIndex={-1}
       sx={{
         color: color,
@@ -31,6 +32,10 @@ export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxPr
 
         '&.Mui-checked': {
           color: color,
+        },
+
+        '&.Mui-focusVisible': {
+          background: color ? alpha(color, 0.5) : undefined,
         },
 
         '& .MuiSvgIcon-root': { fontSize: isCompact ? 14 : 16 },

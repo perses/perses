@@ -92,9 +92,15 @@ export function TableCell({
     if (focusState === 'trigger-focus' && elRef.current) {
       elRef.current.focus();
     }
+
+    return () => {
+      console.log('unmounting');
+    };
   }, [focusState]);
 
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
+    console.log('on focus cell');
+
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     // TODO: dig int if this can be cleaned up a bit.
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
