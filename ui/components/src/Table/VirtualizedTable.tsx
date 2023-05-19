@@ -1,6 +1,6 @@
 import { Table as TSTable, flexRender } from '@tanstack/react-table';
 import { Box, Typography } from '@mui/material';
-import { TableVirtuoso, TableComponents, TableVirtuosoHandle } from 'react-virtuoso';
+import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
 import { useRef, useState, useMemo, useCallback } from 'react';
 import { combineSx } from '../utils';
 import { TableProps } from './Table';
@@ -11,6 +11,7 @@ import { TableHead } from './TableHead';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableDensity } from './table-model';
+import { useVirtualizedTableKeyboardNav } from './useVirtualizedTableKeyboardNav';
 
 type TableCellPosition = {
   row: number;
@@ -23,18 +24,7 @@ export interface VirtualizedTableProps<TableData> {
   width: number;
   table: TSTable<TableData>;
   density: TableDensity;
-  onRowClick: (id: rowId) => void;
-}
-
-const DEFAULT_ACTIVE_CELL: TableCellPosition = {
-  row: 0,
-  column: 0,
-};
-
-const ARROW_KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
-
-function isArrowKey(key: string) {
-  return ARROW_KEYS.includes(key);
+  onRowClick: (id: string) => void;
 }
 
 // Separating out the virtualized table because we may want a paginated table
@@ -49,19 +39,29 @@ export function VirtualizedTable<TableData>({
 }: VirtualizedTableProps<TableData>) {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
-  const [activeCell, setActiveCell] = useState<TableCellPosition>(DEFAULT_ACTIVE_CELL);
-  const [isActive, setIsActive] = useState(false);
   const visibleRange = useRef({
     startIndex: 0,
     endIndex: 0,
   });
 
-  const setVisibleRange = (newVisibleRange) => {
+  const setVisibleRange: TableVirtuosoProps<TableData, unknown>['rangeChanged'] = (newVisibleRange) => {
     visibleRange.current = newVisibleRange;
   };
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllFlatColumns();
+
+  const keyboardNav = useVirtualizedTableKeyboardNav({
+    visibleRange: visibleRange,
+    virtualTable: virtuosoRef,
+
+    // We add 1 here for the header.
+    maxRows: rows.length + 1,
+    maxColumns: columns.length,
+  });
+
+  const { activeCell, isActive } = keyboardNav;
+  console.log(activeCell);
 
   const getFocusState = (cellPosition: TableCellPosition): TableCellProps['focusState'] => {
     if (cellPosition.row === activeCell.row && cellPosition.column === activeCell.column) {
@@ -71,118 +71,13 @@ export function VirtualizedTable<TableData>({
     return 'none';
   };
 
-  // TODO: figure out correct naming
-  const handleCellOnClick = (cellPosition: TableCellPosition) => {
-    console.log('handle cell', isActive);
-    if (cellPosition.column === activeCell.column && cellPosition.row === activeCell.row && isActive) {
-      return;
-    }
-    setIsActive(true);
-    console.log('handle cell on click');
-    setActiveCell(cellPosition);
-  };
-
-  // We add 1 here for the header.
-  const MAX_ROWS = rows.length + 1;
-  const MAX_COLUMNS = columns.length;
-
-  const handleKeyDown: React.KeyboardEventHandler<HTMLTableElement> = useCallback(
-    (e) => {
-      // Including some of the basic a11y keyboard interaction patterns from:
-      // https://www.w3.org/WAI/ARIA/apg/patterns/grid/
-      // TODO: add other keyboard combos.
-      const key = e.key;
-
-      if (isArrowKey(key) || key === 'Home' || key === 'End' || key === 'PageDown' || key === 'PageUp') {
-        setActiveCell((curActiveCell) => {
-          let nextRow: number = curActiveCell.row;
-          let nextColumn: number = curActiveCell.column;
-
-          if (key === 'ArrowRight' && nextColumn < MAX_COLUMNS - 1) {
-            nextColumn += 1;
-          } else if (key === 'ArrowLeft' && nextColumn > 0) {
-            nextColumn -= 1;
-          } else if (key === 'ArrowDown' && nextRow < MAX_ROWS - 1) {
-            e.preventDefault();
-            nextRow += 1;
-
-            // TODO: Only do when needed
-            if (nextRow - 1 < visibleRange.current.startIndex || nextRow - 1 > visibleRange.current.endIndex) {
-              virtuosoRef.current?.scrollToIndex({
-                index: nextRow - 1,
-                align: 'end',
-              });
-            }
-          } else if (key === 'ArrowUp' && nextRow > 0) {
-            e.preventDefault();
-            nextRow -= 1;
-
-            // TODO: Only do when needed
-            if (nextRow - 1 < visibleRange.current.startIndex || nextRow - 1 > visibleRange.current.endIndex) {
-              virtuosoRef.current?.scrollToIndex({
-                index: nextRow - 1,
-                align: 'start',
-              });
-            }
-          } else if (key === 'Home') {
-            nextRow = 0;
-            nextColumn = 0;
-            virtuosoRef.current?.scrollToIndex({
-              index: nextRow - 1,
-              align: 'start',
-            });
-          } else if (key === 'End') {
-            nextRow = MAX_ROWS - 1;
-            nextColumn = MAX_COLUMNS - 1;
-            virtuosoRef.current?.scrollToIndex({
-              index: nextRow - 1,
-              align: 'start',
-            });
-          } else if (key === 'PageDown') {
-            e.preventDefault();
-            // Add 1 to account for header
-            nextRow = Math.min(MAX_ROWS - 1, visibleRange.current.endIndex + 1);
-            virtuosoRef.current?.scrollToIndex({
-              index: nextRow - 1,
-              align: 'start',
-            });
-          } else if (key === 'PageUp') {
-            e.preventDefault();
-            // Minus 1 to account for header
-            nextRow = Math.max(0, visibleRange.current.startIndex - 1);
-            virtuosoRef.current?.scrollToIndex({
-              index: nextRow - 1,
-              align: 'end',
-            });
-          }
-
-          if (nextRow === curActiveCell.row && nextColumn === curActiveCell.column) {
-            // Return original to avoid creating a new object if nothing
-            // changed.
-            return curActiveCell;
-          }
-
-          return { column: nextColumn, row: nextRow };
-        });
-      }
-    },
-    [MAX_COLUMNS, MAX_ROWS]
-  );
-
-  // const tableComponent = useCallback(
-  //   (props) => {
-  //     return <InnerTable {...props} width={width} density={density} onKeyDown={handleKeyDown} />;
-  //   },
-  //   [width, density, handleKeyDown]
-  // );
-
   const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
     return {
       Scroller: VirtualizedTableContainer,
       // Table: tableComponent,
       Table: (props) => {
         console.log('render table');
-        return <InnerTable {...props} width={width} density={density} onKeyDown={handleKeyDown} />;
+        return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
       },
       TableHead,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -197,8 +92,7 @@ export function VirtualizedTable<TableData>({
       },
       TableBody,
     };
-  }, [density, handleKeyDown, onRowClick, rows, width]);
-  console.log(activeCell, isActive);
+  }, [density, keyboardNav.onTableKeyDown, onRowClick, rows, width]);
 
   return (
     <Box sx={{ width, height }}>
@@ -230,7 +124,7 @@ export function VirtualizedTable<TableData>({
                           variant="head"
                           density={density}
                           focusState={getFocusState(position)}
-                          onFocus={() => handleCellOnClick(position)}
+                          onFocus={() => keyboardNav.onCellFocus(position)}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableCell>
@@ -256,8 +150,6 @@ export function VirtualizedTable<TableData>({
                   column: i,
                 };
 
-                // console.log(i, cell.id);
-
                 return (
                   <TableCell
                     key={cell.id}
@@ -265,7 +157,7 @@ export function VirtualizedTable<TableData>({
                     density={density}
                     // Add 1 to the row index because the header is row 0
                     focusState={getFocusState(position)}
-                    onFocus={() => handleCellOnClick(position)}
+                    onFocus={() => keyboardNav.onCellFocus(position)}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
