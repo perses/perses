@@ -61,7 +61,6 @@ export function VirtualizedTable<TableData>({
   });
 
   const { activeCell, isActive } = keyboardNav;
-  console.log(activeCell);
 
   const getFocusState = (cellPosition: TableCellPosition): TableCellProps['focusState'] => {
     if (cellPosition.row === activeCell.row && cellPosition.column === activeCell.column) {
@@ -76,7 +75,6 @@ export function VirtualizedTable<TableData>({
       Scroller: VirtualizedTableContainer,
       // Table: tableComponent,
       Table: (props) => {
-        console.log('render table');
         return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
       },
       TableHead,
