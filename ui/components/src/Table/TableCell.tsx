@@ -95,8 +95,6 @@ export function TableCell({
   }, [focusState]);
 
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
-    // console.log('on focus cell');
-
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     // TODO: dig int if this can be cleaned up a bit.
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
@@ -110,9 +108,6 @@ export function TableCell({
 
   // Fix typing
   const handleInteractionFocusTrigger = (e: any) => {
-    // console.log(e);
-    // console.log(e.target);
-    // console.log(e.currentTarget);
     // Causing issues with checkbox. Debug tomorrow.
     onFocus?.(e);
   };
