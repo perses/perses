@@ -38,10 +38,11 @@ type RenderLegendOpts = Partial<Pick<LegendProps, 'onSelectedItemsChange' | 'sel
   position?: LegendProps['options']['position'];
 };
 
-const renderLegend = (
-  { onSelectedItemsChange = jest.fn(), selectedItems = 'ALL' }: RenderLegendOpts = {},
-  position = 'Bottom' as const
-) => {
+const renderLegend = ({
+  onSelectedItemsChange = jest.fn(),
+  selectedItems = 'ALL',
+  position = 'Bottom',
+}: RenderLegendOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
       <Legend
