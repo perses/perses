@@ -202,8 +202,10 @@ export function LineChart({
   return (
     <Box
       sx={{ height }}
-      onClick={() => {
-        setTooltipPinned((current) => !current);
+      onClick={(e) => {
+        if (e.target instanceof HTMLCanvasElement) {
+          setTooltipPinned((current) => !current);
+        }
       }}
       onMouseDown={(e) => {
         // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels

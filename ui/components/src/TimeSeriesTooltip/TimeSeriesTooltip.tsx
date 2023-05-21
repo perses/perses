@@ -94,16 +94,13 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent
-          focusedSeries={focusedSeries}
-          wrapLabels={wrapLabels}
-          tooltipPinned={tooltipPinned || showAllSeries}
-        />
-
-        <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
-          <Typography>Show All?</Typography>
-          <Switch checked={showAllSeries} onChange={(_, checked) => setShowAllSeries(checked)} />
-        </Stack>
+        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} tooltipPinned={tooltipPinned} />
+        {tooltipPinned && showAllSeries === false && chartData.timeSeries.length > 1 && (
+          <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
+            <Typography>Show All?</Typography>
+            <Switch checked={showAllSeries} onChange={(_, checked) => setShowAllSeries(checked)} />
+          </Stack>
+        )}
       </Box>
     </Portal>
   );
