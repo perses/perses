@@ -70,8 +70,8 @@ export function TooltipContent(props: TooltipContentProps) {
         >
           {formatTimeSeriesHeader(seriesTime)}
           <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-            <Typography>Click chart to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
-            {tooltipPinned ? <Pin /> : <PinOutline />}
+            <Typography sx={{ fontSize: 11 }}>Click chart to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
+            {tooltipPinned ? <Pin sx={{ fontSize: 16 }} /> : <PinOutline sx={{ fontSize: 16 }} />}
           </Stack>
         </Box>
 

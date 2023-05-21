@@ -142,6 +142,7 @@ export function getNearbySeries(
 export function getFocusedSeriesData({
   mousePos,
   chartData,
+  tooltipPinned,
   pinnedPos,
   chart,
   unit,
@@ -195,6 +196,10 @@ export function getFocusedSeriesData({
   const yBufferMin = yAxisInterval * 0.3;
   if (yBuffer < yBufferMin) {
     yBuffer = yBufferMin;
+  }
+
+  if (showAllSeries) {
+    yBuffer = yAxisInterval * 10;
   }
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
