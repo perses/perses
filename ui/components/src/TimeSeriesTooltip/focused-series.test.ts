@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { EChartsDataFormat, UnitOptions } from '../model';
-import { getNearbySeries } from './focused-series';
+import { getNearbySeries, isWithinPercentageRange } from './focused-series';
 
 describe('getNearbySeries', () => {
   const chartData: EChartsDataFormat = {
@@ -48,6 +48,7 @@ describe('getNearbySeries', () => {
     {
       date: 1654007895000,
       datumIdx: 2,
+      isClosestToCursor: true,
       markerColor: 'hsla(286664040,50%,50%,0.8)',
       seriesName: 'env="demo", instance="demo.do.prometheus", job="node", mode="test alt"',
       seriesIdx: 1,
@@ -77,5 +78,23 @@ describe('getNearbySeries', () => {
     expect(getNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
       percentFormattedOutput
     );
+  });
+});
+
+describe('isWithinPercentageRange', () => {
+  it('should return true when focusedY is within the specified percentage range of yValue', () => {
+    const focusedY = 256250000;
+    const yValue = 261353472;
+    const percentage = 5;
+    const result = isWithinPercentageRange(focusedY, yValue, percentage);
+    expect(result).toBe(true);
+  });
+
+  it('returns false when focusedY is outside the specified percentage range of yValue', () => {
+    const focusedY = 200;
+    const yValue = 100;
+    const percentage = 5;
+    const result = isWithinPercentageRange(focusedY, yValue, percentage);
+    expect(result).toBe(false);
   });
 });

@@ -17,7 +17,8 @@ import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
-export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 1.75; // used to reduce number of focused series for heavy queries
+// export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 1.75; // used to reduce number of focused series for heavy queries
+export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 20;
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
@@ -29,6 +30,7 @@ export interface FocusedSeriesInfo {
   x: number;
   y: number;
   formattedY: string;
+  isClosestToCursor: boolean;
 }
 
 export type FocusedSeriesArray = FocusedSeriesInfo[];
@@ -52,20 +54,19 @@ export function getNearbySeries(
     return currentFocusedData;
   }
 
+  const allSeriesNames: string[] = [];
+  const focusedSeriesNames: string[] = [];
+  const focusedSeriesIndexes: number[] = [];
+  const nonFocusedSeriesNames: string[] = [];
+  const nonFocusedSeriesIndexes: number[] = [];
+
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
-      // TODO: look into using batch or excludeSeriesId within downplay action to fix flicker
-      if (chart?.dispatchAction !== undefined) {
-        // clears emphasis state of lines that are not focused
-        chart.dispatchAction({
-          type: 'downplay',
-          seriesIndex: seriesIdx,
-        });
-      }
       if (currentFocusedData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
+        allSeriesNames.push(currentSeriesName);
         const markerColor = currentSeries.color ?? '#000';
         if (Array.isArray(currentSeries.data)) {
           for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
@@ -77,14 +78,6 @@ export function getNearbySeries(
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
                 const formattedY = formatValue(yValue, unit);
-                // trigger emphasis state of nearby series so tooltip matches highlighted lines
-                // https://echarts.apache.org/en/api.html#action.highlight
-                if (chart?.dispatchAction !== undefined) {
-                  chart.dispatchAction({
-                    type: 'highlight',
-                    seriesIndex: seriesIdx,
-                  });
-                }
                 currentFocusedData.push({
                   seriesIdx: seriesIdx,
                   datumIdx: datumIdx,
@@ -94,13 +87,33 @@ export function getNearbySeries(
                   y: yValue,
                   formattedY: formattedY,
                   markerColor: markerColor.toString(),
+                  isClosestToCursor: isWithinPercentageRange(focusedY, yValue, 5),
                 });
+                focusedSeriesNames.push(currentSeriesName);
+                focusedSeriesIndexes.push(seriesIdx);
+              } else {
+                nonFocusedSeriesNames.push(currentSeriesName);
+                nonFocusedSeriesIndexes.push(seriesIdx);
               }
             }
           }
         }
       }
     }
+  }
+  if (chart?.dispatchAction !== undefined) {
+    // clears emphasis state of lines that are not focused
+    chart.dispatchAction({
+      type: 'downplay',
+      seriesIndex: nonFocusedSeriesIndexes,
+    });
+
+    // trigger emphasis state of nearby series so tooltip matches highlighted lines
+    // https://echarts.apache.org/en/api.html#action.highlight
+    chart.dispatchAction({
+      type: 'highlight',
+      seriesIndex: focusedSeriesIndexes,
+    });
   }
   return currentFocusedData;
 }
@@ -150,7 +163,7 @@ export function getFocusedSeriesData(
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const yBuffer =
     seriesNum > SHOW_FEWER_SERIES_LIMIT
-      ? yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER
+      ? (yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER) / seriesNum
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
@@ -172,4 +185,14 @@ export function getFocusedSeriesData(
     }
   }
   return [];
+}
+
+/*
+ * Check if two numbers are within a specified percentage range
+ */
+export function isWithinPercentageRange(valueToCheck: number, baseValue: number, percentage: number): boolean {
+  const range = (percentage / 100) * baseValue;
+  const lowerBound = baseValue - range;
+  const upperBound = baseValue + range;
+  return valueToCheck >= lowerBound && valueToCheck <= upperBound;
 }

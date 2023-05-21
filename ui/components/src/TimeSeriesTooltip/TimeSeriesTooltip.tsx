@@ -48,14 +48,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   const chart = chartRef.current;
   const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart, unit);
   const chartWidth = chart?.getWidth() ?? 750;
-  const cursorTransform = assembleTransform(
-    mousePos,
-    focusedSeries.length,
-    chartWidth,
-    pinnedPos,
-    height ?? 0,
-    width ?? 0
-  );
+  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
   if (focusedSeries.length === 0) {
     return null;

@@ -18,7 +18,6 @@ import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH } from './tooltip-mode
  */
 export function assembleTransform(
   mousePos: CursorData['coords'],
-  seriesNum: number,
   chartWidth: number,
   pinnedPos: CursorCoordinates | null,
   tooltipHeight: number,
@@ -43,7 +42,7 @@ export function assembleTransform(
 
   // adjust so tooltip does not get cut off at bottom of chart
   if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
-    y = mousePos.page.y - tooltipHeight;
+    y = mousePos.page.y - tooltipHeight * 0.75;
   }
 
   // use tooltip width to determine when to repos from right to left

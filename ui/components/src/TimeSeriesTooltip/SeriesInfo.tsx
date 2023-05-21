@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { SeriesMarker } from './SeriesMarker';
 import { SeriesLabelsStack } from './SeriesLabelsStack';
 import { TOOLTIP_LABELS_MAX_WIDTH } from './tooltip-model';
@@ -22,11 +22,12 @@ export interface SeriesInfoProps {
   formattedY: string;
   markerColor: string;
   totalSeries: number;
+  emphasizeText?: boolean;
   wrapLabels?: boolean;
 }
 
 export function SeriesInfo(props: SeriesInfoProps) {
-  const { seriesName, formattedY, markerColor, totalSeries, wrapLabels = true } = props;
+  const { seriesName, formattedY, markerColor, totalSeries, emphasizeText = false, wrapLabels = true } = props;
 
   // metric __name__ comes before opening curly brace, ignore if not populated
   // ex with metric name: node_load15{env="demo",job="node"}
@@ -77,6 +78,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
             overflow: 'hidden',
             color: theme.palette.common.white,
+            fontWeight: emphasizeText ? theme.typography.fontWeightBold : theme.typography.fontWeightRegular,
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
@@ -85,13 +87,13 @@ export function SeriesInfo(props: SeriesInfoProps) {
         </Box>
       </Box>
       <Box
-        sx={{
+        sx={(theme) => ({
           display: 'table-cell',
           paddingLeft: 1.5,
           textAlign: 'right',
           verticalAlign: 'top',
-          fontWeight: '700',
-        }}
+          fontWeight: emphasizeText ? theme.typography.fontWeightBold : theme.typography.fontWeightRegular,
+        })}
       >
         {formattedY}
       </Box>

@@ -52,8 +52,22 @@ export function TooltipContent(props: TooltipContentProps) {
   };
 
   const sortedFocusedSeries = useMemo(() => {
-    if (focusedSeries === null) return null;
-    return focusedSeries.sort((a, b) => (a.y > b.y ? -1 : 1));
+    if (focusedSeries === null) {
+      return null;
+    }
+    return focusedSeries.sort((a, b) => {
+      // // if (focusedSeries.length > TOOLTIP_MAX_ITEMS && !a.isClosestToCursor) {
+      // //   return 1;
+      // // }
+      // if (a.isClosestToCursor) {
+      //   return -1;
+      // }
+      if (a.y > b.y) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
   }, [focusedSeries]);
 
   // TODO: use react-virtuoso to improve performance
@@ -71,25 +85,28 @@ export function TooltipContent(props: TooltipContentProps) {
             display: 'table',
           }}
         >
-          {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor }, index) => {
-            if (index > TOOLTIP_MAX_ITEMS) {
-              return null;
-            }
-            if (datumIdx === null || seriesIdx === null) return null;
-            const key = seriesIdx.toString() + datumIdx.toString();
+          {sortedFocusedSeries.map(
+            ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }, index) => {
+              // if (index > TOOLTIP_MAX_ITEMS) {
+              //   return null;
+              // }
+              if (datumIdx === null || seriesIdx === null) return null;
+              const key = seriesIdx.toString() + datumIdx.toString();
 
-            return (
-              <SeriesInfo
-                key={key}
-                seriesName={seriesName}
-                y={y}
-                formattedY={formattedY}
-                markerColor={markerColor}
-                totalSeries={sortedFocusedSeries.length}
-                wrapLabels={wrapLabels}
-              />
-            );
-          })}
+              return (
+                <SeriesInfo
+                  key={key}
+                  seriesName={seriesName}
+                  y={y}
+                  formattedY={formattedY}
+                  markerColor={markerColor}
+                  totalSeries={sortedFocusedSeries.length}
+                  wrapLabels={wrapLabels}
+                  emphasizeText={isClosestToCursor}
+                />
+              );
+            }
+          )}
         </Box>
       </Stack>
     );
