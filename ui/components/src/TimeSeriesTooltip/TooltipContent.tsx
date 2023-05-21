@@ -12,19 +12,22 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import PinOutline from 'mdi-material-ui/PinOutline';
+import Pin from 'mdi-material-ui/Pin';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { FocusedSeriesArray } from './focused-series';
-import { TOOLTIP_MAX_ITEMS } from './tooltip-model';
+// import { TOOLTIP_MAX_ITEMS } from './tooltip-model';
 import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
+  tooltipPinned: boolean;
   wrapLabels?: boolean;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { focusedSeries, wrapLabels } = props;
+  const { focusedSeries, wrapLabels, tooltipPinned = false } = props;
   const { formatWithUserTimeZone } = useTimeZone();
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
@@ -33,9 +36,8 @@ export function TooltipContent(props: TooltipContentProps) {
     const date = new Date(timeMs);
     const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
     const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
-
     return (
-      <>
+      <Box>
         <Typography
           variant="caption"
           sx={(theme) => ({
@@ -47,7 +49,7 @@ export function TooltipContent(props: TooltipContentProps) {
         <Typography variant="caption">
           <strong>{formattedTime}</strong>
         </Typography>
-      </>
+      </Box>
     );
   };
 
@@ -73,8 +75,21 @@ export function TooltipContent(props: TooltipContentProps) {
   // TODO: use react-virtuoso to improve performance
   if (sortedFocusedSeries !== null && seriesTime !== null) {
     return (
-      <Stack py={1} px={1.5} spacing={0.5}>
-        <Typography variant="caption">{formatTimeSeriesHeader(seriesTime)}</Typography>
+      <Stack py={1} spacing={0.5}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'start',
+            alignItems: 'center',
+          }}
+        >
+          {formatTimeSeriesHeader(seriesTime)}
+          <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
+            <Typography>Click to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
+            {tooltipPinned ? <Pin /> : <PinOutline />}
+          </Stack>
+        </Box>
+
         <Divider
           sx={(theme) => ({
             borderColor: theme.palette.grey['500'],

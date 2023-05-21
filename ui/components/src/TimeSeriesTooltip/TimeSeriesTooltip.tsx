@@ -11,20 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Portal } from '@mui/material';
+import { Box, Portal, Typography, Stack, Switch } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import React, { useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
 import { TooltipContent } from './TooltipContent';
 import { getFocusedSeriesData } from './focused-series';
-import { CursorCoordinates, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH, useMousePosition } from './tooltip-model';
+import {
+  CursorCoordinates,
+  TOOLTIP_MAX_HEIGHT,
+  TOOLTIP_MIN_WIDTH,
+  TOOLTIP_MAX_WIDTH,
+  useMousePosition,
+} from './tooltip-model';
 import { assembleTransform } from './utils';
 
 interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
-  pinTooltip: boolean;
+  tooltipPinned: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
 }
@@ -33,9 +39,10 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,
-  pinTooltip,
+  tooltipPinned,
   unit,
 }: TimeSeriesTooltipProps) {
+  const [showAllSeries, setShowAllSeries] = useState(false);
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
@@ -54,7 +61,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     return null;
   }
 
-  if (pinTooltip === true && pinnedPos === null) {
+  if (tooltipPinned === true && pinnedPos === null) {
     setPinnedPos(mousePos);
   }
 
@@ -63,8 +70,10 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
       <Box
         ref={tooltipRef}
         sx={(theme) => ({
+          minWidth: TOOLTIP_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,
+          padding: theme.spacing(0.5, 2),
           position: 'absolute',
           top: 0,
           left: 0,
@@ -85,7 +94,16 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
+        <TooltipContent
+          focusedSeries={focusedSeries}
+          wrapLabels={wrapLabels}
+          tooltipPinned={tooltipPinned || showAllSeries}
+        />
+
+        <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
+          <Typography>Show All?</Typography>
+          <Switch checked={showAllSeries} onChange={(_, checked) => setShowAllSeries(checked)} />
+        </Stack>
       </Box>
     </Portal>
   );

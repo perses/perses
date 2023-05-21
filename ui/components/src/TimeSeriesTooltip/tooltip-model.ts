@@ -14,6 +14,7 @@
 import { useEffect, useState } from 'react';
 import { FocusedSeriesArray } from './focused-series';
 
+export const TOOLTIP_MIN_WIDTH = 375;
 export const TOOLTIP_MAX_WIDTH = 650;
 export const TOOLTIP_MAX_HEIGHT = 600;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
