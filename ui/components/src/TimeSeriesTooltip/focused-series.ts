@@ -17,7 +17,7 @@ import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
-export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 30;
+export const DYNAMIC_FOCUSED_SERIES_MULTIPLIER = 50; // used for adjustment after series number divisor
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
@@ -74,6 +74,9 @@ export function getNearbySeries(
             // ensure null values not displayed in tooltip
             if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                // show fewer bold series in tooltip when many total series
+                const percentRangeToCheck = data.timeSeries.length > 50 ? 1 : 5;
+
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
                 const formattedY = formatValue(yValue, unit);
@@ -86,7 +89,7 @@ export function getNearbySeries(
                   y: yValue,
                   formattedY: formattedY,
                   markerColor: markerColor.toString(),
-                  isClosestToCursor: isWithinPercentageRange(focusedY, yValue, 5),
+                  isClosestToCursor: isWithinPercentageRange(focusedY, yValue, percentRangeToCheck),
                 });
                 focusedSeriesNames.push(currentSeriesName);
                 focusedSeriesIndexes.push(seriesIdx);
@@ -158,15 +161,18 @@ export function getFocusedSeriesData(
   const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
 
   const seriesNum = chartData.timeSeries.length;
-  console.log(seriesNum);
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
-  const yBuffer =
+  let yBuffer =
     seriesNum > SHOW_FEWER_SERIES_LIMIT
-      ? (yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER) / seriesNum
+      ? (yAxisInterval * DYNAMIC_FOCUSED_SERIES_MULTIPLIER) / seriesNum
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
 
-  console.log('yBuffer: ', yBuffer);
+  // never let nearby series range be less than roughly the size of a single tick
+  const yBufferMin = yAxisInterval * 0.1;
+  if (yBuffer < yBufferMin) {
+    yBuffer = yBufferMin;
+  }
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
