@@ -72,6 +72,26 @@ export function getNearbySeries(
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
                 // show fewer bold series in tooltip when many total series
                 const percentRangeToCheck = data.timeSeries.length > 50 ? 1 : 5;
+                const isClosestToCursor = isWithinPercentageRange(focusedY, yValue, percentRangeToCheck);
+                if (isClosestToCursor) {
+                  if (chart?.dispatchAction !== undefined) {
+                    chart.dispatchAction({
+                      type: 'highlight',
+                      seriesIndex: seriesIdx,
+                      // notBlur: true,
+                      // isFired: true,
+                    });
+                  }
+                } else {
+                  if (chart?.dispatchAction !== undefined) {
+                    chart.dispatchAction({
+                      type: 'downplay',
+                      seriesIndex: seriesIdx,
+                      // notBlur: true,
+                      // isFired: true,
+                    });
+                  }
+                }
 
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
@@ -85,7 +105,7 @@ export function getNearbySeries(
                   y: yValue,
                   formattedY: formattedY,
                   markerColor: markerColor.toString(),
-                  isClosestToCursor: isWithinPercentageRange(focusedY, yValue, percentRangeToCheck),
+                  isClosestToCursor,
                 });
                 focusedSeriesIndexes.push(seriesIdx);
               } else {
@@ -98,19 +118,34 @@ export function getNearbySeries(
     }
   }
   if (chart?.dispatchAction !== undefined) {
-    // clears emphasis state of lines that are not focused
-    chart.dispatchAction({
-      type: 'downplay',
-      seriesIndex: nonFocusedSeriesIndexes,
-    });
-
+    // // clears emphasis state of lines that are not focused
+    // chart.dispatchAction({
+    //   type: 'downplay',
+    //   seriesIndex: nonFocusedSeriesIndexes,
+    // });
     // trigger emphasis state of nearby series so tooltip matches highlighted lines
     // https://echarts.apache.org/en/api.html#action.highlight
     // chart.dispatchAction({
     //   type: 'highlight',
     //   seriesIndex: focusedSeriesIndexes,
     //   // notBlur: true,
-    //   // isFired: true,
+    //   isFired: true,
+    // });
+    //
+    // chart.dispatchAction({
+    //   // type: 'select',
+    //   type: 'toggleSelect',
+    //   seriesIndex: focusedSeriesIndexes,
+    //   // seriesIndex: nonFocusedSeriesIndexes,
+    // });
+    // chart.dispatchAction({
+    //   type: 'selectDataRange',
+    //   // // optional; index of visualMap component; useful for are multiple visualMap components; 0 by default
+    //   // visualMapIndex: number,
+    //   // // continuous visualMap is different from discrete one
+    //   // // continuous visualMap is an array representing range of data values.
+    //   // // discrete visualMap is an object, whose key is category or piece index; value is `true` or `false`
+    //   // selected: Object|Array
     // });
   }
 

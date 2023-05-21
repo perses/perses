@@ -78,8 +78,8 @@ export function getLineSeries(
     showSymbol: showPoints,
     showAllSymbol: true,
     symbolSize: pointRadius,
-    // selectedMode: false,
-    // triggerLineEvent: true,
+    selectedMode: true,
+    triggerLineEvent: true,
     lineStyle: {
       width: lineWidth,
       opacity: 0.9,
@@ -90,9 +90,9 @@ export function getLineSeries(
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       // focus: 'series',
-      focus: 'self',
-      blurScope: 'series',
-      // disabled: true,
+      // // focus: 'self',
+      // blurScope: 'global',
+      disabled: true,
       // disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 10,
