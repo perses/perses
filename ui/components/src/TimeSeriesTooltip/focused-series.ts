@@ -54,6 +54,8 @@ export function getNearbySeries(
   }
 
   const focusedSeriesIndexes: number[] = [];
+  const emphasizedSeriesIndexes: number[] = [];
+  const nonEmphasizedSeriesIndexes: number[] = [];
   const nonFocusedSeriesIndexes: number[] = [];
 
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
@@ -74,23 +76,25 @@ export function getNearbySeries(
                 const percentRangeToCheck = Math.max(2, 200 / data.timeSeries.length);
                 const isClosestToCursor = isWithinPercentageRange(focusedY, yValue, percentRangeToCheck);
                 if (isClosestToCursor) {
-                  if (chart?.dispatchAction !== undefined) {
-                    chart.dispatchAction({
-                      type: 'highlight',
-                      seriesIndex: seriesIdx,
-                      // notBlur: true,
-                      // isFired: true,
-                    });
-                  }
+                  emphasizedSeriesIndexes.push(seriesIdx);
+                  // if (chart?.dispatchAction !== undefined) {
+                  //   chart.dispatchAction({
+                  //     type: 'highlight',
+                  //     seriesIndex: seriesIdx,
+                  //     // notBlur: true,
+                  //     // isFired: true,
+                  //   });
+                  // }
                 } else {
-                  if (chart?.dispatchAction !== undefined) {
-                    chart.dispatchAction({
-                      type: 'downplay',
-                      seriesIndex: seriesIdx,
-                      // notBlur: true,
-                      // isFired: true,
-                    });
-                  }
+                  nonEmphasizedSeriesIndexes.push(seriesIdx);
+                  // if (chart?.dispatchAction !== undefined) {
+                  //   chart.dispatchAction({
+                  //     type: 'downplay',
+                  //     seriesIndex: seriesIdx,
+                  //     // notBlur: true,
+                  //     // isFired: true,
+                  //   });
+                  // }
                 }
 
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
@@ -118,19 +122,21 @@ export function getNearbySeries(
     }
   }
   if (chart?.dispatchAction !== undefined) {
-    // // clears emphasis state of lines that are not focused
+    // clears emphasis state of lines that are not focused
     chart.dispatchAction({
       type: 'downplay',
-      seriesIndex: nonFocusedSeriesIndexes,
+      seriesIndex: nonEmphasizedSeriesIndexes,
+      // seriesIndex: nonFocusedSeriesIndexes,
     });
     // trigger emphasis state of nearby series so tooltip matches highlighted lines
     // https://echarts.apache.org/en/api.html#action.highlight
-    // chart.dispatchAction({
-    //   type: 'highlight',
-    //   seriesIndex: focusedSeriesIndexes,
-    //   // notBlur: true,
-    //   isFired: true,
-    // });
+    chart.dispatchAction({
+      type: 'highlight',
+      seriesIndex: emphasizedSeriesIndexes,
+      // seriesIndex: focusedSeriesIndexes,
+      // notBlur: true,
+      // isFired: true,
+    });
     //
     // chart.dispatchAction({
     //   // type: 'select',
