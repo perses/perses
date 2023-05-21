@@ -178,7 +178,7 @@ export function getFocusedSeriesData({
     cursorTargetMatchesChart = true;
   }
 
-  if (cursorTargetMatchesChart === false) return [];
+  if (tooltipPinned === true && cursorTargetMatchesChart === false) return [];
 
   if (chart['_model'] === undefined) return [];
   const chartModel = chart['_model'];
