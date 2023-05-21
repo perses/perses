@@ -142,7 +142,6 @@ export function getNearbySeries(
 export function getFocusedSeriesData({
   mousePos,
   chartData,
-  tooltipPinned,
   pinnedPos,
   chart,
   unit,
@@ -178,7 +177,7 @@ export function getFocusedSeriesData({
     cursorTargetMatchesChart = true;
   }
 
-  if (tooltipPinned === true && cursorTargetMatchesChart === false) return [];
+  if (cursorTargetMatchesChart === false) return [];
 
   if (chart['_model'] === undefined) return [];
   const chartModel = chart['_model'];

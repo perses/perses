@@ -56,7 +56,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   const focusedSeries = getFocusedSeriesData({
     mousePos,
     chartData,
-    tooltipPinned,
     pinnedPos,
     chart,
     unit,
