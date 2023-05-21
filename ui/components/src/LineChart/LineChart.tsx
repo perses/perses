@@ -95,7 +95,7 @@ export function LineChart({
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [pinTooltip, setPinTooltip] = useState<boolean>(false);
+  const [tooltipPinned, setTooltipPinned] = useState<boolean>(false);
   const { timeZone } = useTimeZone();
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -104,7 +104,7 @@ export function LineChart({
         if (onDataZoom === undefined) {
           setTimeout(() => {
             // workaround so unpin happens after click event
-            setPinTooltip(false);
+            setTooltipPinned(false);
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -125,14 +125,14 @@ export function LineChart({
       },
       // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
-  }, [data, onDataZoom, setPinTooltip]);
+  }, [data, onDataZoom, setTooltipPinned]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
   }
 
   const handleOnDoubleClick = (e: MouseEvent) => {
-    setPinTooltip(false);
+    setTooltipPinned(false);
     // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
     if (onDoubleClick === undefined) {
       if (chartRef.current !== undefined) {
@@ -203,7 +203,7 @@ export function LineChart({
     <Box
       sx={{ height }}
       onClick={() => {
-        setPinTooltip((current) => !current);
+        setTooltipPinned((current) => !current);
       }}
       onMouseDown={(e) => {
         // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
@@ -216,7 +216,6 @@ export function LineChart({
       }}
       onMouseLeave={() => {
         setShowTooltip(false);
-        setPinTooltip(false);
       }}
       onMouseEnter={() => {
         setShowTooltip(true);
@@ -234,7 +233,7 @@ export function LineChart({
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
-            pinTooltip={pinTooltip}
+            tooltipPinned={tooltipPinned}
             unit={unit}
           />
         )}
