@@ -78,11 +78,9 @@ export function getLineSeries(
     showSymbol: showPoints,
     showAllSymbol: true,
     symbolSize: pointRadius,
-    // selectedMode: true,
-    // triggerLineEvent: true,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.9,
+      opacity: 0.8,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
@@ -90,19 +88,16 @@ export function getLineSeries(
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      // // // focus: 'self',
-      // blurScope: 'series',
-      // disabled: true,
-      // disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
+      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 10,
+        width: lineWidth + 1,
         opacity: 1,
       },
     },
     blur: {
       lineStyle: {
-        width: 0,
-        opacity: 0,
+        width: lineWidth,
+        opacity: 0.4,
       },
     },
   };
@@ -131,8 +126,14 @@ export function getThresholdSeries(
       width: 2,
     },
     emphasis: {
+      focus: 'series',
       lineStyle: {
         width: 2.5,
+      },
+    },
+    blur: {
+      lineStyle: {
+        opacity: 0.4,
       },
     },
   };

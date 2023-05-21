@@ -77,24 +77,14 @@ export function getNearbySeries(
                 const isClosestToCursor = isWithinPercentageRange(focusedY, yValue, percentRangeToCheck);
                 if (isClosestToCursor) {
                   emphasizedSeriesIndexes.push(seriesIdx);
-                  // if (chart?.dispatchAction !== undefined) {
-                  //   chart.dispatchAction({
-                  //     type: 'highlight',
-                  //     seriesIndex: seriesIdx,
-                  //     // notBlur: true,
-                  //     // isFired: true,
-                  //   });
-                  // }
                 } else {
                   nonEmphasizedSeriesIndexes.push(seriesIdx);
-                  // if (chart?.dispatchAction !== undefined) {
-                  //   chart.dispatchAction({
-                  //     type: 'downplay',
-                  //     seriesIndex: seriesIdx,
-                  //     // notBlur: true,
-                  //     // isFired: true,
-                  //   });
-                  // }
+                  if (chart?.dispatchAction !== undefined) {
+                    chart.dispatchAction({
+                      type: 'downplay',
+                      seriesIndex: seriesIdx,
+                    });
+                  }
                 }
 
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
@@ -126,33 +116,20 @@ export function getNearbySeries(
     chart.dispatchAction({
       type: 'downplay',
       seriesIndex: nonEmphasizedSeriesIndexes,
-      // seriesIndex: nonFocusedSeriesIndexes,
     });
-    // trigger emphasis state of nearby series so tooltip matches highlighted lines
-    // https://echarts.apache.org/en/api.html#action.highlight
-    chart.dispatchAction({
-      type: 'highlight',
-      seriesIndex: emphasizedSeriesIndexes,
-      // seriesIndex: focusedSeriesIndexes,
-      // notBlur: true,
-      // isFired: true,
-    });
-    //
-    // chart.dispatchAction({
-    //   // type: 'select',
-    //   type: 'toggleSelect',
-    //   seriesIndex: focusedSeriesIndexes,
-    //   // seriesIndex: nonFocusedSeriesIndexes,
-    // });
-    // chart.dispatchAction({
-    //   type: 'selectDataRange',
-    //   // // optional; index of visualMap component; useful for are multiple visualMap components; 0 by default
-    //   // visualMapIndex: number,
-    //   // // continuous visualMap is different from discrete one
-    //   // // continuous visualMap is an array representing range of data values.
-    //   // // discrete visualMap is an object, whose key is category or piece index; value is `true` or `false`
-    //   // selected: Object|Array
-    // });
+
+    if (emphasizedSeriesIndexes.length > 0) {
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: emphasizedSeriesIndexes,
+      });
+    } else {
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: focusedSeriesIndexes,
+        notBlur: true,
+      });
+    }
   }
 
   return currentFocusedData;
@@ -201,18 +178,16 @@ export function getFocusedSeriesData(
   const seriesNum = chartData.timeSeries.length;
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
-  const yBuffer =
+  let yBuffer =
     seriesNum > SHOW_FEWER_SERIES_LIMIT
       ? (yAxisInterval * DYNAMIC_FOCUSED_SERIES_MULTIPLIER) / seriesNum
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
 
-  // let yBuffer = yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
-
-  // // never let nearby series range be less than roughly the size of a single tick
-  // const yBufferMin = yAxisInterval * 0.3;
-  // if (yBuffer < yBufferMin) {
-  //   yBuffer = yBufferMin;
-  // }
+  // never let nearby series range be less than roughly the size of a single tick
+  const yBufferMin = yAxisInterval * 0.3;
+  if (yBuffer < yBufferMin) {
+    yBuffer = yBufferMin;
+  }
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
