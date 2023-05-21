@@ -86,10 +86,7 @@ export function TooltipContent(props: TooltipContentProps) {
           }}
         >
           {sortedFocusedSeries.map(
-            ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }, index) => {
-              // if (index > TOOLTIP_MAX_ITEMS) {
-              //   return null;
-              // }
+            ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
               if (datumIdx === null || seriesIdx === null) return null;
               const key = seriesIdx.toString() + datumIdx.toString();
 

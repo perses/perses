@@ -17,8 +17,7 @@ import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
-// export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 1.75; // used to reduce number of focused series for heavy queries
-export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 20;
+export const DYNAMIC_FOCUSED_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
@@ -54,10 +53,9 @@ export function getNearbySeries(
     return currentFocusedData;
   }
 
-  const allSeriesNames: string[] = [];
-  const focusedSeriesNames: string[] = [];
   const focusedSeriesIndexes: number[] = [];
-  const nonFocusedSeriesNames: string[] = [];
+  const emphasizedSeriesIndexes: number[] = [];
+  const nonEmphasizedSeriesIndexes: number[] = [];
   const nonFocusedSeriesIndexes: number[] = [];
 
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
@@ -66,7 +64,6 @@ export function getNearbySeries(
       if (currentFocusedData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        allSeriesNames.push(currentSeriesName);
         const markerColor = currentSeries.color ?? '#000';
         if (Array.isArray(currentSeries.data)) {
           for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
@@ -75,6 +72,21 @@ export function getNearbySeries(
             // ensure null values not displayed in tooltip
             if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
+                // show fewer bold series in tooltip when many total series
+                const percentRangeToCheck = Math.max(2, 200 / data.timeSeries.length);
+                const isClosestToCursor = isWithinPercentageRange(focusedY, yValue, percentRangeToCheck);
+                if (isClosestToCursor) {
+                  emphasizedSeriesIndexes.push(seriesIdx);
+                } else {
+                  nonEmphasizedSeriesIndexes.push(seriesIdx);
+                  if (chart?.dispatchAction !== undefined) {
+                    chart.dispatchAction({
+                      type: 'downplay',
+                      seriesIndex: seriesIdx,
+                    });
+                  }
+                }
+
                 // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
                 const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
                 const formattedY = formatValue(yValue, unit);
@@ -87,12 +99,10 @@ export function getNearbySeries(
                   y: yValue,
                   formattedY: formattedY,
                   markerColor: markerColor.toString(),
-                  isClosestToCursor: isWithinPercentageRange(focusedY, yValue, 5),
+                  isClosestToCursor,
                 });
-                focusedSeriesNames.push(currentSeriesName);
                 focusedSeriesIndexes.push(seriesIdx);
               } else {
-                nonFocusedSeriesNames.push(currentSeriesName);
                 nonFocusedSeriesIndexes.push(seriesIdx);
               }
             }
@@ -105,16 +115,23 @@ export function getNearbySeries(
     // clears emphasis state of lines that are not focused
     chart.dispatchAction({
       type: 'downplay',
-      seriesIndex: nonFocusedSeriesIndexes,
+      seriesIndex: nonEmphasizedSeriesIndexes,
     });
 
-    // trigger emphasis state of nearby series so tooltip matches highlighted lines
-    // https://echarts.apache.org/en/api.html#action.highlight
-    chart.dispatchAction({
-      type: 'highlight',
-      seriesIndex: focusedSeriesIndexes,
-    });
+    if (emphasizedSeriesIndexes.length > 0) {
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: emphasizedSeriesIndexes,
+      });
+    } else {
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: focusedSeriesIndexes,
+        notBlur: true,
+      });
+    }
   }
+
   return currentFocusedData;
 }
 
@@ -171,11 +188,13 @@ export function getFocusedSeriesData({
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   let yBuffer =
     seriesNum > SHOW_FEWER_SERIES_LIMIT
-      ? (yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER) / seriesNum
+      ? (yAxisInterval * DYNAMIC_FOCUSED_SERIES_MULTIPLIER) / seriesNum
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
 
-  if (showAllSeries) {
-    yBuffer = yAxisInterval * 10;
+  // never let nearby series range be less than roughly the size of a single tick
+  const yBufferMin = yAxisInterval * 0.3;
+  if (yBuffer < yBufferMin) {
+    yBuffer = yBufferMin;
   }
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];

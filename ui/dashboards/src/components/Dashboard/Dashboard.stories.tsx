@@ -738,6 +738,34 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           ],
         },
       },
+      TwoThousandSeries: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Two Thousand Series' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_two_thousand_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
     },
     layouts: [
       {
@@ -750,6 +778,13 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             { x: 0, y: 8, width: 12, height: 8, content: { $ref: '#/spec/panels/OneHundredSeries' } },
             { x: 12, y: 8, width: 12, height: 8, content: { $ref: '#/spec/panels/FiveHundredSeries' } },
           ],
+        },
+      },
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 2', collapse: { open: false } },
+          items: [{ x: 0, y: 0, width: 24, height: 12, content: { $ref: '#/spec/panels/TwoThousandSeries' } }],
         },
       },
     ],
@@ -826,6 +861,16 @@ export const ExampleWithManySeries: Story = {
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                   totalSeries: 500,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_two_thousand_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 2000,
                 }),
               },
             },
