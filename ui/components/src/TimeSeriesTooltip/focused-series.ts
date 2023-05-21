@@ -53,10 +53,7 @@ export function getNearbySeries(
     return currentFocusedData;
   }
 
-  const allSeriesNames: string[] = [];
-  const focusedSeriesNames: string[] = [];
   const focusedSeriesIndexes: number[] = [];
-  const nonFocusedSeriesNames: string[] = [];
   const nonFocusedSeriesIndexes: number[] = [];
 
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
@@ -65,7 +62,6 @@ export function getNearbySeries(
       if (currentFocusedData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
       if (currentSeries !== undefined) {
         const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        allSeriesNames.push(currentSeriesName);
         const markerColor = currentSeries.color ?? '#000';
         if (Array.isArray(currentSeries.data)) {
           for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
@@ -91,10 +87,8 @@ export function getNearbySeries(
                   markerColor: markerColor.toString(),
                   isClosestToCursor: isWithinPercentageRange(focusedY, yValue, percentRangeToCheck),
                 });
-                focusedSeriesNames.push(currentSeriesName);
                 focusedSeriesIndexes.push(seriesIdx);
               } else {
-                nonFocusedSeriesNames.push(currentSeriesName);
                 nonFocusedSeriesIndexes.push(seriesIdx);
               }
             }
@@ -112,11 +106,14 @@ export function getNearbySeries(
 
     // trigger emphasis state of nearby series so tooltip matches highlighted lines
     // https://echarts.apache.org/en/api.html#action.highlight
-    chart.dispatchAction({
-      type: 'highlight',
-      seriesIndex: focusedSeriesIndexes,
-    });
+    // chart.dispatchAction({
+    //   type: 'highlight',
+    //   seriesIndex: focusedSeriesIndexes,
+    //   // notBlur: true,
+    //   // isFired: true,
+    // });
   }
+
   return currentFocusedData;
 }
 

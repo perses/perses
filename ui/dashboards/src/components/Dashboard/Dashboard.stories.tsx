@@ -776,8 +776,15 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             { x: 0, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/TwentySeries' } },
             { x: 12, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/FiftySeries' } },
             { x: 0, y: 8, width: 12, height: 8, content: { $ref: '#/spec/panels/OneHundredSeries' } },
-            { x: 12, y: 8, width: 12, height: 8, content: { $ref: '#/spec/panels/TwoThousandSeries' } },
+            { x: 12, y: 8, width: 12, height: 8, content: { $ref: '#/spec/panels/FiveHundredSeries' } },
           ],
+        },
+      },
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 2', collapse: { open: false } },
+          items: [{ x: 0, y: 0, width: 24, height: 12, content: { $ref: '#/spec/panels/TwoThousandSeries' } }],
         },
       },
     ],

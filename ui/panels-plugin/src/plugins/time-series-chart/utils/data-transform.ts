@@ -78,19 +78,31 @@ export function getLineSeries(
     showSymbol: showPoints,
     showAllSymbol: true,
     symbolSize: pointRadius,
+    // selectedMode: false,
+    // triggerLineEvent: true,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.7,
+      opacity: 0.9,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
-      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
+      // focus: 'series',
+      focus: 'self',
+      blurScope: 'series',
+      // disabled: true,
+      // disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 1,
+        width: lineWidth + 10,
         opacity: 1,
+      },
+    },
+    blur: {
+      lineStyle: {
+        width: 0,
+        opacity: 0,
       },
     },
   };
