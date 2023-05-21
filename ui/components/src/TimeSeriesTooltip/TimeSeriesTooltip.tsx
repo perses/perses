@@ -65,6 +65,12 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     setPinnedPos(mousePos);
   }
 
+  const showShowAllSeriesToggle =
+    tooltipPinned === true &&
+    showAllSeries === false &&
+    chartData.timeSeries.length > 1 &&
+    focusedSeries.length !== chartData.timeSeries.length;
+
   return (
     <Portal>
       <Box
@@ -95,7 +101,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
         }}
       >
         <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} tooltipPinned={tooltipPinned} />
-        {tooltipPinned && showAllSeries === false && chartData.timeSeries.length > 1 && (
+        {showShowAllSeriesToggle && (
           <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
             <Typography>Show All?</Typography>
             <Switch checked={showAllSeries} onChange={(_, checked) => setShowAllSeries(checked)} />
