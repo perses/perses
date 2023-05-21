@@ -122,13 +122,21 @@ export function getNearbySeries(
  * Uses mouse position to determine whether user is hovering over a chart canvas
  * If yes, convert from pixel values to logical cartesian coordinates and return all focused series
  */
-export function getFocusedSeriesData(
-  mousePos: CursorData['coords'],
-  chartData: EChartsDataFormat,
-  pinnedPos: CursorData['coords'],
-  chart?: EChartsInstance,
-  unit?: UnitOptions
-) {
+export function getFocusedSeriesData({
+  mousePos,
+  chartData,
+  pinnedPos,
+  chart,
+  unit,
+  showAllSeries = false,
+}: {
+  mousePos: CursorData['coords'];
+  chartData: EChartsDataFormat;
+  pinnedPos: CursorData['coords'];
+  chart?: EChartsInstance;
+  unit?: UnitOptions;
+  showAllSeries?: boolean;
+}) {
   if (chart === undefined || mousePos === null) return [];
 
   // prevents multiple tooltips showing from adjacent charts
@@ -161,10 +169,14 @@ export function getFocusedSeriesData(
   const seriesNum = chartData.timeSeries.length;
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
-  const yBuffer =
+  let yBuffer =
     seriesNum > SHOW_FEWER_SERIES_LIMIT
       ? (yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER) / seriesNum
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
+
+  if (showAllSeries) {
+    yBuffer = yAxisInterval * 10;
+  }
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {

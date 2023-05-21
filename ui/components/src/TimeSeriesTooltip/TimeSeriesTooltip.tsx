@@ -53,7 +53,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-  const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart, unit);
+  const focusedSeries = getFocusedSeriesData({ mousePos, chartData, pinnedPos, chart, unit, showAllSeries });
   const chartWidth = chart?.getWidth() ?? 750;
   const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
