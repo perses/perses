@@ -17,7 +17,7 @@ import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
-export const DYNAMIC_FOCUSED_SERIES_MULTIPLIER = 50; // used for adjustment after series number divisor
+export const DYNAMIC_FOCUSED_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
@@ -71,7 +71,7 @@ export function getNearbySeries(
             if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
                 // show fewer bold series in tooltip when many total series
-                const percentRangeToCheck = data.timeSeries.length > 50 ? 1 : 5;
+                const percentRangeToCheck = Math.max(2, 200 / data.timeSeries.length);
                 const isClosestToCursor = isWithinPercentageRange(focusedY, yValue, percentRangeToCheck);
                 if (isClosestToCursor) {
                   if (chart?.dispatchAction !== undefined) {
@@ -119,10 +119,10 @@ export function getNearbySeries(
   }
   if (chart?.dispatchAction !== undefined) {
     // // clears emphasis state of lines that are not focused
-    // chart.dispatchAction({
-    //   type: 'downplay',
-    //   seriesIndex: nonFocusedSeriesIndexes,
-    // });
+    chart.dispatchAction({
+      type: 'downplay',
+      seriesIndex: nonFocusedSeriesIndexes,
+    });
     // trigger emphasis state of nearby series so tooltip matches highlighted lines
     // https://echarts.apache.org/en/api.html#action.highlight
     // chart.dispatchAction({
@@ -195,16 +195,18 @@ export function getFocusedSeriesData(
   const seriesNum = chartData.timeSeries.length;
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
-  let yBuffer =
+  const yBuffer =
     seriesNum > SHOW_FEWER_SERIES_LIMIT
       ? (yAxisInterval * DYNAMIC_FOCUSED_SERIES_MULTIPLIER) / seriesNum
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
 
-  // never let nearby series range be less than roughly the size of a single tick
-  const yBufferMin = yAxisInterval * 0.1;
-  if (yBuffer < yBufferMin) {
-    yBuffer = yBufferMin;
-  }
+  // let yBuffer = yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
+
+  // // never let nearby series range be less than roughly the size of a single tick
+  // const yBufferMin = yAxisInterval * 0.3;
+  // if (yBuffer < yBufferMin) {
+  //   yBuffer = yBufferMin;
+  // }
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
