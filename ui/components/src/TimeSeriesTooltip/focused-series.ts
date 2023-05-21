@@ -17,8 +17,7 @@ import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
-// export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 1.75; // used to reduce number of focused series for heavy queries
-export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 20;
+export const REDUCE_FOCUSED_SERIES_MULTIPLIER = 30;
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface FocusedSeriesInfo {
@@ -159,12 +158,15 @@ export function getFocusedSeriesData(
   const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
 
   const seriesNum = chartData.timeSeries.length;
+  console.log(seriesNum);
 
   // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
   const yBuffer =
     seriesNum > SHOW_FEWER_SERIES_LIMIT
       ? (yAxisInterval * REDUCE_FOCUSED_SERIES_MULTIPLIER) / seriesNum
       : yAxisInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER;
+
+  console.log('yBuffer: ', yBuffer);
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
