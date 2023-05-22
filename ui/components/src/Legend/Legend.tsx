@@ -13,9 +13,10 @@
 
 import { Box } from '@mui/material';
 import { ReactNode } from 'react';
-import { LegendOptions, LegendItem, getLegendMode } from '../model';
-import { ListLegend } from './ListLegend';
-import { CompactLegend } from './CompactLegend';
+import { produce } from 'immer';
+import { LegendOptions, LegendItem, getLegendMode, SelectedLegendItemState } from '../model';
+import { ListLegend, ListLegendProps } from './ListLegend';
+import { CompactLegend, CompactLegendProps } from './CompactLegend';
 import { TableLegend, TableLegendProps } from './TableLegend';
 
 export interface LegendProps {
@@ -25,10 +26,17 @@ export interface LegendProps {
   options: LegendOptions;
 
   /**
-   * Additional props that will be passed to the table variation of the legend
-   * that is used when `options.mode` is set to `table`.
+   * State of selected items in the legend.
+   *
+   * Selected legend item state is a controlled value that should be managed using a
+   * combination of this prop and `onSelectedChange`.
    */
-  tableProps: Pick<TableLegendProps, 'onRowSelectionChange' | 'rowSelection'>;
+  selectedItems: SelectedLegendItemState;
+
+  /**
+   * Callback fired when the selected items in the legend changes.
+   */
+  onSelectedItemsChange: (newSelected: SelectedLegendItemState) => void;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -38,7 +46,7 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, tableProps }: LegendProps) {
+export function Legend({ width, height, options, data, selectedItems, onSelectedItemsChange }: LegendProps) {
   const mode = getLegendMode(options.mode);
 
   // The bottom legend is displayed as a list when the number of items is too
@@ -47,13 +55,56 @@ export function Legend({ width, height, options, data, tableProps }: LegendProps
   // a virtualized list.
   const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
 
+  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
+    const isModifiedClick = e.metaKey || e.shiftKey;
+
+    const newSelected = produce(selectedItems, (draft) => {
+      if (draft === 'ALL') {
+        return {
+          [seriesId]: true,
+        };
+      }
+
+      const isSelected = !!draft[seriesId];
+
+      // Clicks with modifier key can select multiple items.
+      if (isModifiedClick) {
+        if (isSelected) {
+          // Modified click on already selected item. Remove that item.
+          delete draft[seriesId];
+        } else {
+          // Modified click on not-selected item. Add it.
+          draft[seriesId] = true;
+        }
+        return draft;
+      }
+
+      if (isSelected) {
+        // Clicked item was already selected. Unselect it and return to
+        // ALL state.
+        return 'ALL' as const;
+      }
+
+      // Select clicked item.
+      return { [seriesId]: true };
+    });
+    onSelectedItemsChange(newSelected);
+  };
+
+  const commonLegendProps: ListLegendProps | CompactLegendProps = {
+    height,
+    items: data,
+    selectedItems,
+    onLegendItemClick,
+  };
+
   let legendContent: ReactNode;
   if (mode === 'Table') {
-    legendContent = <TableLegend {...tableProps} width={width} height={height} items={data} />;
+    legendContent = <TableLegend {...commonLegendProps} width={width} />;
   } else if (options.position === 'Right' || needsVirtualization) {
-    legendContent = <ListLegend items={data} width={width} height={height} />;
+    legendContent = <ListLegend {...commonLegendProps} width={width} />;
   } else {
-    legendContent = <CompactLegend items={data} height={height} />;
+    legendContent = <CompactLegend {...commonLegendProps} />;
   }
 
   if (options.position === 'Right') {

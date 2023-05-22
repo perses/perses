@@ -28,6 +28,7 @@ import {
   ZoomEventData,
   useChartsTheme,
   LineChartProps,
+  SelectedLegendItemState,
 } from '@perses-dev/components';
 import produce from 'immer';
 import {
@@ -52,16 +53,6 @@ import { getSeriesColor } from './utils/palette-gen';
 import { getTimeSeriesLayout } from './utils/layout-utils';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
-
-// Using an "ALL" value to handle the case on first loading the chart where we
-// want to select all, but do not want all of the legend items to be visually highlighted.
-// This helps us differentiate those cases more clearly instead of inferring it
-// based on the state of the data. This also helps us avoid some coding
-// complexity around initializing a full record for the initial load that would
-// currently require significantly more refactoring of this component.
-// TODO: simplify this if we switch the list-based legend UI to use checkboxes,
-// where we *would* want to visually select all items in this case.
-type SelectedSeriesState = Record<string, boolean> | 'ALL';
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const { spec, contentDimensions } = props;
@@ -115,51 +106,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     showYAxis: !!echartsYAxis.show,
   });
 
-  const [selectedSeries, setSelectedSeries] = useState<SelectedSeriesState>('ALL');
+  const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
 
   const { setTimeRange } = useTimeRange();
 
-  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
-    const isModifiedClick = e.metaKey || e.shiftKey;
-
-    setSelectedSeries((current) => {
-      return produce(current, (draft) => {
-        if (draft === 'ALL') {
-          return {
-            [seriesId]: true,
-          };
-        }
-
-        const isSelected = !!draft[seriesId];
-
-        // Clicks with modifier key can select multiple items.
-        if (isModifiedClick) {
-          if (isSelected) {
-            // Modified click on already selected item. Remove that item.
-            delete draft[seriesId];
-          } else {
-            // Modified click on not-selected item. Add it.
-            draft[seriesId] = true;
-          }
-          return draft;
-        }
-
-        if (isSelected) {
-          // Clicked item was already selected. Unselect it and return to
-          // ALL state.
-          return 'ALL' as const;
-        }
-
-        // Select clicked item.
-        return { [seriesId]: true };
-      });
-    });
-  };
-
-  const handleOnRowSelectionChange: Required<LegendProps>['tableProps']['onRowSelectionChange'] = (newRowSelection) => {
-    // const newSelectedSeriesNames = Object.keys(newRowSelection).filter((key) => newRowSelection[key]);
-    setSelectedSeries(newRowSelection);
-  };
+  // const handleOnRowSelectionChange: Required<LegendProps>['tableProps']['onRowSelectionChange'] = (newRowSelection) => {
+  //   // const newSelectedSeriesNames = Object.keys(newRowSelection).filter((key) => newRowSelection[key]);
+  //   setSelectedLegendItems(newRowSelection);
+  // };
 
   // Populate series data based on query results
   const { graphData } = useDeepMemo(() => {
@@ -232,8 +186,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
-        const isSelectAll = selectedSeries === 'ALL';
-        const isSelected = !isSelectAll && !!selectedSeries[seriesId];
+        const isSelectAll = selectedLegendItems === 'ALL';
+        const isSelected = !isSelectAll && !!selectedLegendItems[seriesId];
         const showTimeSeries = isSelected || isSelectAll;
 
         if (showTimeSeries) {
@@ -243,9 +197,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           graphData.legendItems.push({
             id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
-            isSelected,
             color: seriesColor,
-            onClick: (e) => onLegendItemClick(e, seriesId),
           });
         }
       }
@@ -279,7 +231,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeries, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
+  }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
   if (layout === undefined) {
     return null;
@@ -343,10 +295,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           height={layout.legend.height}
           options={legend}
           data={graphData.legendItems}
-          tableProps={{
-            rowSelection: selectedSeries,
-            onRowSelectionChange: handleOnRowSelectionChange,
-          }}
+          selectedItems={selectedLegendItems}
+          onSelectedItemsChange={setSelectedLegendItems}
         />
       )}
     </Box>

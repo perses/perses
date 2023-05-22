@@ -7,7 +7,7 @@ export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSel
   items: LegendItem[];
   height: number;
   width: number;
-  rowSelection: TableProps<LegendItem>['rowSelection'] | 'ALL';
+  selectedItems: TableProps<LegendItem>['rowSelection'] | 'ALL';
 }
 
 const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
@@ -22,7 +22,7 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
   },
 ];
 
-export function TableLegend({ items, rowSelection: initRowSelection, ...tableProps }: TableLegendProps) {
+export function TableLegend({ items, selectedItems: initRowSelection, ...tableProps }: TableLegendProps) {
   const rowSelection =
     typeof initRowSelection !== 'string'
       ? initRowSelection
