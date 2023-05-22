@@ -614,7 +614,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
   },
 };
 
-const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
+const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'TimeSeriesChartPanel',
@@ -800,7 +800,7 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       {
         kind: 'Grid',
         spec: {
-          display: { title: 'Row 1', collapse: { open: false } },
+          display: { title: 'Row 1', collapse: { open: true } },
           items: [
             { x: 0, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/TwentySeries' } },
             { x: 12, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/FiftySeries' } },
@@ -823,7 +823,7 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
 const TIMESERIES_ALT_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_END - 2 * 60 * 60 * 1000;
 export const ExampleWithManySeries: Story = {
   parameters: {
-    ...formatProviderParameters(TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE),
+    ...formatProviderParameters(TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE),
     withTimeRange: {
       props: {
         initialTimeRange: {

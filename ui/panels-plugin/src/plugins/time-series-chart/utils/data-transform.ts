@@ -37,7 +37,7 @@ export const EMPTY_GRAPH_DATA = {
 
 export const HIDE_DATAPOINTS_LIMIT = 70;
 
-export const BLUR_FADEOUT_OPACITY = 0;
+export const BLUR_FADEOUT_OPACITY = 0.5;
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
