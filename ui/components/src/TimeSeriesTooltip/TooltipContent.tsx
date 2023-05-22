@@ -58,61 +58,61 @@ export function TooltipContent(props: TooltipContentProps) {
     return focusedSeries.sort((a, b) => (a.y > b.y ? -1 : 1));
   }, [focusedSeries]);
 
-  // TODO: use react-virtuoso to improve performance
-  if (sortedFocusedSeries !== null && seriesTime !== null) {
-    return (
-      <Stack py={1} spacing={0.5}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'start',
-            alignItems: 'center',
-          }}
-        >
-          {formatTimeSeriesHeader(seriesTime)}
-          <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-            <Typography sx={{ fontSize: 11 }}>Click to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
-            {tooltipPinned ? (
-              <Pin onClick={onUnpinClick} sx={{ fontSize: 16, cursor: 'pointer' }} />
-            ) : (
-              <PinOutline sx={{ fontSize: 16 }} />
-            )}
-          </Stack>
-        </Box>
-
-        <Divider
-          sx={(theme) => ({
-            borderColor: theme.palette.grey['500'],
-          })}
-        />
-        <Box
-          sx={{
-            display: 'table',
-          }}
-        >
-          {sortedFocusedSeries.map(
-            ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
-              if (datumIdx === null || seriesIdx === null) return null;
-              const key = seriesIdx.toString() + datumIdx.toString();
-
-              return (
-                <SeriesInfo
-                  key={key}
-                  seriesName={seriesName}
-                  y={y}
-                  formattedY={formattedY}
-                  markerColor={markerColor}
-                  totalSeries={sortedFocusedSeries.length}
-                  wrapLabels={wrapLabels}
-                  emphasizeText={isClosestToCursor}
-                />
-              );
-            }
-          )}
-        </Box>
-      </Stack>
-    );
-  } else {
-    return <></>;
+  if (sortedFocusedSeries === null || seriesTime === null) {
+    return null;
   }
+
+  // TODO: use react-virtuoso to improve performance
+  return (
+    <Stack py={1} spacing={0.5}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'start',
+          alignItems: 'center',
+        }}
+      >
+        {formatTimeSeriesHeader(seriesTime)}
+        <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
+          <Typography sx={{ fontSize: 11 }}>Click to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
+          {tooltipPinned ? (
+            <Pin onClick={onUnpinClick} sx={{ fontSize: 16, cursor: 'pointer' }} />
+          ) : (
+            <PinOutline sx={{ fontSize: 16 }} />
+          )}
+        </Stack>
+      </Box>
+
+      <Divider
+        sx={(theme) => ({
+          borderColor: theme.palette.grey['500'],
+        })}
+      />
+      <Box
+        sx={{
+          display: 'table',
+        }}
+      >
+        {sortedFocusedSeries.map(
+          ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
+            if (datumIdx === null || seriesIdx === null) return null;
+            const key = seriesIdx.toString() + datumIdx.toString();
+
+            return (
+              <SeriesInfo
+                key={key}
+                seriesName={seriesName}
+                y={y}
+                formattedY={formattedY}
+                markerColor={markerColor}
+                totalSeries={sortedFocusedSeries.length}
+                wrapLabels={wrapLabels}
+                emphasizeText={isClosestToCursor}
+              />
+            );
+          }
+        )}
+      </Box>
+    </Stack>
+  );
 }

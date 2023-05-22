@@ -959,6 +959,7 @@ const TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE: DashboardResource = {
 
 export const ExampleWithTestData: Story = {
   parameters: {
+    happo: false,
     ...formatProviderParameters(TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE),
     withTimeRange: {
       props: {

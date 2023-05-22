@@ -203,12 +203,13 @@ export function LineChart({
     <Box
       sx={{ height }}
       onClick={(e) => {
+        // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinned((current) => !current);
         }
       }}
       onMouseDown={(e) => {
-        // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
+        // Hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels.
         if (e.target instanceof HTMLCanvasElement) {
           setShowTooltip(false);
         }

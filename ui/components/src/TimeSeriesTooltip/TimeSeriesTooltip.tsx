@@ -20,6 +20,7 @@ import { TooltipContent } from './TooltipContent';
 import { getFocusedSeriesData } from './focused-series';
 import {
   CursorCoordinates,
+  FALLBACK_CHART_WIDTH,
   TOOLTIP_MAX_HEIGHT,
   TOOLTIP_MIN_WIDTH,
   TOOLTIP_MAX_WIDTH,
@@ -51,10 +52,14 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
 
   if (mousePos === null || mousePos.target === null) return null;
 
-  // ensure user is hovering over a chart before checking for nearby series
+  // Ensure user is hovering over a chart before checking for nearby series.
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
+  const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to every be needed.
+  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
+
+  // Get series nearby the cursor and pass into tooltip content children.
   const focusedSeries = getFocusedSeriesData({
     mousePos,
     chartData,
@@ -63,9 +68,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     unit,
     showAllSeries,
   });
-  const chartWidth = chart?.getWidth() ?? 750;
-  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
-
   if (focusedSeries.length === 0) {
     return null;
   }
