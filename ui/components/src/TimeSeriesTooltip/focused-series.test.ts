@@ -83,11 +83,27 @@ describe('getNearbySeries', () => {
 
 describe('getYBuffer', () => {
   it('should return area to search for nearby series', () => {
-    expect(getYBuffer({ interval: 1, totalSeries: 100, showAllSeries: false })).toBe(0.3);
+    expect(getYBuffer({ interval: 1, totalSeries: 10, showAllSeries: false })).toBe(3);
   });
 
   it('should return entire canvas', () => {
-    expect(getYBuffer({ interval: 1, totalSeries: 100, showAllSeries: true })).toBe(10);
+    expect(getYBuffer({ interval: 1, totalSeries: 10, showAllSeries: true })).toBe(10);
+  });
+
+  it('should reduce area to search when many series', () => {
+    expect(getYBuffer({ interval: 1, totalSeries: 1000, showAllSeries: false })).toBe(0.3);
+  });
+
+  it('should return area to search for larger interval', () => {
+    expect(getYBuffer({ interval: 10, totalSeries: 10, showAllSeries: false })).toBe(30);
+  });
+
+  it('should return entire canvas for larger interval', () => {
+    expect(getYBuffer({ interval: 10, totalSeries: 10, showAllSeries: true })).toBe(100);
+  });
+
+  it('should reduce area to search for larger interval when many series', () => {
+    expect(getYBuffer({ interval: 10, totalSeries: 1000, showAllSeries: false })).toBe(3);
   });
 });
 
