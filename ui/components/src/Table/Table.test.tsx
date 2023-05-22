@@ -90,6 +90,8 @@ describe('Table', () => {
     const data = generateMockTableData(dataRows);
     const rowsToRender = 5;
 
+    // TODO: make some height utils to help simplfiy. Remember that the header
+    // isn't in the virtual scroll.
     const height = rowsToRender * MOCK_ITEM_HEIGHT;
     console.log(height);
 
