@@ -99,7 +99,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           color: '#fff',
           fontSize: '11px',
           visibility: 'visible',
-          // resize: tooltipPinned ? 'both' : 'none',
           opacity: 1,
           transition: 'all 0.1s ease-out',
           zIndex: theme.zIndex.tooltip,
@@ -126,7 +125,15 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
         {showAllSeriesToggle && (
           <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
             <Typography>Show All?</Typography>
-            <Switch checked={showAllSeries} onChange={(_, checked) => setShowAllSeries(checked)} />
+            <Switch
+              checked={showAllSeries}
+              onChange={(_, checked) => setShowAllSeries(checked)}
+              sx={(theme) => ({
+                '& .MuiSwitch-switchBase': {
+                  color: theme.palette.common.white,
+                },
+              })}
+            />
           </Stack>
         )}
       </Box>
