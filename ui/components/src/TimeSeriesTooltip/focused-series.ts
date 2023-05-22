@@ -56,7 +56,6 @@ export function getNearbySeries(
   const focusedSeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
-  const nonFocusedSeriesIndexes: number[] = [];
 
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
@@ -83,6 +82,7 @@ export function getNearbySeries(
                   emphasizedSeriesIndexes.push(seriesIdx);
                 } else {
                   nonEmphasizedSeriesIndexes.push(seriesIdx);
+                  // ensure series not close to cursor are not highlighted
                   if (chart?.dispatchAction !== undefined) {
                     chart.dispatchAction({
                       type: 'downplay',
@@ -106,8 +106,6 @@ export function getNearbySeries(
                   isClosestToCursor,
                 });
                 focusedSeriesIndexes.push(seriesIdx);
-              } else {
-                nonFocusedSeriesIndexes.push(seriesIdx);
               }
             }
           }
@@ -116,18 +114,24 @@ export function getNearbySeries(
     }
   }
   if (chart?.dispatchAction !== undefined) {
-    // clears emphasis state of lines that are not focused
+    // Clears emphasis state of all lines that are not focused or emphasized.
+    // Focused is term for all nearby series showing in the tooltip.
+    // Emphasized is a subset of just the focused series that are closest to cursor.
     chart.dispatchAction({
       type: 'downplay',
       seriesIndex: nonEmphasizedSeriesIndexes,
     });
 
+    // https://echarts.apache.org/en/api.html#action.highlight
     if (emphasizedSeriesIndexes.length > 0) {
+      // Fadeout opacity of all series not closest to cursor.
       chart.dispatchAction({
         type: 'highlight',
         seriesIndex: emphasizedSeriesIndexes,
+        notBlur: false,
       });
     } else {
+      // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
       chart.dispatchAction({
         type: 'highlight',
         seriesIndex: focusedSeriesIndexes,
