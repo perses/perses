@@ -21,9 +21,10 @@ export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick
   item: LegendItem;
 
   /**
-   * When true, the item is visually highlighted to communicate it is selected.
+   * When true, the item is rendered differently to visually communicate it is
+   * selected.
    */
-  isHighlighted?: boolean;
+  isVisuallySelected?: boolean;
 
   onClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => void;
 
@@ -37,7 +38,7 @@ export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick
 }
 
 const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
-  { item, sx, truncateLabel, onClick, isHighlighted, ...others },
+  { item, sx, truncateLabel, onClick, isVisuallySelected, ...others },
   ref
 ) {
   const [noWrap, setNoWrap] = useState(truncateLabel);
@@ -74,7 +75,7 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
       dense={true}
       key={item.id}
       onClick={handleClick}
-      selected={isHighlighted}
+      selected={isVisuallySelected}
       ref={ref}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>

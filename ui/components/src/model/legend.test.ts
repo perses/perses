@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegendOptions, validateLegendSpec, isLegendItemHighlighted } from './legend';
+import { LegendOptions, validateLegendSpec, isLegendItemVisuallySelected } from './legend';
 
 describe('validateLegendSpec', () => {
   it('should check if a legend spec is valid', () => {
@@ -22,10 +22,10 @@ describe('validateLegendSpec', () => {
   });
 });
 
-describe('isLegendItemHighlighted', () => {
+describe('isLegendItemVisuallySelected', () => {
   it('does not highlight the item when "ALL" selected', () => {
     expect(
-      isLegendItemHighlighted(
+      isLegendItemVisuallySelected(
         {
           id: 'one',
           label: 'One',
@@ -38,7 +38,7 @@ describe('isLegendItemHighlighted', () => {
 
   it('does not highlight the item when it is not in the selected object', () => {
     expect(
-      isLegendItemHighlighted(
+      isLegendItemVisuallySelected(
         {
           id: 'one',
           label: 'One',
@@ -53,7 +53,7 @@ describe('isLegendItemHighlighted', () => {
 
   it('does not highlight the item when it is false in the selected object', () => {
     expect(
-      isLegendItemHighlighted(
+      isLegendItemVisuallySelected(
         {
           id: 'one',
           label: 'One',
@@ -69,7 +69,7 @@ describe('isLegendItemHighlighted', () => {
 
   it('highlights the item when it is true in the selected object', () => {
     expect(
-      isLegendItemHighlighted(
+      isLegendItemVisuallySelected(
         {
           id: 'one',
           label: 'One',

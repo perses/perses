@@ -13,7 +13,7 @@
 
 import { useTheme, Box } from '@mui/material';
 import { Virtuoso } from 'react-virtuoso';
-import { LegendItem, SelectedLegendItemState, isLegendItemHighlighted } from '../model';
+import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from '../model';
 import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 
 export interface ListLegendProps {
@@ -52,7 +52,7 @@ export function ListLegend({ items, height, width, selectedItems, onLegendItemCl
             key={item.id}
             item={item}
             truncateLabel={truncateLabels}
-            isHighlighted={isLegendItemHighlighted(item, selectedItems)}
+            isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
             onClick={onLegendItemClick}
             sx={{
               // Having an explicit width is important for the ellipsizing to

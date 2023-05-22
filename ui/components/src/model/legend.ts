@@ -75,8 +75,8 @@ export function validateLegendSpec(legend?: LegendOptions) {
   return true;
 }
 
-export function isLegendItemHighlighted(item: LegendItem, selectedItems: SelectedLegendItemState) {
+export function isLegendItemVisuallySelected(item: LegendItem, selectedItems: SelectedLegendItemState) {
   // In the "ALL" case, technically all legend items are selected, but we do
-  // not visually highlight them.
+  // not render them differently.
   return selectedItems !== 'ALL' && !!selectedItems[item.id];
 }

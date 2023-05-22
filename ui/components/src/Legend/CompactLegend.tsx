@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { LegendItem, SelectedLegendItemState, isLegendItemHighlighted } from '../model';
+import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from '../model';
 import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 
 export interface CompactLegendProps {
@@ -35,7 +35,7 @@ export function CompactLegend({ height, items, selectedItems, onLegendItemClick 
         <ListLegendItem
           key={item.id}
           item={item}
-          isHighlighted={isLegendItemHighlighted(item, selectedItems)}
+          isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
           onClick={onLegendItemClick}
           sx={{
             width: 'auto',
