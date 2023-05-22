@@ -37,6 +37,8 @@ export const EMPTY_GRAPH_DATA = {
 
 export const HIDE_DATAPOINTS_LIMIT = 70;
 
+export const BLUR_FADEOUT_OPACITY = 0.5;
+
 /**
  * Given a list of running queries, calculates a common time scale for use on
  * the x axis (i.e. start/end dates and a step that is divisible into all of
@@ -97,7 +99,7 @@ export function getLineSeries(
     blur: {
       lineStyle: {
         width: lineWidth,
-        opacity: 0.4,
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -133,7 +135,7 @@ export function getThresholdSeries(
     },
     blur: {
       lineStyle: {
-        opacity: 0.4,
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };

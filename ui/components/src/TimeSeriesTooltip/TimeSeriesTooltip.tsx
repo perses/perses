@@ -72,7 +72,9 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     setPinnedPos(mousePos);
   }
 
-  const showShowAllSeriesToggle =
+  // Option for user to see all series instead of only the nearby focused series.
+  // Only relevant when there are more total series than are visible.
+  const showAllSeriesToggle =
     tooltipPinned === true &&
     showAllSeries === false &&
     chartData.timeSeries.length > 1 &&
@@ -108,7 +110,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
         }}
       >
         <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} tooltipPinned={tooltipPinned} />
-        {showShowAllSeriesToggle && (
+        {showAllSeriesToggle && (
           <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
             <Typography>Show All?</Typography>
             <Switch checked={showAllSeries} onChange={(_, checked) => setShowAllSeries(checked)} />
