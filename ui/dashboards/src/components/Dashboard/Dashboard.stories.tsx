@@ -20,6 +20,7 @@ import {
   mockTimeSeriesResponseWithManySeries,
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
+  mockTimeSeriesResponseWithTestData,
 } from '@perses-dev/internal-utils';
 import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
 import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
@@ -766,6 +767,34 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           ],
         },
       },
+      MockResponseFirst: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Mock Response First' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_range_query_mock_response_1',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
     },
     layouts: [
       {
@@ -801,13 +830,6 @@ export const ExampleWithManySeries: Story = {
           start: new Date(TIMESERIES_ALT_EXAMPLE_MOCK_START),
           end: new Date(TIMESERIES_EXAMPLE_MOCK_END),
         },
-      },
-    },
-    happo: {
-      beforeScreenshot: async () => {
-        await waitForStableCanvas('canvas', {
-          expectedCount: 8,
-        });
       },
     },
     msw: {
@@ -872,6 +894,88 @@ export const ExampleWithManySeries: Story = {
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                   totalSeries: 2000,
                 }),
+              },
+            },
+          ],
+        }),
+      },
+    },
+  },
+};
+
+const TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE: DashboardResource = {
+  kind: 'Dashboard',
+  metadata: {
+    name: 'TimeSeriesChartPanel',
+    created_at: '2022-12-21T00:00:00Z',
+    updated_at: '2023-01-25T17:43:56.745494Z',
+    version: 3,
+    project: 'testing',
+  },
+  spec: {
+    duration: '6h',
+    variables: [],
+    panels: {
+      MockResponseFirst: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Mock Response First' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_range_query_mock_response_1',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    layouts: [
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 1', collapse: { open: true } },
+          items: [{ x: 0, y: 0, width: 24, height: 12, content: { $ref: '#/spec/panels/MockResponseFirst' } }],
+        },
+      },
+    ],
+  },
+};
+
+export const ExampleWithTestData: Story = {
+  parameters: {
+    ...formatProviderParameters(TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE),
+    withTimeRange: {
+      props: {
+        initialTimeRange: {
+          start: new Date(1684559580 * 1000),
+          end: new Date(1684573395 * 1000),
+        },
+      },
+    },
+    msw: {
+      handlers: {
+        queryRange: mockQueryRangeRequests({
+          queries: [
+            {
+              query: 'fake_range_query_mock_response_1',
+              response: {
+                body: mockTimeSeriesResponseWithTestData(),
               },
             },
           ],
