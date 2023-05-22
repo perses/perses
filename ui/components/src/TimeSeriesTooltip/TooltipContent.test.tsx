@@ -32,9 +32,12 @@ describe('TooltipContent', () => {
           y: 0.1,
           formattedY: '0.1',
           markerColor: 'hsla(19838016,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
       ],
       wrapLabels: true,
+      tooltipPinned: false,
+      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
@@ -55,6 +58,7 @@ describe('TooltipContent', () => {
           y: 84635648,
           formattedY: '84.64M',
           markerColor: 'hsla(1887856572,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
         {
           seriesIdx: 1,
@@ -65,9 +69,12 @@ describe('TooltipContent', () => {
           y: 33771520,
           formattedY: '33.77M',
           markerColor: 'hsla(158479636,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
       ],
       wrapLabels: true,
+      tooltipPinned: false,
+      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('84.64M')).toBeInTheDocument();
@@ -92,6 +99,7 @@ describe('TooltipContent', () => {
           y: 84635648,
           formattedY: '84.64M',
           markerColor: 'hsla(1887856572,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
         {
           seriesIdx: 1,
@@ -102,9 +110,12 @@ describe('TooltipContent', () => {
           y: 33771520,
           formattedY: '33.77M',
           markerColor: 'hsla(158479636,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
       ],
       wrapLabels: true,
+      tooltipPinned: false,
+      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(

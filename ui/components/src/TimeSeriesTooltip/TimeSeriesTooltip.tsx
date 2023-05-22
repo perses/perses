@@ -33,7 +33,7 @@ interface TimeSeriesTooltipProps {
   tooltipPinned: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
-  onUnpinClick: () => void;
+  onUnpinClick?: () => void;
 }
 
 export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
@@ -118,7 +118,9 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           tooltipPinned={tooltipPinned}
           onUnpinClick={() => {
             setPinnedPos(null);
-            onUnpinClick();
+            if (onUnpinClick !== undefined) {
+              onUnpinClick();
+            }
           }}
         />
         {showAllSeriesToggle && (
