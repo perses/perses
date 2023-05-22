@@ -125,4 +125,41 @@ describe('TooltipContent', () => {
       screen.getByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
     ).toBeInTheDocument();
   });
+
+  it('should display series closest to cursor as bold', () => {
+    const tooltipContent: TooltipContentProps = {
+      focusedSeries: [
+        {
+          seriesIdx: 2,
+          datumIdx: 48,
+          seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 1671803040000,
+          x: 1671821040000,
+          y: 84635648,
+          formattedY: '84.64M',
+          markerColor: 'hsla(1887856572,50%,50%,0.8)',
+          isClosestToCursor: true,
+        },
+        {
+          seriesIdx: 1,
+          datumIdx: 48,
+          seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 1671803040000,
+          x: 1671821040000,
+          y: 33771520,
+          formattedY: '33.77M',
+          markerColor: 'hsla(158479636,50%,50%,0.8)',
+          isClosestToCursor: false,
+        },
+      ],
+      wrapLabels: true,
+      tooltipPinned: false,
+      onUnpinClick: () => null,
+    };
+    renderComponent(tooltipContent);
+    const boldNearbySeriesText = screen.getByLabelText('emphasized series');
+    expect(boldNearbySeriesText).toBeInTheDocument();
+    const regularNearbySeriesText = screen.getByLabelText('focused series');
+    expect(regularNearbySeriesText).toBeInTheDocument();
+  });
 });

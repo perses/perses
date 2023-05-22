@@ -82,6 +82,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
+          aria-label={emphasizeText ? 'focused series' : 'emphasized series'}
         >
           {formattedSeriesInfo}
         </Box>
