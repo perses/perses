@@ -36,6 +36,7 @@ export function useVirtualizedTableKeyboardNav({
         // Use default cell position. Shift the virtual table scroll position
         // when needed to make the active cell visible.
         if (nextRow - 1 < visibleRange.current.startIndex || nextRow - 1 > visibleRange.current.endIndex) {
+          console.log('scroll to index');
           virtualTable.current?.scrollToIndex({
             index: nextRow - 1,
             align: 'end',

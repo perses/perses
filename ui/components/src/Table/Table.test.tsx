@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, getAllByRole, act } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { Table, TableProps } from './Table';
 
@@ -43,15 +43,46 @@ function generateMockTableData(count: number): MockTableData[] {
 
 const MOCK_VIEWPORT_HEIGHT = 1000;
 const MOCK_ITEM_HEIGHT = 100;
+const HEADER_ROWS = 1;
+const SPACER_ROWS = 1;
 
 const renderTable = ({ data = generateMockTableData(5), height = 600, width = 300 }: RenderTableOpts = {}) => {
-  console.log(`height: ${height}`);
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
       <Table data={data} columns={COLUMNS} height={height} width={width} />
     </VirtuosoMockContext.Provider>
   );
 };
+
+const LARGE_TABLE_OVERALL_ROWS = 100;
+const LARGE_TABLE_VISIBLE_ROWS = 5;
+const LARGE_TABLE_DATA = generateMockTableData(LARGE_TABLE_OVERALL_ROWS);
+
+const renderLargeTable = () => {
+  // TODO: make some height utils to help simplfiy. Remember that the header
+  // isn't in the virtual scroll.
+  const height = LARGE_TABLE_VISIBLE_ROWS * MOCK_ITEM_HEIGHT;
+
+  renderTable({ data: LARGE_TABLE_DATA, height });
+};
+
+/**
+ * Helper for looking up table cells by the index of the row and column. Useful
+ * for testing out keyboard navigations.
+ */
+function getTableCellByIndex(row: number, column: number) {
+  const rowEl = screen.getAllByRole('row')[row];
+  if (!rowEl) {
+    throw new Error(`Cannot find row at index: ${row}.`);
+  }
+
+  const cellEl = getAllByRole(rowEl, 'cell')[column];
+  if (!cellEl) {
+    throw new Error(`Cannot find cellEl at index: ${column}.`);
+  }
+
+  return cellEl;
+}
 
 describe('Table', () => {
   test('renders a table with the expected column headings', () => {
@@ -83,9 +114,7 @@ describe('Table', () => {
     expect(tableRows).toHaveLength(data.length + headerRows);
   });
 
-  test('does not render all table rows when they will not fit', () => {
-    const headerRows = 1;
-    const spacerRow = 1;
+  test('table only renders rows that are visible', () => {
     const dataRows = 100;
     const data = generateMockTableData(dataRows);
     const rowsToRender = 5;
@@ -93,11 +122,82 @@ describe('Table', () => {
     // TODO: make some height utils to help simplfiy. Remember that the header
     // isn't in the virtual scroll.
     const height = rowsToRender * MOCK_ITEM_HEIGHT;
-    console.log(height);
 
     renderTable({ data, height });
 
     const tableRows = screen.getAllByRole('row');
-    expect(tableRows).toHaveLength(rowsToRender + headerRows + spacerRow);
+    expect(tableRows).toHaveLength(rowsToRender + HEADER_ROWS + SPACER_ROWS);
+
+    for (let i = 0; i < rowsToRender; i++) {
+      const itemData = data[i];
+      // +1 to skip the header
+      const row = tableRows[i + 1];
+      if (!row || !itemData) {
+        // To appease TS.
+        throw new Error('Missing row or item data');
+      }
+
+      expect(row).toHaveTextContent(itemData.label);
+    }
+
+    const table = screen.getByRole('table');
+    fireEvent.scroll(table);
+  });
+
+  // TODO: look at where first tabindex should gooo.
+  test('on tab the first column header is focused', () => {
+    renderLargeTable();
+
+    // Tab focuses the top left cell, which is the first column header.
+    userEvent.tab();
+    expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
+  });
+
+  describe('when table is focused', () => {
+    test('left and right arrow move focus left and right within table cells', () => {
+      renderLargeTable();
+
+      userEvent.tab();
+      expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
+
+      // Right arrow moves right to next column header.
+      userEvent.keyboard('{ArrowRight}');
+      expect(screen.getAllByRole('columnheader')[1]).toHaveFocus();
+
+      // Right arrow moves right to next column header.
+      userEvent.keyboard('{ArrowRight}');
+      expect(screen.getAllByRole('columnheader')[2]).toHaveFocus();
+
+      // Right arrow does nothing if already focusing the rightmost column.
+      userEvent.keyboard('{ArrowRight}');
+      expect(screen.getAllByRole('columnheader')[2]).toHaveFocus();
+
+      // Right arrow moves left to previous column header.
+      userEvent.keyboard('{ArrowLeft}');
+      expect(screen.getAllByRole('columnheader')[1]).toHaveFocus();
+
+      // Right arrow moves left to previous column header.
+      userEvent.keyboard('{ArrowLeft}');
+      expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
+
+      // Left arrow does nothing if already focusing the leftmost column.
+      userEvent.keyboard('{ArrowLeft}');
+      expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
+    });
+
+    test('up and down arrow move focus up and down within table cells', () => {
+      renderLargeTable();
+
+      userEvent.tab();
+      expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
+
+      for (let i = 0; i < LARGE_TABLE_VISIBLE_ROWS; i++) {
+        act(() => {
+          userEvent.keyboard('{ArrowDown}');
+        });
+        expect(getTableCellByIndex(i + 1, 0)).toHaveFocus();
+      }
+      // TODO: figure out the virtualization story
+    });
   });
 });
