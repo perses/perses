@@ -99,6 +99,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           color: '#fff',
           fontSize: '11px',
           visibility: 'visible',
+          // resize: tooltipPinned ? 'both' : 'none',
           opacity: 1,
           transition: 'all 0.1s ease-out',
           zIndex: theme.zIndex.tooltip,

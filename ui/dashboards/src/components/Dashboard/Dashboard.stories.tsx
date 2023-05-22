@@ -739,10 +739,10 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           ],
         },
       },
-      TwoThousandSeries: {
+      OneThousandSeries: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Two Thousand Series' },
+          display: { name: 'One Thousand Series' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
@@ -759,7 +759,7 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   kind: 'PrometheusTimeSeriesQuery',
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                    query: 'fake_query_with_two_thousand_series',
+                    query: 'fake_query_with_one_thousand_series',
                   },
                 },
               },
@@ -800,7 +800,7 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       {
         kind: 'Grid',
         spec: {
-          display: { title: 'Row 1', collapse: { open: true } },
+          display: { title: 'Row 1', collapse: { open: false } },
           items: [
             { x: 0, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/TwentySeries' } },
             { x: 12, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/FiftySeries' } },
@@ -887,12 +887,12 @@ export const ExampleWithManySeries: Story = {
               },
             },
             {
-              query: 'fake_query_with_two_thousand_series',
+              query: 'fake_query_with_one_thousand_series',
               response: {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
-                  totalSeries: 2000,
+                  totalSeries: 1000,
                 }),
               },
             },
