@@ -33,6 +33,7 @@ interface TimeSeriesTooltipProps {
   tooltipPinned: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
+  onUnpinClick: () => void;
 }
 
 export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
@@ -41,6 +42,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   wrapLabels,
   tooltipPinned,
   unit,
+  onUnpinClick,
 }: TimeSeriesTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
   const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
@@ -109,7 +111,15 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} tooltipPinned={tooltipPinned} />
+        <TooltipContent
+          focusedSeries={focusedSeries}
+          wrapLabels={wrapLabels}
+          tooltipPinned={tooltipPinned}
+          onUnpinClick={() => {
+            setPinnedPos(null);
+            onUnpinClick();
+          }}
+        />
         {showAllSeriesToggle && (
           <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
             <Typography>Show All?</Typography>

@@ -237,6 +237,9 @@ export function LineChart({
             wrapLabels={tooltipConfig.wrapLabels}
             tooltipPinned={tooltipPinned}
             unit={unit}
+            onUnpinClick={() => {
+              setTooltipPinned(false);
+            }}
           />
         )}
       <EChart

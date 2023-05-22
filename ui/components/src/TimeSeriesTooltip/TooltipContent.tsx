@@ -23,10 +23,11 @@ export interface TooltipContentProps {
   focusedSeries: FocusedSeriesArray | null;
   tooltipPinned: boolean;
   wrapLabels?: boolean;
+  onUnpinClick: () => void;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { focusedSeries, wrapLabels, tooltipPinned } = props;
+  const { focusedSeries, wrapLabels, tooltipPinned, onUnpinClick } = props;
   const { formatWithUserTimeZone } = useTimeZone();
 
   const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
@@ -70,8 +71,12 @@ export function TooltipContent(props: TooltipContentProps) {
         >
           {formatTimeSeriesHeader(seriesTime)}
           <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-            <Typography sx={{ fontSize: 11 }}>Click chart to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
-            {tooltipPinned ? <Pin sx={{ fontSize: 16 }} /> : <PinOutline sx={{ fontSize: 16 }} />}
+            <Typography sx={{ fontSize: 11 }}>Click to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
+            {tooltipPinned ? (
+              <Pin onClick={onUnpinClick} sx={{ fontSize: 16, cursor: 'pointer' }} />
+            ) : (
+              <PinOutline sx={{ fontSize: 16 }} />
+            )}
           </Stack>
         </Box>
 
