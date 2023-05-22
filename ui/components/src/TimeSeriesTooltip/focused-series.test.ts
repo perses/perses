@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { EChartsDataFormat, UnitOptions } from '../model';
-import { getNearbySeries, isWithinPercentageRange } from './focused-series';
+import { getNearbySeries, getYBuffer, isWithinPercentageRange } from './focused-series';
 
 describe('getNearbySeries', () => {
   const chartData: EChartsDataFormat = {
@@ -81,20 +81,28 @@ describe('getNearbySeries', () => {
   });
 });
 
+describe('getYBuffer', () => {
+  it('should return area to search for nearby series', () => {
+    expect(getYBuffer({ interval: 1, totalSeries: 100, showAllSeries: false })).toBe(0.3);
+  });
+
+  it('should return entire canvas', () => {
+    expect(getYBuffer({ interval: 1, totalSeries: 100, showAllSeries: true })).toBe(10);
+  });
+});
+
 describe('isWithinPercentageRange', () => {
   it('should return true when focusedY is within the specified percentage range of yValue', () => {
     const focusedY = 256250000;
     const yValue = 261353472;
-    const percentage = 5;
-    const result = isWithinPercentageRange(focusedY, yValue, percentage);
+    const result = isWithinPercentageRange({ valueToCheck: focusedY, baseValue: yValue, percentage: 5 });
     expect(result).toBe(true);
   });
 
   it('returns false when focusedY is outside the specified percentage range of yValue', () => {
     const focusedY = 200;
     const yValue = 100;
-    const percentage = 5;
-    const result = isWithinPercentageRange(focusedY, yValue, percentage);
+    const result = isWithinPercentageRange({ valueToCheck: focusedY, baseValue: yValue, percentage: 5 });
     expect(result).toBe(false);
   });
 });

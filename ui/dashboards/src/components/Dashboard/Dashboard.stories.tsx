@@ -770,7 +770,7 @@ const TIMESERIES_ALT_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       MockResponseFirst: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Mock Response First' },
+          display: { name: 'Mock Response (168 series)' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
