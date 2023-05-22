@@ -89,7 +89,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
         sx={(theme) => ({
           minWidth: TOOLTIP_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
-          maxHeight: TOOLTIP_MAX_HEIGHT,
+          maxHeight: showAllSeries ? TOOLTIP_MAX_HEIGHT + 100 : TOOLTIP_MAX_HEIGHT,
           padding: theme.spacing(0.5, 2),
           position: 'absolute',
           top: 0,
