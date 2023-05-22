@@ -3,11 +3,12 @@ import { useMemo } from 'react';
 import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from '../model';
 
-export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'onRowSelectionChange'> {
+export interface TableLegendProps {
   items: LegendItem[];
   height: number;
   width: number;
   selectedItems: TableProps<LegendItem>['rowSelection'] | 'ALL';
+  onSelectedItemsChange: TableProps<LegendItem>['onRowSelectionChange'];
 }
 
 const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
@@ -22,7 +23,13 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
   },
 ];
 
-export function TableLegend({ items, selectedItems: initRowSelection, ...tableProps }: TableLegendProps) {
+export function TableLegend({
+  items,
+  selectedItems: initRowSelection,
+  onSelectedItemsChange,
+  height,
+  width,
+}: TableLegendProps) {
   const rowSelection =
     typeof initRowSelection !== 'string'
       ? initRowSelection
@@ -36,8 +43,10 @@ export function TableLegend({ items, selectedItems: initRowSelection, ...tablePr
 
   return (
     <Table
-      {...tableProps}
+      height={height}
+      width={width}
       rowSelection={rowSelection}
+      onRowSelectionChange={onSelectedItemsChange}
       data={items}
       columns={COLUMNS}
       density="compact"

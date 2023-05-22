@@ -95,16 +95,15 @@ export function Legend({ width, height, options, data, selectedItems, onSelected
     height,
     items: data,
     selectedItems,
-    onLegendItemClick,
   };
 
   let legendContent: ReactNode;
   if (mode === 'Table') {
-    legendContent = <TableLegend {...commonLegendProps} width={width} />;
+    legendContent = <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} />;
   } else if (options.position === 'Right' || needsVirtualization) {
-    legendContent = <ListLegend {...commonLegendProps} width={width} />;
+    legendContent = <ListLegend {...commonLegendProps} width={width} onLegendItemClick={onLegendItemClick} />;
   } else {
-    legendContent = <CompactLegend {...commonLegendProps} />;
+    legendContent = <CompactLegend {...commonLegendProps} onLegendItemClick={onLegendItemClick} />;
   }
 
   if (options.position === 'Right') {
