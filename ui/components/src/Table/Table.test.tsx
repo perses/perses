@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { render, screen, fireEvent, getAllByRole, act } from '@testing-library/react';
+import { render, screen, fireEvent, getAllByRole, act, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { Table, TableProps } from './Table';
 
@@ -9,7 +9,12 @@ type MockTableData = {
   value: number;
 };
 
-type RenderTableOpts = Partial<Pick<TableProps<MockTableData>, 'data' | 'height' | 'width'>>;
+type RenderTableOpts = Partial<
+  Pick<
+    TableProps<MockTableData>,
+    'data' | 'height' | 'width' | 'checkboxSelection' | 'onRowSelectionChange' | 'rowSelection'
+  >
+>;
 
 const COLUMNS: TableProps<MockTableData>['columns'] = [
   {
@@ -41,15 +46,29 @@ function generateMockTableData(count: number): MockTableData[] {
   return data;
 }
 
-const MOCK_VIEWPORT_HEIGHT = 1000;
 const MOCK_ITEM_HEIGHT = 100;
 const HEADER_ROWS = 1;
 const SPACER_ROWS = 1;
 
-const renderTable = ({ data = generateMockTableData(5), height = 600, width = 300 }: RenderTableOpts = {}) => {
+const renderTable = ({
+  data = generateMockTableData(5),
+  height = 600,
+  width = 300,
+  checkboxSelection,
+  rowSelection = {},
+  onRowSelectionChange = jest.fn(),
+}: RenderTableOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
-      <Table data={data} columns={COLUMNS} height={height} width={width} />
+      <Table
+        data={data}
+        columns={COLUMNS}
+        height={height}
+        width={width}
+        checkboxSelection={checkboxSelection}
+        rowSelection={rowSelection}
+        onRowSelectionChange={onRowSelectionChange}
+      />
     </VirtuosoMockContext.Provider>
   );
 };
@@ -89,15 +108,15 @@ describe('Table', () => {
     renderTable();
     screen.getByRole('table');
 
-    const tableHeadings = screen.getAllByRole('columnheader');
-    expect(tableHeadings).toHaveLength(COLUMNS.length);
+    const columnHeaders = screen.getAllByRole('columnheader');
+    expect(columnHeaders).toHaveLength(COLUMNS.length);
 
-    tableHeadings.forEach((tableHeading, i) => {
+    columnHeaders.forEach((tableHeading, i) => {
       const column = COLUMNS[i];
 
       if (!column) {
         // This is here to appease typescript
-        throw new Error('Missing column for table headling');
+        throw new Error('Missing column for table heading');
       }
 
       expect(tableHeading).toHaveTextContent(column.header);
@@ -139,9 +158,6 @@ describe('Table', () => {
 
       expect(row).toHaveTextContent(itemData.label);
     }
-
-    const table = screen.getByRole('table');
-    fireEvent.scroll(table);
   });
 
   // TODO: look at where first tabindex should gooo.
@@ -153,7 +169,70 @@ describe('Table', () => {
     expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
   });
 
+  describe('when checkboxes are enabled', () => {
+    test('renders checkbox column followed by specified columns', () => {
+      renderTable({ checkboxSelection: true });
+
+      screen.getByRole('table');
+
+      const columnHeaders = screen.getAllByRole('columnheader');
+      expect(columnHeaders).toHaveLength(COLUMNS.length + 1);
+
+      const firstHeader = columnHeaders[0];
+      if (!firstHeader) {
+        throw new Error('Could not find first column header');
+      }
+      within(firstHeader).getByRole('checkbox');
+
+      columnHeaders.slice(1).forEach((tableHeading, i) => {
+        const column = COLUMNS[i];
+        if (!column) {
+          // This is here to appease typescript
+          throw new Error('Missing column for table heading');
+        }
+        expect(tableHeading).toHaveTextContent(column.header);
+      });
+    });
+
+    test('renders each row with a checkbox', () => {
+      const dataRows = 100;
+      const data = generateMockTableData(dataRows);
+      const rowsToRender = 5;
+
+      // TODO: make some height utils to help simplfiy. Remember that the header
+      // isn't in the virtual scroll.
+      const height = rowsToRender * MOCK_ITEM_HEIGHT;
+
+      renderTable({ data, height, checkboxSelection: true });
+
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows).toHaveLength(rowsToRender + HEADER_ROWS + SPACER_ROWS);
+
+      for (let i = 0; i < rowsToRender; i++) {
+        const itemData = data[i];
+        // +1 to skip the header
+        const row = tableRows[i + 1];
+        if (!row || !itemData) {
+          // To appease TS.
+          throw new Error('Missing row or item data');
+        }
+
+        const cells = within(row).getAllByRole('cell');
+        expect(cells).toHaveLength(COLUMNS.length + 1);
+
+        const firstCell = cells[0];
+        if (!firstCell) {
+          throw new Error(`Missing first cell for row ${i + 1}`);
+        }
+        within(firstCell).getByRole('checkbox');
+      }
+    });
+  });
+
   describe('when table is focused', () => {
+    // Note: it's difficult to test a bunch of the interaction patterns here
+    // because of the limitations of jsdom in combination with virtualization,
+    // so limiting these tests to what's possible within the initial viewport.
     test('left and right arrow move focus left and right within table cells', () => {
       renderLargeTable();
 
@@ -197,7 +276,6 @@ describe('Table', () => {
         });
         expect(getTableCellByIndex(i + 1, 0)).toHaveFocus();
       }
-      // TODO: figure out the virtualization story
     });
   });
 });
