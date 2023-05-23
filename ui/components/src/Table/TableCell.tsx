@@ -57,7 +57,7 @@ export function TableCell({
 
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
     // From https://zellwk.com/blog/keyboard-focusable-elements/
-    // TODO: dig int if this can be cleaned up a bit.
+    // TODO: dig into if this can be cleaned up a bit.
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
       'a[href], button, input, textarea, select, details'
     );
@@ -67,7 +67,7 @@ export function TableCell({
     }
   };
 
-  // Fix typing
+  // TODO: Fix typing
   const handleInteractionFocusTrigger = (e: any) => {
     // Causing issues with checkbox. Debug tomorrow.
     onFocus?.(e);
@@ -78,6 +78,8 @@ export function TableCell({
       {...otherProps}
       tabIndex={focusState !== 'none' ? 0 : -1}
       onFocus={handleFocus}
+      // We use these instead of `onFocus` because of some ordering issues with
+      // when the browser calls the various events.
       onClick={handleInteractionFocusTrigger}
       onKeyUp={handleInteractionFocusTrigger}
       sx={{

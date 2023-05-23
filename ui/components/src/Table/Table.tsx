@@ -60,6 +60,8 @@ function persesColumnToTanstackColumn<TableData>(columns: Array<TableColumnConfi
     const sizeProps =
       size === 'auto' || size === undefined
         ? {
+            // All zero values are used as shorthand for "auto" when rendering
+            // because it makes it easy to fall back. (e.g. `row.size || "auto"`)
             size: 0,
             minSize: 0,
             maxSize: 0,
