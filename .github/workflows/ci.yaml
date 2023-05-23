@@ -71,6 +71,8 @@ jobs:
         env:
           HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
           HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}
+      - name: Run storybook tests
+        run: cd ./ui && npm run storybook:serve-and-test
       - name: store storybook build
         uses: actions/upload-artifact@v3
         with:
