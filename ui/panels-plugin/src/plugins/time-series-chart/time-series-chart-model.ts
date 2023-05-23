@@ -143,10 +143,10 @@ export const LEGEND_HEIGHT_LG = 100;
 type LegendSizeConfig = Record<LegendPositions, number>;
 
 // TODO: move this constant to the legend component.
-export const LEGEND_ROW_HEIGHT = 26;
+// export const LEGEND_ROW_HEIGHT = 26;
 export const LEGEND_SIZE: LegendSizeConfig = {
   // 5 rows plus header
-  Bottom: 6 * LEGEND_ROW_HEIGHT,
+  Bottom: 6,
 
   // Pixel value
   Right: 250,

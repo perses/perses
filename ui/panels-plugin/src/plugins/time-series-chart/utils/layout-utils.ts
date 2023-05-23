@@ -1,5 +1,6 @@
-import { PersesChartsTheme } from '@perses-dev/components';
+import { PersesChartsTheme, getTableCellLayout } from '@perses-dev/components';
 import type { GridComponentOption, YAXisComponentOption } from 'echarts';
+import { Theme } from '@mui/material';
 import { TimeSeriesChartProps } from '../TimeSeriesChartPanel';
 import { LEGEND_SIZE } from '../time-series-chart-model';
 
@@ -8,6 +9,7 @@ export type TimeSeriesLayoutOpts = {
   contentDimensions: TimeSeriesChartProps['contentDimensions'];
   spec: TimeSeriesChartProps['spec'];
   showYAxis: boolean;
+  theme: Theme;
 };
 
 export type TimeSeriesLayoutConfig = {
@@ -31,6 +33,7 @@ export const getTimeSeriesLayout = ({
   spec: { legend, y_axis },
   contentDimensions,
   showYAxis,
+  theme,
 }: TimeSeriesLayoutOpts): TimeSeriesLayoutConfig | undefined => {
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -49,10 +52,13 @@ export const getTimeSeriesLayout = ({
     return undefined;
   }
 
+  const tableCellLayout = getTableCellLayout(theme, 'compact');
+  const legendRowHeight = tableCellLayout.height;
+
   const legendWidth = legend && legend.position === 'Right' ? LEGEND_SIZE['Right'] : adjustedContentDimensions.width;
   const legendHeight =
     legend && legend.position === 'Bottom'
-      ? LEGEND_SIZE['Bottom']
+      ? LEGEND_SIZE['Bottom'] * legendRowHeight
       : contentDimensions?.height ?? adjustedContentDimensions.height;
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid

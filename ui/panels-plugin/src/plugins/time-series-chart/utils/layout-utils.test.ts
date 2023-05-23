@@ -11,6 +11,9 @@ describe('getTimeSeriesLayout', () => {
         },
         showYAxis: false,
         spec: {},
+
+        // @ts-ignore
+        theme: {},
       })
     ).toMatchSnapshot();
   });

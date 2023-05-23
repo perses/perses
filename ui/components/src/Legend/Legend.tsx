@@ -91,7 +91,7 @@ export function Legend({ width, height, options, data, selectedItems, onSelected
     onSelectedItemsChange(newSelected);
   };
 
-  const commonLegendProps: ListLegendProps | CompactLegendProps = {
+  const commonLegendProps = {
     height,
     items: data,
     selectedItems,

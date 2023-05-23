@@ -68,19 +68,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
-  // TODO: consider refactoring how the layout/spacing/alignment are calculated
-  // the next time significant changes are made to the time series panel (e.g.
-  // when making improvements to the legend to more closely match designs).
-  // This may also want to include moving some of this logic down to the shared,
-  // embeddable components.
   const contentPadding = chartsTheme.container.padding.default;
-  // const adjustedContentDimensions: typeof contentDimensions = contentDimensions
-  //   ? {
-  //       width: contentDimensions.width - contentPadding * 2,
-  //       height: contentDimensions.height - contentPadding * 2,
-  //     }
-  //   : undefined;
-
   const { thresholds: thresholdsColors } = useChartsTheme();
 
   // populate default 'position' and other future properties
@@ -104,16 +92,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     contentDimensions,
     spec,
     showYAxis: !!echartsYAxis.show,
+    theme: muiTheme,
   });
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
 
   const { setTimeRange } = useTimeRange();
-
-  // const handleOnRowSelectionChange: Required<LegendProps>['tableProps']['onRowSelectionChange'] = (newRowSelection) => {
-  //   // const newSelectedSeriesNames = Object.keys(newRowSelection).filter((key) => newRowSelection[key]);
-  //   setSelectedLegendItems(newRowSelection);
-  // };
 
   // Populate series data based on query results
   const { graphData } = useDeepMemo(() => {
