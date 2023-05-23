@@ -8,7 +8,7 @@ import {
   AccessorKeyColumnDef,
 } from '@tanstack/react-table';
 import { Checkbox, useTheme } from '@mui/material';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
 import { TableDensity } from './table-model';
@@ -44,10 +44,10 @@ export interface TableProps<TableData> {
   columns: Array<TableColumnConfig<TableData>>;
   density?: TableDensity;
   checkboxSelection?: boolean;
+  rowSelection?: RowSelectionState;
   onRowSelectionChange?: (rowSelection: RowSelectionState) => void;
   getRowId?: CoreOptions<TableData>['getRowId'];
   getCheckboxColor?: (data: TableData) => string;
-  rowSelection?: RowSelectionState;
 }
 
 function persesColumnToTanstackColumn<TableData>(columns: Array<TableColumnConfig<TableData>>) {
@@ -78,8 +78,6 @@ function persesColumnToTanstackColumn<TableData>(columns: Array<TableColumnConfi
 
   return tableCols;
 }
-
-// TODO: perf tuning
 
 /**
  * Component used to render tabular data in Perses use cases. This component is
@@ -151,10 +149,6 @@ export function Table<TableData>({
     return initTableColumns;
   }, [checkboxColumn, checkboxSelection, columns]);
 
-  const handleRowClick = (rowId: string) => {
-    table.getRow(rowId).toggleSelected();
-  };
-
   const table = useReactTable({
     data,
     columns: tableColumns,
@@ -167,5 +161,21 @@ export function Table<TableData>({
     },
   });
 
-  return <VirtualizedTable {...otherProps} table={table} density={density} onRowClick={handleRowClick} />;
+  const handleRowClick = useCallback(
+    (rowId: string) => {
+      table.getRow(rowId).toggleSelected();
+    },
+    [table]
+  );
+
+  return (
+    <VirtualizedTable
+      {...otherProps}
+      density={density}
+      onRowClick={handleRowClick}
+      rows={table.getRowModel().rows}
+      columns={table.getAllFlatColumns()}
+      headers={table.getHeaderGroups()}
+    />
+  );
 }

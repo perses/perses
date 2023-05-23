@@ -1,4 +1,4 @@
-import { Table as TSTable, flexRender } from '@tanstack/react-table';
+import { Column, HeaderGroup, Row, Table as TSTable, flexRender } from '@tanstack/react-table';
 import { Box, Typography } from '@mui/material';
 import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
 import { useRef, useState, useMemo, useCallback } from 'react';
@@ -22,9 +22,11 @@ type TableCellPosition = {
 export interface VirtualizedTableProps<TableData> {
   height: number;
   width: number;
-  table: TSTable<TableData>;
   density: TableDensity;
   onRowClick: (id: string) => void;
+  rows: Array<Row<TableData>>;
+  columns: Array<Column<TableData, unknown>>;
+  headers: Array<HeaderGroup<TableData>>;
 }
 
 // Separating out the virtualized table because we may want a paginated table
@@ -33,12 +35,13 @@ export interface VirtualizedTableProps<TableData> {
 export function VirtualizedTable<TableData>({
   width,
   height,
-  table,
   density,
   onRowClick,
+  rows,
+  columns,
+  headers,
 }: VirtualizedTableProps<TableData>) {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
-
   const visibleRange = useRef({
     startIndex: 0,
     endIndex: 0,
@@ -47,9 +50,6 @@ export function VirtualizedTable<TableData>({
   const setVisibleRange: TableVirtuosoProps<TableData, unknown>['rangeChanged'] = (newVisibleRange) => {
     visibleRange.current = newVisibleRange;
   };
-
-  const rows = table.getRowModel().rows;
-  const columns = table.getAllFlatColumns();
 
   const keyboardNav = useVirtualizedTableKeyboardNav({
     visibleRange: visibleRange,
@@ -73,7 +73,6 @@ export function VirtualizedTable<TableData>({
   const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
     return {
       Scroller: VirtualizedTableContainer,
-      // Table: tableComponent,
       Table: (props) => {
         return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
       },
@@ -105,7 +104,7 @@ export function VirtualizedTable<TableData>({
         fixedHeaderContent={() => {
           return (
             <>
-              {table.getHeaderGroups().map((headerGroup) => {
+              {headers.map((headerGroup) => {
                 return (
                   <TableRow key={headerGroup.id} density={density}>
                     {headerGroup.headers.map((header, i) => {
@@ -144,6 +143,7 @@ export function VirtualizedTable<TableData>({
             <>
               {row.getVisibleCells().map((cell, i) => {
                 const position: TableCellPosition = {
+                  // Add 1 to the row index because the header is row 0
                   row: index + 1,
                   column: i,
                 };
@@ -153,7 +153,6 @@ export function VirtualizedTable<TableData>({
                     key={cell.id}
                     sx={{ width: cell.column.getSize() || 'auto' }}
                     density={density}
-                    // Add 1 to the row index because the header is row 0
                     focusState={getFocusState(position)}
                     onFocus={() => keyboardNav.onCellFocus(position)}
                   >
