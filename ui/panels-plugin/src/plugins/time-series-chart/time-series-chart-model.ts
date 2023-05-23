@@ -137,12 +137,15 @@ export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => 
 });
 
 export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
-export const LEGEND_HEIGHT_SM = 40;
-export const LEGEND_HEIGHT_LG = 100;
+
+// TODO: Normalize the list to size consistently with the table when size
+// configuration is added.
+export const LIST_LEGEND_HEIGHT_SM = 40;
+export const LIST_LEGEND_HEIGHT_LG = 100;
 
 type LegendSizeConfig = Record<LegendPositions, number>;
 
-export const LEGEND_SIZE: LegendSizeConfig = {
+export const TABLE_LEGEND_SIZE: LegendSizeConfig = {
   // 5 rows plus header
   Bottom: 6,
 

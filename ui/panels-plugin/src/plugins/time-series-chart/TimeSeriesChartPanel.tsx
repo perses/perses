@@ -36,9 +36,9 @@ import {
   DEFAULT_UNIT,
   DEFAULT_VISUAL,
   PANEL_HEIGHT_LG_BREAKPOINT,
-  LEGEND_HEIGHT_SM,
-  LEGEND_HEIGHT_LG,
-  LEGEND_SIZE,
+  LIST_LEGEND_HEIGHT_SM,
+  LIST_LEGEND_HEIGHT_LG,
+  TABLE_LEGEND_SIZE,
   MIN_CHART_SIZE,
 } from './time-series-chart-model';
 import {
@@ -68,8 +68,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
-  const contentPadding = chartsTheme.container.padding.default;
-  const { thresholds: thresholdsColors } = useChartsTheme();
+  const { thresholds: thresholdsColors } = chartsTheme;
 
   // populate default 'position' and other future properties
   const legend =
@@ -88,11 +87,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const echartsYAxis = convertPanelYAxis(y_axis);
 
   const layout = getTimeSeriesLayout({
-    contentPadding,
     contentDimensions,
     spec,
     showYAxis: !!echartsYAxis.show,
-    theme: muiTheme,
+    muiTheme,
+    chartsTheme,
   });
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');

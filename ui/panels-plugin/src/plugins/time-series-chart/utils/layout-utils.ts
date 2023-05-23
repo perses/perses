@@ -1,15 +1,20 @@
 import { LegendOptions, PersesChartsTheme, getTableCellLayout } from '@perses-dev/components';
-import type { GridComponentOption, YAXisComponentOption } from 'echarts';
+import type { GridComponentOption } from 'echarts';
 import { Theme } from '@mui/material';
 import { TimeSeriesChartProps } from '../TimeSeriesChartPanel';
-import { LEGEND_SIZE } from '../time-series-chart-model';
+import {
+  LIST_LEGEND_HEIGHT_LG,
+  LIST_LEGEND_HEIGHT_SM,
+  PANEL_HEIGHT_LG_BREAKPOINT,
+  TABLE_LEGEND_SIZE,
+} from '../time-series-chart-model';
 
 export type TimeSeriesLayoutOpts = {
-  contentPadding: number;
   contentDimensions: TimeSeriesChartProps['contentDimensions'];
   spec: TimeSeriesChartProps['spec'];
   showYAxis: boolean;
-  theme: Theme;
+  muiTheme: Theme;
+  chartsTheme: PersesChartsTheme;
 };
 
 export type TimeSeriesLayoutConfig = {
@@ -28,12 +33,17 @@ export type TimeSeriesLayoutConfig = {
   padding: number;
 };
 
-interface GetLegendDimensionsOpts extends Pick<TimeSeriesLayoutOpts, 'theme' | 'contentDimensions'> {
+interface GetLegendDimensionsOpts extends Pick<TimeSeriesLayoutOpts, 'muiTheme' | 'contentDimensions'> {
   adjustedContentDimensions: NonNullable<TimeSeriesChartProps['contentDimensions']>;
   legend?: LegendOptions;
 }
 
-function getLegendDimensions({ theme, adjustedContentDimensions, contentDimensions, legend }: GetLegendDimensionsOpts) {
+function getLegendDimensions({
+  muiTheme,
+  adjustedContentDimensions,
+  contentDimensions,
+  legend,
+}: GetLegendDimensionsOpts) {
   if (!legend) {
     return {
       width: 0,
@@ -41,41 +51,65 @@ function getLegendDimensions({ theme, adjustedContentDimensions, contentDimensio
     };
   }
 
-  const width = adjustedContentDimensions.width;
-  const height = contentDimensions?.height ?? adjustedContentDimensions.height;
+  const contentWidth = adjustedContentDimensions.width;
+  const contentHeight = contentDimensions?.height ?? adjustedContentDimensions.height;
 
-  if (legend.position === 'Right') {
+  // TODO: normalize table & list to size similarly when sizing options are
+  // added.
+  if (legend.mode === 'Table') {
+    if (legend.position === 'Right') {
+      return {
+        width: TABLE_LEGEND_SIZE['Right'],
+        height: contentHeight,
+      };
+    }
+    // Position: Bottom
+
+    // We need the table cell layout to properly size "bottom" aligned legends
+    // based on the height of table cells.
+    const tableCellLayout = getTableCellLayout(muiTheme, 'compact');
+    const legendRowHeight = tableCellLayout.height;
     return {
-      width: LEGEND_SIZE['Right'],
-      height,
+      width: contentWidth,
+      height: TABLE_LEGEND_SIZE['Bottom'] * legendRowHeight,
     };
   }
 
-  // Position: Bottom
+  // List mode
+  if (legend.position === 'Right') {
+    // TODO: account for number of time series returned when adjusting legend spacing
+    return {
+      width: 200,
+      height: contentDimensions?.height || adjustedContentDimensions.height,
+    };
+  } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
+    return {
+      width: contentWidth,
+      height: LIST_LEGEND_HEIGHT_LG,
+    };
+  }
 
-  // We need the table cell layout to properly size "bottom" aligned legends
-  // based on the height of table cells.
-  const tableCellLayout = getTableCellLayout(theme, 'compact');
-  const legendRowHeight = tableCellLayout.height;
   return {
-    width,
-    height: LEGEND_SIZE['Bottom'] * legendRowHeight,
+    width: contentWidth,
+    height: LIST_LEGEND_HEIGHT_SM,
   };
 }
 
 export const getTimeSeriesLayout = ({
-  contentPadding,
   spec: { legend, y_axis },
   contentDimensions,
   showYAxis,
-  theme,
+  muiTheme,
+  chartsTheme,
 }: TimeSeriesLayoutOpts): TimeSeriesLayoutConfig | undefined => {
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
   // when making improvements to the legend to more closely match designs).
   // This may also want to include moving some of this logic down to the shared,
   // embeddable components.
-  const padding = contentPadding;
+  const padding = chartsTheme.container.padding.default;
+  console.log(`padding: ${padding}`);
+
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
     ? {
         width: contentDimensions.width - padding * 2,
@@ -91,7 +125,7 @@ export const getTimeSeriesLayout = ({
     contentDimensions,
     adjustedContentDimensions,
     legend,
-    theme,
+    muiTheme,
   });
   const legendWidth = legendDimensions.width;
   const legendHeight = legendDimensions.height;

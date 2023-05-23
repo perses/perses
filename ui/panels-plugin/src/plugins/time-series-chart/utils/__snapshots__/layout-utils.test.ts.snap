@@ -1,6 +1,94 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getTimeSeriesLayout handles simple chart 1`] = `
+exports[`getTimeSeriesLayout with list legend positioned bottom 1`] = `
+Object {
+  "chart": Object {
+    "grid": Object {
+      "bottom": 100,
+      "left": 20,
+      "right": 20,
+    },
+  },
+  "content": Object {
+    "height": 376,
+    "width": 576,
+  },
+  "legend": Object {
+    "height": 100,
+    "show": true,
+    "width": 576,
+  },
+  "padding": 12,
+}
+`;
+
+exports[`getTimeSeriesLayout with list legend positioned right 1`] = `
+Object {
+  "chart": Object {
+    "grid": Object {
+      "bottom": 0,
+      "left": 20,
+      "right": 200,
+    },
+  },
+  "content": Object {
+    "height": 376,
+    "width": 576,
+  },
+  "legend": Object {
+    "height": 400,
+    "show": true,
+    "width": 200,
+  },
+  "padding": 12,
+}
+`;
+
+exports[`getTimeSeriesLayout with table legend positioned bottom 1`] = `
+Object {
+  "chart": Object {
+    "grid": Object {
+      "bottom": 56.58,
+      "left": 20,
+      "right": 20,
+    },
+  },
+  "content": Object {
+    "height": 376,
+    "width": 576,
+  },
+  "legend": Object {
+    "height": 56.58,
+    "show": true,
+    "width": 576,
+  },
+  "padding": 12,
+}
+`;
+
+exports[`getTimeSeriesLayout with table legend positioned right 1`] = `
+Object {
+  "chart": Object {
+    "grid": Object {
+      "bottom": 0,
+      "left": 20,
+      "right": 250,
+    },
+  },
+  "content": Object {
+    "height": 376,
+    "width": 576,
+  },
+  "legend": Object {
+    "height": 400,
+    "show": true,
+    "width": 250,
+  },
+  "padding": 12,
+}
+`;
+
+exports[`getTimeSeriesLayout without legend 1`] = `
 Object {
   "chart": Object {
     "grid": Object {
@@ -10,14 +98,14 @@ Object {
     },
   },
   "content": Object {
-    "height": 360,
-    "width": 360,
+    "height": 376,
+    "width": 576,
   },
   "legend": Object {
-    "height": 400,
+    "height": 0,
     "show": false,
-    "width": 360,
+    "width": 0,
   },
-  "padding": 20,
+  "padding": 12,
 }
 `;
