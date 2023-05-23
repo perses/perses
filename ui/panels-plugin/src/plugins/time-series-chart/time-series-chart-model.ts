@@ -146,7 +146,7 @@ export const LIST_LEGEND_HEIGHT_LG = 100;
 type LegendSizeConfig = Record<LegendPositions, number>;
 
 export const TABLE_LEGEND_SIZE: LegendSizeConfig = {
-  // 5 rows plus header
+  // 5 rows plus header. Value to be multiplied by row height in pixels.
   Bottom: 6,
 
   // Pixel value
