@@ -47,7 +47,7 @@ export function GridTitle(props: GridTitleProps) {
 
   return (
     <Box
-      onClick={collapse ? collapse.onToggleOpen : undefined}
+      onClick={collapse?.onToggleOpen}
       sx={{
         display: 'flex',
         justifyContent: 'start',
@@ -110,7 +110,7 @@ export function GridTitle(props: GridTitleProps) {
                   onClick={(e) => {
                     // Don't trigger expand/collapse
                     e.stopPropagation();
-                    if (moveDown) moveDown();
+                    moveDown && moveDown();
                   }}
                 >
                   <ArrowDownIcon />
@@ -123,7 +123,7 @@ export function GridTitle(props: GridTitleProps) {
                   onClick={(e) => {
                     // Don't trigger expand/collapse
                     e.stopPropagation();
-                    if (moveUp) moveUp();
+                    moveUp && moveUp();
                   }}
                 >
                   <ArrowUpIcon />
