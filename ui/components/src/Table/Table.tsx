@@ -1,10 +1,6 @@
 import {
   useReactTable,
-  TableOptions,
-  createColumnHelper,
   getCoreRowModel,
-  getSortedRowModel,
-  flexRender,
   ColumnDef,
   SortingState,
   RowSelectionState,
@@ -14,7 +10,6 @@ import {
   AccessorColumnDef,
   AccessorKeyColumnDef,
 } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
 import { Checkbox, useTheme } from '@mui/material';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
@@ -81,14 +76,6 @@ export function Table<TableData>({
     return `${index}`;
   };
   const getRowId = initGetRowId ?? DEFAULT_GET_ROW_ID;
-
-  // TODO: consider making this controlled instead of internal.
-  // const initRowSelection: RowSelectionState = data.reduce((rowSelectionResult, row, index) => {
-  //   rowSelectionResult[getRowId(row, index)] = true;
-  //   return rowSelectionResult;
-  // }, {} as RowSelectionState);
-
-  // const [rowSelection, setRowSelection] = useState<RowSelectionState>(initRowSelection);
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
     const newRowSelection =
