@@ -2,15 +2,13 @@ import {
   useReactTable,
   getCoreRowModel,
   ColumnDef,
-  SortingState,
   RowSelectionState,
-  getFilteredRowModel,
   OnChangeFn,
   CoreOptions,
-  AccessorColumnDef,
   AccessorKeyColumnDef,
 } from '@tanstack/react-table';
 import { Checkbox, useTheme } from '@mui/material';
+import { useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
 import { TableDensity } from './table-model';
@@ -52,6 +50,35 @@ export interface TableProps<TableData> {
   rowSelection?: RowSelectionState;
 }
 
+function persesColumnToTanstackColumn<TableData>(columns: Array<TableColumnConfig<TableData>>) {
+  const tableCols: Array<ColumnDef<TableData>> = columns.map(({ size, ...otherProps }) => {
+    // Tanstack Table does not support an "auto" value to naturally size to fit
+    // the space in a table. We translate our custom "auto" setting to 0 size
+    // for these columns, so it is easy to fall back to auto when rendering.
+    // Taking from a recommendation in this github discussion:
+    // https://github.com/TanStack/table/discussions/4179#discussioncomment-3631326
+    const sizeProps =
+      size === 'auto' || size === undefined
+        ? {
+            size: 0,
+            minSize: 0,
+            maxSize: 0,
+          }
+        : {
+            size,
+          };
+
+    const result = {
+      ...otherProps,
+      ...sizeProps,
+    };
+
+    return result;
+  });
+
+  return tableCols;
+}
+
 // TODO: perf tuning
 
 /**
@@ -83,63 +110,46 @@ export function Table<TableData>({
     onRowSelectionChange?.(newRowSelection);
   };
 
-  const checkboxColumn: ColumnDef<TableData> = {
-    id: 'checkboxRowSelect',
-    size: 32,
-    header: ({ table }) => {
-      return (
-        <TableCheckbox
-          checked={table.getIsAllRowsSelected()}
-          indeterminate={table.getIsSomeRowsSelected()}
-          onChange={table.getToggleAllRowsSelectedHandler()}
-          color={theme.palette.text.primary}
-          density={density}
-        />
-      );
-    },
-    cell: ({ row }) => {
-      return (
-        <TableCheckbox
-          checked={row.getIsSelected()}
-          indeterminate={row.getIsSomeSelected()}
-          onChange={(e) => {
-            row.getToggleSelectedHandler()(e);
-          }}
-          color={getCheckboxColor?.(row.original)}
-          density={density}
-        />
-      );
-    },
-  };
-
-  const tableColumns: Array<ColumnDef<TableData>> = [...columns].map(({ size, ...otherProps }) => {
-    // Tanstack Table does not support an "auto" value to naturally size to fit
-    // the space in a table. We translate our custom "auto" setting to 0 size
-    // for these columns, so it is easy to fall back to auto when rendering.
-    // Taking from a recommendation in this github discussion:
-    // https://github.com/TanStack/table/discussions/4179#discussioncomment-3631326
-    const sizeProps =
-      size === 'auto' || size === undefined
-        ? {
-            size: 0,
-            minSize: 0,
-            maxSize: 0,
-          }
-        : {
-            size,
-          };
-
-    const result = {
-      ...otherProps,
-      ...sizeProps,
+  const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
+    return {
+      id: 'checkboxRowSelect',
+      size: 32,
+      header: ({ table }) => {
+        return (
+          <TableCheckbox
+            checked={table.getIsAllRowsSelected()}
+            indeterminate={table.getIsSomeRowsSelected()}
+            onChange={table.getToggleAllRowsSelectedHandler()}
+            color={theme.palette.text.primary}
+            density={density}
+          />
+        );
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCheckbox
+            checked={row.getIsSelected()}
+            indeterminate={row.getIsSomeSelected()}
+            onChange={(e) => {
+              row.getToggleSelectedHandler()(e);
+            }}
+            color={getCheckboxColor?.(row.original)}
+            density={density}
+          />
+        );
+      },
     };
+  }, [density, getCheckboxColor, theme.palette.text.primary]);
 
-    return result;
-  });
+  const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
+    const initTableColumns = persesColumnToTanstackColumn(columns);
 
-  if (checkboxSelection) {
-    tableColumns.unshift(checkboxColumn);
-  }
+    if (checkboxSelection) {
+      initTableColumns.unshift(checkboxColumn);
+    }
+
+    return initTableColumns;
+  }, [checkboxColumn, checkboxSelection, columns]);
 
   const handleRowClick = (rowId: string) => {
     table.getRow(rowId).toggleSelected();
