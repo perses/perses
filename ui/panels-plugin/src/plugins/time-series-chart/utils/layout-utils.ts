@@ -1,4 +1,4 @@
-import { PersesChartsTheme, getTableCellLayout } from '@perses-dev/components';
+import { LegendOptions, PersesChartsTheme, getTableCellLayout } from '@perses-dev/components';
 import type { GridComponentOption, YAXisComponentOption } from 'echarts';
 import { Theme } from '@mui/material';
 import { TimeSeriesChartProps } from '../TimeSeriesChartPanel';
@@ -28,6 +28,41 @@ export type TimeSeriesLayoutConfig = {
   padding: number;
 };
 
+interface GetLegendDimensionsOpts extends Pick<TimeSeriesLayoutOpts, 'theme' | 'contentDimensions'> {
+  adjustedContentDimensions: NonNullable<TimeSeriesChartProps['contentDimensions']>;
+  legend?: LegendOptions;
+}
+
+function getLegendDimensions({ theme, adjustedContentDimensions, contentDimensions, legend }: GetLegendDimensionsOpts) {
+  if (!legend) {
+    return {
+      width: 0,
+      height: 0,
+    };
+  }
+
+  const width = adjustedContentDimensions.width;
+  const height = contentDimensions?.height ?? adjustedContentDimensions.height;
+
+  if (legend.position === 'Right') {
+    return {
+      width: LEGEND_SIZE['Right'],
+      height,
+    };
+  }
+
+  // Position: Bottom
+
+  // We need the table cell layout to properly size "bottom" aligned legends
+  // based on the height of table cells.
+  const tableCellLayout = getTableCellLayout(theme, 'compact');
+  const legendRowHeight = tableCellLayout.height;
+  return {
+    width,
+    height: LEGEND_SIZE['Bottom'] * legendRowHeight,
+  };
+}
+
 export const getTimeSeriesLayout = ({
   contentPadding,
   spec: { legend, y_axis },
@@ -52,14 +87,14 @@ export const getTimeSeriesLayout = ({
     return undefined;
   }
 
-  const tableCellLayout = getTableCellLayout(theme, 'compact');
-  const legendRowHeight = tableCellLayout.height;
-
-  const legendWidth = legend && legend.position === 'Right' ? LEGEND_SIZE['Right'] : adjustedContentDimensions.width;
-  const legendHeight =
-    legend && legend.position === 'Bottom'
-      ? LEGEND_SIZE['Bottom'] * legendRowHeight
-      : contentDimensions?.height ?? adjustedContentDimensions.height;
+  const legendDimensions = getLegendDimensions({
+    contentDimensions,
+    adjustedContentDimensions,
+    legend,
+    theme,
+  });
+  const legendWidth = legendDimensions.width;
+  const legendHeight = legendDimensions.height;
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
