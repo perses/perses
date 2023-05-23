@@ -160,6 +160,42 @@ describe('Table', () => {
     }
   });
 
+  test('renders table cell content based on accessor', () => {
+    const headerRows = 1;
+    const dataRows = 5;
+    const data = generateMockTableData(dataRows);
+    renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+    const tableRows = screen.getAllByRole('row');
+    expect(tableRows).toHaveLength(data.length + headerRows);
+
+    // Offset 1 to account for header row.
+    for (let i = 1; i <= dataRows; i++) {
+      const dataRow = data[i - 1];
+      const cell = getTableCellByIndex(i, 1);
+      expect(cell).toHaveTextContent(`${dataRow?.value}`);
+    }
+  });
+
+  test('renders table cell content based on a function', () => {
+    const headerRows = 1;
+    const dataRows = 5;
+    const data = generateMockTableData(dataRows);
+    renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+    const tableRows = screen.getAllByRole('row');
+    expect(tableRows).toHaveLength(data.length + headerRows);
+
+    // Offset 1 to account for header row.
+    for (let i = 1; i <= dataRows; i++) {
+      const dataRow = data[i - 1];
+      const cell = getTableCellByIndex(i, 0);
+
+      within(cell).getByTitle(`${dataRow?.label}`);
+      expect(cell).toHaveTextContent(`${dataRow?.label}`);
+    }
+  });
+
   describe('when checkboxes are enabled', () => {
     test('renders checkbox column followed by specified columns', () => {
       renderTable({ checkboxSelection: true });
@@ -218,6 +254,66 @@ describe('Table', () => {
         within(firstCell).getByRole('checkbox');
       }
     });
+
+    describe('when no checkboxes are selected', () => {
+      test('selects all after clicking header checkbox', () => {
+        const data = generateMockTableData(3);
+        const mockOnRowSelectionChange = jest.fn();
+        renderTable({
+          data: data,
+          checkboxSelection: true,
+          onRowSelectionChange: mockOnRowSelectionChange,
+          rowSelection: {},
+        });
+
+        const table = screen.getByRole('table');
+        const checkboxes = within(table).getAllByRole('checkbox');
+        const firstCheckbox = checkboxes[0];
+        if (!firstCheckbox) {
+          throw new Error('Missing first checkbox');
+        }
+
+        userEvent.click(firstCheckbox);
+        const expectedSelectAll = {
+          '0': true,
+          '1': true,
+          '2': true,
+        };
+        expect(mockOnRowSelectionChange).toHaveBeenCalledWith(expectedSelectAll);
+      });
+
+      // Clicking row
+    });
+
+    describe('when all checkboxes are selected', () => {
+      test('selects none after clicking header checkbox', () => {
+        const data = generateMockTableData(3);
+        const mockOnRowSelectionChange = jest.fn();
+        renderTable({
+          data: data,
+          checkboxSelection: true,
+          onRowSelectionChange: mockOnRowSelectionChange,
+          rowSelection: {
+            '0': true,
+            '1': true,
+            '2': true,
+          },
+        });
+
+        const table = screen.getByRole('table');
+        const checkboxes = within(table).getAllByRole('checkbox');
+        const firstCheckbox = checkboxes[0];
+        if (!firstCheckbox) {
+          throw new Error('Missing first checkbox');
+        }
+
+        userEvent.click(firstCheckbox);
+        const expectedSelectNone = {};
+        expect(mockOnRowSelectionChange).toHaveBeenCalledWith(expectedSelectNone);
+      });
+    });
+
+    // Clicking row
   });
 
   // TODO: look at where first tabindex should gooo.
