@@ -12,4 +12,4 @@
 // limitations under the License.
 
 export * from './Markdown';
-export type { MarkdownPanelDefinition } from './markdown-panel-model';
+export type { MarkdownPanelDefinition, MarkdownPanelOptions } from './markdown-panel-model';

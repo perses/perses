@@ -12,4 +12,10 @@
 // limitations under the License.
 
 export * from './TimeSeriesChart';
-export type { TimeSeriesChartDefinition } from './time-series-chart-model';
+export type {
+  TimeSeriesChartDefinition,
+  TimeSeriesChartOptions,
+  YAxisOptions,
+  PaletteOptions,
+  VisualOptions,
+} from './time-series-chart-model';
