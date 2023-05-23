@@ -1,4 +1,3 @@
-import { useCallback, useState } from 'react';
 import { TableVirtuosoHandle } from 'react-virtuoso';
 import { useTableKeyboardNav, UseTableKeyboardNavProps } from './useTableKeyboardNav';
 

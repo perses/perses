@@ -1,9 +1,7 @@
-import { Column, HeaderGroup, Row, Table as TSTable, flexRender } from '@tanstack/react-table';
-import { Box, Typography } from '@mui/material';
+import { Column, HeaderGroup, Row, flexRender } from '@tanstack/react-table';
+import { Box } from '@mui/material';
 import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
-import { useRef, useState, useMemo, useCallback } from 'react';
-import { combineSx } from '../utils';
-import { TableProps } from './Table';
+import { useRef, useMemo } from 'react';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -11,7 +9,7 @@ import { TableHead } from './TableHead';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableDensity } from './table-model';
-import { useVirtualizedTableKeyboardNav } from './useVirtualizedTableKeyboardNav';
+import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 
 type TableCellPosition = {
   row: number;

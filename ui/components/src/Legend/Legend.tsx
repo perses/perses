@@ -15,9 +15,9 @@ import { Box } from '@mui/material';
 import { ReactNode } from 'react';
 import { produce } from 'immer';
 import { LegendOptions, LegendItem, getLegendMode, SelectedLegendItemState } from '../model';
-import { ListLegend, ListLegendProps } from './ListLegend';
-import { CompactLegend, CompactLegendProps } from './CompactLegend';
-import { TableLegend, TableLegendProps } from './TableLegend';
+import { ListLegend } from './ListLegend';
+import { CompactLegend } from './CompactLegend';
+import { TableLegend } from './TableLegend';
 
 export interface LegendProps {
   width: number;

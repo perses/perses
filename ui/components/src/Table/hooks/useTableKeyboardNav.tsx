@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { TableVirtuosoHandle } from 'react-virtuoso';
 
 export interface UseTableKeyboardNavProps {
   maxRows: number;

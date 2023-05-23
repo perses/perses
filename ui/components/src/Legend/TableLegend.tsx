@@ -1,5 +1,3 @@
-import { ColumnDef, CellContext } from '@tanstack/react-table';
-import { useMemo } from 'react';
 import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from '../model';
 

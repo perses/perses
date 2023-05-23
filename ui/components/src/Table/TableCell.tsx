@@ -1,16 +1,8 @@
-import {
-  TableCell as MuiTableCell,
-  styled,
-  TableCellProps as MuiTableCellProps,
-  Box,
-  useTheme,
-  Theme,
-} from '@mui/material';
-import { CSSProperties, forwardRef, useEffect, useRef } from 'react';
-import { combineSx } from '../utils';
+import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
+import { useEffect, useRef } from 'react';
 import { TableDensity, getTableCellLayout } from './table-model';
 
-const StyledMuiTableCell = styled(MuiTableCell)(({ theme, variant }) => ({
+const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   padding: 0,
   backgroundColor: 'inherit',
 
@@ -46,7 +38,6 @@ export function TableCell({
   const elRef = useRef<HTMLTableCellElement>();
 
   const isHeader = variant === 'head';
-  const isCompact = density === 'compact';
 
   // TODO: see if this should be a uselayouteffect.
   useEffect(() => {

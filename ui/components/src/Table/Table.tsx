@@ -7,7 +7,7 @@ import {
   CoreOptions,
   AccessorKeyColumnDef,
 } from '@tanstack/react-table';
-import { Checkbox, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';

@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { render, screen, fireEvent, getAllByRole, act, within } from '@testing-library/react';
+import { render, screen, getAllByRole, act, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { Table, TableProps } from './Table';
 
@@ -252,6 +252,9 @@ describe('Table', () => {
           throw new Error(`Missing first cell for row ${i + 1}`);
         }
         within(firstCell).getByRole('checkbox');
+
+        // Note: we cover testing the checkbox colors using visual tests in
+        // storybook because that's easier.
       }
     });
 

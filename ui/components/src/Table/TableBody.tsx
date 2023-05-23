@@ -1,7 +1,7 @@
 import { TableBody as MuiTableBody, styled, TableBodyProps as MuiTableBodyProps } from '@mui/material';
 import { forwardRef } from 'react';
 
-const StyledMuiTableBody = styled(MuiTableBody)(({ theme }) => ({}));
+const StyledMuiTableBody = styled(MuiTableBody)(() => ({}));
 
 type TableBodyProps = MuiTableBodyProps;
 

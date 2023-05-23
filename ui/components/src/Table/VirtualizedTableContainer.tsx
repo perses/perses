@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import { forwardRef } from 'react';
 
-const StyledMuiTablContainer = styled(MuiTableContainer)(({ theme }) => ({}));
+const StyledMuiTablContainer = styled(MuiTableContainer)(() => ({}));
 
 type VirtualizedTableContainerProps = MuiTableContainerProps;
 
