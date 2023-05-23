@@ -160,15 +160,6 @@ describe('Table', () => {
     }
   });
 
-  // TODO: look at where first tabindex should gooo.
-  test('on tab the first column header is focused', () => {
-    renderLargeTable();
-
-    // Tab focuses the top left cell, which is the first column header.
-    userEvent.tab();
-    expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
-  });
-
   describe('when checkboxes are enabled', () => {
     test('renders checkbox column followed by specified columns', () => {
       renderTable({ checkboxSelection: true });
@@ -227,6 +218,15 @@ describe('Table', () => {
         within(firstCell).getByRole('checkbox');
       }
     });
+  });
+
+  // TODO: look at where first tabindex should gooo.
+  test('on tab the first column header is focused', () => {
+    renderLargeTable();
+
+    // Tab focuses the top left cell, which is the first column header.
+    userEvent.tab();
+    expect(screen.getAllByRole('columnheader')[0]).toHaveFocus();
   });
 
   describe('when table is focused', () => {
