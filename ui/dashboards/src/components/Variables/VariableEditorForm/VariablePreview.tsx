@@ -13,13 +13,12 @@
 
 import React, { useState } from 'react';
 import { Alert, Box, Card, Chip, CircularProgress, IconButton, Stack, Typography } from '@mui/material';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, useSnackbar } from '@perses-dev/components';
 import Refresh from 'mdi-material-ui/Refresh';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { ListVariableDefinition } from '@perses-dev/core';
 import { TOOLTIP_TEXT } from '../../../constants';
 import { useListVariablePluginValues } from '../variable-model';
-import { useSnackbar } from '../../../context';
 
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
 

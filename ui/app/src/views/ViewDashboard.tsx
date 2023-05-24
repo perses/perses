@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ViewDashboard as DashboardView, useSnackbar } from '@perses-dev/dashboards';
+import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
 import { useCallback, useEffect, useRef, useState } from 'react';

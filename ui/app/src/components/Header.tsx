@@ -30,7 +30,7 @@ import {
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import { MouseEvent, useState } from 'react';
-import { useSnackbar } from '@perses-dev/dashboards';
+import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { PersesLogo } from './PersesLogo';

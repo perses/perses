@@ -17,7 +17,7 @@ import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SnackbarProvider } from '@perses-dev/dashboards';
+import { SnackbarProvider } from '@perses-dev/components';
 import { DarkModeContextProvider } from './context/DarkMode';
 import App from './App';
 import { NavHistoryProvider } from './context/DashboardNavHistory';

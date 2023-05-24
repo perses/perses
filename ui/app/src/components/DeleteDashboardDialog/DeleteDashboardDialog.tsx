@@ -13,10 +13,9 @@
 
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
 import { Button } from '@mui/material';
-import { Dialog } from '@perses-dev/components';
+import { Dialog, useSnackbar } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
-import { useSnackbar } from '@perses-dev/dashboards';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 
 export interface DeleteDashboardDialogProps {

@@ -13,8 +13,7 @@
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { Button, TextField } from '@mui/material';
-import { Dialog } from '@perses-dev/components';
-import { useSnackbar } from '@perses-dev/dashboards';
+import { Dialog, useSnackbar } from '@perses-dev/components';
 import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
 
 export interface AddProjectDialogProps {
