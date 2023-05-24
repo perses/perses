@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import { FocusedSeriesArray } from './focused-series';
+import { FocusedSeriesArray } from './nearby-series';
 
 export const TOOLTIP_MIN_WIDTH = 375;
 export const TOOLTIP_MAX_WIDTH = 650;

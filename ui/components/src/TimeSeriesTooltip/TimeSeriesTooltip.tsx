@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
 import { TooltipContent } from './TooltipContent';
-import { getFocusedSeriesData } from './focused-series';
+import { getFocusedSeriesData } from './nearby-series';
 import {
   CursorCoordinates,
   FALLBACK_CHART_WIDTH,

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { EChartsDataFormat, UnitOptions } from '../model';
-import { getNearbySeries, getYBuffer, isWithinPercentageRange } from './focused-series';
+import { getNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
 
 describe('getNearbySeries', () => {
   const chartData: EChartsDataFormat = {

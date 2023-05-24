@@ -16,7 +16,7 @@ import PinOutline from 'mdi-material-ui/PinOutline';
 import Pin from 'mdi-material-ui/Pin';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { FocusedSeriesArray } from './focused-series';
+import { FocusedSeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
