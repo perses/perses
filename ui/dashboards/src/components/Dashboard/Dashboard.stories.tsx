@@ -603,7 +603,7 @@ export const ExampleWithTimeSeriesPanels: Story = {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
-                  totalSeries: 100,
+                  totalSeries: 20,
                 }),
               },
             },
