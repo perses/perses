@@ -14,7 +14,7 @@
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
 import { Button } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
-import { useSnackbar } from '../../context/SnackbarProvider';
+import { useSnackbar } from '@perses-dev/dashboards';
 import { useDeleteProjectMutation } from '../../model/project-client';
 
 export interface DeleteProjectDialogProps {

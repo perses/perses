@@ -15,7 +15,7 @@ import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } f
 import { Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
-import { useSnackbar } from '../../context/SnackbarProvider';
+import { useSnackbar } from '@perses-dev/dashboards';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 
 export interface RenameDashboardDialogProps {

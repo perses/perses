@@ -14,4 +14,5 @@
 export * from './DashboardProvider';
 export * from './DatasourceStoreProvider';
 export * from './TemplateVariableProvider';
+export * from './SnackbarProvider';
 export * from './useDashboard';

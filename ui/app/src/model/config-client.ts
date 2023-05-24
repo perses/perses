@@ -16,7 +16,7 @@ import { DashboardSelector, fetchJson } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { marked } from 'marked';
 import * as DOMPurify from 'dompurify';
-import { useSnackbar } from '../context/SnackbarProvider';
+import { useSnackbar } from '@perses-dev/dashboards';
 import buildURL from './url-builder';
 
 const resource = 'config';

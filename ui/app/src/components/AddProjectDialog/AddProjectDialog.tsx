@@ -14,8 +14,8 @@
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
+import { useSnackbar } from '@perses-dev/dashboards';
 import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
-import { useSnackbar } from '../../context/SnackbarProvider';
 
 export interface AddProjectDialogProps {
   open: boolean;
