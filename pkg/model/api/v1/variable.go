@@ -66,6 +66,7 @@ func (v *VariableSpec) unmarshal(unmarshal func(interface{}) error, staticMarsha
 	return nil
 }
 
+// GlobalVariable is a global variable that be used everywhere regardless the project.
 type GlobalVariable struct {
 	Kind     Kind         `json:"kind" yaml:"kind"`
 	Metadata Metadata     `json:"metadata" yaml:"metadata"`
@@ -84,6 +85,8 @@ func (v *GlobalVariable) GetSpec() interface{} {
 	return v.Spec
 }
 
+// Variable is a global variable at project level.
+// If you are looking for the variable contained in a dashboard, take a look at dashboard.Variable
 type Variable struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
