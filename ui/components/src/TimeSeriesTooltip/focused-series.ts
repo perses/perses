@@ -150,15 +150,15 @@ export function getNearbySeries(
  */
 export function getFocusedSeriesData({
   mousePos,
-  chartData,
   pinnedPos,
+  chartData,
   chart,
   unit,
   showAllSeries = false,
 }: {
   mousePos: CursorData['coords'];
-  chartData: EChartsDataFormat;
   pinnedPos: CursorData['coords'];
+  chartData: EChartsDataFormat;
   chart?: EChartsInstance;
   unit?: UnitOptions;
   showAllSeries?: boolean;
