@@ -229,14 +229,14 @@ export const NoData: Story = {
  * The table supports some basic common keyboard navigation to support
  * keyboard-based interactions with the table including:
  * - Initial focus on top left cell.
- * - right arrow: moves the focus one cell to the right
- * - left arrow: moves the focus one cell to the left
- * - up arrow: moves the focus one cell up
- * - down arrow: moves the focus one cell down
- * - home: moves focus to the top left cell
- * - end: moves focus to the bottom right cell
- * - page up: moves the focus up approximately one page
- * - page down: moves the focus down approximately one page
+ * - `right arrow`: moves the focus one cell to the right
+ * - `left arrow`: moves the focus one cell to the left
+ * - `up arrow`: moves the focus one cell up
+ * - `down arrow`: moves the focus one cell down
+ * - `home`: moves focus to the top left cell
+ * - `end`: moves focus to the bottom right cell
+ * - `page up`: moves the focus up approximately one page
+ * - `page down`: moves the focus down approximately one page
  */
 export const KeyboardNavigation: Story = {
   args: {
