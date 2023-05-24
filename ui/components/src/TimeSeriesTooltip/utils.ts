@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH } from './tooltip-model';
+import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH, TOOLTIP_ADJUST_Y_POS_MULTIPLIER } from './tooltip-model';
 
 /**
  * Determine position of tooltip depending on chart dimensions and the number of focused series
@@ -42,7 +42,8 @@ export function assembleTransform(
 
   // adjust so tooltip does not get cut off at bottom of chart
   if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
-    y = mousePos.page.y - tooltipHeight * 0.75;
+    // multiplier ensures tooltip isn't overly adjusted and gets cut off at the top of the viewport
+    y = mousePos.page.y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
   }
 
   // use tooltip width to determine when to repos from right to left
