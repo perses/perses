@@ -61,8 +61,6 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
-            maintain 17 compatibility somehow with a polyfill/shim? */}
         <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind="PrometheusDatasource"
@@ -112,8 +110,6 @@ function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<Prometheus
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
-            maintain 17 compatibility somehow with a polyfill/shim? */}
         <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind="PrometheusDatasource"
@@ -158,8 +154,6 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
-            maintain 17 compatibility somehow with a polyfill/shim? */}
         <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
