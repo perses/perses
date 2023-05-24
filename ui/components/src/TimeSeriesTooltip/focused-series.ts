@@ -190,9 +190,9 @@ export function getFocusedSeriesData({
 
   if (chart['_model'] === undefined) return [];
   const chartModel = chart['_model'];
-  const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
+  const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
   const totalSeries = chartData.timeSeries.length;
-  const yBuffer = getYBuffer({ interval: yAxisInterval, totalSeries, showAllSeries });
+  const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
@@ -236,27 +236,27 @@ export function isWithinPercentageRange({
  * Get range to check within for nearby series to show in tooltip.
  */
 export function getYBuffer({
-  interval,
+  yInterval,
   totalSeries,
   showAllSeries = false,
 }: {
-  interval: number;
+  yInterval: number;
   totalSeries: number;
   showAllSeries?: boolean;
 }) {
   if (showAllSeries) {
-    return interval * 10; // roughly correlates with grid so entire canvas is searched
+    return yInterval * 10; // roughly correlates with grid so entire canvas is searched
   }
 
   // never let nearby series range be less than roughly the size of a single tick
-  const yBufferMin = interval * 0.3;
+  const yBufferMin = yInterval * 0.3;
 
   // tooltip trigger area gets smaller with more series
   if (totalSeries > SHOW_FEWER_SERIES_LIMIT) {
-    const adjustedBuffer = (interval * DYNAMIC_FOCUSED_SERIES_MULTIPLIER) / totalSeries;
+    const adjustedBuffer = (yInterval * DYNAMIC_FOCUSED_SERIES_MULTIPLIER) / totalSeries;
     return Math.max(yBufferMin, adjustedBuffer);
   }
 
   // increase multiplier to expand nearby series range
-  return Math.max(yBufferMin, interval * INCREASE_FOCUSED_SERIES_MULTIPLIER);
+  return Math.max(yBufferMin, yInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER);
 }
