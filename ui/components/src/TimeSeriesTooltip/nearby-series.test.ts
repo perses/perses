@@ -44,7 +44,7 @@ describe('checkforNearbySeries', () => {
 
   const yBuffer = 0.02; // calculated from y axis interval
 
-  const focusedSeriesOutput = [
+  const nearbySeriesOutput = [
     {
       date: 1654007895000,
       datumIdx: 2,
@@ -58,16 +58,16 @@ describe('checkforNearbySeries', () => {
     },
   ];
 
-  it('should return focused series data for points nearby the cursor', () => {
+  it('should return nearby series data for points nearby the cursor', () => {
     const decimalUnit: UnitOptions = {
       kind: 'Decimal',
       decimal_places: 2,
     };
-    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(focusedSeriesOutput);
+    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(nearbySeriesOutput);
   });
 
   it('should return series values formatted as a percent', () => {
-    const percentFormattedOutput = [...focusedSeriesOutput];
+    const percentFormattedOutput = [...nearbySeriesOutput];
     if (percentFormattedOutput[0]) {
       percentFormattedOutput[0].formattedY = '5%';
     }
@@ -108,17 +108,15 @@ describe('getYBuffer', () => {
 });
 
 describe('isWithinPercentageRange', () => {
-  it('should return true when focusedY is within the specified percentage range of yValue', () => {
-    const focusedY = 256250000;
+  it('should return true when input value is within the specified percentage range of yValue', () => {
     const yValue = 261353472;
-    const result = isWithinPercentageRange({ valueToCheck: focusedY, baseValue: yValue, percentage: 5 });
+    const result = isWithinPercentageRange({ valueToCheck: 256250000, baseValue: yValue, percentage: 5 });
     expect(result).toBe(true);
   });
 
-  it('returns false when focusedY is outside the specified percentage range of yValue', () => {
-    const focusedY = 200;
+  it('returns false when nearbyY is outside the specified percentage range of yValue', () => {
     const yValue = 100;
-    const result = isWithinPercentageRange({ valueToCheck: focusedY, baseValue: yValue, percentage: 5 });
+    const result = isWithinPercentageRange({ valueToCheck: 200, baseValue: yValue, percentage: 5 });
     expect(result).toBe(false);
   });
 });
