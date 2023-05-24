@@ -31,7 +31,7 @@ import { assembleTransform } from './utils';
 interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
-  tooltipPinned: boolean;
+  isTooltipPinned: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;
@@ -41,7 +41,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,
-  tooltipPinned,
+  isTooltipPinned,
   unit,
   onUnpinClick,
 }: TimeSeriesTooltipProps) {
@@ -72,14 +72,14 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     return null;
   }
 
-  if (tooltipPinned === true && pinnedPos === null) {
+  if (isTooltipPinned === true && pinnedPos === null) {
     setPinnedPos(mousePos);
   }
 
   // Option for user to see all series instead of only the nearby focused series.
   // Only relevant when there are more total series than are visible.
   const showAllSeriesToggle =
-    tooltipPinned === true &&
+    isTooltipPinned === true &&
     showAllSeries === false &&
     chartData.timeSeries.length > 1 &&
     focusedSeries.length !== chartData.timeSeries.length;
@@ -116,7 +116,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
         <TooltipContent
           series={focusedSeries}
           wrapLabels={wrapLabels}
-          tooltipPinned={tooltipPinned}
+          isTooltipPinned={isTooltipPinned}
           onUnpinClick={() => {
             setPinnedPos(null);
             if (onUnpinClick !== undefined) {

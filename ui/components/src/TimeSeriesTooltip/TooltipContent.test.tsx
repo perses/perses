@@ -37,7 +37,7 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      tooltipPinned: false,
+      isTooltipPinned: false,
       onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
@@ -74,7 +74,7 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      tooltipPinned: false,
+      isTooltipPinned: false,
       onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
@@ -115,7 +115,7 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      tooltipPinned: false,
+      isTooltipPinned: false,
       onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
@@ -156,7 +156,7 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      tooltipPinned: false,
+      isTooltipPinned: false,
       onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);

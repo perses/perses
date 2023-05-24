@@ -95,7 +95,7 @@ export function LineChart({
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [tooltipPinned, setTooltipPinned] = useState<boolean>(false);
+  const [isTooltipPinned, setTooltipPinned] = useState<boolean>(false);
   const { timeZone } = useTimeZone();
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -236,7 +236,7 @@ export function LineChart({
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
-            tooltipPinned={tooltipPinned}
+            isTooltipPinned={isTooltipPinned}
             unit={unit}
             onUnpinClick={() => {
               setTooltipPinned(false);

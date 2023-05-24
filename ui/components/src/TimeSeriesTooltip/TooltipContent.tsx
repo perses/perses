@@ -21,13 +21,13 @@ import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;
-  tooltipPinned: boolean;
+  isTooltipPinned: boolean;
   wrapLabels?: boolean;
   onUnpinClick: () => void;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { series, wrapLabels, tooltipPinned, onUnpinClick } = props;
+  const { series, wrapLabels, isTooltipPinned, onUnpinClick } = props;
   const { formatWithUserTimeZone } = useTimeZone();
 
   const seriesTime = series && series[0] && series[0].date ? series[0].date : null;
@@ -74,8 +74,8 @@ export function TooltipContent(props: TooltipContentProps) {
       >
         {formatTimeSeriesHeader(seriesTime)}
         <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-          <Typography sx={{ fontSize: 11 }}>Click to {tooltipPinned ? 'Unpin' : 'Pin'}</Typography>
-          {tooltipPinned ? (
+          <Typography sx={{ fontSize: 11 }}>Click to {isTooltipPinned ? 'Unpin' : 'Pin'}</Typography>
+          {isTooltipPinned ? (
             <Pin onClick={onUnpinClick} sx={{ fontSize: 16, cursor: 'pointer' }} />
           ) : (
             <PinOutline sx={{ fontSize: 16 }} />
