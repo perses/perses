@@ -25,6 +25,10 @@ import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
 import { TableProps, persesColumnsToTanstackColumns } from './model/table-model';
 
+const DEFAULT_GET_ROW_ID = (data: unknown, index: number) => {
+  return `${index}`;
+};
+
 /**
  * Component used to render tabular data in Perses use cases. This component is
  * **not** intended to be a general use data table for use cases unrelated to Perses.
@@ -38,15 +42,11 @@ export function Table<TableData extends Record<string, unknown>>({
   checkboxSelection,
   onRowSelectionChange,
   getCheckboxColor,
-  getRowId: initGetRowId,
+  getRowId = DEFAULT_GET_ROW_ID,
   rowSelection = {},
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
-  const DEFAULT_GET_ROW_ID: CoreOptions<TableData>['getRowId'] = (data, index) => {
-    return `${index}`;
-  };
-  const getRowId = initGetRowId ?? DEFAULT_GET_ROW_ID;
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
     const newRowSelection =
