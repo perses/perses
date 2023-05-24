@@ -16,6 +16,7 @@ import { Legend, LegendProps } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { Box, Stack, Typography } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
+import { useState } from 'react';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -34,13 +35,25 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
     data.push({
       id: `${i}`,
       label: `${labelPrefix} ${i}`,
-      isSelected: false,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
       onClick: action(`onClick legendItem ${i}`),
     });
   }
   return data;
 }
+
+// Wrapper that manages the controlled legend selection state, so the individual
+// story does not need to. Useful for stories that are not focused on explaining
+// how this state works.
+const UncontrolledLegendWrapper = (props: LegendProps) => {
+  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>('ALL');
+  const handleSelectedItemsChange: LegendProps['onSelectedItemsChange'] = (newSelectedItems) => {
+    action('onSelectedItemsChange')(newSelectedItems);
+    setSelectedItems(newSelectedItems);
+  };
+
+  return <LegendWrapper {...props} selectedItems={selectedItems} onSelectedItemsChange={handleSelectedItemsChange} />;
+};
 
 // Simple wrapper to try to help visualize that the legend is positioned absolutely
 // inside a relative ancestor.
@@ -75,7 +88,16 @@ const LegendWrapper = (props: LegendProps) => {
 
 const meta: Meta<typeof Legend> = {
   component: Legend,
-  argTypes: {},
+  argTypes: {
+    // Disabling the controls for these types because they are managed inside
+    // LegendWrapper for the purpose of stories.
+    selectedItems: {
+      control: false,
+    },
+    onSelectedItemsChange: {
+      control: false,
+    },
+  },
   args: {
     width: 400,
     height: 100,
@@ -85,7 +107,7 @@ const meta: Meta<typeof Legend> = {
     },
   },
   render: (args) => {
-    return <LegendWrapper {...args} />;
+    return <UncontrolledLegendWrapper {...args} />;
   },
 };
 
@@ -144,18 +166,24 @@ export const RightWithLongLabels: Story = {
           <Typography variant="h3" gutterBottom>
             Small number of items
           </Typography>
-          <LegendWrapper {...args} options={{ position: 'Right' }} data={generateMockLegendData(4, labelPrefix)} />
+          <UncontrolledLegendWrapper
+            {...args}
+            options={{ position: 'Right' }}
+            data={generateMockLegendData(4, labelPrefix)}
+          />
         </div>
         <div>
           <Typography variant="h3" gutterBottom>
             Large number of items
           </Typography>
-          <LegendWrapper {...args} options={{ position: 'Right' }} data={generateMockLegendData(1000, labelPrefix)} />
+          <UncontrolledLegendWrapper
+            {...args}
+            options={{ position: 'Right' }}
+            data={generateMockLegendData(1000, labelPrefix)}
+          />
         </div>
       </Stack>
     );
-
-    return <LegendWrapper {...args} data={generateMockLegendData(3)} />;
   },
 };
 
@@ -209,7 +237,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
           <Typography variant="h3" gutterBottom>
             Position: right
           </Typography>
-          <LegendWrapper
+          <UncontrolledLegendWrapper
             {...args}
             width={400}
             height={200}
@@ -221,12 +249,85 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
           <Typography variant="h3" gutterBottom>
             Position: bottom
           </Typography>
-          <LegendWrapper
+          <UncontrolledLegendWrapper
             {...args}
             width={500}
             height={100}
             options={{ position: 'Bottom' }}
             data={generateMockLegendData(args.legendItemsCount)}
+          />
+        </div>
+      </Stack>
+    );
+  },
+};
+
+/**
+ * The selection and visual highlighting of items within the legend is controlled
+ * using the `selectedItems` and `onSelectedItemsChange` props.
+ *
+ * The selection behavior is as followed based on the setting of `selectedItems:
+ * - When "ALL", all legend items are selected, but not visually highlighted.
+ * - Otherwise, it is a Record that associates legend item ids with a boolean
+ *   value. When the associated entry for a legend item is `true`, that item
+ *   will be treated as selected and visually highlighted.
+ */
+export const SelectedItems: StoryObj<LegendProps> = {
+  argTypes: {
+    data: {
+      table: {
+        disable: true,
+      },
+    },
+    width: {
+      table: {
+        disable: true,
+      },
+    },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    options: {
+      table: {
+        disable: true,
+      },
+    },
+    selectedItems: {
+      table: {
+        disable: true,
+      },
+    },
+    onSelectedItemsChange: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  args: {},
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            ALL: all items are selected, but they are not visually highlighted
+          </Typography>
+          <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right' }} selectedItems="ALL" />
+        </div>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            partial selection: specified items are selected and visually highlighted
+          </Typography>
+          <LegendWrapper
+            {...args}
+            width={400}
+            height={200}
+            options={{ position: 'Right' }}
+            selectedItems={{
+              '1': true,
+              '3': true,
+            }}
           />
         </div>
       </Stack>

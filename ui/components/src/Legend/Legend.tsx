@@ -12,15 +12,29 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { LegendOptions, LegendItem } from '../model';
-import { ListLegend } from './ListLegend';
-import { CompactLegend } from './CompactLegend';
+import { produce } from 'immer';
+import { LegendOptions, LegendItem, SelectedLegendItemState } from '../model';
+import { ListLegend, ListLegendProps } from './ListLegend';
+import { CompactLegend, CompactLegendProps } from './CompactLegend';
 
 export interface LegendProps {
   width: number;
   height: number;
   data: LegendItem[];
   options: LegendOptions;
+
+  /**
+   * State of selected items in the legend.
+   *
+   * Selected legend item state is a controlled value that should be managed using a
+   * combination of this prop and `onSelectedChange`.
+   */
+  selectedItems: SelectedLegendItemState;
+
+  /**
+   * Callback fired when the selected items in the legend changes.
+   */
+  onSelectedItemsChange: (newSelected: SelectedLegendItemState) => void;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -30,7 +44,50 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data }: LegendProps) {
+export function Legend({ width, height, options, data, selectedItems, onSelectedItemsChange }: LegendProps) {
+  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
+    const isModifiedClick = e.metaKey || e.shiftKey;
+
+    const newSelected = produce(selectedItems, (draft) => {
+      if (draft === 'ALL') {
+        return {
+          [seriesId]: true,
+        };
+      }
+
+      const isSelected = !!draft[seriesId];
+
+      // Clicks with modifier key can select multiple items.
+      if (isModifiedClick) {
+        if (isSelected) {
+          // Modified click on already selected item. Remove that item.
+          delete draft[seriesId];
+        } else {
+          // Modified click on not-selected item. Add it.
+          draft[seriesId] = true;
+        }
+        return draft;
+      }
+
+      if (isSelected) {
+        // Clicked item was already selected. Unselect it and return to
+        // ALL state.
+        return 'ALL' as const;
+      }
+
+      // Select clicked item.
+      return { [seriesId]: true };
+    });
+    onSelectedItemsChange(newSelected);
+  };
+
+  const commonLegendProps: ListLegendProps | CompactLegendProps = {
+    height,
+    items: data,
+    selectedItems,
+    onLegendItemClick,
+  };
+
   if (options.position === 'Right') {
     return (
       <Box
@@ -42,7 +99,7 @@ export function Legend({ width, height, options, data }: LegendProps) {
           right: 0,
         }}
       >
-        <ListLegend items={data} width={width} height={height} />
+        <ListLegend {...commonLegendProps} width={width} />
       </Box>
     );
   }
@@ -62,9 +119,9 @@ export function Legend({ width, height, options, data }: LegendProps) {
       }}
     >
       {needsVirtualization ? (
-        <ListLegend items={data} width={width} height={height} />
+        <ListLegend {...commonLegendProps} width={width} />
       ) : (
-        <CompactLegend items={data} height={height} />
+        <CompactLegend {...commonLegendProps} />
       )}
     </Box>
   );
