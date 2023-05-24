@@ -85,8 +85,8 @@ func (v *GlobalVariable) GetSpec() interface{} {
 	return v.Spec
 }
 
-// Variable is a global variable at project level.
-// If you are looking for the variable contained in a dashboard, take a look at dashboard.Variable
+// Variable relates to variables defined at project level.
+// If you are looking for variable defined at dashboard level, see dashboard.Variable
 type Variable struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
