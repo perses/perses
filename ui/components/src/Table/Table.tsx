@@ -11,14 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  useReactTable,
-  getCoreRowModel,
-  ColumnDef,
-  RowSelectionState,
-  OnChangeFn,
-  CoreOptions,
-} from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, ColumnDef, RowSelectionState, OnChangeFn } from '@tanstack/react-table';
 import { useTheme } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
