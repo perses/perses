@@ -19,6 +19,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -27,11 +28,13 @@ import (
 type service struct {
 	globalvariable.Service
 	dao globalvariable.DAO
+	sch schemas.Schemas
 }
 
-func NewService(dao globalvariable.DAO) globalvariable.Service {
+func NewService(dao globalvariable.DAO, sch schemas.Schemas) globalvariable.Service {
 	return &service{
 		dao: dao,
+		sch: sch,
 	}
 }
 
@@ -43,7 +46,9 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.GlobalVariable) (*v1.GlobalVariable, error) {
-	//TODO need to validate the plugin
+	if err := s.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+		return nil, shared.HandleBadRequestError(err.Error())
+	}
 
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
@@ -64,6 +69,9 @@ func (s *service) update(entity *v1.GlobalVariable, parameters shared.Parameters
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
+	}
+	if err := s.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+		return nil, shared.HandleBadRequestError(err.Error())
 	}
 	// find the previous version of the Datasource
 	oldEntity, err := s.dao.Get(parameters.Name)
