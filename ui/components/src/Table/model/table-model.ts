@@ -17,7 +17,7 @@ import { CSSProperties } from 'react';
 
 export type TableDensity = 'compact' | 'standard';
 
-export interface TableProps<TableData extends Record<string, unknown>> {
+export interface TableProps<TableData> {
   /**
    * Height of the table.
    */

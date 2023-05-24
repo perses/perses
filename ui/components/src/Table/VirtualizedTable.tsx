@@ -29,9 +29,7 @@ type TableCellPosition = {
   column: number;
 };
 
-export type VirtualizedTableProps<TableData extends Record<string, unknown>> = Required<
-  Pick<TableProps<TableData>, 'height' | 'width' | 'density'>
-> & {
+export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> & {
   onRowClick: (id: string) => void;
   rows: Array<Row<TableData>>;
   columns: Array<Column<TableData, unknown>>;
@@ -41,7 +39,7 @@ export type VirtualizedTableProps<TableData extends Record<string, unknown>> = R
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
-export function VirtualizedTable<TableData extends Record<string, unknown>>({
+export function VirtualizedTable<TableData>({
   width,
   height,
   density,

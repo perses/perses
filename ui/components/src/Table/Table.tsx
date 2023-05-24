@@ -28,7 +28,7 @@ const DEFAULT_GET_ROW_ID = (data: unknown, index: number) => {
  *
  * **Note: This component is currently experimental and is likely to have significant breaking changes in the near future. Use with caution outside of the core Perses codebase.**
  */
-export function Table<TableData extends Record<string, unknown>>({
+export function Table<TableData>({
   data,
   columns,
   density = 'standard',
