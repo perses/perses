@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { Legend, LegendProps } from '@perses-dev/components';
+import { Legend, LegendProps, legendModes } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { Box, Stack, Typography } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
 import { useState } from 'react';
+import { StorySection } from '@perses-dev/storybook';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -62,6 +63,8 @@ const LegendWrapper = (props: LegendProps) => {
     options: { position },
   } = props;
 
+  const borderWidth = 1;
+
   // The legend does not look very interesting by itself in stories, especially
   // when considering the positioning. This wrapper puts a box with a border
   // and some additional height/width (depending on the positioning of the
@@ -70,15 +73,13 @@ const LegendWrapper = (props: LegendProps) => {
   return (
     <Box
       sx={{
-        border: (theme) => `solid 1px ${theme.palette.divider}`,
+        border: (theme) => `solid ${borderWidth}px ${theme.palette.divider}`,
         position: 'relative',
-        width: position === 'Right' ? props.width + 100 : props.width,
-        height: position === 'Right' ? props.height : props.height + 100,
 
-        // This is a rare case where content-box is helpful because we want to
-        // have the border be additive, so we don't have to do any special
-        // math with the height/width or end up with an off-by-2px issue.
-        boxSizing: 'content-box',
+        // Accounting for border sizes to fit nicely within the box without
+        // changing the box-sizing.
+        width: (position === 'Right' ? props.width + 100 : props.width) + borderWidth * 2,
+        height: (position === 'Right' ? props.height : props.height + 100) + borderWidth * 2,
       }}
     >
       <Legend {...props} />
@@ -104,7 +105,9 @@ const meta: Meta<typeof Legend> = {
     data: generateMockLegendData(5),
     options: {
       position: 'Bottom',
+      mode: 'List',
     },
+    selectedItems: 'ALL',
   },
   render: (args) => {
     return <UncontrolledLegendWrapper {...args} />;
@@ -115,97 +118,15 @@ export default meta;
 
 type Story = StoryObj<typeof Legend>;
 
-export const Bottom: Story = {
-  args: {
-    options: {
-      position: 'Bottom',
-    },
-  },
-};
-
-export const Right: Story = {
-  args: {
-    width: 200,
-    height: 300,
-    options: {
-      position: 'Right',
-    },
-  },
-};
-
 /**
- * When the legend is positioned on the right, items with long labels will be
- * displayed in full when there are a small number of items.
- *
- * When there are a larger number of items, longer labels will be truncated to
- * fit within the width. On hover, the full label will be displayed.
+ * Set `options.position` to `Right` or `Bottom` to posiition the legend.
  */
-export const RightWithLongLabels: Story = {
+export const Position: Story = {
   args: {
-    width: 200,
-    height: 300,
+    selectedItems: 'ALL',
   },
   argTypes: {
-    data: {
-      table: {
-        disable: true,
-      },
-    },
-    options: {
-      table: {
-        disable: true,
-      },
-    },
-  },
-  render: (args) => {
-    const labelPrefix = 'long_legend_label{env="demo", namespace="prometheus"}';
-
-    return (
-      <Stack spacing={3}>
-        <div>
-          <Typography variant="h3" gutterBottom>
-            Small number of items
-          </Typography>
-          <UncontrolledLegendWrapper
-            {...args}
-            options={{ position: 'Right' }}
-            data={generateMockLegendData(4, labelPrefix)}
-          />
-        </div>
-        <div>
-          <Typography variant="h3" gutterBottom>
-            Large number of items
-          </Typography>
-          <UncontrolledLegendWrapper
-            {...args}
-            options={{ position: 'Right' }}
-            data={generateMockLegendData(1000, labelPrefix)}
-          />
-        </div>
-      </Stack>
-    );
-  },
-};
-
-/**
- * The legend uses virtualization to avoid performance issues when there are a
- * large number of items to display.
- *
- * When the legend is positioned on the right, it is always rendered in a
- * virtualized list with a single item per row.
- *
- * When the legend is positioned on the bottom with a small number of items,
- * it is rendered in a compact, non-virtualized inline list with a variable number
- * of items per row. When the number of items is large enough to cause performance,
- * issues, it is rendered in a virtualized list with a single item per row.
- */
-export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> = {
-  argTypes: {
-    data: {
-      table: {
-        disable: true,
-      },
-    },
+    // Do not show values managed internally in the render prop.
     width: {
       table: {
         disable: true,
@@ -216,47 +137,62 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
         disable: true,
       },
     },
-    options: {
-      table: {
+    data: {
+      options: {
         disable: true,
       },
     },
   },
-  args: {
-    // Custom arg for just this story to easily control how many items are rendered
-    // to test performance.
-    legendItemsCount: 1000,
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        <StorySection title="Right" level="h3">
+          <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right' }} />
+        </StorySection>
+        <StorySection title="Bottom" level="h3">
+          <LegendWrapper {...args} width={500} height={100} options={{ position: 'Bottom' }} />
+        </StorySection>
+      </Stack>
+    );
   },
-  parameters: {
-    happo: false,
+};
+
+/**
+ * Set `options.mode` to `List` or `Table` to determine how the legend is
+ * formatted.
+ */
+export const Mode: Story = {
+  args: {
+    selectedItems: 'ALL',
+  },
+  argTypes: {
+    // Do not show values managed internally in the render prop.
+    width: {
+      table: {
+        disable: true,
+      },
+    },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    data: {
+      options: {
+        disable: true,
+      },
+    },
   },
   render: (args) => {
     return (
       <Stack spacing={3}>
-        <div>
-          <Typography variant="h3" gutterBottom>
-            Position: right
-          </Typography>
-          <UncontrolledLegendWrapper
-            {...args}
-            width={400}
-            height={200}
-            options={{ position: 'Right' }}
-            data={generateMockLegendData(args.legendItemsCount)}
-          />
-        </div>
-        <div>
-          <Typography variant="h3" gutterBottom>
-            Position: bottom
-          </Typography>
-          <UncontrolledLegendWrapper
-            {...args}
-            width={500}
-            height={100}
-            options={{ position: 'Bottom' }}
-            data={generateMockLegendData(args.legendItemsCount)}
-          />
-        </div>
+        {legendModes.map((mode) => {
+          return (
+            <StorySection key={mode} title={mode} level="h3">
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+            </StorySection>
+          );
+        })}
       </Stack>
     );
   },
@@ -309,27 +245,195 @@ export const SelectedItems: StoryObj<LegendProps> = {
   render: (args) => {
     return (
       <Stack spacing={3}>
-        <div>
-          <Typography variant="h3" gutterBottom>
-            ALL: all items are selected, but they are not visually highlighted
-          </Typography>
-          <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right' }} selectedItems="ALL" />
-        </div>
-        <div>
-          <Typography variant="h3" gutterBottom>
-            partial selection: specified items are selected and visually highlighted
-          </Typography>
-          <LegendWrapper
-            {...args}
-            width={400}
-            height={200}
-            options={{ position: 'Right' }}
-            selectedItems={{
-              '1': true,
-              '3': true,
-            }}
-          />
-        </div>
+        <StorySection
+          title="ALL: all items are selected, but they are not visually highlighted in list mode"
+          level="h3"
+        >
+          <Stack spacing={1} direction="row" flexWrap="wrap">
+            {legendModes.map((mode) => {
+              return (
+                <StorySection key={mode} title={mode} level="h4">
+                  <LegendWrapper
+                    {...args}
+                    width={400}
+                    height={200}
+                    options={{ position: 'Right', mode }}
+                    selectedItems="ALL"
+                  />
+                </StorySection>
+              );
+            })}
+          </Stack>
+        </StorySection>
+        <StorySection title="partial selection: specified items are selected and visually highlighted" level="h3">
+          <Stack spacing={1} direction="row" flexWrap="wrap">
+            {legendModes.map((mode) => {
+              return (
+                <StorySection key={mode} title={mode} level="h4">
+                  <LegendWrapper
+                    {...args}
+                    width={400}
+                    height={200}
+                    options={{ position: 'Right', mode }}
+                    selectedItems={{
+                      '1': true,
+                      '3': true,
+                    }}
+                  />
+                </StorySection>
+              );
+            })}
+          </Stack>
+        </StorySection>
+      </Stack>
+    );
+  },
+};
+
+/**
+ * When the legend is positioned on the right, items with long labels will be
+ * displayed in full when there are a small number of items.
+ *
+ * When there are a larger number of items, longer labels will be truncated to
+ * fit within the width. On hover, the full label will be displayed.
+ */
+export const RightWithLongLabels: Story = {
+  args: {
+    width: 200,
+    height: 300,
+  },
+  argTypes: {
+    data: {
+      table: {
+        disable: true,
+      },
+    },
+    options: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => {
+    const labelPrefix = 'long_legend_label{env="demo", namespace="prometheus"}';
+
+    return (
+      <Stack spacing={3}>
+        <StorySection title="Small number of items" level="h3">
+          <Stack spacing={1} direction="row" flexWrap="wrap">
+            {legendModes.map((mode) => {
+              return (
+                <StorySection key={mode} title={mode} level="h4">
+                  <LegendWrapper
+                    {...args}
+                    options={{ position: 'Right', mode }}
+                    data={generateMockLegendData(4, labelPrefix)}
+                  />
+                </StorySection>
+              );
+            })}
+          </Stack>
+        </StorySection>
+        <StorySection title=" Large number of items" level="h3">
+          <Stack spacing={1} direction="row" flexWrap="wrap">
+            {legendModes.map((mode) => {
+              return (
+                <StorySection key={mode} title={mode} level="h4">
+                  <LegendWrapper
+                    {...args}
+                    options={{ position: 'Right', mode }}
+                    data={generateMockLegendData(1000, labelPrefix)}
+                  />
+                </StorySection>
+              );
+            })}
+          </Stack>
+        </StorySection>
+      </Stack>
+    );
+  },
+};
+
+/**
+ * The legend uses virtualization to avoid performance issues when there are a
+ * large number of items to display.
+ *
+ * When the legend is positioned on the right, it is always rendered in a
+ * virtualized list with a single item per row.
+ *
+ * When the legend is positioned on the bottom with a small number of items,
+ * it is rendered in a compact, non-virtualized inline list with a variable number
+ * of items per row. When the number of items is large enough to cause performance,
+ * issues, it is rendered in a virtualized list with a single item per row.
+ */
+export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> = {
+  argTypes: {
+    data: {
+      table: {
+        disable: true,
+      },
+    },
+    width: {
+      table: {
+        disable: true,
+      },
+    },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    options: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  args: {
+    // Custom arg for just this story to easily control how many items are rendered
+    // to test performance.
+    legendItemsCount: 1000,
+  },
+  parameters: {
+    happo: false,
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        <StorySection title="Position: right" level="h3">
+          <Stack spacing={1} direction="row" flexWrap="wrap">
+            {legendModes.map((mode) => {
+              return (
+                <StorySection key={mode} title={mode} level="h4">
+                  <UncontrolledLegendWrapper
+                    {...args}
+                    width={400}
+                    height={200}
+                    options={{ position: 'Right', mode }}
+                    data={generateMockLegendData(args.legendItemsCount)}
+                  />
+                </StorySection>
+              );
+            })}
+          </Stack>
+        </StorySection>
+        <StorySection title="Position: bottom" level="h3">
+          <Stack spacing={1} direction="row" flexWrap="wrap">
+            {legendModes.map((mode) => {
+              return (
+                <StorySection key={mode} title={mode} level="h4">
+                  <UncontrolledLegendWrapper
+                    {...args}
+                    width={500}
+                    height={100}
+                    options={{ position: 'Bottom', mode }}
+                    data={generateMockLegendData(args.legendItemsCount)}
+                  />
+                </StorySection>
+              );
+            })}
+          </Stack>
+        </StorySection>
       </Stack>
     );
   },
