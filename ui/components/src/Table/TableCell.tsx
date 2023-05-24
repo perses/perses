@@ -34,6 +34,15 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
 
 export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex'> {
   density: TableDensity;
+
+  /**
+   * How the cell should behave related to focus.
+   * - `trigger-focus`: the cell should be auto-focused when it renders.
+   * - `focus-next`: the cell should have tabindex="0", so that it will be
+   *   focused the next time someone tabs with a keyboard.
+   * - `none`: the cell should have tabindex="-1", so it is not focused by
+   *   keyboard interactions at this time.
+   */
   focusState?: 'trigger-focus' | 'focus-next' | 'none';
   onFocusTrigger?: (e: React.MouseEvent<HTMLTableCellElement> | React.KeyboardEvent<HTMLTableCellElement>) => void;
 }
@@ -53,7 +62,6 @@ export function TableCell({
 
   const isHeader = variant === 'head';
 
-  // TODO: see if this should be a uselayouteffect.
   useEffect(() => {
     if (focusState === 'trigger-focus' && elRef.current) {
       elRef.current.focus();
@@ -66,7 +74,8 @@ export function TableCell({
       'a[href], button, input, textarea, select, details'
     );
     if (nestedFocusTarget) {
-      // If the cell has a focusable child, focus it instead.
+      // If the cell has a focusable child, focus it instead. Mostly used for
+      // checkbox cells, but could have other uses.
       nestedFocusTarget.focus();
     }
   };
@@ -75,12 +84,18 @@ export function TableCell({
     // We use `onClick` and `onKeyUp` events instead of `onFocus` because of
     // some ordering issues with when the browser calls events and how this
     // plays with the triggering of focus with keyboard interactions.
+    // These report that a focus event happened, so we can adjust the current
+    // tabindex and focuses to the right cell.
     onFocusTrigger?.(e);
   };
 
   return (
     <StyledMuiTableCell
       {...otherProps}
+      // Modify the tab index based on the currently focused cell. It's important
+      // to avoid having tabindex 0 on everything because it essentially traps
+      // a keyboard user in the table until they hit "tab" for every single
+      // cell.
       tabIndex={focusState !== 'none' ? 0 : -1}
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
@@ -99,7 +114,7 @@ export function TableCell({
           position: 'relative',
 
           // Text truncation. Currently enforced on all cells. We may control
-          // this with a prop in the future.
+          // this with a prop on column config in the future.
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',

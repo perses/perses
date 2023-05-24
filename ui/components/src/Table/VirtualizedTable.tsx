@@ -51,11 +51,14 @@ export function VirtualizedTable<TableData extends Record<string, unknown>>({
   headers,
 }: VirtualizedTableProps<TableData>) {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
+
+  // Use a ref for these values because they are only needed for keyboard
+  // focus interactions and setting them on state will lead to a significant
+  // amount of unnecessary re-renders.
   const visibleRange = useRef({
     startIndex: 0,
     endIndex: 0,
   });
-
   const setVisibleRange: TableVirtuosoProps<TableData, unknown>['rangeChanged'] = (newVisibleRange) => {
     visibleRange.current = newVisibleRange;
   };
@@ -69,11 +72,9 @@ export function VirtualizedTable<TableData extends Record<string, unknown>>({
     maxColumns: columns.length,
   });
 
-  const { activeCell, isActive } = keyboardNav;
-
   const getFocusState = (cellPosition: TableCellPosition): TableCellProps['focusState'] => {
-    if (cellPosition.row === activeCell.row && cellPosition.column === activeCell.column) {
-      return isActive ? 'trigger-focus' : 'focus-next';
+    if (cellPosition.row === keyboardNav.activeCell.row && cellPosition.column === keyboardNav.activeCell.column) {
+      return keyboardNav.isActive ? 'trigger-focus' : 'focus-next';
     }
 
     return 'none';

@@ -27,9 +27,12 @@ export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxPr
       size={isCompact ? 'small' : 'medium'}
       {...otherProps}
       // Disable ripple and set background color below because of some issues
-      // with re-rendering with the a11y interactions that causes the ripple
+      // with re-rendering with the keyboard interactions that causes the ripple
       // animation to stutter.
       focusRipple={false}
+      // Tab index is handled by the overall keyboard interactions for the table
+      // to avoid trapping a keyboard user in a table by requiring them to tab
+      // through every single checkbox.
       tabIndex={-1}
       sx={{
         color: color,
