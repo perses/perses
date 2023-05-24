@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
 import { TooltipContent } from './TooltipContent';
-import { getFocusedSeriesData } from './nearby-series';
+import { getNearbySeriesData } from './nearby-series';
 import {
   CursorCoordinates,
   FALLBACK_CHART_WIDTH,
@@ -60,7 +60,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
   // Get series nearby the cursor and pass into tooltip content children.
-  const focusedSeries = getFocusedSeriesData({
+  const focusedSeries = getNearbySeriesData({
     mousePos,
     chartData,
     pinnedPos,

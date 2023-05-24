@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { EChartsDataFormat, UnitOptions } from '../model';
-import { getNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
+import { checkforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
 
-describe('getNearbySeries', () => {
+describe('checkforNearbySeries', () => {
   const chartData: EChartsDataFormat = {
     timeSeries: [
       {
@@ -63,7 +63,7 @@ describe('getNearbySeries', () => {
       kind: 'Decimal',
       decimal_places: 2,
     };
-    expect(getNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(focusedSeriesOutput);
+    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(focusedSeriesOutput);
   });
 
   it('should return series values formatted as a percent', () => {
@@ -75,7 +75,7 @@ describe('getNearbySeries', () => {
       kind: 'PercentDecimal',
       decimal_places: 0,
     };
-    expect(getNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
+    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
       percentFormattedOutput
     );
   });

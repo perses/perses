@@ -38,7 +38,7 @@ export type NearbySeriesArray = NearbySeriesInfo[];
  * Returns formatted series data for the points that are close to the user's cursor
  * Adjust yBuffer to increase or decrease number of series shown
  */
-export function getNearbySeries(
+export function checkforNearbySeries(
   data: EChartsDataFormat,
   pointInGrid: number[],
   yBuffer: number,
@@ -148,7 +148,7 @@ export function getNearbySeries(
  * Uses mouse position to determine whether user is hovering over a chart canvas
  * If yes, convert from pixel values to logical cartesian coordinates and return all focused series
  */
-export function getFocusedSeriesData({
+export function getNearbySeriesData({
   mousePos,
   pinnedPos,
   chartData,
@@ -197,7 +197,7 @@ export function getFocusedSeriesData({
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return getNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
+      return checkforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
     }
   }
 
