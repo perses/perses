@@ -56,9 +56,9 @@ export function getNearbySeries(
   const focusedSeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
-
+  const totalSeries = data.timeSeries.length;
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
-    for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
+    for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
       if (currentFocusedData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
       if (currentSeries !== undefined) {
@@ -72,7 +72,8 @@ export function getNearbySeries(
             if (yValue !== undefined && yValue !== null && focusedX === datumIdx) {
               if (yValue !== '-' && focusedY <= yValue + yBuffer && focusedY >= yValue - yBuffer) {
                 // show fewer bold series in tooltip when many total series
-                const percentRangeToCheck = Math.max(5, 100 / data.timeSeries.length);
+                const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
+                const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
                 const isClosestToCursor = isWithinPercentageRange({
                   valueToCheck: focusedY,
                   baseValue: yValue,
