@@ -20,17 +20,17 @@ import { FocusedSeriesArray } from './focused-series';
 import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
-  focusedSeries: FocusedSeriesArray | null;
+  series: FocusedSeriesArray | null;
   tooltipPinned: boolean;
   wrapLabels?: boolean;
   onUnpinClick: () => void;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { focusedSeries, wrapLabels, tooltipPinned, onUnpinClick } = props;
+  const { series, wrapLabels, tooltipPinned, onUnpinClick } = props;
   const { formatWithUserTimeZone } = useTimeZone();
 
-  const seriesTime = focusedSeries && focusedSeries[0] && focusedSeries[0].date ? focusedSeries[0].date : null;
+  const seriesTime = series && series[0] && series[0].date ? series[0].date : null;
 
   const formatTimeSeriesHeader = (timeMs: number) => {
     const date = new Date(timeMs);
@@ -54,9 +54,9 @@ export function TooltipContent(props: TooltipContentProps) {
   };
 
   const sortedFocusedSeries = useMemo(() => {
-    if (focusedSeries === null) return null;
-    return focusedSeries.sort((a, b) => (a.y > b.y ? -1 : 1));
-  }, [focusedSeries]);
+    if (series === null) return null;
+    return series.sort((a, b) => (a.y > b.y ? -1 : 1));
+  }, [series]);
 
   if (sortedFocusedSeries === null || seriesTime === null) {
     return null;

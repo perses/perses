@@ -114,7 +114,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
         }}
       >
         <TooltipContent
-          focusedSeries={focusedSeries}
+          series={focusedSeries}
           wrapLabels={wrapLabels}
           tooltipPinned={tooltipPinned}
           onUnpinClick={() => {

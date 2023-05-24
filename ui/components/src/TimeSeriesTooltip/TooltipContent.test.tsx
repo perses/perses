@@ -22,7 +22,7 @@ describe('TooltipContent', () => {
 
   it('should display a single series name', () => {
     const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
+      series: [
         {
           seriesIdx: 0,
           datumIdx: 84,
@@ -48,7 +48,7 @@ describe('TooltipContent', () => {
 
   it('should display multiple series data', () => {
     const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
+      series: [
         {
           seriesIdx: 2,
           datumIdx: 48,
@@ -89,7 +89,7 @@ describe('TooltipContent', () => {
 
   it('should display query before wrapped labels', () => {
     const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
+      series: [
         {
           seriesIdx: 2,
           datumIdx: 48,
@@ -128,7 +128,7 @@ describe('TooltipContent', () => {
 
   it('should display series closest to cursor as bold', () => {
     const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
+      series: [
         {
           seriesIdx: 2,
           datumIdx: 48,
