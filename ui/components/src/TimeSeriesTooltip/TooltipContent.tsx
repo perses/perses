@@ -16,11 +16,11 @@ import PinOutline from 'mdi-material-ui/PinOutline';
 import Pin from 'mdi-material-ui/Pin';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { FocusedSeriesArray } from './nearby-series';
+import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
-  series: FocusedSeriesArray | null;
+  series: NearbySeriesArray | null;
   tooltipPinned: boolean;
   wrapLabels?: boolean;
   onUnpinClick: () => void;

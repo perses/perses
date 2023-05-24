@@ -16,11 +16,11 @@ import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMI
 import { CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
-export const INCREASE_FOCUSED_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
-export const DYNAMIC_FOCUSED_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
+export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many focused series show in tooltip (higher == more series shown)
+export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
-export interface FocusedSeriesInfo {
+export interface NearbySeriesInfo {
   seriesIdx: number | null;
   datumIdx: number | null;
   seriesName: string;
@@ -32,7 +32,7 @@ export interface FocusedSeriesInfo {
   isClosestToCursor: boolean;
 }
 
-export type FocusedSeriesArray = FocusedSeriesInfo[];
+export type NearbySeriesArray = NearbySeriesInfo[];
 
 /**
  * Returns formatted series data for the points that are close to the user's cursor
@@ -44,8 +44,8 @@ export function getNearbySeries(
   yBuffer: number,
   chart?: EChartsInstance,
   unit?: UnitOptions
-): FocusedSeriesArray {
-  const currentFocusedData: FocusedSeriesArray = [];
+): NearbySeriesArray {
+  const currentFocusedData: NearbySeriesArray = [];
   const focusedX: number | null = pointInGrid[0] ?? null;
   const focusedY: number | null = pointInGrid[1] ?? null;
 
@@ -253,10 +253,10 @@ export function getYBuffer({
 
   // tooltip trigger area gets smaller with more series
   if (totalSeries > SHOW_FEWER_SERIES_LIMIT) {
-    const adjustedBuffer = (yInterval * DYNAMIC_FOCUSED_SERIES_MULTIPLIER) / totalSeries;
+    const adjustedBuffer = (yInterval * DYNAMIC_NEARBY_SERIES_MULTIPLIER) / totalSeries;
     return Math.max(yBufferMin, adjustedBuffer);
   }
 
   // increase multiplier to expand nearby series range
-  return Math.max(yBufferMin, yInterval * INCREASE_FOCUSED_SERIES_MULTIPLIER);
+  return Math.max(yBufferMin, yInterval * INCREASE_NEARBY_SERIES_MULTIPLIER);
 }
