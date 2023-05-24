@@ -14,6 +14,7 @@
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { TooltipContent, TooltipContentProps } from './TooltipContent';
+import { EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
 
 describe('TooltipContent', () => {
   const renderComponent = (props: TooltipContentProps) => {
@@ -87,7 +88,7 @@ describe('TooltipContent', () => {
     ).toHaveLength(1);
   });
 
-  it('should display query before wrapped labels', () => {
+  it('should display query before wrapped labels with correct series font weights', () => {
     const tooltipContent: TooltipContentProps = {
       series: [
         {
@@ -124,6 +125,8 @@ describe('TooltipContent', () => {
     expect(
       screen.getByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
     ).toBeInTheDocument();
+    expect(screen.queryByText(EMPHASIZED_SERIES_DESCRIPTION)).not.toBeInTheDocument();
+    expect(screen.getAllByLabelText(NEARBY_SERIES_DESCRIPTION)).toHaveLength(2);
   });
 
   it('should display series closest to cursor as bold', () => {
@@ -157,9 +160,9 @@ describe('TooltipContent', () => {
       onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
-    const boldNearbySeriesText = screen.getByLabelText('emphasized series');
-    expect(boldNearbySeriesText).toBeInTheDocument();
-    const regularNearbySeriesText = screen.getByLabelText('focused series');
-    expect(regularNearbySeriesText).toBeInTheDocument();
+    const boldSeriesText = screen.getByLabelText(EMPHASIZED_SERIES_DESCRIPTION);
+    expect(boldSeriesText).toBeInTheDocument();
+    const regularSeriesText = screen.getByLabelText(NEARBY_SERIES_DESCRIPTION);
+    expect(regularSeriesText).toBeInTheDocument();
   });
 });

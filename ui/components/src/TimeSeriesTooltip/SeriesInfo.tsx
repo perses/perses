@@ -14,7 +14,7 @@
 import { Box } from '@mui/material';
 import { SeriesMarker } from './SeriesMarker';
 import { SeriesLabelsStack } from './SeriesLabelsStack';
-import { TOOLTIP_LABELS_MAX_WIDTH } from './tooltip-model';
+import { TOOLTIP_LABELS_MAX_WIDTH, EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
 
 export interface SeriesInfoProps {
   seriesName: string;
@@ -82,7 +82,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
           })}
-          aria-label={emphasizeText ? 'focused series' : 'emphasized series'}
+          aria-label={emphasizeText ? EMPHASIZED_SERIES_DESCRIPTION : NEARBY_SERIES_DESCRIPTION}
         >
           {formattedSeriesInfo}
         </Box>

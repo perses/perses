@@ -21,6 +21,9 @@ export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 
 export const FALLBACK_CHART_WIDTH = 750;
 
+export const NEARBY_SERIES_DESCRIPTION = 'nearby series showing in tooltip';
+export const EMPHASIZED_SERIES_DESCRIPTION = 'emphasized series showing as bold in tooltip';
+
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
   month: 'short',
