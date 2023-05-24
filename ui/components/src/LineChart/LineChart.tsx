@@ -95,7 +95,7 @@ export function LineChart({
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [isTooltipPinned, setTooltipPinned] = useState<boolean>(false);
+  const [isTooltipPinned, setIsTooltipPinned] = useState<boolean>(false);
   const { timeZone } = useTimeZone();
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -104,7 +104,7 @@ export function LineChart({
         if (onDataZoom === undefined) {
           setTimeout(() => {
             // workaround so unpin happens after click event
-            setTooltipPinned(false);
+            setIsTooltipPinned(false);
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -125,14 +125,14 @@ export function LineChart({
       },
       // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
-  }, [data, onDataZoom, setTooltipPinned]);
+  }, [data, onDataZoom, setIsTooltipPinned]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
   }
 
   const handleOnDoubleClick = (e: MouseEvent) => {
-    setTooltipPinned(false);
+    setIsTooltipPinned(false);
     // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
     if (onDoubleClick === undefined) {
       if (chartRef.current !== undefined) {
@@ -205,7 +205,7 @@ export function LineChart({
       onClick={(e) => {
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
-          setTooltipPinned((current) => !current);
+          setIsTooltipPinned((current) => !current);
         }
       }}
       onMouseDown={(e) => {
@@ -239,7 +239,7 @@ export function LineChart({
             isTooltipPinned={isTooltipPinned}
             unit={unit}
             onUnpinClick={() => {
-              setTooltipPinned(false);
+              setIsTooltipPinned(false);
             }}
           />
         )}
