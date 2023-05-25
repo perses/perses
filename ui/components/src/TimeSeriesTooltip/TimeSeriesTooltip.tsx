@@ -35,25 +35,28 @@ import { assembleTransform } from './utils';
 interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
-  isTooltipPinned: boolean;
+  // isTooltipPinned: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;
+  pinnedPos: CursorCoordinates | null;
 }
 
 export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,
-  isTooltipPinned,
+  // isTooltipPinned,
   unit,
   onUnpinClick,
+  pinnedPos,
 }: TimeSeriesTooltipProps) {
   const { formatWithUserTimeZone } = useTimeZone();
   const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
-  const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const { height, width, ref: tooltipRef } = useResizeObserver();
+
+  const isTooltipPinned = pinnedPos !== null;
 
   if (mousePos === null || mousePos.target === null) return null;
 
@@ -106,10 +109,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   const seriesTime = nearbySeries[0]?.date ? nearbySeries[0].date : null;
   if (seriesTime === null) {
     return null;
-  }
-
-  if (isTooltipPinned === true && pinnedPos === null) {
-    setPinnedPos(mousePos);
   }
 
   // Hide 'Show All' button when only one series returned

@@ -58,20 +58,16 @@ export const emptyTooltipData = {
   focusedSeries: null,
 };
 
+export interface Coordinate {
+  x: number;
+  y: number;
+}
+
 export interface CursorCoordinates {
-  page: {
-    x: number;
-    y: number;
-  };
-  client: {
-    x: number;
-    y: number;
-  };
-  plotCanvas: {
-    x: number;
-    y: number;
-  };
-  zrender: {
+  page: Coordinate;
+  client: Coordinate;
+  plotCanvas: Coordinate;
+  zrender?: {
     x?: number;
     y?: number;
   };

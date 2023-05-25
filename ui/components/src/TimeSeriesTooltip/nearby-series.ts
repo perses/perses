@@ -13,7 +13,7 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
-import { CursorData } from './tooltip-model';
+import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many series show in tooltip (higher == more series shown)
@@ -157,7 +157,7 @@ export function getNearbySeriesData({
   showAllSeries = false,
 }: {
   mousePos: CursorData['coords'];
-  pinnedPos: CursorData['coords'];
+  pinnedPos: CursorCoordinates | null;
   isTooltipPinned: boolean;
   chartData: EChartsDataFormat;
   chart?: EChartsInstance;
