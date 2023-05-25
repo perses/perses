@@ -16,15 +16,16 @@ import { Virtuoso } from 'react-virtuoso';
 import { Box, useTheme } from '@mui/material';
 import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
-import { APPROX_SERIES_HEIGHT, TOOLTIP_MULTI_SERIES_MIN_WIDTH } from './tooltip-model';
+import { TOOLTIP_MULTI_SERIES_MIN_WIDTH } from './tooltip-model';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;
   wrapLabels?: boolean;
+  contentHeight: number;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { series, wrapLabels } = props;
+  const { series, wrapLabels, contentHeight } = props;
 
   const theme = useTheme();
 
@@ -36,8 +37,9 @@ export function TooltipContent(props: TooltipContentProps) {
   if (series === null || sortedFocusedSeries === null) {
     return null;
   }
+  const totalSeries = series.length;
 
-  if (series.length === 1) {
+  if (totalSeries === 1) {
     const [seriesData] = series;
     if (seriesData === undefined) {
       return null;
@@ -56,9 +58,9 @@ export function TooltipContent(props: TooltipContentProps) {
     );
   }
 
-  // TODO: is there a better way to approximate height or a dynamic height workaround for Virtuoso?
-  // Need to roughly estimate height based on number of series for react-virtuoso'
-  const contentHeight = Math.min(series.length * APPROX_SERIES_HEIGHT);
+  // // TODO: is there a better way to approximate height or a dynamic height workaround for Virtuoso?
+  // // Need to roughly estimate height based on number of series for react-virtuoso'
+  // const contentHeight = Math.min(series.length * APPROX_SERIES_HEIGHT);
 
   // Padding value used in the react virtuoso header/footer components to
   // simulate top/bottom padding based on recommendation in this issue.
@@ -70,6 +72,7 @@ export function TooltipContent(props: TooltipContentProps) {
     <Virtuoso
       style={{ height: contentHeight, width: TOOLTIP_MULTI_SERIES_MIN_WIDTH }}
       data={sortedFocusedSeries}
+      totalCount={totalSeries}
       itemContent={(index, item) => {
         return (
           <SeriesInfo
@@ -78,7 +81,7 @@ export function TooltipContent(props: TooltipContentProps) {
             y={item.y}
             formattedY={item.formattedY}
             markerColor={item.markerColor}
-            totalSeries={sortedFocusedSeries.length}
+            totalSeries={totalSeries}
             wrapLabels={wrapLabels}
             emphasizeText={item.isClosestToCursor}
           />
