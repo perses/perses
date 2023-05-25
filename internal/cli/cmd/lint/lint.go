@@ -121,6 +121,22 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 			} else if err := validate.Datasource(entity, nil, o.sch); err != nil {
 				return err
 			}
+		case *modelV1.GlobalVariable:
+			if o.online {
+				if err := o.apiClient.Validate().GlobalVariable(entity); err != nil {
+					return err
+				}
+			} else if err := o.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+				return err
+			}
+		case *modelV1.Variable:
+			if o.online {
+				if err := o.apiClient.Validate().Variable(entity); err != nil {
+					return err
+				}
+			} else if err := o.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

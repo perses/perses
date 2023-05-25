@@ -66,6 +66,7 @@ type Schemas interface {
 	ValidateDatasource(plugin common.Plugin) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
+	ValidateGlobalVariable(v modelV1.VariableSpec) error
 	ValidateDashboardVariables([]dashboard.Variable) error
 	ValidateVariable(plugin common.Plugin, varName string) error
 	GetLoaders() []Loader
@@ -175,6 +176,18 @@ func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
 
 func (s *sch) ValidateQuery(plugin common.Plugin) error {
 	return s.validatePlugin(plugin, "query", "", s.queries)
+}
+
+func (s *sch) ValidateGlobalVariable(v modelV1.VariableSpec) error {
+	if v.Kind != variable.KindList {
+		return nil
+	}
+
+	listVariableSpec, ok := v.Spec.(*variable.ListSpec)
+	if !ok {
+		return errors.New("Error converting Variable to ListVariable")
+	}
+	return s.ValidateVariable(listVariableSpec.Plugin, "")
 }
 
 // ValidateDashboardVariables verify a list of variables defines in a dashboard.

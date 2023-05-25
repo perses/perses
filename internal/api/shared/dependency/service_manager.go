@@ -76,9 +76,9 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
 	folderService := folderImpl.NewService(dao.GetFolder())
-	variableService := variableImpl.NewService(dao.GetVariable())
+	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
-	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable())
+	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetVariable())
 	return &service{
