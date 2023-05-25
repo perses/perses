@@ -72,6 +72,7 @@ export function TooltipContent(props: TooltipContentProps) {
       style={{ height: contentHeight, width: TOOLTIP_MULTI_SERIES_MIN_WIDTH }}
       data={sortedFocusedSeries}
       totalCount={totalSeries}
+      overscan={50}
       itemContent={(index, item) => {
         return (
           <SeriesInfo
