@@ -29,7 +29,7 @@ export function assembleTransform(
   }
 
   if (isTooltipPinned === true && pinnedPos !== null) {
-    mousePos = pinnedPos;
+    return pinnedPos;
   }
 
   const cursorPaddingX = 32;
