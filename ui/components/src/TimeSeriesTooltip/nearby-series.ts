@@ -168,10 +168,9 @@ export function getNearbySeriesData({
 
   // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
   let cursorTargetMatchesChart = false;
-  // if (isTooltipPinned) {
-  //   // cursorTargetMatchesChart = true;
-  // } else if (mousePos.target !== null) {
-  if (mousePos.target !== null) {
+  if (isTooltipPinned) {
+    cursorTargetMatchesChart = true;
+  } else if (mousePos.target !== null) {
     const currentParent = (<HTMLElement>mousePos.target).parentElement;
     if (currentParent !== null) {
       const currentGrandparent = currentParent.parentElement;

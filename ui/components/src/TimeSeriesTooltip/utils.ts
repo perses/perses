@@ -28,7 +28,7 @@ export function assembleTransform(
     return 'translate3d(0, 0)';
   }
 
-  if (isTooltipPinned === false && pinnedPos !== null) {
+  if (isTooltipPinned === true && pinnedPos !== null) {
     mousePos = pinnedPos;
   }
 
