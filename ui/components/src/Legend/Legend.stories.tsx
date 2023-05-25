@@ -253,7 +253,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -270,7 +270,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -324,7 +324,7 @@ export const RightWithLongLabels: Story = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     options={{ position: 'Right', mode }}
                     data={generateMockLegendData(4, labelPrefix)}
@@ -339,7 +339,7 @@ export const RightWithLongLabels: Story = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     options={{ position: 'Right', mode }}
                     data={generateMockLegendData(1000, labelPrefix)}
