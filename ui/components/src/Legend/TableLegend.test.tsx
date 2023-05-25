@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { render, screen, getAllByRole, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { TableLegend, TableLegendProps } from './TableLegend';
 
