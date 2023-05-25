@@ -148,6 +148,17 @@ Storybook configuration lives in `src/config` and includes the following:
 
 Storybook is currently configured to build with [Webpack 5](https://storybook.js.org/docs/react/builders/webpack#webpack-5).
 
+## Interaction tests
+
+We primarily use Jest and Playwright for writing tests. However, there are use cases where we want to test real browser-based interactions (i.e. not jsdom, which is used in Jest tests) for lower-level react components. In this case, [Storybook interaction tests](https://storybook.js.org/docs/react/writing-tests/interaction-testing) can be a good fit.
+
+To test locally:
+
+- Start storybook: `npm run storybook`
+- Open the specified story in your browser.
+- Use the "interactions" tab in the addons drawer to see the results interactively.
+- Run the tests from the command line: `npm run storybook:test`
+
 ## Visual tests
 
 This project uses a free open source account from [Happo](https://happo.io/) for our visual testing. Visual tests generated for storybook use `happo-plugin-storybook` ([relevant documentation](https://docs.happo.io/docs/storybook)) and are listed under the `perses-storybook` project in Happo. See the `e2e` package for information about visual tests generated using that tooling.
