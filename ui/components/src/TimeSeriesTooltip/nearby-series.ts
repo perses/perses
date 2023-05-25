@@ -183,7 +183,7 @@ export function getNearbySeriesData({
     }
   }
 
-  // allows moving cursor inside tooltip
+  // allows moving cursor inside tooltip without it fading away
   if (pinnedPos !== null) {
     mousePos = pinnedPos;
     cursorTargetMatchesChart = true;

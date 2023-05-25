@@ -98,6 +98,9 @@ export function LineChart({
   const [isTooltipPinned, setIsTooltipPinned] = useState<boolean>(false);
   const { timeZone } = useTimeZone();
 
+  const [isDragging, setDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
       datazoom: (params) => {
@@ -209,12 +212,26 @@ export function LineChart({
         }
       }}
       onMouseDown={(e) => {
-        // Hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels.
-        if (e.target instanceof HTMLCanvasElement) {
-          setShowTooltip(false);
+        e.preventDefault();
+        const { clientX } = e;
+        setDragging(true);
+        setStartX(clientX);
+      }}
+      onMouseMove={(e) => {
+        const { clientX } = e;
+        if (isDragging) {
+          const deltaX = clientX - startX;
+          // Hide tooltip when user drags to zoom.
+          if (deltaX > 0) {
+            // Allow clicking inside tooltip to copy labels.
+            if (e.target instanceof HTMLCanvasElement) {
+              setShowTooltip(false);
+            }
+          }
         }
       }}
       onMouseUp={() => {
+        setDragging(false);
         setShowTooltip(true);
       }}
       onMouseLeave={() => {

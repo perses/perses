@@ -114,8 +114,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   // Disable since only relevant when there are more total series than are visible.
   const disableAllSeriesToggle = isTooltipPinned === false;
 
-  const contentHeight = Math.min(TOOLTIP_MAX_HEIGHT, nearbySeries.length * APPROX_SERIES_HEIGHT);
-
   return (
     <Portal>
       <Box
@@ -187,7 +185,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
                       if (onUnpinClick !== undefined) {
                         onUnpinClick();
                       }
-                      setPinnedPos(null);
+                      // setPinnedPos(null);
                     }}
                     sx={{
                       fontSize: 16,
@@ -206,7 +204,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
               borderColor: theme.palette.grey['500'],
             })}
           />
-          <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} contentHeight={contentHeight} />
+          <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
         </Stack>
       </Box>
     </Portal>
