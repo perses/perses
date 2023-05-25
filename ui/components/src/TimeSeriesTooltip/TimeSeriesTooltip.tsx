@@ -106,18 +106,19 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     setPinnedPos(mousePos);
   }
 
-  // TODO: always show toggle, when to disable?
-  // Option for user to see all series instead of only the nearby focused series.
-  // const showAllSeriesToggle =
-  //   (isTooltipPinned === true &&
-  //     chartData.timeSeries.length > 1 &&
-  //     nearbySeries.length !== chartData.timeSeries.length) ||
-  //   showAllSeries === true;
-  // Option for user to see all series instead of only the nearby focused series.
-  const showAllSeriesToggle = isTooltipPinned === true;
+  // Only show 'Show All' toggle when there are hidden series, once pinned allow toggling on and off
+  const showAllSeriesToggle = nearbySeries.length !== chartData.timeSeries.length || (isTooltipPinned && showAllSeries);
+  // TODO: remove after refactoring to ternary
+  // let showAllSeriesToggle = false;
+  // if (nearbySeries.length !== chartData.timeSeries.length) {
+  //   showAllSeriesToggle = true;
+  // }
+  // if (isTooltipPinned && showAllSeries) {
+  //   showAllSeriesToggle = true;
+  // }
 
   // Disable since only relevant when there are more total series than are visible.
-  // const disableAllSeriesToggle = nearbySeries.length === chartData.timeSeries.length;
+  const disableAllSeriesToggle = isTooltipPinned === false;
 
   return (
     <Portal>
@@ -163,7 +164,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
                   <Typography sx={{ fontSize: 11 }}>Show All?</Typography>
                   <Switch
                     checked={showAllSeries}
-                    // disabled={disableAllSeriesToggle}
+                    disabled={disableAllSeriesToggle}
                     size="small"
                     onChange={(_, checked) => setShowAllSeries(checked)}
                     sx={(theme) => ({
