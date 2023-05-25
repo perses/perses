@@ -31,6 +31,7 @@ export function assembleTransform(
   const cursorPaddingX = 32;
   const cursorPaddingY = 16;
 
+  // TODO: can this be consolidated, remove isTooltipPinned?
   if (isTooltipPinned === true && pinnedPos !== null) {
     return `translate3d(${pinnedPos.page.x + cursorPaddingX}px, ${pinnedPos.page.y}px, 0)`;
   }

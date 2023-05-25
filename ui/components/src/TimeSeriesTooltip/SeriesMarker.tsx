@@ -24,7 +24,7 @@ export function SeriesMarker(props: SeriesMarkerProps) {
     <Box
       sx={combineSx(
         {
-          // display: 'inline-block',
+          display: 'inline-block',
           width: '11px',
           height: '11px',
           borderRadius: '2px',

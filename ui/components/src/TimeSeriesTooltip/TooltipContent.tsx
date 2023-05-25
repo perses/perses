@@ -57,8 +57,8 @@ export function TooltipContent(props: TooltipContentProps) {
     );
   }
 
-  // // TODO: is there a better way to approximate height or a dynamic height and width workaround for Virtuoso?
-  // // Need to roughly estimate height based on number of series for react-virtuoso'
+  // TODO: is there a better way to approximate height or a dynamic height and width workaround for Virtuoso?
+  // Need to roughly estimate height based on number of series for react-virtuoso
   const contentHeight = Math.min(TOOLTIP_MAX_HEIGHT, totalSeries * APPROX_SERIES_HEIGHT);
 
   // Padding value used in the react virtuoso header/footer components to

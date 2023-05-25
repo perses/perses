@@ -17,15 +17,7 @@ import { TooltipContent } from '@perses-dev/components';
 
 const meta: Meta<typeof TooltipContent> = {
   component: TooltipContent,
-  argTypes: {
-    // placement: {
-    //   options: ['top', 'left', 'right', 'bottom'],
-    //   control: 'select',
-    // },
-    // children: {
-    //   control: false,
-    // },
-  },
+  argTypes: {},
   parameters: {
     happo: false,
   },
@@ -35,8 +27,6 @@ export default meta;
 
 type Story = StoryObj<typeof TooltipContent>;
 
-export const Primary: Story = {};
-
 export const SingleSeries: Story = {
   args: {
     series: [
@@ -44,7 +34,6 @@ export const SingleSeries: Story = {
         seriesIdx: 0,
         datumIdx: 84,
         seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-        // seriesName: 'Test node demo.do.prometheus.io:9100',
         date: 1671803580000,
         x: 1671821580000,
         y: 0.1,
@@ -54,12 +43,6 @@ export const SingleSeries: Story = {
       },
     ],
     wrapLabels: true,
-    // data: {
-    //   // timeSeries: [],
-    //   // xAxis: [1673784000000, 1673784060000, 1673784120000],
-    //   // legendItems: [],
-    //   // rangeMs: 21600000,
-    // },
   },
   render: (args) => {
     return (

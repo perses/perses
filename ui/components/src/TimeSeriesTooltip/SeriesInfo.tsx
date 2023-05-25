@@ -78,14 +78,14 @@ export function SeriesInfo(props: SeriesInfoProps) {
             fontSize: 11,
             fontWeight: emphasizeText ? theme.typography.fontWeightBold : theme.typography.fontWeightRegular,
             display: '-webkit-box',
-            '-webkit-box-orient': 'vertical',
-            '-webkit-line-clamp': '3', // Allows long series names to wrap to three lines before adding ellipsis
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: '3', // Allows long series names to wrap to three lines before adding ellipsis
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'pre-line' : 'nowrap',
             // wordBreak: 'break-all',
             overflow: 'hidden',
             '&:hover': {
-              '-webkit-line-clamp': '10', // Show full series name on hover if it wraps to more than 3 lines
+              WebkitLineClamp: '10', // Show full series name on hover if it wraps to more than 3 lines
             },
           })}
           aria-label={emphasizeText ? EMPHASIZED_SERIES_DESCRIPTION : NEARBY_SERIES_DESCRIPTION}

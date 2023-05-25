@@ -35,7 +35,6 @@ import { assembleTransform } from './utils';
 interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
-  // isTooltipPinned: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;
@@ -46,7 +45,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,
-  // isTooltipPinned,
   unit,
   onUnpinClick,
   pinnedPos,
@@ -119,7 +117,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
       <Box
         ref={tooltipRef}
         sx={(theme) => ({
-          // minWidth: TOOLTIP_SINGLE_SERIES_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,
           padding: theme.spacing(0.5, 2),
@@ -187,7 +184,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
                     onClick={() => {
                       if (onUnpinClick !== undefined) {
                         onUnpinClick();
-                        setPinnedPos(null);
                       }
                     }}
                     sx={{

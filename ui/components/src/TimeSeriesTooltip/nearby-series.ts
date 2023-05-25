@@ -185,6 +185,7 @@ export function getNearbySeriesData({
 
   // allows moving cursor inside tooltip without it fading away
   if (isTooltipPinned === true && pinnedPos !== null) {
+    // TODO: can this be consolidated, remove isTooltipPinned and only use pinnedPos check everywhere?
     mousePos = pinnedPos;
     cursorTargetMatchesChart = true;
   }
