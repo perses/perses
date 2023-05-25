@@ -89,9 +89,9 @@ export function TooltipContent(props: TooltipContentProps) {
         Header: () => {
           return mockPadding;
         },
-        // Footer: () => {
-        //   return mockPadding;
-        // },
+        Footer: () => {
+          return mockPadding;
+        },
       }}
     />
   );

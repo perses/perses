@@ -82,7 +82,7 @@ export const MultiSeries: Story = {
         y: 84635648,
         formattedY: '84.64M',
         markerColor: 'hsla(1887856572,50%,50%,0.8)',
-        isClosestToCursor: true,
+        isClosestToCursor: false,
       },
       {
         seriesIdx: 2,
@@ -115,7 +115,7 @@ export const MultiSeries: Story = {
         y: 99635655,
         formattedY: '99.63M',
         markerColor: '#9179D2',
-        isClosestToCursor: false,
+        isClosestToCursor: true,
       },
       {
         seriesIdx: 5,
@@ -139,7 +139,7 @@ export const MultiSeries: Story = {
         y: 8888812345,
         formattedY: '88.8888M',
         markerColor: '#0047AB',
-        isClosestToCursor: false,
+        isClosestToCursor: true,
       },
     ],
     wrapLabels: true,
