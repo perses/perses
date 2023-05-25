@@ -13,7 +13,7 @@
 
 import { useMemo } from 'react';
 import { Virtuoso } from 'react-virtuoso';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
 import { APPROX_SERIES_HEIGHT, TOOLTIP_MULTI_SERIES_MIN_WIDTH } from './tooltip-model';
@@ -25,6 +25,8 @@ export interface TooltipContentProps {
 
 export function TooltipContent(props: TooltipContentProps) {
   const { series, wrapLabels } = props;
+
+  const theme = useTheme();
 
   const sortedFocusedSeries = useMemo(() => {
     if (series === null) return null;
@@ -58,32 +60,39 @@ export function TooltipContent(props: TooltipContentProps) {
   // Need to roughly estimate height based on number of series for react-virtuoso'
   const contentHeight = Math.min(series.length * APPROX_SERIES_HEIGHT);
 
+  // Padding value used in the react virtuoso header/footer components to
+  // simulate top/bottom padding based on recommendation in this issue.
+  // https://github.com/petyosi/react-virtuoso/issues/238
+  const LIST_PADDING = parseInt(theme.spacing(0.5), 10);
+  const mockPadding = <Box sx={{ width: '100%', height: `${LIST_PADDING}px` }}></Box>;
+
   return (
-    <Box
-      sx={{
-        display: 'table',
-        paddingTop: 1,
+    <Virtuoso
+      style={{ height: contentHeight, width: TOOLTIP_MULTI_SERIES_MIN_WIDTH }}
+      data={sortedFocusedSeries}
+      itemContent={(index, item) => {
+        return (
+          <SeriesInfo
+            key={item.seriesIdx}
+            seriesName={item.seriesName}
+            y={item.y}
+            formattedY={item.formattedY}
+            markerColor={item.markerColor}
+            totalSeries={sortedFocusedSeries.length}
+            wrapLabels={wrapLabels}
+            emphasizeText={item.isClosestToCursor}
+          />
+        );
       }}
-    >
-      <Virtuoso
-        style={{ height: contentHeight, width: TOOLTIP_MULTI_SERIES_MIN_WIDTH }}
-        data={sortedFocusedSeries}
-        itemContent={(index, item) => {
-          return (
-            <SeriesInfo
-              key={item.id}
-              seriesName={item.seriesName}
-              y={item.y}
-              formattedY={item.formattedY}
-              markerColor={item.markerColor}
-              totalSeries={sortedFocusedSeries.length}
-              wrapLabels={wrapLabels}
-              emphasizeText={item.isClosestToCursor}
-            />
-          );
-        }}
-        role="list"
-      />
-    </Box>
+      role="list"
+      components={{
+        Header: () => {
+          return mockPadding;
+        },
+        // Footer: () => {
+        //   return mockPadding;
+        // },
+      }}
+    />
   );
 }

@@ -141,7 +141,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <Stack py={1} spacing={0.5}>
+        <Stack pt={1} spacing={0.5}>
           <Box
             sx={{
               display: 'flex',
