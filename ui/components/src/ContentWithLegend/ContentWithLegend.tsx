@@ -53,8 +53,8 @@ export function ContentWithLegend({
         sx={{
           width: content.width,
           height: content.height,
-          marginRight: margin.right,
-          marginBottom: margin.bottom,
+          marginRight: `${margin.right}px`,
+          marginBottom: `${margin.bottom}px`,
         }}
       >
         {typeof children === 'function' ? children({ width: content.width, height: content.height }) : children}

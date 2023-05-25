@@ -269,7 +269,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       <ContentWithLegend
         width={adjustedContentDimensions.width}
         height={adjustedContentDimensions.height}
-        spacing={contentPadding}
         legendProps={
           legend && {
             options: legend,
