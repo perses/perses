@@ -150,6 +150,7 @@ export function checkforNearbySeries(
 export function getNearbySeriesData({
   mousePos,
   pinnedPos,
+  isTooltipPinned,
   chartData,
   chart,
   unit,
@@ -157,6 +158,7 @@ export function getNearbySeriesData({
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorData['coords'];
+  isTooltipPinned: boolean;
   chartData: EChartsDataFormat;
   chart?: EChartsInstance;
   unit?: UnitOptions;
@@ -164,9 +166,11 @@ export function getNearbySeriesData({
 }) {
   if (chart === undefined || mousePos === null) return [];
 
-  // prevents multiple tooltips showing from adjacent charts
+  // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
   let cursorTargetMatchesChart = false;
-  if (mousePos.target !== null) {
+  if (isTooltipPinned) {
+    cursorTargetMatchesChart = true;
+  } else if (mousePos.target !== null) {
     const currentParent = (<HTMLElement>mousePos.target).parentElement;
     if (currentParent !== null) {
       const currentGrandparent = currentParent.parentElement;

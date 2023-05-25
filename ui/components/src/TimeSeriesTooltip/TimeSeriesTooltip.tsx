@@ -88,6 +88,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   const nearbySeries = getNearbySeriesData({
     mousePos,
     chartData,
+    isTooltipPinned,
     pinnedPos,
     chart,
     unit,

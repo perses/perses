@@ -60,7 +60,7 @@ export function SeriesInfo(props: SeriesInfoProps) {
       <SeriesMarker
         markerColor={markerColor}
         sx={{
-          marginTop: 0.5,
+          marginTop: 0.6,
         }}
       />
       <Box
@@ -103,7 +103,6 @@ export function SeriesInfo(props: SeriesInfoProps) {
           variant="body1"
           sx={(theme) => ({
             fontSize: 11,
-            // verticalAlign: 'top',
             fontWeight: emphasizeText ? theme.typography.fontWeightBold : theme.typography.fontWeightRegular,
           })}
         >

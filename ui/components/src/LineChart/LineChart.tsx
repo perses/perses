@@ -218,7 +218,9 @@ export function LineChart({
         setShowTooltip(true);
       }}
       onMouseLeave={() => {
-        setShowTooltip(false);
+        if (isTooltipPinned === false) {
+          setShowTooltip(false);
+        }
       }}
       onMouseEnter={() => {
         setShowTooltip(true);
