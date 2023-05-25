@@ -95,7 +95,7 @@ export function LineChart({
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [pinTooltip, setPinTooltip] = useState<boolean>(false);
+  const [isTooltipPinned, setIsTooltipPinned] = useState<boolean>(false);
   const { timeZone } = useTimeZone();
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -104,7 +104,7 @@ export function LineChart({
         if (onDataZoom === undefined) {
           setTimeout(() => {
             // workaround so unpin happens after click event
-            setPinTooltip(false);
+            setIsTooltipPinned(false);
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -125,14 +125,14 @@ export function LineChart({
       },
       // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
-  }, [data, onDataZoom, setPinTooltip]);
+  }, [data, onDataZoom, setIsTooltipPinned]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
   }
 
   const handleOnDoubleClick = (e: MouseEvent) => {
-    setPinTooltip(false);
+    setIsTooltipPinned(false);
     // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
     if (onDoubleClick === undefined) {
       if (chartRef.current !== undefined) {
@@ -202,11 +202,14 @@ export function LineChart({
   return (
     <Box
       sx={{ height }}
-      onClick={() => {
-        setPinTooltip((current) => !current);
+      onClick={(e) => {
+        // Pin and unpin when clicking on chart canvas but not tooltip text.
+        if (e.target instanceof HTMLCanvasElement) {
+          setIsTooltipPinned((current) => !current);
+        }
       }}
       onMouseDown={(e) => {
-        // hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels
+        // Hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels.
         if (e.target instanceof HTMLCanvasElement) {
           setShowTooltip(false);
         }
@@ -216,7 +219,6 @@ export function LineChart({
       }}
       onMouseLeave={() => {
         setShowTooltip(false);
-        setPinTooltip(false);
       }}
       onMouseEnter={() => {
         setShowTooltip(true);
@@ -234,8 +236,11 @@ export function LineChart({
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
-            pinTooltip={pinTooltip}
+            isTooltipPinned={isTooltipPinned}
             unit={unit}
+            onUnpinClick={() => {
+              setIsTooltipPinned(false);
+            }}
           />
         )}
       <EChart

@@ -20,6 +20,7 @@ import {
   mockTimeSeriesResponseWithManySeries,
   mockTimeSeriesResponseWithNullValues,
   mockTimeSeriesResponseWithStableValue,
+  mockTimeSeriesResponseWithTestData,
 } from '@perses-dev/internal-utils';
 import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
 import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
@@ -469,7 +470,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   kind: 'PrometheusTimeSeriesQuery',
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
-                    query: 'fake_query_with_many_series',
+                    query: 'fake_query_with_twenty_series',
                   },
                 },
               },
@@ -597,13 +598,385 @@ export const ExampleWithTimeSeriesPanels: Story = {
               },
             },
             {
-              query: 'fake_query_with_many_series',
+              query: 'fake_query_with_twenty_series',
               response: {
                 body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
                   totalSeries: 20,
                 }),
+              },
+            },
+          ],
+        }),
+      },
+    },
+  },
+};
+
+const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
+  kind: 'Dashboard',
+  metadata: {
+    name: 'TimeSeriesChartPanel',
+    created_at: '2022-12-21T00:00:00Z',
+    updated_at: '2023-01-25T17:43:56.745494Z',
+    version: 3,
+    project: 'testing',
+  },
+  spec: {
+    duration: '6h',
+    variables: [],
+    panels: {
+      TwentySeries: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Twenty Series' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_twenty_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      FiftySeries: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Fifty Series' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_fifty_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      OneHundredSeries: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'One Hundred Series' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_one_hundred_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      FiveHundredSeries: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Five Hundred Series' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_five_hundred_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      OneThousandSeries: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'One Thousand Series' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_query_with_one_thousand_series',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      MockResponseFirst: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Mock Response (168 series)' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_range_query_mock_response_1',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    layouts: [
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 1', collapse: { open: true } },
+          items: [
+            { x: 0, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/TwentySeries' } },
+            { x: 12, y: 0, width: 12, height: 8, content: { $ref: '#/spec/panels/FiftySeries' } },
+            { x: 0, y: 8, width: 12, height: 8, content: { $ref: '#/spec/panels/OneHundredSeries' } },
+            { x: 12, y: 8, width: 12, height: 8, content: { $ref: '#/spec/panels/FiveHundredSeries' } },
+          ],
+        },
+      },
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 2', collapse: { open: false } },
+          items: [{ x: 0, y: 0, width: 24, height: 12, content: { $ref: '#/spec/panels/TwoThousandSeries' } }],
+        },
+      },
+    ],
+  },
+};
+
+const TIMESERIES_ALT_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_END - 2 * 60 * 60 * 1000;
+export const ExampleWithManySeries: Story = {
+  parameters: {
+    ...formatProviderParameters(TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE),
+    withTimeRange: {
+      props: {
+        initialTimeRange: {
+          start: new Date(TIMESERIES_ALT_EXAMPLE_MOCK_START),
+          end: new Date(TIMESERIES_EXAMPLE_MOCK_END),
+        },
+      },
+    },
+    msw: {
+      handlers: {
+        queryRange: mockQueryRangeRequests({
+          queries: [
+            {
+              query: 'fake_query_with_few_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_ALT_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 7,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_twenty_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 20,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_fifty_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 50,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_one_hundred_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 100,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_five_hundred_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 500,
+                }),
+              },
+            },
+            {
+              query: 'fake_query_with_one_thousand_series',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 1000,
+                }),
+              },
+            },
+          ],
+        }),
+      },
+    },
+  },
+};
+
+const TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE: DashboardResource = {
+  kind: 'Dashboard',
+  metadata: {
+    name: 'TimeSeriesChartPanel',
+    created_at: '2022-12-21T00:00:00Z',
+    updated_at: '2023-01-25T17:43:56.745494Z',
+    version: 3,
+    project: 'testing',
+  },
+  spec: {
+    duration: '6h',
+    variables: [],
+    panels: {
+      MockResponseFirst: {
+        kind: 'Panel',
+        spec: {
+          display: { name: 'Mock Response First' },
+          plugin: {
+            kind: 'TimeSeriesChart',
+            spec: {
+              legend: {
+                position: 'Right',
+              },
+            },
+          },
+          queries: [
+            {
+              kind: 'TimeSeriesQuery',
+              spec: {
+                plugin: {
+                  kind: 'PrometheusTimeSeriesQuery',
+                  spec: {
+                    datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
+                    query: 'fake_range_query_mock_response_1',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    layouts: [
+      {
+        kind: 'Grid',
+        spec: {
+          display: { title: 'Row 1', collapse: { open: true } },
+          items: [{ x: 0, y: 0, width: 24, height: 12, content: { $ref: '#/spec/panels/MockResponseFirst' } }],
+        },
+      },
+    ],
+  },
+};
+
+export const ExampleWithTestData: Story = {
+  parameters: {
+    happo: false,
+    ...formatProviderParameters(TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE),
+    withTimeRange: {
+      props: {
+        initialTimeRange: {
+          start: new Date(1684559580 * 1000),
+          end: new Date(1684573395 * 1000),
+        },
+      },
+    },
+    msw: {
+      handlers: {
+        queryRange: mockQueryRangeRequests({
+          queries: [
+            {
+              query: 'fake_range_query_mock_response_1',
+              response: {
+                body: mockTimeSeriesResponseWithTestData(),
               },
             },
           ],

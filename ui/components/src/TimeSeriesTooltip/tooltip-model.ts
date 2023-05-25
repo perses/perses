@@ -12,14 +12,18 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import { FocusedSeriesArray } from './focused-series';
+import { NearbySeriesArray } from './nearby-series';
 
+export const TOOLTIP_MIN_WIDTH = 375;
 export const TOOLTIP_MAX_WIDTH = 650;
-export const TOOLTIP_MAX_HEIGHT = 400;
+export const TOOLTIP_MAX_HEIGHT = 600;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
+export const TOOLTIP_ADJUST_Y_POS_MULTIPLIER = 0.75;
 
-// TODO: increase after virtualizing TooltipContent
-export const TOOLTIP_MAX_ITEMS = 10;
+export const FALLBACK_CHART_WIDTH = 750;
+
+export const NEARBY_SERIES_DESCRIPTION = 'nearby series showing in tooltip';
+export const EMPHASIZED_SERIES_DESCRIPTION = 'emphasized series showing as bold in tooltip';
 
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
@@ -77,7 +81,7 @@ export interface CursorData {
 }
 
 export interface TooltipData {
-  focusedSeries: FocusedSeriesArray | null;
+  focusedSeries: NearbySeriesArray | null;
   cursor: CursorData;
 }
 
