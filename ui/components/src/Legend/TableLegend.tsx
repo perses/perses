@@ -35,7 +35,7 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
   },
 ];
 
-const getRowId: TableProps<LegendItem>['getRowId'] = (data) => {
+const getRowId: NonNullable<TableProps<LegendItem>['getRowId']> = (data) => {
   return data.id;
 };
 
@@ -56,8 +56,8 @@ export function TableLegend({
       : // Turn "ALL" state into a table component friendly map of all of the selected
         // items for checkboxes.
         // TODO: clean this up if we switch to also using checkboxes in list legend.
-        items.reduce((allRowSelection, item) => {
-          allRowSelection[item.id] = true;
+        items.reduce((allRowSelection, item, index) => {
+          allRowSelection[getRowId(item, index)] = true;
           return allRowSelection;
         }, {} as Record<string, boolean>);
   }, [initRowSelection, items]);
