@@ -17,7 +17,7 @@ import { NearbySeriesArray } from './nearby-series';
 export const TOOLTIP_SINGLE_SERIES_MIN_WIDTH = 375;
 export const TOOLTIP_MULTI_SERIES_MIN_WIDTH = 500; // TODO: add check for number of characters in series name in case this should be narrower
 export const TOOLTIP_MAX_WIDTH = 650;
-export const TOOLTIP_MAX_HEIGHT = 600;
+export const TOOLTIP_MAX_HEIGHT = 650;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 export const TOOLTIP_ADJUST_Y_POS_MULTIPLIER = 0.75;
 
