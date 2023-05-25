@@ -13,151 +13,62 @@
 
 import { useMemo } from 'react';
 import { Virtuoso } from 'react-virtuoso';
-import PinOutline from 'mdi-material-ui/PinOutline';
-import Pin from 'mdi-material-ui/Pin';
-import { Box, Divider, Stack, Typography } from '@mui/material';
-import { useTimeZone } from '../context/TimeZoneProvider';
+import { Box } from '@mui/material';
 import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;
-  isTooltipPinned: boolean;
   wrapLabels?: boolean;
-  onUnpinClick: () => void;
 }
 
 export function TooltipContent(props: TooltipContentProps) {
-  const { series, wrapLabels, isTooltipPinned, onUnpinClick } = props;
-  const { formatWithUserTimeZone } = useTimeZone();
-
-  const seriesTime = series && series[0] && series[0].date ? series[0].date : null;
-
-  const formatTimeSeriesHeader = (timeMs: number) => {
-    const date = new Date(timeMs);
-    const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
-    const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
-    return (
-      <Box>
-        <Typography
-          variant="caption"
-          sx={(theme) => ({
-            color: theme.palette.common.white,
-          })}
-        >
-          {formattedDate}
-        </Typography>
-        <Typography variant="caption">
-          <strong>{formattedTime}</strong>
-        </Typography>
-      </Box>
-    );
-  };
+  const { series, wrapLabels } = props;
 
   const sortedFocusedSeries = useMemo(() => {
     if (series === null) return null;
     return series.sort((a, b) => (a.y > b.y ? -1 : 1));
   }, [series]);
 
-  if (sortedFocusedSeries === null || seriesTime === null) {
+  if (sortedFocusedSeries === null) {
     return null;
   }
 
-  // TODO: use react-virtuoso to improve performance
   return (
-    <Stack py={1} spacing={0.5}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'start',
-          alignItems: 'center',
+    <Box
+      sx={{
+        display: 'table',
+      }}
+    >
+      <Virtuoso
+        // style={{ height, width }}
+        // TODO: how to define height and width?
+        style={{ height: 400, width: 500 }}
+        data={sortedFocusedSeries}
+        itemContent={(index, item) => {
+          return (
+            <SeriesInfo
+              key={item.id}
+              seriesName={item.seriesName}
+              y={item.y}
+              formattedY={item.formattedY}
+              markerColor={item.markerColor}
+              totalSeries={sortedFocusedSeries.length}
+              wrapLabels={wrapLabels}
+              emphasizeText={item.isClosestToCursor}
+            />
+          );
         }}
-      >
-        {formatTimeSeriesHeader(seriesTime)}
-        <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-          <Typography sx={{ fontSize: 11 }}>Click to {isTooltipPinned ? 'Unpin' : 'Pin'}</Typography>
-          {isTooltipPinned ? (
-            <Pin onClick={onUnpinClick} sx={{ fontSize: 16, cursor: 'pointer' }} />
-          ) : (
-            <PinOutline sx={{ fontSize: 16 }} />
-          )}
-        </Stack>
-      </Box>
-
-      <Divider
-        sx={(theme) => ({
-          borderColor: theme.palette.grey['500'],
-        })}
+        role="list"
+        // components={{
+        //   Header: () => {
+        //     return mockPadding;
+        //   },
+        //   Footer: () => {
+        //     return mockPadding;
+        //   },
+        // }}
       />
-      <Box
-        sx={{
-          display: 'table',
-        }}
-      >
-        <Virtuoso
-          // style={{ height, width }}
-          style={{ height: 400, width: 500 }}
-          data={sortedFocusedSeries}
-          itemContent={(index, item) => {
-            return (
-              <SeriesInfo
-                key={item.id}
-                seriesName={item.seriesName}
-                y={item.y}
-                formattedY={item.formattedY}
-                markerColor={item.markerColor}
-                totalSeries={sortedFocusedSeries.length}
-                wrapLabels={wrapLabels}
-                emphasizeText={item.isClosestToCursor}
-              />
-            );
-            // return (
-            //   <ListLegendItem
-            //     key={item.id}
-            //     item={item}
-            //     truncateLabel={truncateLabels}
-            //     isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
-            //     onClick={onLegendItemClick}
-            //     sx={{
-            //       // Having an explicit width is important for the ellipsizing to
-            //       // work correctly. Subtract padding to simulate padding.
-            //       width: width - LIST_PADDING,
-            //       wordBreak: 'break-word',
-            //       overflow: 'hidden',
-            //     }}
-            //   />
-            // );
-          }}
-          role="list"
-          // components={{
-          //   Header: () => {
-          //     return mockPadding;
-          //   },
-          //   Footer: () => {
-          //     return mockPadding;
-          //   },
-          // }}
-        />
-        {/* {sortedFocusedSeries.map(
-          ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
-            if (datumIdx === null || seriesIdx === null) return null;
-            const key = seriesIdx.toString() + datumIdx.toString();
-
-            return (
-              <SeriesInfo
-                key={key}
-                seriesName={seriesName}
-                y={y}
-                formattedY={formattedY}
-                markerColor={markerColor}
-                totalSeries={sortedFocusedSeries.length}
-                wrapLabels={wrapLabels}
-                emphasizeText={isClosestToCursor}
-              />
-            );
-          }
-        )} */}
-      </Box>
-    </Stack>
+    </Box>
   );
 }
