@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import { Virtuoso } from 'react-virtuoso';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import Pin from 'mdi-material-ui/Pin';
 import { Box, Divider, Stack, Typography } from '@mui/material';
@@ -93,7 +94,51 @@ export function TooltipContent(props: TooltipContentProps) {
           display: 'table',
         }}
       >
-        {sortedFocusedSeries.map(
+        <Virtuoso
+          // style={{ height, width }}
+          style={{ height: 400, width: 500 }}
+          data={sortedFocusedSeries}
+          itemContent={(index, item) => {
+            return (
+              <SeriesInfo
+                key={item.id}
+                seriesName={item.seriesName}
+                y={item.y}
+                formattedY={item.formattedY}
+                markerColor={item.markerColor}
+                totalSeries={sortedFocusedSeries.length}
+                wrapLabels={wrapLabels}
+                emphasizeText={item.isClosestToCursor}
+              />
+            );
+            // return (
+            //   <ListLegendItem
+            //     key={item.id}
+            //     item={item}
+            //     truncateLabel={truncateLabels}
+            //     isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
+            //     onClick={onLegendItemClick}
+            //     sx={{
+            //       // Having an explicit width is important for the ellipsizing to
+            //       // work correctly. Subtract padding to simulate padding.
+            //       width: width - LIST_PADDING,
+            //       wordBreak: 'break-word',
+            //       overflow: 'hidden',
+            //     }}
+            //   />
+            // );
+          }}
+          role="list"
+          // components={{
+          //   Header: () => {
+          //     return mockPadding;
+          //   },
+          //   Footer: () => {
+          //     return mockPadding;
+          //   },
+          // }}
+        />
+        {/* {sortedFocusedSeries.map(
           ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
             if (datumIdx === null || seriesIdx === null) return null;
             const key = seriesIdx.toString() + datumIdx.toString();
@@ -111,7 +156,7 @@ export function TooltipContent(props: TooltipContentProps) {
               />
             );
           }
-        )}
+        )} */}
       </Box>
     </Stack>
   );
