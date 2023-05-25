@@ -108,14 +108,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
 
   // Only show 'Show All' toggle when there are hidden series, once pinned allow toggling on and off
   const showAllSeriesToggle = nearbySeries.length !== chartData.timeSeries.length || (isTooltipPinned && showAllSeries);
-  // TODO: remove after refactoring to ternary
-  // let showAllSeriesToggle = false;
-  // if (nearbySeries.length !== chartData.timeSeries.length) {
-  //   showAllSeriesToggle = true;
-  // }
-  // if (isTooltipPinned && showAllSeries) {
-  //   showAllSeriesToggle = true;
-  // }
 
   // Disable since only relevant when there are more total series than are visible.
   const disableAllSeriesToggle = isTooltipPinned === false;
