@@ -51,8 +51,8 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
 }: TimeSeriesTooltipProps) {
   const { formatWithUserTimeZone } = useTimeZone();
   const [showAllSeries, setShowAllSeries] = useState(false);
-  const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
+  const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
   if (mousePos === null || mousePos.target === null) return null;
@@ -62,7 +62,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
 
   const chart = chartRef.current;
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
-  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
+  const cursorTransform = assembleTransform(mousePos, chartWidth, isTooltipPinned, pinnedPos, height ?? 0, width ?? 0);
 
   const formatTimeSeriesHeader = (timeMs: number) => {
     const date = new Date(timeMs);
@@ -184,8 +184,8 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
                     onClick={() => {
                       if (onUnpinClick !== undefined) {
                         onUnpinClick();
+                        setPinnedPos(null);
                       }
-                      // setPinnedPos(null);
                     }}
                     sx={{
                       fontSize: 16,

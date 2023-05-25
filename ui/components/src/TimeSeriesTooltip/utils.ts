@@ -19,6 +19,7 @@ import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH, TOOLTIP_ADJUST_Y_POS_
 export function assembleTransform(
   mousePos: CursorData['coords'],
   chartWidth: number,
+  isTooltipPinned: boolean,
   pinnedPos: CursorCoordinates | null,
   tooltipHeight: number,
   tooltipWidth: number
@@ -27,7 +28,7 @@ export function assembleTransform(
     return 'translate3d(0, 0)';
   }
 
-  if (pinnedPos !== null) {
+  if (isTooltipPinned === false && pinnedPos !== null) {
     mousePos = pinnedPos;
   }
 

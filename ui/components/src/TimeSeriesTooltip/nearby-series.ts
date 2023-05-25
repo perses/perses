@@ -168,9 +168,10 @@ export function getNearbySeriesData({
 
   // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
   let cursorTargetMatchesChart = false;
-  if (isTooltipPinned) {
-    cursorTargetMatchesChart = true;
-  } else if (mousePos.target !== null) {
+  // if (isTooltipPinned) {
+  //   // cursorTargetMatchesChart = true;
+  // } else if (mousePos.target !== null) {
+  if (mousePos.target !== null) {
     const currentParent = (<HTMLElement>mousePos.target).parentElement;
     if (currentParent !== null) {
       const currentGrandparent = currentParent.parentElement;
@@ -184,7 +185,7 @@ export function getNearbySeriesData({
   }
 
   // allows moving cursor inside tooltip without it fading away
-  if (pinnedPos !== null) {
+  if (isTooltipPinned === true && pinnedPos !== null) {
     mousePos = pinnedPos;
     cursorTargetMatchesChart = true;
   }
