@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './ColorPicker';
+export * from './ContentWithLegend';
 export * from './DateTimeRangePicker';
 export * from './Dialog';
 export * from './Drawer';

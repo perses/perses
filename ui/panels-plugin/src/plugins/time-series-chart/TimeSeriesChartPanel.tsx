@@ -21,21 +21,14 @@ import {
   DEFAULT_LEGEND,
   EChartsDataFormat,
   validateLegendSpec,
-  Legend,
   LineChart,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
   SelectedLegendItemState,
+  ContentWithLegend,
 } from '@perses-dev/components';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_UNIT,
-  DEFAULT_VISUAL,
-  PANEL_HEIGHT_LG_BREAKPOINT,
-  LEGEND_HEIGHT_SM,
-  LEGEND_HEIGHT_LG,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
@@ -258,22 +251,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
-
-  // TODO: account for number of time series returned when adjusting legend spacing
-  let legendHeight = LEGEND_HEIGHT_SM;
-  if (legend && legend.position === 'Right') {
-    legendHeight = contentDimensions?.height || adjustedContentDimensions.height;
-  } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
-    legendHeight = LEGEND_HEIGHT_LG;
-  }
-
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
     left: !echartsYAxis.show ? 0 : gridLeft,
-    right: legend && legend.position === 'Right' ? legendWidth : 20,
-    bottom: legend && legend.position === 'Bottom' ? legendHeight : 0,
+    right: 20,
+    bottom: 0,
   };
 
   const handleDataZoom = (event: ZoomEventData) => {
@@ -282,29 +265,54 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   return (
-    <Box sx={{ padding: `${contentPadding}px`, position: 'relative' }}>
-      {y_axis && y_axis.show && y_axis.label && (
-        <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
-      )}
-      <LineChart
+    <Box sx={{ padding: `${contentPadding}px` }}>
+      <ContentWithLegend
+        width={adjustedContentDimensions.width}
         height={adjustedContentDimensions.height}
-        data={graphData}
-        yAxis={echartsYAxis}
-        unit={unit}
-        grid={gridOverrides}
-        tooltipConfig={{ wrapLabels: true }}
-        onDataZoom={handleDataZoom}
-      />
-      {legend && graphData.legendItems && (
-        <Legend
-          width={legendWidth}
-          height={legendHeight}
-          options={legend}
-          data={graphData.legendItems}
-          selectedItems={selectedLegendItems}
-          onSelectedItemsChange={setSelectedLegendItems}
-        />
-      )}
+        spacing={contentPadding}
+        legendProps={
+          legend && {
+            options: legend,
+            data: graphData.legendItems || [],
+            selectedItems: selectedLegendItems,
+            onSelectedItemsChange: setSelectedLegendItems,
+          }
+        }
+      >
+        {({ height, width }) => {
+          return (
+            <Box sx={{ height, width }}>
+              {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={height} />}
+              <LineChart
+                height={height}
+                data={graphData}
+                yAxis={echartsYAxis}
+                unit={unit}
+                grid={gridOverrides}
+                tooltipConfig={{ wrapLabels: true }}
+                onDataZoom={handleDataZoom}
+              />
+            </Box>
+          );
+        }}
+      </ContentWithLegend>
     </Box>
   );
+
+  // return (
+  //   <Box sx={{ padding: `${contentPadding}px` }}>
+  //     {y_axis && y_axis.show && y_axis.label && (
+  //       <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
+  //     )}
+  //     <LineChart
+  //       height={adjustedContentDimensions.height}
+  //       data={graphData}
+  //       yAxis={echartsYAxis}
+  //       unit={unit}
+  //       grid={gridOverrides}
+  //       tooltipConfig={{ wrapLabels: true }}
+  //       onDataZoom={handleDataZoom}
+  //     />
+  //   </Box>
+  // );
 }
