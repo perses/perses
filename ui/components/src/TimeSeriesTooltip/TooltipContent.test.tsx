@@ -37,8 +37,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
@@ -74,8 +72,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('84.64M')).toBeInTheDocument();
@@ -115,8 +111,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(
@@ -156,8 +150,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     const boldSeriesText = screen.getByLabelText(EMPHASIZED_SERIES_DESCRIPTION);

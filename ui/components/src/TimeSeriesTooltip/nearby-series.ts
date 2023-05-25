@@ -30,8 +30,6 @@ export interface NearbySeriesInfo {
   y: number;
   formattedY: string;
   isClosestToCursor: boolean;
-  label: string;
-  id: number;
 }
 
 export type NearbySeriesArray = NearbySeriesInfo[];
@@ -107,9 +105,6 @@ export function checkforNearbySeries(
                   formattedY: formattedY,
                   markerColor: markerColor.toString(),
                   isClosestToCursor,
-                  // TODO: confirm this will work with MUI Autocomplete approach
-                  label: currentSeriesName,
-                  id: seriesIdx,
                 });
                 nearbySeriesIndexes.push(seriesIdx);
               }

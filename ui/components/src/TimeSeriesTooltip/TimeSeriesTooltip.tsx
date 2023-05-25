@@ -25,7 +25,7 @@ import {
   CursorCoordinates,
   FALLBACK_CHART_WIDTH,
   TOOLTIP_MAX_HEIGHT,
-  TOOLTIP_MIN_WIDTH,
+  TOOLTIP_SINGLE_SERIES_MIN_WIDTH,
   TOOLTIP_MAX_WIDTH,
   useMousePosition,
 } from './tooltip-model';
@@ -117,7 +117,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
       <Box
         ref={tooltipRef}
         sx={(theme) => ({
-          minWidth: TOOLTIP_MIN_WIDTH,
+          minWidth: TOOLTIP_SINGLE_SERIES_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,
           padding: theme.spacing(0.5, 2),

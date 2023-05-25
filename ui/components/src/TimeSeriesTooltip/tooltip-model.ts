@@ -14,11 +14,14 @@
 import { useEffect, useState } from 'react';
 import { NearbySeriesArray } from './nearby-series';
 
-export const TOOLTIP_MIN_WIDTH = 375;
+export const TOOLTIP_SINGLE_SERIES_MIN_WIDTH = 350;
+export const TOOLTIP_MULTI_SERIES_MIN_WIDTH = 425;
 export const TOOLTIP_MAX_WIDTH = 650;
 export const TOOLTIP_MAX_HEIGHT = 600;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 export const TOOLTIP_ADJUST_Y_POS_MULTIPLIER = 0.75;
+
+export const APPROX_SERIES_HEIGHT = 40;
 
 export const FALLBACK_CHART_WIDTH = 750;
 
