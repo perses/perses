@@ -298,21 +298,4 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       </ContentWithLegend>
     </Box>
   );
-
-  // return (
-  //   <Box sx={{ padding: `${contentPadding}px` }}>
-  //     {y_axis && y_axis.show && y_axis.label && (
-  //       <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
-  //     )}
-  //     <LineChart
-  //       height={adjustedContentDimensions.height}
-  //       data={graphData}
-  //       yAxis={echartsYAxis}
-  //       unit={unit}
-  //       grid={gridOverrides}
-  //       tooltipConfig={{ wrapLabels: true }}
-  //       onDataZoom={handleDataZoom}
-  //     />
-  //   </Box>
-  // );
 }
