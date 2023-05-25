@@ -22,7 +22,6 @@ import { useTimeZone } from '../context/TimeZoneProvider';
 import { TooltipContent } from './TooltipContent';
 import { getNearbySeriesData } from './nearby-series';
 import {
-  APPROX_SERIES_HEIGHT,
   CursorCoordinates,
   FALLBACK_CHART_WIDTH,
   TOOLTIP_MAX_HEIGHT,

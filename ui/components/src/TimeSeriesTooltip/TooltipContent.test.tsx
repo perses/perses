@@ -152,6 +152,7 @@ describe('TooltipContent', () => {
       wrapLabels: true,
     };
     renderComponent(tooltipContent);
+    // TODO: fix this test, series not visible due to contentHeight calc
     const boldSeriesText = screen.getByLabelText(EMPHASIZED_SERIES_DESCRIPTION);
     expect(boldSeriesText).toBeInTheDocument();
     const regularSeriesText = screen.getByLabelText(NEARBY_SERIES_DESCRIPTION);
