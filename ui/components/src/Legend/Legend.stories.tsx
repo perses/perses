@@ -253,7 +253,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <UncontrolledLegendWrapper
+                  <LegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -270,7 +270,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <UncontrolledLegendWrapper
+                  <LegendWrapper
                     {...args}
                     width={400}
                     height={200}
