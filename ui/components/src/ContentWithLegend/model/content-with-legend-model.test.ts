@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { legendModes } from '../../model';
 import { ContentWithLegendLayoutOpts, getContentWithLegendLayout } from './content-with-legend-model';
 
 describe('getContentWithLegendLayout', () => {
@@ -36,33 +37,124 @@ describe('getContentWithLegendLayout', () => {
     });
   });
 
-  describe('with right oriented legend', () => {
-    describe('with spacing', () => {
-      const layoutOpts: ContentWithLegendLayoutOpts = {
-        width: 800,
-        height: 500,
-        spacing: 10,
-        minChildrenWidth: 0,
-        minChildrenHeight: 0,
-        legendOptions: {
-          position: 'Right',
-        },
-      };
+  describe.each(legendModes)('%s mode legend', (mode) => {
+    describe('with right oriented legend', () => {
+      describe('with spacing', () => {
+        const layoutOpts: ContentWithLegendLayoutOpts = {
+          width: 800,
+          height: 500,
+          spacing: 10,
+          minChildrenWidth: 0,
+          minChildrenHeight: 0,
+          legendOptions: {
+            position: 'Right',
+            mode: mode,
+          },
+        };
 
-      test('shows legend', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.legend.show).toBeTruthy();
+        test('shows legend', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.legend.show).toBeTruthy();
+        });
+
+        test('lays out the content, spacing, and legend horizontally', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.content.width + layout.margin.right + layout.legend.width).toEqual(layoutOpts.width);
+        });
+
+        test('content and legend use full height', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.content.height).toEqual(layoutOpts.height);
+          expect(layout.legend.height).toEqual(layoutOpts.height);
+        });
       });
 
-      test('lays out the content, spacing, and legend horizontally', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.content.width + layout.margin.right + layout.legend.width).toEqual(layoutOpts.width);
+      describe('without spacing', () => {
+        const layoutOpts: ContentWithLegendLayoutOpts = {
+          width: 800,
+          height: 500,
+          spacing: 0,
+          minChildrenWidth: 0,
+          minChildrenHeight: 0,
+          legendOptions: {
+            position: 'Right',
+            mode: mode,
+          },
+        };
+
+        test('shows legend', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.legend.show).toBeTruthy();
+        });
+
+        test('lays out the content, spacing, and legend horizontally', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.content.width + layout.legend.width).toEqual(layoutOpts.width);
+        });
+
+        test('content and legend use full height', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.content.height).toEqual(layoutOpts.height);
+          expect(layout.legend.height).toEqual(layoutOpts.height);
+        });
       });
 
-      test('content and legend use full height', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.content.height).toEqual(layoutOpts.height);
-        expect(layout.legend.height).toEqual(layoutOpts.height);
+      describe('without enough horizontal space for the legend', () => {
+        const layoutOpts: ContentWithLegendLayoutOpts = {
+          width: 200,
+          height: 500,
+          spacing: 10,
+          minChildrenWidth: 200,
+          minChildrenHeight: 0,
+          legendOptions: {
+            position: 'Right',
+            mode: mode,
+          },
+        };
+
+        test('does not show legend', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.legend.show).toBeFalsy();
+        });
+
+        test('gives content full width and height without a margin', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.content.width).toEqual(layoutOpts.width);
+          expect(layout.content.height).toEqual(layoutOpts.height);
+          expect(layout.margin).toEqual({ bottom: 0, right: 0 });
+        });
+      });
+    });
+
+    describe('with bottom oriented legend', () => {
+      describe('with spacing', () => {
+        const layoutOpts: ContentWithLegendLayoutOpts = {
+          width: 800,
+          height: 500,
+          spacing: 15,
+          minChildrenWidth: 0,
+          minChildrenHeight: 0,
+          legendOptions: {
+            position: 'Bottom',
+            mode: mode,
+          },
+        };
+
+        test('shows legend', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.legend.show).toBeTruthy();
+        });
+
+        test('lays out the content, spacing, and legend vertically', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.content.height + layout.margin.bottom + layout.legend.height).toEqual(layoutOpts.height);
+        });
+
+        test('content and legend use full width', () => {
+          const layout = getContentWithLegendLayout(layoutOpts);
+          expect(layout.content.width).toEqual(layoutOpts.width);
+          expect(layout.legend.width).toEqual(layoutOpts.width);
+        });
       });
     });
 
@@ -74,92 +166,8 @@ describe('getContentWithLegendLayout', () => {
         minChildrenWidth: 0,
         minChildrenHeight: 0,
         legendOptions: {
-          position: 'Right',
-        },
-      };
-
-      test('shows legend', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.legend.show).toBeTruthy();
-      });
-
-      test('lays out the content, spacing, and legend horizontally', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.content.width + layout.legend.width).toEqual(layoutOpts.width);
-      });
-
-      test('content and legend use full height', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.content.height).toEqual(layoutOpts.height);
-        expect(layout.legend.height).toEqual(layoutOpts.height);
-      });
-    });
-
-    describe('without enough horizontal space for the legend', () => {
-      const layoutOpts: ContentWithLegendLayoutOpts = {
-        width: 200,
-        height: 500,
-        spacing: 10,
-        minChildrenWidth: 200,
-        minChildrenHeight: 0,
-        legendOptions: {
-          position: 'Right',
-        },
-      };
-
-      test('does not show legend', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.legend.show).toBeFalsy();
-      });
-
-      test('gives content full width and height without a margin', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.content.width).toEqual(layoutOpts.width);
-        expect(layout.content.height).toEqual(layoutOpts.height);
-        expect(layout.margin).toEqual({ bottom: 0, right: 0 });
-      });
-    });
-  });
-
-  describe('with bottom oriented legend', () => {
-    describe('with spacing', () => {
-      const layoutOpts: ContentWithLegendLayoutOpts = {
-        width: 800,
-        height: 500,
-        spacing: 15,
-        minChildrenWidth: 0,
-        minChildrenHeight: 0,
-        legendOptions: {
           position: 'Bottom',
-        },
-      };
-
-      test('shows legend', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.legend.show).toBeTruthy();
-      });
-
-      test('lays out the content, spacing, and legend vertically', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.content.height + layout.margin.bottom + layout.legend.height).toEqual(layoutOpts.height);
-      });
-
-      test('content and legend use full width', () => {
-        const layout = getContentWithLegendLayout(layoutOpts);
-        expect(layout.content.width).toEqual(layoutOpts.width);
-        expect(layout.legend.width).toEqual(layoutOpts.width);
-      });
-    });
-
-    describe('without spacing', () => {
-      const layoutOpts: ContentWithLegendLayoutOpts = {
-        width: 800,
-        height: 500,
-        spacing: 0,
-        minChildrenWidth: 0,
-        minChildrenHeight: 0,
-        legendOptions: {
-          position: 'Bottom',
+          mode: mode,
         },
       };
 
@@ -189,6 +197,7 @@ describe('getContentWithLegendLayout', () => {
         minChildrenHeight: 100,
         legendOptions: {
           position: 'Bottom',
+          mode: mode,
         },
       };
 
