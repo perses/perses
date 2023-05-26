@@ -79,24 +79,29 @@ jobs:
           name: storybook
           path: ui/storybook/storybook-static
   
-  build-typedoc:
-    name: "build-typedoc"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - uses: ./.github/actions/setup_environment
-        with:
-          enable_npm: true
-      - name: Install UI deps
-        run: cd ./ui && npm install
-      - name: Build the typedoc docs
-        run: cd ./ui && npm run build && npm run typedoc
-      - name: store typedoc build
-        uses: actions/upload-artifact@v3
-        with:
-          name: typedoc
-          path: ui/typedoc
+  # Temporarily disabling the typedoc run in CI because it is causing OOM
+  # errors. There also appear to be some other issues with typedoc that need
+  # addressing (error on a potentialy valid typing that is fine when running
+  # type-check, breaking changes in the latest minor release we need to handle).
+  # TODO: uncomment and re-enable this when those issues are addressed.
+  # build-typedoc:
+  #   name: "build-typedoc"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - uses: ./.github/actions/setup_environment
+  #       with:
+  #         enable_npm: true
+  #     - name: Install UI deps
+  #       run: cd ./ui && npm install
+  #     - name: Build the typedoc docs
+  #       run: cd ./ui && npm run build && npm run typedoc
+  #     - name: store typedoc build
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: typedoc
+  #         path: ui/typedoc
   
   libs-release:
     name: "libs-release"
