@@ -113,9 +113,15 @@ export function TooltipContent(props: TooltipContentProps) {
     <>
       <SearchInput
         // sx={{ display: 'flex', marginLeft: 'auto' }}
-        sx={{ display: 'flex', width: '100%' }}
+        // sx={{ display: 'flex', width: '100%' }}
+        sx={(theme) => ({
+          display: 'flex',
+          width: '100%',
+          marginBottom: 1,
+          zIndex: theme.zIndex.tooltip + 1,
+        })}
         variant="outlined"
-        label={'Search series names'}
+        label={'Search Series Names'}
         value={seriesFilter}
         onChange={(e) => setSeriesFilter(e.target.value)}
       />
