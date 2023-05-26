@@ -16,6 +16,6 @@ export * from './SeriesInfo';
 export * from './SeriesLabelsStack';
 export * from './SeriesMarker';
 export * from './TooltipContent';
-export * from './focused-series';
+export * from './nearby-series';
 export * from './tooltip-model';
 export * from './utils';

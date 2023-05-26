@@ -21,6 +21,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -153,36 +154,36 @@ func TestMarshalDashboard(t *testing.T) {
 					Duration: model.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
-							Kind: dashboard.ListVariable,
+							Kind: variable.KindList,
 							Spec: &dashboard.ListVariableSpec{
-								CommonVariableSpec: dashboard.CommonVariableSpec{
-									Name: "labelName",
-								},
-								Plugin: common.Plugin{
-									Kind: "PrometheusLabelNamesVariable",
-									Spec: map[string]interface{}{
-										"matchers": []string{
-											"up",
+								ListSpec: variable.ListSpec{
+									Plugin: common.Plugin{
+										Kind: "PrometheusLabelNamesVariable",
+										Spec: map[string]interface{}{
+											"matchers": []string{
+												"up",
+											},
 										},
 									},
 								},
+								Name: "labelName",
 							},
 						},
 						{
-							Kind: dashboard.ListVariable,
+							Kind: variable.KindList,
 							Spec: &dashboard.ListVariableSpec{
-								CommonVariableSpec: dashboard.CommonVariableSpec{
-									Name: "labelValue",
-								},
-								Plugin: common.Plugin{
-									Kind: "PrometheusLabelValuesVariable",
-									Spec: map[string]interface{}{
-										"label_name": "$labelName",
-										"matchers": []string{
-											"up",
+								ListSpec: variable.ListSpec{
+									Plugin: common.Plugin{
+										Kind: "PrometheusLabelValuesVariable",
+										Spec: map[string]interface{}{
+											"label_name": "$labelName",
+											"matchers": []string{
+												"up",
+											},
 										},
 									},
 								},
+								Name: "labelValue",
 							},
 						},
 					},
@@ -239,7 +240,6 @@ func TestMarshalDashboard(t *testing.T) {
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "labelName",
           "allow_all_value": false,
           "allow_multiple": false,
           "plugin": {
@@ -249,13 +249,13 @@ func TestMarshalDashboard(t *testing.T) {
                 "up"
               ]
             }
-          }
+          },
+          "name": "labelName"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "labelValue",
           "allow_all_value": false,
           "allow_multiple": false,
           "plugin": {
@@ -266,7 +266,8 @@ func TestMarshalDashboard(t *testing.T) {
                 "up"
               ]
             }
-          }
+          },
+          "name": "labelValue"
         }
       }
     ],
@@ -431,36 +432,36 @@ func TestUnmarshallDashboard(t *testing.T) {
 			Duration: model.Duration(6 * time.Hour),
 			Variables: []dashboard.Variable{
 				{
-					Kind: dashboard.ListVariable,
+					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
-						CommonVariableSpec: dashboard.CommonVariableSpec{
-							Name: "labelName",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusLabelNamesVariable",
-							Spec: map[string]interface{}{
-								"matchers": []interface{}{
-									"up",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusLabelNamesVariable",
+								Spec: map[string]interface{}{
+									"matchers": []interface{}{
+										"up",
+									},
 								},
 							},
 						},
+						Name: "labelName",
 					},
 				},
 				{
-					Kind: dashboard.ListVariable,
+					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
-						CommonVariableSpec: dashboard.CommonVariableSpec{
-							Name: "labelValue",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusLabelValuesVariable",
-							Spec: map[string]interface{}{
-								"label_name": "$labelName",
-								"matchers": []interface{}{
-									"up",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusLabelValuesVariable",
+								Spec: map[string]interface{}{
+									"label_name": "$labelName",
+									"matchers": []interface{}{
+										"up",
+									},
 								},
 							},
 						},
+						Name: "labelValue",
 					},
 				},
 			},

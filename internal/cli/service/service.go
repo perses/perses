@@ -60,9 +60,17 @@ func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (
 		return &globalDatasource{
 			apiClient: apiClient.V1().GlobalDatasource(),
 		}, nil
+	case modelV1.KindGlobalVariable:
+		return &globalVariable{
+			apiClient: apiClient.V1().GlobalVariable(),
+		}, nil
 	case modelV1.KindProject:
 		return &project{
 			apiClient: apiClient.V1().Project(),
+		}, nil
+	case modelV1.KindVariable:
+		return &variable{
+			apiClient: apiClient.V1().Variable(projectName),
 		}, nil
 	default:
 		return nil, fmt.Errorf("resource %q not supported by the command", kind)

@@ -19,28 +19,23 @@ import {
   TextField,
   Grid,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
   Button,
   Stack,
-  Alert,
-  Chip,
-  IconButton,
   ClickAwayListener,
+  Divider,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { PluginEditor } from '@perses-dev/plugin-system';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
-import { ErrorBoundary, InfoTooltip } from '@perses-dev/components';
-import Refresh from 'mdi-material-ui/Refresh';
-import Clipboard from 'mdi-material-ui/ClipboardOutline';
+import { ErrorBoundary } from '@perses-dev/components';
 
-import { TOOLTIP_TEXT } from '../../../constants';
-import { useListVariablePluginValues, VARIABLE_TYPES } from '../variable-model';
+import { VARIABLE_TYPES } from '../variable-model';
+import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
-
-const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
 // TODO: Replace with proper validation library
 function getValidation(state: ReturnType<typeof getInitialState>) {
@@ -60,76 +55,22 @@ function getValidation(state: ReturnType<typeof getInitialState>) {
   };
 }
 
-const SectionHeader = ({ children }: React.PropsWithChildren) => (
-  <Typography pb={2} variant="subtitle1">
-    {children}
-  </Typography>
-);
-
-function VariableListPreview({ definition, onRefresh }: { definition: ListVariableDefinition; onRefresh: () => void }) {
-  const { data, isFetching, error } = useListVariablePluginValues(definition);
-  const [maxValues, setMaxValues] = useState<number | undefined>(DEFAULT_MAX_PREVIEW_VALUES);
-  const showAll = () => {
-    setMaxValues(undefined);
-  };
-  let notShown = 0;
-
-  if (data && data?.length > 0 && maxValues) {
-    notShown = data.length - maxValues;
-  }
-  const errorMessage = (error as Error)?.message;
-
-  return (
-    <Box>
-      <Stack direction={'row'} spacing={1} alignItems="center">
-        <Typography variant="caption">Preview Values</Typography>
-        <InfoTooltip description={TOOLTIP_TEXT.refreshVariableValues}>
-          <IconButton onClick={onRefresh} size="small">
-            <Refresh />
-          </IconButton>
-        </InfoTooltip>
-        <InfoTooltip description={TOOLTIP_TEXT.copyVariableValues}>
-          <IconButton
-            onClick={async () => {
-              if (data?.length) {
-                await navigator.clipboard.writeText(data.map((d) => d.label).join(','));
-                alert('Copied to clipboard!');
-              }
-            }}
-            size="small"
-          >
-            <Clipboard />
-          </IconButton>
-        </InfoTooltip>
-      </Stack>
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-      {isFetching && 'Loading...'}
-      {data?.length === 0 && <Alert severity="info">No results</Alert>}
-      <>
-        {data?.slice(0, maxValues).map((val) => (
-          <Chip sx={{ mr: 1, mb: 1 }} size="small" key={val.value} label={val.label} />
-        ))}
-        {notShown > 0 && (
-          <Chip onClick={showAll} variant="outlined" sx={{ mr: 1, mb: 1 }} size="small" label={`+${notShown} more`} />
-        )}
-      </>
-    </Box>
-  );
+function FallbackPreview() {
+  return <div>Error previewing values</div>;
 }
 
-export function VariableEditForm({
-  initialVariableDefinition,
-  onChange,
-  onCancel,
-}: {
+interface VariableEditFormProps {
   initialVariableDefinition: VariableDefinition;
   onChange: (def: VariableDefinition) => void;
   onCancel: () => void;
-}) {
+}
+
+export function VariableEditForm(props: VariableEditFormProps) {
+  const { initialVariableDefinition, onChange, onCancel } = props;
   const [state, setState] = useImmer(getInitialState(initialVariableDefinition));
   const validation = useMemo(() => getValidation(state), [state]);
 
-  const [previewKey, setPreviewKey] = React.useState(0);
+  const [previewKey, setPreviewKey] = useState(0);
 
   const refreshPreview = () => {
     setPreviewKey((prev) => prev + 1);
@@ -177,9 +118,8 @@ export function VariableEditForm({
         </Stack>
       </Box>
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
-        <SectionHeader>General</SectionHeader>
         <Grid container spacing={2} mb={2}>
-          <Grid item xs={6}>
+          <Grid item xs={8}>
             <TextField
               required
               error={!!validation.name}
@@ -189,12 +129,36 @@ export function VariableEditForm({
               helperText={validation.name}
               onChange={(v) => {
                 setState((draft) => {
-                  draft.name = v.target.value as string;
+                  draft.name = v.target.value;
                 });
               }}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
+            <TextField
+              fullWidth
+              label="Display Label"
+              value={state.title || ''}
+              onChange={(v) => {
+                setState((draft) => {
+                  draft.title = v.target.value;
+                });
+              }}
+            />
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              label="Description"
+              value={state.description}
+              onChange={(v) => {
+                setState((draft) => {
+                  draft.description = v.target.value;
+                });
+              }}
+            />
+          </Grid>
+          <Grid item xs={4}>
             <FormControl fullWidth>
               <InputLabel id="variable-type-select-label">Type</InputLabel>
               <Select
@@ -216,63 +180,56 @@ export function VariableEditForm({
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6}>
-            <TextField
-              fullWidth
-              label="Display Label"
-              value={state.title || ''}
-              onChange={(v) => {
-                setState((draft) => {
-                  draft.title = v.target.value;
-                });
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Description"
-              value={state.description}
-              onChange={(v) => {
-                setState((draft) => {
-                  draft.description = v.target.value;
-                });
-              }}
-            />
-          </Grid>
         </Grid>
+
+        <Divider />
 
         {state.kind === 'TextVariable' && (
           <>
-            <SectionHeader>Text Options</SectionHeader>
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={12}>
-                <TextField
-                  label="Value"
-                  value={state.textVariableFields.value}
-                  onChange={(v) => {
-                    setState((draft) => {
-                      draft.textVariableFields.value = v.target.value;
-                    });
-                  }}
-                />
-              </Grid>
-            </Grid>
+            <Typography py={1} variant="subtitle1">
+              Text Options
+            </Typography>
+            <Stack spacing={2}>
+              <Box>
+                <VariablePreview values={[state.textVariableFields.value]} />
+              </Box>
+              <TextField
+                label="Value"
+                value={state.textVariableFields.value}
+                onChange={(v) => {
+                  setState((draft) => {
+                    draft.textVariableFields.value = v.target.value;
+                  });
+                }}
+              />
+            </Stack>
           </>
         )}
 
         {state.kind === 'ListVariable' && (
           <>
-            <SectionHeader>List Options</SectionHeader>
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={6}>
+            <Typography py={1} variant="subtitle1">
+              List Options
+            </Typography>
+            <Stack spacing={2} mb={2}>
+              {state.listVariableFields.plugin.kind ? (
+                <Box>
+                  <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
+                    <VariableListPreview definition={previewSpec} onRefresh={refreshPreview} />
+                  </ErrorBoundary>
+                </Box>
+              ) : (
+                <VariablePreview isLoading={true} />
+              )}
+
+              <Stack>
                 {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
                 <ClickAwayListener onClickAway={() => refreshPreview()}>
                   <Box />
                 </ClickAwayListener>
                 {/** */}
                 <PluginEditor
-                  width={500}
+                  width="100%"
                   pluginType="Variable"
                   pluginKindLabel="Source"
                   value={state.listVariableFields.plugin}
@@ -282,52 +239,66 @@ export function VariableEditForm({
                     });
                   }}
                 />
-              </Grid>
+              </Stack>
 
-              {state.listVariableFields.plugin.kind && (
-                <Grid item xs={12}>
-                  <TextField
-                    sx={{ mb: 1 }}
-                    label="Capturing Regexp Filter"
-                    value={state.listVariableFields.capturing_regexp || ''}
-                    onChange={(e) => {
-                      setState((draft) => {
+              <Stack>
+                <TextField
+                  label="Capturing Regexp Filter"
+                  value={state.listVariableFields.capturing_regexp || ''}
+                  onChange={(e) => {
+                    setState((draft) => {
+                      if (e.target.value) {
+                        // TODO: do a better fix, if empty string => it should skip the filter
                         draft.listVariableFields.capturing_regexp = e.target.value;
-                      });
-                    }}
-                  />
-                  <ErrorBoundary FallbackComponent={() => <div>Error previewing values</div>} resetKeys={[previewSpec]}>
-                    <VariableListPreview onRefresh={refreshPreview} definition={previewSpec} />
-                  </ErrorBoundary>
-                </Grid>
-              )}
-            </Grid>
+                      } else {
+                        draft.listVariableFields.capturing_regexp = undefined;
+                      }
+                    });
+                  }}
+                  helperText="Optional, if you want to filter on captured result."
+                />
+              </Stack>
+            </Stack>
 
-            <SectionHeader>Dropdown Options</SectionHeader>
-            <Grid container spacing={1} mb={1}>
-              <Grid item xs={12}>
-                Allow Multiple
-                <Switch
-                  checked={state.listVariableFields.allowMultiple}
-                  onChange={(e) => {
-                    setState((draft) => {
-                      draft.listVariableFields.allowMultiple = e.target.checked;
-                    });
-                  }}
+            <Divider />
+
+            <Typography py={1} variant="subtitle1">
+              Dropdown Options
+            </Typography>
+            <Stack spacing="2">
+              <Stack>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={state.listVariableFields.allowMultiple}
+                      onChange={(e) => {
+                        setState((draft) => {
+                          draft.listVariableFields.allowMultiple = e.target.checked;
+                        });
+                      }}
+                    />
+                  }
+                  label="Allow Multiple Values"
                 />
-              </Grid>
-              <Grid item xs={12}>
-                Allow All
-                <Switch
-                  checked={state.listVariableFields.allowAll}
-                  onChange={(e) => {
-                    setState((draft) => {
-                      draft.listVariableFields.allowAll = e.target.checked;
-                    });
-                  }}
+                <Typography variant="caption">Enables multiple values to be selected at the same time</Typography>
+              </Stack>
+              <Stack>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={state.listVariableFields.allowAll}
+                      onChange={(e) => {
+                        setState((draft) => {
+                          draft.listVariableFields.allowAll = e.target.checked;
+                        });
+                      }}
+                    />
+                  }
+                  label="Allow All option"
                 />
-              </Grid>
-            </Grid>
+                <Typography variant="caption">Enables an option to include all variable values</Typography>
+              </Stack>
+            </Stack>
           </>
         )}
       </Box>

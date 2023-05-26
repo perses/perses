@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -41,12 +42,12 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 }
 `,
 			result: &Variable{
-				Kind: TextVariable,
+				Kind: variable.KindText,
 				Spec: &TextVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "SimpleText",
+					TextSpec: variable.TextSpec{
+						Value: "value",
 					},
-					Value: "value",
+					Name: "SimpleText",
 				},
 			},
 		},
@@ -68,19 +69,19 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 }
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelNamesVariable",
+							Spec: map[string]interface{}{},
+						},
 					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelNamesVariable",
-						Spec: map[string]interface{}{},
-					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -106,21 +107,21 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 }
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelNamesVariable",
-						Spec: map[string]interface{}{
-							"matchers": []interface{}{"up"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelNamesVariable",
+							Spec: map[string]interface{}{
+								"matchers": []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -148,22 +149,22 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 }
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: true,
 						},
-					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[string]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[string]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -191,23 +192,23 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 }
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					DefaultValue: &DefaultVariableValue{SingleValue: "default"},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[string]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						DefaultValue: &variable.DefaultValue{SingleValue: "default"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[string]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -236,24 +237,24 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 }
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					AllowMultiple: true,
-					DefaultValue:  &DefaultVariableValue{SliceValues: []string{"default1", "default2"}},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[string]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						AllowMultiple: true,
+						DefaultValue:  &variable.DefaultValue{SliceValues: []string{"default1", "default2"}},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[string]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -282,12 +283,12 @@ spec:
   value: "value"
 `,
 			result: &Variable{
-				Kind: TextVariable,
+				Kind: variable.KindText,
 				Spec: &TextVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "SimpleText",
+					TextSpec: variable.TextSpec{
+						Value: "value",
 					},
-					Value: "value",
+					Name: "SimpleText",
 				},
 			},
 		},
@@ -303,18 +304,18 @@ spec:
     kind: "PrometheusLabelNamesVariable"
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelNamesVariable",
+						},
 					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelNamesVariable",
-					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -333,21 +334,21 @@ spec:
         - "up"
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelNamesVariable",
-						Spec: map[interface{}]interface{}{
-							"matchers": []interface{}{"up"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelNamesVariable",
+							Spec: map[interface{}]interface{}{
+								"matchers": []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -368,22 +369,22 @@ spec:
         - "up"
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: true,
 						},
-					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[interface{}]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[interface{}]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -404,23 +405,23 @@ spec:
         - "up"
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					DefaultValue: &DefaultVariableValue{SingleValue: "default"},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[interface{}]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						DefaultValue: &variable.DefaultValue{SingleValue: "default"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[interface{}]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -444,24 +445,24 @@ spec:
         - "up"
 `,
 			result: &Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					AllowMultiple: true,
-					DefaultValue:  &DefaultVariableValue{SliceValues: []string{"default1", "default2"}},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[interface{}]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						AllowMultiple: true,
+						DefaultValue:  &variable.DefaultValue{SliceValues: []string{"default1", "default2"}},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[interface{}]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 		},
@@ -512,7 +513,7 @@ func TestUnmarshalVariableError(t *testing.T) {
   }
 }
 `,
-			err: fmt.Errorf(`value for the variable "hogwarts" cannot be empty`),
+			err: fmt.Errorf(`value for the text variable cannot be empty`),
 		},
 		{
 			title: "ListVariable with no name",
@@ -543,44 +544,43 @@ func TestMarshalListVariable(t *testing.T) {
 		{
 			title: "simple TextVariable",
 			variable: Variable{
-				Kind: TextVariable,
+				Kind: variable.KindText,
 				Spec: &TextVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "SimpleText",
+					TextSpec: variable.TextSpec{
+						Value: "value",
 					},
-					Value: "value",
+					Name: "SimpleText",
 				},
 			},
 			result: `{
   "kind": "TextVariable",
   "spec": {
-    "name": "SimpleText",
-    "value": "value"
+    "value": "value",
+    "name": "SimpleText"
   }
 }`,
 		},
 		{
 			title: "query variable by label_names",
 			variable: Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelNamesVariable",
+							Spec: map[string]interface{}{},
+						},
 					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelNamesVariable",
-						Spec: map[string]interface{}{},
-					},
+					Name: "MyList",
 				},
 			},
 			result: `{
   "kind": "ListVariable",
   "spec": {
-    "name": "MyList",
     "display": {
       "name": "my awesome variable",
       "hidden": false
@@ -590,34 +590,34 @@ func TestMarshalListVariable(t *testing.T) {
     "plugin": {
       "kind": "PrometheusLabelNamesVariable",
       "spec": {}
-    }
+    },
+    "name": "MyList"
   }
 }`,
 		},
 		{
 			title: "query variable by label_names with matcher",
 			variable: Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelNamesVariable",
-						Spec: map[string]interface{}{
-							"matchers": []interface{}{"up"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelNamesVariable",
+							Spec: map[string]interface{}{
+								"matchers": []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 			result: `{
   "kind": "ListVariable",
   "spec": {
-    "name": "MyList",
     "display": {
       "name": "my awesome variable",
       "hidden": false
@@ -631,35 +631,35 @@ func TestMarshalListVariable(t *testing.T) {
           "up"
         ]
       }
-    }
+    },
+    "name": "MyList"
   }
 }`,
 		},
 		{
 			title: "query variable with label_values and matcher",
 			variable: Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[string]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[string]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 			result: `{
   "kind": "ListVariable",
   "spec": {
-    "name": "MyList",
     "display": {
       "name": "my awesome variable",
       "hidden": false
@@ -674,36 +674,36 @@ func TestMarshalListVariable(t *testing.T) {
           "up"
         ]
       }
-    }
+    },
+    "name": "MyList"
   }
 }`,
 		},
 		{
 			title: "default value as a single string",
 			variable: Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					DefaultValue: &DefaultVariableValue{SingleValue: "default"},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[string]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						DefaultValue: &variable.DefaultValue{SingleValue: "default"},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[string]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 			result: `{
   "kind": "ListVariable",
   "spec": {
-    "name": "MyList",
     "display": {
       "name": "my awesome variable",
       "hidden": false
@@ -719,37 +719,37 @@ func TestMarshalListVariable(t *testing.T) {
           "up"
         ]
       }
-    }
+    },
+    "name": "MyList"
   }
 }`,
 		},
 		{
 			title: "default list of values",
 			variable: Variable{
-				Kind: ListVariable,
+				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
-					CommonVariableSpec: CommonVariableSpec{
-						Name: "MyList",
-						Display: &VariableDisplay{
+					ListSpec: variable.ListSpec{
+						Display: &variable.Display{
 							Name:   "my awesome variable",
 							Hidden: false,
 						},
-					},
-					AllowMultiple: true,
-					DefaultValue:  &DefaultVariableValue{SliceValues: []string{"default1", "default2"}},
-					Plugin: common.Plugin{
-						Kind: "PrometheusLabelValuesVariable",
-						Spec: map[string]interface{}{
-							"label_name": "instance",
-							"matchers":   []interface{}{"up"},
+						AllowMultiple: true,
+						DefaultValue:  &variable.DefaultValue{SliceValues: []string{"default1", "default2"}},
+						Plugin: common.Plugin{
+							Kind: "PrometheusLabelValuesVariable",
+							Spec: map[string]interface{}{
+								"label_name": "instance",
+								"matchers":   []interface{}{"up"},
+							},
 						},
 					},
+					Name: "MyList",
 				},
 			},
 			result: `{
   "kind": "ListVariable",
   "spec": {
-    "name": "MyList",
     "display": {
       "name": "my awesome variable",
       "hidden": false
@@ -768,7 +768,8 @@ func TestMarshalListVariable(t *testing.T) {
           "up"
         ]
       }
-    }
+    },
+    "name": "MyList"
   }
 }`,
 		},

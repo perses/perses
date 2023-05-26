@@ -27,14 +27,14 @@ export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOpt
  */
 export interface TimeSeriesChartOptions {
   legend?: LegendOptions;
-  y_axis?: YAxisOptions;
+  y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
-  visual?: VisualOptions;
+  visual?: TimeSeriesChartVisualOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
-export interface YAxisOptions {
+export interface TimeSeriesChartYAxisOptions {
   show?: boolean;
   label?: string;
   unit?: UnitOptions;
@@ -42,16 +42,16 @@ export interface YAxisOptions {
   max?: number;
 }
 
-export interface PaletteOptions {
+export interface TimeSeriesChartPaletteOptions {
   kind: 'Auto' | 'Categorical';
   // colors: string []; // TODO: add colors to override ECharts theme
 }
 
-export type VisualOptions = {
+export type TimeSeriesChartVisualOptions = {
   line_width?: number;
   area_opacity?: number;
   show_points?: 'Auto' | 'Always';
-  palette?: PaletteOptions;
+  palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
   stack?: StackOptions;
   connect_nulls?: boolean;
@@ -62,7 +62,7 @@ export const DEFAULT_UNIT: UnitOptions = {
   abbreviate: true,
 };
 
-export const DEFAULT_Y_AXIS: YAxisOptions = {
+export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   show: true,
   label: '',
   unit: DEFAULT_UNIT,
@@ -83,7 +83,7 @@ export const DEFAULT_AREA_OPACITY = 0;
 export const DEFAULT_POINT_RADIUS = 4;
 export const DEFAULT_CONNECT_NULLS = false;
 
-export const DEFAULT_VISUAL: VisualOptions = {
+export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
   line_width: DEFAULT_LINE_WIDTH,
   area_opacity: DEFAULT_AREA_OPACITY,
   point_radius: DEFAULT_POINT_RADIUS,
