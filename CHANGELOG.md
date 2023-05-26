@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.31.0 / 2023-05-26
+
+- [FEATURE] Revamp dashboard variables form (#1177)
+- [FEATURE] Tooltip bold multi series when close to cursor, fix pinning and add show all toggle (#1181)
+- [FEATURE] Add HTTP endpoint to manage global variable (#1162)
+- [FEATURE] Option to save default variable values and time range (#1165)
+- [ENHANCEMENT] Export types that are useful for working with core panels (#1189)
+- [ENHANCEMENT] make the whole panel group clickable for toggle/expand (#1178)
+- [ENHANCEMENT] Refactor time series chart panel selection (#1175)
+- [ENHANCEMENT] Add `noDataVariant` to `LineChart` (#1176)
+- [ENHANCEMENT] Add experimental table component (#1191)
+- [BUGFIX] Line highlight on hover refactor using ECharts dispatch (#1112)
+- [BREAKINGCHANGE] : move legend interactions to legend (#1179)
+- [BREAKINGCHANGE] Optional metadata, remove `unknown` DashboardResource type assertion (#1171)
+- [BREAKINGCHANGE] Add interfaces for each panel's definition (#1158)
+- [BREAKINGCHANGE] use react-virtuoso for virtualization (#1160)
+
 ## 0.30.0 / 2023-05-11
 
 - [FEATURE] Disable CRUD dialogs in readonly mode (#1129)
