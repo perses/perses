@@ -12,11 +12,19 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { ContentWithLegend, LegendProps, LineChart, legendModes, legendPositions } from '@perses-dev/components';
+import {
+  ContentWithLegend,
+  LegendPositions,
+  LegendProps,
+  LineChart,
+  legendModes,
+  legendPositions,
+} from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
-import { Stack } from '@mui/material';
+import { Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { StorySection } from '@perses-dev/storybook';
+import { useState } from 'react';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -142,7 +150,7 @@ export const Mode: Story = {
               <ContentWithLegend
                 {...args}
                 legendProps={{
-                  data: generateMockLegendData(10),
+                  data: generateMockLegendData(100),
                   options: {
                     position: 'Right',
                     mode,
@@ -307,6 +315,45 @@ export const Responsive: Story = {
             />
           </Stack>
         </StorySection>
+      </Stack>
+    );
+  },
+};
+
+export const ChangingPosition: Story = {
+  args: {},
+  render: (args) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [position, setPosition] = useState<LegendPositions>('Right');
+
+    return (
+      <Stack spacing={1}>
+        <ToggleButtonGroup
+          exclusive
+          value={position}
+          onChange={(e, value) => value && setPosition(value)}
+          aria-label="text formatting"
+        >
+          {legendPositions.map((position) => {
+            return (
+              <ToggleButton key={position} value={position}>
+                {position}
+              </ToggleButton>
+            );
+          })}
+        </ToggleButtonGroup>
+        <ContentWithLegend
+          {...args}
+          legendProps={{
+            data: generateMockLegendData(100),
+            options: {
+              position: position,
+              mode: 'List',
+            },
+            selectedItems: {},
+            onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
+          }}
+        />
       </Stack>
     );
   },

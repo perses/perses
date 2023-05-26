@@ -47,6 +47,7 @@ export function ContentWithLegend({
         width,
         height,
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <Box
@@ -55,6 +56,7 @@ export function ContentWithLegend({
           height: content.height,
           marginRight: `${margin.right}px`,
           marginBottom: `${margin.bottom}px`,
+          overflow: 'hidden',
         }}
       >
         {typeof children === 'function' ? children({ width: content.width, height: content.height }) : children}
