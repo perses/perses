@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getTableCellLayout gets layout for compact density 1`] = `
+Object {
+  "fontSize": "0.875rem",
+  "height": 9.43,
+  "lineHeight": 1.43,
+  "padding": "4px 2px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for standard density 1`] = `
+Object {
+  "fontSize": "1rem",
+  "height": 17.5,
+  "lineHeight": 1.5,
+  "padding": "8px 10px",
+}
+`;
+
+exports[`persesColumnToTanstackColumn transforms perses columns to tanstack columns 1`] = `
+Array [
+  Object {
+    "accessorKey": "label",
+    "header": "Name",
+    "maxSize": 0,
+    "minSize": 0,
+    "size": 0,
+  },
+  Object {
+    "accessorKey": "value",
+    "cell": [Function],
+    "header": "Count",
+    "size": 120,
+  },
+]
+`;

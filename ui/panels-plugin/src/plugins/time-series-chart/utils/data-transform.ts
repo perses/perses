@@ -13,7 +13,12 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
+import {
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  EChartsTimeSeries,
+  EChartsValues,
+  EChartsDataFormat,
+} from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
@@ -23,17 +28,21 @@ import {
   DEFAULT_Y_AXIS,
   POSITIVE_MIN_VALUE_MULTIPLIER,
   NEGATIVE_MIN_VALUE_MULTIPLIER,
-  VisualOptions,
-  YAxisOptions,
+  TimeSeriesChartVisualOptions,
+  TimeSeriesChartYAxisOptions,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
 
-export const EMPTY_GRAPH_DATA = {
+export const EMPTY_GRAPH_DATA: EChartsDataFormat = {
   timeSeries: [],
   xAxis: [],
   legendItems: [],
 };
+
+export const HIDE_DATAPOINTS_LIMIT = 70;
+
+export const BLUR_FADEOUT_OPACITY = 0.5;
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -51,11 +60,19 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
 export function getLineSeries(
   formattedName: string,
   data: EChartsTimeSeries['data'],
-  visual: VisualOptions,
+  visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
 ): EChartsTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
+
+  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
+  if (visual.show_points === 'Always') {
+    showPoints = true;
+  }
+
   return {
     type: 'line',
     name: formattedName,
@@ -65,25 +82,29 @@ export function getLineSeries(
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
-    showSymbol: visual.show_points === 'Always' ? true : false,
-    symbolSize: visual.show_points === 'Always' ? pointRadius + 1 : pointRadius, // accounts for smaller symbols on initial render than on hover
+    showSymbol: showPoints,
+    showAllSymbol: true,
+    symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
+      opacity: 0.8,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
+    // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      blurScope: 'coordinateSystem',
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth,
+        width: lineWidth + 1.5,
+        opacity: 1,
       },
     },
     blur: {
       lineStyle: {
-        opacity: 0.6,
+        width: lineWidth,
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -112,8 +133,14 @@ export function getThresholdSeries(
       width: 2,
     },
     emphasis: {
+      focus: 'series',
       lineStyle: {
         width: 2.5,
+      },
+    },
+    blur: {
+      lineStyle: {
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -146,7 +173,7 @@ function findMax(timeSeries: EChartsTimeSeries[]) {
 /**
  * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
  */
-export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentOption {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   const yAxis: YAXisComponentOption = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: inputAxis?.min,

@@ -14,6 +14,12 @@
 import { StoryFn, StoryContext } from '@storybook/react';
 import { TimeRangeProvider, TimeRangeProviderProps } from '@perses-dev/plugin-system';
 
+declare module '@storybook/react' {
+  interface Parameters {
+    withTimeRange?: WithTimeRangeParameter;
+  }
+}
+
 export type WithTimeRangeParameter = {
   props: Partial<TimeRangeProviderProps>;
 };

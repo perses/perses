@@ -56,11 +56,11 @@ export function formatPercent(value: number, { kind, decimal_places }: PercentUn
   };
 
   if (hasDecimalPlaces(decimal_places)) {
+    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
     formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
   } else {
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }
 
-  const formatter = Intl.NumberFormat('en-us', formatterOptions);
-  return formatter.format(value);
+  return Intl.NumberFormat('en-US', formatterOptions).format(value);
 }

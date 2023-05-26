@@ -11,23 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ThresholdOptions } from '@perses-dev/core';
+import { Definition, ThresholdOptions } from '@perses-dev/core';
 import { UnitOptions } from '@perses-dev/components';
 import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export interface SparklineOptions {
-  color?: string;
-  width?: number;
+/**
+ * The schema for a StatChart panel.
+ */
+export interface StatChartDefinition extends Definition<StatChartOptions> {
+  kind: 'StatChart';
 }
-
-export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
 export interface StatChartOptions {
   calculation: CalculationType;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
-  sparkline?: SparklineOptions;
+  sparkline?: StatChartSparklineOptions;
 }
+
+export interface StatChartSparklineOptions {
+  color?: string;
+  width?: number;
+}
+
+export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
 export function createInitialStatChartOptions(): StatChartOptions {
   return {

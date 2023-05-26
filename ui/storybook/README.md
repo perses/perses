@@ -90,6 +90,13 @@ We primarily use first party addons maintained by Storybook to avoid pain with u
 
 [Decorators](https://storybook.js.org/docs/react/writing-stories/decorators) provide a way to wrap a story in extra "rendering" functionality.
 
+### General guidelines
+
+- Decorators should have unique names across the project to avoid type conflicts and reduce confusion about the code.
+- Decorator components should start with the word "With" and be named using `UpperCamelCase` (e.g. `WithDashboard`). This provides consistency with Storybook's addons.
+- Parameters used to configured a decorator should be named the same as the component but using `lowerCamelCase` (e.g. `withDashboard`). This provides consistency with Storybook's addons.
+- Recommend extending the `Parameters` interface in the `@storybook/react` module in TypeScript for decorators configurable with parameters to assist with typing in story configuration.
+
 ### Global decorators
 
 Global decorators are specified in the [Storybook configuration](#configuring-storybook) and are applied to all stories. These decorators live in the `storybook` package in `src/config/decorators` and are primarily related to global storybook behavior (e.g. theming, time zones).
@@ -140,6 +147,17 @@ Storybook configuration lives in `src/config` and includes the following:
 - `DocsContainer` - Custom container for the docs addon to make it work with the dark mode addon.
 
 Storybook is currently configured to build with [Webpack 5](https://storybook.js.org/docs/react/builders/webpack#webpack-5).
+
+## Interaction tests
+
+We primarily use Jest and Playwright for writing tests. However, there are use cases where we want to test real browser-based interactions (i.e. not jsdom, which is used in Jest tests) for lower-level react components. In this case, [Storybook interaction tests](https://storybook.js.org/docs/react/writing-tests/interaction-testing) can be a good fit.
+
+To test locally:
+
+- Start storybook: `npm run storybook`
+- Open the specified story in your browser.
+- Use the "interactions" tab in the addons drawer to see the results interactively.
+- Run the tests from the command line: `npm run storybook:test`
 
 ## Visual tests
 

@@ -32,7 +32,17 @@
       "cache": false
     },
     "storybook:serve": {
-      "dependsOn": ["storybook:build"],
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false
+    },
+    "storybook:test": {
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false
+    },
+    "storybook:serve-and-test": {
+      "dependsOn": [],
       "outputs": [],
       "cache": false
     },
@@ -44,7 +54,8 @@
       // Make sure all packages are built once before type-checking to ensure
       // we have the right files for cross-package dependencies.
       "dependsOn": ["^build"],
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "e2e:local": {
       "dependsOn": [],

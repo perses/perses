@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegendOptions, validateLegendSpec } from './legend';
+import { LegendOptions, validateLegendSpec, isLegendItemVisuallySelected } from './legend';
 
 describe('validateLegendSpec', () => {
   it('should check if a legend spec is valid', () => {
@@ -19,5 +19,67 @@ describe('validateLegendSpec', () => {
     expect(validateLegendSpec(invalidLegend as LegendOptions)).toEqual(false);
     expect(validateLegendSpec({ position: 'Bottom' })).toEqual(true);
     expect(validateLegendSpec(undefined)).toEqual(true);
+  });
+});
+
+describe('isLegendItemVisuallySelected', () => {
+  it('does not highlight the item when "ALL" selected', () => {
+    expect(
+      isLegendItemVisuallySelected(
+        {
+          id: 'one',
+          label: 'One',
+          color: 'red',
+        },
+        'ALL'
+      )
+    ).toBeFalsy();
+  });
+
+  it('does not highlight the item when it is not in the selected object', () => {
+    expect(
+      isLegendItemVisuallySelected(
+        {
+          id: 'one',
+          label: 'One',
+          color: 'red',
+        },
+        {
+          two: true,
+        }
+      )
+    ).toBeFalsy();
+  });
+
+  it('does not highlight the item when it is false in the selected object', () => {
+    expect(
+      isLegendItemVisuallySelected(
+        {
+          id: 'one',
+          label: 'One',
+          color: 'red',
+        },
+        {
+          one: false,
+          two: true,
+        }
+      )
+    ).toBeFalsy();
+  });
+
+  it('highlights the item when it is true in the selected object', () => {
+    expect(
+      isLegendItemVisuallySelected(
+        {
+          id: 'one',
+          label: 'One',
+          color: 'red',
+        },
+        {
+          one: true,
+          two: true,
+        }
+      )
+    ).toBeTruthy();
   });
 });

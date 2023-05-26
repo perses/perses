@@ -31,6 +31,7 @@ import { JSONEditor } from '@perses-dev/components';
 import { useNavigate } from 'react-router-dom';
 import { useMigrate } from '../model/migrate-client';
 import { useCreateDashboardMutation } from '../model/dashboard-client';
+import { useIsReadonly } from '../model/config-client';
 
 interface GrafanaLightDashboard {
   // The only part that is interesting us is the list of the input that can exists in the Grafana dashboard definition.
@@ -40,13 +41,14 @@ interface GrafanaLightDashboard {
   [key: string]: unknown;
 }
 
-function ViewMigrate() {
+function MigrateView() {
   const [grafanaDashboard, setGrafanaDashboard] = useState<string>('');
   const [lightGrafanaDashboard, setLightGrafanaDashboard] = useState<GrafanaLightDashboard>();
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
   const [projectName, setProjectName] = useState<string>('');
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const navigate = useNavigate();
+  const isReadonly = useIsReadonly();
   const migrateMutation = useMigrate();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
@@ -161,7 +163,7 @@ function ViewMigrate() {
               />
               <Button
                 variant="contained"
-                disabled={dashboardMutation.isLoading || projectName.length === 0}
+                disabled={dashboardMutation.isLoading || projectName.length === 0 || isReadonly}
                 startIcon={<Import />}
                 onClick={importOnClick}
               >
@@ -172,6 +174,11 @@ function ViewMigrate() {
                   {dashboardMutation.error.message}
                 </Alert>
               )}
+              {isReadonly && (
+                <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                  Dashboard managed via code only.
+                </Alert>
+              )}
             </Stack>
           </Stack>
         )}
@@ -180,4 +187,4 @@ function ViewMigrate() {
   );
 }
 
-export default ViewMigrate;
+export default MigrateView;

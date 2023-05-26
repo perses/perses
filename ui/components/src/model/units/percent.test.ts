@@ -17,7 +17,7 @@ import { UnitTestCase } from './types';
 const PERCENT_TESTS: UnitTestCase[] = [
   // Percent
   { value: 0, unit: { kind: 'Percent' }, expected: '0%' },
-  { value: 0, unit: { kind: 'Percent', decimal_places: 4 }, expected: '0%' },
+  { value: 0, unit: { kind: 'Percent', decimal_places: 4 }, expected: '0.0000%' },
 
   { value: 0.001111, unit: { kind: 'Percent' }, expected: '0.00111%' },
   { value: 0.001111, unit: { kind: 'Percent', decimal_places: 0 }, expected: '0%' },
@@ -32,31 +32,31 @@ const PERCENT_TESTS: UnitTestCase[] = [
   { value: 0.111111, unit: { kind: 'Percent', decimal_places: 4 }, expected: '0.1111%' },
 
   { value: 1, unit: { kind: 'Percent' }, expected: '1%' },
-  { value: 1, unit: { kind: 'Percent', decimal_places: 4 }, expected: '1%' },
+  { value: 1, unit: { kind: 'Percent', decimal_places: 4 }, expected: '1.0000%' },
 
   { value: 1.1111, unit: { kind: 'Percent' }, expected: '1.11%' },
   { value: 1.1111, unit: { kind: 'Percent', decimal_places: 0 }, expected: '1%' },
   { value: 1.1111, unit: { kind: 'Percent', decimal_places: 4 }, expected: '1.1111%' },
 
   { value: 55, unit: { kind: 'Percent' }, expected: '55%' },
-  { value: 55, unit: { kind: 'Percent', decimal_places: 4 }, expected: '55%' },
+  { value: 55, unit: { kind: 'Percent', decimal_places: 4 }, expected: '55.0000%' },
 
   { value: 55.555, unit: { kind: 'Percent' }, expected: '55.6%' },
   { value: 55.555, unit: { kind: 'Percent', decimal_places: 0 }, expected: '56%' },
-  { value: 55.555, unit: { kind: 'Percent', decimal_places: 4 }, expected: '55.555%' },
+  { value: 55.555, unit: { kind: 'Percent', decimal_places: 4 }, expected: '55.5550%' },
 
   { value: 111, unit: { kind: 'Percent' }, expected: '111%' },
-  { value: 111, unit: { kind: 'Percent', decimal_places: 4 }, expected: '111%' },
+  { value: 111, unit: { kind: 'Percent', decimal_places: 4 }, expected: '111.0000%' },
 
   { value: 111.111, unit: { kind: 'Percent' }, expected: '111%' },
   { value: 111.111, unit: { kind: 'Percent', decimal_places: 0 }, expected: '111%' },
-  { value: 111.111, unit: { kind: 'Percent', decimal_places: 4 }, expected: '111.111%' },
+  { value: 111.111, unit: { kind: 'Percent', decimal_places: 4 }, expected: '111.1110%' },
 
   { value: 100000, unit: { kind: 'Percent' }, expected: '100,000%' },
 
   // PercentDecimal
   { value: 0, unit: { kind: 'PercentDecimal' }, expected: '0%' },
-  { value: 0, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '0%' },
+  { value: 0, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '0.0000%' },
 
   { value: 0.00001111, unit: { kind: 'PercentDecimal' }, expected: '0.00111%' },
   { value: 0.00001111, unit: { kind: 'PercentDecimal', decimal_places: 0 }, expected: '0%' },
@@ -72,23 +72,23 @@ const PERCENT_TESTS: UnitTestCase[] = [
 
   { value: 0.01, unit: { kind: 'PercentDecimal' }, expected: '1%' },
   { value: 0.01, unit: { kind: 'PercentDecimal', decimal_places: 0 }, expected: '1%' },
-  { value: 0.01, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '1%' },
+  { value: 0.01, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '1.0000%' },
 
   { value: 0.01111, unit: { kind: 'PercentDecimal' }, expected: '1.11%' },
   { value: 0.01111, unit: { kind: 'PercentDecimal', decimal_places: 0 }, expected: '1%' },
-  { value: 0.01111, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '1.111%' },
+  { value: 0.01111, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '1.1110%' },
 
   { value: 0.11, unit: { kind: 'PercentDecimal' }, expected: '11%' },
   { value: 0.11, unit: { kind: 'PercentDecimal', decimal_places: 0 }, expected: '11%' },
-  { value: 0.11, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '11%' },
+  { value: 0.11, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '11.0000%' },
 
   { value: 0.1111, unit: { kind: 'PercentDecimal' }, expected: '11.1%' },
   { value: 0.1111, unit: { kind: 'PercentDecimal', decimal_places: 0 }, expected: '11%' },
-  { value: 0.1111, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '11.11%' },
+  { value: 0.1111, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '11.1100%' },
 
   { value: 1, unit: { kind: 'PercentDecimal' }, expected: '100%' },
   { value: 1, unit: { kind: 'PercentDecimal', decimal_places: 0 }, expected: '100%' },
-  { value: 1, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '100%' },
+  { value: 1, unit: { kind: 'PercentDecimal', decimal_places: 4 }, expected: '100.0000%' },
 
   { value: 10, unit: { kind: 'PercentDecimal' }, expected: '1,000%' },
 ];

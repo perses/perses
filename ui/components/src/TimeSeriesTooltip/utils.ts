@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH } from './tooltip-model';
+import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH, TOOLTIP_ADJUST_Y_POS_MULTIPLIER } from './tooltip-model';
 
 /**
  * Determine position of tooltip depending on chart dimensions and the number of focused series
  */
 export function assembleTransform(
   mousePos: CursorData['coords'],
-  seriesNum: number,
   chartWidth: number,
-  chartHeight: number,
-  pinnedPos: CursorCoordinates | null
+  pinnedPos: CursorCoordinates | null,
+  tooltipHeight: number,
+  tooltipWidth: number
 ) {
   if (mousePos === null) {
     return 'translate3d(0, 0)';
@@ -40,21 +40,13 @@ export function assembleTransform(
   const x = mousePos.page.x;
   let y = mousePos.page.y + cursorPaddingY;
 
-  const isCloseToBottom = mousePos.page.y > window.innerHeight * 0.8;
-  const yPosAdjustThreshold = chartHeight * 0.75;
-  // adjust so tooltip does not get cut off at bottom of chart, reduce multiplier to move up
-  if (isCloseToBottom === true) {
-    if (seriesNum > 6) {
-      y = mousePos.page.y * 0.75;
-    } else {
-      y = mousePos.page.y * 0.9;
-    }
-  } else if (mousePos.plotCanvas.y > yPosAdjustThreshold) {
-    y = mousePos.page.y * 0.95;
+  // adjust so tooltip does not get cut off at bottom of chart
+  if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
+    // multiplier ensures tooltip isn't overly adjusted and gets cut off at the top of the viewport
+    y = mousePos.page.y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
   }
 
-  // use tooltip width to determine when to repos from right to left (width is narrower when only 1 focused series since labels wrap)
-  const tooltipWidth = seriesNum > 1 ? TOOLTIP_MAX_WIDTH : TOOLTIP_MAX_WIDTH / 2;
+  // use tooltip width to determine when to repos from right to left
   const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;
 
   // reposition so tooltip is never too close to right side of chart or left side of browser window

@@ -14,7 +14,7 @@
 import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -22,7 +22,6 @@ import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
 import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
 import { useIsReadonly } from '../model/config-client';
-import { useSnackbar } from '../context/SnackbarProvider';
 import { CreateAction } from '../model/action';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
 import { useNavHistoryDispatch } from '../context/DashboardNavHistory';
@@ -96,7 +95,7 @@ function ViewDashboard() {
           layouts: [],
           panels: {},
         },
-      } as unknown as DashboardResource;
+      };
       isEditing = true;
     }
   }

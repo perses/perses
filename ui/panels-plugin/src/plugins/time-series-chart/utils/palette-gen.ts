@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import ColorHash from 'color-hash';
-import { VisualOptions } from '../time-series-chart-model';
+import { TimeSeriesChartVisualOptions } from '../time-series-chart-model';
 
 export interface SeriesColorProps {
   categoricalPalette: string[];
-  visual: VisualOptions;
+  visual: TimeSeriesChartVisualOptions;
   muiPrimaryColor: string;
   seriesName: string;
   seriesIndex: number;

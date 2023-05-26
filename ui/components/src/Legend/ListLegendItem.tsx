@@ -11,14 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
 import { LegendItem } from '../model';
 import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
 
-interface ListLegendItemProps extends ListItemProps<'div'> {
+export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick'> {
   item: LegendItem;
+
+  /**
+   * When true, the item is rendered differently to visually communicate it is
+   * selected.
+   */
+  isVisuallySelected?: boolean;
+
+  onClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => void;
 
   /**
    * When `true`, will keep labels to a single line with overflow ellipsized. The
@@ -27,16 +35,10 @@ interface ListLegendItemProps extends ListItemProps<'div'> {
    * When `false` or unset, will show the full label.
    */
   truncateLabel?: boolean;
-
-  /**
-   * Called when the layout of the legend item changes as a result of the hover
-   * behavior when `truncateLabel` is `true`.
-   */
-  onLayoutChange?: () => void;
 }
 
 const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
-  { item, sx, truncateLabel, onLayoutChange, ...others },
+  { item, sx, truncateLabel, onClick, isVisuallySelected, ...others },
   ref
 ) {
   const [noWrap, setNoWrap] = useState(truncateLabel);
@@ -53,11 +55,10 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
     }
   }
 
-  useEffect(() => {
-    // When `noWrap` changes, so does the layout of the component. Notifies the
-    // parent, so it can handle those changes.
-    onLayoutChange?.();
-  }, [noWrap, onLayoutChange]);
+  const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    onClick(e, item.id);
+    item.onClick?.(e);
+  };
 
   return (
     <ListItem
@@ -73,8 +74,8 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
       )}
       dense={true}
       key={item.id}
-      onClick={item.onClick}
-      selected={item.isSelected}
+      onClick={handleClick}
+      selected={isVisuallySelected}
       ref={ref}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>

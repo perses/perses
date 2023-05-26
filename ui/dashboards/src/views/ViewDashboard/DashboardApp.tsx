@@ -25,6 +25,7 @@ import {
   DeletePanelDialog,
   EmptyDashboardProps,
   EditJsonDialog,
+  SaveChangesConfirmationDialog,
 } from '../../components';
 import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
@@ -123,6 +124,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <DeletePanelDialog />
         <DiscardChangesConfirmationDialog />
         <EditJsonDialog />
+        <SaveChangesConfirmationDialog />
       </Box>
     </Box>
   );

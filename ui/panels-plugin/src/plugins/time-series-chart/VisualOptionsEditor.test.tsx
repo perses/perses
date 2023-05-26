@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { VisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
+import { TimeSeriesChartVisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
-  const renderVisualOptionsEditor = (value: VisualOptions, onChange = jest.fn()) => {
+  const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = jest.fn()) => {
     render(<VisualOptionsEditor value={value} onChange={onChange} />);
   };
 

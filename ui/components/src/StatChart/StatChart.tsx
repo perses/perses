@@ -119,12 +119,24 @@ export function StatChart(props: StatChartProps) {
         sx={(theme) => ({
           color: color ?? theme.palette.text.primary,
           fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
-          padding: `${containerPadding} ${containerPadding} 0 ${containerPadding}`,
+          padding: sparkline
+            ? `${containerPadding} ${containerPadding} 0 ${containerPadding}`
+            : ` 0 ${containerPadding}`,
         })}
       >
         {formattedValue}
       </Typography>
-      {sparkline !== undefined && <EChart option={option} theme={chartsTheme.echartsTheme} renderer="svg" />}
+      {sparkline !== undefined && (
+        <EChart
+          sx={{
+            width: '100%',
+            height: '100%',
+          }}
+          option={option}
+          theme={chartsTheme.echartsTheme}
+          renderer="svg"
+        />
+      )}
     </Box>
   );
 }

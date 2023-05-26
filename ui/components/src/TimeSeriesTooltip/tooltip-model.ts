@@ -12,13 +12,18 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import { FocusedSeriesArray } from './focused-series';
+import { NearbySeriesArray } from './nearby-series';
 
+export const TOOLTIP_MIN_WIDTH = 375;
 export const TOOLTIP_MAX_WIDTH = 650;
-export const TOOLTIP_MAX_HEIGHT = 400;
+export const TOOLTIP_MAX_HEIGHT = 600;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
+export const TOOLTIP_ADJUST_Y_POS_MULTIPLIER = 0.75;
 
-export const TOOLTIP_MAX_ITEMS = 50;
+export const FALLBACK_CHART_WIDTH = 750;
+
+export const NEARBY_SERIES_DESCRIPTION = 'nearby series showing in tooltip';
+export const EMPHASIZED_SERIES_DESCRIPTION = 'emphasized series showing as bold in tooltip';
 
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
@@ -55,6 +60,10 @@ export interface CursorCoordinates {
     x: number;
     y: number;
   };
+  client: {
+    x: number;
+    y: number;
+  };
   plotCanvas: {
     x: number;
     y: number;
@@ -72,7 +81,7 @@ export interface CursorData {
 }
 
 export interface TooltipData {
-  focusedSeries: FocusedSeriesArray | null;
+  focusedSeries: NearbySeriesArray | null;
   cursor: CursorData;
 }
 
@@ -95,6 +104,10 @@ export const useMousePosition = (): CursorData['coords'] => {
         page: {
           x: e.pageX,
           y: e.pageY,
+        },
+        client: {
+          x: e.clientX,
+          y: e.clientY,
         },
         plotCanvas: {
           x: e.offsetX,

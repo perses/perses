@@ -11,15 +11,31 @@
     "spec": {
       "duration": "5m",
       "variables": [
-        { "kind": "TextVariable", "spec": { "name": "job", "value": "node" } },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "job",
+            "allow_multiple": false,
+            "allow_all_value": false,
+            "plugin": {
+              "kind": "PrometheusLabelValuesVariable",
+              "spec": {
+                "label_name": "job"
+              }
+            }
+          }
+        },
         {
           "kind": "ListVariable",
           "spec": {
             "name": "instance",
+            "allow_multiple": false,
+            "allow_all_value": false,
             "plugin": {
-              "kind": "StaticListVariable",
+              "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "values": ["demo.do.prometheus.io:9100", "demo.do.prometheus.io:3000", "demo.promlabs.com:9100"]
+                "label_name": "instance",
+                "matchers": ["up{job=~\"$job\"}"]
               }
             }
           }
@@ -33,7 +49,8 @@
               "spec": { "values": ["1m", "5m"] }
             }
           }
-        }
+        },
+        { "kind": "TextVariable", "spec": { "name": "text", "value": "test" } }
       ],
       "panels": {
         "defaultTimeSeriesChart": {
@@ -2830,6 +2847,210 @@
                 "content": {
                   "$ref": "#/spec/panels/markdownEx-7"
                 }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "EditJson",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-02-07T00:28:57.658905Z",
+      "version": 1,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "1h",
+      "variables": [
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "interval",
+            "allow_multiple": false,
+            "allow_all_value": false,
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  {
+                    "value": "1m",
+                    "label": "1m"
+                  },
+                  {
+                    "value": "5m",
+                    "label": "5m"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "NewListVariable",
+            "display": { "name": "Test display name", "hidden": false },
+            "default_value": "second value",
+            "allow_all_value": true,
+            "allow_multiple": false,
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  { "label": "test list value", "value": "test list value" },
+                  { "label": "second value", "value": "second value" },
+                  {
+                    "label": "another list value",
+                    "value": "another list value"
+                  },
+                  { "label": "final value", "value": "final value" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "kind": "TextVariable",
+          "spec": {
+            "name": "NewTextVariable",
+            "display": {
+              "name": "Text variable",
+              "hidden": false
+            },
+            "value": "initial value"
+          }
+        }
+      ],
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Markdown Example Zero",
+              "description": "This is a markdown panel"
+            },
+            "plugin": { "kind": "Markdown", "spec": { "text": "## Example" } }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": { "title": "Row 1", "collapse": { "open": true } },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/markdownEx" }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "Defaults",
+      "created_at": "2022-12-21T00:00:00Z",
+      "updated_at": "2023-02-07T00:28:57.658905Z",
+      "version": 1,
+      "project": "testing"
+    },
+    "spec": {
+      "duration": "1h",
+      "variables": [
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "interval",
+            "allow_multiple": false,
+            "allow_all_value": false,
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  {
+                    "value": "1m",
+                    "label": "1m"
+                  },
+                  {
+                    "value": "5m",
+                    "label": "5m"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "NewListVariable",
+            "display": { "name": "Test display name", "hidden": false },
+            "default_value": "second value",
+            "allow_all_value": true,
+            "allow_multiple": false,
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": {
+                "values": [
+                  { "label": "test list value", "value": "test list value" },
+                  { "label": "second value", "value": "second value" },
+                  {
+                    "label": "another list value",
+                    "value": "another list value"
+                  },
+                  { "label": "final value", "value": "final value" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "kind": "TextVariable",
+          "spec": {
+            "name": "NewTextVariable",
+            "display": {
+              "name": "Text variable",
+              "hidden": false
+            },
+            "value": "initial value"
+          }
+        }
+      ],
+      "panels": {
+        "markdownEx": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Markdown Example Zero",
+              "description": "This is a markdown panel"
+            },
+            "plugin": { "kind": "Markdown", "spec": { "text": "## Example" } }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": { "title": "Row 1", "collapse": { "open": true } },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/markdownEx" }
               }
             ]
           }

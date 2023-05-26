@@ -23,12 +23,12 @@ import {
   StackOptions,
   STACK_OPTIONS,
   VISUAL_CONFIG,
-  VisualOptions,
+  TimeSeriesChartVisualOptions,
 } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
-  value: VisualOptions;
-  onChange: (visual: VisualOptions) => void;
+  value: TimeSeriesChartVisualOptions;
+  onChange: (visual: TimeSeriesChartVisualOptions) => void;
 }
 
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
@@ -98,7 +98,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => <TextField {...params} />}
             onChange={(__, newValue) => {
-              const updatedValue: VisualOptions = {
+              const updatedValue: TimeSeriesChartVisualOptions = {
                 ...value,
                 stack: newValue.id === 'None' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
               };

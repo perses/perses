@@ -62,7 +62,7 @@ const meta: Meta<typeof Panel> = {
     // with the page.
     actions: { argTypesRegex: '' },
     happo: false,
-    WithDataQueries: {
+    withDataQueries: {
       props: {
         definitions: [
           {

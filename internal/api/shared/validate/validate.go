@@ -28,7 +28,7 @@ func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 		return err
 	}
 	if sch != nil {
-		if err := sch.ValidateVariables(entity.Spec.Variables); err != nil {
+		if err := sch.ValidateDashboardVariables(entity.Spec.Variables); err != nil {
 			return err
 		}
 		if err := sch.ValidatePanels(entity.Spec.Panels); err != nil {
