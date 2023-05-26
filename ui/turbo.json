@@ -32,7 +32,17 @@
       "cache": false
     },
     "storybook:serve": {
-      "dependsOn": ["storybook:build"],
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false
+    },
+    "storybook:test": {
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false
+    },
+    "storybook:serve-and-test": {
+      "dependsOn": [],
       "outputs": [],
       "cache": false
     },

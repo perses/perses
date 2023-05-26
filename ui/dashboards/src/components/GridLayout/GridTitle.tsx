@@ -43,19 +43,17 @@ export function GridTitle(props: GridTitleProps) {
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
   const { isEditMode } = useEditMode();
 
-  const text = (
-    <Typography variant="h2" sx={{ marginLeft: collapse !== undefined ? 1 : undefined }}>
-      {title}
-    </Typography>
-  );
+  const text = <Typography variant="h2">{title}</Typography>;
 
   return (
     <Box
+      onClick={collapse?.onToggleOpen}
       sx={{
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
         padding: (theme) => theme.spacing(1),
+        cursor: collapse ? 'pointer' : 'auto',
         backgroundColor: ({ palette }) =>
           palette.mode === 'dark' ? palette.background.paper : palette.background.default,
       }}
@@ -63,29 +61,44 @@ export function GridTitle(props: GridTitleProps) {
     >
       {collapse ? (
         <>
-          <IconButton
-            onClick={collapse.onToggleOpen}
-            aria-label={`${collapse.isOpen ? 'collapse' : 'expand'} group ${title}`}
-          >
+          <IconButton sx={{ marginRight: 1 }} aria-label={`${collapse.isOpen ? 'collapse' : 'expand'} group ${title}`}>
             {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
           </IconButton>
           {text}
           {isEditMode && (
             <Stack direction="row" marginLeft="auto">
               <InfoTooltip description={TOOLTIP_TEXT.addPanelToGroup}>
-                <IconButton aria-label={ARIA_LABEL_TEXT.addPanelToGroup(title)} onClick={openAddPanel}>
+                <IconButton
+                  aria-label={ARIA_LABEL_TEXT.addPanelToGroup(title)}
+                  onClick={(e) => {
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
+                    openAddPanel();
+                  }}
+                >
                   <AddPanelIcon />
                 </IconButton>
               </InfoTooltip>
               <InfoTooltip description={TOOLTIP_TEXT.editGroup}>
-                <IconButton aria-label={ARIA_LABEL_TEXT.editGroup(title)} onClick={openEditPanelGroup}>
+                <IconButton
+                  aria-label={ARIA_LABEL_TEXT.editGroup(title)}
+                  onClick={(e) => {
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
+                    openEditPanelGroup();
+                  }}
+                >
                   <PencilIcon />
                 </IconButton>
               </InfoTooltip>
               <InfoTooltip description={TOOLTIP_TEXT.deleteGroup}>
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.deleteGroup(title)}
-                  onClick={() => openDeletePanelGroupDialog(panelGroupId)}
+                  onClick={(e) => {
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
+                    openDeletePanelGroupDialog(panelGroupId);
+                  }}
                 >
                   <DeleteIcon />
                 </IconButton>
@@ -94,7 +107,11 @@ export function GridTitle(props: GridTitleProps) {
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.moveGroupDown(title)}
                   disabled={moveDown === undefined}
-                  onClick={moveDown}
+                  onClick={(e) => {
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
+                    moveDown && moveDown();
+                  }}
                 >
                   <ArrowDownIcon />
                 </IconButton>
@@ -103,7 +120,11 @@ export function GridTitle(props: GridTitleProps) {
                 <IconButton
                   aria-label={ARIA_LABEL_TEXT.moveGroupUp(title)}
                   disabled={moveUp === undefined}
-                  onClick={moveUp}
+                  onClick={(e) => {
+                    // Don't trigger expand/collapse
+                    e.stopPropagation();
+                    moveUp && moveUp();
+                  }}
                 >
                   <ArrowUpIcon />
                 </IconButton>

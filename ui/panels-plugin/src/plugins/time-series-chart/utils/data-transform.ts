@@ -13,7 +13,12 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
+import {
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  EChartsTimeSeries,
+  EChartsValues,
+  EChartsDataFormat,
+} from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
@@ -29,13 +34,15 @@ import {
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
 
-export const EMPTY_GRAPH_DATA = {
+export const EMPTY_GRAPH_DATA: EChartsDataFormat = {
   timeSeries: [],
   xAxis: [],
   legendItems: [],
 };
 
 export const HIDE_DATAPOINTS_LIMIT = 70;
+
+export const BLUR_FADEOUT_OPACITY = 0.5;
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -80,17 +87,24 @@ export function getLineSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.7,
+      opacity: 0.8,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
+      focus: 'series',
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 1,
+        width: lineWidth + 1.5,
         opacity: 1,
+      },
+    },
+    blur: {
+      lineStyle: {
+        width: lineWidth,
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -119,8 +133,14 @@ export function getThresholdSeries(
       width: 2,
     },
     emphasis: {
+      focus: 'series',
       lineStyle: {
         width: 2.5,
+      },
+    },
+    blur: {
+      lineStyle: {
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
