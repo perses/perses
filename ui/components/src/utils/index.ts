@@ -15,3 +15,4 @@ export * from './combine-sx';
 export * from './theme-gen';
 export * from './component-ids';
 export * from './format';
+export * from './search-filter';

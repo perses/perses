@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, Stack } from '@mui/material';
+import { useSearchFilter } from '../utils';
 import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
+import { SearchInput } from './SearchInput';
 import { APPROX_SERIES_HEIGHT, TOOLTIP_MAX_HEIGHT, TOOLTIP_MULTI_SERIES_MIN_WIDTH } from './tooltip-model';
 
 export interface TooltipContentProps {
@@ -26,12 +28,30 @@ export interface TooltipContentProps {
 export function TooltipContent(props: TooltipContentProps) {
   const { series, wrapLabels } = props;
 
+  const [seriesFilter, setSeriesFilter] = useState('');
+  const { filteredData } = useSearchFilter(series ?? [], ['seriesName', 'seriesIdx'], seriesFilter);
+  // const { filteredData } = useSearchFilter(accounts, ['name', 'id'], filter.searchText);
+
+  // // Format the record to an array to allow filtering using Fuse.js
+  // const labelEntries = Object.entries(event?.labels ?? {}).map((x) => ({ key: x[0], value: x[1] }));
+  // const [labelFilter, setLabelFilter] = useState('');
+  // const filteredLabels = useSearchFilter<{
+  //   key: string;
+  //   value: string;
+  // }>(labelEntries, ['key', 'value'], labelFilter, { threshold: 0, ignoreLocation: true });
+
   const theme = useTheme();
 
   const sortedFocusedSeries = useMemo(() => {
-    if (series === null) return null;
-    return series.sort((a, b) => (a.y > b.y ? -1 : 1));
-  }, [series]);
+    return filteredData.sort((a, b) => (a.y > b.y ? -1 : 1));
+    // if (series === null) return null;
+    // return series.sort((a, b) => (a.y > b.y ? -1 : 1));
+  }, [filteredData]);
+
+  // const sortedFocusedSeries = useMemo(() => {
+  //   if (series === null) return null;
+  //   return series.sort((a, b) => (a.y > b.y ? -1 : 1));
+  // }, [series]);
 
   if (series === null || sortedFocusedSeries === null) {
     return null;
@@ -67,35 +87,67 @@ export function TooltipContent(props: TooltipContentProps) {
   const LIST_PADDING = parseInt(theme.spacing(0.5), 10);
   const mockPadding = <Box sx={{ width: '100%', height: `${LIST_PADDING}px` }}></Box>;
 
+  // return (
+  //   <Stack sx={{ paddingTop: (theme) => theme.spacing(2) }} direction={'row'} alignItems={'center'}>
+  //     {/* <Typography variant="h2">Labels</Typography> */}
+  //     <SearchInput
+  //       sx={{ display: 'flex', marginLeft: 'auto' }}
+  //       variant="outlined"
+  //       label={'Search series names'}
+  //       value={seriesFilter}
+  //       onChange={(e) => setSeriesFilter(e.target.value)}
+  //     />
+  //     <SeriesInfo
+  //       seriesName={seriesName}
+  //       y={y}
+  //       formattedY={formattedY}
+  //       markerColor={markerColor}
+  //       totalSeries={sortedFocusedSeries.length}
+  //       wrapLabels={wrapLabels}
+  //       emphasizeText={isClosestToCursor}
+  //     />
+  //   </Stack>
+  // );
+
   return (
-    <Virtuoso
-      style={{ height: contentHeight, width: TOOLTIP_MULTI_SERIES_MIN_WIDTH }}
-      data={sortedFocusedSeries}
-      totalCount={totalSeries}
-      overscan={50}
-      itemContent={(index, item) => {
-        return (
-          <SeriesInfo
-            key={item.seriesIdx}
-            seriesName={item.seriesName}
-            y={item.y}
-            formattedY={item.formattedY}
-            markerColor={item.markerColor}
-            totalSeries={totalSeries}
-            wrapLabels={wrapLabels}
-            emphasizeText={item.isClosestToCursor}
-          />
-        );
-      }}
-      role="list"
-      components={{
-        Header: () => {
-          return mockPadding;
-        },
-        Footer: () => {
-          return mockPadding;
-        },
-      }}
-    />
+    <>
+      <SearchInput
+        // sx={{ display: 'flex', marginLeft: 'auto' }}
+        sx={{ display: 'flex', width: '100%' }}
+        variant="outlined"
+        label={'Search series names'}
+        value={seriesFilter}
+        onChange={(e) => setSeriesFilter(e.target.value)}
+      />
+      <Virtuoso
+        style={{ height: contentHeight, width: TOOLTIP_MULTI_SERIES_MIN_WIDTH }}
+        data={sortedFocusedSeries}
+        totalCount={totalSeries}
+        overscan={50}
+        itemContent={(index, item) => {
+          return (
+            <SeriesInfo
+              key={item.seriesIdx}
+              seriesName={item.seriesName}
+              y={item.y}
+              formattedY={item.formattedY}
+              markerColor={item.markerColor}
+              totalSeries={totalSeries}
+              wrapLabels={wrapLabels}
+              emphasizeText={item.isClosestToCursor}
+            />
+          );
+        }}
+        role="list"
+        components={{
+          Header: () => {
+            return mockPadding;
+          },
+          Footer: () => {
+            return mockPadding;
+          },
+        }}
+      />
+    </>
   );
 }

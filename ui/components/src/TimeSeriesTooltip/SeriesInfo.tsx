@@ -66,9 +66,11 @@ export function SeriesInfo(props: SeriesInfoProps) {
       <Box
         sx={{
           flex: 1,
-          width: 'calc(100% - 20px)',
-          minWidth: 150,
-          maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
+          // // flex: 1,
+          // flex: '0 0 auto',
+          // // width: 'calc(100% - 20px)',
+          // // minWidth: 150,
+          // // maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
         }}
       >
         <Typography

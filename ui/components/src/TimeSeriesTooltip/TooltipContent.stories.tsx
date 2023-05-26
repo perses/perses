@@ -124,14 +124,21 @@ export const MultiSeries: Story = {
         markerColor: '#0047AB',
         isClosestToCursor: true,
       },
+      {
+        seriesIdx: 7,
+        datumIdx: 48,
+        seriesName: 'slightly longer name here',
+        date: 1671803040000,
+        x: 1671821040000,
+        y: 44443422,
+        formattedY: '44.44M',
+        markerColor: '#87C59D',
+        isClosestToCursor: false,
+      },
     ],
     wrapLabels: true,
   },
   render: (args) => {
-    return (
-      <div style={{ width: '100px' }}>
-        <TooltipContent {...args} />
-      </div>
-    );
+    return <TooltipContent {...args} />;
   },
 };
