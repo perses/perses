@@ -42,7 +42,7 @@ export interface YAxisOptions {
   max?: number;
 }
 
-export interface PaletteOptions {
+export interface TimeSeriesChartPaletteOptions {
   kind: 'Auto' | 'Categorical';
   // colors: string []; // TODO: add colors to override ECharts theme
 }
@@ -51,7 +51,7 @@ export type VisualOptions = {
   line_width?: number;
   area_opacity?: number;
   show_points?: 'Auto' | 'Always';
-  palette?: PaletteOptions;
+  palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
   stack?: StackOptions;
   connect_nulls?: boolean;
