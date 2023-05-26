@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VisualOptions } from '../time-series-chart-model';
+import { TimeSeriesChartVisualOptions } from '../time-series-chart-model';
 import {
   getSeriesColor,
   getAutoPaletteColor,
@@ -74,7 +74,7 @@ describe('getSeriesColor', () => {
   });
 
   it('should return color from the generative Auto palette when visual option is defined', () => {
-    const visualOptionAuto: VisualOptions = {
+    const visualOptionAuto: TimeSeriesChartVisualOptions = {
       palette: {
         kind: 'Auto',
       },
@@ -92,7 +92,7 @@ describe('getSeriesColor', () => {
   });
 
   it('should return color from the Categorical palette when visual option is defined', () => {
-    const visualOptionCategorical: VisualOptions = {
+    const visualOptionCategorical: TimeSeriesChartVisualOptions = {
       palette: {
         kind: 'Categorical',
       },

@@ -29,7 +29,7 @@ export interface TimeSeriesChartOptions {
   legend?: LegendOptions;
   y_axis?: YAxisOptions;
   thresholds?: ThresholdOptions;
-  visual?: VisualOptions;
+  visual?: TimeSeriesChartVisualOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -47,7 +47,7 @@ export interface TimeSeriesChartPaletteOptions {
   // colors: string []; // TODO: add colors to override ECharts theme
 }
 
-export type VisualOptions = {
+export type TimeSeriesChartVisualOptions = {
   line_width?: number;
   area_opacity?: number;
   show_points?: 'Auto' | 'Always';
@@ -83,7 +83,7 @@ export const DEFAULT_AREA_OPACITY = 0;
 export const DEFAULT_POINT_RADIUS = 4;
 export const DEFAULT_CONNECT_NULLS = false;
 
-export const DEFAULT_VISUAL: VisualOptions = {
+export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
   line_width: DEFAULT_LINE_WIDTH,
   area_opacity: DEFAULT_AREA_OPACITY,
   point_radius: DEFAULT_POINT_RADIUS,

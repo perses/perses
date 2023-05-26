@@ -17,5 +17,5 @@ export type {
   TimeSeriesChartOptions,
   YAxisOptions,
   TimeSeriesChartPaletteOptions,
-  VisualOptions,
+  TimeSeriesChartVisualOptions,
 } from './time-series-chart-model';
