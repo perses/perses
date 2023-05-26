@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { EChartsTimeSeries } from '@perses-dev/components';
-import { YAxisOptions } from '../time-series-chart-model';
+import { TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
 import { convertPercentThreshold, convertPanelYAxis, roundDown } from './data-transform';
 
 const MAX_VALUE = 120;
@@ -44,7 +44,7 @@ describe('convertPercentThreshold', () => {
 
 describe('convertPanelYAxis', () => {
   it('should convert a Perses y_axis spec to the ECharts equivalent', () => {
-    const persesAxis: YAxisOptions = {
+    const persesAxis: TimeSeriesChartYAxisOptions = {
       show: true,
       label: 'Axis Label',
       unit: {

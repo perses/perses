@@ -28,8 +28,8 @@ import {
   DEFAULT_Y_AXIS,
   POSITIVE_MIN_VALUE_MULTIPLIER,
   NEGATIVE_MIN_VALUE_MULTIPLIER,
-  VisualOptions,
-  YAxisOptions,
+  TimeSeriesChartVisualOptions,
+  TimeSeriesChartYAxisOptions,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -60,7 +60,7 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
 export function getLineSeries(
   formattedName: string,
   data: EChartsTimeSeries['data'],
-  visual: VisualOptions,
+  visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
 ): EChartsTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
@@ -173,7 +173,7 @@ function findMax(timeSeries: EChartsTimeSeries[]) {
 /**
  * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
  */
-export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentOption {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   const yAxis: YAXisComponentOption = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: inputAxis?.min,
