@@ -233,21 +233,21 @@ export function LineChart({
         }
       }}
       onMouseDown={(e) => {
-        e.preventDefault();
         const { clientX } = e;
         setDragging(true);
         setStartX(clientX);
       }}
       onMouseMove={(e) => {
+        // Allow clicking inside tooltip to copy labels.
+        if (!(e.target instanceof HTMLCanvasElement)) {
+          return;
+        }
         const { clientX } = e;
         if (isDragging) {
           const deltaX = clientX - startX;
-          // Hide tooltip when user drags to zoom.
           if (deltaX > 0) {
-            // Allow clicking inside tooltip to copy labels.
-            if (e.target instanceof HTMLCanvasElement) {
-              setShowTooltip(false);
-            }
+            // Hide tooltip when user drags to zoom.
+            setShowTooltip(false);
           }
         }
       }}
