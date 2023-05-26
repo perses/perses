@@ -24,7 +24,7 @@ import {
   POSITIVE_MIN_VALUE_MULTIPLIER,
   NEGATIVE_MIN_VALUE_MULTIPLIER,
   TimeSeriesChartVisualOptions,
-  YAxisOptions,
+  TimeSeriesChartYAxisOptions,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -153,7 +153,7 @@ function findMax(timeSeries: EChartsTimeSeries[]) {
 /**
  * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
  */
-export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentOption {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   const yAxis: YAXisComponentOption = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: inputAxis?.min,

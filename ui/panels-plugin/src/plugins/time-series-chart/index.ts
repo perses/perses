@@ -15,7 +15,7 @@ export * from './TimeSeriesChart';
 export type {
   TimeSeriesChartDefinition,
   TimeSeriesChartOptions,
-  YAxisOptions,
+  TimeSeriesChartYAxisOptions,
   TimeSeriesChartPaletteOptions,
   TimeSeriesChartVisualOptions,
 } from './time-series-chart-model';

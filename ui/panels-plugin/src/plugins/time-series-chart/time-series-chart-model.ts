@@ -27,14 +27,14 @@ export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOpt
  */
 export interface TimeSeriesChartOptions {
   legend?: LegendOptions;
-  y_axis?: YAxisOptions;
+  y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
-export interface YAxisOptions {
+export interface TimeSeriesChartYAxisOptions {
   show?: boolean;
   label?: string;
   unit?: UnitOptions;
@@ -62,7 +62,7 @@ export const DEFAULT_UNIT: UnitOptions = {
   abbreviate: true,
 };
 
-export const DEFAULT_Y_AXIS: YAxisOptions = {
+export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   show: true,
   label: '',
   unit: DEFAULT_UNIT,
