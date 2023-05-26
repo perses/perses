@@ -181,11 +181,11 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
                 </Typography>
                 {isTooltipPinned ? (
                   <Pin
-                    // onClick={() => {
-                    //   if (onUnpinClick !== undefined) {
-                    //     onUnpinClick();
-                    //   }
-                    // }}
+                    onClick={() => {
+                      if (onUnpinClick !== undefined) {
+                        onUnpinClick();
+                      }
+                    }}
                     sx={{
                       fontSize: 16,
                       cursor: 'pointer',
