@@ -150,7 +150,6 @@ export function checkforNearbySeries(
 export function getNearbySeriesData({
   mousePos,
   pinnedPos,
-  isTooltipPinned,
   chartData,
   chart,
   unit,
@@ -158,7 +157,6 @@ export function getNearbySeriesData({
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
-  isTooltipPinned: boolean;
   chartData: EChartsDataFormat;
   chart?: EChartsInstance;
   unit?: UnitOptions;
@@ -168,9 +166,7 @@ export function getNearbySeriesData({
 
   // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
   let cursorTargetMatchesChart = false;
-  if (isTooltipPinned) {
-    cursorTargetMatchesChart = true;
-  } else if (mousePos.target !== null) {
+  if (mousePos.target !== null) {
     const currentParent = (<HTMLElement>mousePos.target).parentElement;
     if (currentParent !== null) {
       const currentGrandparent = currentParent.parentElement;
@@ -184,8 +180,7 @@ export function getNearbySeriesData({
   }
 
   // allows moving cursor inside tooltip without it fading away
-  if (isTooltipPinned === true && pinnedPos !== null) {
-    // TODO: can this be consolidated, remove isTooltipPinned and only use pinnedPos check everywhere?
+  if (pinnedPos !== null) {
     mousePos = pinnedPos;
     cursorTargetMatchesChart = true;
   }
