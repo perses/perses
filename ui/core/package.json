@@ -24,6 +24,7 @@
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "TZ=UTC jest",
+    "test:windows": "SET TZ=\"UTC\" && jest",
     "test:watch": "TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
