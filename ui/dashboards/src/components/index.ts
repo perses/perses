@@ -29,6 +29,7 @@ export * from './PanelDrawer';
 export * from './PanelGroupDialog';
 export * from './QuerySummaryTable';
 export * from './SaveChangesConfirmationDialog';
+export * from './SaveDashboardButton';
 export * from './TimeRangeControls';
 export * from './ToolbarIconButton';
 export * from './Variables';
