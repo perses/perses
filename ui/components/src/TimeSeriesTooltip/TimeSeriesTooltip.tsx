@@ -12,14 +12,12 @@
 // limitations under the License.
 
 import { Box, Divider, Portal, Typography, Stack, Switch } from '@mui/material';
-import Pin from 'mdi-material-ui/Pin';
-import PinOutline from 'mdi-material-ui/PinOutline';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import React, { useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
-import { useTimeZone } from '../context/TimeZoneProvider';
 import { TooltipContent } from './TooltipContent';
+import { TooltipHeader } from './TooltipHeader';
 import { getNearbySeriesData } from './nearby-series';
 import {
   CursorCoordinates,
@@ -31,7 +29,7 @@ import {
 } from './tooltip-model';
 import { assembleTransform } from './utils';
 
-interface TimeSeriesTooltipProps {
+export interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
   wrapLabels?: boolean;
@@ -48,7 +46,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   onUnpinClick,
   pinnedPos,
 }: TimeSeriesTooltipProps) {
-  const { formatWithUserTimeZone } = useTimeZone();
   const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
@@ -63,27 +60,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   const chart = chartRef.current;
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
   const cursorTransform = assembleTransform(mousePos, chartWidth, isTooltipPinned, pinnedPos, height ?? 0, width ?? 0);
-
-  const formatTimeSeriesHeader = (timeMs: number) => {
-    const date = new Date(timeMs);
-    const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
-    const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
-    return (
-      <Box>
-        <Typography
-          variant="caption"
-          sx={(theme) => ({
-            color: theme.palette.common.white,
-          })}
-        >
-          {formattedDate}
-        </Typography>
-        <Typography variant="caption">
-          <strong>{formattedTime}</strong>
-        </Typography>
-      </Box>
-    );
-  };
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
@@ -101,8 +77,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     return null;
   }
 
-  // Hide 'Show All' button when only one series returned
-  const showAllSeriesToggle = chartData.timeSeries.length > 1;
+  const totalSeries = chartData.timeSeries.length;
 
   return (
     <Portal>
@@ -134,64 +109,14 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
         }}
       >
         <Stack pt={3} spacing={0.5} sx={{ position: 'relative' }}>
-          <Box
-            sx={(theme) => ({
-              width: '100%',
-              height: 30,
-              padding: theme.spacing(0.5, 2),
-              display: 'flex',
-              justifyContent: 'start',
-              alignItems: 'center',
-              position: 'fixed',
-              top: 0,
-              left: 0,
-            })}
-          >
-            {formatTimeSeriesHeader(seriesTime)}
-            <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-              {showAllSeriesToggle && (
-                <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
-                  <Typography sx={{ fontSize: 11 }}>Show All?</Typography>
-                  <Switch
-                    checked={showAllSeries}
-                    size="small"
-                    onChange={(_, checked) => setShowAllSeries(checked)}
-                    sx={(theme) => ({
-                      '& .MuiSwitch-switchBase': {
-                        color: theme.palette.common.white,
-                      },
-                    })}
-                  />
-                </Stack>
-              )}
-              <Stack direction="row" alignItems="center">
-                <Typography
-                  sx={{
-                    marginRight: 0.5,
-                    fontSize: 11,
-                    verticalAlign: 'middle',
-                  }}
-                >
-                  Click to {isTooltipPinned ? 'Unpin' : 'Pin'}
-                </Typography>
-                {isTooltipPinned ? (
-                  <Pin
-                    onClick={() => {
-                      if (onUnpinClick !== undefined) {
-                        onUnpinClick();
-                      }
-                    }}
-                    sx={{
-                      fontSize: 16,
-                      cursor: 'pointer',
-                    }}
-                  />
-                ) : (
-                  <PinOutline sx={{ fontSize: 16 }} />
-                )}
-              </Stack>
-            </Stack>
-          </Box>
+          <TooltipHeader
+            series={nearbySeries}
+            totalSeries={totalSeries}
+            isTooltipPinned={isTooltipPinned}
+            showAllSeries={showAllSeries}
+            onShowAllClick={(checked) => setShowAllSeries(checked)}
+            onUnpinClick={onUnpinClick}
+          />
 
           <Divider
             sx={(theme) => ({
