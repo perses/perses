@@ -22,6 +22,7 @@ import { getNearbySeriesData } from './nearby-series';
 import {
   CursorCoordinates,
   FALLBACK_CHART_WIDTH,
+  TOOLTIP_BG_COLOR_FALLBACK,
   TOOLTIP_MAX_HEIGHT,
   TOOLTIP_MAX_WIDTH,
   TOOLTIP_MIN_WIDTH,
@@ -90,7 +91,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           position: 'absolute',
           top: 0,
           left: 0,
-          backgroundColor: theme.palette.designSystem.grey[800],
+          backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
           borderRadius: '6px',
           color: '#fff',
           fontSize: '11px',

@@ -27,6 +27,8 @@ export const FALLBACK_CHART_WIDTH = 750;
 export const NEARBY_SERIES_DESCRIPTION = 'nearby series showing in tooltip';
 export const EMPHASIZED_SERIES_DESCRIPTION = 'emphasized series showing as bold in tooltip';
 
+export const TOOLTIP_BG_COLOR_FALLBACK = '#2E313E';
+
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
   month: 'short',

@@ -16,7 +16,7 @@ import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import React from 'react';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { TOOLTIP_MAX_WIDTH } from './tooltip-model';
+import { TOOLTIP_BG_COLOR_FALLBACK, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 
 export interface TooltipHeaderProps {
   seriesTimeMs: number;
@@ -67,7 +67,7 @@ export const TooltipHeader = React.memo(function TooltipHeader({
         width: '100%',
         maxWidth: TOOLTIP_MAX_WIDTH,
         padding: theme.spacing(1.5, 2, 0.5, 2),
-        backgroundColor: theme.palette.designSystem.grey[800],
+        backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
         position: 'sticky',
         top: 0,
         left: 0,
