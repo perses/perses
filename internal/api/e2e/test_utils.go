@@ -13,7 +13,7 @@
 
 //go:build integration
 
-package v1
+package e2e
 
 import (
 	"net/http/httptest"
