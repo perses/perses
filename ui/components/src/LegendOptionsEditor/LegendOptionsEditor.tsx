@@ -19,11 +19,11 @@ import {
   validateLegendSpec,
   LEGEND_POSITIONS_CONFIG,
   LegendOptions,
-  LegendPositionConfig,
+  LegendSingleSelectConfig,
 } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 
-type LegendPositionOption = LegendPositionConfig & { id: LegendOptions['position'] };
+type LegendPositionOption = LegendSingleSelectConfig & { id: LegendOptions['position'] };
 
 const POSITION_OPTIONS: LegendPositionOption[] = Object.entries(LEGEND_POSITIONS_CONFIG).map(([id, config]) => {
   return {

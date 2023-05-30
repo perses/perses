@@ -13,9 +13,11 @@
 
 import { Box } from '@mui/material';
 import { produce } from 'immer';
-import { LegendOptions, LegendItem, SelectedLegendItemState } from '../model';
-import { ListLegend, ListLegendProps } from './ListLegend';
-import { CompactLegend, CompactLegendProps } from './CompactLegend';
+import { ReactNode } from 'react';
+import { LegendOptions, LegendItem, SelectedLegendItemState, getLegendMode } from '../model';
+import { ListLegend } from './ListLegend';
+import { CompactLegend } from './CompactLegend';
+import { TableLegend } from './TableLegend';
 
 export interface LegendProps {
   width: number;
@@ -81,12 +83,29 @@ export function Legend({ width, height, options, data, selectedItems, onSelected
     onSelectedItemsChange(newSelected);
   };
 
-  const commonLegendProps: ListLegendProps | CompactLegendProps = {
+  const mode = getLegendMode(options.mode);
+
+  // The bottom legend is displayed as a list when the number of items is too
+  // large and requires virtualization. Otherwise, it is rendered more compactly.
+  // We do not need this check for the right-side legend because it is always
+  // a virtualized list.
+  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
+
+  const commonLegendProps = {
     height,
     items: data,
     selectedItems,
     onLegendItemClick,
   };
+
+  let legendContent: ReactNode;
+  if (mode === 'Table') {
+    legendContent = <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} />;
+  } else if (options.position === 'Right' || needsVirtualization) {
+    legendContent = <ListLegend {...commonLegendProps} width={width} onLegendItemClick={onLegendItemClick} />;
+  } else {
+    legendContent = <CompactLegend {...commonLegendProps} onLegendItemClick={onLegendItemClick} />;
+  }
 
   if (options.position === 'Right') {
     return (
@@ -99,16 +118,12 @@ export function Legend({ width, height, options, data, selectedItems, onSelected
           right: 0,
         }}
       >
-        <ListLegend {...commonLegendProps} width={width} />
+        {legendContent}
       </Box>
     );
   }
 
-  // The bottom legend is displayed as a list when the number of items is too
-  // large and requires virtualization. Otherwise, it is rendered more compactly.
-  // We do not need this check for the right-side legend because it is always
-  // a virtualized list.
-  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
+  // Position bottom
   return (
     <Box
       sx={{
@@ -118,11 +133,7 @@ export function Legend({ width, height, options, data, selectedItems, onSelected
         bottom: 0,
       }}
     >
-      {needsVirtualization ? (
-        <ListLegend {...commonLegendProps} width={width} />
-      ) : (
-        <CompactLegend {...commonLegendProps} />
-      )}
+      {legendContent}
     </Box>
   );
 }
