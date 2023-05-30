@@ -24,8 +24,6 @@ export interface TooltipContentProps {
 export function TooltipContent(props: TooltipContentProps) {
   const { series, wrapLabels } = props;
 
-  // const theme = useTheme();
-
   const sortedFocusedSeries = useMemo(() => {
     if (series === null) return null;
     return series.sort((a, b) => (a.y > b.y ? -1 : 1));
@@ -37,9 +35,10 @@ export function TooltipContent(props: TooltipContentProps) {
   // TODO: use react-virtuoso to improve performance
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         display: 'table',
-      }}
+        padding: theme.spacing(0.5, 2),
+      })}
     >
       {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
         if (datumIdx === null || seriesIdx === null) return null;

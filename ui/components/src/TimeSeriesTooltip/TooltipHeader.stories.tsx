@@ -13,6 +13,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { TooltipHeader } from '@perses-dev/components';
+import { TOOLTIP_MIN_WIDTH } from './tooltip-model';
 
 const meta: Meta<typeof TooltipHeader> = {
   component: TooltipHeader,
@@ -28,26 +29,14 @@ type Story = StoryObj<typeof TooltipHeader>;
 
 export const Primary: Story = {
   args: {
-    series: [
-      {
-        seriesIdx: 0,
-        datumIdx: 84,
-        seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-        date: 1671803580000,
-        x: 1671821580000,
-        y: 0.1,
-        formattedY: '0.1',
-        markerColor: 'hsla(19838016,50%,50%,0.8)',
-        isClosestToCursor: false,
-      },
-    ],
+    seriesTimeMs: 1671803580000,
     isTooltipPinned: false,
     totalSeries: 5,
     showAllSeries: false,
   },
   render: (args) => {
     return (
-      <div style={{ width: '100px', position: 'relative' }}>
+      <div style={{ width: TOOLTIP_MIN_WIDTH, position: 'relative' }}>
         <TooltipHeader {...args} />
       </div>
     );

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, Portal, Typography, Stack, Switch } from '@mui/material';
+import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import React, { useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
@@ -86,11 +86,11 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           minWidth: TOOLTIP_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,
-          padding: theme.spacing(0.5, 2),
+          padding: 0,
           position: 'absolute',
           top: 0,
           left: 0,
-          backgroundColor: '#2E313E', // TODO: use colors from theme, separate styles for dark mode
+          backgroundColor: theme.palette.designSystem.grey[800],
           borderRadius: '6px',
           color: '#fff',
           fontSize: '11px',
@@ -107,7 +107,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <Stack pt={3} spacing={0.5} sx={{ position: 'relative' }}>
+        <Stack spacing={0.5}>
           <TooltipHeader
             seriesTimeMs={seriesTimeMs}
             totalSeries={totalSeries}
@@ -115,12 +115,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
             showAllSeries={showAllSeries}
             onShowAllClick={(checked) => setShowAllSeries(checked)}
             onUnpinClick={onUnpinClick}
-          />
-
-          <Divider
-            sx={(theme) => ({
-              borderColor: theme.palette.grey['500'],
-            })}
           />
           <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
         </Stack>

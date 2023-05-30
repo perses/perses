@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Typography, Stack, Switch } from '@mui/material';
+import { Box, Divider, Typography, Stack, Switch } from '@mui/material';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import React from 'react';
@@ -66,64 +66,77 @@ export const TooltipHeader = React.memo(function TooltipHeader({
       sx={(theme) => ({
         width: '100%',
         maxWidth: TOOLTIP_MAX_WIDTH,
-        height: 30,
-        padding: theme.spacing(0.5, 2),
-        display: 'flex',
-        justifyContent: 'start',
-        alignItems: 'center',
-        position: 'fixed',
+        padding: theme.spacing(1.5, 2, 0.5, 2),
+        backgroundColor: theme.palette.designSystem.grey[800],
+        position: 'sticky',
         top: 0,
         left: 0,
       })}
     >
-      {formatTimeSeriesHeader(seriesTimeMs)}
-      <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-        {showAllSeriesToggle && (
-          <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
-            <Typography sx={{ fontSize: 11 }}>Show All?</Typography>
-            <Switch
-              checked={showAllSeries}
-              size="small"
-              onChange={(_, checked) => {
-                if (onShowAllClick !== undefined) {
-                  return onShowAllClick(checked);
-                }
-              }}
-              sx={(theme) => ({
-                '& .MuiSwitch-switchBase': {
-                  color: theme.palette.common.white,
-                },
-              })}
-            />
-          </Stack>
-        )}
-        <Stack direction="row" alignItems="center">
-          <Typography
-            sx={{
-              marginRight: 0.5,
-              fontSize: 11,
-              verticalAlign: 'middle',
-            }}
-          >
-            Click to {isTooltipPinned ? 'Unpin' : 'Pin'}
-          </Typography>
-          {isTooltipPinned ? (
-            <Pin
-              onClick={() => {
-                if (onUnpinClick !== undefined) {
-                  onUnpinClick();
-                }
-              }}
-              sx={{
-                fontSize: 16,
-                cursor: 'pointer',
-              }}
-            />
-          ) : (
-            <PinOutline sx={{ fontSize: 16 }} />
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'start',
+          alignItems: 'center',
+          paddingBottom: 0.5,
+        }}
+      >
+        {formatTimeSeriesHeader(seriesTimeMs)}
+        <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
+          {showAllSeriesToggle && (
+            <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
+              <Typography sx={{ fontSize: 11 }}>Show All?</Typography>
+              <Switch
+                checked={showAllSeries}
+                size="small"
+                onChange={(_, checked) => {
+                  if (onShowAllClick !== undefined) {
+                    return onShowAllClick(checked);
+                  }
+                }}
+                sx={(theme) => ({
+                  '& .MuiSwitch-switchBase': {
+                    color: theme.palette.common.white,
+                  },
+                })}
+              />
+            </Stack>
           )}
+          <Stack direction="row" alignItems="center">
+            <Typography
+              sx={{
+                marginRight: 0.5,
+                fontSize: 11,
+                verticalAlign: 'middle',
+              }}
+            >
+              Click to {isTooltipPinned ? 'Unpin' : 'Pin'}
+            </Typography>
+            {isTooltipPinned ? (
+              <Pin
+                onClick={() => {
+                  if (onUnpinClick !== undefined) {
+                    onUnpinClick();
+                  }
+                }}
+                sx={{
+                  fontSize: 16,
+                  cursor: 'pointer',
+                }}
+              />
+            ) : (
+              <PinOutline sx={{ fontSize: 16 }} />
+            )}
+          </Stack>
         </Stack>
-      </Stack>
+      </Box>
+      <Divider
+        sx={(theme) => ({
+          width: '100%',
+          borderColor: theme.palette.grey['500'],
+        })}
+      />
     </Box>
   );
 });
