@@ -302,7 +302,7 @@ export const Responsive: Story = {
             />
           </Stack>
         </StorySection>
-        <StorySection title="size of bottom list legend adjusts depends on the height" level="h3">
+        <StorySection title="size of bottom list legend adjusts depending on the height" level="h3">
           <Stack direction="row" spacing={2} flexWrap="wrap">
             <ContentWithLegend
               {...args}
