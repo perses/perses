@@ -19,7 +19,7 @@ import (
 
 #legend: {
 	position: "Bottom" | "Right"
-	mode?: "List" | "Table"
+	mode?:    "List" | "Table"
 }
 
 #palette: {
