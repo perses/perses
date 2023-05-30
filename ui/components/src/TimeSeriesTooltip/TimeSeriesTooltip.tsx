@@ -59,7 +59,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
 
   const chart = chartRef.current;
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
-  const cursorTransform = assembleTransform(mousePos, chartWidth, isTooltipPinned, pinnedPos, height ?? 0, width ?? 0);
+  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({

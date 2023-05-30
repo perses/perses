@@ -19,7 +19,6 @@ import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH, TOOLTIP_ADJUST_Y_POS_
 export function assembleTransform(
   mousePos: CursorData['coords'],
   chartWidth: number,
-  isTooltipPinned: boolean,
   pinnedPos: CursorCoordinates | null,
   tooltipHeight: number,
   tooltipWidth: number
@@ -31,8 +30,7 @@ export function assembleTransform(
   const cursorPaddingX = 32;
   const cursorPaddingY = 16;
 
-  // TODO: can this be consolidated, remove isTooltipPinned?
-  if (isTooltipPinned === true && pinnedPos !== null) {
+  if (pinnedPos !== null) {
     return `translate3d(${pinnedPos.page.x + cursorPaddingX}px, ${pinnedPos.page.y}px, 0)`;
   }
 
