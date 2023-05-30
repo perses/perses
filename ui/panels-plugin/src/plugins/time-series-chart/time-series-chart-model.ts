@@ -80,7 +80,11 @@ export const Y_AXIS_CONFIG = {
 
 export const DEFAULT_LINE_WIDTH = 1.5;
 export const DEFAULT_AREA_OPACITY = 0;
-export const DEFAULT_POINT_RADIUS = 4;
+
+// How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.
+export const POINT_SIZE_OFFSET = 1.5;
+export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
+
 export const DEFAULT_CONNECT_NULLS = false;
 
 export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
