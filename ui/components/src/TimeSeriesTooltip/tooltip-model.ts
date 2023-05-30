@@ -20,8 +20,6 @@ export const TOOLTIP_MAX_HEIGHT = 650;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 export const TOOLTIP_ADJUST_Y_POS_MULTIPLIER = 0.75;
 
-export const APPROX_SERIES_HEIGHT = 40;
-
 export const FALLBACK_CHART_WIDTH = 750;
 
 export const NEARBY_SERIES_DESCRIPTION = 'nearby series showing in tooltip';
