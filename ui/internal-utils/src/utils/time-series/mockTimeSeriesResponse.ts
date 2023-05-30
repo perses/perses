@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MatrixData } from '@perses-dev/prometheus-plugin';
+import mockRangeQuery from '../../data/mock-query-range.json';
 
 type ExampleMetric = {
   __name__?: string;
@@ -167,4 +168,11 @@ export function mockTimeSeriesResponseWithManySeries({
     mockData.push({ metric, values });
   }
   return mockSuccessfulTimeSeriesResponse(mockData);
+}
+
+/*
+ * Hard-coded mock response using test data
+ */
+export function mockTimeSeriesResponseWithTestData() {
+  return mockSuccessfulTimeSeriesResponse(mockRangeQuery.data.result as unknown as SeriesData[]);
 }

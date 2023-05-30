@@ -18,32 +18,27 @@ import {
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
+  POINT_SIZE_OFFSET,
   STACK_CONFIG,
   StackOptions,
   STACK_OPTIONS,
   VISUAL_CONFIG,
-  VisualOptions,
+  TimeSeriesChartVisualOptions,
 } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
-  value: VisualOptions;
-  onChange: (visual: VisualOptions) => void;
+  value: TimeSeriesChartVisualOptions;
+  onChange: (visual: TimeSeriesChartVisualOptions) => void;
 }
 
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
-  const handlePointRadiusChange = (_: Event, sliderValue: number | number[]) => {
-    const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
-    onChange({
-      ...value,
-      point_radius: newValue,
-    });
-  };
-
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
+    const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
     onChange({
       ...value,
       line_width: newValue,
+      point_radius: symbolSize,
     });
   };
 
@@ -60,21 +55,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
 
   return (
     <OptionsEditorGroup title="Visual">
-      <OptionsEditorControl
-        label={VISUAL_CONFIG.point_radius.label}
-        control={
-          <Slider
-            data-testid={VISUAL_CONFIG.point_radius.testId}
-            value={value.point_radius ?? DEFAULT_POINT_RADIUS}
-            valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.point_radius.step}
-            marks
-            min={VISUAL_CONFIG.point_radius.min}
-            max={VISUAL_CONFIG.point_radius.max}
-            onChange={handlePointRadiusChange}
-          />
-        }
-      />
       <OptionsEditorControl
         label={VISUAL_CONFIG.line_width.label}
         control={
@@ -118,7 +98,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => <TextField {...params} />}
             onChange={(__, newValue) => {
-              const updatedValue: VisualOptions = {
+              const updatedValue: TimeSeriesChartVisualOptions = {
                 ...value,
                 stack: newValue.id === 'None' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
               };

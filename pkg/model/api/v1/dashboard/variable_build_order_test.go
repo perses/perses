@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,12 +37,12 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "constant variable, no dep",
 			variables: []Variable{
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "myVariable",
 					},
 				},
 			},
@@ -51,17 +52,17 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "query variable with no variable used",
 			variables: []Variable{
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "vector(1)",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "vector(1)",
+								},
 							},
 						},
+						Name: "myVariable",
 					},
 				},
 			},
@@ -71,54 +72,54 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "query variable with variable used",
 			variables: []Variable{
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "sum by($doe) (rate($foo{label='$bar'}))",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "sum by($doe) (rate($foo{label='$bar'}))",
+								},
 							},
 						},
+						Name: "myVariable",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "foo",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "test",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "test",
+								},
 							},
 						},
+						Name: "foo",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "bar",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "vector($foo)",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "vector($foo)",
+								},
 							},
 						},
+						Name: "bar",
 					},
 				},
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "doe",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "doe",
 					},
 				},
 			},
@@ -135,57 +136,57 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "query variable label_values with variable used",
 			variables: []Variable{
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusLabelValuesVariable",
-							Spec: map[string]interface{}{
-								"label_name": "$foo",
-								"matchers": []interface{}{
-									"$foo{$bar='test'}",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusLabelValuesVariable",
+								Spec: map[string]interface{}{
+									"label_name": "$foo",
+									"matchers": []interface{}{
+										"$foo{$bar='test'}",
+									},
 								},
 							},
 						},
+						Name: "myVariable",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "foo",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "test",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "test",
+								},
 							},
 						},
+						Name: "foo",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "bar",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "vector($foo)",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "vector($foo)",
+								},
 							},
 						},
+						Name: "bar",
 					},
 				},
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "doe",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "doe",
 					},
 				},
 			},
@@ -202,54 +203,54 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "multiple usage of the same variable",
 			variables: []Variable{
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+								},
 							},
 						},
+						Name: "myVariable",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "foo",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "test",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "test",
+								},
 							},
 						},
+						Name: "foo",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "bar",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "vector($foo)",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "vector($foo)",
+								},
 							},
 						},
+						Name: "bar",
 					},
 				},
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "doe",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "doe",
 					},
 				},
 			},
@@ -266,54 +267,54 @@ func TestBuildVariableDependencies(t *testing.T) {
 			title: "variable with only number is ignored",
 			variables: []Variable{
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "filter_platform",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "filter_platform",
 					},
 				},
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "PaaS",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "PaaS",
 					},
 				},
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "filter_kube_sts",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "filter_kube_sts",
 					},
 				},
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "extlabels_prometheus_namespace",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "extlabels_prometheus_namespace",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "foo",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr":       "group by(prometheus) (label_replace(kube_statefulset_labels{$filter_platform,stack=~\"$PaaS\",$filter_kube_sts,stack=~\"$PaaS\",namespace=~\"$extlabels_prometheus_namespace\"},\"prometheus\",\"$1\",\"label_app_kubernetes_io_instance\",\"([^-]+)-?.*\"))",
-								"label_name": "prometheus",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr":       "group by(prometheus) (label_replace(kube_statefulset_labels{$filter_platform,stack=~\"$PaaS\",$filter_kube_sts,stack=~\"$PaaS\",namespace=~\"$extlabels_prometheus_namespace\"},\"prometheus\",\"$1\",\"label_app_kubernetes_io_instance\",\"([^-]+)-?.*\"))",
+									"label_name": "prometheus",
+								},
 							},
 						},
+						Name: "foo",
 					},
 				},
 			},
@@ -346,17 +347,17 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 			title: "variable used but not defined",
 			variables: []Variable{
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+								},
 							},
 						},
+						Name: "myVariable",
 					},
 				},
 			},
@@ -490,12 +491,12 @@ func TestBuildOrder(t *testing.T) {
 			title: "constant variable, no dep",
 			variables: []Variable{
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "myVariable",
 					},
 				},
 			},
@@ -505,54 +506,54 @@ func TestBuildOrder(t *testing.T) {
 			title: "multiple usage of same variable",
 			variables: []Variable{
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "myVariable",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+								},
 							},
 						},
+						Name: "myVariable",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "foo",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "test",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "test",
+								},
 							},
 						},
+						Name: "foo",
 					},
 				},
 				{
-					Kind: ListVariable,
+					Kind: variable.KindList,
 					Spec: &ListVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "bar",
-						},
-						Plugin: common.Plugin{
-							Kind: "PrometheusPromQLVariable",
-							Spec: map[string]interface{}{
-								"expr": "vector($foo)",
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "vector($foo)",
+								},
 							},
 						},
+						Name: "bar",
 					},
 				},
 				{
-					Kind: TextVariable,
+					Kind: variable.KindText,
 					Spec: &TextVariableSpec{
-						CommonVariableSpec: CommonVariableSpec{
-							Name: "doe",
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
 						},
-						Value: "myConstant",
+						Name: "doe",
 					},
 				},
 			},
