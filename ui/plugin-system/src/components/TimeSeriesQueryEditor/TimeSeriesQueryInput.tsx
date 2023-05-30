@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import produce from 'immer';
+import { produce } from 'immer';
 import { TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { Stack, IconButton, Typography, BoxProps, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';

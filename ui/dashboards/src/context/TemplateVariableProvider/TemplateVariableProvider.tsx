@@ -15,7 +15,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
-import produce from 'immer';
+import { produce } from 'immer';
 
 import {
   TemplateVariableContext,

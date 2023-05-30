@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useEffect, useRef, useState } from 'react';
-import produce from 'immer';
+import { produce } from 'immer';
 import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { test, expect } from '../fixtures/dashboardTest';
+import { expect, test } from '../fixtures/dashboardTest';
 import { parseDateIntoTimeZone } from '../utils';
 
 test.use({
@@ -36,46 +36,46 @@ test.describe('Time Picker', () => {
 
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
-      // eslint-disable-next-line playwright/no-force-option
       await page
         .getByRole('option', {
           name: '3 hours',
         })
         .click({
+          // eslint-disable-next-line playwright/no-force-option
           force: true,
         });
 
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
-      // eslint-disable-next-line playwright/no-force-option
       await page
         .getByRole('option', {
           name: '15 minutes',
         })
         .click({
+          // eslint-disable-next-line playwright/no-force-option
           force: true,
         });
 
       await page.getByRole('button', { name: 'Feb 9, 2023' }).click();
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
-      // eslint-disable-next-line playwright/no-force-option
       await page
         .getByRole('option', {
           name: '7 hours',
         })
         .click({
+          // eslint-disable-next-line playwright/no-force-option
           force: true,
         });
 
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
-      // eslint-disable-next-line playwright/no-force-option
       await page
         .getByRole('option', {
           name: '55 minutes',
         })
         .click({
+          // eslint-disable-next-line playwright/no-force-option
           force: true,
         });
 

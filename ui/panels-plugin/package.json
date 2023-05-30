@@ -34,11 +34,11 @@
     "@perses-dev/plugin-system": "0.31.0",
     "color-hash": "^2.0.2",
     "date-fns": "^2.28.0",
-    "dompurify": "^2.4.0",
+    "dompurify": "^3.0.3",
     "echarts": "npm:echarts-nightly@5.5.0-dev.20230517",
-    "immer": "^9.0.15",
+     "immer": "^9.0.21",
     "lodash-es": "^4.17.21",
-    "marked": "^4.2.12"
+    "marked": "^4.3.0"
   },
   "peerDependencies": {
     "@mui/material": "^5.10.0",

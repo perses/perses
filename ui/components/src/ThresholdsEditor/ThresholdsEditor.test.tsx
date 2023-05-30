@@ -14,7 +14,7 @@
 import { ThresholdOptions } from '@perses-dev/core';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import produce from 'immer';
+import { produce } from 'immer';
 import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
 import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
