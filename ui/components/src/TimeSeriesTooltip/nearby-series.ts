@@ -13,7 +13,7 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
-import { CursorData } from './tooltip-model';
+import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many series show in tooltip (higher == more series shown)
@@ -150,13 +150,15 @@ export function checkforNearbySeries(
 export function getNearbySeriesData({
   mousePos,
   pinnedPos,
+  isTooltipPinned,
   chartData,
   chart,
   unit,
   showAllSeries = false,
 }: {
   mousePos: CursorData['coords'];
-  pinnedPos: CursorData['coords'];
+  pinnedPos: CursorCoordinates | null;
+  isTooltipPinned: boolean;
   chartData: EChartsDataFormat;
   chart?: EChartsInstance;
   unit?: UnitOptions;
@@ -164,9 +166,11 @@ export function getNearbySeriesData({
 }) {
   if (chart === undefined || mousePos === null) return [];
 
-  // prevents multiple tooltips showing from adjacent charts
+  // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
   let cursorTargetMatchesChart = false;
-  if (mousePos.target !== null) {
+  if (isTooltipPinned) {
+    cursorTargetMatchesChart = true;
+  } else if (mousePos.target !== null) {
     const currentParent = (<HTMLElement>mousePos.target).parentElement;
     if (currentParent !== null) {
       const currentGrandparent = currentParent.parentElement;
@@ -179,8 +183,9 @@ export function getNearbySeriesData({
     }
   }
 
-  // allows moving cursor inside tooltip
-  if (pinnedPos !== null) {
+  // allows moving cursor inside tooltip without it fading away
+  if (isTooltipPinned === true && pinnedPos !== null) {
+    // TODO: can this be consolidated, remove isTooltipPinned and only use pinnedPos check everywhere?
     mousePos = pinnedPos;
     cursorTargetMatchesChart = true;
   }

@@ -19,6 +19,7 @@ import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH, TOOLTIP_ADJUST_Y_POS_
 export function assembleTransform(
   mousePos: CursorData['coords'],
   chartWidth: number,
+  isTooltipPinned: boolean,
   pinnedPos: CursorCoordinates | null,
   tooltipHeight: number,
   tooltipWidth: number
@@ -27,12 +28,13 @@ export function assembleTransform(
     return 'translate3d(0, 0)';
   }
 
-  if (pinnedPos !== null) {
-    mousePos = pinnedPos;
-  }
-
   const cursorPaddingX = 32;
   const cursorPaddingY = 16;
+
+  // TODO: can this be consolidated, remove isTooltipPinned?
+  if (isTooltipPinned === true && pinnedPos !== null) {
+    return `translate3d(${pinnedPos.page.x + cursorPaddingX}px, ${pinnedPos.page.y}px, 0)`;
+  }
 
   // Tooltip is located in a Portal attached to the body.
   // Using page coordinates instead of viewport ensures the tooltip is
