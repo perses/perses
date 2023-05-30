@@ -50,6 +50,6 @@ describe('VisualOptionsEditor', () => {
 
     // to move slider and update visual options
     fireEvent.mouseDown(sliderInput, { clientX: 220, clientY: 100 });
-    expect(onChange).toHaveBeenCalledWith({ line_width: 1.25, point_radius: 2 });
+    expect(onChange).toHaveBeenCalledWith({ line_width: 1.25, point_radius: 2.75 });
   });
 });
