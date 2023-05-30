@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { LegendProps } from '../../Legend';
-import { LegendOptions, LegendPositions, getLegendMode } from '../../model/legend';
+import { LegendPositions, getLegendMode } from '../../model/legend';
 
 type Dimensions = {
   width: number;
