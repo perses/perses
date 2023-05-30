@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Theme } from '@mui/material';
 import { LegendProps } from '../../Legend';
+import { getTableCellLayout } from '../../Table';
 import { LegendPositions, getLegendMode } from '../../model/legend';
 
 type Dimensions = {
@@ -63,6 +65,7 @@ export interface ContentWithLegendProps {
 export interface ContentWithLegendLayoutOpts
   extends Required<Omit<ContentWithLegendProps, 'children' | 'legendProps'>> {
   legendOptions?: LegendProps['options'];
+  theme: Theme;
 }
 
 export interface ContentWithLegendLayout {
@@ -100,6 +103,7 @@ export function getContentWithLegendLayout({
   minChildrenHeight,
   minChildrenWidth,
   spacing,
+  theme,
 }: ContentWithLegendLayoutOpts): ContentWithLegendLayout {
   const hasLegend = !!legendOptions;
 
@@ -142,8 +146,12 @@ export function getContentWithLegendLayout({
       legendHeight = LEGEND_HEIGHT_LG;
     }
   } else {
+    // Table mode
+
+    const tableLayout = getTableCellLayout(theme, 'compact');
+
     legendWidth = position === 'Right' ? TABLE_LEGEND_SIZE['Right'] : width;
-    legendHeight = position === 'Bottom' ? TABLE_LEGEND_SIZE['Bottom'] * 26 : height;
+    legendHeight = position === 'Bottom' ? TABLE_LEGEND_SIZE['Bottom'] * tableLayout.height : height;
   }
 
   const contentWidth = position === 'Right' ? width - legendWidth - spacing : width;

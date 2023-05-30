@@ -11,8 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { createTheme } from '@mui/material';
 import { legendModes } from '../../model';
 import { ContentWithLegendLayoutOpts, getContentWithLegendLayout } from './content-with-legend-model';
+
+const mockMuiTheme = createTheme({});
 
 describe('getContentWithLegendLayout', () => {
   describe('without legend options', () => {
@@ -22,6 +25,7 @@ describe('getContentWithLegendLayout', () => {
       spacing: 0,
       minChildrenWidth: 0,
       minChildrenHeight: 0,
+      theme: mockMuiTheme,
     };
 
     test('does not show legend', () => {
@@ -50,6 +54,7 @@ describe('getContentWithLegendLayout', () => {
             position: 'Right',
             mode: mode,
           },
+          theme: mockMuiTheme,
         };
 
         test('shows legend', () => {
@@ -80,6 +85,7 @@ describe('getContentWithLegendLayout', () => {
             position: 'Right',
             mode: mode,
           },
+          theme: mockMuiTheme,
         };
 
         test('shows legend', () => {
@@ -110,6 +116,7 @@ describe('getContentWithLegendLayout', () => {
             position: 'Right',
             mode: mode,
           },
+          theme: mockMuiTheme,
         };
 
         test('does not show legend', () => {
@@ -138,6 +145,7 @@ describe('getContentWithLegendLayout', () => {
             position: 'Bottom',
             mode: mode,
           },
+          theme: mockMuiTheme,
         };
 
         test('shows legend', () => {
@@ -169,6 +177,7 @@ describe('getContentWithLegendLayout', () => {
           position: 'Bottom',
           mode: mode,
         },
+        theme: mockMuiTheme,
       };
 
       test('shows legend', () => {
@@ -199,6 +208,7 @@ describe('getContentWithLegendLayout', () => {
           position: 'Bottom',
           mode: mode,
         },
+        theme: mockMuiTheme,
       };
 
       test('does not show legend', () => {
