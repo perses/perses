@@ -72,8 +72,8 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     showAllSeries,
   });
 
-  const seriesTime = nearbySeries[0]?.date ? nearbySeries[0].date : null;
-  if (seriesTime === null) {
+  const seriesTimeMs = nearbySeries[0]?.date ? nearbySeries[0].date : null;
+  if (seriesTimeMs === null) {
     return null;
   }
 
@@ -110,7 +110,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
       >
         <Stack pt={3} spacing={0.5} sx={{ position: 'relative' }}>
           <TooltipHeader
-            series={nearbySeries}
+            seriesTimeMs={seriesTimeMs}
             totalSeries={totalSeries}
             isTooltipPinned={isTooltipPinned}
             showAllSeries={showAllSeries}

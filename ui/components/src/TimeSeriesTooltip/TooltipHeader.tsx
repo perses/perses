@@ -16,11 +16,10 @@ import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import React from 'react';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { NearbySeriesArray } from './nearby-series';
 import { TOOLTIP_MAX_WIDTH } from './tooltip-model';
 
 export interface TooltipHeaderProps {
-  series: NearbySeriesArray;
+  seriesTimeMs: number;
   totalSeries: number;
   isTooltipPinned: boolean;
   showAllSeries: boolean;
@@ -29,7 +28,7 @@ export interface TooltipHeaderProps {
 }
 
 export const TooltipHeader = React.memo(function TooltipHeader({
-  series,
+  seriesTimeMs,
   isTooltipPinned,
   totalSeries,
   showAllSeries,
@@ -59,11 +58,6 @@ export const TooltipHeader = React.memo(function TooltipHeader({
     );
   };
 
-  const seriesTime = series[0]?.date ? series[0].date : null;
-  if (seriesTime === null) {
-    return null;
-  }
-
   // Hide 'Show All' button when only one series returned
   const showAllSeriesToggle = totalSeries > 1;
 
@@ -82,7 +76,7 @@ export const TooltipHeader = React.memo(function TooltipHeader({
         left: 0,
       })}
     >
-      {formatTimeSeriesHeader(seriesTime)}
+      {formatTimeSeriesHeader(seriesTimeMs)}
       <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
         {showAllSeriesToggle && (
           <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>

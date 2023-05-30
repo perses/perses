@@ -20,23 +20,11 @@ describe('TooltipHeader', () => {
     render(<TooltipHeader {...props} />);
   };
 
-  const nearbySeries = [
-    {
-      seriesIdx: 0,
-      datumIdx: 84,
-      seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-      date: 1671803580000,
-      x: 1671821580000,
-      y: 0.1,
-      formattedY: '0.1',
-      markerColor: 'hsla(19838016,50%,50%,0.8)',
-      isClosestToCursor: false,
-    },
-  ];
+  const testSeriesTimeMs = 1671803580000;
 
   it('should display with correct date and pin text', () => {
     const tooltipContent: TooltipHeaderProps = {
-      series: nearbySeries,
+      seriesTimeMs: testSeriesTimeMs,
       isTooltipPinned: false,
       totalSeries: 5,
       showAllSeries: false,
@@ -50,7 +38,7 @@ describe('TooltipHeader', () => {
 
   it('should display with unpin text', () => {
     const tooltipContent: TooltipHeaderProps = {
-      series: nearbySeries,
+      seriesTimeMs: testSeriesTimeMs,
       isTooltipPinned: true,
       totalSeries: 5,
       showAllSeries: false,
@@ -61,7 +49,7 @@ describe('TooltipHeader', () => {
 
   it('should not display show all toggle when only 1 total series', () => {
     const tooltipContent: TooltipHeaderProps = {
-      series: nearbySeries,
+      seriesTimeMs: testSeriesTimeMs,
       isTooltipPinned: false,
       totalSeries: 1,
       showAllSeries: false,

@@ -13,7 +13,6 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { TooltipContent } from '@perses-dev/components';
-// import { Button } from '@mui/material';
 
 const meta: Meta<typeof TooltipContent> = {
   component: TooltipContent,
