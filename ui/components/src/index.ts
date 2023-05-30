@@ -34,6 +34,7 @@ export * from './UnitSelector';
 export * from './YAxisLabel';
 export * from './context/ChartsThemeProvider';
 export * from './context/TimeZoneProvider';
+export * from './context/SnackbarProvider';
 export * from './utils';
 export * from './model';
 export * from './test-utils';

@@ -14,6 +14,7 @@
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { TooltipContent, TooltipContentProps } from './TooltipContent';
+import { EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
 
 describe('TooltipContent', () => {
   const renderComponent = (props: TooltipContentProps) => {
@@ -22,7 +23,7 @@ describe('TooltipContent', () => {
 
   it('should display a single series name', () => {
     const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
+      series: [
         {
           seriesIdx: 0,
           datumIdx: 84,
@@ -32,9 +33,12 @@ describe('TooltipContent', () => {
           y: 0.1,
           formattedY: '0.1',
           markerColor: 'hsla(19838016,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
       ],
       wrapLabels: true,
+      isTooltipPinned: false,
+      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
@@ -45,7 +49,7 @@ describe('TooltipContent', () => {
 
   it('should display multiple series data', () => {
     const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
+      series: [
         {
           seriesIdx: 2,
           datumIdx: 48,
@@ -55,6 +59,7 @@ describe('TooltipContent', () => {
           y: 84635648,
           formattedY: '84.64M',
           markerColor: 'hsla(1887856572,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
         {
           seriesIdx: 1,
@@ -65,9 +70,12 @@ describe('TooltipContent', () => {
           y: 33771520,
           formattedY: '33.77M',
           markerColor: 'hsla(158479636,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
       ],
       wrapLabels: true,
+      isTooltipPinned: false,
+      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('84.64M')).toBeInTheDocument();
@@ -80,9 +88,9 @@ describe('TooltipContent', () => {
     ).toHaveLength(1);
   });
 
-  it('should display query before wrapped labels', () => {
+  it('should display query before wrapped labels with correct series font weights', () => {
     const tooltipContent: TooltipContentProps = {
-      focusedSeries: [
+      series: [
         {
           seriesIdx: 2,
           datumIdx: 48,
@@ -92,6 +100,7 @@ describe('TooltipContent', () => {
           y: 84635648,
           formattedY: '84.64M',
           markerColor: 'hsla(1887856572,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
         {
           seriesIdx: 1,
@@ -102,9 +111,12 @@ describe('TooltipContent', () => {
           y: 33771520,
           formattedY: '33.77M',
           markerColor: 'hsla(158479636,50%,50%,0.8)',
+          isClosestToCursor: false,
         },
       ],
       wrapLabels: true,
+      isTooltipPinned: false,
+      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(
@@ -113,5 +125,44 @@ describe('TooltipContent', () => {
     expect(
       screen.getByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
     ).toBeInTheDocument();
+    expect(screen.queryByText(EMPHASIZED_SERIES_DESCRIPTION)).not.toBeInTheDocument();
+    expect(screen.getAllByLabelText(NEARBY_SERIES_DESCRIPTION)).toHaveLength(2);
+  });
+
+  it('should display series closest to cursor as bold', () => {
+    const tooltipContent: TooltipContentProps = {
+      series: [
+        {
+          seriesIdx: 2,
+          datumIdx: 48,
+          seriesName: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 1671803040000,
+          x: 1671821040000,
+          y: 84635648,
+          formattedY: '84.64M',
+          markerColor: 'hsla(1887856572,50%,50%,0.8)',
+          isClosestToCursor: true,
+        },
+        {
+          seriesIdx: 1,
+          datumIdx: 48,
+          seriesName: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+          date: 1671803040000,
+          x: 1671821040000,
+          y: 33771520,
+          formattedY: '33.77M',
+          markerColor: 'hsla(158479636,50%,50%,0.8)',
+          isClosestToCursor: false,
+        },
+      ],
+      wrapLabels: true,
+      isTooltipPinned: false,
+      onUnpinClick: () => null,
+    };
+    renderComponent(tooltipContent);
+    const boldSeriesText = screen.getByLabelText(EMPHASIZED_SERIES_DESCRIPTION);
+    expect(boldSeriesText).toBeInTheDocument();
+    const regularSeriesText = screen.getByLabelText(NEARBY_SERIES_DESCRIPTION);
+    expect(regularSeriesText).toBeInTheDocument();
   });
 });

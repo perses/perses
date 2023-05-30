@@ -26,10 +26,10 @@ export interface StatChartOptions {
   calculation: CalculationType;
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
-  sparkline?: SparklineOptions;
+  sparkline?: StatChartSparklineOptions;
 }
 
-export interface SparklineOptions {
+export interface StatChartSparklineOptions {
   color?: string;
   width?: number;
 }

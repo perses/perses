@@ -21,14 +21,18 @@ import (
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
+	globalVariableImpl "github.com/perses/perses/internal/api/impl/v1/globalvariable"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
+	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/schemas"
 )
@@ -38,10 +42,12 @@ type ServiceManager interface {
 	GetDatasource() datasource.Service
 	GetFolder() folder.Service
 	GetGlobalDatasource() globaldatasource.Service
+	GetGlobalVariable() globalvariable.Service
 	GetHealth() health.Service
 	GetMigration() migrate.Migration
 	GetProject() project.Service
 	GetSchemas() schemas.Schemas
+	GetVariable() variable.Service
 }
 
 type service struct {
@@ -50,10 +56,12 @@ type service struct {
 	datasource       datasource.Service
 	folder           folder.Service
 	globalDatasource globaldatasource.Service
+	globalVariable   globalvariable.Service
 	health           health.Service
 	migrate          migrate.Migration
 	project          project.Service
 	schemas          schemas.Schemas
+	variable         variable.Service
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
@@ -68,18 +76,22 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
 	folderService := folderImpl.NewService(dao.GetFolder())
+	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
+	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
-	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard())
+	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetVariable())
 	return &service{
 		dashboard:        dashboardService,
 		datasource:       datasourceService,
 		folder:           folderService,
 		globalDatasource: globalDatasourceService,
+		globalVariable:   globalVariableService,
 		health:           healthService,
 		migrate:          migrateService,
 		project:          projectService,
 		schemas:          schemasService,
+		variable:         variableService,
 	}, nil
 }
 
@@ -99,6 +111,10 @@ func (s *service) GetGlobalDatasource() globaldatasource.Service {
 	return s.globalDatasource
 }
 
+func (s *service) GetGlobalVariable() globalvariable.Service {
+	return s.globalVariable
+}
+
 func (s *service) GetHealth() health.Service {
 	return s.health
 }
@@ -113,4 +129,8 @@ func (s *service) GetProject() project.Service {
 
 func (s *service) GetSchemas() schemas.Schemas {
 	return s.schemas
+}
+
+func (s *service) GetVariable() variable.Service {
+	return s.variable
 }

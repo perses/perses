@@ -24,12 +24,13 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	test "github.com/perses/perses/internal/test"
+	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 )
 
 type GetFunc func() (api.Entity, error)
@@ -66,6 +67,20 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 		}
 		upsertFunc = func() error {
 			return persistenceManager.GetDashboard().Update(entity)
+		}
+	case *v1.Variable:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetVariable().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetVariable().Update(entity)
+		}
+	case *v1.GlobalVariable:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetGlobalVariable().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetGlobalVariable().Update(entity)
 		}
 	default:
 		t.Fatalf("%T is not managed", object)
@@ -194,6 +209,57 @@ func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 			Name: name,
 		},
 		Spec: newDatasourceSpec(t),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewVariable(projectName string, name string) *v1.Variable {
+	entity := &v1.Variable{
+		Kind: v1.KindVariable,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: name,
+			},
+			Project: projectName,
+		},
+		Spec: v1.VariableSpec{
+			Kind: variable.KindList,
+			Spec: &variable.ListSpec{
+				Plugin: common.Plugin{
+					Kind: "PrometheusLabelNamesVariable",
+					Spec: map[string]interface{}{
+						"matchers": []interface{}{
+							"up",
+						},
+					},
+				},
+			},
+		},
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewGlobalVariable(name string) *v1.GlobalVariable {
+	entity := &v1.GlobalVariable{
+		Kind: v1.KindGlobalVariable,
+		Metadata: v1.Metadata{
+			Name: name,
+		},
+		Spec: v1.VariableSpec{
+			Kind: variable.KindList,
+			Spec: &variable.ListSpec{
+				Plugin: common.Plugin{
+					Kind: "PrometheusLabelNamesVariable",
+					Spec: map[string]interface{}{
+						"matchers": []interface{}{
+							"up",
+						},
+					},
+				},
+			},
+		},
 	}
 	entity.Metadata.CreateNow()
 	return entity

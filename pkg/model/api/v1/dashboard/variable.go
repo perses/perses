@@ -19,110 +19,19 @@ import (
 	"strconv"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"gopkg.in/yaml.v2"
 )
 
-type VariableKind string
-
-const (
-	TextVariable VariableKind = "TextVariable"
-	ListVariable VariableKind = "ListVariable"
-)
-
-var KindMap = map[VariableKind]bool{
-	TextVariable: true,
-	ListVariable: true,
-}
-
-func (k *VariableKind) UnmarshalJSON(data []byte) error {
-	var tmp VariableKind
-	type plain VariableKind
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*k = tmp
-	return nil
-}
-
-func (k *VariableKind) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp VariableKind
-	type plain VariableKind
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*k = tmp
-	return nil
-}
-
-func (k *VariableKind) validate() error {
-	if len(*k) == 0 {
-		return fmt.Errorf("variable.kind cannot be empty")
-	}
-	if _, ok := KindMap[*k]; !ok {
-		return fmt.Errorf("unknown variable.kind %q used", *k)
-	}
-	return nil
-}
-
-type VariableSpec interface {
+type variableSpec interface {
 	// GetName returns the name of the variable. It will be used to reference the variable in others
 	GetName() string
 }
 
-type VariableDisplay struct {
-	Name        string `json:"name" yaml:"name"`
-	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-	Hidden      bool   `json:"hidden" yaml:"hidden"`
-}
-
-func (d *VariableDisplay) UnmarshalJSON(data []byte) error {
-	var tmp VariableDisplay
-	type plain VariableDisplay
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *VariableDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp VariableDisplay
-	type plain VariableDisplay
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *VariableDisplay) validate() error {
-	if len(d.Name) == 0 {
-		return fmt.Errorf("variables[].display.name cannot be empty")
-	}
-	return nil
-}
-
-type CommonVariableSpec struct {
-	Name    string           `json:"name" yaml:"name"`
-	Display *VariableDisplay `json:"display,omitempty" yaml:"display,omitempty"`
-}
-
 type TextVariableSpec struct {
-	VariableSpec       `json:"-" yaml:"-"`
-	CommonVariableSpec `json:",inline" yaml:",inline"`
-	Value              string `json:"value" yaml:"value"`
+	variableSpec      `json:"-" yaml:"-"`
+	variable.TextSpec `json:",inline" yaml:",inline"`
+	Name              string `json:"name" yaml:"name"`
 }
 
 func (v *TextVariableSpec) GetName() string {
@@ -162,69 +71,13 @@ func (v *TextVariableSpec) validate() error {
 	if _, err := strconv.Atoi(v.Name); err == nil {
 		return fmt.Errorf("variable name cannot contain only digits. That's not a meaningful name for a variable")
 	}
-	if len(v.Value) == 0 {
-		return fmt.Errorf("value for the variable %q cannot be empty", v.Name)
-	}
-	return nil
-}
-
-type DefaultVariableValue struct {
-	SingleValue string
-	SliceValues []string
-}
-
-func (v *DefaultVariableValue) UnmarshalJSON(data []byte) error {
-	var s string
-	var slice []string
-	if unmarshalStringErr := json.Unmarshal(data, &s); unmarshalStringErr != nil {
-		if unmarshalSliceErr := json.Unmarshal(data, &slice); unmarshalSliceErr != nil {
-			return fmt.Errorf("unable to unmarshal default_value. Only string or array of string can be used")
-		}
-	}
-	v.SingleValue = s
-	v.SliceValues = slice
-	return nil
-}
-
-func (v *DefaultVariableValue) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var s string
-	var slice []string
-	if unmarshalStringErr := unmarshal(&s); unmarshalStringErr != nil {
-		if unmarshalSliceErr := unmarshal(&slice); unmarshalSliceErr != nil {
-			return fmt.Errorf("unable to unmarshal default_value. Only string or array of string can be used")
-		}
-	}
-	v.SingleValue = s
-	v.SliceValues = slice
-	return nil
-}
-
-func (v *DefaultVariableValue) MarshalJSON() ([]byte, error) {
-	if len(v.SingleValue) > 0 {
-		return json.Marshal(v.SingleValue)
-	}
-	return json.Marshal(v.SliceValues)
-}
-
-func (v *DefaultVariableValue) MarshalYAML() (interface{}, error) {
-	if len(v.SingleValue) > 0 {
-		return v.SingleValue, nil
-	}
-	return v.SliceValues, nil
+	return v.TextSpec.Validate()
 }
 
 type ListVariableSpec struct {
-	VariableSpec       `json:"-" yaml:"-"`
-	CommonVariableSpec `json:",inline" yaml:",inline"`
-	DefaultValue       *DefaultVariableValue `json:"default_value,omitempty" yaml:"default_value,omitempty"`
-	AllowAllValue      bool                  `json:"allow_all_value" yaml:"allow_all_value"`
-	AllowMultiple      bool                  `json:"allow_multiple" yaml:"allow_multiple"`
-	// CustomAllValue is a custom value that will be used if AllowAllValue is true and if then `all` is selected
-	CustomAllValue string `json:"custom_all_value,omitempty" yaml:"custom_all_value,omitempty"`
-	// CapturingRegexp is the regexp used to catch and filter the result of the query.
-	// If empty, then nothing is filtered. That's the equivalent of setting CapturingRegexp with (.*)
-	CapturingRegexp string        `json:"capturing_regexp,omitempty" yaml:"capturing_regexp,omitempty"`
-	Plugin          common.Plugin `json:"plugin" yaml:"plugin"`
+	variableSpec      `json:"-" yaml:"-"`
+	variable.ListSpec `json:",inline" yaml:",inline"`
+	Name              string `json:"name" yaml:"name"`
 }
 
 func (v *ListVariableSpec) GetName() string {
@@ -261,25 +114,18 @@ func (v *ListVariableSpec) validate() error {
 	if err := common.ValidateID(v.Name); err != nil {
 		return err
 	}
-	if len(v.CustomAllValue) > 0 && !v.AllowAllValue {
-		return fmt.Errorf("custom_all_value cannot be set if allow_all_value is not set to true")
-	}
-	if v.DefaultValue != nil && len(v.DefaultValue.SliceValues) > 0 && !v.AllowMultiple {
-		return fmt.Errorf("you can not use a list of default values if allow_multiple is set to false")
-	}
-
-	return nil
+	return v.ListSpec.Validate()
 }
 
 type Variable struct {
 	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
-	Kind VariableKind `json:"kind" yaml:"kind"`
-	Spec VariableSpec `json:"spec" yaml:"spec"`
+	Kind variable.Kind `json:"kind" yaml:"kind"`
+	Spec variableSpec  `json:"spec" yaml:"spec"`
 }
 
 type tmpVariable struct {
-	Kind VariableKind `json:"kind" yaml:"kind"`
-	Spec interface{}  `json:"spec" yaml:"spec"`
+	Kind variable.Kind `json:"kind" yaml:"kind"`
+	Spec interface{}   `json:"spec" yaml:"spec"`
 }
 
 func (v *Variable) UnmarshalJSON(data []byte) error {
@@ -302,11 +148,11 @@ func (v *Variable) unmarshal(unmarshal func(interface{}) error, staticMarshal fu
 	if err != nil {
 		return err
 	}
-	var spec VariableSpec
+	var spec variableSpec
 	switch tmp.Kind {
-	case ListVariable:
+	case variable.KindList:
 		spec = &ListVariableSpec{}
-	case TextVariable:
+	case variable.KindText:
 		spec = &TextVariableSpec{}
 	default:
 		return fmt.Errorf("unknown variable.kind %q used", tmp.Kind)

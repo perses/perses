@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { EChartsDataFormat, UnitOptions } from '../model';
-import { getNearbySeries } from './focused-series';
+import { checkforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
 
-describe('getNearbySeries', () => {
+describe('checkforNearbySeries', () => {
   const chartData: EChartsDataFormat = {
     timeSeries: [
       {
@@ -44,10 +44,11 @@ describe('getNearbySeries', () => {
 
   const yBuffer = 0.02; // calculated from y axis interval
 
-  const focusedSeriesOutput = [
+  const nearbySeriesOutput = [
     {
       date: 1654007895000,
       datumIdx: 2,
+      isClosestToCursor: true,
       markerColor: 'hsla(286664040,50%,50%,0.8)',
       seriesName: 'env="demo", instance="demo.do.prometheus", job="node", mode="test alt"',
       seriesIdx: 1,
@@ -57,16 +58,16 @@ describe('getNearbySeries', () => {
     },
   ];
 
-  it('should return focused series data for points nearby the cursor', () => {
+  it('should return nearby series data for points nearby the cursor', () => {
     const decimalUnit: UnitOptions = {
       kind: 'Decimal',
       decimal_places: 2,
     };
-    expect(getNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(focusedSeriesOutput);
+    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(nearbySeriesOutput);
   });
 
   it('should return series values formatted as a percent', () => {
-    const percentFormattedOutput = [...focusedSeriesOutput];
+    const percentFormattedOutput = [...nearbySeriesOutput];
     if (percentFormattedOutput[0]) {
       percentFormattedOutput[0].formattedY = '5%';
     }
@@ -74,8 +75,48 @@ describe('getNearbySeries', () => {
       kind: 'PercentDecimal',
       decimal_places: 0,
     };
-    expect(getNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
+    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
       percentFormattedOutput
     );
+  });
+});
+
+describe('getYBuffer', () => {
+  it('should return area to search for nearby series', () => {
+    expect(getYBuffer({ yInterval: 1, totalSeries: 10, showAllSeries: false })).toBe(3);
+  });
+
+  it('should return entire canvas', () => {
+    expect(getYBuffer({ yInterval: 1, totalSeries: 10, showAllSeries: true })).toBe(10);
+  });
+
+  it('should reduce area to search when many series', () => {
+    expect(getYBuffer({ yInterval: 1, totalSeries: 1000, showAllSeries: false })).toBe(0.3);
+  });
+
+  it('should return area to search for larger interval', () => {
+    expect(getYBuffer({ yInterval: 10, totalSeries: 10, showAllSeries: false })).toBe(30);
+  });
+
+  it('should return entire canvas for larger interval', () => {
+    expect(getYBuffer({ yInterval: 10, totalSeries: 10, showAllSeries: true })).toBe(100);
+  });
+
+  it('should reduce area to search for larger interval when many series', () => {
+    expect(getYBuffer({ yInterval: 10, totalSeries: 1000, showAllSeries: false })).toBe(3);
+  });
+});
+
+describe('isWithinPercentageRange', () => {
+  it('should return true when input value is within the specified percentage range of yValue', () => {
+    const yValue = 261353472;
+    const result = isWithinPercentageRange({ valueToCheck: 256250000, baseValue: yValue, percentage: 5 });
+    expect(result).toBe(true);
+  });
+
+  it('returns false when nearbyY is outside the specified percentage range of yValue', () => {
+    const yValue = 100;
+    const result = isWithinPercentageRange({ valueToCheck: 200, baseValue: yValue, percentage: 5 });
+    expect(result).toBe(false);
   });
 });

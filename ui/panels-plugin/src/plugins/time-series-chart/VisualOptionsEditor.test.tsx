@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { VisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
+import { TimeSeriesChartVisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
-  const renderVisualOptionsEditor = (value: VisualOptions, onChange = jest.fn()) => {
+  const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = jest.fn()) => {
     render(<VisualOptionsEditor value={value} onChange={onChange} />);
   };
 
@@ -50,6 +50,6 @@ describe('VisualOptionsEditor', () => {
 
     // to move slider and update visual options
     fireEvent.mouseDown(sliderInput, { clientX: 220, clientY: 100 });
-    expect(onChange).toHaveBeenCalledWith({ line_width: 1.25, point_radius: 2 });
+    expect(onChange).toHaveBeenCalledWith({ line_width: 1.25, point_radius: 2.75 });
   });
 });

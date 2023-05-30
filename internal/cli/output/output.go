@@ -80,7 +80,7 @@ func FormatArrayMessage(message string, list []string) string {
 	return builder.String()
 }
 
-// FormatTime formats a time with human readable format
+// FormatTime formats a time with human-readable format
 func FormatTime(t time.Time) string {
 	var age string
 

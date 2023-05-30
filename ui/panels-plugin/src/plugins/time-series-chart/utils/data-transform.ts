@@ -28,8 +28,8 @@ import {
   DEFAULT_Y_AXIS,
   POSITIVE_MIN_VALUE_MULTIPLIER,
   NEGATIVE_MIN_VALUE_MULTIPLIER,
-  VisualOptions,
-  YAxisOptions,
+  TimeSeriesChartVisualOptions,
+  TimeSeriesChartYAxisOptions,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -41,6 +41,8 @@ export const EMPTY_GRAPH_DATA: EChartsDataFormat = {
 };
 
 export const HIDE_DATAPOINTS_LIMIT = 70;
+
+export const BLUR_FADEOUT_OPACITY = 0.5;
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -58,7 +60,7 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
 export function getLineSeries(
   formattedName: string,
   data: EChartsTimeSeries['data'],
-  visual: VisualOptions,
+  visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
 ): EChartsTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
@@ -85,17 +87,24 @@ export function getLineSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.7,
+      opacity: 0.8,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
+      focus: 'series',
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 1,
+        width: lineWidth + 1.5,
         opacity: 1,
+      },
+    },
+    blur: {
+      lineStyle: {
+        width: lineWidth,
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -124,8 +133,14 @@ export function getThresholdSeries(
       width: 2,
     },
     emphasis: {
+      focus: 'series',
       lineStyle: {
         width: 2.5,
+      },
+    },
+    blur: {
+      lineStyle: {
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -158,7 +173,7 @@ function findMax(timeSeries: EChartsTimeSeries[]) {
 /**
  * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
  */
-export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentOption {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   const yAxis: YAXisComponentOption = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: inputAxis?.min,

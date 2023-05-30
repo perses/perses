@@ -62,7 +62,7 @@ export interface ContentWithLegendProps {
 
 export interface ContentWithLegendLayoutOpts
   extends Required<Omit<ContentWithLegendProps, 'children' | 'legendProps'>> {
-  legendOptions?: LegendOptions;
+  legendOptions?: LegendProps['options'];
 }
 
 export interface ContentWithLegendLayout {
