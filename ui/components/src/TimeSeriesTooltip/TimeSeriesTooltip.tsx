@@ -26,8 +26,7 @@ import {
   FALLBACK_CHART_WIDTH,
   TOOLTIP_MAX_HEIGHT,
   TOOLTIP_MAX_WIDTH,
-  TOOLTIP_MULTI_SERIES_MIN_WIDTH,
-  TOOLTIP_SINGLE_SERIES_MIN_WIDTH,
+  TOOLTIP_MIN_WIDTH,
   useMousePosition,
 } from './tooltip-model';
 import { assembleTransform } from './utils';
@@ -97,13 +96,6 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     showAllSeries,
   });
 
-  // TODO: where is best place to set contentWidth and is there a better way to calculate?
-  let contentWidth = TOOLTIP_MULTI_SERIES_MIN_WIDTH;
-  if (nearbySeries.length === 0) {
-    contentWidth = TOOLTIP_SINGLE_SERIES_MIN_WIDTH;
-    return null;
-  }
-
   const seriesTime = nearbySeries[0]?.date ? nearbySeries[0].date : null;
   if (seriesTime === null) {
     return null;
@@ -117,6 +109,7 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
       <Box
         ref={tooltipRef}
         sx={(theme) => ({
+          minWidth: TOOLTIP_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,
           padding: theme.spacing(0.5, 2),
@@ -142,15 +135,17 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
       >
         <Stack pt={3} spacing={0.5} sx={{ position: 'relative' }}>
           <Box
-            sx={{
+            sx={(theme) => ({
+              width: '100%',
+              height: 30,
+              padding: theme.spacing(0.5, 2),
               display: 'flex',
               justifyContent: 'start',
               alignItems: 'center',
               position: 'fixed',
               top: 0,
-              height: 30,
-              width: contentWidth,
-            }}
+              left: 0,
+            })}
           >
             {formatTimeSeriesHeader(seriesTime)}
             <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
