@@ -41,6 +41,7 @@ import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
+import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
 import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
@@ -95,8 +96,11 @@ export function LineChart({
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [isTooltipPinned, setIsTooltipPinned] = useState<boolean>(false);
+  const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const { timeZone } = useTimeZone();
+
+  const [isDragging, setDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
@@ -104,7 +108,7 @@ export function LineChart({
         if (onDataZoom === undefined) {
           setTimeout(() => {
             // workaround so unpin happens after click event
-            setIsTooltipPinned(false);
+            setTooltipPinnedCoords(null);
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -125,14 +129,14 @@ export function LineChart({
       },
       // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
-  }, [data, onDataZoom, setIsTooltipPinned]);
+  }, [data, onDataZoom, setTooltipPinnedCoords]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
   }
 
   const handleOnDoubleClick = (e: MouseEvent) => {
-    setIsTooltipPinned(false);
+    setTooltipPinnedCoords(null);
     // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
     if (onDoubleClick === undefined) {
       if (chartRef.current !== undefined) {
@@ -205,20 +209,56 @@ export function LineChart({
       onClick={(e) => {
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
-          setIsTooltipPinned((current) => !current);
+          setTooltipPinnedCoords((current) => {
+            if (current === null) {
+              return {
+                page: {
+                  x: e.pageX,
+                  y: e.pageY,
+                },
+                client: {
+                  x: e.clientX,
+                  y: e.clientY,
+                },
+                plotCanvas: {
+                  x: e.nativeEvent.offsetX,
+                  y: e.nativeEvent.offsetY,
+                },
+                target: e.target,
+              };
+            } else {
+              return null;
+            }
+          });
         }
       }}
       onMouseDown={(e) => {
-        // Hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels.
-        if (e.target instanceof HTMLCanvasElement) {
-          setShowTooltip(false);
+        const { clientX } = e;
+        setDragging(true);
+        setStartX(clientX);
+      }}
+      onMouseMove={(e) => {
+        // Allow clicking inside tooltip to copy labels.
+        if (!(e.target instanceof HTMLCanvasElement)) {
+          return;
+        }
+        const { clientX } = e;
+        if (isDragging) {
+          const deltaX = clientX - startX;
+          if (deltaX > 0) {
+            // Hide tooltip when user drags to zoom.
+            setShowTooltip(false);
+          }
         }
       }}
       onMouseUp={() => {
+        setDragging(false);
         setShowTooltip(true);
       }}
       onMouseLeave={() => {
-        setShowTooltip(false);
+        if (tooltipPinnedCoords === null) {
+          setShowTooltip(false);
+        }
       }}
       onMouseEnter={() => {
         setShowTooltip(true);
@@ -236,10 +276,10 @@ export function LineChart({
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
-            isTooltipPinned={isTooltipPinned}
+            pinnedPos={tooltipPinnedCoords}
             unit={unit}
             onUnpinClick={() => {
-              setIsTooltipPinned(false);
+              setTooltipPinnedCoords(null);
             }}
           />
         )}
