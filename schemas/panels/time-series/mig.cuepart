@@ -20,7 +20,7 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                 mode: [
                     if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "Table" },
                     { "List" }
-                ]
+                ][0]
             }
         }
         #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
