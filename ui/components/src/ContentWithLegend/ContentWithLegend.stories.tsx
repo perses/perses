@@ -164,7 +164,7 @@ export const Mode: Story = {
                             position,
                             mode,
                           },
-                          selectedItems: {},
+                          selectedItems: 'ALL',
                           onSelectedItemsChange: (newSelectedItems) =>
                             action('onSelectedItemsChange')(newSelectedItems),
                         }}
