@@ -71,8 +71,11 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     unit,
     showAllSeries,
   });
+  if (nearbySeries.length === 0) {
+    return null;
+  }
 
-  const seriesTimeMs = nearbySeries[0]?.date ? nearbySeries[0].date : null;
+  const seriesTimeMs = nearbySeries[0]?.date ?? null;
   if (seriesTimeMs === null) {
     return null;
   }
