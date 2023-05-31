@@ -25,13 +25,10 @@ export type OptionsEditorTab = {
 
 export type OptionsEditorTabsProps = {
   tabs: OptionsEditorTab[];
-  mode?: 'Add' | 'Edit';
+  defaultTab?: number;
 };
 
-export const OptionsEditorTabs = ({ tabs, mode = 'Add' }: OptionsEditorTabsProps) => {
-  // If user is adding a panel, default to first tab ("General")
-  // If user is editing a panel, default to second tab ("Query" or "Markdown")
-  const defaultTab = mode === 'Add' ? 0 : 1;
+export const OptionsEditorTabs = ({ tabs, defaultTab = 0 }: OptionsEditorTabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const handleChange: TabsProps['onChange'] = (_, newValue) => {

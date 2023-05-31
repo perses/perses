@@ -36,14 +36,15 @@ describe('OptionsEditorTabs', () => {
     },
   ];
 
-  const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
+  const renderTabs = ({
+    otherTabs,
+    defaultTab,
+  }: {
+    otherTabs?: OptionsEditorTabsProps['tabs'];
+    defaultTab?: number;
+  } = {}) => {
     const tabs = otherTabs ?? mockTabs;
-    render(<OptionsEditorTabs tabs={tabs} />);
-  };
-
-  const renderTabsEditMode = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
-    const tabs = otherTabs ?? mockTabs;
-    render(<OptionsEditorTabs tabs={tabs} mode="Edit" />);
+    render(<OptionsEditorTabs tabs={tabs} defaultTab={defaultTab} />);
   };
 
   it('renders all specified tabs in a tab list', () => {
@@ -58,7 +59,7 @@ describe('OptionsEditorTabs', () => {
     expect(tabs[3]).toHaveTextContent('JSON');
   });
 
-  it('defaults to selecting the first tab in add mode', () => {
+  it('defaults to selecting the first tab', () => {
     renderTabs();
 
     const activeTab = screen.getByRole('tab', {
@@ -70,8 +71,8 @@ describe('OptionsEditorTabs', () => {
     expect(activeTabPanel).toHaveTextContent('general configuration');
   });
 
-  it('defaults to selecting the second tab in edit mode', () => {
-    renderTabsEditMode();
+  it('defaults to selecting the specified default tab', () => {
+    renderTabs({ defaultTab: 1 });
 
     const activeTab = screen.getByRole('tab', {
       selected: true,
@@ -102,6 +103,7 @@ describe('OptionsEditorTabs', () => {
 
     const vizTab = screen.getByRole('tab', { name: 'Settings' });
     userEvent.tab();
+    userEvent.keyboard('{arrowright}{space}');
     userEvent.keyboard('{arrowright}{space}');
 
     const activeTab = screen.getByRole('tab', {

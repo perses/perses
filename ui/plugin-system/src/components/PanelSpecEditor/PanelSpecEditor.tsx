@@ -113,5 +113,9 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   // Always show JSON editor
   tabs.push({ label: JSON_TAB_LABEL, content: <JSONEditor value={panelDefinition} onChange={onJSONChange} /> });
 
-  return <OptionsEditorTabs tabs={tabs} mode={mode} />;
+  // If user is adding a panel, default to first tab ("General")
+  // If user is editing a panel, default to second tab ("Query" or "Markdown")
+  const defaultTab = mode === 'Add' ? 0 : 1;
+
+  return <OptionsEditorTabs tabs={tabs} defaultTab={defaultTab} />;
 }

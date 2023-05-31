@@ -22,6 +22,7 @@ describe('PanelSpecEditor', () => {
 
   it('should show query, options and json editors', async () => {
     renderComponent({
+      mode: 'Add',
       panelDefinition: {
         kind: 'Panel',
         spec: {
@@ -60,6 +61,7 @@ describe('PanelSpecEditor', () => {
 
   it('should hide query editor if hideQueryEditor is true', async () => {
     renderComponent({
+      mode: 'Add',
       panelDefinition: {
         kind: 'Panel',
         spec: {
