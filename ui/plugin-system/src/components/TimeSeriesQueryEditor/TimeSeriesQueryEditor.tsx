@@ -114,9 +114,6 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
 
   return (
     <Stack spacing={1}>
-      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
-        Add Query
-      </Button>
       {queryDefinitions.map((query: TimeSeriesQueryDefinition, i: number) => (
         <TimeSeriesQueryInput
           key={i}
@@ -128,6 +125,9 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
           onCollapseExpand={handleQueryCollapseExpand}
         />
       ))}
+      <Button variant="contained" startIcon={<AddIcon />} sx={{ alignSelf: 'start' }} onClick={handleQueryAdd}>
+        Add Query
+      </Button>
     </Stack>
   );
 }

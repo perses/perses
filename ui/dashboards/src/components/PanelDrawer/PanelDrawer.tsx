@@ -72,7 +72,13 @@ export const PanelDrawer = () => {
   }, []);
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }} data-testid="panel-editor">
+    <Drawer
+      isOpen={isOpen}
+      onClose={handleClose}
+      PaperProps={{ sx: { width: '1280px' } }}
+      SlideProps={{ onExited: handleExited }}
+      data-testid="panel-editor"
+    >
       {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
       {panelEditor !== undefined && (
         <>
@@ -95,7 +101,7 @@ export const PanelDrawer = () => {
               </Button>
             </Stack>
           </Box>
-          <PanelEditorForm initialValues={panelEditor.initialValues} onChange={handleChange} />
+          <PanelEditorForm mode={panelEditor.mode} initialValues={panelEditor.initialValues} onChange={handleChange} />
         </>
       )}
     </Drawer>

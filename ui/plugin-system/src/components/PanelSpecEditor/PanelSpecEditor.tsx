@@ -31,6 +31,7 @@ type Group = {
 };
 
 export interface PanelSpecEditorProps {
+  mode: 'Add' | 'Edit';
   panelDefinition: PanelDefinition;
   groupId: number;
   groups: Group[];
@@ -45,6 +46,7 @@ export interface PanelSpecEditorProps {
 
 export function PanelSpecEditor(props: PanelSpecEditorProps) {
   const {
+    mode,
     panelDefinition,
     groupId,
     groups,
@@ -111,5 +113,5 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   // Always show JSON editor
   tabs.push({ label: JSON_TAB_LABEL, content: <JSONEditor value={panelDefinition} onChange={onJSONChange} /> });
 
-  return <OptionsEditorTabs tabs={tabs} />;
+  return <OptionsEditorTabs tabs={tabs} mode={mode} />;
 }

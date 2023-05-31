@@ -44,6 +44,29 @@ export const GeneralSettingsEditor = ({
   return (
     <Grid container spacing={2}>
       <Grid item xs={6}>
+        <TextField
+          required
+          fullWidth
+          label="Name"
+          value={panelDefinition.spec.display.name ?? ''}
+          variant="outlined"
+          onChange={(e) => {
+            onNameChange(e.target.value);
+          }}
+        />
+      </Grid>
+      <Grid item xs={6}>
+        <TextField
+          fullWidth
+          label="Description"
+          value={panelDefinition.spec.display.description ?? ''}
+          variant="outlined"
+          onChange={(e) => {
+            onDescriptionChange(e.target.value);
+          }}
+        />
+      </Grid>
+      <Grid item xs={6}>
         <FormControl fullWidth disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
           <InputLabel id="panel-type-label">Type</InputLabel>
           <PluginKindSelect
@@ -82,29 +105,6 @@ export const GeneralSettingsEditor = ({
             ))}
           </Select>
         </FormControl>
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          required
-          fullWidth
-          label="Name"
-          value={panelDefinition.spec.display.name ?? ''}
-          variant="outlined"
-          onChange={(e) => {
-            onNameChange(e.target.value);
-          }}
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          fullWidth
-          label="Description"
-          value={panelDefinition.spec.display.description ?? ''}
-          variant="outlined"
-          onChange={(e) => {
-            onDescriptionChange(e.target.value);
-          }}
-        />
       </Grid>
     </Grid>
   );

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { PanelDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PanelSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
@@ -22,12 +22,14 @@ import { PanelPreview } from './PanelPreview';
 import { usePanelEditor } from './usePanelEditor';
 
 export interface PanelEditorFormProps {
+  mode: 'Add' | 'Edit';
   initialValues: PanelEditorValues;
   onChange: (values: PanelEditorValues) => void;
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps) {
   const {
+    mode,
     initialValues: { panelDefinition: initialPanelDef, groupId: initialGroupId },
     onChange,
   } = props;
@@ -89,9 +91,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     >
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Typography variant="h4" marginBottom={1}>
-            Preview
-          </Typography>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <PanelPreview panelDefinition={panelDefinition} />
           </ErrorBoundary>
@@ -99,6 +98,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         <Grid item xs={12}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <PanelSpecEditor
+              mode={mode}
               panelDefinition={panelDefinition}
               groupId={groupId}
               groups={groups}

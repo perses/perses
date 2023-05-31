@@ -19,6 +19,10 @@ import { OptionsEditorTabs, OptionsEditorTabsProps } from './OptionsEditorTabs';
 describe('OptionsEditorTabs', () => {
   const mockTabs: OptionsEditorTabsProps['tabs'] = [
     {
+      label: 'General',
+      content: <div>Edit general configuration</div>,
+    },
+    {
       label: 'Query',
       content: <div>Edit query configuration</div>,
     },
@@ -31,9 +35,15 @@ describe('OptionsEditorTabs', () => {
       content: <div>JSON editor</div>,
     },
   ];
+
   const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
     const tabs = otherTabs ?? mockTabs;
     render(<OptionsEditorTabs tabs={tabs} />);
+  };
+
+  const renderTabsEditMode = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
+    const tabs = otherTabs ?? mockTabs;
+    render(<OptionsEditorTabs tabs={tabs} mode="Edit" />);
   };
 
   it('renders all specified tabs in a tab list', () => {
@@ -41,14 +51,27 @@ describe('OptionsEditorTabs', () => {
 
     const tabList = screen.getByRole('tablist');
     const tabs = getAllByRole(tabList, 'tab');
-    expect(tabs).toHaveLength(3);
-    expect(tabs[0]).toHaveTextContent('Query');
-    expect(tabs[1]).toHaveTextContent('Settings');
-    expect(tabs[2]).toHaveTextContent('JSON');
+    expect(tabs).toHaveLength(4);
+    expect(tabs[0]).toHaveTextContent('General');
+    expect(tabs[1]).toHaveTextContent('Query');
+    expect(tabs[2]).toHaveTextContent('Settings');
+    expect(tabs[3]).toHaveTextContent('JSON');
   });
 
-  it('defaults to selecting the first tab', () => {
+  it('defaults to selecting the first tab in add mode', () => {
     renderTabs();
+
+    const activeTab = screen.getByRole('tab', {
+      selected: true,
+    });
+    expect(activeTab).toHaveTextContent('General');
+
+    const activeTabPanel = screen.getByRole('tabpanel');
+    expect(activeTabPanel).toHaveTextContent('general configuration');
+  });
+
+  it('defaults to selecting the second tab in edit mode', () => {
+    renderTabsEditMode();
 
     const activeTab = screen.getByRole('tab', {
       selected: true,
@@ -61,6 +84,7 @@ describe('OptionsEditorTabs', () => {
 
   it('switches selected tab on click', () => {
     renderTabs();
+
     const jsonTab = screen.getByRole('tab', { name: 'JSON' });
     userEvent.click(jsonTab);
 
@@ -75,6 +99,7 @@ describe('OptionsEditorTabs', () => {
 
   it('switches selected tab on keyboard interactions', () => {
     renderTabs();
+
     const vizTab = screen.getByRole('tab', { name: 'Settings' });
     userEvent.tab();
     userEvent.keyboard('{arrowright}{space}');
@@ -86,16 +111,5 @@ describe('OptionsEditorTabs', () => {
 
     const activeTabPanel = screen.getByRole('tabpanel');
     expect(activeTabPanel).toHaveTextContent('settings configuration');
-  });
-
-  it('renders tabs in correct order', () => {
-    renderTabs();
-
-    const tabList = screen.getByRole('tablist');
-    const tabs = getAllByRole(tabList, 'tab');
-    expect(tabs).toHaveLength(3);
-    expect(tabs[0]).toHaveTextContent('Query');
-    expect(tabs[1]).toHaveTextContent('Settings');
-    expect(tabs[2]).toHaveTextContent('JSON');
   });
 });
