@@ -13,7 +13,7 @@
 
 import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
-import { useSnackbar } from '@perses-dev/components';
+// import { useSnackbar } from '@perses-dev/components';
 import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
@@ -28,7 +28,7 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
-  const { exceptionSnackbar } = useSnackbar();
+  // const { exceptionSnackbar } = useSnackbar();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
   const isSavedVariableModified = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
@@ -71,7 +71,7 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
         setEditMode(false);
       } catch (error) {
         setSavingDashboard(false);
-        exceptionSnackbar(error);
+        // exceptionSnackbar(error);
       }
     } else {
       setEditMode(false);
