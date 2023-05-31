@@ -13,12 +13,14 @@
 
 import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
+import { useSnackbar } from '@perses-dev/components';
 import { OnSaveDashboard, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   onSave?: OnSaveDashboard;
+  onUnsavedChanges?: () => void;
   isDisabled: boolean;
   variant?: 'contained' | 'text' | 'outlined';
 }
@@ -26,6 +28,7 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
+  const { exceptionSnackbar } = useSnackbar();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
   const isSavedVariableModified = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
@@ -58,18 +61,18 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
     }
   };
 
-  const saveDashboard = () => {
-    if (onSave !== undefined) {
-      setSavingDashboard(true);
-      onSave(dashboard)
-        .then(() => {
-          setSavingDashboard(false);
-          closeSaveChangesConfirmationDialog();
-          setEditMode(false);
-        })
-        .catch(() => {
-          setSavingDashboard(false);
-        });
+  const saveDashboard = async () => {
+    if (onSave) {
+      try {
+        setSavingDashboard(true);
+        await onSave(dashboard);
+        setSavingDashboard(false);
+        closeSaveChangesConfirmationDialog();
+        setEditMode(false);
+      } catch (error) {
+        setSavingDashboard(false);
+        exceptionSnackbar(error);
+      }
     } else {
       setEditMode(false);
     }
