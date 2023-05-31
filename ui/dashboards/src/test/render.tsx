@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useLayoutEffect, useState } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { unstable_HistoryRouter } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
@@ -20,6 +21,26 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
 import { mockPluginRegistry, PluginRegistry } from '@perses-dev/plugin-system';
 import { MOCK_PLUGINS } from './plugin-registry';
+
+interface CustomRouterProps {
+  history: MemoryHistory;
+  children: React.ReactNode;
+}
+
+const CustomRouter: React.FC<CustomRouterProps> = ({ history, children }) => {
+  const [state, setState] = useState({
+    action: history.action,
+    location: history.location,
+  });
+
+  useLayoutEffect(() => history.listen(setState), [history]);
+
+  return (
+    <Router location={state.location} navigationType={state.action} navigator={history}>
+      {children}
+    </Router>
+  );
+};
 
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.
@@ -32,21 +53,19 @@ export function renderWithContext(
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
 
-  const BaseRender = () => {
-    const HistoryRouter = unstable_HistoryRouter;
-    history = history ?? createMemoryHistory();
-    return (
-      <HistoryRouter history={history}>
-        <QueryClientProvider client={queryClient}>
-          <QueryParamProvider adapter={ReactRouter6Adapter}>
-            <ChartsThemeProvider chartsTheme={testChartsTheme}>
-              <PluginRegistry {...mockPluginRegistry(...MOCK_PLUGINS)}>{ui}</PluginRegistry>
-            </ChartsThemeProvider>
-          </QueryParamProvider>
-        </QueryClientProvider>
-      </HistoryRouter>
-    );
-  };
+  const customHistory = history ?? createMemoryHistory();
+
+  const BaseRender = () => (
+    <CustomRouter history={customHistory}>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+          <ChartsThemeProvider chartsTheme={testChartsTheme}>
+            <PluginRegistry {...mockPluginRegistry(...MOCK_PLUGINS)}>{ui}</PluginRegistry>
+          </ChartsThemeProvider>
+        </QueryParamProvider>
+      </QueryClientProvider>
+    </CustomRouter>
+  );
 
   return render(<BaseRender />, options);
 }
