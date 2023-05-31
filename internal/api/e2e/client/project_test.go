@@ -13,19 +13,20 @@
 
 //go:build integration
 
-package v1
+package client
 
 import (
 	"testing"
 
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateProject(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		entity := e2eframework.NewProject("perses")
 		object, err := clientInterface.Project().Create(entity)
 		assert.NoError(t, err)
@@ -36,7 +37,7 @@ func TestCreateProject(t *testing.T) {
 }
 
 func TestUpdateProject(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		entity := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 		object, err := clientInterface.Project().Update(entity)
@@ -49,7 +50,7 @@ func TestUpdateProject(t *testing.T) {
 }
 
 func TestGetProject(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		entity := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 		object, err := clientInterface.Project().Get(entity.Metadata.Name)
@@ -60,7 +61,7 @@ func TestGetProject(t *testing.T) {
 }
 
 func TestDeleteProject(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		entity := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 		err := clientInterface.Project().Delete(entity.Metadata.Name)

@@ -13,19 +13,20 @@
 
 //go:build integration
 
-package v1
+package client
 
 import (
 	"testing"
 
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateDatasource(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		projectEntity := e2eframework.NewProject("perses")
 		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
@@ -39,7 +40,7 @@ func TestCreateDatasource(t *testing.T) {
 }
 
 func TestUpdateDatasource(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		projectEntity := e2eframework.NewProject("perses")
 		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
@@ -56,7 +57,7 @@ func TestUpdateDatasource(t *testing.T) {
 }
 
 func TestGetDatasource(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		projectEntity := e2eframework.NewProject("perses")
 		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
@@ -71,7 +72,7 @@ func TestGetDatasource(t *testing.T) {
 }
 
 func TestDeleteDatasource(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		projectEntity := e2eframework.NewProject("perses")
 		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)
@@ -84,7 +85,7 @@ func TestDeleteDatasource(t *testing.T) {
 }
 
 func TestListDatasource(t *testing.T) {
-	withClient(t, func(clientInterface ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
+	withClient(t, func(clientInterface v1.ClientInterface, manager dependency.PersistenceManager) []modelAPI.Entity {
 		projectEntity := e2eframework.NewProject("perses")
 		entity := e2eframework.NewDatasource(t, "perses", "myDTS")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, projectEntity)

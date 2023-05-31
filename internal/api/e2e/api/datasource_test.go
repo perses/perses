@@ -13,7 +13,7 @@
 
 //go:build integration
 
-package e2e
+package api
 
 import (
 	"fmt"
@@ -23,33 +23,34 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/shared"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/pkg/model/api"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestMainScenarioProject(t *testing.T) {
-	e2eframework.MainTestScenario(t, shared.PathProject, func(name string) api.Entity {
-		return e2eframework.NewProject(name)
+func TestMainScenarioDatasource(t *testing.T) {
+	e2eframework.MainTestScenarioWithProject(t, shared.PathDatasource, func(projectName string, name string) (api.Entity, api.Entity) {
+		return e2eframework.NewProject(projectName), e2eframework.NewDatasource(t, projectName, name)
 	})
 }
 
-func TestDeleteProjectWithSubResources(t *testing.T) {
+func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
 	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		projectName := "perses"
-		dash := e2eframework.NewDashboard(t, "perses", "Demo")
-		project := e2eframework.NewProject(projectName)
-		datasource := e2eframework.NewDatasource(t, "perses", "Demo")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, project, dash, datasource)
-		expect.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, projectName)).
+		entity := e2eframework.NewDatasource(t, "", "myDTS")
+		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+			WithJSON(entity).
 			Expect().
-			Status(http.StatusNoContent)
+			Status(http.StatusBadRequest)
+		return []api.Entity{}
+	})
+}
 
-		_, err := manager.GetDashboard().Get(projectName, dash.Metadata.Name)
-		assert.True(t, databaseModel.IsKeyNotFound(err))
-		_, err = manager.GetDatasource().Get(projectName, datasource.Metadata.Name)
-		assert.True(t, databaseModel.IsKeyNotFound(err))
+func TestCreateDatasourceWithNonExistingProject(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		entity := e2eframework.NewDatasource(t, "awesomeProjectThatDoesntExist", "myDTS")
+		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathDatasource)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusBadRequest)
 		return []api.Entity{}
 	})
 }
