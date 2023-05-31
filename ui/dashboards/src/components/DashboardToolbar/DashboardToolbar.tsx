@@ -32,7 +32,7 @@ export interface DashboardToolbarProps {
   isReadonly: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
-  onSave?: (dashboard: DashboardResource) => Promise<unknown>;
+  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {

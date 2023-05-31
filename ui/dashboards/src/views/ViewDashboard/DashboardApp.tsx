@@ -34,7 +34,7 @@ export interface DashboardAppProps {
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
 
-  onSave?: (dashboard: DashboardResource) => Promise<unknown>;
+  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
