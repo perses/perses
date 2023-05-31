@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DashboardResource, OnSaveDashboard } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 import {
   PanelDrawer,
   Dashboard,
@@ -27,7 +27,7 @@ import {
   EditJsonDialog,
   SaveChangesConfirmationDialog,
 } from '../../components';
-import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
+import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
   emptyDashboardProps?: Partial<EmptyDashboardProps>;

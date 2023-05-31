@@ -13,9 +13,15 @@
 
 import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
-import { OnSaveDashboard, isRelativeTimeRange } from '@perses-dev/core';
+import { isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
+import {
+  OnSaveDashboard,
+  useDashboard,
+  useEditMode,
+  useSaveChangesConfirmationDialog,
+  useTemplateVariableActions,
+} from '../../context';
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   onSave?: OnSaveDashboard;

@@ -38,5 +38,3 @@ export interface DashboardSelector {
   project: string;
   dashboard: string;
 }
-
-export type OnSaveDashboard = (dashboard: DashboardResource) => Promise<unknown>;
