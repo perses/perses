@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Tab, Tabs, TabsProps, Box } from '@mui/material';
-import { useState } from 'react';
 import { TabPanel } from './TabPanel';
 
 export type OptionsEditorTab = {
@@ -25,11 +24,11 @@ export type OptionsEditorTab = {
 
 export type OptionsEditorTabsProps = {
   tabs: OptionsEditorTab[];
+  activeTab: string;
+  setActiveTab: (activeTab: string) => void;
 };
 
-export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
-  const [activeTab, setActiveTab] = useState(0);
-
+export const OptionsEditorTabs = ({ tabs, activeTab, setActiveTab }: OptionsEditorTabsProps) => {
   const handleChange: TabsProps['onChange'] = (_, newValue) => {
     setActiveTab(newValue);
   };
@@ -43,6 +42,7 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
               <Tab
                 key={label}
                 label={label}
+                value={label}
                 id={`options-editor-tab-${i}`}
                 aria-controls={`options-editor-tabpanel-${i}`}
               />
@@ -52,7 +52,7 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
       </Box>
       {tabs.map(({ label, content }, i) => {
         return (
-          <TabPanel key={label} value={activeTab} index={i}>
+          <TabPanel key={label} isActive={label === activeTab} index={i}>
             {content}
           </TabPanel>
         );

@@ -15,14 +15,12 @@ import { Box } from '@mui/material';
 
 interface TabPanelProps {
   children: React.ReactNode;
+  isActive: boolean;
   index: number;
-  value: number;
 }
 
 export function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  const isActive = value === index;
+  const { children, isActive, index, ...other } = props;
 
   return (
     <div

@@ -33,7 +33,7 @@ describe('OptionsEditorTabs', () => {
   ];
   const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
     const tabs = otherTabs ?? mockTabs;
-    render(<OptionsEditorTabs tabs={tabs} />);
+    render(<OptionsEditorTabs tabs={tabs} activeTab={tabs[0]?.label || ''} setActiveTab={jest.fn()} />);
   };
 
   it('renders all specified tabs in a tab list', () => {

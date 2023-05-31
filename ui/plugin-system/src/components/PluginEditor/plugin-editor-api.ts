@@ -31,6 +31,15 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   onChange: (next: Definition<UnknownSpec>) => void;
 }
 
+export type PluginEditorState = {
+  isLoading: boolean;
+  error: Error | null;
+  pendingKind: string;
+  onKindChange: PluginKindSelectProps['onChange'];
+  onSpecChange: PluginSpecEditorProps['onChange'];
+  rememberCurrentSpecState: () => void;
+};
+
 type PreviousSpecState = Record<string, Record<string, UnknownSpec>>;
 type HideQueryEditorState = Record<string, boolean>;
 
@@ -47,7 +56,7 @@ export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value
  * remembers previous `spec` values that it's seen, allowing and restores those values if a user switches the plugin
  * kind back.
  */
-export function usePluginEditor(props: UsePluginEditorProps) {
+export function usePluginEditor(props: UsePluginEditorProps): PluginEditorState {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const { pluginType, value, onHideQueryEditorChange = () => {} } = props; // setting onHideQueryEditorChange to empty function here because useEvent requires a function
 

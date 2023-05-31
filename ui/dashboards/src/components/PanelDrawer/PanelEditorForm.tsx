@@ -12,21 +12,10 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectProps,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { PanelDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginKindSelect, usePluginEditor, PanelSpecEditor } from '@perses-dev/plugin-system';
+import { PanelSpecEditor, usePluginEditor } from '@perses-dev/plugin-system';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { PanelPreview } from './PanelPreview';
@@ -43,10 +32,10 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     onChange,
   } = props;
 
-  const panelGroups = useListPanelGroups();
-  const [groupId, setGroupId] = useState(initialGroupId);
   const { panelDefinition, setName, setDescription, setQueries, setPlugin, setPanelDefinition } =
     usePanelEditor(initialPanelDef);
+  const [groupId, setGroupId] = useState(initialGroupId);
+  const groups = useListPanelGroups();
   const { plugin } = panelDefinition.spec;
 
   // Use common plugin editor logic even though we've split the inputs up in this form
@@ -61,13 +50,16 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     },
   });
 
-  // Ignore string values (which would be an "empty" value from the Select) since we don't allow them to unset it
-  const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
-    const { value } = e.target;
-    if (typeof value === 'string') {
-      return;
-    }
-    setGroupId(value);
+  const handleNameChange = (name: string) => {
+    setName(name);
+  };
+
+  const handleDescriptionChange = (description: string) => {
+    setDescription(description);
+  };
+
+  const handleGroupIdChange = (groupId: number) => {
+    setGroupId(groupId);
   };
 
   const handlePanelDefinitionChange = (nextPanelDef: PanelDefinition) => {
@@ -84,9 +76,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   };
 
   useEffect(() => {
-    const values: PanelEditorValues = { groupId, panelDefinition };
+    const values: PanelEditorValues = { panelDefinition, groupId };
     onChange(values);
-  }, [groupId, panelDefinition, onChange]);
+  }, [panelDefinition, groupId, onChange]);
 
   return (
     // Grid maxHeight allows user to scroll inside Drawer to see all content
@@ -96,55 +88,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
       sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}
     >
       <Grid container spacing={2}>
-        <Grid item xs={8}>
-          <TextField
-            required
-            fullWidth
-            label="Name"
-            value={panelDefinition.spec.display.name ?? ''}
-            variant="outlined"
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <FormControl fullWidth>
-            <InputLabel id="select-group">Group</InputLabel>
-            <Select required labelId="select-group" label="Group" value={groupId} onChange={handleGroupChange}>
-              {panelGroups.map((panelGroup, index) => (
-                <MenuItem key={panelGroup.id} value={panelGroup.id}>
-                  {panelGroup.title ?? `Group ${index + 1}`}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={8}>
-          <TextField
-            fullWidth
-            label="Description"
-            value={panelDefinition.spec.display.description ?? ''}
-            variant="outlined"
-            onChange={(e) => {
-              setDescription(e.target.value);
-            }}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <FormControl fullWidth disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
-            <InputLabel id="panel-type-label">Type</InputLabel>
-            <PluginKindSelect
-              pluginType="Panel"
-              required
-              labelId="panel-type-label"
-              label="Type"
-              value={pluginEditor.pendingKind ? pluginEditor.pendingKind : plugin.kind}
-              onChange={pluginEditor.onKindChange}
-            />
-          </FormControl>
-          <FormHelperText>{pluginEditor.error?.message ?? ''}</FormHelperText>
-        </Grid>
         <Grid item xs={12}>
           <Typography variant="h4" marginBottom={1}>
             Preview
@@ -157,13 +100,19 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <PanelSpecEditor
               panelDefinition={panelDefinition}
-              onJSONChange={handlePanelDefinitionChange}
+              groupId={groupId}
+              groups={groups}
+              pluginEditor={pluginEditor}
+              onNameChange={handleNameChange}
+              onDescriptionChange={handleDescriptionChange}
+              onGroupIdChange={handleGroupIdChange}
               onQueriesChange={(queries) => {
                 setQueries(queries);
               }}
               onPluginSpecChange={(spec) => {
                 pluginEditor.onSpecChange(spec);
               }}
+              onJSONChange={handlePanelDefinitionChange}
             />
           </ErrorBoundary>
         </Grid>

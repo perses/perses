@@ -11,30 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Meta, StoryObj } from '@storybook/react';
-import { OptionsEditorTabs } from '@perses-dev/plugin-system';
-
-const meta: Meta<typeof OptionsEditorTabs> = {
-  component: OptionsEditorTabs,
-};
-
-export default meta;
-
-type Story = StoryObj<typeof OptionsEditorTabs>;
-
-export const Primary: Story = {
-  args: {
-    tabs: [
-      {
-        label: 'Tab One',
-        content: 'Tab One',
-      },
-      {
-        label: 'Tab Two',
-        content: 'Tab Two',
-      },
-    ],
-    activeTab: 'Tab One',
-    setActiveTab: jest.fn(),
-  },
-};
+export * from './GeneralSettingsEditor';
