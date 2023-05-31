@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, OnSaveDashboard } from '@perses-dev/core';
 import {
   PanelDrawer,
   Dashboard,
@@ -33,8 +33,7 @@ export interface DashboardAppProps {
   emptyDashboardProps?: Partial<EmptyDashboardProps>;
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
-
-  onSave?: (dashboard: DashboardResource) => Promise<unknown>;
+  onSave?: OnSaveDashboard;
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
