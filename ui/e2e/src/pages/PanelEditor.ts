@@ -81,7 +81,7 @@ export class PanelEditor {
   }
 
   async editThreshold(label: string, value: string) {
-    const input = this.container.getByLabel(label);
+    const input = this.container.getByLabel(label, { exact: true });
     await input.clear();
     await input.type(value);
   }
