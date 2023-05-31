@@ -27,6 +27,10 @@ interface CustomRouterProps {
   children: React.ReactNode;
 }
 
+/*
+ * Workaround for React router upgrade type errors.
+ * More details: https://stackoverflow.com/a/69948457/17575201
+ */
 const CustomRouter: React.FC<CustomRouterProps> = ({ history, children }) => {
   const [state, setState] = useState({
     action: history.action,
