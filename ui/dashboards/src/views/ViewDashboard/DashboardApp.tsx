@@ -27,14 +27,14 @@ import {
   EditJsonDialog,
   SaveChangesConfirmationDialog,
 } from '../../components';
-import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
+import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
   emptyDashboardProps?: Partial<EmptyDashboardProps>;
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
 
-  onSave?: OnSaveDashboard;
+  onSave?: (dashboard: DashboardResource) => Promise<unknown>;
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;

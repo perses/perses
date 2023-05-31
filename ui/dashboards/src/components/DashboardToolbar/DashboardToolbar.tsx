@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
+import { DashboardResource } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { OnSaveDashboard, useEditMode } from '../../context';
+import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
@@ -31,7 +32,7 @@ export interface DashboardToolbarProps {
   isReadonly: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
-  onSave?: OnSaveDashboard;
+  onSave?: (dashboard: DashboardResource) => Promise<unknown>;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
