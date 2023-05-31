@@ -46,7 +46,7 @@ const PanelOptionsEditorWrapper = ({ initialPanelDefinition }: PanelOptionsEdito
       content: <OptionsEditorComponent value={panelDefinition.spec.plugin.spec} onChange={handleChange} />,
     })) || [];
 
-  return <OptionsEditorTabs tabs={tabs} activeTab={tabs[0]?.label || ''} setActiveTab={jest.fn()} />;
+  return <OptionsEditorTabs tabs={tabs} />;
 };
 
 /**

@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
 import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { usePlugin } from '../../runtime';
@@ -59,9 +58,22 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
-  const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
+
+  if (error) {
+    return <ErrorAlert error={error} />;
+  }
+
+  // TODO: Proper loading indicator
+  if (isLoading) {
+    return null;
+  }
+
+  if (plugin === undefined) {
+    throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
+  }
 
   // Create tabs
+  const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
   let tabs: OptionsEditorTabsProps['tabs'] = [];
 
   tabs.push({
@@ -99,22 +111,5 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   // Always show JSON editor
   tabs.push({ label: JSON_TAB_LABEL, content: <JSONEditor value={panelDefinition} onChange={onJSONChange} /> });
 
-  // Keep  track of active tab
-  const defaultTab = tabs.find((t) => t.label === QUERY_TAB_LABEL) ? QUERY_TAB_LABEL : GENERAL_TAB_LABEL;
-  const [activeTab, setActiveTab] = useState(defaultTab);
-
-  if (error) {
-    return <ErrorAlert error={error} />;
-  }
-
-  // TODO: Proper loading indicator
-  if (isLoading) {
-    return null;
-  }
-
-  if (plugin === undefined) {
-    throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
-  }
-
-  return <OptionsEditorTabs key={tabs.length} tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />;
+  return <OptionsEditorTabs tabs={tabs} />;
 }

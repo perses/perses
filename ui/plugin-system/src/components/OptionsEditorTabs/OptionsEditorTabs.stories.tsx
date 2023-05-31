@@ -34,7 +34,5 @@ export const Primary: Story = {
         content: 'Tab Two',
       },
     ],
-    activeTab: 'Tab One',
-    setActiveTab: jest.fn(),
   },
 };

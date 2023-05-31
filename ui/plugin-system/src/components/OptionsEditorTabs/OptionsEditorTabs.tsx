@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Tab, Tabs, TabsProps, Box } from '@mui/material';
+import { useState } from 'react';
 import { TabPanel } from './TabPanel';
 
 export type OptionsEditorTab = {
@@ -24,11 +25,12 @@ export type OptionsEditorTab = {
 
 export type OptionsEditorTabsProps = {
   tabs: OptionsEditorTab[];
-  activeTab: string;
-  setActiveTab: (activeTab: string) => void;
 };
 
-export const OptionsEditorTabs = ({ tabs, activeTab, setActiveTab }: OptionsEditorTabsProps) => {
+export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
+  // Set default tab to be the tab that comes after "General" ("General" is always first tab)
+  const [activeTab, setActiveTab] = useState(1);
+
   const handleChange: TabsProps['onChange'] = (_, newValue) => {
     setActiveTab(newValue);
   };
@@ -42,7 +44,6 @@ export const OptionsEditorTabs = ({ tabs, activeTab, setActiveTab }: OptionsEdit
               <Tab
                 key={label}
                 label={label}
-                value={label}
                 id={`options-editor-tab-${i}`}
                 aria-controls={`options-editor-tabpanel-${i}`}
               />
@@ -52,7 +53,7 @@ export const OptionsEditorTabs = ({ tabs, activeTab, setActiveTab }: OptionsEdit
       </Box>
       {tabs.map(({ label, content }, i) => {
         return (
-          <TabPanel key={label} isActive={label === activeTab} index={i}>
+          <TabPanel key={label} value={activeTab} index={i}>
             {content}
           </TabPanel>
         );
