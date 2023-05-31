@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import { DashboardResource } from '@perses-dev/core';
 import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
