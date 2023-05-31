@@ -39,7 +39,8 @@ const config: Config.InitialOptions = {
   transform: {
     // This does not do type-checking and assumes that's happening elsewhere for TS test files (e.g. as part of the
     // build process)
-    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', swcrc],
+    // exclude: [] + swcrc: false => https://github.com/swc-project/jest/issues/62
+    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', { ...swcrc, exclude: [], swcrc: false }],
   },
 };
 
