@@ -13,8 +13,7 @@
 
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
-import { useEditMode } from '../../context';
+import { OnSaveDashboard, useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
@@ -32,7 +31,7 @@ export interface DashboardToolbarProps {
   isReadonly: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
-  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
+  onSave?: OnSaveDashboard;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
