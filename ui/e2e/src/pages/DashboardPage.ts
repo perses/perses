@@ -148,6 +148,7 @@ export class DashboardPage {
 
   async toggleTheme() {
     await this.themeToggle.click();
+    await this.page.mouse.move(-200, -200);
   }
 
   /**
