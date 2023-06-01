@@ -27,10 +27,16 @@ import {
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   onSave?: OnSaveDashboard;
   isDisabled: boolean;
+  showErrorSnackbar?: boolean;
   variant?: 'contained' | 'text' | 'outlined';
 }
 
-export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
+export const SaveDashboardButton = ({
+  onSave,
+  isDisabled,
+  showErrorSnackbar = false,
+  variant = 'contained',
+}: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
   const { exceptionSnackbar } = useSnackbar();
@@ -76,7 +82,9 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
         setEditMode(false);
       } catch (error) {
         setSavingDashboard(false);
-        exceptionSnackbar(error);
+        if (showErrorSnackbar) {
+          exceptionSnackbar(error);
+        }
       }
     } else {
       setEditMode(false);
