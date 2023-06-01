@@ -13,7 +13,7 @@
 
 import { Datasource, DatasourceSelector, GlobalDatasource } from '@perses-dev/core';
 import { DatasourceApi } from '@perses-dev/dashboards';
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import { fetchDatasourceList, fetchGlobalDatasourceList } from './datasource-client';
 
 export class HTTPDatasourceAPI implements DatasourceApi {
