@@ -156,6 +156,33 @@ describe('isSavedVariableModified', () => {
     expect(isSavedVariableModified(savedVariables, variableState)).toBe(false);
   });
 
+  it('should confirm null list variable was not modified', () => {
+    const savedVariables: VariableDefinition[] = [
+      {
+        kind: 'ListVariable',
+        spec: {
+          allow_all_value: false,
+          allow_multiple: false,
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: [],
+            },
+          },
+          name: 'EmptyListVariableTest',
+        },
+      },
+    ];
+    const variableState = {
+      EmptyListVariableTest: {
+        value: null,
+        loading: false,
+        options: [],
+      },
+    };
+    expect(isSavedVariableModified(savedVariables, variableState)).toBe(false);
+  });
+
   it('should confirm text variable value was not modified', () => {
     const savedVariables: VariableDefinition[] = [
       {

@@ -21,7 +21,7 @@ export function isSavedVariableModified(definitions: VariableDefinition[], varSt
   for (const savedVariable of definitions) {
     if (savedVariable.kind === 'ListVariable') {
       const currentVariable = varState[savedVariable.spec.name];
-      if (savedVariable.spec.default_value !== currentVariable?.value) {
+      if (currentVariable?.value !== null && currentVariable?.value !== savedVariable.spec.default_value) {
         return true;
       }
     } else if (savedVariable.kind === 'TextVariable') {
