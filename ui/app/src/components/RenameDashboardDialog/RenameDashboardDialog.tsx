@@ -37,22 +37,22 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
-  const [name, setName] = useState<string>();
-  const [error, setError] = useState<string>();
+  const [name, setName] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
     if (!e.target.value) {
       setError('Required');
     } else {
-      setError(undefined);
+      setError('');
     }
   }, []);
 
   // Reinitialize form for next time the dialog is opened
   const resetForm = useCallback(() => {
-    setName(undefined);
-    setError(undefined);
+    setName('');
+    setError('');
   }, []);
 
   const handleSubmit = useCallback(() => {

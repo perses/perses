@@ -35,18 +35,18 @@ export interface CreateDashboardProps {
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   const { open, projectOptions, onClose, onSuccess } = props;
 
-  const [projectName, setProjectName] = useState<string | undefined>(projectOptions[0]);
-  const [projectError, setProjectError] = useState<string>();
+  const [projectName, setProjectName] = useState<string>(projectOptions[0] ?? '');
+  const [projectError, setProjectError] = useState<string>('');
 
-  const [dashboardName, setDashboardName] = useState<string>();
-  const [dashboardError, setDashboardError] = useState<string>();
+  const [dashboardName, setDashboardName] = useState<string>('');
+  const [dashboardError, setDashboardError] = useState<string>('');
 
   const handleProjectChange = useCallback((e: SelectChangeEvent) => {
     setProjectName(e.target.value);
     if (!e.target.value) {
       setProjectError('Required');
     } else {
-      setProjectError(undefined);
+      setProjectError('');
     }
   }, []);
 
@@ -55,14 +55,14 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
     if (!e.target.value) {
       setDashboardError('Required');
     } else {
-      setDashboardError(undefined);
+      setDashboardError('');
     }
   }, []);
 
   // Reinitialize form for next time the dialog is opened
   const resetForm = useCallback(() => {
-    setDashboardName(undefined);
-    setDashboardError(undefined);
+    setDashboardName('');
+    setDashboardError('');
   }, []);
 
   const handleSubmit = useCallback(() => {
