@@ -13,6 +13,7 @@
 
 import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
+import { useSnackbar } from '@perses-dev/components';
 import { isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import {
@@ -32,6 +33,7 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
+  const { exceptionSnackbar } = useSnackbar();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
   const isSavedVariableModified = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
@@ -64,18 +66,18 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
     }
   };
 
-  const saveDashboard = () => {
-    if (onSave !== undefined) {
-      setSavingDashboard(true);
-      onSave(dashboard)
-        .then(() => {
-          setSavingDashboard(false);
-          closeSaveChangesConfirmationDialog();
-          setEditMode(false);
-        })
-        .catch(() => {
-          setSavingDashboard(false);
-        });
+  const saveDashboard = async () => {
+    if (onSave) {
+      try {
+        setSavingDashboard(true);
+        await onSave(dashboard);
+        setSavingDashboard(false);
+        closeSaveChangesConfirmationDialog();
+        setEditMode(false);
+      } catch (error) {
+        setSavingDashboard(false);
+        exceptionSnackbar(error);
+      }
     } else {
       setEditMode(false);
     }
