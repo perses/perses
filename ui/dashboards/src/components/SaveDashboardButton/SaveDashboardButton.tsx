@@ -74,6 +74,7 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
         setEditMode(false);
       } catch (error) {
         setSavingDashboard(false);
+        throw new Error(`An error occurred while saving the dashboard. ${error}`);
       }
     } else {
       setEditMode(false);
