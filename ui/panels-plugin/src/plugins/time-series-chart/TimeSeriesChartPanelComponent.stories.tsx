@@ -20,9 +20,17 @@ import {
   WithPluginSystemTemplateVariables,
   WithPluginSystemDatasourceStore,
 } from '@perses-dev/plugin-system/src/stories/shared-utils';
-import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
-import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+import { mockTimeSeriesResponseWithManySeries } from '@perses-dev/internal-utils';
+import {
+  mockQueryRangeRequests,
+  waitForStableCanvas,
+  WithQueryClient,
+  WithQueryParams,
+  StorySection,
+} from '@perses-dev/storybook';
 import { ComponentProps } from 'react';
+import { legendModes, legendPositions } from '@perses-dev/components';
+import { Stack } from '@mui/material';
 
 type TimeSeriesChartProps = ComponentProps<typeof TimeSeriesChart.PanelComponent>;
 
@@ -89,19 +97,10 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
             {
               query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
               response: {
-                body: mockTimeSeriesResponseWithStableValue({
-                  metrics: [
-                    {
-                      metric: {
-                        __name__: 'up',
-                        instance: 'demo.do.prometheus.io:3000',
-                        job: 'grafana',
-                      },
-                      value: '1',
-                    },
-                  ],
+                body: mockTimeSeriesResponseWithManySeries({
                   startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
                   endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 20,
                   totalDatapoints: 10000,
                 }),
               },
@@ -142,5 +141,53 @@ export const Primary: Story = {
         position: 'Bottom',
       },
     },
+  },
+};
+
+export const LegendModes: Story = {
+  args: {
+    contentDimensions: {
+      width: 600,
+      height: 400,
+    },
+  },
+  argTypes: {
+    // Managed inside the render function
+    spec: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        {legendModes.map((mode) => {
+          return (
+            <StorySection key={mode} level="h3" title={mode}>
+              <Stack direction="row" spacing={1} flexWrap="wrap">
+                {legendPositions.map((position) => {
+                  return (
+                    <StorySection key={position} level="h4" title={position}>
+                      <TimeSeriesChartWrapper
+                        {...args}
+                        width={args.contentDimensions?.width}
+                        height={args.contentDimensions?.height}
+                        spec={{
+                          legend: {
+                            position,
+                            mode,
+                          },
+                        }}
+                      />
+                    </StorySection>
+                  );
+                })}
+              </Stack>
+            </StorySection>
+          );
+        })}
+      </Stack>
+    );
   },
 };

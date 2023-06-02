@@ -33,6 +33,10 @@ describe('LegendOptionsEditor', () => {
     return screen.getByRole('combobox', { name: 'Position' });
   };
 
+  const getLegendModeSelector = () => {
+    return screen.getByRole('combobox', { name: 'Mode' });
+  };
+
   it('can change legend visibility by clicking', () => {
     const onChange = jest.fn();
     renderLegendOptionsEditor(undefined, onChange);
@@ -51,5 +55,17 @@ describe('LegendOptionsEditor', () => {
     });
     userEvent.click(positionRightOption);
     expect(onChange).toHaveBeenCalledWith({ position: 'Right' });
+  });
+
+  it('should allow changing legend mode', () => {
+    const onChange = jest.fn();
+    renderLegendOptionsEditor({ position: 'Bottom', mode: 'List' }, onChange);
+    expect(getLegendModeSelector()).toBeEnabled();
+    userEvent.click(getLegendModeSelector());
+    const tableModeOption = screen.getByRole('option', {
+      name: 'Table',
+    });
+    userEvent.click(tableModeOption);
+    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table' });
   });
 });

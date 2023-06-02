@@ -75,7 +75,8 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "Bottom"
+                "position": "Bottom",
+                "mode": "Table"
               }
             }
           },
