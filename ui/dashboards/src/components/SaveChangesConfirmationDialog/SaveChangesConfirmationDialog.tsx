@@ -16,11 +16,14 @@ import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
-import { useSaveChangesConfirmationDialog } from '../../context';
+import { useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
   const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(true);
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(true);
+
+  const { getSavedVariablesStatus } = useTemplateVariableActions();
+  const { isSavedVariableModified, modifiedVariableNames } = getSavedVariablesStatus();
 
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isOpen = dialog !== undefined;
@@ -30,7 +33,11 @@ export const SaveChangesConfirmationDialog = () => {
     ? `(Last ${timeRange.pastDuration})`
     : '(Absolute time ranges can not be saved)';
 
-  const timeRangeInfoText = `Save current time range as new default ${currentTimeRangeText}`;
+  const saveTimeRangeText = `Save current time range as new default ${currentTimeRangeText}`;
+
+  const saveVariablesText = `Save current variable values as new default (${
+    modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
+  })`;
 
   return (
     <Dialog open={isOpen}>
@@ -49,16 +56,17 @@ export const SaveChangesConfirmationDialog = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeRange(e.target.checked)}
                   />
                 }
-                label={timeRangeInfoText}
+                label={saveTimeRangeText}
               />
               <FormControlLabel
                 control={
                   <Checkbox
+                    disabled={!isSavedVariableModified}
                     checked={saveDefaultVariables}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultVariables(e.target.checked)}
                   />
                 }
-                label="Save current variable values as new default."
+                label={saveVariablesText}
               />
             </FormGroup>
           </Dialog.Content>

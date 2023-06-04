@@ -31,9 +31,9 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 
 export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
-  const { dashboard } = useDashboard();
+  const { dashboard, setDashboard } = useDashboard();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
-  const isSavedVariableModified = getSavedVariablesStatus();
+  const { isSavedVariableModified } = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
@@ -72,6 +72,7 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
         setSavingDashboard(false);
         closeSaveChangesConfirmationDialog();
         setEditMode(false);
+        setDashboard(dashboard);
       } catch (error) {
         setSavingDashboard(false);
         throw new Error(`An error occurred while saving the dashboard. ${error}`);

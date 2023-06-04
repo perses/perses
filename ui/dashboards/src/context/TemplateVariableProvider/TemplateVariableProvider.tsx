@@ -37,7 +37,7 @@ type TemplateVariableStore = {
   setVariableLoading: (name: VariableName, loading: boolean) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
   setVariableDefaultValues: () => VariableDefinition[];
-  getSavedVariablesStatus: () => boolean;
+  getSavedVariablesStatus: () => { isSavedVariableModified: boolean; modifiedVariableNames: string[] };
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
