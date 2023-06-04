@@ -135,18 +135,6 @@ export function LineChart({
     enableDataZoom(chartRef.current);
   }
 
-  const handleOnDoubleClick = (e: MouseEvent) => {
-    setTooltipPinnedCoords(null);
-    // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
-    if (onDoubleClick === undefined) {
-      if (chartRef.current !== undefined) {
-        restoreChart(chartRef.current);
-      }
-    } else {
-      onDoubleClick(e);
-    }
-  };
-
   const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
@@ -267,7 +255,17 @@ export function LineChart({
           enableDataZoom(chartRef.current);
         }
       }}
-      onDoubleClick={handleOnDoubleClick}
+      onDoubleClick={(e) => {
+        setTooltipPinnedCoords(null);
+        // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
+        if (onDoubleClick === undefined) {
+          if (chartRef.current !== undefined) {
+            restoreChart(chartRef.current);
+          }
+        } else {
+          onDoubleClick(e);
+        }
+      }}
     >
       {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead */}
       {showTooltip === true &&
