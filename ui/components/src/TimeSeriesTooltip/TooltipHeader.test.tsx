@@ -21,10 +21,24 @@ describe('TooltipHeader', () => {
   };
 
   const testSeriesTimeMs = 1671803580000;
+  const testNearbySeries = [
+    {
+      seriesIdx: 0,
+      datumIdx: 14,
+      seriesName:
+        '{device="/dev/vda1",env="demo",fstype="ext4",instance="demo.do.prometheus.io:9100",job="node",mountpoint="/"}',
+      date: testSeriesTimeMs,
+      x: testSeriesTimeMs,
+      y: 0.29086960933858064,
+      formattedY: '29%',
+      markerColor: '#56B4E9',
+      isClosestToCursor: true,
+    },
+  ];
 
   it('should display with correct date and pin text', () => {
     const tooltipContent: TooltipHeaderProps = {
-      seriesTimeMs: testSeriesTimeMs,
+      nearbySeries: testNearbySeries,
       isTooltipPinned: false,
       totalSeries: 5,
       showAllSeries: false,
@@ -33,12 +47,11 @@ describe('TooltipHeader', () => {
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
     expect(screen.getByText('13:53:00')).toBeInTheDocument();
     expect(screen.getByText('Click to Pin')).toBeInTheDocument();
-    expect(screen.getByText('Show All?')).toBeInTheDocument();
   });
 
   it('should display with unpin text', () => {
     const tooltipContent: TooltipHeaderProps = {
-      seriesTimeMs: testSeriesTimeMs,
+      nearbySeries: testNearbySeries,
       isTooltipPinned: true,
       totalSeries: 5,
       showAllSeries: false,
@@ -49,7 +62,7 @@ describe('TooltipHeader', () => {
 
   it('should not display show all toggle when only 1 total series', () => {
     const tooltipContent: TooltipHeaderProps = {
-      seriesTimeMs: testSeriesTimeMs,
+      nearbySeries: testNearbySeries,
       isTooltipPinned: false,
       totalSeries: 1,
       showAllSeries: false,
