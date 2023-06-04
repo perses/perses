@@ -25,7 +25,7 @@ import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/plugin-system';
 import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
-import { isSavedVariableModified } from './utils';
+import { checkSavedDefaultVariableStatus } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQueryParamName } from './query-params';
 
@@ -245,7 +245,7 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
           return updatedVariables;
         },
         getSavedVariablesStatus: () => {
-          return isSavedVariableModified(get().variableDefinitions, get().variableState);
+          return checkSavedDefaultVariableStatus(get().variableDefinitions, get().variableState);
         },
       }))
     )

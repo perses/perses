@@ -17,7 +17,7 @@ import { VariableStateMap } from '@perses-dev/plugin-system';
 /*
  * Check whether saved variable definitions are out of date with current default list values in Zustand store
  */
-export function isSavedVariableModified(definitions: VariableDefinition[], varState: VariableStateMap) {
+export function checkSavedDefaultVariableStatus(definitions: VariableDefinition[], varState: VariableStateMap) {
   let isSavedVariableModified = false;
   const modifiedVariableNames: string[] = [];
   for (const savedVariable of definitions) {
