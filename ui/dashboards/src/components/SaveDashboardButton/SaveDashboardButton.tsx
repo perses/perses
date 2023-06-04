@@ -69,13 +69,13 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
       try {
         setSavingDashboard(true);
         await onSave(dashboard);
-        setSavingDashboard(false);
         closeSaveChangesConfirmationDialog();
         setEditMode(false);
         setDashboard(dashboard);
       } catch (error) {
-        setSavingDashboard(false);
         throw new Error(`An error occurred while saving the dashboard. ${error}`);
+      } finally {
+        setSavingDashboard(false);
       }
     } else {
       setEditMode(false);
