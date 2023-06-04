@@ -13,12 +13,18 @@
 
 import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
-import { DashboardResource, isRelativeTimeRange } from '@perses-dev/core';
+import { isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useDashboard, useEditMode, useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
+import {
+  OnSaveDashboard,
+  useDashboard,
+  useEditMode,
+  useSaveChangesConfirmationDialog,
+  useTemplateVariableActions,
+} from '../../context';
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
-  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
+  onSave?: OnSaveDashboard;
   isDisabled: boolean;
   variant?: 'contained' | 'text' | 'outlined';
 }

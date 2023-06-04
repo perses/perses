@@ -19,15 +19,26 @@ import {
   validateLegendSpec,
   LEGEND_POSITIONS_CONFIG,
   LegendOptions,
-  LegendPositionConfig,
+  LegendSingleSelectConfig,
+  LEGEND_MODE_CONFIG,
+  getLegendMode,
 } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 
-type LegendPositionOption = LegendPositionConfig & { id: LegendOptions['position'] };
+type LegendPositionOption = LegendSingleSelectConfig & { id: LegendOptions['position'] };
 
 const POSITION_OPTIONS: LegendPositionOption[] = Object.entries(LEGEND_POSITIONS_CONFIG).map(([id, config]) => {
   return {
     id: id as LegendOptions['position'],
+    ...config,
+  };
+});
+
+type LegendModeOption = LegendSingleSelectConfig & { id: LegendOptions['mode'] };
+
+const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(([id, config]) => {
+  return {
+    id: id as LegendOptions['mode'],
     ...config,
   };
 });
@@ -51,9 +62,21 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
+  const handleLegendModeChange = (_: unknown, newValue: LegendModeOption) => {
+    onChange({
+      ...value,
+      position: currentPosition,
+      mode: newValue.id,
+    });
+  };
+
   const isValidLegend = validateLegendSpec(value);
   const currentPosition = getLegendPosition(value?.position);
-  const legendConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
+  const legendPositionConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
+
+  const currentMode = getLegendMode(value?.mode);
+  const legendModeConfig = LEGEND_MODE_CONFIG[currentMode];
+
   return (
     <>
       {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
@@ -66,13 +89,30 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
         control={
           <Autocomplete
             value={{
-              ...legendConfig,
+              ...legendPositionConfig,
               id: currentPosition,
             }}
             options={POSITION_OPTIONS}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => <TextField {...params} />}
             onChange={handleLegendPositionChange}
+            disabled={value === undefined}
+            disableClearable
+          ></Autocomplete>
+        }
+      />
+      <OptionsEditorControl
+        label="Mode"
+        control={
+          <Autocomplete
+            value={{
+              ...legendModeConfig,
+              id: currentMode,
+            }}
+            options={MODE_OPTIONS}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => <TextField {...params} />}
+            onChange={handleLegendModeChange}
             disabled={value === undefined}
             disableClearable
           ></Autocomplete>

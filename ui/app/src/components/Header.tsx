@@ -131,9 +131,9 @@ export default function Header(): JSX.Element {
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
-  const handleDarkModeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDarkModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      await setDarkMode(e.target.checked);
+      setDarkMode(e.target.checked);
     } catch (e) {
       exceptionSnackbar(e);
     }

@@ -47,25 +47,24 @@ test.describe('Dashboard: Stat Chart Panel', () => {
   });
 
   test('should be able to add and edit threshold', async ({ page, dashboardPage, mockNow }) => {
+    await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
+    await dashboardPage.startEditing();
+    await dashboardPage.editPanel('Simple Stat', async (panelEditor) => {
+      await panelEditor.selectTab('Settings');
+      await panelEditor.addThreshold();
+      await panelEditor.editThreshold('T1', '5');
+      await panelEditor.openThresholdColorPicker('T1');
+      const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+      await colorPicker.isVisible();
+      const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
+      await colorInput.clear();
+      await colorInput.type('ed6bd4', { delay: 100 });
+      await page.keyboard.press('Escape');
+    });
+    const panel = dashboardPage.getPanelByName('Simple Stat');
+    await panel.isLoaded();
+    await waitForStableCanvas(panel.canvas);
     await dashboardPage.forEachTheme(async (themeName) => {
-      await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
-      await dashboardPage.startEditing();
-      await dashboardPage.editPanel('Simple Stat', async (panelEditor) => {
-        await panelEditor.selectTab('Settings');
-        await panelEditor.addThreshold();
-        await panelEditor.editThreshold('T1', '5');
-        await panelEditor.openThresholdColorPicker('T1');
-        const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
-        await colorPicker.isVisible();
-        const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
-        await colorInput.clear();
-        await colorInput.type('ed6bd4', { delay: 100 });
-        await page.keyboard.press('Escape');
-      });
-      const panel = dashboardPage.getPanelByName('Simple Stat');
-      await panel.isLoaded();
-      await waitForStableCanvas(panel.canvas);
-
       await happoPlaywright.screenshot(page, panel.parent, {
         component: 'Stat Chart Panel',
         variant: `Single Stat with Threshold [${themeName}]`,

@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition, UnknownSpec } from '@perses-dev/core';
+import { DashboardResource, PanelDefinition, UnknownSpec } from '@perses-dev/core';
+
+export type OnSaveDashboard = (dashboard: DashboardResource) => Promise<unknown>;
 
 /**
  * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).

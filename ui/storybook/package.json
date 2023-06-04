@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/storybook",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "private": true,
   "main": "src/index.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "@babel/preset-typescript": "^7.21.0",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
+    "@mui/material": "^5.10.0",
     "@storybook/addon-a11y": "^7.0.2",
     "@storybook/addon-actions": "^7.0.2",
     "@storybook/addon-essentials": "^7.0.2",

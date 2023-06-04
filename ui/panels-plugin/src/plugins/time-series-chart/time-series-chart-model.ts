@@ -80,7 +80,11 @@ export const Y_AXIS_CONFIG = {
 
 export const DEFAULT_LINE_WIDTH = 1.5;
 export const DEFAULT_AREA_OPACITY = 0;
-export const DEFAULT_POINT_RADIUS = 4;
+
+// How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.
+export const POINT_SIZE_OFFSET = 1.5;
+export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
+
 export const DEFAULT_CONNECT_NULLS = false;
 
 export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
@@ -135,10 +139,6 @@ export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => 
     ...config,
   };
 });
-
-export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
-export const LEGEND_HEIGHT_SM = 40;
-export const LEGEND_HEIGHT_LG = 100;
 
 // Both of these constants help produce a value that is LESS THAN the initial value.
 // For positive values, we multiply by a number less than 1 to get this outcome.

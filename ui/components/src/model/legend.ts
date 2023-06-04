@@ -14,11 +14,14 @@
 import { MouseEventHandler } from 'react';
 
 export const legendPositions = ['Bottom', 'Right'] as const;
-
 export type LegendPositions = (typeof legendPositions)[number];
+
+export const legendModes = ['List', 'Table'] as const;
+export type LegendMode = (typeof legendModes)[number];
 
 export interface LegendOptions {
   position: LegendPositions;
+  mode?: LegendMode;
 }
 
 export interface LegendItem {
@@ -28,7 +31,7 @@ export interface LegendItem {
   onClick?: MouseEventHandler<HTMLElement>;
 }
 
-export type LegendPositionConfig = {
+export type LegendSingleSelectConfig = {
   label: string;
 };
 
@@ -41,13 +44,19 @@ export type LegendPositionConfig = {
  */
 export type SelectedLegendItemState = Record<LegendItem['id'], boolean> | 'ALL';
 
-export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendPositionConfig>> = {
+export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSingleSelectConfig>> = {
   Bottom: { label: 'Bottom' },
   Right: { label: 'Right' },
 };
 
-export const DEFAULT_LEGEND: LegendOptions = {
+export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectConfig>> = {
+  List: { label: 'List' },
+  Table: { label: 'Table' },
+};
+
+export const DEFAULT_LEGEND: Required<LegendOptions> = {
   position: 'Bottom',
+  mode: 'List',
 };
 
 export function getLegendPosition(position?: LegendPositions) {
@@ -64,6 +73,18 @@ export function isValidLegendPosition(position: LegendPositions) {
   return (legendPositions as readonly string[]).includes(position);
 }
 
+export function isValidLegendMode(mode: LegendMode) {
+  return (legendModes as readonly string[]).includes(mode);
+}
+
+export function getLegendMode(mode?: LegendMode) {
+  if (!mode || !isValidLegendMode(mode)) {
+    return DEFAULT_LEGEND.mode;
+  }
+
+  return mode;
+}
+
 export function validateLegendSpec(legend?: LegendOptions) {
   if (legend === undefined) {
     // undefined is valid since this is how legend is hidden by default
@@ -72,6 +93,10 @@ export function validateLegendSpec(legend?: LegendOptions) {
   if (!isValidLegendPosition(legend.position)) {
     return false;
   }
+  if (legend.mode && !isValidLegendMode(legend.mode)) {
+    return false;
+  }
+
   return true;
 }
 
