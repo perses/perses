@@ -99,7 +99,7 @@ export function LineChart({
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const { timeZone } = useTimeZone();
 
-  const [isDragging, setDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -234,7 +234,7 @@ export function LineChart({
       }}
       onMouseDown={(e) => {
         const { clientX } = e;
-        setDragging(true);
+        setIsDragging(true);
         setStartX(clientX);
       }}
       onMouseMove={(e) => {
@@ -252,7 +252,8 @@ export function LineChart({
         }
       }}
       onMouseUp={() => {
-        setDragging(false);
+        setIsDragging(false);
+        setStartX(0);
         setShowTooltip(true);
       }}
       onMouseLeave={() => {
