@@ -29,7 +29,20 @@ type Story = StoryObj<typeof TooltipHeader>;
 
 export const Primary: Story = {
   args: {
-    seriesTimeMs: 1671803580000,
+    nearbySeries: [
+      {
+        seriesIdx: 0,
+        datumIdx: 14,
+        seriesName:
+          '{device="/dev/vda1",env="demo",fstype="ext4",instance="demo.do.prometheus.io:9100",job="node",mountpoint="/"}',
+        date: 1671803580000,
+        x: 1671803580000,
+        y: 0.29086960933858064,
+        formattedY: '29%',
+        markerColor: '#56B4E9',
+        isClosestToCursor: true,
+      },
+    ],
     isTooltipPinned: false,
     totalSeries: 5,
     showAllSeries: false,
