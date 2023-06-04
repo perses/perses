@@ -62,7 +62,7 @@ export const SaveChangesConfirmationDialog = () => {
                 control={
                   <Checkbox
                     disabled={!isSavedVariableModified}
-                    checked={saveDefaultVariables}
+                    checked={saveDefaultVariables && isSavedVariableModified}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultVariables(e.target.checked)}
                   />
                 }
