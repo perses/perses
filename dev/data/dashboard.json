@@ -3057,5 +3057,192 @@
         }
       ]
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "TimeSeriesChartLegends",
+      "created_at": "2023-05-15T18:47:36.711505Z",
+      "updated_at": "2023-05-30T23:57:14.365507Z",
+      "version": 8,
+      "project": "testing"
+    },
+    "spec": {
+      "display": {
+        "name": "TimeSeriesChartLegends"
+      },
+      "duration": "5m",
+      "panels": {
+        "bottomlist": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "bottom list"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "Bottom"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "prometheus_http_requests_total"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "bottomlist-1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "right list"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "Right"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "prometheus_http_requests_total"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "bottomlist-2": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "bottom table"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "mode": "Table",
+                  "position": "Bottom"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "prometheus_http_requests_total"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "bottomlist-3": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "right table"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "mode": "Table",
+                  "position": "Right"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "prometheus_http_requests_total"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Panel Group",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/bottomlist"
+                }
+              },
+              {
+                "x": 12,
+                "y": 9,
+                "width": 12,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/bottomlist-1"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/bottomlist-3"
+                }
+              },
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/bottomlist-2"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 ]

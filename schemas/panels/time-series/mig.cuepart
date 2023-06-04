@@ -7,11 +7,19 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
             	  	if #panel.options.legend.placement == "bottom" { "Bottom" },
             	  	if #panel.options.legend.placement == "right" { "Right" },
             	  ][0]
+                  mode: [
+                    if #panel.options.legend.displayMode == "list" { "List" },
+            	  	if #panel.options.legend.displayMode == "table" { "Table" },
+                  ][0]
             }
             if #panel.type == "graph" {
                 position: [ // switch
                     if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "Right" },
                     { "Bottom" }
+                ][0]
+                mode: [
+                    if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "Table" },
+                    { "List" }
                 ][0]
             }
         }

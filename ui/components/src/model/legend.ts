@@ -54,7 +54,7 @@ export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectC
   Table: { label: 'Table' },
 };
 
-export const DEFAULT_LEGEND: LegendOptions = {
+export const DEFAULT_LEGEND: Required<LegendOptions> = {
   position: 'Bottom',
   mode: 'List',
 };

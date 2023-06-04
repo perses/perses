@@ -374,7 +374,8 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "Bottom"
+                "position": "Bottom",
+                "mode": "List"
               },
               "thresholds": {
                 "steps": [
@@ -420,7 +421,8 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "Bottom"
+                "position": "Bottom",
+                "mode": "Table"
               },
               "thresholds": {
                 "steps": [

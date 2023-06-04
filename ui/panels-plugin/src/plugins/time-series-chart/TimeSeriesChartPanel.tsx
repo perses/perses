@@ -269,6 +269,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       <ContentWithLegend
         width={adjustedContentDimensions.width}
         height={adjustedContentDimensions.height}
+        // Making this small enough that the medium size doesn't get
+        // responsive-handling-ed away when in the panel options editor.
+        minChildrenHeight={50}
         legendProps={
           legend && {
             options: legend,
@@ -290,6 +293,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 grid={gridOverrides}
                 tooltipConfig={{ wrapLabels: true }}
                 onDataZoom={handleDataZoom}
+                //  Show an empty chart when there is no data because the user unselected all items in
+                // the legend. Otherwise, show a "no data" message.
+                noDataVariant={
+                  !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0
+                    ? 'chart'
+                    : 'message'
+                }
               />
             </Box>
           );

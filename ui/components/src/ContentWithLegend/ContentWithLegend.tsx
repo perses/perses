@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { Legend } from '../Legend';
 import { ContentWithLegendProps, getContentWithLegendLayout } from './model/content-with-legend-model';
 
@@ -32,6 +32,7 @@ export function ContentWithLegend({
   minChildrenWidth = 100,
   minChildrenHeight = 100,
 }: ContentWithLegendProps) {
+  const theme = useTheme();
   const { content, legend, margin } = getContentWithLegendLayout({
     width,
     height,
@@ -39,6 +40,7 @@ export function ContentWithLegend({
     minChildrenHeight,
     minChildrenWidth,
     spacing,
+    theme,
   });
 
   return (
