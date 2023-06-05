@@ -14,6 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
+import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import { DashboardProvider } from '../../context/DashboardProvider';
 import { PanelDrawer } from './PanelDrawer';
@@ -24,8 +25,10 @@ describe('Panel Drawer', () => {
 
     renderWithContext(
       <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
-        <DashboardProviderSpy />
-        <PanelDrawer />
+        <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
+          <DashboardProviderSpy />
+          <PanelDrawer />
+        </TimeRangeProvider>
       </DashboardProvider>
     );
 

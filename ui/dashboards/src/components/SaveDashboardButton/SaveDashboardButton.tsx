@@ -33,7 +33,7 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard } = useDashboard();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
-  const isSavedVariableModified = getSavedVariablesStatus();
+  const { isSavedVariableModified } = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
@@ -64,18 +64,18 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
     }
   };
 
-  const saveDashboard = () => {
-    if (onSave !== undefined) {
-      setSavingDashboard(true);
-      onSave(dashboard)
-        .then(() => {
-          setSavingDashboard(false);
-          closeSaveChangesConfirmationDialog();
-          setEditMode(false);
-        })
-        .catch(() => {
-          setSavingDashboard(false);
-        });
+  const saveDashboard = async () => {
+    if (onSave) {
+      try {
+        setSavingDashboard(true);
+        await onSave(dashboard);
+        closeSaveChangesConfirmationDialog();
+        setEditMode(false);
+      } catch (error) {
+        throw new Error(`An error occurred while saving the dashboard. ${error}`);
+      } finally {
+        setSavingDashboard(false);
+      }
     } else {
       setEditMode(false);
     }
