@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { useMemo } from 'react';
-import { useDeepMemo } from '@perses-dev/core';
+import { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import merge from 'lodash/merge';
 import { use, EChartsCoreOption } from 'echarts/core';
@@ -49,7 +48,7 @@ export function StatChart(props: StatChartProps) {
 
   const formattedValue = data.calculatedValue === undefined ? '' : formatValue(data.calculatedValue, unit);
 
-  const option: EChartsCoreOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return chartsTheme.noDataOption;
 
     const series = data.seriesData;
@@ -58,7 +57,8 @@ export function StatChart(props: StatChartProps) {
     if (sparkline !== undefined) {
       const lineSeries = {
         type: 'line',
-        data: [...series.values],
+        name: series.name,
+        data: series.values,
         zlevel: 1,
         symbol: 'none',
         animation: false,
