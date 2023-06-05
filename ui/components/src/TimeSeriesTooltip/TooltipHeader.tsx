@@ -91,8 +91,8 @@ export const TooltipHeader = memo(function TooltipHeader({
         {formatTimeSeriesHeader(seriesTimeMs)}
         <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
           {showAllSeriesToggle && (
-            <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
-              <Typography sx={{ fontSize: 11 }}>Show All?</Typography>
+            <Stack direction="row" gap={0.5} alignItems="center" sx={{ textAlign: 'right' }}>
+              <Typography sx={{ fontSize: 11 }}>Show All</Typography>
               <Switch
                 checked={showAllSeries}
                 size="small"
@@ -104,6 +104,9 @@ export const TooltipHeader = memo(function TooltipHeader({
                 sx={(theme) => ({
                   '& .MuiSwitch-switchBase': {
                     color: theme.palette.common.white,
+                  },
+                  '& .MuiSwitch-track': {
+                    backgroundColor: theme.palette.grey['500'],
                   },
                 })}
               />
