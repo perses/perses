@@ -3,12 +3,13 @@
 ## 0.32.0 / 2023-06-05
 
 - [FEATURE] Table legend for time series chart panel (#1197)
-- [ENHANCEMENT] Tooltip pin event refactor, sticky header and move show all toggle (#1202)
+- [ENHANCEMENT] Tooltip sticky header and move show all toggle (#1202)
 - [ENHANCEMENT] Add table mode to legend component (#1193)
 - [ENHANCEMENT] Export SaveDashboardButton from dashboards package (#1203)
 - [ENHANCEMENT] Predefined point_radius ratio to simplify TimeSeriesChart visual editing (#1102)
 - [ENHANCEMENT] Set stat chart yaxis min (#1204)
 - [BUGFIX] Saving defaults error adjustments and account for Empty StaticListVariable (#1214)
+- [BUGFIX] Fix pin event to work on first click without hiding tooltip (#1202)
 - [BUGFIX] Avoiding screen reload on theme toggle (#1198)
 - [BREAKINGCHANGE] Save dashboard type change for embed gql users (#1210)
 - [BREAKINGCHANGE] Extract legend layout to reusable component (#1196)
