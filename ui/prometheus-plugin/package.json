@@ -45,8 +45,5 @@
   "files": [
     "dist",
     "plugin.json"
-  ],
-  "typedoc": {
-    "entryPoint": "./src/index.ts"
-  }
+  ]
 }
