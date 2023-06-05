@@ -106,7 +106,7 @@ export const TooltipHeader = memo(function TooltipHeader({
                     color: theme.palette.common.white,
                   },
                   '& .MuiSwitch-track': {
-                    backgroundColor: theme.palette.grey['500'],
+                    backgroundColor: theme.palette.common.white,
                   },
                 })}
               />
