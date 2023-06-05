@@ -54,8 +54,7 @@ export function GridTitle(props: GridTitleProps) {
         alignItems: 'center',
         padding: (theme) => theme.spacing(1),
         cursor: collapse ? 'pointer' : 'auto',
-        backgroundColor: ({ palette }) =>
-          palette.mode === 'dark' ? palette.background.paper : palette.background.default,
+        backgroundColor: ({ palette }) => palette.background.paper,
       }}
       data-testid="panel-group-header"
     >
