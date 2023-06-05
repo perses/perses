@@ -13,7 +13,7 @@
 
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import React, { useState } from 'react';
+import { memo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
 import { TooltipContent } from './TooltipContent';
@@ -39,7 +39,7 @@ export interface TimeSeriesTooltipProps {
   pinnedPos: CursorCoordinates | null;
 }
 
-export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
+export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,

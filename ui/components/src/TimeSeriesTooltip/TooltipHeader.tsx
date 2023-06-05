@@ -14,7 +14,7 @@
 import { Box, Divider, Typography, Stack, Switch } from '@mui/material';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
-import React from 'react';
+import { memo } from 'react';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { NearbySeriesArray } from './nearby-series';
 import { TOOLTIP_BG_COLOR_FALLBACK, TOOLTIP_MAX_WIDTH } from './tooltip-model';
@@ -28,7 +28,7 @@ export interface TooltipHeaderProps {
   onUnpinClick?: () => void;
 }
 
-export const TooltipHeader = React.memo(function TooltipHeader({
+export const TooltipHeader = memo(function TooltipHeader({
   nearbySeries,
   totalSeries,
   isTooltipPinned,
