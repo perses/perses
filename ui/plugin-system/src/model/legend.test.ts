@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './CalculationSelector';
-export * from './DatasourceSelect';
-export * from './LegendOptionsEditor';
-export * from './OptionsEditorTabs';
-export * from './PanelSpecEditor';
-export * from './PluginEditor';
-export * from './PluginKindSelect';
-export * from './PluginRegistry';
-export * from './PluginSpecEditor';
-export * from './TimeSeriesQueryEditor';
+import { LegendOptionsBase } from '@perses-dev/core';
+import { validateLegendSpec } from './legend';
+
+describe('validateLegendSpec', () => {
+  it('should check if a legend spec is valid', () => {
+    const invalidLegend = { position: 'bottom' };
+    expect(validateLegendSpec(invalidLegend as LegendOptionsBase)).toEqual(false);
+    expect(validateLegendSpec({ position: 'Bottom' })).toEqual(true);
+    expect(validateLegendSpec(undefined)).toEqual(true);
+  });
+});

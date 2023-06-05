@@ -23,7 +23,6 @@ export * from './GaugeChart';
 export * from './InfoTooltip';
 export * from './JSONEditor';
 export * from './Legend';
-export * from './LegendOptionsEditor';
 export * from './LineChart';
 export * from './OptionsEditorLayout';
 export * from './StatChart';

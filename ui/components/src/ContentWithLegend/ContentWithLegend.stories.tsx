@@ -12,19 +12,13 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-  ContentWithLegend,
-  LegendPositions,
-  LegendProps,
-  LineChart,
-  legendModes,
-  legendPositions,
-} from '@perses-dev/components';
+import { ContentWithLegend, LegendProps, LineChart } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
 import { Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { StorySection } from '@perses-dev/storybook';
 import { useState } from 'react';
+import { LegendPositions, legendModes, legendPositions } from '@perses-dev/core';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];

@@ -12,40 +12,38 @@
 // limitations under the License.
 
 import { Autocomplete, Switch, SwitchProps, TextField } from '@mui/material';
-import { ErrorAlert } from '../ErrorAlert';
+import { DEFAULT_LEGEND, getLegendMode, getLegendPosition } from '@perses-dev/core';
+import { ErrorAlert } from '@perses-dev/components/src/ErrorAlert';
+import { OptionsEditorControl } from '@perses-dev/components/src/OptionsEditorLayout';
 import {
-  DEFAULT_LEGEND,
-  getLegendPosition,
-  validateLegendSpec,
-  LEGEND_POSITIONS_CONFIG,
-  LegendOptions,
-  LegendSingleSelectConfig,
   LEGEND_MODE_CONFIG,
-  getLegendMode,
-} from '../model';
-import { OptionsEditorControl } from '../OptionsEditorLayout';
+  LEGEND_POSITIONS_CONFIG,
+  LegendSpecOptions,
+  LegendSingleSelectConfig,
+  validateLegendSpec,
+} from '../../model';
 
-type LegendPositionOption = LegendSingleSelectConfig & { id: LegendOptions['position'] };
+type LegendPositionOption = LegendSingleSelectConfig & { id: LegendSpecOptions['position'] };
 
 const POSITION_OPTIONS: LegendPositionOption[] = Object.entries(LEGEND_POSITIONS_CONFIG).map(([id, config]) => {
   return {
-    id: id as LegendOptions['position'],
+    id: id as LegendSpecOptions['position'],
     ...config,
   };
 });
 
-type LegendModeOption = LegendSingleSelectConfig & { id: LegendOptions['mode'] };
+type LegendModeOption = LegendSingleSelectConfig & { id: LegendSpecOptions['mode'] };
 
 const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(([id, config]) => {
   return {
-    id: id as LegendOptions['mode'],
+    id: id as LegendSpecOptions['mode'],
     ...config,
   };
 });
 
 export interface LegendOptionsEditorProps {
-  value?: LegendOptions;
-  onChange: (legend?: LegendOptions) => void;
+  value?: LegendSpecOptions;
+  onChange: (legend?: LegendSpecOptions) => void;
 }
 
 export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProps) {

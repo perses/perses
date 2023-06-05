@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
+import { LegendPositions, getLegendMode } from '@perses-dev/core';
 import { LegendProps } from '../../Legend';
 import { getTableCellLayout } from '../../Table';
-import { LegendPositions, getLegendMode } from '../../model/legend';
 
 type Dimensions = {
   width: number;

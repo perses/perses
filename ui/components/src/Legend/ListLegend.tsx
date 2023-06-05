@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Virtuoso } from 'react-virtuoso';
-import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from '../model';
 import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
+import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
 
 export interface ListLegendProps {
   items: LegendItem[];

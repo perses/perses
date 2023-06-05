@@ -14,16 +14,17 @@
 import { Box } from '@mui/material';
 import { produce } from 'immer';
 import { ReactNode } from 'react';
-import { LegendOptions, LegendItem, SelectedLegendItemState, getLegendMode } from '../model';
+import { getLegendMode } from '@perses-dev/core';
 import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 import { TableLegend } from './TableLegend';
+import { LegendItem, LegendComponentOptions, SelectedLegendItemState } from './legend-model';
 
 export interface LegendProps {
   width: number;
   height: number;
   data: LegendItem[];
-  options: LegendOptions;
+  options: LegendComponentOptions;
 
   /**
    * State of selected items in the legend.

@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from '../model';
 import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
+import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
 
 export interface CompactLegendProps {
   height: number;

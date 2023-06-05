@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Definition, ThresholdOptions } from '@perses-dev/core';
-import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { UnitOptions } from '@perses-dev/components';
+import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
 /**
  * The schema for a TimeSeriesChart panel.
@@ -26,7 +26,7 @@ export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOpt
  * The Options object supported by the TimeSeriesChartPanel plugin.
  */
 export interface TimeSeriesChartOptions {
-  legend?: LegendOptions;
+  legend?: LegendSpecOptions;
   y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;

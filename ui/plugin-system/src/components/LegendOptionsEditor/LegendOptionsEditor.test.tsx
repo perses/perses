@@ -13,11 +13,11 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LegendOptions } from '../model';
+import { LegendSpecOptions } from '../../model';
 import { LegendOptionsEditor } from './LegendOptionsEditor';
 
 describe('LegendOptionsEditor', () => {
-  const renderLegendOptionsEditor = (value?: LegendOptions, onChange = jest.fn()) => {
+  const renderLegendOptionsEditor = (value?: LegendSpecOptions, onChange = jest.fn()) => {
     render(
       <div>
         <LegendOptionsEditor value={value} onChange={onChange} />

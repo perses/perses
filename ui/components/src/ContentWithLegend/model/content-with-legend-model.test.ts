@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createTheme } from '@mui/material';
-import { legendModes } from '../../model';
+import { legendModes } from '@perses-dev/core';
 import { ContentWithLegendLayoutOpts, getContentWithLegendLayout } from './content-with-legend-model';
 
 const mockMuiTheme = createTheme({});

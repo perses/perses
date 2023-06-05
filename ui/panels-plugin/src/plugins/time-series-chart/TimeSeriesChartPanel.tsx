@@ -13,14 +13,12 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries } from '@perses-dev/core';
-import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
+import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries, DEFAULT_LEGEND } from '@perses-dev/core';
+import { PanelProps, useDataQueries, useTimeRange, validateLegendSpec } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
-  DEFAULT_LEGEND,
   EChartsDataFormat,
-  validateLegendSpec,
   LineChart,
   YAxisLabel,
   ZoomEventData,
