@@ -11,44 +11,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Portal, Typography, Stack, Switch } from '@mui/material';
+import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import React, { useState } from 'react';
+import { memo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
 import { TooltipContent } from './TooltipContent';
+import { TooltipHeader } from './TooltipHeader';
 import { getNearbySeriesData } from './nearby-series';
 import {
   CursorCoordinates,
   FALLBACK_CHART_WIDTH,
+  TOOLTIP_BG_COLOR_FALLBACK,
   TOOLTIP_MAX_HEIGHT,
-  TOOLTIP_MIN_WIDTH,
   TOOLTIP_MAX_WIDTH,
+  TOOLTIP_MIN_WIDTH,
   useMousePosition,
 } from './tooltip-model';
 import { assembleTransform } from './utils';
 
-interface TimeSeriesTooltipProps {
+export interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
-  isTooltipPinned: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;
+  pinnedPos: CursorCoordinates | null;
 }
 
-export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
+export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,
-  isTooltipPinned,
   unit,
   onUnpinClick,
+  pinnedPos,
 }: TimeSeriesTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
-  const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
+
+  const isTooltipPinned = pinnedPos !== null;
 
   if (mousePos === null || mousePos.target === null) return null;
 
@@ -56,11 +59,11 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-  const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to every be needed.
+  const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
   const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
   // Get series nearby the cursor and pass into tooltip content children.
-  const focusedSeries = getNearbySeriesData({
+  const nearbySeries = getNearbySeriesData({
     mousePos,
     chartData,
     pinnedPos,
@@ -68,21 +71,11 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
     unit,
     showAllSeries,
   });
-  if (focusedSeries.length === 0) {
+  if (nearbySeries.length === 0) {
     return null;
   }
 
-  if (isTooltipPinned === true && pinnedPos === null) {
-    setPinnedPos(mousePos);
-  }
-
-  // Option for user to see all series instead of only the nearby focused series.
-  // Only relevant when there are more total series than are visible.
-  const showAllSeriesToggle =
-    isTooltipPinned === true &&
-    showAllSeries === false &&
-    chartData.timeSeries.length > 1 &&
-    focusedSeries.length !== chartData.timeSeries.length;
+  const totalSeries = chartData.timeSeries.length;
 
   return (
     <Portal>
@@ -92,11 +85,11 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           minWidth: TOOLTIP_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,
-          padding: theme.spacing(0.5, 2),
+          padding: 0,
           position: 'absolute',
           top: 0,
           left: 0,
-          backgroundColor: '#2E313E', // TODO: use colors from theme, separate styles for dark mode
+          backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
           borderRadius: '6px',
           color: '#fff',
           fontSize: '11px',
@@ -113,31 +106,17 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent
-          series={focusedSeries}
-          wrapLabels={wrapLabels}
-          isTooltipPinned={isTooltipPinned}
-          onUnpinClick={() => {
-            setPinnedPos(null);
-            if (onUnpinClick !== undefined) {
-              onUnpinClick();
-            }
-          }}
-        />
-        {showAllSeriesToggle && (
-          <Stack direction="row" gap={1} alignItems="center" sx={{ textAlign: 'right' }}>
-            <Typography>Show All?</Typography>
-            <Switch
-              checked={showAllSeries}
-              onChange={(_, checked) => setShowAllSeries(checked)}
-              sx={(theme) => ({
-                '& .MuiSwitch-switchBase': {
-                  color: theme.palette.common.white,
-                },
-              })}
-            />
-          </Stack>
-        )}
+        <Stack spacing={0.5}>
+          <TooltipHeader
+            nearbySeries={nearbySeries}
+            totalSeries={totalSeries}
+            isTooltipPinned={isTooltipPinned}
+            showAllSeries={showAllSeries}
+            onShowAllClick={(checked) => setShowAllSeries(checked)}
+            onUnpinClick={onUnpinClick}
+          />
+          <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
+        </Stack>
       </Box>
     </Portal>
   );

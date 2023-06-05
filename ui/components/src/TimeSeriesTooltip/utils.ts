@@ -27,12 +27,12 @@ export function assembleTransform(
     return 'translate3d(0, 0)';
   }
 
+  const cursorPaddingX = 32;
+  const cursorPaddingY = 16;
+
   if (pinnedPos !== null) {
     mousePos = pinnedPos;
   }
-
-  const cursorPaddingX = 32;
-  const cursorPaddingY = 16;
 
   // Tooltip is located in a Portal attached to the body.
   // Using page coordinates instead of viewport ensures the tooltip is
