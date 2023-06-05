@@ -63,8 +63,6 @@ test.describe('Dashboard: Variables', () => {
     // TODO: add helper for saving and confirming in defaults dialog
     const toolbarSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
-    const dialogSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save Changes' });
-    await dialogSaveButton.click();
 
     await expect(dashboardPage.variableListItems).toHaveCount(1);
     await expect(dashboardPage.variableListItems).toContainText([/List Var/]);

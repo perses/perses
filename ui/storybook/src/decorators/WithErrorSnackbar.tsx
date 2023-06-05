@@ -11,6 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './WithErrorSnackbar';
-export * from './WithQueryClient';
-export * from './WithQueryParams';
+import { StoryFn } from '@storybook/react';
+import { SnackbarProvider } from '@perses-dev/components';
+
+export const WithErrorSnackbar = (Story: StoryFn) => {
+  return (
+    <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+      <Story />
+    </SnackbarProvider>
+  );
+};
