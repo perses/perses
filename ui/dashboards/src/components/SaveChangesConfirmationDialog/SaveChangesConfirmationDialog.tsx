@@ -19,13 +19,15 @@ import { Dialog } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
-  const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(true);
-  const [saveDefaultVariables, setSaveDefaultVariables] = useState(true);
+  const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
+  const isSavedDurationModified = dialog?.isSavedDurationModified ?? true;
+  const isSavedVariableModified = dialog?.isSavedVariableModified ?? true;
+  const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(isSavedDurationModified);
+  const [saveDefaultVariables, setSaveDefaultVariables] = useState(isSavedVariableModified);
 
   const { getSavedVariablesStatus } = useTemplateVariableActions();
-  const { isSavedVariableModified, modifiedVariableNames } = getSavedVariablesStatus();
+  const { modifiedVariableNames } = getSavedVariablesStatus();
 
-  const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isOpen = dialog !== undefined;
 
   const { timeRange } = useTimeRange();
@@ -51,8 +53,8 @@ export const SaveChangesConfirmationDialog = () => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={!isRelativeTimeRange(timeRange)}
-                    checked={saveDefaultTimeRange && isRelativeTimeRange(timeRange)}
+                    disabled={!isSavedDurationModified || !isRelativeTimeRange(timeRange)}
+                    checked={saveDefaultTimeRange && isSavedDurationModified && isRelativeTimeRange(timeRange)}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeRange(e.target.checked)}
                   />
                 }
