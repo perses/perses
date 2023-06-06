@@ -88,8 +88,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
                 sx={{
-                  backgroundColor: ({ palette }) =>
-                    palette.mode === 'dark' ? palette.background.default : palette.background.paper,
+                  backgroundColor: ({ palette }) => palette.background.default,
                 }}
               />
             </ErrorBoundary>
@@ -135,8 +134,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
                 sx={{
-                  backgroundColor: ({ palette }) =>
-                    palette.mode === 'dark' ? palette.background.default : palette.background.paper,
+                  backgroundColor: ({ palette }) => palette.background.default,
                 }}
               />
             </ErrorBoundary>

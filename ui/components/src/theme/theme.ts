@@ -13,6 +13,7 @@
 
 import { createTheme, PaletteMode, ThemeOptions, Theme } from '@mui/material';
 import { MuiAlert } from './component-overrides/alert';
+import { MuiPaper } from './component-overrides/paper';
 import { getPaletteOptions } from './palette/palette-options';
 import { typography } from './typography';
 
@@ -57,6 +58,7 @@ const components: ThemeOptions['components'] = {
       size: 'small',
     },
   },
+  MuiPaper,
   MuiTextField: {
     defaultProps: {
       size: 'small',

@@ -21,8 +21,8 @@ export const background = (mode: PaletteMode): PaletteOptions['background'] => {
     ? {
         navigation,
         overlay,
-        default: grey[50],
-        paper: white,
+        default: white,
+        paper: grey[50],
         tooltip: grey[100],
         border: grey[100],
       }

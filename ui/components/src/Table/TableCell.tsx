@@ -21,7 +21,7 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
 
   '&.MuiTableCell-head': {
     // Important to avoid scrolling behind the header showing through.
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.default,
   },
   '&:focus-visible': {
     outline: `solid 1px ${theme.palette.primary.main}`,
