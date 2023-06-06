@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.33.0 / 2023-06-06
+
+- [BUGFIX] Fix save dashboard console warning and saved duration checkbox (#1226)
+- [BREAKINGCHANGE] Adjust MUI bg tokens to simplify theming (#1222)
+
 ## 0.32.0 / 2023-06-05
 
 - [FEATURE] Table legend for time series chart panel (#1197)
