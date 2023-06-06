@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
-import { ECharts, EChartsCoreOption, init } from 'echarts/core';
+import { ECharts, EChartsCoreOption, init, connect } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import { isEqual, debounce } from 'lodash-es';
 import { EChartsTheme } from '../model';
@@ -127,6 +127,9 @@ export const EChart = React.memo(function EChart<T>({
     if (containerRef.current === null || chartElement.current !== null) return;
     chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
     if (chartElement.current === undefined) return;
+    // https://echarts.apache.org/en/api.html#echarts.connect
+    chartElement.current.group = 'dashboard';
+    connect([chartElement.current]);
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
