@@ -15,8 +15,8 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
 import { renderWithContext } from '../../test';
+import { TemplateVariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
-
 describe('Panel', () => {
   const createTestPanel = (): PanelDefinition => ({
     kind: 'Panel',
@@ -37,7 +37,11 @@ describe('Panel', () => {
   const renderPanel = (definition?: PanelDefinition, editHandlers?: PanelProps['editHandlers']) => {
     definition ??= createTestPanel();
 
-    renderWithContext(<Panel definition={definition} editHandlers={editHandlers} />);
+    renderWithContext(
+      <TemplateVariableProvider>
+        <Panel definition={definition} editHandlers={editHandlers} />
+      </TemplateVariableProvider>
+    );
   };
 
   // Helper to get the panel once rendered
