@@ -44,8 +44,8 @@ export function PanelHeader({
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
 
-  const title = useReplaceVariablesInString(rawTitle);
-  const description = useReplaceVariablesInString(rawDescription ?? null);
+  const title = useReplaceVariablesInString(rawTitle) as string;
+  const description = useReplaceVariablesInString(rawDescription);
 
   let actions: CardHeaderProps['action'] = undefined;
   if (editHandlers !== undefined) {
@@ -93,7 +93,7 @@ export function PanelHeader({
         </InfoTooltip>
       </>
     );
-  } else if (rawDescription !== undefined) {
+  } else if (description !== undefined) {
     // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
     actions = (
       <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>

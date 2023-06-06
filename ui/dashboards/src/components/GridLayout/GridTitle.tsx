@@ -40,7 +40,7 @@ export interface GridTitleProps {
 export function GridTitle(props: GridTitleProps) {
   const { panelGroupId, title: rawTitle, collapse } = props;
 
-  const title = useReplaceVariablesInString(rawTitle);
+  const title = useReplaceVariablesInString(rawTitle) as string;
 
   const { openAddPanel, openEditPanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();

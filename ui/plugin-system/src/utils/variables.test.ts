@@ -81,6 +81,14 @@ describe('replaceTemplateVariables()', () => {
       },
       expected: 'hello world (a|b)',
     },
+    {
+      text: 'hello $var1 $var2 $var3',
+      state: {
+        var1: { value: 'world', loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello world world $var3',
+    },
   ];
 
   tests.forEach(({ text, state, expected }) => {

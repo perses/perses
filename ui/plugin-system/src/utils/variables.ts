@@ -40,6 +40,10 @@ export function replaceTemplateVariable(text: string, varName: string, templateV
   return text.replaceAll(variableTemplate, replaceString);
 }
 
+// This regular expression is designed to identify variable references in a template string.
+// It supports two formats for referencing variables:
+// 1. $variableName - This is a simpler format, and the regular expression captures the variable name (\w+ matches one or more word characters).
+// 2. [COMING SOON] ${variableName:value} - This is a more complex format that allows specifying a format function as well.
 // TODO: Fix this lint error
 // eslint-disable-next-line no-useless-escape
 const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
