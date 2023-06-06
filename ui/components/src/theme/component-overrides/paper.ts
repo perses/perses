@@ -11,34 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Components, Theme } from '@mui/material';
 
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Router from './Router';
-
-function App() {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        backgroundColor: ({ palette }) => palette.background.default,
-      }}
-    >
-      <Header />
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-        }}
-      >
-        <Router />
-      </Box>
-      <Footer />
-    </Box>
-  );
-}
-
-export default App;
+export const MuiPaper: Components<Theme>['MuiPaper'] = {
+  styleOverrides: {
+    root: ({ theme }) => ({
+      backgroundColor: theme.palette.background.default,
+    }),
+  },
+};
