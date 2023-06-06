@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTemplateVariableValues } from '@perses-dev/plugin-system';
-import { replaceTemplateVariables, parseTemplateVariables } from '../utils';
+import { useTemplateVariableValues, replaceTemplateVariables, parseTemplateVariables } from '@perses-dev/plugin-system';
 
 /**
  * Type alias to indicate what parts of the API support template variables.
