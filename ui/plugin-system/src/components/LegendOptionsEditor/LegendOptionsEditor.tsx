@@ -13,8 +13,7 @@
 
 import { Autocomplete, Switch, SwitchProps, TextField } from '@mui/material';
 import { DEFAULT_LEGEND, getLegendMode, getLegendPosition } from '@perses-dev/core';
-import { ErrorAlert } from '@perses-dev/components/src/ErrorAlert';
-import { OptionsEditorControl } from '@perses-dev/components/src/OptionsEditorLayout';
+import { ErrorAlert, OptionsEditorControl } from '@perses-dev/components';
 import {
   LEGEND_MODE_CONFIG,
   LEGEND_POSITIONS_CONFIG,
