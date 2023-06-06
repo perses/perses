@@ -1,20 +1,56 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getTableCellLayout gets layout for compact density 1`] = `
+exports[`getTableCellLayout gets layout for compact density in center column 1`] = `
 Object {
   "fontSize": "0.875rem",
   "height": 9.43,
   "lineHeight": 1.43,
-  "padding": "4px 2px",
+  "padding": "4px 4px 4px 4px",
 }
 `;
 
-exports[`getTableCellLayout gets layout for standard density 1`] = `
+exports[`getTableCellLayout gets layout for compact density in first column 1`] = `
+Object {
+  "fontSize": "0.875rem",
+  "height": 9.43,
+  "lineHeight": 1.43,
+  "padding": "4px 4px 4px 8px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for compact density in last column 1`] = `
+Object {
+  "fontSize": "0.875rem",
+  "height": 9.43,
+  "lineHeight": 1.43,
+  "padding": "4px 8px 4px 4px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for standard density in center column 1`] = `
 Object {
   "fontSize": "1rem",
   "height": 17.5,
   "lineHeight": 1.5,
-  "padding": "8px 10px",
+  "padding": "8px 10px 8px 10px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for standard density in first column 1`] = `
+Object {
+  "fontSize": "1rem",
+  "height": 17.5,
+  "lineHeight": 1.5,
+  "padding": "8px 10px 8px 16px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for standard density in last column 1`] = `
+Object {
+  "fontSize": "1rem",
+  "height": 17.5,
+  "lineHeight": 1.5,
+  "padding": "8px 16px 8px 10px",
 }
 `;
 
@@ -24,6 +60,9 @@ Array [
     "accessorKey": "label",
     "header": "Name",
     "maxSize": 0,
+    "meta": Object {
+      "align": "right",
+    },
     "minSize": 0,
     "size": 0,
   },
@@ -31,6 +70,9 @@ Array [
     "accessorKey": "value",
     "cell": [Function],
     "header": "Count",
+    "meta": Object {
+      "align": undefined,
+    },
     "size": 120,
   },
 ]

@@ -13,7 +13,7 @@
 
 import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
 import { useEffect, useRef } from 'react';
-import { TableDensity, getTableCellLayout } from './model/table-model';
+import { TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   padding: 0,
@@ -32,8 +32,14 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   },
 }));
 
-export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex'> {
+export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'align'> {
   density: TableDensity;
+
+  // These values are used to adjust the spacing for the first/last columns.
+  isLastColumn: boolean;
+  isFirstColumn: boolean;
+
+  align?: TableCellAlignment;
 
   /**
    * How the cell should behave related to focus.
@@ -54,6 +60,8 @@ export function TableCell({
   width,
   focusState = 'none',
   onFocusTrigger,
+  isFirstColumn,
+  isLastColumn,
   ...otherProps
 }: TableCellProps) {
   const theme = useTheme();
@@ -110,7 +118,7 @@ export function TableCell({
     >
       <Box
         sx={{
-          ...getTableCellLayout(theme, density),
+          ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
           position: 'relative',
 
           // Text truncation. Currently enforced on all cells. We may control

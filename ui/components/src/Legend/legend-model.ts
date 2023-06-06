@@ -27,6 +27,12 @@ export interface LegendItem {
   id: string;
   label: string;
   color: string;
+
+  /**
+   * Additional data for the legend item. Useful for laying out additional
+   * columns when using a table legend.
+   */
+  data?: Record<string, unknown>;
   onClick?: MouseEventHandler<HTMLElement>;
 }
 

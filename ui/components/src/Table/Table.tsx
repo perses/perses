@@ -50,7 +50,7 @@ export function Table<TableData>({
   const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
     return {
       id: 'checkboxRowSelect',
-      size: 32,
+      size: 28,
       header: ({ table }) => {
         return (
           <TableCheckbox

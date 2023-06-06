@@ -115,7 +115,7 @@ export function VirtualizedTable<TableData>({
               {headers.map((headerGroup) => {
                 return (
                   <TableRow key={headerGroup.id} density={density}>
-                    {headerGroup.headers.map((header, i) => {
+                    {headerGroup.headers.map((header, i, headers) => {
                       const column = header.column;
                       const position: TableCellPosition = {
                         row: 0,
@@ -126,10 +126,13 @@ export function VirtualizedTable<TableData>({
                         <TableCell
                           key={header.id}
                           width={column.getSize() || 'auto'}
+                          align={column.columnDef.meta?.align}
                           variant="head"
                           density={density}
                           focusState={getFocusState(position)}
                           onFocusTrigger={() => keyboardNav.onCellFocus(position)}
+                          isFirstColumn={i === 0}
+                          isLastColumn={i === headers.length - 1}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableCell>
@@ -149,7 +152,7 @@ export function VirtualizedTable<TableData>({
 
           return (
             <>
-              {row.getVisibleCells().map((cell, i) => {
+              {row.getVisibleCells().map((cell, i, cells) => {
                 const position: TableCellPosition = {
                   // Add 1 to the row index because the header is row 0
                   row: index + 1,
@@ -159,10 +162,13 @@ export function VirtualizedTable<TableData>({
                 return (
                   <TableCell
                     key={cell.id}
-                    sx={{ width: cell.column.getSize() || 'auto' }}
+                    width={cell.column.getSize() || 'auto'}
+                    align={cell.column.columnDef.meta?.align}
                     density={density}
                     focusState={getFocusState(position)}
                     onFocusTrigger={() => keyboardNav.onCellFocus(position)}
+                    isFirstColumn={i === 0}
+                    isLastColumn={i === cells.length - 1}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

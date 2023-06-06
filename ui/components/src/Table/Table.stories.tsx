@@ -36,11 +36,13 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
     accessorKey: 'value',
     header: 'Value',
     width: 100,
+    align: 'center',
   },
   {
     accessorKey: 'color',
     header: 'Color',
     width: 100,
+    align: 'right',
   },
 ];
 
@@ -115,6 +117,7 @@ export const Basic: Story = {
  *
  * Each column config may include the following optional properties:
  * - `width`: determines the size of the column in the table. It can be set to a number indicating a pixel width or to "auto."
+ * - `align`: determinse how the content in the column's cells are aligned. Can be set to: `left`, `right`, or `center`.
  * - `cell`: function used to customize rendering of the content in a given column cell. Note that cells have a hardcoded height your customization must work within.
  */
 export const ColumnConfig: Story = {

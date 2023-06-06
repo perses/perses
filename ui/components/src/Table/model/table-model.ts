@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
-import { AccessorKeyColumnDef, ColumnDef, CoreOptions, RowSelectionState } from '@tanstack/react-table';
+import { AccessorKeyColumnDef, ColumnDef, CoreOptions, RowData, RowSelectionState } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
 export type TableDensity = 'compact' | 'standard';
@@ -92,18 +92,32 @@ type TableCellLayout = NonNullable<Pick<React.CSSProperties, 'padding' | 'fontSi
   height: number;
 };
 
+type GetTableCellLayoutOpts = {
+  isLastColumn?: boolean;
+  isFirstColumn?: boolean;
+};
+
 /**
  * Returns the properties to lay out the content of table cells based on the
  * theme and density.
  */
-export function getTableCellLayout(theme: Theme, density: TableDensity): TableCellLayout {
+export function getTableCellLayout(
+  theme: Theme,
+  density: TableDensity,
+  { isLastColumn, isFirstColumn }: GetTableCellLayoutOpts = {}
+): TableCellLayout {
   if (density === 'compact') {
     const paddingY = theme.spacing(0.5);
-    const paddingX = theme.spacing(0.25);
+
+    const basePaddingX = theme.spacing(0.5);
+    const edgePaddingX = theme.spacing(1);
+    const paddingLeft = isFirstColumn ? edgePaddingX : basePaddingX;
+    const paddingRight = isLastColumn ? edgePaddingX : basePaddingX;
+
     const lineHeight = theme.typography.body2.lineHeight;
 
     return {
-      padding: `${paddingY} ${paddingX}`,
+      padding: `${paddingY} ${paddingRight} ${paddingY} ${paddingLeft}`,
       height: calculateTableCellHeight(lineHeight, paddingY),
       fontSize: theme.typography.body2.fontSize,
       lineHeight: lineHeight,
@@ -112,15 +126,31 @@ export function getTableCellLayout(theme: Theme, density: TableDensity): TableCe
 
   // standard density
   const paddingY = theme.spacing(1);
-  const paddingX = theme.spacing(1.25);
+  const basePaddingX = theme.spacing(1.25);
+  const edgePaddingX = theme.spacing(2);
+  const paddingLeft = isFirstColumn ? edgePaddingX : basePaddingX;
+  const paddingRight = isLastColumn ? edgePaddingX : basePaddingX;
   const lineHeight = theme.typography.body1.lineHeight;
 
   return {
-    padding: `${paddingY} ${paddingX}`,
+    padding: `${paddingY} ${paddingRight} ${paddingY} ${paddingLeft}`,
     height: calculateTableCellHeight(lineHeight, paddingY),
     fontSize: theme.typography.body1.fontSize,
     lineHeight: lineHeight,
   };
+}
+
+export type TableCellAlignment = 'left' | 'right' | 'center';
+
+// Overrides of meta value, so it can have a meaningful type in our code instead
+// of `any`. Putting this in the model instead of a separate .d.ts file because
+// I couldn't get it to work properly that way and punted on figuring it out
+// after trying several things.
+declare module '@tanstack/table-core' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    align?: TableCellAlignment;
+  }
 }
 
 // Only exposing a very simplified version of the very extensive column definitions
@@ -145,13 +175,18 @@ export interface TableColumnConfig<TableData>
    * @default 'auto'
    */
   width?: number | 'auto';
+
+  /**
+   * Alignment of the content in the cell.
+   */
+  align?: TableCellAlignment;
 }
 
 /**
  * Takes in a perses table column and transforms it into a tanstack column.
  */
 export function persesColumnsToTanstackColumns<TableData>(columns: Array<TableColumnConfig<TableData>>) {
-  const tableCols: Array<ColumnDef<TableData>> = columns.map(({ width, ...otherProps }) => {
+  const tableCols: Array<ColumnDef<TableData>> = columns.map(({ width, align, ...otherProps }) => {
     // Tanstack Table does not support an "auto" value to naturally size to fit
     // the space in a table. We translate our custom "auto" setting to 0 size
     // for these columns, so it is easy to fall back to auto when rendering.
@@ -173,6 +208,12 @@ export function persesColumnsToTanstackColumns<TableData>(columns: Array<TableCo
     const result = {
       ...otherProps,
       ...sizeProps,
+
+      // Open-ended store for extra metadata in TanStack Table, so you can bake
+      // in your own features.
+      meta: {
+        align,
+      },
     };
 
     return result;

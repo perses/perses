@@ -21,6 +21,7 @@ export interface TableLegendProps {
   width: number;
   selectedItems: TableProps<LegendItem>['rowSelection'] | 'ALL';
   onSelectedItemsChange: TableProps<LegendItem>['onRowSelectionChange'];
+  columns?: TableProps<LegendItem>['columns'];
 }
 
 const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
@@ -49,6 +50,7 @@ export function TableLegend({
   onSelectedItemsChange,
   height,
   width,
+  columns: additionalColumns = [],
 }: TableLegendProps) {
   const rowSelection = useMemo(() => {
     return typeof initRowSelection !== 'string'
@@ -62,6 +64,10 @@ export function TableLegend({
         }, {} as Record<string, boolean>);
   }, [initRowSelection, items]);
 
+  const columns = useMemo(() => {
+    return [...COLUMNS, ...additionalColumns];
+  }, [additionalColumns]);
+
   return (
     <Table
       height={height}
@@ -69,7 +75,7 @@ export function TableLegend({
       rowSelection={rowSelection}
       onRowSelectionChange={onSelectedItemsChange}
       data={items}
-      columns={COLUMNS}
+      columns={columns}
       density="compact"
       getRowId={getRowId}
       getCheckboxColor={getCheckboxColor}

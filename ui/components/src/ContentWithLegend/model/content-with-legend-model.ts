@@ -64,7 +64,7 @@ export interface ContentWithLegendProps {
 
 export interface ContentWithLegendLayoutOpts
   extends Required<Omit<ContentWithLegendProps, 'children' | 'legendProps'>> {
-  legendOptions?: LegendProps['options'];
+  legendProps?: ContentWithLegendProps['legendProps'];
   theme: Theme;
 }
 
@@ -99,12 +99,13 @@ const LEGEND_HEIGHT_LG = 100;
 export function getContentWithLegendLayout({
   width,
   height,
-  legendOptions,
+  legendProps,
   minChildrenHeight,
   minChildrenWidth,
   spacing,
   theme,
 }: ContentWithLegendLayoutOpts): ContentWithLegendLayout {
+  const legendOptions = legendProps?.options;
   const hasLegend = !!legendOptions;
 
   const noLegendLayout: ContentWithLegendLayout = {
@@ -150,7 +151,15 @@ export function getContentWithLegendLayout({
 
     const tableLayout = getTableCellLayout(theme, 'compact');
 
-    legendWidth = position === 'Right' ? TABLE_LEGEND_SIZE['Right'] : width;
+    const tableColumns = legendProps?.tableProps?.columns || [];
+    const columnsWidth = tableColumns.reduce((total, col) => {
+      if (typeof col.width === 'number') {
+        total += col.width;
+      }
+      return total;
+    }, 0);
+
+    legendWidth = position === 'Right' ? TABLE_LEGEND_SIZE['Right'] + columnsWidth : width;
     legendHeight = position === 'Bottom' ? TABLE_LEGEND_SIZE['Bottom'] * tableLayout.height : height;
   }
 
