@@ -14,9 +14,9 @@
 import { useTemplateVariableValues, parseTemplateVariables, replaceTemplateVariables } from '@perses-dev/plugin-system';
 
 // Convenience hook for replacing template variables in a string
-export function useReplaceVariablesInString(str: string | null): string | null {
+export function useReplaceVariablesInString(str: string | null): string {
   const variablesInString = str ? parseTemplateVariables(str) : [];
   const variableValues = useTemplateVariableValues(variablesInString);
-  if (!str) return null;
+  if (!str) return '';
   return replaceTemplateVariables(str, variableValues);
 }
