@@ -17,9 +17,12 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
+#legend_value: "AverageNonNull" | "FirstNonNull" | "LastNonNull" | "Min" | "Max" | "Total"
+
 #legend: {
 	position: "Bottom" | "Right"
 	mode?:    "List" | "Table"
+	values?: [...#legend_value]
 }
 
 #palette: {

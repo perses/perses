@@ -20,6 +20,8 @@ import {
   LegendSpecOptions,
   LegendSingleSelectConfig,
   validateLegendSpec,
+  LEGEND_VALUE_CONFIG,
+  LegendValue,
 } from '../../model';
 
 type LegendPositionOption = LegendSingleSelectConfig & { id: LegendSpecOptions['position'] };
@@ -36,6 +38,14 @@ type LegendModeOption = LegendSingleSelectConfig & { id: LegendSpecOptions['mode
 const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(([id, config]) => {
   return {
     id: id as LegendSpecOptions['mode'],
+    ...config,
+  };
+});
+
+type LegendValueOption = LegendSingleSelectConfig & { id: string };
+const VALUE_OPTIONS: LegendValueOption[] = Object.entries(LEGEND_VALUE_CONFIG).map(([id, config]) => {
+  return {
+    id: id as LegendValue,
     ...config,
   };
 });
@@ -67,12 +77,28 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
+  const handleLegendValueChange = (_: unknown, newValue: LegendValueOption[]) => {
+    onChange({
+      ...value,
+      position: currentPosition,
+      values: newValue.map((value) => {
+        // TODO: figure out better typing
+        return value.id as unknown as LegendValue;
+      }),
+    });
+  };
+
   const isValidLegend = validateLegendSpec(value);
   const currentPosition = getLegendPosition(value?.position);
   const legendPositionConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
 
   const currentMode = getLegendMode(value?.mode);
   const legendModeConfig = LEGEND_MODE_CONFIG[currentMode];
+
+  const currentValues = value?.values || [];
+  const legendValuesConfig = currentValues.map((item) => {
+    return { ...LEGEND_VALUE_CONFIG[item], id: item };
+  });
 
   return (
     <>
@@ -113,6 +139,29 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
             disabled={value === undefined}
             disableClearable
           ></Autocomplete>
+        }
+      />
+      <OptionsEditorControl
+        label="Values"
+        description="Computed values ignore nulls."
+        control={
+          <Autocomplete
+            multiple
+            disableCloseOnSelect
+            // Disabling the clearable because it leads to some weird height
+            // behavior of the MUI autocomplete.
+            disableClearable
+            value={legendValuesConfig}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            options={VALUE_OPTIONS}
+            onChange={handleLegendValueChange}
+            renderInput={(params) => <TextField {...params} />}
+            disabled={value === undefined || currentMode !== 'Table'}
+            limitTags={1}
+            ChipProps={{
+              size: 'small',
+            }}
+          />
         }
       />
     </>

@@ -13,8 +13,22 @@
 
 import { useState } from 'react';
 import { merge } from 'lodash-es';
-import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries, DEFAULT_LEGEND } from '@perses-dev/core';
-import { PanelProps, useDataQueries, useTimeRange, validateLegendSpec } from '@perses-dev/plugin-system';
+import {
+  useDeepMemo,
+  StepOptions,
+  getXValues,
+  getYValues,
+  TimeSeries,
+  DEFAULT_LEGEND,
+  getAggregationValues,
+} from '@perses-dev/core';
+import {
+  LEGEND_VALUE_CONFIG,
+  PanelProps,
+  useDataQueries,
+  useTimeRange,
+  validateLegendSpec,
+} from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
@@ -25,6 +39,9 @@ import {
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
+  formatValue,
+  TableColumnConfig,
+  LegendItem,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -167,6 +184,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
+        const legendValues = getAggregationValues(yValues);
 
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
@@ -182,6 +200,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
             color: seriesColor,
+            data: legendValues,
           });
         }
       }
@@ -262,6 +281,34 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
 
+  const legendValues = legend?.values || [];
+  const legendColumns = legendValues.reduce((columns, value) => {
+    if (legendValues.includes(value)) {
+      columns.push({
+        accessorKey: `data.${value}`,
+        header: LEGEND_VALUE_CONFIG[value].label,
+        // TODO: evaluate making these dynamic to better account for the variability
+        // in space that numbers can take up. This requires revisiting the approach
+        // for the space the legend takes up with design, so starting with the original
+        // designs to get the core functionality out, and then we can tune the
+        // UI/UX in a follow-up.
+        width: 72,
+        align: 'right',
+        cell: ({ getValue }) => {
+          const cellValue = getValue();
+          const formattedValue = typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
+
+          // TODO: consider adding a prop to the Table component column def, so
+          // we can auto-title (or potentially auto-tooltip in the future)
+          // instead of scattering this span-with-title logic all over the place.
+          return <span title={formattedValue}>{formattedValue}</span>;
+        },
+      });
+    }
+
+    return columns;
+  }, [] as Array<TableColumnConfig<LegendItem>>);
+
   return (
     <Box sx={{ padding: `${contentPadding}px` }}>
       <ContentWithLegend
@@ -276,6 +323,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             data: graphData.legendItems || [],
             selectedItems: selectedLegendItems,
             onSelectedItemsChange: setSelectedLegendItems,
+            tableProps: {
+              columns: legendColumns,
+            },
           }
         }
       >

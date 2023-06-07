@@ -191,3 +191,19 @@ export const LegendModes: Story = {
     );
   },
 };
+
+export const TableLegendWithValues: Story = {
+  args: {
+    contentDimensions: {
+      width: 600,
+      height: 400,
+    },
+    spec: {
+      legend: {
+        position: 'Bottom',
+        mode: 'Table',
+        values: ['AverageNonNull', 'FirstNonNull', 'LastNonNull', 'Max', 'Min', 'Total'],
+      },
+    },
+  },
+};

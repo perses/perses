@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData } from '../model';
+import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesAggregationValue, TimeSeriesData } from '../model';
 import { gcd } from './mathjs';
 
 export const MIN_STEP_INTERVAL_MS = 10;
@@ -106,4 +106,81 @@ export function getCommonTimeScale(seriesData: Array<TimeSeriesData | undefined>
   const endMs = timeRange.end.valueOf();
 
   return { startMs, endMs, stepMs };
+}
+
+/**
+ * Given a list of values for time series data, it will return an object containing
+ * the following aggregate calculations:
+ * - AverageNonNull: average across non-null values
+ * - Total: sum of values
+ * - Min: minimum value
+ * - Max: maximum value
+ * - FirstNonNull: first non-null value
+ * - LastNonNull: last non-null value
+ */
+export function getAggregationValues(
+  values: Array<number | null>
+): Record<TimeSeriesAggregationValue, number | undefined> {
+  let total: undefined | number = undefined;
+  let min: undefined | number = undefined;
+  let max: undefined | number = undefined;
+  let firstNonNull: undefined | number = undefined;
+  let lastNonNull: undefined | number = undefined;
+  let nonNullCount = 0;
+
+  // Calculating all values in a single loop because we can be working with
+  // large quantities of data and looping repeatedly would have performance
+  // issues. For now, calculating all the values we need because the actual math
+  // is pretty cheap. If that changes, we may want to add a configuration option
+  // that specifies the values to calculate.
+  values.forEach((value) => {
+    if (typeof value === 'number') {
+      if (typeof total === 'undefined') {
+        // Init total the first time we see a non-null value.
+        total = 0;
+      }
+      total += value;
+
+      nonNullCount += 1;
+
+      if (typeof firstNonNull === 'undefined') {
+        // Set first value at the first non-null value we see.
+        firstNonNull = value;
+      }
+
+      // Set last non-null every time we see a non-null value to ensure it's
+      // eventually set the last value.
+      lastNonNull = value;
+
+      // Init at the first non-null value we see and then adjust based on the
+      // larger value.
+      if (typeof min === 'undefined') {
+        min = value;
+      } else {
+        min = Math.min(min, value);
+      }
+
+      // Init at the first non-null value we see and then adjust based on the
+      // larger value.
+      if (typeof max === 'undefined') {
+        max = value;
+      } else {
+        max = Math.max(max, value);
+      }
+    }
+  });
+
+  let averageNonNull: undefined | number = undefined;
+  if (typeof total !== 'undefined' && typeof nonNullCount !== 'undefined') {
+    averageNonNull = total > 0 && nonNullCount > 0 ? total / nonNullCount : 0;
+  }
+
+  return {
+    AverageNonNull: averageNonNull,
+    Total: total,
+    Min: min,
+    Max: max,
+    FirstNonNull: firstNonNull,
+    LastNonNull: lastNonNull,
+  };
 }

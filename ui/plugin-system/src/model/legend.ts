@@ -17,16 +17,26 @@ import {
   LegendPositions,
   isValidLegendMode,
   isValidLegendPosition,
+  timeSeriesAggregationValues,
 } from '@perses-dev/core';
 
 // This file contains legend-related model code specific to panel plugin specs.
 // See the `core` package for common/shared legend model code and the
 // `components` package for legend model code specific to the Legend component.
 
+// These values are currently the same as the time series aggregation, but intentionally
+// creating separate variables/types to communicate that it is possible they will
+// diverge at some point in the future as the aggregation values may be used for
+// things besides legends.
+export const legendValues = timeSeriesAggregationValues;
+export type LegendValue = (typeof legendValues)[number];
+
 // Note: explicitly defining different options for the legend spec and
 // legend component that extend from some common options, so we can allow the
 // component and the spec to diverge in some upcoming work.
-export type LegendSpecOptions = LegendOptionsBase;
+export interface LegendSpecOptions extends LegendOptionsBase {
+  values?: LegendValue[];
+}
 
 export type LegendSingleSelectConfig = {
   label: string;
@@ -40,6 +50,27 @@ export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSin
 export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectConfig>> = {
   List: { label: 'List' },
   Table: { label: 'Table' },
+};
+
+export const LEGEND_VALUE_CONFIG: Readonly<Record<LegendValue, LegendSingleSelectConfig>> = {
+  AverageNonNull: {
+    label: 'Average',
+  },
+  FirstNonNull: {
+    label: 'First',
+  },
+  LastNonNull: {
+    label: 'Last',
+  },
+  Min: {
+    label: 'Min',
+  },
+  Max: {
+    label: 'Max',
+  },
+  Total: {
+    label: 'Total',
+  },
 };
 
 export function validateLegendSpec(legend?: LegendOptionsBase) {

@@ -37,6 +37,10 @@ describe('LegendOptionsEditor', () => {
     return screen.getByRole('combobox', { name: 'Mode' });
   };
 
+  const getLegendValuesSelector = () => {
+    return screen.getByRole('combobox', { name: 'Values' });
+  };
+
   it('can change legend visibility by clicking', () => {
     const onChange = jest.fn();
     renderLegendOptionsEditor(undefined, onChange);
@@ -67,5 +71,57 @@ describe('LegendOptionsEditor', () => {
     });
     userEvent.click(tableModeOption);
     expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table' });
+  });
+
+  it('should allow setting a legend value', () => {
+    const onChange = jest.fn();
+    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table' }, onChange);
+    expect(getLegendValuesSelector()).toBeEnabled();
+    userEvent.click(getLegendValuesSelector());
+    const totalValueOption = screen.getByRole('option', {
+      name: 'Total',
+    });
+    userEvent.click(totalValueOption);
+    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Total'] });
+  });
+
+  it('should allow adding a legend value', () => {
+    const onChange = jest.fn();
+    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Total'] }, onChange);
+    expect(getLegendValuesSelector()).toBeEnabled();
+    userEvent.click(getLegendValuesSelector());
+    const minValueOption = screen.getByRole('option', {
+      name: 'Min',
+    });
+    userEvent.click(minValueOption);
+    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Total', 'Min'] });
+  });
+
+  it('should allow removing a legend value', () => {
+    const onChange = jest.fn();
+    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Total', 'Min'] }, onChange);
+    expect(getLegendValuesSelector()).toBeEnabled();
+    userEvent.click(getLegendValuesSelector());
+    const totalValueOption = screen.getByRole('option', {
+      name: 'Total',
+    });
+    userEvent.click(totalValueOption);
+    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Min'] });
+  });
+
+  describe('when legend mode is "list"', () => {
+    test('legend values should be disabled', () => {
+      const onChange = jest.fn();
+      renderLegendOptionsEditor({ position: 'Bottom', mode: 'List' }, onChange);
+      expect(getLegendValuesSelector()).toBeDisabled();
+    });
+  });
+
+  describe('when legend mode is "list"', () => {
+    test('legend values should be enabled', () => {
+      const onChange = jest.fn();
+      renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table' }, onChange);
+      expect(getLegendValuesSelector()).toBeEnabled();
+    });
   });
 });

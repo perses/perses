@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeScale, TimeSeries, TimeSeriesData } from '../model';
-import { getXValues, getYValues, getCommonTimeScale } from './time-series-data';
+import { getXValues, getYValues, getCommonTimeScale, getAggregationValues } from './time-series-data';
 
 function getExpectedIntervals(timeScale: TimeScale): number {
   return Math.floor((timeScale.endMs - timeScale.startMs) / timeScale.stepMs) + 1;
@@ -288,6 +288,88 @@ describe('getCommonTimeScale', () => {
       startMs: timeRange.start.getTime(),
       endMs: timeRange.end.getTime(),
       stepMs: 1200,
+    });
+  });
+});
+
+function generateMockYValues(count: number): Array<number | null> {
+  // Simple array that counts up
+  return [...Array(count)].map((_, i) => i);
+}
+
+describe('getAggregationValues', () => {
+  test('with empty data set sets values to undefined', () => {
+    expect(getAggregationValues([])).toEqual({
+      AverageNonNull: undefined,
+      FirstNonNull: undefined,
+      LastNonNull: undefined,
+      Max: undefined,
+      Min: undefined,
+      Total: undefined,
+    });
+  });
+
+  test('with all nulls sets values to undefined', () => {
+    expect(getAggregationValues([null, null, null])).toEqual({
+      AverageNonNull: undefined,
+      FirstNonNull: undefined,
+      LastNonNull: undefined,
+      Max: undefined,
+      Min: undefined,
+      Total: undefined,
+    });
+  });
+
+  test('with no nulls', () => {
+    const mockYValues = generateMockYValues(10);
+
+    expect(getAggregationValues(mockYValues)).toEqual({
+      AverageNonNull: 4.5,
+      FirstNonNull: 0,
+      LastNonNull: 9,
+      Max: 9,
+      Min: 0,
+      Total: 45,
+    });
+  });
+
+  test('with nulls at beginning', () => {
+    const mockYValues = [null, null, ...generateMockYValues(10)];
+
+    expect(getAggregationValues(mockYValues)).toEqual({
+      AverageNonNull: 4.5,
+      FirstNonNull: 0,
+      LastNonNull: 9,
+      Max: 9,
+      Min: 0,
+      Total: 45,
+    });
+  });
+
+  test('with nulls at end', () => {
+    const mockYValues = [...generateMockYValues(10), null, null];
+
+    expect(getAggregationValues(mockYValues)).toEqual({
+      AverageNonNull: 4.5,
+      FirstNonNull: 0,
+      LastNonNull: 9,
+      Max: 9,
+      Min: 0,
+      Total: 45,
+    });
+  });
+
+  test('with nulls in middle', () => {
+    const mockYValues = generateMockYValues(10);
+    mockYValues.splice(2, 0, null, null);
+
+    expect(getAggregationValues(mockYValues)).toEqual({
+      AverageNonNull: 4.5,
+      FirstNonNull: 0,
+      LastNonNull: 9,
+      Max: 9,
+      Min: 0,
+      Total: 45,
     });
   });
 });
