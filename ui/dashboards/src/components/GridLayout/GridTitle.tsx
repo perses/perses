@@ -20,9 +20,9 @@ import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { InfoTooltip } from '@perses-dev/components';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { usePanelGroupActions, useEditMode, PanelGroupId, useDeletePanelGroupDialog } from '../../context';
-import { useReplaceVariablesInString } from '../../utils';
 
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;
