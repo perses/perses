@@ -128,6 +128,7 @@ export const EChart = React.memo(function EChart<T>({
   useLayoutEffect(() => {
     if (containerRef.current === null || chartElement.current !== null) return;
     chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
+    if (chartElement.current === undefined) return;
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
@@ -140,8 +141,8 @@ export const EChart = React.memo(function EChart<T>({
     };
   }, [_instance, onChartInitialized, theme, renderer]);
 
+  // When syncGroup is explicitly set, charts within same group share interactions such as crosshair
   useEffect(() => {
-    // When syncGroup is explicitly set, charts within same group share interactions such as crosshair
     if (!chartElement.current || !syncGroup) return;
     chartElement.current.group = syncGroup;
     connect([chartElement.current]); // more info: https://echarts.apache.org/en/api.html#echarts.connect
