@@ -11,24 +11,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import { PrometheusTimeSeriesQuery } from './';
-
 // TODO: This should be fixed globally in the test setup
 jest.mock('echarts/core');
 
-const stubTimeSeriesContext: TimeSeriesQueryContext = {
-  datasourceStore: {
-    getDatasource: jest.fn(),
-    getDatasourceClient: jest.fn(),
-    listDatasourceMetadata: jest.fn(),
+import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
+import { RangeQueryResponse } from '../../model';
+import { PrometheusDatasource } from '../prometheus-datasource';
+import { PrometheusTimeSeriesQuery } from './';
+
+const promStubClient = PrometheusDatasource.createClient(
+  {
+    direct_url: '/test',
   },
-  refreshKey: 'test',
-  timeRange: {
-    end: new Date('01-01-2023'),
-    start: new Date('01-02-2023'),
-  },
-  variableState: {},
+  {}
+);
+
+// Mock range query
+promStubClient.rangeQuery = jest.fn(async () => {
+  const stubRepsonse: RangeQueryResponse = {
+    status: 'success',
+    data: {
+      resultType: 'matrix',
+      result: [
+        {
+          metric: {
+            __name__: 'up',
+          },
+          values: [[1686141338.877, '10']],
+        },
+      ],
+    },
+  };
+  return stubRepsonse;
+});
+
+const getDatasourceClient: jest.Mock = jest.fn(() => {
+  return promStubClient;
+});
+
+const createStubContext = () => {
+  const stubTimeSeriesContext: TimeSeriesQueryContext = {
+    datasourceStore: {
+      getDatasource: jest.fn(),
+      getDatasourceClient: getDatasourceClient,
+      listDatasourceMetadata: jest.fn(),
+    },
+    refreshKey: 'test',
+    timeRange: {
+      end: new Date('01-01-2023'),
+      start: new Date('01-02-2023'),
+    },
+    variableState: {},
+  };
+  return stubTimeSeriesContext;
 };
 
 describe('PrometheusTimeSeriesQuery', () => {
@@ -39,8 +74,30 @@ describe('PrometheusTimeSeriesQuery', () => {
         query: 'sum(up{job="$job"}) by ($instance)',
         series_name_format: `$foo - label`,
       },
-      stubTimeSeriesContext
+      createStubContext()
     );
     expect(variables).toEqual(['job', 'instance', 'foo']);
+  });
+
+  it('should replace variables in legend formatter', async () => {
+    if (!PrometheusTimeSeriesQuery.dependsOn) throw new Error('dependsOn is not defined');
+
+    const ctx = createStubContext();
+    ctx.variableState = {
+      foo: {
+        value: 'bar',
+        loading: false,
+      },
+    };
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData(
+      {
+        query: 'sum(up{job="$job"}) by ($instance)',
+        series_name_format: `$foo - format`,
+      },
+      ctx
+    );
+
+    expect(results.series[0]?.formattedName).toEqual('bar - format');
   });
 });
