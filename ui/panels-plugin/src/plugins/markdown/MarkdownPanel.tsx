@@ -81,9 +81,9 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   } = props;
   const chartsTheme = useChartsTheme();
 
-  const text = useReplaceVariablesInString(rawText) as string;
+  const text = useReplaceVariablesInString(rawText);
 
-  const html = useMemo(() => markdownToHTML(text), [text]);
+  const html = useMemo(() => markdownToHTML(text ?? ''), [text]);
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 
   return (
