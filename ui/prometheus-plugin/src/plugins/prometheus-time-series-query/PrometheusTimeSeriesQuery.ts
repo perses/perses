@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { parseTemplateVariables } from '../../utils';
+import { TimeSeriesQueryPlugin, parseTemplateVariables } from '@perses-dev/plugin-system';
 import { getTimeSeriesData } from './get-time-series-data';
 import { PrometheusTimeSeriesQueryEditor } from './PrometheusTimeSeriesQueryEditor';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';

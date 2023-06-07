@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Notice, TimeSeriesData } from '@perses-dev/core';
-import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryPlugin, replaceTemplateVariables } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import {
   parseValueTuple,
@@ -22,7 +22,7 @@ import {
   getRangeStep,
   DEFAULT_PROM,
 } from '../../model';
-import { getFormattedPrometheusSeriesName, replaceTemplateVariables } from '../../utils';
+import { getFormattedPrometheusSeriesName } from '../../utils';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (

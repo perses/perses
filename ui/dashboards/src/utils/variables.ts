@@ -11,8 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './components';
-export * from './model';
-export * from './runtime';
-export * from './test-utils';
-export * from './utils';
+import { useTemplateVariableValues, parseTemplateVariables, replaceTemplateVariables } from '@perses-dev/plugin-system';
+
+// Convenience hook for replacing template variables in a string
+export function useReplaceVariablesInString(str: string | undefined): string | undefined {
+  const variablesInString = str ? parseTemplateVariables(str) : [];
+  const variableValues = useTemplateVariableValues(variablesInString);
+  if (!str) return undefined;
+  return replaceTemplateVariables(str, variableValues);
+}

@@ -22,6 +22,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { InfoTooltip } from '@perses-dev/components';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { usePanelGroupActions, useEditMode, PanelGroupId, useDeletePanelGroupDialog } from '../../context';
+import { useReplaceVariablesInString } from '../../utils';
 
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;
@@ -37,7 +38,9 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { panelGroupId, title, collapse } = props;
+  const { panelGroupId, title: rawTitle, collapse } = props;
+
+  const title = useReplaceVariablesInString(rawTitle) as string;
 
   const { openAddPanel, openEditPanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
