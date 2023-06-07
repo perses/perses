@@ -147,8 +147,6 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
           <Autocomplete
             multiple
             disableCloseOnSelect
-            // Disabling the clearable because it leads to some weird height
-            // behavior of the MUI autocomplete.
             disableClearable
             value={legendValuesConfig}
             isOptionEqualToValue={(option, value) => option.id === value.id}
