@@ -105,6 +105,7 @@ export interface EChartsProps<T> {
   sx?: SxProps<Theme>;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
+  syncGroup?: string;
   onChartInitialized?: (instance: ECharts) => void;
 }
 
@@ -115,6 +116,7 @@ export const EChart = React.memo(function EChart<T>({
   sx,
   onEvents,
   _instance,
+  syncGroup,
   onChartInitialized,
 }: EChartsProps<T>) {
   const initialOption = useRef<EChartsCoreOption>(option);
@@ -126,10 +128,6 @@ export const EChart = React.memo(function EChart<T>({
   useLayoutEffect(() => {
     if (containerRef.current === null || chartElement.current !== null) return;
     chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
-    if (chartElement.current === undefined) return;
-    // https://echarts.apache.org/en/api.html#echarts.connect
-    chartElement.current.group = 'dashboard';
-    connect([chartElement.current]);
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
@@ -141,6 +139,13 @@ export const EChart = React.memo(function EChart<T>({
       chartElement.current = null;
     };
   }, [_instance, onChartInitialized, theme, renderer]);
+
+  useEffect(() => {
+    // When syncGroup is explicitly set, charts within same group share interactions such as crosshair
+    if (!chartElement.current || !syncGroup) return;
+    chartElement.current.group = syncGroup;
+    connect([chartElement.current]); // more info: https://echarts.apache.org/en/api.html#echarts.connect
+  }, [syncGroup, chartElement]);
 
   // Update chart data when option changes
   useEffect(() => {

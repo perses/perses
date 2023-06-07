@@ -292,6 +292,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 unit={unit}
                 grid={gridOverrides}
                 tooltipConfig={{ wrapLabels: true }}
+                syncGroup="default-panel-group"
                 onDataZoom={handleDataZoom}
                 //  Show an empty chart when there is no data because the user unselected all items in
                 // the legend. Otherwise, show a "no data" message.
