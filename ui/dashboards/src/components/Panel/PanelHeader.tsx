@@ -18,8 +18,8 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopy from 'mdi-material-ui/ContentCopy';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
-import { useReplaceVariablesInString } from '../../utils';
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
