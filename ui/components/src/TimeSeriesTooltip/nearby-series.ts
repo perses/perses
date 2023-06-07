@@ -129,6 +129,7 @@ export function checkforNearbySeries(
         type: 'highlight',
         seriesIndex: emphasizedSeriesIndexes,
         notBlur: false,
+        escapeConnect: true,
       });
     } else {
       // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
@@ -136,6 +137,7 @@ export function checkforNearbySeries(
         type: 'highlight',
         seriesIndex: nearbySeriesIndexes,
         notBlur: true,
+        escapeConnect: true,
       });
     }
   }
