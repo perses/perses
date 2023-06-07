@@ -238,6 +238,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const legendColumns = useMemo(() => {
     const legendValues = legend?.values || [];
+    // Translate the legend values into columns for the table legend.
     return legendValues.reduce((columns, value) => {
       if (legendValues.includes(value)) {
         columns.push({
