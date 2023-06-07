@@ -298,7 +298,7 @@ function generateMockYValues(count: number): Array<number | null> {
 }
 
 describe('getAggregationValues', () => {
-  test('with empty data set sets values to undefined', () => {
+  test('with empty data set returns undefined values', () => {
     expect(getAggregationValues([])).toEqual({
       AverageNonNull: undefined,
       FirstNonNull: undefined,
@@ -309,7 +309,7 @@ describe('getAggregationValues', () => {
     });
   });
 
-  test('with all nulls sets values to undefined', () => {
+  test('with all nulls returns undefined values', () => {
     expect(getAggregationValues([null, null, null])).toEqual({
       AverageNonNull: undefined,
       FirstNonNull: undefined,
