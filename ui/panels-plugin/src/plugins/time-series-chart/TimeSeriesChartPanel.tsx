@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { merge } from 'lodash-es';
 import {
   useDeepMemo,
@@ -236,6 +236,36 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
   }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
+  const legendColumns = useMemo(() => {
+    const legendValues = legend?.values || [];
+    return legendValues.reduce((columns, value) => {
+      if (legendValues.includes(value)) {
+        columns.push({
+          accessorKey: `data.${value}`,
+          header: LEGEND_VALUE_CONFIG[value].label,
+          // TODO: evaluate making these dynamic to better account for the variability
+          // in space that numbers can take up. This requires revisiting the approach
+          // for the space the legend takes up with design, so starting with the original
+          // designs to get the core functionality out, and then we can tune the
+          // UI/UX in a follow-up.
+          width: 72,
+          align: 'right',
+          cell: ({ getValue }) => {
+            const cellValue = getValue();
+            const formattedValue = typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
+
+            // TODO: consider adding a prop to the Table component column def, so
+            // we can auto-title (or potentially auto-tooltip in the future)
+            // instead of scattering this span-with-title logic all over the place.
+            return <span title={formattedValue}>{formattedValue}</span>;
+          },
+        });
+      }
+
+      return columns;
+    }, [] as Array<TableColumnConfig<LegendItem>>);
+  }, [legend?.values, unit]);
+
   if (adjustedContentDimensions === undefined) {
     return null;
   }
@@ -280,34 +310,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // TODO: add ECharts transition animation on zoom
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
-
-  const legendValues = legend?.values || [];
-  const legendColumns = legendValues.reduce((columns, value) => {
-    if (legendValues.includes(value)) {
-      columns.push({
-        accessorKey: `data.${value}`,
-        header: LEGEND_VALUE_CONFIG[value].label,
-        // TODO: evaluate making these dynamic to better account for the variability
-        // in space that numbers can take up. This requires revisiting the approach
-        // for the space the legend takes up with design, so starting with the original
-        // designs to get the core functionality out, and then we can tune the
-        // UI/UX in a follow-up.
-        width: 72,
-        align: 'right',
-        cell: ({ getValue }) => {
-          const cellValue = getValue();
-          const formattedValue = typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
-
-          // TODO: consider adding a prop to the Table component column def, so
-          // we can auto-title (or potentially auto-tooltip in the future)
-          // instead of scattering this span-with-title logic all over the place.
-          return <span title={formattedValue}>{formattedValue}</span>;
-        },
-      });
-    }
-
-    return columns;
-  }, [] as Array<TableColumnConfig<LegendItem>>);
 
   return (
     <Box sx={{ padding: `${contentPadding}px` }}>
