@@ -42,7 +42,7 @@ const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(
   };
 });
 
-type LegendValueOption = LegendSingleSelectConfig & { id: string };
+type LegendValueOption = LegendSingleSelectConfig & { id: LegendValue };
 const VALUE_OPTIONS: LegendValueOption[] = Object.entries(LEGEND_VALUE_CONFIG).map(([id, config]) => {
   return {
     id: id as LegendValue,
@@ -82,8 +82,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
       ...value,
       position: currentPosition,
       values: newValue.map((value) => {
-        // TODO: figure out better typing
-        return value.id as unknown as LegendValue;
+        return value.id;
       }),
     });
   };
